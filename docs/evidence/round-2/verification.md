@@ -1,6 +1,7 @@
 # Round two — local implementation and visual verification
 
 Date: 2026-10-05, Canberra. Branch: `prototype/small-world-c8`.
+Implementation and screenshots: local commit `e1e1d54` (not pushed).
 Workspace: `/Users/ray/Documents/Codex/2026-10-05/task-2/comp4020-final-ray0766`.
 
 ## What changed

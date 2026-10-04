@@ -58,6 +58,9 @@ The old radial visibility approximation hid NPC labels with the close camera;
 a camera-to-label sphere intersection and edge-clamped active marker repaired it.
 Before/after screenshots, actual rendering samples and the expanded browser
 regression are recorded in `docs/evidence/round-2/verification.md`.
+The implementation and captured evidence are in local commit
+[`e1e1d54`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/e1e1d54),
+which has not been pushed.
 
 See `docs/evidence/verification.md` for executed commands, browser coverage and
 remaining limits. Screenshots in that folder are generated from the local app.
