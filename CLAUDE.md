@@ -25,6 +25,12 @@ prototype. They do not claim to be the student's finished academic harness.
   modal keyboard use, reduced motion, and both marking viewports.
 - Browser validation must confirm the world is visibly rendered, not only that
   a canvas element exists. Exercise the complete interaction via real controls.
+- Check close and overview cameras at desktop and phone sizes. Elevated NPC
+  labels need camera-ray occlusion, not the old radial visibility approximation.
+  Keep a readable active destination when it leaves the narrow phone viewport.
+- Preserve original procedural scenery and character art. Record measured
+  performance with hardware/browser context; phone viewport emulation does not
+  establish physical phone performance.
 - Run typecheck, lint, course tests, focused state/motion tests, build, real Chrome
   browser checks, and evidence checks. Record failures and repairs truthfully.
 - Write factual engineering evidence only. Do not invent student reflection,

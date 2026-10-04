@@ -37,9 +37,14 @@ export class SurfaceWalker {
     return new Quaternion().setFromRotationMatrix(new Matrix4().makeBasis(right, this.up, this.facing));
   }
 }
-export function cameraPose(walker: SurfaceWalker, portrait: boolean) {
+export function cameraPose(walker: SurfaceWalker, portrait: boolean, overview = false) {
+  if (overview) return {
+    position: walker.up.clone().multiplyScalar(RADIUS + (portrait ? 17 : 12)).addScaledVector(walker.north, -15),
+    target: walker.up.clone().multiplyScalar(RADIUS - 1.0),
+  };
+  const lookAhead = walker.velocity.clone().multiplyScalar(.13);
   return {
-    position: walker.up.clone().multiplyScalar(RADIUS + (portrait ? 14.7 : 11.2)).addScaledVector(walker.north, portrait ? -17 : -14),
-    target: walker.up.clone().multiplyScalar(RADIUS - 1.4).addScaledVector(walker.north, 1.4),
+    position: walker.up.clone().multiplyScalar(RADIUS + (portrait ? 5.8 : 4.6)).addScaledVector(walker.north, portrait ? -7.8 : -6.8),
+    target: walker.up.clone().multiplyScalar(RADIUS + .85).addScaledVector(walker.north, 1.6).add(lookAhead),
   };
 }

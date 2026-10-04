@@ -42,6 +42,23 @@ with a regression test.
 
 ## Evidence and remaining student work
 
+Following the user's request for a closer visual and interaction study, the live
+Messenger was opened in Mac Chrome. The opening dialogue and normal play camera
+were observed and brief forward input tried. Its close character framing, dense
+streets, flatter shading and small interface informed a second implementation
+round. This is a limited direct observation, not a systematic playtest or a claim
+that the original architecture was reverse engineered.
+
+The second round adds original procedural cottages, postal props, a glasshouse,
+connected lanes, pond and windmill; articulated couriers; a close camera with
+optional overview; contextual dialogue and a smaller HUD. A coarse occlusion
+silhouette keeps the player's position visible behind props. Static scenery is
+merged by material. Existing server persistence and task schema are unchanged.
+The old radial visibility approximation hid NPC labels with the close camera;
+a camera-to-label sphere intersection and edge-clamped active marker repaired it.
+Before/after screenshots, actual rendering samples and the expanded browser
+regression are recorded in `docs/evidence/round-2/verification.md`.
+
 See `docs/evidence/verification.md` for executed commands, browser coverage and
 remaining limits. Screenshots in that folder are generated from the local app.
 No push, public visibility change, Fly deployment or course submission was made.

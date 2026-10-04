@@ -36,11 +36,17 @@ for(const mobile of [false,true])test(`${mobile?'phone touch':'desktop keyboard'
   await walkToDestination(page,mobile);
   await page.getByRole('button',{name:'Collect the parcel'}).click();
   await expect(page.locator('#mission-title')).toHaveText('A little care, on its way.');
+  await expect(page.locator('#conversation')).toBeVisible();
+  await expect(page.locator('#speaker')).toContainText('Mica');
+  await page.locator('#close-conversation').click();
+  await expect(page.locator('#conversation')).not.toBeVisible();
   await page.reload();await expect(page.locator('#mission-title')).toHaveText('A little care, on its way.');
   await walkToDestination(page,mobile);
   if(mobile)await page.getByRole('button',{name:'Deliver to Sol'}).click();else { await page.locator('#interact').focus(); await page.keyboard.press('e'); }
   await expect(page.locator('#mission-title')).toHaveText('Something good is growing.');
   await expect(page.locator('#interact')).toContainText('Talk to Sol');
+  await expect(page.locator('#conversation')).toBeVisible();
+  await expect(page.locator('#speaker')).toContainText('Sol');
   await page.screenshot({path:`docs/evidence/${mobile?'mobile':'desktop'}-completed.png`});
   const saved=await context.storageState();await context.close();
   const returned=await browser.newContext({storageState:saved,viewport:mobile?{width:390,height:844}:{width:1920,height:1080}});

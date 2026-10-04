@@ -7,13 +7,12 @@ completed delivery and coat remain when the same browser returns.
 
 ## Current design brief
 
-This first version implements the approved learning goal: reproduce the core
+This prototype implements the approved learning goal: reproduce the core
 experience of continuous movement on a small planet with a following camera,
 then develop an original direction. The target is a short, legible delivery that a new visitor can finish without
 operating the camera. There is no timer or penalty for taking a longer route.
-The pale stepping stones, destination arrow, distance and nearby action button
-provide several ways to find the next step. Three coats give the courier a small
-personal choice before departure.
+The connected lanes, destination arrow, distance and nearby action button
+provide several ways to find the next step. Three coats offer a personal choice.
 
 This is an engineering description of the current prototype and agreed scope.
 The student’s own argument about what makes the experience good, its intended
@@ -26,7 +25,9 @@ Keyboard movement uses WASD or the arrow keys. Clicking the ground selects a
 walking destination; phone users can drag the thumbstick. Press E, or use the
 nearby button, to collect or deliver. The camera follows the local surface
 orientation through either pole. Trees and buildings have simple collision
-boundaries. After delivery, the planet remains open for wandering.
+boundaries. A close walking view and optional planet overview share the same
+controller. Articulated couriers greet neighbours; dialogue accompanies the parcel
+handoff. The postal street, glasshouse, pond and windmill provide landmarks.
 
 Character and task state are stored in SQLite on the server, identified by an
 HttpOnly browser cookie. The browser never awards itself a delivery. The server
@@ -47,17 +48,16 @@ for this prototype. No original game assets, shaders or source were extracted.
 
 [Three.js](https://threejs.org/docs/) supplies rendering and vector mathematics.
 [Node SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html) supplies the
-persistent database. These are implementation references, not substitutes for
-the student’s design research.
+persistent database.
 
 ## What is checked, and what needs judgement
 
-The automated specifications cover continuous spherical movement, reversal,
+Automated specifications cover continuous spherical movement, reversal,
 bounded speed, request validation, isolated identities, ordered task transitions,
 idempotency and reopening the database. Browser checks exercise the visible
-journey, refresh, returning visits and 1920 × 1080 and 390 × 844 layouts.
-Visual clarity and how pleasant the camera feels still need human playtesting;
-a passing test does not settle those questions.
+journey, refresh, returning visits, dialogue, camera modes and 1920 × 1080 and
+390 × 844 layouts. Evidence: `docs/evidence/round-2/verification.md`.
+Camera comfort still needs human playtesting; tests do not settle that judgement.
 
 ## Run locally
 

@@ -3,6 +3,11 @@
 Run date: 2026-10-05 (Canberra; tool workspace date was 2026-10-04 UTC).
 Implementation: `c02a639`, branch `prototype/small-world-c8`.
 
+This is the historical first-round record. Current screenshots at this folder's
+root now show round two; the original first views are preserved under
+`round-2/before-*.png`. See `round-2/verification.md` for the current implementation
+and checks, and git commit `b70a53a` for all first-round image versions.
+
 ## Environment and provenance
 
 - Independent clone: `/Users/ray/Documents/Codex/2026-10-05/task-2/comp4020-final-ray0766`.
