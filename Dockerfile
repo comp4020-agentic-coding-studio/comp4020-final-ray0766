@@ -1,18 +1,19 @@
-# syntax = docker/dockerfile:1
-
-# A placeholder, and yours to replace: it serves one page, plus README.md
-# verbatim at /readme/, which is enough to prove the deploy path end to end.
-# Whatever your app is built with, the image that replaces this one must serve
-# HTTP on 0.0.0.0:$PORT (fly.toml sets PORT) and publish README.md at /readme/
-# (spec/README.md says what's checked).
-
-FROM docker.io/library/busybox:1.38.0
-COPY placeholder/ /src/
-COPY README.md /src/
-# README.md goes into the page as-is, HTML-escaped, in place of @README@;
-# rendering it properly is your app's job
-RUN mkdir -p /site/readme \
-    && cp /src/index.html /site/ \
-    && sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g' /src/README.md > /src/body \
-    && sed -e '/@README@/{r /src/body' -e 'd}' /src/readme.html > /site/readme/index.html
-CMD ["sh", "-c", "exec httpd -f -p 0.0.0.0:${PORT:-8080} -h /site"]
+# syntax=docker/dockerfile:1
+# One Node process; persistent SQLite lives on the course's /data volume.
+FROM node:24-slim AS build
+WORKDIR /app
+RUN npm install -g pnpm@11.9.0
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
+COPY . .
+RUN pnpm build && pnpm prune --prod
+FROM node:24-slim
+WORKDIR /app
+ENV NODE_ENV=production PORT=8080 DATABASE_PATH=/data/little-post.sqlite NODE_OPTIONS=--max-old-space-size=150
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/src/server ./src/server
+COPY --from=build /app/src/shared ./src/shared
+COPY package.json README.md ./
+EXPOSE 8080
+CMD ["node", "src/server/index.ts"]
