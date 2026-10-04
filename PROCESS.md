@@ -1,20 +1,53 @@
-# Process overview
+# Implementation evidence — Little Post
 
-<!-- TEMPLATE: replace everything in this file with your own account, this
-     comment included --- `pnpm check:evidence` fails while it's still here. -->
+This document records engineering actions for the local prototype. It is not the
+student's 900–1100 word process argument and must be rewritten by the student
+before submission. No personal reflection or judgement is attributed to them.
 
-How you got from the brief to the harness, agentic workflow and stack behind
-this app, told however suits the work. The
-[final project brief](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/assessments/final-project/#what-you-submit)
-says what it covers and how long it runs.
+## Starting point and scope
 
-Markers follow the links you give them; they don't trawl the repo for evidence
-you didn't point at. A link to the record is one whose text is the commit hash,
-and it can sit anywhere in a sentence:
-[`a1b2c3d`](https://github.com/YOUR-ORG/YOUR-REPO/commit/a1b2c3d) for one
-commit, or
-[`a1b2c3d...e4f5a6b`](https://github.com/YOUR-ORG/YOUR-REPO/compare/a1b2c3d...e4f5a6b)
-for a range.
+The course Final repository was independently cloned into the authorised Mac
+workspace. The remote contained only
+[`07b2f35`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/07b2f35),
+the course template. Work proceeded on `prototype/small-world-c8`. The template's
+Dockerfile, fly.toml, CI workflow, package scripts and spec were read before
+implementation. No existing uncommitted Final work was overwritten. Crit7 and the
+cancelled/deleted implementation were not modified or recovered.
 
-`pnpm check:evidence` checks that this comment is gone and that every commit you
-link exists in this repo. Whether the account is any good is the marker's call.
+The user authorised a Messenger-inspired learning prototype with original assets:
+a spherical world, following camera, two NPCs, one delivery and saved character /
+quest state. Earlier Hamlet planning was treated as historical context, not as an
+approved feature specification. Current C8 and Final pages were checked. The
+reported local C8 time was not verified against MyTimetable and is not asserted
+here.
+
+## Implementation and corrections
+
+`docs/adr/0001-local-prototype.md` records the stack and controller decisions.
+`src/client` contains the scene, camera/controller and interface. `src/server`
+contains SQLite storage and request validation. `src/shared/world.ts` holds the
+small shared world contract. The local implementation is recorded in
+[`c02a639`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/c02a639)
+(this commit has not been pushed, so the web link becomes available only after
+an authorised push). The shipped HTTP invariant tests remain intact.
+
+The first browser screenshots showed a blank world although the canvas existed.
+The temporary camera-pose object used Object3D.lookAt, whose forward convention
+is opposite to Camera.lookAt. Replacing it with a camera repaired the orientation.
+This correction is captured in CLAUDE.md and the browser check now requires the
+NPC labels to be visibly projected as well as an actual rendered-world inspection.
+Review of movement also found that normalising a linear blend of opposite heading
+vectors can prevent a full reversal; the turn now uses a signed angular rotation,
+with a regression test.
+
+## Evidence and remaining student work
+
+See `docs/evidence/verification.md` for executed commands, browser coverage and
+remaining limits. Screenshots in that folder are generated from the local app.
+No push, public visibility change, Fly deployment or course submission was made.
+
+The student still needs to write their own definition of good, audience and source
+argument in README.md; develop this factual record into their process argument;
+write reflections/crit-8.md; and later produce the COMP8020 research note. The
+current reflection file is explicitly unfilled. A green mechanical evidence
+check does not mean those academic requirements are complete.
