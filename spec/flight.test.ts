@@ -5,7 +5,9 @@ import { join } from 'node:path';
 import { bearing, flightStep, groundFlight, planetCenter, SAFE_RADIUS, spaceDistance } from '../src/shared/flight.ts';
 import type { FlightState } from '../src/shared/flight.ts';
 import { openStore } from '../src/server/store.ts';
-import { SPAWN } from '../src/shared/world.ts';
+import { SPAWN, normalize } from '../src/shared/world.ts';
+import { HUB_DOCK } from '../src/shared/ports.ts';
+const walkToDock=(s:ReturnType<typeof openStore>,id:string,now:number)=>{s.move(id,normalize([0,1,-.2]),now+2000,'hub');s.move(id,HUB_DOCK,now+4000,'hub');return now+4000;};
 const idle={thrust:false,brake:false,turn:0,pitch:0};
 const body=(f:FlightState)=>({journey:f.journey,sequence:f.sequence,position:f.position,yaw:f.yaw,pitch:f.pitch,speed:f.speed,targetId:f.targetId});
 it('lays planets at stable non-overlapping coordinates and integrates a full stop without tunnelling',()=>{
@@ -23,7 +25,7 @@ it('lays planets at stable non-overlapping coordinates and integrates a full sto
 });
 it('fences forged/stale navigation and persists a flown landing and resumed journey',()=>{
   const dir=mkdtempSync(join(tmpdir(),'worlds-flight-')),path=join(dir,'save.sqlite');let s=openStore(path);let now=10000;s.create('pilot',now);s.character('pilot','sky');
-  const initial=s.state('pilot'),depart={planetId:'hub',journey:0};s.takeoff('pilot',depart,now);const departure=s.state('pilot');s.takeoff('pilot',depart,now);expect(s.state('pilot')).toEqual(departure);
+  const initial=s.state('pilot'),depart={planetId:'hub',journey:0};expect(()=>s.takeoff('pilot',depart,now)).toThrow('Walk to');expect(s.state('pilot')).toEqual(initial);now=walkToDock(s,'pilot',now);s.takeoff('pilot',depart,now);const departure=s.state('pilot');s.takeoff('pilot',depart,now);expect(s.state('pilot')).toEqual(departure);
   const target=s.universe('pilot').planets.find(p=>p.id===departure.flight.targetId)!;
   expect(()=>s.land('pilot',{planetId:target.id,journey:1},now)).toThrow('closer');
   expect(()=>s.move('pilot',SPAWN,now,'hub')).toThrow('Land');expect(()=>s.interact('pilot','pickup')).toThrow('Harbour');
@@ -45,7 +47,7 @@ it('fences forged/stale navigation and persists a flown landing and resumed jour
   s.close();rmSync(dir,{recursive:true});
 });
 it('accepts a collision stop but rejects a segment that crosses a planet',()=>{
-  const s=openStore(':memory:');s.create('a',0);s.takeoff('a',{planetId:'hub',journey:0},0);
+  const s=openStore(':memory:');s.create('a',-5000);walkToDock(s,'a',-5000);s.takeoff('a',{planetId:'hub',journey:0},0);
   const f={...s.state('a').flight,position:[0,0,30] as [number,number,number],yaw:0,pitch:0,speed:36};
   s.db.prepare('UPDATE players SET flight=?,flight_at=0 WHERE id=?').run(JSON.stringify(f),'a');
   const stopped={...f,position:[0,0,13] as [number,number,number],speed:0,sequence:1};expect(()=>s.flight('a',body(stopped),500)).not.toThrow();

@@ -65,6 +65,7 @@ export function makeShip(){
   mergeStatic(body);
   const flame=new T.Group();root.add(flame);
   const exhaust=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,uniforms:{power:{value:0}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec2 vUv;uniform float power;void main(){float core=pow(1.-abs(vUv.x-.5)*2.,2.);float tail=pow(1.-vUv.y,1.7);float shock=.76+.24*sin(vUv.y*48.);gl_FragColor=vec4(mix(vec3(.10,.43,.75),vec3(.62,.86,1.),core*tail),core*tail*shock*(.4+power*.4));}'});
+  exhaust.userData.ownedResource=true;
   for(const side of [-1,1])for(const angle of [0,Math.PI/2]){const plane=mesh(flame,new T.PlaneGeometry(.65,2.6),exhaust,[side*1.23,0,3.65]);plane.rotation.x=Math.PI/2;plane.rotation.y=angle;}
   const engineLight=new T.PointLight('#81b9e0',0,7,2);engineLight.position.set(0,0,2.5);root.add(engineLight);
   return{root,flame,animate:(power:number,brake:boolean)=>{exhaust.uniforms.power.value=power;flame.visible=power>.03;flame.scale.z=.35+power*.95;engineLight.intensity=power*.65;white.emissiveIntensity=brake?1.2:1.6+power*1.4;}};
@@ -94,7 +95,7 @@ function planetMaterial(seed:number){
 export function orbitalPlanet(slot:number){
   const root=new T.Group();const globe=mesh(root,new T.SphereGeometry(RADIUS,64,40),planetMaterial(slot));globe.rotation.y=slot*1.37;
   const atmosphere=new T.ShaderMaterial({transparent:true,depthWrite:false,side:T.BackSide,blending:T.AdditiveBlending,uniforms:{tint:{value:new T.Color(slot%4===1?'#8e765b':'#548494')}},vertexShader:'varying vec3 n;varying vec3 v;void main(){vec4 p=modelViewMatrix*vec4(position,1.);n=normalize(normalMatrix*normal);v=normalize(-p.xyz);gl_Position=projectionMatrix*p;}',fragmentShader:'varying vec3 n;varying vec3 v;uniform vec3 tint;void main(){float rim=pow(1.-abs(dot(normalize(n),normalize(v))),3.5);gl_FragColor=vec4(tint,rim*.2);}'});
-  mesh(root,new T.SphereGeometry(RADIUS*1.028,48,24),atmosphere);return root;
+  atmosphere.userData.ownedResource=true;mesh(root,new T.SphereGeometry(RADIUS*1.028,48,24),atmosphere);return root;
 }
 export function configureSpace(scene:T.Scene,renderer:T.WebGLRenderer){
   scene.background=new T.Color('#040810');scene.fog=new T.FogExp2('#080e18',.00013);

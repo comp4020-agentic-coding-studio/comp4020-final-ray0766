@@ -1,75 +1,27 @@
 import * as T from 'three';
-import { ball, box, shape, material } from './art.ts';
 import type { Character } from '../shared/world.ts';
-export const PALETTES = {clay:'#d67c50',fern:'#678578',sky:'#638f9e'};
-export function courier(identity:Character|'mica'|'sol') {
-  const root=new T.Group(),rig=new T.Group(),torso=new T.Group(),head=new T.Group();root.add(rig);rig.add(torso);torso.position.y=.88;
-  const coat=identity==='mica'?'#c79759':identity==='sol'?'#80936d':PALETTES[identity];
-  const colored:T.Mesh[]=[];
-  const body=shape(torso,new T.CylinderGeometry(.23,.26,.53,8),coat,[0,.03,0]);body.scale.z=.76;colored.push(body);
-  colored.push(box(torso,[.32,.14,.33],coat,[0,.29,0]));
-  box(torso,[.035,.4,.018],'#e6c991',[0,.035,.20]);
-  for(const x of [-.15,.15])box(torso,[.12,.1,.03],'#b7a783',[x,-.12,.2]);
-  // Satchel, flap and a tiny letter emblem give the courier a readable back silhouette.
-  box(torso,[.39,.36,.17],'#a45f43',[0,.08,-.24],true);
-  box(torso,[.41,.12,.19],'#c88450',[0,.23,-.25],true);
-  box(torso,[.15,.11,.016],'#eee2bc',[0,.06,-.333]);
-  for(const x of [-.16,.16]) {const strap=box(torso,[.055,.55,.07],'#725548',[x,.08,-.1]);strap.rotation.x=.35;}
-  torso.add(head);head.position.set(0,.48,0);
-  shape(head,new T.CylinderGeometry(.24,.20,.34,9),'#e6c5a0',[0,.02,0]).scale.z=.88;
-  ball(head,.055,'#e6c5a0',[-.245,.02,0],1);ball(head,.055,'#e6c5a0',[.245,.02,0],1);
-  shape(head,new T.CylinderGeometry(.252,.26,.13,9),'#554940',[0,.22,-.015]);
-  for(let i=0;i<4;i++){const fringe=box(head,[.1,.11,.10],'#554940',[-.155+i*.103,.16,.18]);fringe.rotation.z=(i-1.5)*-.12;}
-  const eyes=[-.088,.088].map(x=>{const eye=ball(head,.028,'#33443d',[x,.047,.212],1);eye.scale.set(.7,1,.5);return eye;});
-  ball(head,.042,'#d9ad89',[0,-.005,.23],1).scale.set(.75,.8,.8);
-  box(head,[.07,.012,.008],'#946c5b',[0,-.09,.22]);
-  const cap=shape(head,new T.CylinderGeometry(.265,.28,.14,10),coat,[0,.30,-.005]);colored.push(cap);
-  const brim=box(head,[.35,.032,.27],coat,[0,.235,.16]);brim.rotation.x=-.10;colored.push(brim);
-  if(identity==='sol') {cap.scale.set(1.2,.6,1.2);brim.scale.set(1.6,1,1.2);}
-  if(identity==='mica') {
-    for(const x of [-.088,.088])shape(head,new T.TorusGeometry(.065,.009,4,12),'#54534b',[x,.046,.235]);
-    box(head,[.05,.013,.018],'#54534b',[0,.046,.235]);
-  }
-  const arms=[-1,1].map(side=>{
-    const upper=new T.Group(),forearm=new T.Group();torso.add(upper);upper.position.set(side*.30,.19,0);
-    colored.push(shape(upper,new T.CylinderGeometry(.092,.075,.30,7),coat,[0,-.14,0]));
-    upper.add(forearm);forearm.position.y=-.28;
-    colored.push(shape(forearm,new T.CylinderGeometry(.076,.065,.25,7),coat,[0,-.115,0]));
-    ball(forearm,.078,'#e6c5a0',[0,-.265,0],1).scale.y=1.1;
-    return {upper,forearm};
-  });
-  const legs=[-1,1].map(side=>{
-    const hip=new T.Group(),knee=new T.Group();rig.add(hip);hip.position.set(side*.12,.65,0);
-    shape(hip,new T.CylinderGeometry(.12,.094,.30,7),'#475d59',[0,-.15,0]);hip.add(knee);knee.position.y=-.30;
-    shape(knee,new T.CylinderGeometry(.091,.069,.23,7),'#405854',[0,-.115,0]);
-    box(knee,[.145,.095,.27],'#384b4d',[0,-.255,.045],true);
-    box(knee,[.15,.035,.28],'#e6dabe',[0,-.315,.045]);
-    return {hip,knee};
-  });
-  const parcel=box(torso,[.43,.32,.32],'#dbaa6a',[0,-.10,.40],true);box(parcel,[.055,.325,.325],'#eeddb0',[0,0,0]);parcel.visible=false;
-  const shadow=new T.Mesh(new T.CircleGeometry(.32,24),new T.MeshBasicMaterial({color:'#344f48',transparent:true,opacity:.18,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.024;root.add(shadow);
+export const PALETTES={clay:'#876247',fern:'#4e6a60',sky:'#4d6675'};
+const cache=new Map<string,T.MeshStandardMaterial>();
+const material=(color:string)=>{if(!cache.has(color))cache.set(color,new T.MeshStandardMaterial({color,metalness:.25,roughness:.65}));return cache.get(color)!;};
+export function courier(identity:Character|'mica'|'sol'){
+  const root=new T.Group(),rig=new T.Group(),torso=new T.Group(),head=new T.Group();root.add(rig);rig.add(torso);torso.position.y=.93;
+  const coat=identity==='mica'?'#a17a48':identity==='sol'?'#52766c':PALETTES[identity],colored:T.Mesh[]=[];
+  const add=(p:T.Object3D,g:T.BufferGeometry,c:string,pos:number[],tint=false)=>{const m=new T.Mesh(g,material(c));m.position.fromArray(pos);m.castShadow=true;m.receiveShadow=true;p.add(m);if(tint)colored.push(m);return m;};
+  const box=(p:T.Object3D,size:[number,number,number],c:string,pos:number[],tint=false)=>add(p,new T.BoxGeometry(...size),c,pos,tint);
+  add(torso,new T.CapsuleGeometry(.19,.3,6,12),coat,[0,.02,0],true).scale.z=.77;
+  box(torso,[.30,.20,.08],'#89999a',[0,.12,.175]);box(torso,[.12,.07,.013],'#90c2c8',[.06,.15,.226]);box(torso,[.35,.085,.31],'#27333a',[0,-.2,0]);
+  box(torso,[.30,.40,.17],'#3b474b',[0,.04,-.22]);for(const x of [-.13,.13])box(torso,[.047,.47,.045],'#8a948c',[x,.05,-.14]);
+  torso.add(head);head.position.y=.47;
+  add(head,new T.SphereGeometry(.235,20,14),'#a6adaa',[0,.03,0]);
+  const visor=new T.Mesh(new T.SphereGeometry(.218,20,12),new T.MeshPhysicalMaterial({color:'#132c38',metalness:.55,roughness:.14,clearcoat:1}));visor.material.userData.ownedResource=true;visor.scale.set(1,.63,.82);visor.position.set(0,.025,.105);head.add(visor);
+  for(const x of [-.23,.23])box(head,[.05,.15,.12],'#445158',[x,.025,.01]);box(head,[.13,.025,.12],'#b9c8c4',[0,.258,0]);
+  const arms=[-1,1].map(side=>{const upper=new T.Group(),forearm=new T.Group();torso.add(upper);upper.position.set(side*.27,.19,0);add(upper,new T.CapsuleGeometry(.075,.21,4,10),coat,[0,-.15,0],true);box(upper,[.17,.12,.2],'#7a8888',[0,-.04,0]);upper.add(forearm);forearm.position.y=-.30;add(forearm,new T.CapsuleGeometry(.067,.16,4,10),coat,[0,-.12,0],true);add(forearm,new T.SphereGeometry(.073,10,8),'#283a42',[0,-.275,.015]);return{upper,forearm};});
+  const legs=[-1,1].map(side=>{const hip=new T.Group(),knee=new T.Group();rig.add(hip);hip.position.set(side*.105,.67,0);add(hip,new T.CapsuleGeometry(.095,.20,4,10),'#384c53',[0,-.15,0]);hip.add(knee);knee.position.y=-.3;add(knee,new T.CapsuleGeometry(.07,.17,4,10),'#35464e',[0,-.13,0]);box(knee,[.14,.14,.09],'#7d8b8b',[0,.0,.07]);box(knee,[.15,.105,.27],'#22313a',[0,-.265,.04]);return{hip,knee};});
+  const parcel=box(torso,[.4,.28,.31],'#a1875a',[0,-.1,.38]);box(parcel,[.32,.035,.02],'#bacac7',[0,.045,.167]);parcel.visible=false;
+  const shadow=new T.Mesh(new T.CircleGeometry(.3,24),new T.MeshBasicMaterial({color:'#071116',transparent:true,opacity:.3,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.024;root.add(shadow);
   let gait=0,lastTime=0,gestureUntil=0;
-  return {root,parcel,head,
-    setColor(c:Character){colored.forEach(m=>m.material=material(PALETTES[c]));},
-    greet(t:number){gestureUntil=t+1.6;},
-    animate(t:number,speed:number,reduced:boolean,turn=0){
-      const delta=Math.max(0,Math.min(.05,t-lastTime));lastTime=t;
-      const stride=Math.min(1,speed/2.6);gait+=delta*speed*4.6;
-      const phase=reduced?0:gait;
-      rig.position.y=reduced?0:Math.abs(Math.sin(phase))*.043*stride;
-      torso.rotation.x=reduced?0:stride*.055;
-      torso.rotation.z=reduced?0:-Math.max(-.12,Math.min(.12,turn*.2))+Math.sin(phase)*.028*stride;
-      torso.position.y=.88+(reduced?0:Math.sin(t*2)*.01*(1-stride));
-      head.rotation.y=reduced?0:Math.sin(t*.65)*.08*(1-stride);
-      const blink=!reduced&&t%4.8<.13;eyes.forEach(e=>e.scale.y=blink?.1:1);
-      legs.forEach((leg,i)=>{const s=Math.sin(phase+i*Math.PI);leg.hip.rotation.x=s*.60*stride;leg.knee.rotation.x=Math.max(0,-s)*.65*stride;});
-      arms.forEach((arm,i)=>{
-        arm.upper.rotation.x=parcel.visible?-.9:-Math.sin(phase+i*Math.PI)*.48*stride;
-        arm.forearm.rotation.x=parcel.visible?-.75:-.10-Math.max(0,Math.sin(phase+i*Math.PI))*.25*stride;
-        arm.upper.rotation.z=(i?1:-1)*.07;
-      });
-      if(t<gestureUntil&&!reduced&&!parcel.visible){arms[1].upper.rotation.z=-2.3;arms[1].forearm.rotation.x=Math.sin(t*18)*.4;}
-      parcel.rotation.z=reduced?0:Math.sin(phase)*.035*stride;
-    }
-  };
+  return{root,parcel,head,setColor(c:Character){colored.forEach(m=>m.material=material(PALETTES[c]));},greet(t:number){gestureUntil=t+1.6;},animate(t:number,speed:number,reduced:boolean,turn=0){
+    const dt=Math.min(.05,Math.max(0,t-lastTime));lastTime=t;const stride=Math.min(1,speed/2.6);gait+=dt*speed*4.6;const phase=reduced?0:gait;rig.position.y=reduced?0:Math.abs(Math.sin(phase))*.025*stride;torso.rotation.x=reduced?0:stride*.045;torso.rotation.z=reduced?0:Math.sin(phase)*.02*stride-turn*.05;head.rotation.y=reduced?0:Math.sin(t*.65)*.055*(1-stride);
+    legs.forEach((leg,i)=>{const s=Math.sin(phase+i*Math.PI);leg.hip.rotation.x=s*.55*stride;leg.knee.rotation.x=Math.max(0,-s)*.55*stride;});arms.forEach((arm,i)=>{arm.upper.rotation.x=parcel.visible?-.9:-Math.sin(phase+i*Math.PI)*.42*stride;arm.forearm.rotation.x=parcel.visible?-.75:-.15;arm.upper.rotation.z=(i?1:-1)*.06;});if(t<gestureUntil&&!reduced&&!parcel.visible){arms[1].upper.rotation.z=-2.3;arms[1].forearm.rotation.x=Math.sin(t*18)*.35;}
+  }};
 }

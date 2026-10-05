@@ -22,7 +22,10 @@ prototype. They do not claim to be the student's finished academic harness.
   browser identity is not a real-world person or cross-device account.
 - Latest visual direction: an industrial science-fiction flight sample with original
   mechanical geometry, PBR metal/glass layers, restrained HUD and readable exposure.
-  Preserve the existing ground scene until separately restyled. Do not add the
+  The authorised ground restyle adds an industrial public hub, connected routes,
+  original suits and a physical gate. Board only beside the saved port position;
+  no global takeoff button or client-supplied proximity bypass. Private return
+  beacons/craft are temporary travel scenery, never placed owner objects. Do not add the
   independently proposed workshop/blueprint/ecology/history features here.
 - Original procedural assets or explicitly documented free licensed assets only.
   The user approved NASA SVS public-domain lunar maps for the orbital sample.
@@ -36,6 +39,11 @@ prototype. They do not claim to be the student's finished academic harness.
   pickup/delivery requests must be idempotent. Do not trust client counters.
 - Persist before acknowledging. Save SQLite to DATABASE_PATH (local .data;
   /data in the container). Never commit databases, cookies, tokens or .env files.
+- Preserve fixed planet slots while expanding the finite survey; use bounded
+  orbital detail and remote-avatar budgets. Ground presence is ephemeral and
+  scoped by server-derived planet/mode. Never expose cookies or session hashes,
+  accept client position as presence authority, or grant building rights through
+  presence. No remote spacecraft/chat/voice/account systems in this iteration.
 - A failed save must show an error and reconnect to the acknowledged state.
   Queue writes so delivery cannot overtake position. Never silently mark an
   unsaved coat or quest complete.
@@ -46,7 +54,7 @@ prototype. They do not claim to be the student's finished academic harness.
 - Check close and overview cameras at desktop and phone sizes. Elevated NPC
   labels need camera-ray occlusion, not the old radial visibility approximation.
   Keep a readable active destination when it leaves the narrow phone viewport.
-- Preserve original procedural scenery and character art. Record measured
+- Keep original/properly credited scenery and character art. Record measured
   performance with hardware/browser context; phone viewport emulation does not
   establish physical phone performance.
 - Run typecheck, lint, course tests, focused state/motion tests, build, real Chrome

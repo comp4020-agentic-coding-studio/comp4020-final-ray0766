@@ -3,10 +3,12 @@ import { createHash, randomBytes } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import { marked } from 'marked';
+import { presenceStore } from './presence.ts';
 import { openStore, RequestError } from './store.ts';
 
 const store = openStore(process.env.DATABASE_PATH ?? '.data/little-post.sqlite');
 if (store.migrationBackup) console.log(`Before migration, saved a consistent backup: ${store.migrationBackup}`);
+const presence=presenceStore(store.state);
 const root = resolve('dist');
 const limits = new Map<string, { start: number; count: number }>();
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -49,12 +51,13 @@ const server = createServer(async (req, res) => {
       let body: Record<string, unknown>;
       try { body = JSON.parse(text); } catch { throw new RequestError(400, 'Invalid JSON.'); }
       if (!body || Array.isArray(body) || typeof body !== 'object') throw new RequestError(400, 'Expected an object.');
-      if (url.pathname === '/api/character') send(200, store.character(id, body.character));
+      if(url.pathname==='/api/presence')send(200,presence.heartbeat(id,body));
+      else if (url.pathname === '/api/character') send(200, store.character(id, body.character));
       else if (url.pathname === '/api/move') send(200, store.move(id, body.position, Date.now(), body.planetId));
       else if (url.pathname === '/api/interact') send(200, store.interact(id, body.action));
-      else if (url.pathname === '/api/flight/takeoff') send(200,store.takeoff(id,body));
+      else if (url.pathname === '/api/flight/takeoff') {const result=store.takeoff(id,body);presence.leave(id);send(200,result);}
       else if (url.pathname === '/api/flight/checkpoint') send(200,store.flight(id,body));
-      else if (url.pathname === '/api/flight/land') send(200,store.land(id,body));
+      else if (url.pathname === '/api/flight/land') {const result=store.land(id,body);presence.leave(id);send(200,result);}
       else if (url.pathname === '/api/planets/visit') throw new RequestError(410,'Board your ship and fly to the planet before landing.');
       else if (url.pathname === '/api/planets/claim') {
         if (Object.keys(body).some(k => k !== 'planetId')) throw new RequestError(400, 'Unexpected planet field.');

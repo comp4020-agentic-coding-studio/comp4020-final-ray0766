@@ -1,0 +1,23 @@
+{
+  "measuredAt": "2026-10-05T11:36:07.716Z",
+  "note": "Mac Google Chrome headed. Three-second moving/coasting sample after shader warm-up. Phone is viewport/touch emulation, not physical-device performance. No FPS pass threshold.",
+  "medianFrameMs": 6.899999999999636,
+  "p95FrameMs": 8.30000000000291,
+  "meanFps": 143.95681295611308,
+  "frames": 432,
+  "drawCalls": 20,
+  "triangles": 49814,
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "devicePixelRatio": 1,
+  "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "overflow": false,
+  "flightMode": true,
+  "detailedPlanets": 8,
+  "solidPlanets": 24,
+  "surveyedPlanets": 33,
+  "errors": []
+}

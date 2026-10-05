@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-05T11:47:02.386Z",
+  "note": "Four simultaneous independent Mac Chrome headless contexts; not four physical devices. Other local work may contend for CPU/GPU.",
+  "medianMs": 33.30000000000291,
+  "p95Ms": 50,
+  "meanFps": 31.788921560836066,
+  "render": {
+    "engine": "three.js r186",
+    "visibleVisitors": "3",
+    "detailedVisitors": "3",
+    "drawCalls": "329",
+    "triangles": "134904",
+    "portDistance": "8.87734887439023",
+    "groundPosition": "[0,0.9654290825583874,0.2606658522907646]",
+    "visitors": "3",
+    "nearbyVisitors": "3",
+    "presencePlanet": "hub"
+  },
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+}

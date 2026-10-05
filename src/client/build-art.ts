@@ -28,6 +28,6 @@ export function builtObject(kind: BuildKind) {
   return g;
 }
 export function disposeGeometry(root: T.Object3D) {
-  root.traverse(o=>{if(o instanceof T.Mesh || o instanceof T.Line){o.geometry.dispose(); const mats=Array.isArray(o.material)?o.material:[o.material];for(const m of mats){if(m instanceof T.MeshBasicMaterial){m.map?.dispose();m.dispose();}else if(m instanceof T.LineBasicMaterial || (m instanceof T.MeshToonMaterial && (m.vertexColors || !m.gradientMap)))m.dispose();}}});
+  root.traverse(o=>{if(o instanceof T.Mesh || o instanceof T.Line){o.geometry.dispose(); const mats=Array.isArray(o.material)?o.material:[o.material];for(const m of mats){if(m.userData.ownedResource){m.dispose();}else if(m instanceof T.MeshStandardMaterial && m.map){m.map.dispose();m.dispose();}else if(m instanceof T.MeshBasicMaterial){m.map?.dispose();m.dispose();}else if(m instanceof T.LineBasicMaterial || (m instanceof T.MeshToonMaterial && (m.vertexColors || !m.gradientMap)))m.dispose();}}});
   root.removeFromParent();
 }

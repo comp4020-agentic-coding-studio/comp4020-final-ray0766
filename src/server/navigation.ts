@@ -1,8 +1,9 @@
 import type { DatabaseSync } from 'node:sqlite';
 import type { planetStore } from './planets.ts';
 import { RequestError } from './errors.ts';
-import { RADIUS, SPAWN } from '../shared/world.ts';
+import { RADIUS } from '../shared/world.ts';
 import type { Vec3 } from '../shared/world.ts';
+import { canBoard, portPoint } from '../shared/ports.ts';
 import { bearing, firstCollision, groundFlight, LAND_RADIUS, LAND_SPEED, MAX_FLIGHT_SPEED, FLIGHT_ACCEL, FLIGHT_BRAKE, TURN_RATE, planetCenter, spaceDistance, validSpacePosition, wrapAngle } from '../shared/flight.ts';
 import type { FlightState } from '../shared/flight.ts';
 interface FlightRow {flight:string|null;flight_at:number;planet_id:string;position:string}
@@ -18,7 +19,8 @@ export function navigationStore(db:DatabaseSync,planets:ReturnType<typeof planet
       if(body.planetId!==r.planet_id||!Number.isSafeInteger(body.journey))throw new RequestError(409,'Your departure point changed. Reconnect first.');
       if(f.mode==='space'&&body.journey===f.journey-1)return;
       if(f.mode!=='ground'||body.journey!==f.journey)throw new RequestError(409,'This departure is no longer current.');
-      const center=planetCenter(planets.planet(r.planet_id).slot),up=JSON.parse(r.position) as Vec3;
+      if(!canBoard(r.planet_id,JSON.parse(r.position)))throw new RequestError(409,'Walk to the starport boarding gate or your parked ship first.');
+      const center=planetCenter(planets.planet(r.planet_id).slot),up=portPoint(r.planet_id);
       const position=center.map((v,i)=>v+up[i]*(RADIUS+20)) as Vec3;
       const other=planets.list(id).filter(p=>p.id!==r.planet_id).sort((a,b)=>spaceDistance(position,a.center)-spaceDistance(position,b.center))[0];
       const aim=other?bearing(position,other.center):{yaw:0,pitch:0};
@@ -51,9 +53,8 @@ export function navigationStore(db:DatabaseSync,planets:ReturnType<typeof planet
       db.exec('BEGIN IMMEDIATE');
       try {
         db.prepare('INSERT INTO visits (player_id,planet_id,position) VALUES (?,?,?) ON CONFLICT(player_id,planet_id) DO UPDATE SET position=excluded.position').run(id,r.planet_id,r.position);
-        const previous=db.prepare('SELECT position FROM visits WHERE player_id=? AND planet_id=?').get(id,p.id)?.position as string|undefined;
         f.mode='ground';f.speed=0;f.targetId=p.id;
-        db.prepare('UPDATE players SET planet_id=?,position=?,moved_at=?,flight=?,flight_at=?,revision=revision+1 WHERE id=?').run(p.id,previous??JSON.stringify(SPAWN),now,JSON.stringify(f),now,id);
+        db.prepare('UPDATE players SET planet_id=?,position=?,moved_at=?,flight=?,flight_at=?,revision=revision+1 WHERE id=?').run(p.id,JSON.stringify(portPoint(p.id)),now,JSON.stringify(f),now,id);
         db.exec('COMMIT');
       }catch(error){db.exec('ROLLBACK');throw error;}
     },

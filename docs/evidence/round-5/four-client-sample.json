@@ -1,0 +1,38 @@
+{
+  "at": "2026-10-05T12:10:39.563Z",
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "width": 800,
+      "height": 600
+    },
+    {
+      "width": 800,
+      "height": 600
+    },
+    {
+      "width": 800,
+      "height": 600
+    }
+  ],
+  "note": "Four simultaneous independent Mac Chrome contexts; window mode is indicated by userAgent. Not four physical devices. Other local work may contend for CPU/GPU.",
+  "medianMs": 50,
+  "p95Ms": 83.40000000000146,
+  "meanFps": 19.07335293650164,
+  "render": {
+    "engine": "three.js r186",
+    "visibleVisitors": "3",
+    "detailedVisitors": "3",
+    "drawCalls": "329",
+    "triangles": "134904",
+    "portDistance": "8.87734887439023",
+    "groundPosition": "[0,0.9654290825583874,0.2606658522907646]",
+    "visitors": "3",
+    "nearbyVisitors": "3",
+    "presencePlanet": "hub"
+  },
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+}

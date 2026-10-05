@@ -35,3 +35,8 @@ No model pack, paid asset or paid API was used.
 Three.js 0.186.1 and its bundled RoundedBoxGeometry, merge helper and
 RoomEnvironment are used under the MIT license. License: `node_modules/three/LICENSE`.
 Source: https://github.com/mrdoob/three
+
+The industrial starport district, service circuit, observatory, boarding/return
+beacons, mechanical suits and visitor LOD silhouettes added in round 5 are also
+original procedural geometry. The existing NASA orbital texture attribution is
+unchanged. No external workshop or character pack was imported.

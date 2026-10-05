@@ -159,3 +159,63 @@ in ASSET-CREDITS.md and /credits/. No runtime third-party fetch is required.
 The completed flight implementation and visual evidence are saved in local commit
 [`f590257`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/f590257).
 It has not been pushed; this link will resolve on the remote only after an authorised push.
+
+## Physical starport, finite survey and ground visitors
+
+After authorising the flight sample, the user asked to enter it by walking to a
+physical ship/spaceport, reduce the exploration HUD, and expand the sense of a
+shared world. The public hub was restyled as original industrial geometry with
+streets, signs, a gate, parked craft and a connected service circuit/observatory.
+Private worlds keep their saved owner objects and use temporary return scenery at
+the reserved landing point. Boarding checks the saved server position. Landing now
+returns the walker to that point, while ordinary refresh preserves current walking
+position. The UI moves optional management into Pause; nearby E/touch actions remain
+on the world. No schema migration was introduced.
+
+The existing fixed slots were grouped into three finite survey regions, with at
+least 33 initial worlds, Atlas filtering/distances and bounded orbital detail.
+One-second ground presence uses server-derived position/identity, tangent facing,
+public ephemeral UUIDs, same-planet filtering, six-second expiry and interpolated
+avatars. It does not grant editing rights or expose cookie/database identity data.
+There is no remote spacecraft presence or external module integration.
+
+Initial actual Chrome checks rejected distant takeoff and confirmed walking to the
+gate. An early phone flight regression timed out while its keyboard driver repeatedly
+overshot small heading thresholds under concurrent local test activity; its inputs
+were changed to concurrent key updates and a larger angular dead zone. View tests
+also still searched accessibility roles inside a closed pause dialog; they now
+check the control's stored label instead. Phone captures showed too little street
+context, so only the close phone camera was widened, leaving the build overview
+unchanged. The complete final results and remaining limits belong to
+`docs/evidence/round-5/verification.md`.
+
+The main repository was checked for concurrent edits throughout. A separate Claude
+module workspace had its own browser tests; its directory and processes were not
+changed, contacted or integrated. This is factual engineering history, not a
+student-authored reflection or claim of user-study findings.
+
+The final application build passed 21 HTTP/logic/course tests, ran within the
+unchanged one-CPU/256-MiB container settings, and survived a real container restart
+with the complete saved universe equal. Updating the retained 8080 preview preserved
+all rows in five existing tables. Actual headed Chrome flight samples and screenshots
+were recorded for desktop and phone dimensions. An 18-case browser run passed 16
+cases; two timed out in Mac Chrome context creation/cleanup after application
+assertions, alongside browser display/GPU errors. The test cleanup was changed to
+leave WebGL before releasing contexts, with focused headed replays recorded in
+round-5 evidence. No academic reflection was filled in.
+
+The user then selected four reference qualities—exploration/landing/building/visits,
+physical ports, credible mechanical structure and direct contextual interaction.
+They were mapped against the implemented scope and explicit gaps in ADR 0005.
+The existing ground UI bridge type was exported, and an adapter contract documents
+its real endpoints and validation boundaries for later separately reviewed workshop
+integration. No new gameplay subsystem or commercial asset was added.
+
+The focused desktop delivery/return replay passed in headed Chrome. The four-client
+case needed trace recording disabled and bounded transition waits; its final run
+used one desktop and three compact viewports on the same Mac and passed all meeting,
+expiry, reconnection, travel, isolation and permission checks in 2.2 minutes. All 18
+scenarios therefore have passing evidence across the full run and focused replays;
+this is not described as one all-green 18-case run. Earlier stress samples and
+failures remain documented. The build hash stayed unchanged after exporting the
+existing UI bridge type for the adapter contract.

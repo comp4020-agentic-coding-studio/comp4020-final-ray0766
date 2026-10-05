@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-05T11:55:36.188Z",
+  "note": "Four simultaneous independent headed Mac Chrome contexts; not four physical devices. Recorded during a run whose application assertions passed but trace/context teardown timed out.",
+  "medianMs": 83.29999999998836,
+  "p95Ms": 159.89999999999418,
+  "meanFps": 14.599724227431242,
+  "render": {
+    "engine": "three.js r186",
+    "visibleVisitors": "3",
+    "detailedVisitors": "3",
+    "drawCalls": "329",
+    "triangles": "134904",
+    "portDistance": "8.87734887439023",
+    "groundPosition": "[0,0.9654290825583874,0.2606658522907646]",
+    "visitors": "3",
+    "nearbyVisitors": "3",
+    "presencePlanet": "hub"
+  },
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+}

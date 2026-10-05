@@ -1,0 +1,49 @@
+{
+  "at": "2026-10-05T11:40:36.799553+00:00",
+  "equalAllRows": true,
+  "schema": 4,
+  "tables": {
+    "players": {
+      "rows": 99,
+      "digest": "d00b330fd9fa9b6a604a9e8ef9902d7b239786698bb96ee9ebf4c0c189df72d7"
+    },
+    "planets": {
+      "rows": 42,
+      "digest": "615709d745174b8c20ab7aa2d27be82c3807832d5895284a633f6484b7ffeb7d"
+    },
+    "planet_objects": {
+      "rows": 24,
+      "digest": "0a77957e8e1209a255ec69282be8b0d5e16f83c1b568e27d1d071dfec3c9d16f"
+    },
+    "visits": {
+      "rows": 50,
+      "digest": "fccc25ea77d162166ac21e080f17d555ba54395d29b1557d1d7b94e8b3712c4f"
+    },
+    "object_tombstones": {
+      "rows": 5,
+      "digest": "d16d178020cf4d429ce8240f811e64b6762b8b1a1bdd335de0df9619d8f2fe90"
+    }
+  },
+  "http": {
+    "/healthz": {
+      "status": 200,
+      "type": "application/json"
+    },
+    "/readme/": {
+      "status": 200,
+      "type": "text/html; charset=utf-8"
+    },
+    "/credits/": {
+      "status": 200,
+      "type": "text/html; charset=utf-8"
+    },
+    "/textures/lroc-color-2k.jpg": {
+      "status": 200,
+      "type": "image/jpeg"
+    },
+    "/textures/lola-height-1k.jpg": {
+      "status": 200,
+      "type": "image/jpeg"
+    }
+  }
+}

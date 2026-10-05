@@ -44,7 +44,7 @@ export function cameraPose(walker: SurfaceWalker, portrait: boolean, overview = 
   };
   const lookAhead = walker.velocity.clone().multiplyScalar(.13);
   return {
-    position: walker.up.clone().multiplyScalar(RADIUS + (portrait ? 5.8 : 4.6)).addScaledVector(walker.north, portrait ? -7.8 : -6.8),
+    position: walker.up.clone().multiplyScalar(RADIUS + (portrait ? 6.4 : 4.6)).addScaledVector(walker.north, portrait ? -9.0 : -6.8),
     target: walker.up.clone().multiplyScalar(RADIUS + .85).addScaledVector(walker.north, 1.6).add(lookAhead),
   };
 }

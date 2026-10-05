@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-05T11:44:53.751Z",
+  "fullUniverseEqual": true,
+  "character": "sky",
+  "flightMode": "space",
+  "journey": 2,
+  "ownedObjectCount": 1,
+  "worldCount": 33,
+  "routes": {
+    "/healthz": 200,
+    "/readme/": 200,
+    "/credits/": 200,
+    "/textures/lroc-color-2k.jpg": 200,
+    "/textures/lola-height-1k.jpg": 200
+  }
+}

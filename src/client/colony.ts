@@ -1,4 +1,6 @@
 import * as T from 'three';
+import { REGIONS,regionFor } from '../shared/regions.ts';
+import { spaceDistance } from '../shared/flight.ts';
 import { CATALOGUE, MAX_OBJECTS, placementProblem } from '../shared/planets.ts';
 import type { BuildKind, Universe } from '../shared/planets.ts';
 import type { PlayerState, Vec3 } from '../shared/world.ts';
@@ -6,7 +8,7 @@ import { builtObject, disposeGeometry } from './build-art.ts';
 import { surfacePoint } from './terrain.ts';
 import type { Obstacle } from './scene.ts';
 const el = <E extends HTMLElement = HTMLElement>(id:string) => document.getElementById(id) as E;
-interface Bridge {
+export interface ColonyBridge {
   canvas: HTMLCanvasElement; camera: T.Camera; scene: T.Scene;
   ground: () => T.Mesh; applyPlayer: (p:PlayerState) => boolean;
   obstacles: (blocks:Obstacle[]) => void; pause: (building:boolean) => void;
@@ -24,9 +26,10 @@ export class Colony {
   private placing = false; private selected: string | null = null;
   private painted = ''; private cards = ''; private pointer: {x:number;y:number} | null = null;
   private ray = new T.Raycaster(); private pollBusy = false;
-  constructor(private bridge: Bridge) {
+  constructor(private bridge: ColonyBridge) {
     bridge.scene.add(this.layer);
-    el('open-map').onclick=()=>{bridge.pause(this.building);this.map.showModal();void this.poll();};
+    el<HTMLSelectElement>('region-select').onchange=()=>{this.cards='';this.starMap();};
+    el('open-map').onclick=()=>{el<HTMLDialogElement>('menu-dialog').close();bridge.pause(this.building);this.cards='';if(this.universe)this.starMap();this.map.showModal();void this.poll();};
     el('close-map').onclick=()=>this.map.close();
     el('my-planet').onclick=()=>{if(this.universe?.ownedPlanetId)this.mark(this.universe.ownedPlanetId);};
     el('claim-planet').onclick=()=>void this.claim();
@@ -48,7 +51,7 @@ export class Colony {
       if(!this.building||this.busy||!this.pointer||Math.hypot(e.clientX-this.pointer.x,e.clientY-this.pointer.y)>10)return;
       this.pointer=null;this.point(e.clientX,e.clientY);
     });
-    window.addEventListener('keydown',e=>{if(this.building&&!this.map.open&&e.key.toLowerCase()==='r'){e.preventDefault();el('rotate-object').click();}});
+    window.addEventListener('keydown',e=>{if(this.building&&!document.querySelector('dialog[open]')&&e.key.toLowerCase()==='r'){e.preventDefault();el('rotate-object').click();}});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)void this.poll();});
     setInterval(()=>{if(!document.hidden)void this.poll();},1000);
     void this.poll();
@@ -57,7 +60,7 @@ export class Colony {
   private clearDraft(){this.draft=null;this.selected=null;this.placing=false;el<HTMLSelectElement>('built-list').value='';if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}}
   private setBuilding(value:boolean){
     this.building=value&&!!this.universe?.currentPlanet.mine&&this.syncing;this.clearDraft();
-    document.body.classList.toggle('building',this.building);el('builder').hidden=!this.building;this.bridge.pause(this.building);this.editor();this.hud();
+    document.body.classList.toggle('building',this.building);el('builder').hidden=!this.building;this.bridge.pause(this.building);if(this.building)el<HTMLDialogElement>('menu-dialog').close();this.editor();this.hud();
   }
   stopBuilding(){this.setBuilding(false);}
   accept(next:Universe){
@@ -88,10 +91,10 @@ export class Colony {
     catch(error){if(error instanceof Error&&'status' in error&&error.status===409)this.clearDraft();this.bridge.notice(error instanceof Error?error.message:'Could not save. Please retry.');return false;}
     finally{this.busy=false;this.editor();this.hud();void this.poll();}
   }
-  private mark(id:string){this.map.close();this.bridge.bearing(id);}
+  private mark(id:string){this.map.close();el<HTMLDialogElement>('menu-dialog').close();this.bridge.bearing(id);}
   private async claim(){
     if(!this.universe)return;
-    if(await this.command('planets/claim',{planetId:this.universe.currentPlanet.id})){this.bridge.notice('This little world is yours to shape.');this.setBuilding(true);}
+    if(await this.command('planets/claim',{planetId:this.universe.currentPlanet.id})){this.bridge.notice('This world is yours. Enter Build mode when you are ready.');}
   }
   private locate(group:T.Object3D,position:Vec3,rotation:number){const n=new T.Vector3(...position);group.position.copy(surfacePoint(n,.015));group.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),n);group.rotateY(rotation);}
   private point(x:number,y:number){
@@ -134,7 +137,7 @@ export class Colony {
   private hud(){
     const u=this.universe;if(!u)return;const p=u.currentPlanet;
     document.body.dataset.planet=p.kind;el('planet-name').textContent=p.name;
-    el('planet-card').dataset.revision=String(p.revision);
+    el('planet-card').dataset.revision=String(p.revision);if(u.player.flight.mode==='ground')el('location-chip').textContent=p.name.toUpperCase();
     el('planet-type').textContent=p.kind==='hub'?'SHARED HARBOUR':p.mine?'YOUR LITTLE WORLD':p.claimed?'A NEIGHBOUR’S WORLD':'AN UNWRITTEN WORLD';
     el('planet-description').textContent=p.kind==='hub'?'Meet the neighbours, or find a place of your own.':p.mine?'Only you can build here. Everyone is welcome to visit.':p.claimed?'Take a look around. This visit is read-only.':'A blank planet, waiting for someone’s first idea.';
     el('planet-count').textContent=p.kind==='hub'?'Public place':`${p.objectCount} / ${MAX_OBJECTS} objects`;
@@ -143,7 +146,7 @@ export class Colony {
     el<HTMLButtonElement>('claim-planet').disabled=this.busy||!this.syncing;
     el<HTMLButtonElement>('build-mode').hidden=!p.mine;el('build-mode').textContent=this.building?'Building…':'Build on my planet';
     el<HTMLButtonElement>('build-mode').disabled=this.busy||!this.syncing;
-    el('find-planet').hidden=true;el('delivery-toggle').hidden=p.kind!=='hub';
+    el('delivery-toggle').hidden=p.kind!=='hub';
     el('my-planet').hidden=!u.ownedPlanetId||u.ownedPlanetId===p.id;
     el('ownership-note').hidden=!(p.kind==='garden'&&!p.claimed&&u.ownedPlanetId);
   }
@@ -151,12 +154,16 @@ export class Colony {
     const u=this.universe!;const key=JSON.stringify(u.planets.map(p=>[p.id,p.claimed,p.mine,p.objectCount]))+u.currentPlanet.id;
     if(key===this.cards)return;this.cards=key;el('planet-list').replaceChildren();
     const priority=(p:Universe['planets'][number])=>p.mine?0:p.kind==='hub'?1:!p.claimed?2:3;
-    const ordered=[...u.planets].sort((a,b)=>priority(a)-priority(b));
+    const filter=el<HTMLSelectElement>('region-select').value;
+    const origin=u.player.flight.mode==='space'?u.player.flight.position:u.currentPlanet.center;
+    const ordered=u.planets.filter(p=>filter==='all'||regionFor(p.slot).id===filter).sort((a,b)=>priority(a)-priority(b)||spaceDistance(a.center,origin)-spaceDistance(b.center,origin));
+    el('survey-summary').textContent=`${u.planets.length} surveyed worlds · ${REGIONS.length} star regions`;
+    el('region-description').textContent=REGIONS.find(r=>r.id===filter)?.description??'Nearby homes and distant crossings. Select a region to plan your route.';
     for(const [index,p] of ordered.entries()){
       const card=document.createElement('article');card.className='planet-option';card.dataset.planetId=p.id;
       const orb=document.createElement('div');orb.className='map-orb';orb.style.setProperty('--orb',p.kind==='hub'?'#d8b783':p.mine?'#91b499':p.claimed?'#9bb9c0':'#cdd4bc');orb.style.rotate=`${index*27}deg`;orb.textContent=p.kind==='hub'?'⌂':p.claimed?'✦':'·';
       const info=document.createElement('div'),tag=document.createElement('small'),name=document.createElement('h3'),detail=document.createElement('p');
-      tag.textContent=p.kind==='hub'?'Shared':p.mine?'My planet':p.claimed?'Neighbour · read only':'Blank · unclaimed';name.textContent=p.name;detail.textContent=p.kind==='hub'?'An optional delivery awaits.':`${p.objectCount} saved object${p.objectCount===1?'':'s'}.`;
+      tag.textContent=p.kind==='hub'?'Shared':p.mine?'My planet':p.claimed?'Neighbour · read only':'Blank · unclaimed';name.textContent=p.name;detail.textContent=`${regionFor(p.slot).name} · ${Math.round(spaceDistance(p.center,origin))} m away · ${p.kind==='hub'?'Public starport':p.objectCount+' saved objects'}`;
       const button=document.createElement('button');button.className='quiet visit-planet';button.textContent='Mark bearing ◇';button.onclick=()=>this.mark(p.id);
       info.append(tag,name,detail);card.append(orb,info,button);el('planet-list').append(card);
     }

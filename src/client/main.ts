@@ -2,6 +2,11 @@ import * as T from 'three';
 import './style.css';
 import './colony.css';
 import './flight.css';
+import './immersive.css';
+import { BOARD_RADIUS, portPoint } from '../shared/ports.ts';
+import { GroundPresence } from './presence.ts';
+import { PRESENCE_INTERVAL } from '../shared/presence.ts';
+import type { PresenceSnapshot } from '../shared/presence.ts';
 import { SpaceFlight } from './flight.ts';
 import { Colony } from './colony.ts';
 import { disposeGeometry } from './build-art.ts';
@@ -25,7 +30,7 @@ let colony: Colony | undefined;
 let flight: SpaceFlight | undefined;
 let activePlanet = 'hub';
 const lastSaved = new T.Vector3();
-let near: NpcId | null = null;
+let near: NpcId | null = null;let nearDock=false,guideDock=false;
 let queue: Promise<unknown> = Promise.resolve();
 const courierDialog = $<HTMLDialogElement>('courier-dialog');
 const helpDialog = $<HTMLDialogElement>('help-dialog');
@@ -56,13 +61,16 @@ function serial<T>(run: () => Promise<T>): Promise<T> {
 }
 function accept(next: PlayerState) {
   const reconnecting = !online;
+  const previousPlanet=state?.planetId;const previousMode=state?.flight.mode;
+  const justLanded=state?.flight.mode==='space'&&next.flight.mode==='ground'&&next.revision>=state.revision;
   if (!state || next.revision >= state.revision) state = next;
   if (state.planetId !== activePlanet) {
     activePlanet = state.planetId; disposeGeometry(worldRoot); worldRoot = new T.Scene(); scene.add(worldRoot);
     world = createWorld(worldRoot, activePlanet === 'hub'); walker = new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;near=null;
     $('npc-mica').hidden=true;$('npc-sol').hidden=true;$('conversation').hidden=true;document.body.classList.remove('delivery-open');
   }
-  if(reconnecting && walker){walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();}
+  if((reconnecting||justLanded) && walker){walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;}
+  if(previousPlanet!==state.planetId||previousMode!==state.flight.mode)presence.clear();
   flight?.receive(state.flight,reconnecting);
   online = navigator.onLine; status(online?'Progress saved':'Offline · retrying',!online); renderTask();
 }
@@ -99,23 +107,18 @@ $('world').append(renderer.domElement);
 renderer.domElement.setAttribute('aria-label', 'Little Worlds planet. Use WASD or arrow keys to walk; board your ship to fly between worlds.');
 const scene = new T.Scene();
 const sky = new T.Group();scene.add(sky);
-for (let i=0;i<7;i++) {
-  const cloud=new T.Group();sky.add(cloud);
-  cloud.position.set((i-3)*7,8+(i%3)*1.5,-23-(i%2)*7);
-  for(let j=0;j<4;j++){
-    const puff=new T.Mesh(new T.IcosahedronGeometry(1.5,1),new T.MeshBasicMaterial({color:i%2?'#deead4':'#c8dfce',transparent:true,opacity:.72,depthWrite:false}));
-    puff.position.set((j-1.5)*1.7,Math.sin(j*2)*.35,0);puff.scale.set(1.2,.4,.65);cloud.add(puff);
-  }
-}
-scene.fog = new T.Fog('#9cc8c4', 21, 48);
+const stars:number[]=[];for(let i=0;i<260;i++){const p=new T.Vector3(Math.sin(i*21.2),Math.cos(i*14.3),Math.sin(i*9.2)).normalize().multiplyScalar(65);stars.push(...p.toArray());}
+const starGeo=new T.BufferGeometry();starGeo.setAttribute('position',new T.Float32BufferAttribute(stars,3));sky.add(new T.Points(starGeo,new T.PointsMaterial({color:'#819dab',size:.085,fog:false})));
+scene.fog = new T.Fog('#0f202b', 28, 65);
 const camera = new T.PerspectiveCamera(48, innerWidth / innerHeight, .1, 150);
-const fill = new T.AmbientLight('#d2e5d4', .95); scene.add(fill);
-const sun = new T.DirectionalLight('#fff0cc', 2.15); sun.castShadow=true;
+const fill = new T.AmbientLight('#839aaf', 1.1); scene.add(fill);
+const sun = new T.DirectionalLight('#efd4b0', 2.5); sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-16;sun.shadow.camera.right=16;sun.shadow.camera.top=16;sun.shadow.camera.bottom=-16;sun.shadow.camera.far=65;sun.shadow.normalBias=.09;sun.shadow.bias=-.0003;
 scene.add(sun);scene.add(sun.target);
 let worldRoot = new T.Scene();scene.add(worldRoot);
 let world = createWorld(worldRoot);
 const player = courier('clay');scene.add(player.root);
+const presence=new GroundPresence(scene,renderer.domElement);
 const silhouette = new T.Mesh(new T.CapsuleGeometry(.22, .90, 4, 8), new T.MeshBasicMaterial({color:'#ffdfa0',transparent:true,opacity:.24,depthTest:false,depthWrite:false}));
 silhouette.visible=false;silhouette.renderOrder=100;scene.add(silhouette);
 const destinationRing = new T.Mesh(new T.RingGeometry(.2,.27,24),new T.MeshBasicMaterial({color:'#fff7db',side:T.DoubleSide,transparent:true,opacity:.9}));
@@ -127,19 +130,19 @@ function clearInput() { keys.clear();joy.set(0,0);$('stick').style.transform='';
 window.addEventListener('blur',clearInput);
 document.addEventListener('visibilitychange',()=> { if(document.hidden) { clearInput(); void savePosition(true); } });
 window.addEventListener('keydown',event=> {
-  if(flight?.active || document.querySelector('#flight-dialog[open]') || courierDialog.open || helpDialog.open || colony?.paused || /INPUT|TEXTAREA|SELECT/.test((event.target as HTMLElement).tagName)) return;
+  if(flight?.active || document.querySelector('dialog[open]') || colony?.paused || /INPUT|TEXTAREA|SELECT/.test((event.target as HTMLElement).tagName)) return;
   const key=event.key.toLowerCase();
   if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e'].includes(key)) {
     event.preventDefault();keys.add(key);target=null;
-    if(key==='e' && !event.repeat) void interact();
+    if(key==='e' && !event.repeat){if(nearDock)flight?.openLaunch();else void interact();}
   }
 });
 window.addEventListener('keyup',event=>keys.delete(event.key.toLowerCase()));
 const raycaster = new T.Raycaster();
 let pointerStart: {x:number;y:number} | null=null;
-renderer.domElement.addEventListener('pointerdown',e=> {if(!flight?.active&&!document.querySelector('#flight-dialog[open]')&&!colony?.paused)pointerStart={x:e.clientX,y:e.clientY};});
+renderer.domElement.addEventListener('pointerdown',e=> {if(!flight?.active&&!document.querySelector('dialog[open]')&&!colony?.paused)pointerStart={x:e.clientX,y:e.clientY};});
 renderer.domElement.addEventListener('pointerup',e=> {
-  if(flight?.active || colony?.paused || !walker || !online || !pointerStart || Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>10) return;
+  if(flight?.active || document.querySelector('dialog[open]') || colony?.paused || !walker || !online || !pointerStart || Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>10) return;
   raycaster.setFromCamera(new T.Vector2(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1),camera);
   const hit=raycaster.intersectObject(world.globe)[0];
   if(hit) {target=hit.point.normalize();destinationRing.position.copy(surfacePoint(target,.05));destinationRing.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),target);}
@@ -153,12 +156,17 @@ function drag(e:PointerEvent) {
 joystick.addEventListener('pointerdown',e=>{joyPointer=e.pointerId;joystick.setPointerCapture(e.pointerId);target=null;drag(e);});
 joystick.addEventListener('pointermove',e=>{if(joyPointer===e.pointerId)drag(e);});
 for(const name of ['pointerup','pointercancel','lostpointercapture']) joystick.addEventListener(name,()=>{joyPointer=null;joy.set(0,0);$('stick').style.transform='';});
-$('view-mode').onclick=()=>{ overview=!overview; $('view-mode').setAttribute('aria-label',overview?'Walking view':'View planet'); $('view-mode').innerHTML=overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>'; };
+$('view-mode').onclick=()=>{menu.close();overview=!overview; $('view-mode').setAttribute('aria-label',overview?'Walking view':'View planet'); $('view-mode').innerHTML=overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>'; };
 $('close-conversation').onclick=()=>{ $('conversation').hidden=true; conversationUntil=0; };
-$('wardrobe').onclick=()=>{clearInput();courierDialog.showModal();};
-$('help').onclick=()=>{clearInput();helpDialog.showModal();};
+$('wardrobe').onclick=()=>{menu.close();clearInput();courierDialog.showModal();};
+$('help').onclick=()=>{menu.close();clearInput();helpDialog.showModal();};
 document.querySelectorAll<HTMLButtonElement>('dialog .close, .close-help').forEach(b=>b.onclick=()=>b.closest('dialog')?.close());
-$('begin').onclick=()=>{courierDialog.close();notice('Board your ship. Find a little world of your own.');};
+$('begin').onclick=()=>{courierDialog.close();notice('Follow the blue-lit street to STARPORT / 01.',6500);};
+const menu=$<HTMLDialogElement>('menu-dialog');
+$('open-menu').onclick=()=>{clearInput();flight?.clear();menu.showModal();};
+$('close-menu').onclick=$('resume').onclick=()=>menu.close();
+$('guide-port').onclick=()=>{guideDock=true;menu.close();notice('Your parked ship is marked. Walk there to board.');};
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('dialog[open]')){e.preventDefault();clearInput();flight?.clear();menu.showModal();}if(e.key.toLowerCase()==='m'&&!document.querySelector('dialog[open]')){$('open-map').click();}});
 document.querySelectorAll<HTMLButtonElement>('[data-character]').forEach(button=>button.onclick=async()=>{
   if(busy || !state) return;
   busy=true;const old=state.character;player.setColor(button.dataset.character as Character);status('Saving coat…');
@@ -193,6 +201,14 @@ async function interact() {
 }
 action.onclick=()=>void interact();
 setInterval(()=>void savePosition(),350);
+let presenceBusy=false;
+setInterval(async()=>{
+  if(presenceBusy||!online||!walker||state?.flight.mode!=='ground'||document.hidden)return;
+  presenceBusy=true;const planetId=activePlanet;
+  try{const snapshot=await request<PresenceSnapshot>('presence',{planetId,facing:walker.facing.toArray()});if(activePlanet===planetId&&state.flight.mode==='ground')presence.receive(snapshot);}
+  catch{/* Presence is ephemeral; a failed heartbeat must not alter durable saves. */}
+  finally{presenceBusy=false;}
+},PRESENCE_INTERVAL);
 setInterval(async()=>{
   if(online || busy) return;
   try {
@@ -208,8 +224,8 @@ function animate(now:number) {
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.05);previous=now;elapsed+=dt;
   if(!walker) return;
-  if(flight?.active){flight.frame(dt,now,renderer);if(now>noticeUntil)$('notice').hidden=true;return;}
-  const paused=!!document.querySelector('#flight-dialog[open]')||courierDialog.open||helpDialog.open||!!colony?.paused||!online||document.hidden;
+  if(flight?.active){$('boarding-prompt').hidden=true;$('dock-guide').hidden=true;flight.frame(dt,now,renderer);if(now>noticeUntil)$('notice').hidden=true;return;}
+  const paused=!!document.querySelector('dialog[open]')||courierDialog.open||helpDialog.open||!!colony?.paused||!online||document.hidden;
   let x=joy.x+Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));
   let y=joy.y+Number(keys.has('w')||keys.has('arrowup'))-Number(keys.has('s')||keys.has('arrowdown'));
   if(target && !paused) {
@@ -223,6 +239,7 @@ function animate(now:number) {
   }
   destinationRing.visible=!!target;
   player.root.position.copy(surfacePoint(walker.up,.018));player.root.quaternion.copy(walker.orientation());player.animate(elapsed,walker.velocity.length(),reduced);
+  const fov=innerWidth<600&&!overview?58:48;if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();}
   const pose=cameraPose(walker,innerWidth<600,overview);
   pose.position.addScaledVector(walker.up,world.height(walker.up));
   pose.target.addScaledVector(walker.up,world.height(walker.up));
@@ -242,12 +259,18 @@ function animate(now:number) {
   sky.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(skyRight,walker.up,skyBack));
   world.animate(elapsed,reduced);
   world.npcs.forEach(n=>{n.avatar.animate(elapsed,0,reduced);if(near===n.id){const local=n.anchor.worldToLocal(player.root.position.clone());const yaw=Math.atan2(local.x,local.z);const diff=Math.atan2(Math.sin(yaw-n.avatar.root.rotation.y),Math.cos(yaw-n.avatar.root.rotation.y));n.avatar.root.rotation.y+=diff*(1-Math.exp(-4*dt));}n.beacon.position.y=2.0+(reduced?0:Math.sin(elapsed*2)*.06);n.beacon.visible=state.quest!=='delivered'&&n.id===(state.quest==='available'?'mica':'sol');});
+  presence.frame(now,dt,walker.up,reduced);
   renderer.render(scene,camera);
   uiTick+=dt;
   if(uiTick>.1) {
     renderer.domElement.dataset.drawCalls=String(renderer.info.render.calls);
     renderer.domElement.dataset.triangles=String(renderer.info.render.triangles);
     uiTick=0;near=null;
+    const dockPoint=new T.Vector3(...portPoint(activePlanet)),dockDistance=walker.up.angleTo(dockPoint)*RADIUS;nearDock=dockDistance<BOARD_RADIUS-.12;
+    $('boarding-prompt').hidden=!nearDock||paused;$('dock-context').textContent=activePlanet==='hub'?'STARPORT / BOARDING GATE':'PARKED SHIP / RETURN BEACON';
+    $('dock-guide').hidden=!guideDock||nearDock||paused;const toward=dockPoint.projectOnPlane(walker.up).normalize();$('dock-arrow').style.transform=`rotate(${Math.atan2(toward.dot(walker.right()),toward.dot(walker.north))*180/Math.PI}deg)`;$('dock-guide-text').textContent=`Parked ship · ${Math.round(dockDistance)} m`;
+    renderer.domElement.dataset.portDistance=String(dockDistance);renderer.domElement.dataset.groundPosition=JSON.stringify(walker.up.toArray());
+
     for(const n of world.npcs){
       const d=distance(walker.up.toArray() as Vec3,NPCS[n.id].position);if(d<INTERACT_DISTANCE-.12)near=n.id;
       const p=n.anchor.position.clone().addScaledVector(n.anchor.position.clone().normalize(),2.12);
@@ -257,12 +280,12 @@ function animate(now:number) {
       p.project(camera);const label=$('npc-'+n.id);
       const active=state.quest!=='delivered'&&n.id===(state.quest==='available'?'mica':'sol');
       const offscreen=Math.abs(p.x)>.84||Math.abs(p.y)>.84;
-      label.hidden=!visible||p.z>1||(!active&&offscreen);
+      label.hidden=!visible||p.z>1||(!active&&offscreen)||(d>3&&!document.body.classList.contains('delivery-open'));
       label.classList.toggle('offscreen',offscreen);label.dataset.side=p.x>0?'right':'left';
       label.style.left=`${Math.max(52,Math.min(innerWidth-52,(p.x*.5+.5)*innerWidth))}px`;
       label.style.top=`${Math.max(innerWidth<600?222:100,Math.min(innerHeight-210,(-p.y*.5+.5)*innerHeight))}px`;
     }
-    action.hidden=!near||paused;
+    action.hidden=!near||paused||nearDock;
     if(near){action.innerHTML=(state.quest==='available'&&near==='mica'?'Collect the parcel':state.quest==='carrying'&&near==='sol'?'Deliver to Sol':`Talk to ${NPCS[near].name}`)+' <kbd>E</kbd>';$('nearby').textContent=near==='mica'?'A little sunshine, ready to go.':'Something’s waiting to grow.';}
     else $('nearby').textContent='';
     if(state.quest!=='delivered') {
@@ -278,8 +301,8 @@ function animate(now:number) {
 }
 function ensureColony() {
   if(colony)return;
-  flight=new SpaceFlight({canvas:renderer.domElement,renderer,online:()=>online,player:()=>state,checkpoint:body=>serial(()=>request('flight/checkpoint',body)),command:(route,body)=>serial(()=>request<Universe>(route,body)),apply:accept,applyUniverse:u=>colony?.accept(u),flushGround:async()=>{await savePosition(true);await queue;},clearGround:()=>{clearInput();colony?.stopBuilding();},failed,notice});
-  flight.receive(state.flight);
+  flight=new SpaceFlight({canvas:renderer.domElement,renderer,online:()=>online,player:()=>state,checkpoint:body=>serial(()=>request('flight/checkpoint',body)),command:(route,body)=>serial(()=>request<Universe>(route,body)),apply:accept,applyUniverse:u=>colony?.accept(u),flushGround:async()=>{await savePosition(true);await queue;},clearGround:()=>{clearInput();colony?.stopBuilding();},canBoard:()=>!!walker&&!colony?.building&&distance(walker.up.toArray() as Vec3,portPoint(activePlanet))<BOARD_RADIUS-.12,failed,notice});
+  flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=.5;
   colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,
     applyPlayer:p=>{accept(p);return state.planetId===p.planetId&&state.revision<=p.revision;},
     universe:u=>flight?.universe(u),bearing:id=>flight?.mark(id),
@@ -287,7 +310,7 @@ function ensureColony() {
     pause:building=>{clearInput();overview=building;$('view-mode').setAttribute('aria-label',overview?'Walking view':'View planet');$('view-mode').innerHTML=overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>';},
     read:()=>request<Universe>('universe'),write:(route,body)=>serial(()=>request<Universe>(route,body)),flush:async()=>{await savePosition(true);await queue;},notice,
   });
-  $('delivery-toggle').onclick=()=>{document.body.classList.toggle('delivery-open');$('delivery-toggle').textContent=document.body.classList.contains('delivery-open')?'Hide delivery':'Try a delivery';};
+  $('delivery-toggle').onclick=()=>{menu.close();document.body.classList.toggle('delivery-open');$('delivery-toggle').textContent=document.body.classList.contains('delivery-open')?'Hide delivery':'Try a delivery';};
 }
 requestAnimationFrame(animate);
 try {

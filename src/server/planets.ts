@@ -5,6 +5,7 @@ import type { PlanetSummary, PlanetView, PlacedObject } from '../shared/planets.
 import { normalize } from '../shared/world.ts';
 import type { Vec3 } from '../shared/world.ts';
 import { RequestError } from './errors.ts';
+import { INITIAL_PLANETS } from '../shared/regions.ts';
 import { MAX_PLANETS, planetCenter } from '../shared/flight.ts';
 
 interface PlanetRow { id: string; name: string; kind: 'hub' | 'garden'; owner_id: string | null; revision: number; objectCount: number;slot:number }
@@ -13,7 +14,9 @@ export function planetStore(db: DatabaseSync) {
   const transaction = <T>(fn: () => T) => { db.exec('BEGIN IMMEDIATE'); try { const result = fn(); db.exec('COMMIT'); return result; } catch (error) { db.exec('ROLLBACK'); throw error; } };
   function replenish() {
     let blank = Number(db.prepare("SELECT count(*) AS n FROM planets WHERE kind='garden' AND owner_id IS NULL").get()!.n);
-    while (blank++ < 6 && Number(db.prepare('SELECT count(*) AS n FROM planets').get()!.n)<MAX_PLANETS) {
+    let total=Number(db.prepare('SELECT count(*) AS n FROM planets').get()!.n);
+    while((blank<6||total<INITIAL_PLANETS)&&total<MAX_PLANETS){
+      blank++;total++;
       const number = Number(db.prepare("SELECT count(*) AS n FROM planets WHERE kind='garden'").get()!.n) + 1;
       const slot=Number(db.prepare('SELECT COALESCE(max(slot),-1)+1 AS slot FROM planets').get()!.slot);
       db.prepare("INSERT INTO planets (id,name,kind,slot) VALUES (?,?,'garden',?)").run('p-' + randomUUID(), `Little world ${String(number).padStart(2, '0')}`,slot);

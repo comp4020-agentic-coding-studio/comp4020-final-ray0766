@@ -1,0 +1,46 @@
+{
+  "applicationBundle": "index-CB0hCiOH.js",
+  "logicAndHttpTests": 21,
+  "fullBrowserRun": {
+    "passed": 16,
+    "total": 18,
+    "durationMinutes": 15.6,
+    "failedAt": "Mac Chrome context creation/cleanup after application assertions"
+  },
+  "focusedReplays": [
+    {
+      "case": "desktop delivery and restored identity",
+      "passed": true,
+      "mode": "headed Chrome",
+      "seconds": 17.1
+    },
+    {
+      "case": "four visitor presence/travel/isolation",
+      "passed": true,
+      "mode": "Chrome without trace recording",
+      "minutes": 2.2,
+      "viewports": [
+        [
+          1440,
+          900
+        ],
+        [
+          800,
+          600
+        ],
+        [
+          800,
+          600
+        ],
+        [
+          800,
+          600
+        ]
+      ]
+    }
+  ],
+  "allScenariosHavePassingEvidence": true,
+  "singleCleanFullRun": false,
+  "livePreview": "http://localhost:8080",
+  "noPushOrDeploy": true
+}
