@@ -1,7 +1,9 @@
 # Workshop integration boundary (not an integrated workshop)
 
 The user assigned the blueprint, ecology, ship and history modules to a separate
-workspace. This repository does not import, launch, copy or invoke that code.
+workspace. Round 5 did not import, launch, copy or invoke that code. Round 6 now reuses only
+a fixed, verified pure-geometry resource snapshot, as documented in
+`shared-assets.md`; the independent editor/server work remains separate.
 The exported `ColonyBridge` type in `src/client/colony.ts` is the existing typed
 boundary for a future ground/building UI adapter. Exposing its type adds no new
 runtime feature or rights. `Colony` still owns the current small catalogue/editor.

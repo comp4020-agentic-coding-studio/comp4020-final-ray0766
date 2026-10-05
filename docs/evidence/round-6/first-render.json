@@ -1,0 +1,42 @@
+[
+  {
+    "name": "desktop",
+    "errors": [],
+    "canvas": {
+      "engine": "three.js r186",
+      "visibleVisitors": "0",
+      "detailedVisitors": "0",
+      "groundScale": "3.905784944346495",
+      "groundRadius": "240",
+      "quality": "full",
+      "drawCalls": "258",
+      "triangles": "166566",
+      "portDistance": "8.87734887439023",
+      "groundPosition": "[0,0.9654290825583874,0.2606658522907646]",
+      "visitors": "0",
+      "nearbyVisitors": "0",
+      "presencePlanet": "hub"
+    },
+    "width": 1600
+  },
+  {
+    "name": "phone",
+    "errors": [],
+    "canvas": {
+      "engine": "three.js r186",
+      "visibleVisitors": "1",
+      "detailedVisitors": "1",
+      "groundScale": "3.905784944346495",
+      "groundRadius": "240",
+      "quality": "compact",
+      "drawCalls": "220",
+      "triangles": "126770",
+      "portDistance": "8.87734887439023",
+      "groundPosition": "[0,0.9654290825583874,0.2606658522907646]",
+      "visitors": "1",
+      "nearbyVisitors": "1",
+      "presencePlanet": "hub"
+    },
+    "width": 390
+  }
+]

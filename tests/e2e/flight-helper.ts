@@ -38,7 +38,7 @@ export async function pilotToBearing(page:Page){
     while(Date.now()<until){
       const d=await page.locator('#flight-hud').evaluate(e=>({...e.dataset})),yaw=Number(d.yawError),pitch=Number(d.pitchError),distance=Number(d.distance),speed=Number(d.speed);
       if(distance<=19.4&&speed<.3)return;
-      stalled=distance>25&&speed<.1&&Math.abs(yaw)<.1&&Math.abs(pitch)<.1?stalled+1:0;
+      stalled=distance>25&&speed<.1&&Math.abs(yaw)<.24&&Math.abs(pitch)<.24?stalled+1:0;
       if(stalled>12){
         // A planet can obstruct a straight bearing. Fly a visible detour above it.
         for(const key of held)await page.keyboard.up(key);held.clear();

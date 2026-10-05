@@ -1,0 +1,865 @@
+{
+  "version": "sunseed-structure/1",
+  "units": "metres",
+  "up": "+Y",
+  "exterior": "+Z",
+  "right": "+X",
+  "yaw": "radians about +Y",
+  "note": "Measured source geometry. Current runtime Sunseed material sharing can reduce material draw groups. Metadata for the independent editor; not additional accepted server kinds.",
+  "parts": [
+    {
+      "id": "floor.deck",
+      "label": "Floor deck",
+      "description": "Concrete slab, tread plate",
+      "mount": "cell",
+      "role": "deck",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 264,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.1599999964237213,
+              -0.5
+            ],
+            "max": [
+              0.5,
+              7.450580430390374e-11,
+              0.5
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 264,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.1599999964237213,
+              -0.5
+            ],
+            "max": [
+              0.5,
+              7.450580430390374e-11,
+              0.5
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 72,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.1599999964237213,
+              -0.5
+            ],
+            "max": [
+              0.5,
+              7.450580430390374e-11,
+              0.5
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "floor.grate",
+      "label": "Grated catwalk",
+      "description": "Open grating on channels",
+      "mount": "cell",
+      "role": "deck",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 792,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.12000000476837158,
+              -0.5
+            ],
+            "max": [
+              0.5,
+              0.00989999994635582,
+              0.5
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 600,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.12000000476837158,
+              -0.5
+            ],
+            "max": [
+              0.5,
+              0.00989999994635582,
+              0.5
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 216,
+          "drawCalls": 2,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.12000000476837158,
+              -0.5
+            ],
+            "max": [
+              0.5,
+              -3.3527614018424856e-10,
+              0.5
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "wall.solid",
+      "label": "Solid wall",
+      "description": "Clad panel, conduit",
+      "mount": "edge",
+      "role": "wall",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 708,
+          "drawCalls": 6,
+          "bounds": {
+            "min": [
+              -0.5,
+              8.940696516468449e-10,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.1420000046491623
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 676,
+          "drawCalls": 6,
+          "bounds": {
+            "min": [
+              -0.5,
+              8.940696516468449e-10,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.1420000046491623
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 164,
+          "drawCalls": 5,
+          "bounds": {
+            "min": [
+              -0.5,
+              8.940696516468449e-10,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.1420000046491623
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "wall.door",
+      "label": "Door wall",
+      "description": "Steel door, status lamp",
+      "mount": "edge",
+      "role": "wall",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 1192,
+          "drawCalls": 10,
+          "bounds": {
+            "min": [
+              -0.5,
+              -1.8626451769865326e-10,
+              -0.14000000059604645
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.15199999511241913
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 1064,
+          "drawCalls": 10,
+          "bounds": {
+            "min": [
+              -0.5,
+              -1.8626451769865326e-10,
+              -0.14000000059604645
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.15199999511241913
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 392,
+          "drawCalls": 8,
+          "bounds": {
+            "min": [
+              -0.5,
+              -1.8626451769865326e-10,
+              -0.14000000059604645
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.15199999511241913
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "wall.window",
+      "label": "Window wall",
+      "description": "Double glazed, sun hood",
+      "mount": "edge",
+      "role": "wall",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 1200,
+          "drawCalls": 6,
+          "bounds": {
+            "min": [
+              -0.5,
+              8.940696516468449e-10,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.289000004529953
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 1200,
+          "drawCalls": 6,
+          "bounds": {
+            "min": [
+              -0.5,
+              8.940696516468449e-10,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.289000004529953
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 336,
+          "drawCalls": 6,
+          "bounds": {
+            "min": [
+              -0.5,
+              8.940696516468449e-10,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.2897946834564209
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "wall.louvre",
+      "label": "Louvre wall",
+      "description": "Vent blades, weather hood",
+      "mount": "edge",
+      "role": "wall",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 1204,
+          "drawCalls": 6,
+          "bounds": {
+            "min": [
+              -0.5,
+              8.940696516468449e-10,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.2473229318857193
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 1172,
+          "drawCalls": 6,
+          "bounds": {
+            "min": [
+              -0.5,
+              8.940696516468449e-10,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.24845536053180695
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 312,
+          "drawCalls": 5,
+          "bounds": {
+            "min": [
+              -0.5,
+              8.940696516468449e-10,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.24845536053180695
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "wall.corrugated",
+      "label": "Shed wall",
+      "description": "Corrugated sheet on girts",
+      "mount": "edge",
+      "role": "wall",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 948,
+          "drawCalls": 5,
+          "bounds": {
+            "min": [
+              -0.5,
+              3.5762786065873797e-9,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.13272836804389954
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 692,
+          "drawCalls": 5,
+          "bounds": {
+            "min": [
+              -0.5,
+              3.5762786065873797e-9,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.13339635729789734
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 132,
+          "drawCalls": 4,
+          "bounds": {
+            "min": [
+              -0.5,
+              3.5762786065873797e-9,
+              -0.10499999672174454
+            ],
+            "max": [
+              0.5,
+              2.0399999618530273,
+              0.13339635729789734
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "structure.column",
+      "label": "Corner column",
+      "description": "Steel post at a vertex",
+      "mount": "vertex",
+      "role": "column",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 228,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.15000000596046448,
+              3.3527614018424856e-10,
+              -0.15000000596046448
+            ],
+            "max": [
+              0.15000000596046448,
+              2.0399999618530273,
+              0.15000000596046448
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 228,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.15000000596046448,
+              3.3527614018424856e-10,
+              -0.15000000596046448
+            ],
+            "max": [
+              0.15000000596046448,
+              2.0399999618530273,
+              0.15000000596046448
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 36,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.15000000596046448,
+              3.3527614018424856e-10,
+              -0.15000000596046448
+            ],
+            "max": [
+              0.15000000596046448,
+              2.0399999618530273,
+              0.15000000596046448
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "stair.straight",
+      "label": "Straight stair",
+      "description": "1×2 cells, one storey",
+      "mount": "cell",
+      "role": "stair",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 2736,
+          "drawCalls": 5,
+          "bounds": {
+            "min": [
+              -0.37599998712539673,
+              -5.215406578829018e-11,
+              -1.5
+            ],
+            "max": [
+              0.37599998712539673,
+              3.0529463291168213,
+              0.4896363615989685
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 1232,
+          "drawCalls": 5,
+          "bounds": {
+            "min": [
+              -0.37599998712539673,
+              -4.128351704935085e-8,
+              -1.5
+            ],
+            "max": [
+              0.37599998712539673,
+              3.0529463291168213,
+              0.4896363615989685
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 448,
+          "drawCalls": 4,
+          "bounds": {
+            "min": [
+              -0.37599998712539673,
+              -5.215406578829018e-11,
+              -1.5
+            ],
+            "max": [
+              0.37599998712539673,
+              3.0529463291168213,
+              0.4896363615989685
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "rail.guard",
+      "label": "Guard railing",
+      "description": "Balcony and roof edge",
+      "mount": "edge",
+      "role": "guard",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 720,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.5,
+              -5.215406578829018e-11,
+              -0.12999999523162842
+            ],
+            "max": [
+              0.5,
+              1.097000002861023,
+              0.010000000707805157
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 432,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.5,
+              -5.215406578829018e-11,
+              -0.12999999523162842
+            ],
+            "max": [
+              0.5,
+              1.097000002861023,
+              0.010000000707805157
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 100,
+          "drawCalls": 2,
+          "bounds": {
+            "min": [
+              -0.5,
+              -5.215406578829018e-11,
+              -0.12999999523162842
+            ],
+            "max": [
+              0.5,
+              1.0920000076293945,
+              0.010000000707805157
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "roof.deck",
+      "label": "Roof deck",
+      "description": "Membrane and pavers",
+      "mount": "cell",
+      "role": "deck",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 440,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.1599999964237213,
+              -0.5
+            ],
+            "max": [
+              0.5,
+              0.044999998062849045,
+              0.5
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 408,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.1599999964237213,
+              -0.5
+            ],
+            "max": [
+              0.5,
+              0.044999998062849045,
+              0.5
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 120,
+          "drawCalls": 3,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.1599999964237213,
+              -0.5
+            ],
+            "max": [
+              0.5,
+              0.044999998062849045,
+              0.5
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "roof.parapet",
+      "label": "Parapet",
+      "description": "Roof edge with coping",
+      "mount": "edge",
+      "role": "guard",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 340,
+          "drawCalls": 5,
+          "bounds": {
+            "min": [
+              -0.5,
+              -5.9604645663569045e-9,
+              -0.14025777578353882
+            ],
+            "max": [
+              0.5,
+              0.6256325840950012,
+              0.14025777578353882
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 244,
+          "drawCalls": 5,
+          "bounds": {
+            "min": [
+              -0.5,
+              -5.9604645663569045e-9,
+              -0.140497624874115
+            ],
+            "max": [
+              0.5,
+              0.6258724927902222,
+              0.140497624874115
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 108,
+          "drawCalls": 4,
+          "bounds": {
+            "min": [
+              -0.5,
+              -5.9604645663569045e-9,
+              -0.140497624874115
+            ],
+            "max": [
+              0.5,
+              0.6258724927902222,
+              0.140497624874115
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "roof.slope",
+      "label": "Sloped roof",
+      "description": "Standing seam, gutter",
+      "mount": "cell",
+      "role": "slope",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 572,
+          "drawCalls": 6,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.16387194395065308,
+              -0.5398173928260803
+            ],
+            "max": [
+              0.5,
+              0.42195990681648254,
+              0.675000011920929
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 380,
+          "drawCalls": 6,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.16387194395065308,
+              -0.5398173928260803
+            ],
+            "max": [
+              0.5,
+              0.42195990681648254,
+              0.675000011920929
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 196,
+          "drawCalls": 5,
+          "bounds": {
+            "min": [
+              -0.5,
+              -0.16387194395065308,
+              -0.5398173928260803
+            ],
+            "max": [
+              0.5,
+              0.42195990681648254,
+              0.6600000262260437
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "roof.plant",
+      "label": "Plant unit",
+      "description": "Condenser on a skid",
+      "mount": "cell",
+      "role": "equipment",
+      "tiers": [
+        {
+          "lod": "high",
+          "triangles": 1652,
+          "drawCalls": 6,
+          "bounds": {
+            "min": [
+              -0.3553447127342224,
+              2.2351741291171123e-10,
+              -0.36399999260902405
+            ],
+            "max": [
+              0.3553447127342224,
+              0.7749999761581421,
+              0.36000001430511475
+            ]
+          }
+        },
+        {
+          "lod": "medium",
+          "triangles": 1124,
+          "drawCalls": 6,
+          "bounds": {
+            "min": [
+              -0.3553447127342224,
+              2.2351741291171123e-10,
+              -0.36399999260902405
+            ],
+            "max": [
+              0.3553447127342224,
+              0.7749999761581421,
+              0.36000001430511475
+            ]
+          }
+        },
+        {
+          "lod": "low",
+          "triangles": 300,
+          "drawCalls": 4,
+          "bounds": {
+            "min": [
+              -0.3499999940395355,
+              2.2351741291171123e-10,
+              -0.36000001430511475
+            ],
+            "max": [
+              0.3499999940395355,
+              0.7749999761581421,
+              0.36000001430511475
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "additional": [
+    {
+      "id": "service.pipe",
+      "height": 2.2
+    },
+    {
+      "id": "service.light",
+      "height": 2.23
+    },
+    {
+      "id": "pad.tile",
+      "grid": 1
+    }
+  ]
+}

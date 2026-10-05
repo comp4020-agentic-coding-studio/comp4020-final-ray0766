@@ -10,7 +10,7 @@ for (const phone of [false, true]) test(`${phone ? 'phone' : 'desktop'} switches
   await menuAction(page,'view-mode');
   await expect(page.locator('#view-mode')).toHaveAttribute('aria-label','Walking view');
   await page.waitForTimeout(1200);
-  await page.screenshot({ path: `docs/evidence/round-5/${phone ? 'phone' : 'desktop'}-planet.png` });
+  await page.screenshot({ path: `docs/evidence/round-6/${phone ? 'phone' : 'desktop'}-planet.png` });
   await menuAction(page,'view-mode');
   await expect(page.locator('#view-mode')).toHaveAttribute('aria-label','View planet');
   await page.waitForTimeout(1200);
@@ -40,8 +40,8 @@ for (const phone of [false, true]) test(`${phone ? 'phone' : 'desktop'} switches
   expect(sample.triangles).toBeGreaterThan(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
   expect(errors).toEqual([]);
-  await mkdir('docs/evidence/round-5', { recursive: true });
-  await writeFile(`docs/evidence/round-5/${phone ? 'phone' : 'desktop'}-render-sample.json`, JSON.stringify({
+  await mkdir('docs/evidence/round-6', { recursive: true });
+  await writeFile(`docs/evidence/round-6/${phone ? 'phone' : 'desktop'}-render-sample.json`, JSON.stringify({
     measuredAt: new Date().toISOString(), note: 'Mac Chrome headless; phone is viewport emulation, not physical phone hardware. Short stationary sample after both camera transitions. FPS is evidence, not a passing threshold.', ...sample,
   }, null, 2) + '\n');
 });

@@ -12,9 +12,9 @@ export function courier(identity:Character|'mica'|'sol'){
   box(torso,[.30,.20,.08],'#89999a',[0,.12,.175]);box(torso,[.12,.07,.013],'#90c2c8',[.06,.15,.226]);box(torso,[.35,.085,.31],'#27333a',[0,-.2,0]);
   box(torso,[.30,.40,.17],'#3b474b',[0,.04,-.22]);for(const x of [-.13,.13])box(torso,[.047,.47,.045],'#8a948c',[x,.05,-.14]);
   torso.add(head);head.position.y=.47;
-  add(head,new T.SphereGeometry(.235,20,14),'#a6adaa',[0,.03,0]);
-  const visor=new T.Mesh(new T.SphereGeometry(.218,20,12),new T.MeshPhysicalMaterial({color:'#132c38',metalness:.55,roughness:.14,clearcoat:1}));visor.material.userData.ownedResource=true;visor.scale.set(1,.63,.82);visor.position.set(0,.025,.105);head.add(visor);
-  for(const x of [-.23,.23])box(head,[.05,.15,.12],'#445158',[x,.025,.01]);box(head,[.13,.025,.12],'#b9c8c4',[0,.258,0]);
+  add(head,new T.SphereGeometry(.19,20,14),'#a6adaa',[0,.03,0]);
+  const visor=new T.Mesh(new T.SphereGeometry(.18,20,12),new T.MeshPhysicalMaterial({color:'#132c38',metalness:.55,roughness:.14,clearcoat:1}));visor.material.userData.ownedResource=true;visor.scale.set(1,.63,.82);visor.position.set(0,.025,.105);head.add(visor);
+  for(const x of [-.19,.19])box(head,[.05,.15,.12],'#445158',[x,.025,.01]);box(head,[.13,.025,.12],'#b9c8c4',[0,.208,0]);
   const arms=[-1,1].map(side=>{const upper=new T.Group(),forearm=new T.Group();torso.add(upper);upper.position.set(side*.27,.19,0);add(upper,new T.CapsuleGeometry(.075,.21,4,10),coat,[0,-.15,0],true);box(upper,[.17,.12,.2],'#7a8888',[0,-.04,0]);upper.add(forearm);forearm.position.y=-.30;add(forearm,new T.CapsuleGeometry(.067,.16,4,10),coat,[0,-.12,0],true);add(forearm,new T.SphereGeometry(.073,10,8),'#283a42',[0,-.275,.015]);return{upper,forearm};});
   const legs=[-1,1].map(side=>{const hip=new T.Group(),knee=new T.Group();rig.add(hip);hip.position.set(side*.105,.67,0);add(hip,new T.CapsuleGeometry(.095,.20,4,10),'#384c53',[0,-.15,0]);hip.add(knee);knee.position.y=-.3;add(knee,new T.CapsuleGeometry(.07,.17,4,10),'#35464e',[0,-.13,0]);box(knee,[.14,.14,.09],'#7d8b8b',[0,.0,.07]);box(knee,[.15,.105,.27],'#22313a',[0,-.265,.04]);return{hip,knee};});
   const parcel=box(torso,[.4,.28,.31],'#a1875a',[0,-.1,.38]);box(parcel,[.32,.035,.02],'#bacac7',[0,.045,.167]);parcel.visible=false;

@@ -1,0 +1,77 @@
+{
+  "at": "2026-10-05T16:00:20.513760+00:00",
+  "sourceHashes": [
+    {
+      "path": "src/assets/claude-geometry/blueprint/parts/catalogue.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/style/geometry.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/style/lod.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/style/tokens.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/core/vec.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/style/materials.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/core/dispose.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/style/textures.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/core/noise.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/blueprint/parts/decks.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/blueprint/parts/kit.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/blueprint/parts/structure.ts",
+      "matchesManifest": true
+    },
+    {
+      "path": "src/assets/claude-geometry/blueprint/parts/walls.ts",
+      "matchesManifest": true
+    }
+  ],
+  "livePreview": [
+    {
+      "path": "/",
+      "status": 200,
+      "bytes": 12093,
+      "bundle": [
+        "/assets/index-BfIgytnH.js"
+      ]
+    },
+    {
+      "path": "/readme/",
+      "status": 200,
+      "bytes": 9803
+    },
+    {
+      "path": "/credits/",
+      "status": 200,
+      "bytes": 4541
+    }
+  ]
+}

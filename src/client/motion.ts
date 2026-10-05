@@ -13,14 +13,14 @@ export class SurfaceWalker {
     this.facing.copy(this.north);
   }
   right() { return new Vector3().crossVectors(this.north, this.up).normalize(); }
-  step(x: number, y: number, delta: number) {
+  step(x: number, y: number, delta: number, speedScale=1) {
     const dt = Math.min(0.05, Math.max(0, delta));
     const desired = this.right().multiplyScalar(x).addScaledVector(this.north, y);
     if (desired.length() > 1) desired.normalize();
-    desired.multiplyScalar(SPEED);
+    desired.multiplyScalar(SPEED*speedScale);
     this.velocity.lerp(desired, 1 - Math.exp(-12 * dt));
     const speed = this.velocity.length();
-    if (speed < 0.002) { this.velocity.set(0, 0, 0); return; }
+    if (speed < 0.002 * speedScale) { this.velocity.set(0, 0, 0); return; }
     const dir = this.velocity.clone().normalize();
     const axis = new Vector3().crossVectors(this.up, dir).normalize();
     const rotation = new Quaternion().setFromAxisAngle(axis, speed * dt / RADIUS);

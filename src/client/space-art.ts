@@ -94,6 +94,12 @@ function planetMaterial(seed:number){
 }
 export function orbitalPlanet(slot:number){
   const root=new T.Group();const globe=mesh(root,new T.SphereGeometry(RADIUS,64,40),planetMaterial(slot));globe.rotation.y=slot*1.37;
+  if(slot===0){
+    // Coarse orbital representation of the same public city, bounded to one draw.
+    const count=120,geometry=new T.BoxGeometry(1,1,1),material=new T.MeshStandardMaterial({color:'#54616c',metalness:.5,roughness:.65});material.userData.ownedResource=true;
+    const city=new T.InstancedMesh(geometry,material,count),dummy=new T.Object3D();
+    for(let i=0;i<count;i++){const a=i*2.399963,r=.25+Math.sqrt(i/count)*5.5,n=new T.Vector3(Math.cos(a)*r,10,Math.sin(a)*r-2).normalize(),h=.18+(Math.sin(i*72.15)*.5+.5)**2*1.5;dummy.position.copy(n).multiplyScalar(RADIUS+h/2);dummy.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),n);dummy.scale.set(.15+(i%5)*.04,h,.22);dummy.updateMatrix();city.setMatrixAt(i,dummy.matrix);}root.add(city);
+  }
   const atmosphere=new T.ShaderMaterial({transparent:true,depthWrite:false,side:T.BackSide,blending:T.AdditiveBlending,uniforms:{tint:{value:new T.Color(slot%4===1?'#8e765b':'#548494')}},vertexShader:'varying vec3 n;varying vec3 v;void main(){vec4 p=modelViewMatrix*vec4(position,1.);n=normalize(normalMatrix*normal);v=normalize(-p.xyz);gl_Position=projectionMatrix*p;}',fragmentShader:'varying vec3 n;varying vec3 v;uniform vec3 tint;void main(){float rim=pow(1.-abs(dot(normalize(n),normalize(v))),3.5);gl_FragColor=vec4(tint,rim*.2);}'});
   atmosphere.userData.ownedResource=true;mesh(root,new T.SphereGeometry(RADIUS*1.028,48,24),atmosphere);return root;
 }

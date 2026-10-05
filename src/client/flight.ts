@@ -15,7 +15,7 @@ interface Bridge {
 }
 export class SpaceFlight {
   scene=new T.Scene();camera=new T.PerspectiveCamera(58,innerWidth/innerHeight,.1,18000);
-  pilot:FlightState|null=null; planets:PlanetSummary[]=[];busy=false;
+  presentation=false;pilot:FlightState|null=null; planets:PlanetSummary[]=[];busy=false;
   private ship=makeShip();private bodies=new Map<string,{root:T.Group,low:T.Mesh,detail:T.Group|null,label:HTMLButtonElement}>();
   private lowGeometry=new T.IcosahedronGeometry(RADIUS,2);private lowMaterials=['#a49d89','#758893','#9a8771'].map(color=>new T.MeshStandardMaterial({color,roughness:1}));
   private beacons:T.Points|null=null;private lodAt=-Infinity;private labelIds=new Set<string>();
@@ -48,7 +48,7 @@ export class SpaceFlight {
     setInterval(()=>{if(this.active&&bridge.online()&&!this.busy&&!document.hidden)void this.flush();},350);
   }
   get active(){return this.pilot?.mode==='space';}
-  private get paused(){return this.busy||!this.bridge.online()||document.hidden||!!document.querySelector('dialog[open]');}
+  private get paused(){return this.presentation||this.busy||!this.bridge.online()||document.hidden||!!document.querySelector('dialog[open]');}
   clear(){this.keys.clear();this.stick.set(0,0);this.held.thrust=false;this.held.brake=false;this.steering.set(0,0);el('flight-knob').style.transform='';}
   receive(f:FlightState,force=false){
     if(!this.pilot||force||f.mode!==this.pilot.mode||f.journey!==this.pilot.journey){this.pilot=structuredClone(f);this.ack=structuredClone(f);this.cameraStarted=false;this.clear();}
@@ -95,7 +95,7 @@ export class SpaceFlight {
     try{
       if(this.action==='launch')await this.bridge.flushGround();else await this.flush();
       const p=this.bridge.player()!;const u=await this.bridge.command(this.action==='launch'?'flight/takeoff':'flight/land',{planetId:this.action==='launch'?p.planetId:this.landingId,journey:p.flight.journey});
-      this.bridge.applyUniverse(u);this.dialog.close();this.bridge.notice(this.action==='launch'?'You have the controls. Fly toward a world, brake, then land.':'Feet on a new little world. Your journey is saved.');
+      this.bridge.applyUniverse(u);this.dialog.close();this.bridge.notice(this.action==='launch'?(this.presentation?'Departure clearance granted · Sunseed Harbour':'You have the controls. Fly toward a world, brake, then land.'):'Feet on a new little world. Your journey is saved.');
     }catch(error){this.bridge.failed(error);}finally{this.busy=false;el<HTMLButtonElement>('confirm-flight').disabled=false;el<HTMLButtonElement>('cancel-flight').disabled=false;}
   }
   async flush():Promise<void>{

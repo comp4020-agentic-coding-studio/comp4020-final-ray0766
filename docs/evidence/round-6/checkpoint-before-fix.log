@@ -1,0 +1,68 @@
+$ playwright test tests/e2e/harbour.spec.ts --headed --reporter=list
+
+Running 2 tests using 1 worker
+
+(node:30649) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 tests/e2e/harbour.spec.ts:6:33 › harbour desktop materials, gate, departure skyline and return (44.8s)
+(node:30909) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 tests/e2e/harbour.spec.ts:6:33 › harbour phone touch materials, gate, departure skyline and return (40.1s)
+
+
+  1) tests/e2e/harbour.spec.ts:6:33 › harbour desktop materials, gate, departure skyline and return 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+        0,
+    -   0.8824724121557502,
+    -   -0.4703641586941037,
+    +   0.8824369392601749,
+    +   -0.47043070502374135,
+      ]
+
+      10 |   const prefix=`docs/evidence/round-6/${phone?'phone':'desktop'}`;await page.screenshot({path:prefix+'-street.png'});
+      11 |   await walkToPort(page,phone);await page.waitForTimeout(600);await page.screenshot({path:prefix+'-gate.png'});
+    > 12 |   await openMenu(page);await page.waitForTimeout(900);const before=(await readUniverse(page)).player;await page.reload();await expect(page.locator('#board-ship')).toBeVisible();expect((await readUniverse(page)).player.position).toEqual(before.position);
+         |                                                                                                                                                                                                                                     ^
+      13 |   await page.locator('#board-ship').click();await page.getByRole('button',{name:'Launch ship',exact:true}).click();await expect(page.locator('body')).toHaveClass(/departing/);await page.waitForTimeout(2300);await page.screenshot({path:prefix+'-departure.png'});
+      14 |   await expect(page.locator('body')).not.toHaveClass(/departing/,{timeout:6000});await expect(page.locator('#flight-hud')).toHaveAttribute('data-speed',/\d/);await page.screenshot({path:prefix+'-orbit.png'});
+      15 |   expect((await readUniverse(page)).player.flight.mode).toBe('space');await visit(page,'hub');await expect(page.locator('canvas')).toHaveAttribute('data-ground-radius','800');await expect(page.locator('#board-ship')).toBeVisible();await page.waitForTimeout(800);await page.screenshot({path:prefix+'-returned.png'});
+        at /Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766/tests/e2e/harbour.spec.ts:12:229
+
+    Error Context: test-results/harbour-harbour-desktop-ma-330b6-eparture-skyline-and-return/error-context.md
+
+  2) tests/e2e/harbour.spec.ts:6:33 › harbour phone touch materials, gate, departure skyline and return 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+        0,
+    -   0.8816788860158724,
+    -   -0.4718499146485146,
+    +   0.8816615188990515,
+    +   -0.4718823646764281,
+      ]
+
+      10 |   const prefix=`docs/evidence/round-6/${phone?'phone':'desktop'}`;await page.screenshot({path:prefix+'-street.png'});
+      11 |   await walkToPort(page,phone);await page.waitForTimeout(600);await page.screenshot({path:prefix+'-gate.png'});
+    > 12 |   await openMenu(page);await page.waitForTimeout(900);const before=(await readUniverse(page)).player;await page.reload();await expect(page.locator('#board-ship')).toBeVisible();expect((await readUniverse(page)).player.position).toEqual(before.position);
+         |                                                                                                                                                                                                                                     ^
+      13 |   await page.locator('#board-ship').click();await page.getByRole('button',{name:'Launch ship',exact:true}).click();await expect(page.locator('body')).toHaveClass(/departing/);await page.waitForTimeout(2300);await page.screenshot({path:prefix+'-departure.png'});
+      14 |   await expect(page.locator('body')).not.toHaveClass(/departing/,{timeout:6000});await expect(page.locator('#flight-hud')).toHaveAttribute('data-speed',/\d/);await page.screenshot({path:prefix+'-orbit.png'});
+      15 |   expect((await readUniverse(page)).player.flight.mode).toBe('space');await visit(page,'hub');await expect(page.locator('canvas')).toHaveAttribute('data-ground-radius','800');await expect(page.locator('#board-ship')).toBeVisible();await page.waitForTimeout(800);await page.screenshot({path:prefix+'-returned.png'});
+        at /Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766/tests/e2e/harbour.spec.ts:12:229
+
+    Error Context: test-results/harbour-harbour-phone-touc-db692-eparture-skyline-and-return/error-context.md
+
+  2 failed
+    tests/e2e/harbour.spec.ts:6:33 › harbour desktop materials, gate, departure skyline and return ─
+    tests/e2e/harbour.spec.ts:6:33 › harbour phone touch materials, gate, departure skyline and return 
+[ELIFECYCLE] Command failed with exit code 1.

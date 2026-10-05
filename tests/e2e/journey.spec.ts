@@ -49,7 +49,7 @@ for(const mobile of [false,true])test(`${mobile?'phone touch':'desktop keyboard'
   await expect(page.locator('#interact')).toContainText('Talk to Sol');
   await expect(page.locator('#conversation')).toBeVisible();
   await expect(page.locator('#speaker')).toContainText('Sol');
-  await page.screenshot({path:`docs/evidence/round-5/${mobile?'mobile':'desktop'}-completed.png`});
+  await page.screenshot({path:`docs/evidence/round-6/${mobile?'mobile':'desktop'}-completed.png`});
   const saved=await context.storageState();await closeVisit(context);
   const returned=await browser.newContext({storageState:saved,viewport:mobile?{width:390,height:844}:{width:1920,height:1080}});
   const again=await returned.newPage();await again.goto('/');await expect(again.locator('#mission-title')).toHaveText('Something good is growing.');
@@ -70,15 +70,15 @@ test('offline does not falsely finish a save and reconnects; resize and reduced 
 test('keyboard crosses the north pole, reverses, and click-to-walk changes saved position',async({page,request})=>{
   await page.setViewportSize({width:1920,height:1080});await page.goto('/');
   await page.getByRole('button',{name:'Let’s wander'}).click();
-  await page.keyboard.down('w');await page.waitForTimeout(1500);await page.keyboard.up('w');await page.waitForTimeout(550);
+  await page.keyboard.down('w');await page.waitForTimeout(4500);await page.keyboard.up('w');await page.waitForTimeout(550);
   const read=async()=>{
     const cookie=(await page.context().cookies()).find(c=>c.name==='little_post')!;
     return (await request.get('/api/state',{headers:{Cookie:`little_post=${cookie.value}`}})).json();
   };
   const crossed=await read();expect(crossed.position[2]).toBeLessThan(0);expect(crossed.position[1]).toBeGreaterThan(.96);
   await expect(page.locator('canvas')).toBeVisible();
-  await page.screenshot({path:'docs/evidence/round-5/north-pole.png'});
-  await page.keyboard.down('s');await page.waitForTimeout(1500);await page.keyboard.up('s');await page.waitForTimeout(550);
+  await page.screenshot({path:'docs/evidence/round-6/north-pole.png'});
+  await page.keyboard.down('s');await page.waitForTimeout(4500);await page.keyboard.up('s');await page.waitForTimeout(550);
   const reversed=await read();expect(reversed.position[2]).toBeGreaterThan(crossed.position[2]+.1);
   await page.mouse.click(1050,620);await page.waitForTimeout(1300);
   const clicked=await read();expect(Math.hypot(...clicked.position.map((v:number,i:number)=>v-reversed.position[i]))).toBeGreaterThan(.02);

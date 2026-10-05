@@ -39,4 +39,23 @@ Source: https://github.com/mrdoob/three
 The industrial starport district, service circuit, observatory, boarding/return
 beacons, mechanical suits and visitor LOD silhouettes added in round 5 are also
 original procedural geometry. The existing NASA orbital texture attribution is
-unchanged. No external workshop or character pack was imported.
+unchanged. At that stage, no external workshop or character pack was imported.
+Round 6 resource reuse is credited separately below.
+
+## Round 6 — City reference and shared structural resources
+
+The official RSI Locations page and its Area18/New Babbage images were actually
+viewed as references for architectural scale, layered skyline and dusk air. They
+are not bundled or used as textures. No Star Citizen model, texture or sound was
+extracted. The new city layout, lights, signs, facade maps, surface grain and the
+Sunseed material profile are generated in this repository.
+
+With explicit user authorization to reuse compatible assets, 13 unchanged pure
+geometry/material dependency files were copied from the user's independent
+`planet-claude-modules` repository at commit
+`ea279fd34fce3a054faaea622378181ce2d8dc9a`. These are credited to that Claude workspace,
+not presented as newly authored geometry from this thread. The snapshot excludes
+its uncommitted editor, blueprint, server, terrain, history and spacecraft work.
+Source path and per-file SHA-256 values: `docs/integration/shared-geometry-source.json`.
+Use and integration boundary: `docs/integration/shared-assets.md`. This is local
+reuse of the user's own project resources, not a third-party public asset pack.

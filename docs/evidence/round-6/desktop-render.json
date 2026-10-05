@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-05T15:57:01.651Z",
+  "meanFps": 53.62995332207768,
+  "medianMs": 20.5,
+  "p95Ms": 27.700000000000728,
+  "render": {
+    "engine": "three.js r186",
+    "visibleVisitors": "0",
+    "detailedVisitors": "0",
+    "placedAssetKit": "sunseed-structure/1",
+    "placedAssetKinds": "",
+    "cameraHeading": "[0.9580158602892249,-0.16752905195961312,-0.232679238832796]",
+    "cameraPitch": "0.2400000000000001",
+    "groundScale": "4.238484123132645",
+    "groundRadius": "800",
+    "quality": "full",
+    "drawCalls": "165",
+    "triangles": "301962",
+    "portDistance": "0",
+    "groundPosition": "[0,0.8115343414514945,-0.584304725845076]",
+    "visitors": "0",
+    "nearbyVisitors": "0",
+    "presencePlanet": "hub",
+    "orbitDetailed": "8",
+    "orbitVisible": "24",
+    "orbitTotal": "33"
+  },
+  "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "viewport": [
+    1600,
+    1000
+  ],
+  "dpr": 1,
+  "width": 1600,
+  "errors": []
+}

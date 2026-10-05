@@ -1,0 +1,22 @@
+
+ RUN  v5.0.1 /Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766
+
+ ❯ spec/ground-projection.test.ts (4 tests | 1 failed) 30ms
+   ❯ public display scale preserves saved navigation (4)
+     × keeps moving near the south pole where logical angular speeds are very small 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  spec/ground-projection.test.ts > public display scale preserves saved navigation > keeps moving near the south pole where logical angular speeds are very small
+AssertionError: expected 0 to be greater than 5.5
+ ❯ spec/ground-projection.test.ts:30:48
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  02:40:22
+   Duration  198ms (tests 36%, import 33%, transform 28%, worker 3%)
+

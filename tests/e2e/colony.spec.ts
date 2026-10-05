@@ -17,7 +17,7 @@ test('two independent owners build, save, visit read-only and see live scene rev
   await begin(owner);await begin(guest);const p1=await visit(owner);
   await expect(owner.locator('#planet-count')).toHaveText('0 / 64 objects');
   await claimAndBuild(owner);await expect(owner.locator('#builder')).toBeVisible();
-  await owner.screenshot({path:'docs/evidence/round-5/desktop-empty-builder.png'});
+  await owner.screenshot({path:'docs/evidence/round-6/desktop-empty-builder.png'});
   await visit(guest,p1);await openMenu(guest);await expect(guest.locator('#planet-description')).toContainText('read-only');await expect(guest.locator('#build-mode')).not.toBeVisible();await expect(guest.locator('#claim-planet')).not.toBeVisible();await guest.locator('#resume').click();
   await add(owner,'cottage',820,740,1);
   await expect(guest.locator('#planet-count')).toHaveText('1 / 64 objects',{timeout:5000});
@@ -32,7 +32,7 @@ test('two independent owners build, save, visit read-only and see live scene rev
   await add(owner,'tree',740,710,2);await add(owner,'flowers',895,810,3);
   await expect(guest.locator('#planet-count')).toHaveText('3 / 64 objects',{timeout:5000});
   await owner.mouse.click(687,672);await expect(owner.locator('#build-selection')).toHaveText('Tree');await owner.getByRole('button',{name:'Cancel',exact:true}).click();await expect(owner.locator('#built-list')).toHaveValue('');
-  await owner.screenshot({path:'docs/evidence/round-5/desktop-built.png'});await guest.screenshot({path:'docs/evidence/round-5/visitor-read-only.png'});
+  await owner.screenshot({path:'docs/evidence/round-6/desktop-built.png'});await guest.screenshot({path:'docs/evidence/round-6/visitor-read-only.png'});
   await owner.getByRole('button',{name:'Done building'}).click();await owner.reload();await openMenu(owner);await expect(owner.locator('#planet-count')).toHaveText('3 / 64 objects');await expect(owner.locator('#build-mode')).toBeVisible();
   const p2=await visit(owner);await openMenu(owner);await expect(owner.locator('#claim-planet')).not.toBeVisible();await expect(owner.locator('#ownership-note')).toBeVisible();
   await visit(guest,p2);await claimAndBuild(guest);await expect(guest.locator('#builder')).toBeVisible();
@@ -40,7 +40,7 @@ test('two independent owners build, save, visit read-only and see live scene rev
   await visit(owner,p1);await menuAction(owner,'build-mode');
   placed=(await read(owner)).currentPlanet.objects[0];await owner.getByLabel('Select a saved object').selectOption(placed.id);await owner.getByRole('button',{name:'Remove',exact:true}).click();
   await expect(guest.locator('#planet-count')).toHaveText('2 / 64 objects',{timeout:5000});
-  await owner.getByRole('button',{name:'Done building'}).click();await menuAction(owner,'open-map');await owner.screenshot({path:'docs/evidence/round-5/star-map.png'});
+  await owner.getByRole('button',{name:'Done building'}).click();await menuAction(owner,'open-map');await owner.screenshot({path:'docs/evidence/round-6/star-map.png'});
   const saved=await a.storageState();await a.close();const returned=await browser.newContext({storageState:saved,viewport:{width:1920,height:1080}});const again=await returned.newPage();await again.goto('/');await openMenu(again);await expect(again.locator('#build-mode')).toBeVisible();await expect(again.locator('#planet-count')).toHaveText('2 / 64 objects');
   expect(errors).toEqual([]);await returned.close();await b.close();
 });
@@ -48,7 +48,7 @@ test('phone touch builds without moving the courier, recovers offline, and edits
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const page=await context.newPage();
   await begin(page);await visit(page);await claimAndBuild(page);await expect(page.locator('#builder')).toBeVisible();
   await page.waitForTimeout(1200); // Let the close-to-overview camera transition finish before choosing a screen point.
-  await page.screenshot({path:'docs/evidence/round-5/phone-empty-builder.png'});
+  await page.screenshot({path:'docs/evidence/round-6/phone-empty-builder.png'});
   const before=(await read(page)).player.position;
   await page.getByRole('button',{name:'Add tree',exact:true}).click();await page.touchscreen.tap(295,350);await expect(page.locator('#save-object')).toBeEnabled();
   await page.getByRole('button',{name:'Place object',exact:true}).click();await expect(page.locator('#planet-count')).toHaveText('1 / 64 objects');
@@ -60,7 +60,7 @@ test('phone touch builds without moving the courier, recovers offline, and edits
   await expect.poll(async()=>(await read(page)).currentPlanet.objects[0].version).toBe(2);
   await expect(page.locator('#object-tools')).not.toBeVisible();
   await expect(page.locator('#built-list')).toHaveValue('');
-  await page.screenshot({path:'docs/evidence/round-5/phone-built.png'});
+  await page.screenshot({path:'docs/evidence/round-6/phone-built.png'});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(390);
   await page.getByRole('button',{name:'Done building'}).click();await expect(page.locator('#joystick')).toBeVisible();await page.reload();await expect(page.locator('#planet-count')).toHaveText('1 / 64 objects');await context.close();
 });

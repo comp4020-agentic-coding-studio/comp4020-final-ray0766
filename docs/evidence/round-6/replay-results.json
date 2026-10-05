@@ -1,0 +1,28 @@
+{
+  "started": "2026-10-05T15:56:03.011284+00:00",
+  "baseUrl": "http://127.0.0.1:8095",
+  "browser": "Mac installed Chrome; headed; trace off; one worker",
+  "steps": [
+    {
+      "name": "lint",
+      "exitCode": 0,
+      "log": "lint-replay.log"
+    },
+    {
+      "name": "logic",
+      "exitCode": 0,
+      "log": "logic-replay.log"
+    },
+    {
+      "name": "build",
+      "exitCode": 0,
+      "log": "build-replay.log"
+    },
+    {
+      "name": "headed",
+      "exitCode": 0,
+      "log": "headed-replay.log"
+    }
+  ],
+  "finished": "2026-10-05T16:02:13.264193+00:00"
+}

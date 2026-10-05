@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-05T15:35:30.888473+00:00",
+  "schema": 4,
+  "tables": {
+    "players": {
+      "rows": 99,
+      "sha256": "d2a6abb233f278acb04d14334292920ac4c84f2cb90c7c1a635711b76531b59e",
+      "identical": true
+    },
+    "planets": {
+      "rows": 42,
+      "sha256": "3bda4a3b66516f00ae0eecf335a58f6669e384b5da084c86a805eb09a7f48811",
+      "identical": true
+    },
+    "planet_objects": {
+      "rows": 24,
+      "sha256": "041fc02fa9593185ae7798b8bc9f536c9b0c5e9d26971f152c21154b2b0d20bb",
+      "identical": true
+    },
+    "visits": {
+      "rows": 50,
+      "sha256": "66a1b5b48d4e0e921875faca282317c7de7f1f057c9bfb53bba0064a356bda6f",
+      "identical": true
+    },
+    "object_tombstones": {
+      "rows": 5,
+      "sha256": "e0463ff565c4581adec25a3fa6bc68542ad4f871b4e1d96d8db6fef1be497180",
+      "identical": true
+    }
+  },
+  "quickCheck": "ok"
+}

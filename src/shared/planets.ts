@@ -2,12 +2,12 @@ import { distance, normalize, SPAWN, validPosition } from './world.ts';
 import type { PlayerState, Vec3 } from './world.ts';
 
 export const CATALOGUE = {
-  cottage: { name: 'Cottage', icon: '⌂', radius: 1.05, height: 2.5, description: 'A warm little roof' },
+  cottage: { name: 'Cottage', icon: '⌂', radius: 1.05, height: 2.5, description: 'Panelled cabin · shared Sunseed components' },
   tree: { name: 'Tree', icon: '♧', radius: .40, height: 2.1, description: 'A patch of shade' },
-  path: { name: 'Path', icon: '▱', radius: .42, height: 0, description: 'A stepping stone' },
+  path: { name: 'Path', icon: '▱', radius: .42, height: 0, description: 'Brushed metal deck tile' },
   flowers: { name: 'Flowers', icon: '✿', radius: .28, height: .55, description: 'Something growing' },
   bench: { name: 'Bench', icon: '▰', radius: .65, height: .9, description: 'A place to pause' },
-  lamp: { name: 'Lamp', icon: '♙', radius: .26, height: 2.1, description: 'A welcoming light' },
+  lamp: { name: 'Lamp', icon: '♙', radius: .26, height: 2.1, description: 'A shielded service light' },
 } as const;
 export type BuildKind = keyof typeof CATALOGUE;
 export const MAX_OBJECTS = 64;

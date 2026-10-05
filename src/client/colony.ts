@@ -5,6 +5,7 @@ import { CATALOGUE, MAX_OBJECTS, placementProblem } from '../shared/planets.ts';
 import type { BuildKind, Universe } from '../shared/planets.ts';
 import type { PlayerState, Vec3 } from '../shared/world.ts';
 import { builtObject, disposeGeometry } from './build-art.ts';
+import { SHARED_ASSET_VERSION } from './shared-assets.ts';
 import { surfacePoint } from './terrain.ts';
 import type { Obstacle } from './scene.ts';
 const el = <E extends HTMLElement = HTMLElement>(id:string) => document.getElementById(id) as E;
@@ -72,7 +73,7 @@ export class Colony {
     if(this.building&&(!next.currentPlanet.mine||next.player.flight.mode==='space'))this.setBuilding(false);
     const key=next.currentPlanet.id+':'+next.currentPlanet.revision;
     if(this.painted!==key){
-      this.painted=key;for(const child of [...this.layer.children])disposeGeometry(child);this.objects.clear();
+      this.painted=key;this.bridge.canvas.dataset.placedAssetKit=SHARED_ASSET_VERSION;this.bridge.canvas.dataset.placedAssetKinds=next.currentPlanet.objects.map(o=>o.kind).join(',');for(const child of [...this.layer.children])disposeGeometry(child);this.objects.clear();
       for(const obj of next.currentPlanet.objects){const group=builtObject(obj.kind);this.locate(group,obj.position,obj.rotation);group.userData.objectId=obj.id;this.layer.add(group);this.objects.set(obj.id,group);}
       const list=el<HTMLSelectElement>('built-list');list.replaceChildren(new Option('Select a saved object…',''));
       next.currentPlanet.objects.forEach((o,i)=>list.add(new Option(`${CATALOGUE[o.kind].name} ${i+1}`,o.id)));list.value=this.selected??'';
@@ -125,7 +126,7 @@ export class Colony {
   private editor(){
     const d=this.draft;el('object-tools').hidden=!d;
     el('build-instruction').textContent=this.busy?'Saving your change…':!this.syncing?'Connection lost. Building is paused.':d?(this.placing?'Tap an open spot on the planet, then save.':'Object selected. Move, rotate or remove it.'):'Choose something to add, or tap an existing object.';
-    el('build-selection').textContent=d?CATALOGUE[d.kind].name:'Your building kit';
+    el('build-selection').textContent=d?CATALOGUE[d.kind].name:'Sunseed building kit';
     const problem=d?.position?placementProblem(d.kind,d.position,this.universe?.currentPlanet.objects??[],d.id):null;
     el('placement-status').textContent=problem??(d?.position?`Turn: ${Math.round(d.rotation*180/Math.PI)}°`:'');
     el<HTMLButtonElement>('save-object').disabled=this.busy||!this.syncing||!d?.position||!!problem;

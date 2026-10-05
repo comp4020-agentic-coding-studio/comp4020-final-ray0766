@@ -2,9 +2,10 @@
 
 A constellation made together: fly to a blank planet, make it your home, and shape
 it with a small building kit. Everyone can visit every planet, while only its
-owner can change it. Sunseed Harbour is an original industrial starport district with a connected
-service loop, an observatory landmark and an optional courier delivery. Existing coats, delivery progress and locations survive
-the move to this multi-planet prototype.
+owner can change it. Sunseed Harbour is an original industrial starport district
+with a walkable arrival street, service buildings, a boarding apron and an optional
+courier delivery. Existing coats, delivery progress and locations survive the move
+to this multi-planet prototype.
 
 ## Current design brief
 
@@ -29,17 +30,24 @@ The finite survey starts with 33 worlds in Harbour Belt, Lantern Reach and Outer
 Drift; it can replenish blank plots up to a hard 256-world limit. Existing planet
 slots and coordinates never move. The Atlas shows regions and distances and only
 marks a bearing. Nearby hops remain short; outer routes take longer. The public
-hub is still a walkable small sphere, with connected places rather than an enlarged
-empty surface. Private worlds remain available for their owners’ construction.
+hub presents a human-scale industrial district on a much gentler display curve,
+while preserving its original saved spherical coordinates. Drag the scene in the
+harbour to look around and up at the buildings. A short departure shot rises over
+the same district before the existing orbital flight begins. Private worlds remain available for their owners’ construction.
 
 In space, hold W to thrust, A/D to turn, arrows up/down to climb or dive, and S or
 Space to brake. You can drag to steer; phones have a stick and thrust/brake pedals.
 Approach within 20 metres of a planet’s centre and slow below 6 m/s to land.
 An original industrial craft, mechanical suits, public buildings, PBR materials
-and restrained instruments establish the visual direction. The existing six-piece
-building catalogue remains a prototype kit; no external workshop module is integrated.
+and restrained instruments establish the visual direction. The existing six-kind
+player catalogue now uses the same high-quality material and structural resource
+layer as the public district. Shared pure geometry is reused from a fixed committed
+Claude resource snapshot; no workshop editor or blueprint persistence is integrated.
 
-The catalogue contains cottages, trees, path stones, flowers, benches and lamps.
+The catalogue retains its saved cottage, tree, path, flowers, bench and lamp kinds.
+They now render as panelled service cabins, foliage, metal deck tiles, planters,
+metal benches and shielded lights. The cabin, floor and light share the public
+district asset factory.
 Enter Build mode, choose an object, tap an open ground position, rotate if needed,
 and save. Select an existing object on the planet or from the accessible object
 list to move, rotate or remove it. Leave Build mode to walk elsewhere. Placement
@@ -91,7 +99,9 @@ explains this before claiming. These limits need revisiting before public releas
 [Messenger by abeto](https://messenger.abeto.co/) informed spherical movement and
 camera exploration; its [authors’ interview](https://www.commarts.com/webpicks/messenger)
 provided technical context. The live experience was also inspected in Chrome.
-Characters, buildings, ship geometry and interface are original procedural work.
+Characters, city arrangement, ship geometry and interface are procedural work in
+this repository. A fixed set of user-owned Claude geometry resources is reused for
+the shared structural kit, with file hashes and attribution in the asset credits.
 Orbital surfaces also use NASA SVS public-domain lunar maps; [asset credits](/credits/)
 record their sources and terms. No game assets or source were extracted. Rendering uses
 [Three.js](https://threejs.org/docs/), with Node’s SQLite for persistence.
@@ -105,7 +115,7 @@ Open http://localhost:8080 or `/readme/`. With the server running, use `pnpm lin
 
 SQLite defaults to `.data/little-post.sqlite`. Upgrades create consistent backup
 files before transactional migration. Recovery instructions and actual test
-results are in `docs/evidence/round-5/verification.md`. Desktop and phone-size
+results are in `docs/evidence/round-6/verification.md`. Desktop and phone-size
 Chrome checks cover walking to gates, flight/return, independent owners, visitor
 presence, touch controls and persistence;
 physical phones and public hosting remain unverified.
@@ -121,4 +131,10 @@ The user-selected game reference qualities, what is implemented and what remains
 absent are compared in `docs/adr/0005-starports-regions-and-presence.md`. The existing
 `ColonyBridge` is exported for later UI adapters; `docs/integration/workshop-adapter.md`
 describes the current server endpoints and validation boundary. The separately
-assigned modules have not been integrated.
+assigned editors and persistence systems have not been integrated.
+
+The current art/resource contract and editor division are documented in
+`docs/integration/shared-assets.md`; display scale and reference decisions are in
+`docs/adr/0006-shared-city-assets-and-display-scale.md`. Wall/stair/level assembly
+editing remains Claude’s integration work; this local UI places the six compatible
+saved kinds. No commercial Star Citizen asset was imported.

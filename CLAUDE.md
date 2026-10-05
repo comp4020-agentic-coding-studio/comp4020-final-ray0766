@@ -63,3 +63,16 @@ prototype. They do not claim to be the student's finished academic harness.
   personal positions, playtest feedback, citations, deployment, or test results.
 - No push, public repository change, Fly billing/deploy or submission without
   separate approval. Crit7 and the deleted old implementation are out of scope.
+
+- Round 6 user clarification supersedes a decorative-only city: public and player
+  art share a material/geometry vocabulary. The existing six saved kinds use the
+  shared assets without changing storage. Seventeen structure resources expose
+  local metres, +Y up, +Z exterior and connection metadata for the separate editor.
+- The user assigned snapping/assembly/undo/blueprint storage to Claude. Do not build
+  a competing editor here. `src/assets/claude-geometry` is an immutable, verified
+  committed resource snapshot; its provenance manifest records the source hash.
+  Do not copy or overwrite that independent workspace's uncommitted changes.
+- Public display projection is reversible and separate from durable normals and
+  orbital coordinates. Compensate walking speed; transform visitor frames and
+  ground picking consistently. Private saved object transforms remain unchanged.
+- Store round 6 screenshots/results separately; keep earlier failed-run evidence.

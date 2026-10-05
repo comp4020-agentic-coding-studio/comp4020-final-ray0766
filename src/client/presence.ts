@@ -1,6 +1,6 @@
 import * as T from 'three';
 import { courier,PALETTES } from './character.ts';
-import { surfacePoint } from './terrain.ts';
+import { surfacePoint,surfaceScale,surfaceOrientation } from './terrain.ts';
 import { disposeGeometry } from './build-art.ts';
 import type { PresenceSnapshot,Visitor } from '../shared/presence.ts';
 import { MAX_NEIGHBOURS,PRESENCE_TTL } from '../shared/presence.ts';
@@ -36,10 +36,10 @@ export class GroundPresence {
       const near=self.angleTo(r.position)*RADIUS,detail=near<6&&detailed<4;r.root.visible=near<21;if(r.root.visible)visible++;
       if(detail){detailed++;if(!r.avatar){r.avatar=courier(r.visitor.character);r.avatar.root.traverse(o=>{if(o instanceof T.Mesh)o.castShadow=false;});r.root.add(r.avatar.root);}}
       else if(r.avatar){disposeGeometry(r.avatar.root);r.avatar=null;}
-      r.low.visible=!detail;r.avatar?.animate(now/1000,t<1?r.speed:0,reduced);
+      r.low.visible=!detail;r.avatar?.animate(now/1000,t<1?r.speed*surfaceScale(r.position):0,reduced);
       r.facing.lerp(new T.Vector3(...r.visitor.facing),reduced?1:1-Math.exp(-8*dt)).projectOnPlane(r.position);
       if(r.facing.lengthSq()<.01)r.facing.set(0,0,1).projectOnPlane(r.position);r.facing.normalize();
-      const right=new T.Vector3().crossVectors(r.position,r.facing).normalize();r.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(right,r.position,r.facing));r.root.position.copy(surfacePoint(r.position,.02));
+      r.root.quaternion.copy(surfaceOrientation(r.position,r.facing));r.root.position.copy(surfacePoint(r.position,.02));
     }
     this.canvas.dataset.visibleVisitors=String(visible);this.canvas.dataset.detailedVisitors=String(detailed);
   }

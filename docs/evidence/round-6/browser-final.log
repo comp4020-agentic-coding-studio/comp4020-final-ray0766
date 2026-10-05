@@ -1,0 +1,96 @@
+$ playwright test --trace=off --reporter=list
+
+Running 21 tests using 1 worker
+
+(node:39223) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/e2e/colony.spec.ts:13:1 › two independent owners build, save, visit read-only and see live scene revisions (1.4m)
+  ✓   2 tests/e2e/colony.spec.ts:47:1 › phone touch builds without moving the courier, recovers offline, and edits saved objects (29.4s)
+  ✓   3 tests/e2e/colony.spec.ts:67:1 › a failed initial identity request recovers the star map without reloading (3.3s)
+  ✓   4 tests/e2e/colony.spec.ts:72:1 › a stale owner tab cannot overwrite a newer edit and can select the object again (27.8s)
+  ✓   5 tests/e2e/flight.spec.ts:4:1 › a real flight survives refresh, cancels transitions and lands with server checks (26.7s)
+  ✓   6 tests/e2e/flight.spec.ts:19:1 › phone flight uses touch thrust and steering, freezes offline and reconnects before landing (24.8s)
+  ✓   7 tests/e2e/immersion.spec.ts:6:33 › desktop walks to a physical gate, cancels, explores and returns to its beacon (40.7s)
+  ✓   8 tests/e2e/immersion.spec.ts:6:33 › phone touch walks to a physical gate, cancels, explores and returns to its beacon (44.0s)
+  ✘   9 tests/e2e/journey.spec.ts:31:34 › desktop keyboard completes and restores the delivery (13.0s)
+(node:40471) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  10 tests/e2e/journey.spec.ts:31:34 › phone touch completes and restores the delivery (15.0s)
+(node:40581) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  11 tests/e2e/journey.spec.ts:59:1 › offline does not falsely finish a save and reconnects; resize and reduced motion keep controls usable (1.9s)
+  ✓  12 tests/e2e/journey.spec.ts:70:1 › keyboard crosses the north pole, reverses, and click-to-walk changes saved position (12.5s)
+  ✓  13 tests/e2e/preview.spec.ts:2:1 › desktop first view (2.4s)
+  ✓  14 tests/e2e/preview.spec.ts:11:1 › phone first view (2.2s)
+  ✓  15 tests/e2e/regions.spec.ts:6:1 › the finite Atlas filters three regions and a real flight reaches the outer survey within render budgets (44.1s)
+  ✓  16 tests/e2e/shared-assets.spec.ts:4:1 › player places the shared cabin, deck and service light; refresh and visitor remain authoritative (57.2s)
+  ✓  17 tests/e2e/views.spec.ts:5:36 › desktop switches views and records a rendering sample (6.1s)
+  ✓  18 tests/e2e/views.spec.ts:5:36 › phone switches views and records a rendering sample (5.9s)
+(node:41011) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  19 tests/e2e/harbour.spec.ts:6:33 › harbour desktop materials, gate, departure skyline and return (33.1s)
+  ✓  20 tests/e2e/harbour.spec.ts:6:33 › harbour phone touch materials, gate, departure skyline and return (35.5s)
+  ✓  21 tests/e2e/presence.spec.ts:10:1 › four independent visitors meet, expire, reconnect and remain isolated across planets (1.6m)
+
+
+  1) tests/e2e/journey.spec.ts:31:34 › desktop keyboard completes and restores the delivery ────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator:  locator('#interact')
+    Expected: visible
+    Received: hidden
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeVisible" locator('#interact') with timeout 5000ms
+      - waiting for locator('#interact')
+        14 × locator resolved to <button hidden="" id="interact" class="primary">…</button>
+           - unexpected value "hidden"
+
+
+      27 |   await cdp?.detach();
+      28 |   await expect(page.locator('#distance')).toContainText('You’re here');
+    > 29 |   await expect(page.locator('#interact')).toBeVisible();
+         |                                           ^
+      30 | }
+      31 | for(const mobile of [false,true])test(`${mobile?'phone touch':'desktop keyboard'} completes and restores the delivery`,async({browser})=>{
+      32 |   const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1920,height:1080},hasTouch:mobile,isMobile:mobile});
+        at walkToDestination (/Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766/tests/e2e/journey.spec.ts:29:43)
+        at /Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766/tests/e2e/journey.spec.ts:38:3
+
+    Error Context: test-results/journey-desktop-keyboard-completes-and-restores-the-delivery/error-context.md
+
+  2) tests/e2e/journey.spec.ts:31:34 › phone touch completes and restores the delivery ─────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator:  locator('#interact')
+    Expected: visible
+    Received: hidden
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeVisible" locator('#interact') with timeout 5000ms
+      - waiting for locator('#interact')
+        14 × locator resolved to <button hidden="" id="interact" class="primary">…</button>
+           - unexpected value "hidden"
+
+
+      27 |   await cdp?.detach();
+      28 |   await expect(page.locator('#distance')).toContainText('You’re here');
+    > 29 |   await expect(page.locator('#interact')).toBeVisible();
+         |                                           ^
+      30 | }
+      31 | for(const mobile of [false,true])test(`${mobile?'phone touch':'desktop keyboard'} completes and restores the delivery`,async({browser})=>{
+      32 |   const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1920,height:1080},hasTouch:mobile,isMobile:mobile});
+        at walkToDestination (/Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766/tests/e2e/journey.spec.ts:29:43)
+        at /Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766/tests/e2e/journey.spec.ts:38:3
+
+    Error Context: test-results/journey-phone-touch-completes-and-restores-the-delivery/error-context.md
+
+  2 failed
+    tests/e2e/journey.spec.ts:31:34 › desktop keyboard completes and restores the delivery ─────────
+    tests/e2e/journey.spec.ts:31:34 › phone touch completes and restores the delivery ──────────────
+  19 passed (10.3m)
+[ELIFECYCLE] Command failed with exit code 1.

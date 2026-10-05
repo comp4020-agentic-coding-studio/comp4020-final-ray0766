@@ -1,0 +1,12 @@
+$ pnpm typecheck && pnpm test
+$ tsc --noEmit
+$ vitest run
+
+ RUN  v5.0.1 /Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766
+
+
+ Test Files  10 passed (10)
+      Tests  25 passed (25)
+   Start at  02:45:04
+   Duration  733ms (tests 56%, import 29%, transform 14%, worker 1%)
+

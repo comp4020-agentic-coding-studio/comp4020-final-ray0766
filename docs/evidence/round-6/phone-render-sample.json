@@ -1,0 +1,16 @@
+{
+  "measuredAt": "2026-10-05T15:52:34.348Z",
+  "note": "Mac Chrome headless; phone is viewport emulation, not physical phone hardware. Short stationary sample after both camera transitions. FPS is evidence, not a passing threshold.",
+  "medianFrameMs": 16.699999999999818,
+  "p95FrameMs": 16.800000000000182,
+  "meanFps": 60,
+  "drawCalls": 187,
+  "triangles": 292566,
+  "frames": 150,
+  "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "devicePixelRatio": 1,
+  "viewport": {
+    "width": 390,
+    "height": 844
+  }
+}

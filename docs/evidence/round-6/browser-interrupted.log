@@ -1,0 +1,11 @@
+$ playwright test --trace=off --reporter=list
+
+Running 21 tests using 1 worker
+
+(node:36461) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/e2e/colony.spec.ts:13:1 › two independent owners build, save, visit read-only and see live scene revisions (2.0m)
+  ✘   2 tests/e2e/colony.spec.ts:47:1 › phone touch builds without moving the courier, recovers offline, and edits saved objects (2.5m)
+(node:37274) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   3 tests/e2e/colony.spec.ts:67:1 › a failed initial identity request recovers the star map without reloading (3.7s)

@@ -1,33 +1,31 @@
 import * as T from 'three';
-import { ball, box, roof, shape } from './art.ts';
+import { habitatCabin,sharedParts,SHARED_ASSET_VERSION } from './shared-assets.ts';
+import { harbourMaterials } from './harbour-materials.ts';
 import type { BuildKind } from '../shared/planets.ts';
 export function builtObject(kind: BuildKind) {
-  const g = new T.Group();
-  if (kind === 'cottage') {
-    box(g, [1.75,.15,1.5], '#b9b59a', [0,.075,0], true);
-    box(g, [1.65,1.55,1.35], '#e6d4a6', [0,.9,0], true); roof(g,1.96,1.64,.65,'#bb795c',1.68);
-    box(g,[.55,.93,.045],'#55786b',[.23,.59,.71],true); box(g,[.055,.055,.04],'#eac878',[.39,.62,.75]);
-    for(const x of [-.51,.53]) { box(g,[.32,.35,.07],'#5b8992',[x,1.35,.71],true); box(g,[.03,.36,.08],'#eee0b8',[x,1.35,.75]); }
-    box(g,[.3,.62,.3],'#e4d0a6',[-.48,2.14,-.2],true);
-  } else if (kind === 'tree') {
-    shape(g,new T.CylinderGeometry(.09,.14,1.2,6),'#877257',[0,.6,0]);
-    for(const [x,y,z,r] of [[0,1.55,0,.64],[-.32,1.23,.06,.40],[.31,1.45,0,.44],[0,1.96,0,.34]]) ball(g,r,'#89a772',[x,y,z],1).scale.y=.8;
-  } else if (kind === 'path') {
-    const stone=shape(g,new T.CylinderGeometry(.46,.48,.065,7),'#d6c3a2',[0,.04,0],true);stone.scale.z=.84;
-  } else if (kind === 'flowers') {
-    for(let i=0;i<4;i++){const x=Math.sin(i*2)*.16,z=Math.cos(i*2)*.16;shape(g,new T.CylinderGeometry(.017,.018,.31,4),'#6a8e65',[x,.19,z]);ball(g,.09,i%2?'#e6b666':'#d89276',[x,.38,z],1);}
-  } else if (kind === 'bench') {
-    for(const x of [-.44,.44])box(g,[.07,.4,.48],'#586b61',[x,.2,0]);
-    for(let i=0;i<3;i++)box(g,[1.13,.07,.14],'#b69a6d',[0,.43,(i-1)*.16],true);
-    for(let i=0;i<2;i++)box(g,[1.13,.13,.07],'#b69a6d',[0,.68+i*.16,-.23],true);
-  } else {
-    shape(g,new T.CylinderGeometry(.042,.065,1.6,6),'#566d61',[0,.8,0]);
-    box(g,[.28,.32,.28],'#eed7a3',[0,1.79,0],true);box(g,[.36,.05,.36],'#526457',[0,1.60,0]);
-    shape(g,new T.ConeGeometry(.28,.21,4),'#526457',[0,2.06,0]).rotation.y=Math.PI/4;
+  if(kind==='cottage')return habitatCabin();
+  if(kind==='lamp')return sharedParts([{part:'service.light',position:[0,0,0]}]);
+  if(kind==='path'){const g=sharedParts([{part:'floor.deck',position:[0,.055,0]}]);g.scale.set(.82,1,.72);return g;}
+  const g=new T.Group(),p=harbourMaterials();
+  const add=(geo:T.BufferGeometry,m:T.Material,pos:number[])=>{const mesh=new T.Mesh(geo,m);mesh.position.fromArray(pos);mesh.castShadow=true;mesh.receiveShadow=true;g.add(mesh);return mesh;};
+  if(kind==='bench'){
+    for(const x of [-.43,.43]){add(new T.BoxGeometry(.075,.44,.46),p.dark,[x,.22,0]);add(new T.BoxGeometry(.20,.045,.53),p.metal,[x,.028,0]);}
+    for(let i=0;i<4;i++)add(new T.BoxGeometry(1.13,.055,.10),p.copper,[0,.46,(i-1.5)*.115]);
+    for(const x of [-.47,.47])add(new T.BoxGeometry(.055,.35,.055),p.pale,[x,.64,-.25]);
+    for(let i=0;i<2;i++)add(new T.BoxGeometry(1.13,.105,.05),p.metal,[0,.65+i*.13,-.26]);
+  }else if(kind==='tree'){
+    const bark=new T.MeshStandardMaterial({color:'#5d6253',roughness:.95});bark.userData.ownedResource=true;const leaf=new T.MeshStandardMaterial({color:'#4f7062',roughness:.85});leaf.userData.ownedResource=true;
+    add(new T.CylinderGeometry(.07,.12,1.2,9),bark,[0,.6,0]);
+    for(let i=0;i<5;i++){const a=i*2.4;add(new T.IcosahedronGeometry(.40,2),leaf,[Math.sin(a)*.19,1.1+i*.17,Math.cos(a)*.16]).scale.set(1,.8,.8);}
+  }else{
+    add(new T.BoxGeometry(.51,.17,.43),p.dark,[0,.085,0]);add(new T.BoxGeometry(.46,.025,.38),p.road,[0,.17,0]);
+    const leaf=new T.MeshStandardMaterial({color:'#789380',roughness:.8});leaf.userData.ownedResource=true;
+    for(let i=0;i<5;i++){const x=Math.sin(i*2)*.16,z=Math.cos(i*2)*.12;add(new T.CylinderGeometry(.013,.018,.28,6),leaf,[x,.29,z]);add(new T.SphereGeometry(.053,10,6),p.amber,[x,.45,z]);}
   }
-  return g;
+  g.userData.assetKit=SHARED_ASSET_VERSION;return g;
 }
 export function disposeGeometry(root: T.Object3D) {
-  root.traverse(o=>{if(o instanceof T.Mesh || o instanceof T.Line){o.geometry.dispose(); const mats=Array.isArray(o.material)?o.material:[o.material];for(const m of mats){if(m.userData.ownedResource){m.dispose();}else if(m instanceof T.MeshStandardMaterial && m.map){m.map.dispose();m.dispose();}else if(m instanceof T.MeshBasicMaterial){m.map?.dispose();m.dispose();}else if(m instanceof T.LineBasicMaterial || (m instanceof T.MeshToonMaterial && (m.vertexColors || !m.gradientMap)))m.dispose();}}});
+  const textures=new Set<T.Texture>();
+  root.traverse(o=>{if(o instanceof T.Mesh || o instanceof T.Line){o.geometry.dispose(); const mats=Array.isArray(o.material)?o.material:[o.material];for(const m of mats){if(m.userData.sharedResource)continue;if(m.userData.ownedResource){if(m instanceof T.MeshStandardMaterial)for(const texture of [m.map,m.bumpMap,m.roughnessMap,m.emissiveMap,m.normalMap,m.metalnessMap,m.aoMap])if(texture?.userData.ownedResource&&!textures.has(texture)){textures.add(texture);texture.dispose();}m.dispose();}else if(m instanceof T.MeshStandardMaterial && m.map){m.map.dispose();m.dispose();}else if(m instanceof T.MeshBasicMaterial){m.map?.dispose();m.dispose();}else if(m instanceof T.LineBasicMaterial || (m instanceof T.MeshToonMaterial && (m.vertexColors || !m.gradientMap)))m.dispose();}}});
   root.removeFromParent();
 }

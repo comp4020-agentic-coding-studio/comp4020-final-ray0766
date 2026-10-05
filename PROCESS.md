@@ -223,3 +223,52 @@ existing UI bridge type for the adapter contract.
 The implementation, adapter contract and verification artifacts are recorded in local
 commit [`705cc35`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/705cc35).
 It has not been pushed; this link resolves remotely only after an authorised push.
+
+
+## Shared city resources and human-scale harbour
+
+The user selected official Area18/New Babbage city images as scale, structure and
+atmosphere references. Both were downloaded temporarily and viewed; neither image
+nor any commercial game asset was bundled. The public hub now uses a shallow
+800-unit display sphere, reversible stereographic coordinate mapping, compensated
+walking speed, lower following camera and drag-look. Saved logical positions and
+private-world terrain retain their previous meaning. The old service-loop and
+observatory scenery was replaced by the denser arrival street, service facades,
+bridge, apron and layered skyline. A short shot shows the actual parked ship
+rising above this scene after acknowledged takeoff; orbit remains a separate
+presentation scale, not continuous physics from street level.
+
+The user explicitly assigned editor/snapping/assembly/undo/blueprint saving to
+Claude and this thread the art/resource layer and smallest current-UI adapter.
+The independent Claude workspace contained uncommitted editor/server changes and
+was inspected read-only. Thirteen selected pure geometry dependencies were verified
+against committed source `ea279fd34fce3a054faaea622378181ce2d8dc9a` and copied unchanged;
+the source hashes are retained. No uncommitted editor, server or blueprint storage
+was copied, modified or run. Shared Sunseed materials and the same cabin/deck/light
+factories now serve public scenery and player objects. Seventeen asset types and
+three detail tiers are exported for later editor integration. The playable UI still
+uses its six existing saved kinds. This is not a completed component assembly editor.
+
+Actual Chrome images guided facade, sky, camera and curvature adjustments. Checks
+found and corrected a final paused-position flush that could omit a small movement,
+a scaled walker stopping at the south pole, and an arrival label appearing before
+its NPC interaction became available. Failing evidence was kept. The flight test
+pilot's obstacle detour condition was also aligned with its steering dead zone;
+application travel and permission checks were not relaxed. The full 21-case browser
+run and subsequent focused headed replays are reported separately in
+`docs/evidence/round-6/verification.md`, including failures and exact exit codes.
+
+Before refreshing the retained local preview, a consistent SQLite backup was made.
+All existing rows in five tables matched after startup: 99 players, 42 planets,
+24 objects, 50 visits and five tombstones; schema 4 and quick_check remained valid.
+The regression uses its own disposable database and browser identities. No server
+schema, dependency, deployment configuration or student reflection was changed.
+This is engineering history, not an invented student reflection or user study.
+
+The complete Chrome run passed 19 of 21 cases, with both failures caused by the
+arrival-label condition. After that application fix, all seven targeted headed
+Chrome replays passed, including both delivery/return journeys, poles, offline
+recovery, harbour departure/return and shared-object ownership/synchronization.
+All 21 scenarios have passing evidence across the runs; no single all-green full
+run is claimed. Final lint, TypeScript, 25 HTTP/logic/course tests, production build
+and the evidence check passed. The existing chunk-size advisory is retained.

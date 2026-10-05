@@ -1,0 +1,18 @@
+{
+  "started": "2026-10-05T15:45:01.558930+00:00",
+  "baseUrl": "http://127.0.0.1:8095",
+  "browser": "Mac installed Chrome; headless; trace off; one worker",
+  "steps": [
+    {
+      "name": "logic",
+      "exitCode": 0,
+      "log": "logic-final.log"
+    },
+    {
+      "name": "browser",
+      "exitCode": 1,
+      "log": "browser-final.log"
+    }
+  ],
+  "finished": "2026-10-05T15:55:21.567330+00:00"
+}

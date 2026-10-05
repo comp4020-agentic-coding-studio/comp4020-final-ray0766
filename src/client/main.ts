@@ -11,7 +11,7 @@ import { SpaceFlight } from './flight.ts';
 import { Colony } from './colony.ts';
 import { disposeGeometry } from './build-art.ts';
 import type { Universe } from '../shared/planets.ts';
-import { surfacePoint } from './terrain.ts';
+import { surfacePoint,surfaceNormal,surfaceTangent,surfaceOrientation,surfaceScale,logicalNormal,groundRadius } from './terrain.ts';
 import { SurfaceWalker, cameraPose } from './motion.ts';
 import { createWorld, courier } from './scene.ts';
 import { distance, INTERACT_DISTANCE, NPCS, RADIUS } from '../shared/world.ts';
@@ -25,7 +25,8 @@ let state: PlayerState;
 let walker: SurfaceWalker;
 let target: T.Vector3 | null = null;
 let busy = false, online = false, noticeUntil = 0, conversationUntil = 0;
-let overview = false;
+let overview = false;let cameraPitch=0;
+let departure:{time:number;base:T.Vector3;start:T.Vector3;rotation:T.Quaternion}|null=null;
 let colony: Colony | undefined;
 let flight: SpaceFlight | undefined;
 let activePlanet = 'hub';
@@ -66,12 +67,13 @@ function accept(next: PlayerState) {
   if (!state || next.revision >= state.revision) state = next;
   if (state.planetId !== activePlanet) {
     activePlanet = state.planetId; disposeGeometry(worldRoot); worldRoot = new T.Scene(); scene.add(worldRoot);
-    world = createWorld(worldRoot, activePlanet === 'hub'); walker = new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;near=null;
+    world = createWorld(worldRoot, activePlanet === 'hub');configureGround(); walker = new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;near=null;
     $('npc-mica').hidden=true;$('npc-sol').hidden=true;$('conversation').hidden=true;document.body.classList.remove('delivery-open');
   }
-  if((reconnecting||justLanded) && walker){walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;}
+  if((reconnecting||justLanded) && walker){cameraPitch=0;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;}
   if(previousPlanet!==state.planetId||previousMode!==state.flight.mode)presence.clear();
   flight?.receive(state.flight,reconnecting);
+  if(previousMode==='ground'&&state.flight.mode==='space'&&activePlanet==='hub'&&!reduced&&flight){departure={time:0,base:world.parked.root.position.clone(),start:camera.position.clone(),rotation:camera.quaternion.clone()};flight.presentation=true;document.body.classList.add('departing');notice('Departure clearance granted · Sunseed Harbour',4200);}
   online = navigator.onLine; status(online?'Progress saved':'Offline · retrying',!online); renderTask();
 }
 function failed(error: unknown) {
@@ -110,13 +112,17 @@ const sky = new T.Group();scene.add(sky);
 const stars:number[]=[];for(let i=0;i<260;i++){const p=new T.Vector3(Math.sin(i*21.2),Math.cos(i*14.3),Math.sin(i*9.2)).normalize().multiplyScalar(65);stars.push(...p.toArray());}
 const starGeo=new T.BufferGeometry();starGeo.setAttribute('position',new T.Float32BufferAttribute(stars,3));sky.add(new T.Points(starGeo,new T.PointsMaterial({color:'#819dab',size:.085,fog:false})));
 scene.fog = new T.Fog('#0f202b', 28, 65);
-const camera = new T.PerspectiveCamera(48, innerWidth / innerHeight, .1, 150);
+const camera = new T.PerspectiveCamera(52, innerWidth / innerHeight, .08, 2400);
 const fill = new T.AmbientLight('#839aaf', 1.1); scene.add(fill);
 const sun = new T.DirectionalLight('#efd4b0', 2.5); sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-16;sun.shadow.camera.right=16;sun.shadow.camera.top=16;sun.shadow.camera.bottom=-16;sun.shadow.camera.far=65;sun.shadow.normalBias=.09;sun.shadow.bias=-.0003;
 scene.add(sun);scene.add(sun.target);
 let worldRoot = new T.Scene();scene.add(worldRoot);
 let world = createWorld(worldRoot);
+function configureGround(){
+ const hub=activePlanet==='hub';sky.visible=!hub;scene.fog=hub?new T.FogExp2('#665b60',.0033):new T.Fog('#0f202b',28,65);fill.color.set(hub?'#839bad':'#839aaf');fill.intensity=hub?.48:1.1;sun.color.set(hub?'#e8bd99':'#efd4b0');sun.intensity=hub?2.35:2.5;sun.shadow.camera.left=hub?-45:-16;sun.shadow.camera.right=hub?45:16;sun.shadow.camera.top=hub?45:16;sun.shadow.camera.bottom=hub?-45:-16;sun.shadow.camera.far=hub?180:65;sun.shadow.camera.updateProjectionMatrix();scene.environmentIntensity=hub?.43:.5;
+}
+configureGround();
 const player = courier('clay');scene.add(player.root);
 const presence=new GroundPresence(scene,renderer.domElement);
 const silhouette = new T.Mesh(new T.CapsuleGeometry(.22, .90, 4, 8), new T.MeshBasicMaterial({color:'#ffdfa0',transparent:true,opacity:.24,depthTest:false,depthWrite:false}));
@@ -124,7 +130,7 @@ silhouette.visible=false;silhouette.renderOrder=100;scene.add(silhouette);
 const destinationRing = new T.Mesh(new T.RingGeometry(.2,.27,24),new T.MeshBasicMaterial({color:'#fff7db',side:T.DoubleSide,transparent:true,opacity:.9}));
 destinationRing.visible=false;scene.add(destinationRing);
 const poseCamera = new T.PerspectiveCamera();
-function resize() { camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight); }
+function resize() { renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<700?1.35:1.8));const shadowSize=innerWidth<700?1024:2048;if(sun.shadow.mapSize.x!==shadowSize){sun.shadow.mapSize.set(shadowSize,shadowSize);sun.shadow.map?.dispose();sun.shadow.map=null;}camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight); }
 window.addEventListener('resize',resize);resize();
 function clearInput() { keys.clear();joy.set(0,0);$('stick').style.transform='';target=null; }
 window.addEventListener('blur',clearInput);
@@ -139,13 +145,21 @@ window.addEventListener('keydown',event=> {
 });
 window.addEventListener('keyup',event=>keys.delete(event.key.toLowerCase()));
 const raycaster = new T.Raycaster();
-let pointerStart: {x:number;y:number} | null=null;
-renderer.domElement.addEventListener('pointerdown',e=> {if(!flight?.active&&!document.querySelector('dialog[open]')&&!colony?.paused)pointerStart={x:e.clientX,y:e.clientY};});
+let pointerStart: {x:number;y:number;lastX:number;lastY:number;dragged:boolean} | null=null;
+renderer.domElement.addEventListener('pointerdown',e=> {if(!flight?.active&&!document.querySelector('dialog[open]')&&!colony?.paused){pointerStart={x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,dragged:false};renderer.domElement.setPointerCapture(e.pointerId);}});
+renderer.domElement.addEventListener('pointermove',e=>{
+  if(!pointerStart||!walker||activePlanet!=='hub'||flight?.active||document.querySelector('dialog[open]')||colony?.paused)return;
+  if(Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>7)pointerStart.dragged=true;
+  if(pointerStart.dragged){walker.north.applyAxisAngle(walker.up,-(e.clientX-pointerStart.lastX)*.004).projectOnPlane(walker.up).normalize();cameraPitch=T.MathUtils.clamp(cameraPitch+(e.clientY-pointerStart.lastY)*.003,-.3,.7);target=null;}
+  pointerStart.lastX=e.clientX;pointerStart.lastY=e.clientY;
+});
+renderer.domElement.addEventListener('pointercancel',()=>pointerStart=null);
+renderer.domElement.addEventListener('lostpointercapture',()=>pointerStart=null);
 renderer.domElement.addEventListener('pointerup',e=> {
-  if(flight?.active || document.querySelector('dialog[open]') || colony?.paused || !walker || !online || !pointerStart || Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>10) return;
+  if(flight?.active || document.querySelector('dialog[open]') || colony?.paused || !walker || !online || !pointerStart || pointerStart.dragged || Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>10) return;
   raycaster.setFromCamera(new T.Vector2(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1),camera);
   const hit=raycaster.intersectObject(world.globe)[0];
-  if(hit) {target=hit.point.normalize();destinationRing.position.copy(surfacePoint(target,.05));destinationRing.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),target);}
+  if(hit) {target=logicalNormal(hit.point.normalize());destinationRing.position.copy(surfacePoint(target,.05));destinationRing.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),surfaceNormal(target));}
   pointerStart=null;
 });
 const joystick=$('joystick');let joyPointer:number|null=null;
@@ -163,26 +177,26 @@ $('help').onclick=()=>{menu.close();clearInput();helpDialog.showModal();};
 document.querySelectorAll<HTMLButtonElement>('dialog .close, .close-help').forEach(b=>b.onclick=()=>b.closest('dialog')?.close());
 $('begin').onclick=()=>{courierDialog.close();notice('Follow the blue-lit street to STARPORT / 01.',6500);};
 const menu=$<HTMLDialogElement>('menu-dialog');
-$('open-menu').onclick=()=>{clearInput();flight?.clear();menu.showModal();};
+$('open-menu').onclick=()=>{clearInput();flight?.clear();menu.showModal();void savePosition(true);};
 $('close-menu').onclick=$('resume').onclick=()=>menu.close();
 $('guide-port').onclick=()=>{guideDock=true;menu.close();notice('Your parked ship is marked. Walk there to board.');};
-window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('dialog[open]')){e.preventDefault();clearInput();flight?.clear();menu.showModal();}if(e.key.toLowerCase()==='m'&&!document.querySelector('dialog[open]')){$('open-map').click();}});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('dialog[open]')){e.preventDefault();clearInput();flight?.clear();menu.showModal();void savePosition(true);}if(e.key.toLowerCase()==='m'&&!document.querySelector('dialog[open]')){$('open-map').click();}});
 document.querySelectorAll<HTMLButtonElement>('[data-character]').forEach(button=>button.onclick=async()=>{
   if(busy || !state) return;
   busy=true;const old=state.character;player.setColor(button.dataset.character as Character);status('Saving coat…');
   try {accept(await serial(()=>request('character',{character:button.dataset.character})));}
   catch(error){player.setColor(old);failed(error);}finally{busy=false;}
 });
-let saving=false;
-async function savePosition(force=false) {
-  if(!walker || !state || state.flight.mode==='space' || saving || !online || (!force && walker.up.distanceTo(lastSaved)<.001)) return;
-  saving=true;const p=walker.up.toArray() as Vec3;
-  const planetId=state.planetId;
-  try {const next=await serial(()=>request('move',{position:p,planetId}));lastSaved.fromArray(p);accept(next);}
-  catch(error) {
-    if(error instanceof ApiError && error.status===409) {walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();}
-    failed(error);
-  }finally{saving=false;}
+let saving:Promise<void>|null=null;
+async function savePosition(force=false):Promise<void> {
+  if(saving){await saving;if(force)return savePosition(true);return;}
+  if(!walker||!state||state.flight.mode==='space'||!online||(!force&&walker.up.distanceTo(lastSaved)<.001))return;
+  const p=walker.up.toArray() as Vec3,planetId=state.planetId;
+  saving=(async()=>{
+    try{const next=await serial(()=>request('move',{position:p,planetId}));lastSaved.fromArray(p);accept(next);}
+    catch(error){if(error instanceof ApiError&&error.status===409){walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();}failed(error);}
+  })().finally(()=>{saving=null;});
+  await saving;
 }
 async function interact() {
   if(state?.flight.mode==='space' || !near || busy || !online) return;
@@ -224,6 +238,18 @@ function animate(now:number) {
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.05);previous=now;elapsed+=dt;
   if(!walker) return;
+  if(flight?.active&&departure){
+    $('boarding-prompt').hidden=true;$('dock-guide').hidden=true;
+    if(online&&!document.hidden&&!document.querySelector('dialog[open]'))departure.time+=dt;
+    const t=Math.min(1,departure.time/3.4),smooth=t*t*(3-2*t),ship=world.parked.root;
+    ship.position.copy(departure.base).add(new T.Vector3(0,18*smooth,-24*smooth));ship.updateWorldMatrix(true,false);world.parked.animate(.7,false);
+    const pos=ship.getWorldPosition(new T.Vector3()),up=surfaceNormal(walker.up),north=surfaceTangent(walker.up,walker.north),right=new T.Vector3().crossVectors(north,up).normalize();
+    const shot=pos.clone().addScaledVector(up,5+8*t).addScaledVector(north,-17-8*t).addScaledVector(right,10);
+    poseCamera.position.copy(shot);poseCamera.up.copy(up);poseCamera.lookAt(pos.clone().addScaledVector(north,10));
+    camera.position.copy(departure.start).lerp(shot,Math.min(1,t*3));camera.quaternion.copy(departure.rotation).slerp(poseCamera.quaternion,Math.min(1,t*3));
+    world.animate(elapsed,reduced,camera.position,up);renderer.domElement.dataset.departure=String(t);renderer.render(scene,camera);
+    if(t>=1){ship.position.copy(departure.base);world.parked.flame.visible=false;departure=null;flight.presentation=false;flight.clear();document.body.classList.remove('departing');delete renderer.domElement.dataset.departure;}return;
+  }
   if(flight?.active){$('boarding-prompt').hidden=true;$('dock-guide').hidden=true;flight.frame(dt,now,renderer);if(now>noticeUntil)$('notice').hidden=true;return;}
   const paused=!!document.querySelector('dialog[open]')||courierDialog.open||helpDialog.open||!!colony?.paused||!online||document.hidden;
   let x=joy.x+Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));
@@ -233,49 +259,58 @@ function animate(now:number) {
     if(walker.up.angleTo(target)*RADIUS<.2){target=null;}else{d.normalize();x=d.dot(walker.right());y=d.dot(walker.north);}
   }
   const old=walker.up.clone(),north=walker.north.clone(),face=walker.facing.clone();
-  if(paused) {walker.velocity.set(0,0,0);} else walker.step(x,y,dt);
+  if(paused) {walker.velocity.set(0,0,0);} else walker.step(x,y,dt,1/surfaceScale(walker.up));
   if(world.blocks.some(b=>walker.up.angleTo(b.point)*RADIUS<b.radius+.19 && walker.up.angleTo(b.point)<=old.angleTo(b.point)+.00001)) {
     walker.up.copy(old);walker.north.copy(north);walker.facing.copy(face);walker.velocity.set(0,0,0);target=null;
   }
   destinationRing.visible=!!target;
-  player.root.position.copy(surfacePoint(walker.up,.018));player.root.quaternion.copy(walker.orientation());player.animate(elapsed,walker.velocity.length(),reduced);
-  const fov=innerWidth<600&&!overview?58:48;if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();}
-  const pose=cameraPose(walker,innerWidth<600,overview);
+  player.root.position.copy(surfacePoint(walker.up,.018));player.root.quaternion.copy(surfaceOrientation(walker.up,walker.facing));player.animate(elapsed,walker.velocity.length()*surfaceScale(walker.up),reduced);
+  const fov=activePlanet==='hub'?(innerWidth<600?65:55):(innerWidth<600&&!overview?58:48);if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();}
+  const renderUp=surfaceNormal(walker.up),renderNorth=surfaceTangent(walker.up,walker.north),renderRight=new T.Vector3().crossVectors(renderNorth,renderUp).normalize();
+  const hub=activePlanet==='hub',phone=innerWidth<600;
+  const pose=hub?{position:surfacePoint(walker.up,overview?65:(phone?2.75:2.35)).addScaledVector(renderNorth,overview?-72:(phone?-6.4:-4.7)).addScaledVector(renderRight,overview?0:.45),target:surfacePoint(walker.up,overview?4:1.48+Math.tan(cameraPitch)*9).addScaledVector(renderNorth,overview?-12:6)}:cameraPose(walker,phone,overview);
   pose.position.addScaledVector(walker.up,world.height(walker.up));
   pose.target.addScaledVector(walker.up,world.height(walker.up));
-  const headPoint=surfacePoint(walker.up,1.05);
+  const headPoint=surfacePoint(walker.up,1.35);
+  if(hub&&!overview){
+    // Shorten the camera boom before it penetrates a facade when looking sideways.
+    const offset=pose.position.clone().sub(headPoint),length=offset.length();raycaster.set(headPoint,offset.normalize());raycaster.far=length;
+    const hit=raycaster.intersectObject(world.scenery,true).find(h=>h.distance>.35);
+    if(hit&&hit.distance<length)pose.position.copy(headPoint).addScaledVector(offset,Math.max(.55,hit.distance-.3));raycaster.far=Infinity;
+  }
   const sight=new T.Ray(pose.position.clone(),headPoint.clone().sub(pose.position).normalize());
   const sightLength=pose.position.distanceTo(headPoint);
-  silhouette.visible=world.blocks.some(b=>{
+  silhouette.visible=!hub&&world.blocks.some(b=>{
     const center=surfacePoint(b.point,b.height*.50),along=center.clone().sub(sight.origin).dot(sight.direction);
     return along>.4&&along<sightLength-.5&&sight.distanceSqToPoint(center)<Math.pow(Math.max(b.radius,b.height*.28),2);
   });
   silhouette.position.copy(surfacePoint(walker.up,.84));silhouette.quaternion.copy(player.root.quaternion);
-  poseCamera.position.copy(pose.position);poseCamera.up.copy(walker.up);poseCamera.lookAt(pose.target);
+  poseCamera.position.copy(pose.position);poseCamera.up.copy(renderUp);poseCamera.lookAt(pose.target);
   if(!started){camera.position.copy(pose.position);camera.quaternion.copy(poseCamera.quaternion);started=true;}
   camera.position.lerp(pose.position,reduced?1:1-Math.exp(-7*dt));camera.quaternion.slerp(poseCamera.quaternion,reduced?1:1-Math.exp(-8*dt));
-  sun.position.copy(walker.up).multiplyScalar(24).addScaledVector(walker.right(),-12).addScaledVector(walker.north,7);sun.target.position.set(0,0,0);
+  if(hub){sun.target.position.copy(surfacePoint(walker.up));sun.position.copy(sun.target.position).addScaledVector(renderUp,65).add(new T.Vector3(-55,0,45).projectOnPlane(renderUp));}else{sun.position.copy(walker.up).multiplyScalar(24).addScaledVector(walker.right(),-12).addScaledVector(walker.north,7);sun.target.position.set(0,0,0);}
   const skyRight=walker.right(),skyBack=walker.north.clone().negate();
   sky.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(skyRight,walker.up,skyBack));
-  world.animate(elapsed,reduced);
+  world.animate(elapsed,reduced,camera.position,renderUp);
   world.npcs.forEach(n=>{n.avatar.animate(elapsed,0,reduced);if(near===n.id){const local=n.anchor.worldToLocal(player.root.position.clone());const yaw=Math.atan2(local.x,local.z);const diff=Math.atan2(Math.sin(yaw-n.avatar.root.rotation.y),Math.cos(yaw-n.avatar.root.rotation.y));n.avatar.root.rotation.y+=diff*(1-Math.exp(-4*dt));}n.beacon.position.y=2.0+(reduced?0:Math.sin(elapsed*2)*.06);n.beacon.visible=state.quest!=='delivered'&&n.id===(state.quest==='available'?'mica':'sol');});
   presence.frame(now,dt,walker.up,reduced);
   renderer.render(scene,camera);
   uiTick+=dt;
   if(uiTick>.1) {
+    renderer.domElement.dataset.cameraHeading=JSON.stringify(walker.north.toArray());renderer.domElement.dataset.cameraPitch=String(cameraPitch);renderer.domElement.dataset.groundScale=String(surfaceScale(walker.up));renderer.domElement.dataset.groundRadius=String(groundRadius());renderer.domElement.dataset.quality=innerWidth<700?'compact':'full';
     renderer.domElement.dataset.drawCalls=String(renderer.info.render.calls);
     renderer.domElement.dataset.triangles=String(renderer.info.render.triangles);
     uiTick=0;near=null;
-    const dockPoint=new T.Vector3(...portPoint(activePlanet)),dockDistance=walker.up.angleTo(dockPoint)*RADIUS;nearDock=dockDistance<BOARD_RADIUS-.12;
+    const dockPoint=new T.Vector3(...portPoint(activePlanet)),displayDockDistance=surfaceNormal(walker.up).angleTo(surfaceNormal(dockPoint))*groundRadius(),dockDistance=walker.up.angleTo(dockPoint)*RADIUS;nearDock=dockDistance<BOARD_RADIUS-.12;
     $('boarding-prompt').hidden=!nearDock||paused;$('dock-context').textContent=activePlanet==='hub'?'STARPORT / BOARDING GATE':'PARKED SHIP / RETURN BEACON';
-    $('dock-guide').hidden=!guideDock||nearDock||paused;const toward=dockPoint.projectOnPlane(walker.up).normalize();$('dock-arrow').style.transform=`rotate(${Math.atan2(toward.dot(walker.right()),toward.dot(walker.north))*180/Math.PI}deg)`;$('dock-guide-text').textContent=`Parked ship · ${Math.round(dockDistance)} m`;
+    $('dock-guide').hidden=!guideDock||nearDock||paused;const toward=dockPoint.projectOnPlane(walker.up).normalize();$('dock-arrow').style.transform=`rotate(${Math.atan2(toward.dot(walker.right()),toward.dot(walker.north))*180/Math.PI}deg)`;$('dock-guide-text').textContent=`Parked ship · ${Math.round(displayDockDistance)} m`;
     renderer.domElement.dataset.portDistance=String(dockDistance);renderer.domElement.dataset.groundPosition=JSON.stringify(walker.up.toArray());
 
     for(const n of world.npcs){
       const d=distance(walker.up.toArray() as Vec3,NPCS[n.id].position);if(d<INTERACT_DISTANCE-.12)near=n.id;
       const p=n.anchor.position.clone().addScaledVector(n.anchor.position.clone().normalize(),2.12);
       const labelRay=new T.Ray(camera.position.clone(),p.clone().sub(camera.position).normalize());
-      const groundHit=labelRay.intersectSphere(new T.Sphere(new T.Vector3(),RADIUS-.10),new T.Vector3());
+      const groundHit=labelRay.intersectSphere(new T.Sphere(new T.Vector3(),groundRadius()-.10),new T.Vector3());
       const visible=!groundHit||camera.position.distanceTo(groundHit)>camera.position.distanceTo(p);
       p.project(camera);const label=$('npc-'+n.id);
       const active=state.quest!=='delivered'&&n.id===(state.quest==='available'?'mica':'sol');
@@ -290,8 +325,7 @@ function animate(now:number) {
     else $('nearby').textContent='';
     if(state.quest!=='delivered') {
       const destination=new T.Vector3(...NPCS[state.quest==='available'?'mica':'sol'].position);
-      const d=walker.up.angleTo(destination)*RADIUS;
-      $('distance').textContent=d<INTERACT_DISTANCE?'You’re here · say hello':`${Math.round(d)} little metres away`;
+      $('distance').textContent=near===(state.quest==='available'?'mica':'sol')?'You’re here · say hello':`${Math.round(surfaceNormal(walker.up).angleTo(surfaceNormal(destination))*groundRadius())} m away`;
       const tangent=destination.projectOnPlane(walker.up).normalize();
       $('compass').style.transform=`rotate(${Math.atan2(tangent.dot(walker.right()),tangent.dot(walker.north))*180/Math.PI}deg)`;
     }else{$('distance').textContent='Saved for your next visit';$('compass').textContent='✓';$('compass').style.transform='';}
@@ -302,7 +336,7 @@ function animate(now:number) {
 function ensureColony() {
   if(colony)return;
   flight=new SpaceFlight({canvas:renderer.domElement,renderer,online:()=>online,player:()=>state,checkpoint:body=>serial(()=>request('flight/checkpoint',body)),command:(route,body)=>serial(()=>request<Universe>(route,body)),apply:accept,applyUniverse:u=>colony?.accept(u),flushGround:async()=>{await savePosition(true);await queue;},clearGround:()=>{clearInput();colony?.stopBuilding();},canBoard:()=>!!walker&&!colony?.building&&distance(walker.up.toArray() as Vec3,portPoint(activePlanet))<BOARD_RADIUS-.12,failed,notice});
-  flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=.5;
+  flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=activePlanet==='hub'?.43:.5;
   colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,
     applyPlayer:p=>{accept(p);return state.planetId===p.planetId&&state.revision<=p.revision;},
     universe:u=>flight?.universe(u),bearing:id=>flight?.mark(id),
