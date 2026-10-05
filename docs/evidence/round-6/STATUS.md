@@ -1,7 +1,7 @@
 # Verified completion checkpoint — 2026-10-05 16:03 UTC
 
 - Workspace: `/Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766`.
-  Branch `prototype/small-world-c8`; local implementation commit is being recorded.
+  Branch `prototype/small-world-c8`; implementation commit `103a7ff` is saved locally.
 - Live preview http://localhost:8080 serves final bundle `index-BfIgytnH.js`.
   `/`, `/readme/`, `/credits/` returned 200. Original SQLite is retained.
 - New city/street/starport, shared structural/PBR asset layer, camera/scale and

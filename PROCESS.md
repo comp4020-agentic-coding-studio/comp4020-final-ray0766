@@ -272,3 +272,7 @@ recovery, harbour departure/return and shared-object ownership/synchronization.
 All 21 scenarios have passing evidence across the runs; no single all-green full
 run is claimed. Final lint, TypeScript, 25 HTTP/logic/course tests, production build
 and the evidence check passed. The existing chunk-size advisory is retained.
+
+The implementation, shared-resource provenance and verification artifacts are saved
+in local commit [`103a7ff`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/103a7ff).
+It has not been pushed; the link will resolve remotely only after an authorised push.

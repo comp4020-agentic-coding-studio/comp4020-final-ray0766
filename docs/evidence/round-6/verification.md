@@ -4,6 +4,7 @@
 
 Workspace: `/Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766`.
 Branch: `prototype/small-world-c8`. Baseline: `4855c4b`.
+Implementation/evidence commit: `103a7ff` (local only).
 Final application bundle: `index-BfIgytnH.js`, built 2026-10-05.
 All testing is local; nothing was pushed, deployed, published or submitted.
 
@@ -29,7 +30,7 @@ No competing editor or new blueprint storage was added.
 | Lint | exit 0 | `lint-replay.log` |
 | TypeScript + logic/HTTP/course | exit 0; 25 tests in 10 files | `logic-replay.log` |
 | Production build | exit 0 | `build-replay.log` |
-| Course evidence and whitespace | exit 0; six prior commit links resolve | `pnpm check:evidence`, `git diff --check` |
+| Course evidence and whitespace | exit 0; seven local commit links resolve | `pnpm check:evidence`, `git diff --check` |
 | Full installed Chrome regression, headless, one worker | 19 passed / 2 failed, exit 1, 10.3 min | `browser-final.log`, `run-results.json` |
 | Final headed Chrome focused replay | 7 passed, exit 0, 6.0 min | `headed-replay.log`, `replay-results.json` |
 
