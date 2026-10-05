@@ -3,22 +3,52 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { CHARACTERS, distance, INTERACT_DISTANCE, NPCS, normalize, SPAWN, SPEED, validPosition } from '../shared/world.ts';
 import type { Character, PlayerState, Quest } from '../shared/world.ts';
+import { planetStore } from './planets.ts';
+import { RequestError } from './errors.ts';
+export { RequestError } from './errors.ts';
 
-export class RequestError extends Error {
-  status: number;
-  constructor(status: number, message: string) { super(message); this.status = status; }
-}
-interface Row { character: Character; quest: Quest; position: string; deliveries: number; revision: number; moved_at: number }
+interface Row { character: Character; quest: Quest; position: string; deliveries: number; revision: number; moved_at: number; planet_id: string }
 export function openStore(path: string) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
-  db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000;
+  const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
+  if (schema > 3) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
       quest TEXT NOT NULL DEFAULT 'available' CHECK(quest IN ('available','carrying','delivered')),
       position TEXT NOT NULL, deliveries INTEGER NOT NULL DEFAULT 0 CHECK(deliveries BETWEEN 0 AND 1),
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
-    ); PRAGMA user_version=1;`);
+    );`);
+  let migrationBackup: string | null = null;
+  if (schema < 3) {
+    if (schema > 0 && path !== ':memory:') {
+      migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
+      // VACUUM INTO includes committed WAL data and produces a consistent restore point.
+      db.prepare('VACUUM INTO ?').run(migrationBackup);
+    }
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      if (schema < 2) db.exec(`ALTER TABLE players ADD COLUMN planet_id TEXT NOT NULL DEFAULT 'hub';
+        CREATE TABLE planets (
+          id TEXT PRIMARY KEY, name TEXT NOT NULL, kind TEXT NOT NULL CHECK(kind IN ('hub','garden')),
+          owner_id TEXT UNIQUE REFERENCES players(id), revision INTEGER NOT NULL DEFAULT 0,
+          CHECK(kind != 'hub' OR owner_id IS NULL)
+        );
+        INSERT INTO planets (id,name,kind) VALUES ('hub','Sunseed Harbour','hub');
+        CREATE TABLE planet_objects (
+          id TEXT PRIMARY KEY, planet_id TEXT NOT NULL REFERENCES planets(id),
+          kind TEXT NOT NULL CHECK(kind IN ('cottage','tree','path','flowers','bench','lamp')),
+          position TEXT NOT NULL, rotation REAL NOT NULL, version INTEGER NOT NULL DEFAULT 1
+        );
+        CREATE INDEX objects_by_planet ON planet_objects(planet_id);
+        CREATE TABLE visits (player_id TEXT NOT NULL REFERENCES players(id), planet_id TEXT NOT NULL REFERENCES planets(id),
+          position TEXT NOT NULL, PRIMARY KEY(player_id,planet_id));`);
+      db.exec(`CREATE TABLE object_tombstones (id TEXT PRIMARY KEY, planet_id TEXT NOT NULL REFERENCES planets(id));
+        PRAGMA user_version=3; COMMIT;`);
+    } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
+  }
+  const planets = planetStore(db);
   const row = (id: string): Row => {
     const result = db.prepare('SELECT * FROM players WHERE id=?').get(id) as unknown as Row | undefined;
     if (!result) throw new RequestError(401, 'Your session has expired. Reload to start a new visit.');
@@ -26,10 +56,11 @@ export function openStore(path: string) {
   };
   const state = (id: string): PlayerState => {
     const r = row(id);
-    return { character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision };
+    return { character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id };
   };
+  const universe = (id: string) => { const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) }; };
   return {
-    db, state,
+    db, state, universe, migrationBackup,
     has: (id: string) => Boolean(db.prepare('SELECT id FROM players WHERE id=?').get(id)),
     create(id: string, now = Date.now()) {
       db.prepare('INSERT INTO players (id,position,moved_at) VALUES (?,?,?)').run(id, JSON.stringify(SPAWN), now);
@@ -41,9 +72,10 @@ export function openStore(path: string) {
       db.prepare('UPDATE players SET character=?,revision=revision+1 WHERE id=?').run(value as string, id);
       return state(id);
     },
-    move(id: string, value: unknown, now = Date.now()) {
+    move(id: string, value: unknown, now = Date.now(), expectedPlanet?: unknown) {
       if (!validPosition(value)) throw new RequestError(400, 'Position must be a finite point on the planet.');
       const r = row(id);
+      if ((expectedPlanet === undefined && r.planet_id !== 'hub') || (expectedPlanet !== undefined && expectedPlanet !== r.planet_id)) throw new RequestError(409, 'Your visit moved to another planet. Reconnecting…');
       // A bounded travel budget prevents a forged jump straight to a destination.
       const budget = SPEED * Math.min(2, Math.max(0, now - r.moved_at) / 1000) + 0.35;
       const p = normalize(value);
@@ -54,6 +86,7 @@ export function openStore(path: string) {
     interact(id: string, action: unknown) {
       if (action !== 'pickup' && action !== 'deliver') throw new RequestError(400, 'Unknown delivery action.');
       const r = row(id);
+      if (r.planet_id !== 'hub') throw new RequestError(409, 'Deliveries take place at Sunseed Harbour.');
       // Replayed requests never award another parcel or delivery.
       if (action === 'pickup' && r.quest !== 'available') return state(id);
       if (action === 'deliver' && r.quest === 'delivered') return state(id);
@@ -64,6 +97,22 @@ export function openStore(path: string) {
         .run(action === 'pickup' ? 'carrying' : 'delivered', action === 'pickup' ? 0 : 1, id);
       return state(id);
     },
+    visit(id: string, planetId: unknown) {
+      const r = row(id), p = planets.planet(planetId);
+      if (r.planet_id === p.id) return universe(id);
+      db.exec('BEGIN IMMEDIATE');
+      try {
+        db.prepare('INSERT INTO visits (player_id,planet_id,position) VALUES (?,?,?) ON CONFLICT(player_id,planet_id) DO UPDATE SET position=excluded.position').run(id, r.planet_id, r.position);
+        const saved = db.prepare('SELECT position FROM visits WHERE player_id=? AND planet_id=?').get(id, p.id)?.position as string | undefined;
+        db.prepare('UPDATE players SET planet_id=?,position=?,moved_at=?,revision=revision+1 WHERE id=?').run(p.id, saved ?? JSON.stringify(SPAWN), Date.now(), id);
+        db.exec('COMMIT');
+      } catch (error) { db.exec('ROLLBACK'); throw error; }
+      return universe(id);
+    },
+    claim(id: string, planetId: unknown) { row(id); planets.claim(id, planetId); return universe(id); },
+    createObject(id: string, body: Record<string, unknown>) { row(id); planets.create(id, body); return universe(id); },
+    updateObject(id: string, body: Record<string, unknown>) { row(id); planets.update(id, body); return universe(id); },
+    removeObject(id: string, body: Record<string, unknown>) { row(id); planets.remove(id, body); return universe(id); },
     close() { db.close(); },
   };
 }

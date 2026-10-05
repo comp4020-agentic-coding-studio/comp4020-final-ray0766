@@ -1,76 +1,72 @@
-# Little Post
+# Little Worlds
 
-A small planet, two neighbours, and one parcel of sunseeds. Little Post is a
-local COMP8020 Final prototype: choose a courier, wander around the spherical
-world, collect a parcel from Mica, then bring it to Sol at the glasshouse. The
-completed delivery and coat remain when the same browser returns.
+A constellation made together: visit a blank planet, make it your home, and shape
+it with a small building kit. Everyone can visit every planet, while only its
+owner can change it. Sunseed Harbour preserves the original courier world and
+its optional delivery. Existing coats, delivery progress and locations survive
+the move to this multi-planet prototype.
 
 ## Current design brief
 
-This prototype implements the approved learning goal: reproduce the core
-experience of continuous movement on a small planet with a following camera,
-then develop an original direction. The target is a short, legible delivery that a new visitor can finish without
-operating the camera. There is no timer or penalty for taking a longer route.
-The connected lanes, destination arrow, distance and nearby action button
-provide several ways to find the next step. Three coats offer a personal choice.
+The user authorised an original direction beyond the Messenger learning
+prototype: many worlds, one home per browser identity, and shared exploration
+without editing someone else’s work. The main loop is now star map, visit, claim,
+build and revisit. Blank planets contain terrain only. Claimed planets start
+empty too; their owners supply the first buildings and planting.
 
-This is an engineering description of the current prototype and agreed scope.
-The student’s own argument about what makes the experience good, its intended
-audience, and the sources behind that position still needs to be written and
-reviewed before submission. This page does not stand in for that academic work.
+The catalogue contains cottages, trees, path stones, flowers, benches and lamps.
+Enter Build mode, choose an object, tap an open ground position, rotate if needed,
+and save. Select an existing object on the planet or from the accessible object
+list to move, rotate or remove it. Leave Build mode to walk elsewhere. Placement
+reserves the landing spot, separates objects and limits each planet to 64 objects;
+path stones may overlap one another to form continuous routes.
 
-## What is implemented
+This describes the implemented, agreed brief. The student’s own argument about
+quality, audience and research still needs to be written and reviewed. It is not
+an authored academic position or a substitute for the required reflection.
 
-Keyboard movement uses WASD or the arrow keys. Clicking the ground selects a
-walking destination; phone users can drag the thumbstick. Press E, or use the
-nearby button, to collect or deliver. The camera follows the local surface
-orientation through either pole. Trees and buildings have simple collision
-boundaries. A close walking view and optional planet overview share the same
-controller. Articulated couriers greet neighbours; dialogue accompanies the parcel
-handoff. The postal street, glasshouse, pond and windmill provide landmarks.
+## Ownership, persistence and visitors
 
-Character and task state are stored in SQLite on the server, identified by an
-HttpOnly browser cookie. The browser never awards itself a delivery. The server
-checks the action, parcel state, saved proximity, character choice and incoming
-coordinates. Repeating a successful request cannot create a second delivery.
-Losing the connection pauses movement and shows a retry message; reconnecting
-returns to the last saved location. Clearing cookies creates a new visitor.
-There is no account or cross-device recovery in this version.
+A random HttpOnly, SameSite browser cookie identifies a server session. SQLite
+stores ownership, object transforms, task state and per-planet visit positions.
+The database enforces one owner per planet and one planet per identity. Claim
+transactions resolve races. Every building write checks server-derived ownership;
+client owner IDs or hidden buttons cannot grant permission. Requests validate
+models, coordinates, rotation, overlap and capacity. Version checks reject stale
+edits, duplicate operations do not multiply objects, and deletion tombstones
+prevent an old create request from resurrecting an object.
 
-## Reference and original work
+Visitors see saved scene changes through one-second polling while their page is
+visible. Their own movement remains local to their session; other visitors’
+avatars are not shown. No chat or trading is included. Multiple tabs of one
+identity share the current visit. Scene edits are acknowledged only after saving.
 
-[Messenger by abeto](https://messenger.abeto.co/) is the interaction reference.
-The [authors’ interview in Communication Arts](https://www.commarts.com/webpicks/messenger)
-describes Three.js, custom controls and a camera that recentres automatically.
-Those ideas informed the technical exploration. The planet, couriers, buildings,
-plants, interface, palette, names and delivery text here were created in code
-for this prototype. No original game assets, shaders or source were extracted.
+An anonymous identity is not a real-world person. New browser profiles can create
+new identities. Clearing cookies loses access to the owned planet, which remains
+visitable. There is no login, cross-device identity or recovery flow. The star map
+explains this before claiming. These limits need revisiting before public release.
 
-[Three.js](https://threejs.org/docs/) supplies rendering and vector mathematics.
-[Node SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html) supplies the
-persistent database.
+## Original work and references
 
-## What is checked, and what needs judgement
+[Messenger by abeto](https://messenger.abeto.co/) informed spherical movement and
+camera exploration; its [authors’ interview](https://www.commarts.com/webpicks/messenger)
+provided technical context. The live experience was also inspected in Chrome.
+All scene assets, characters and interface here are original procedural work;
+no reference assets or source were extracted. Rendering uses
+[Three.js](https://threejs.org/docs/), with Node’s SQLite for persistence.
 
-Automated specifications cover continuous spherical movement, reversal,
-bounded speed, request validation, isolated identities, ordered task transitions,
-idempotency and reopening the database. Browser checks exercise the visible
-journey, refresh, returning visits, dialogue, camera modes and 1920 × 1080 and
-390 × 844 layouts. Evidence: `docs/evidence/round-2/verification.md`.
-Camera comfort still needs human playtesting; tests do not settle that judgement.
+## Run and verify
 
-## Run locally
+Use Node 24 and pnpm 11: `pnpm install`, `pnpm build`, then `pnpm start`.
+Open http://localhost:8080 or `/readme/`. With the server running, use `pnpm lint`,
+`pnpm check`, `pnpm test:browser` and `pnpm check:evidence`.
 
-Use Node 24 and pnpm 11. Install with `pnpm install`, then run `pnpm build` and
-`pnpm start`. Visit http://localhost:8080. Run `pnpm check`, `pnpm lint`,
-`pnpm test:browser` and `pnpm check:evidence` while the app is running.
-SQLite defaults to `.data/little-post.sqlite`; production uses
-`DATABASE_PATH=/data/little-post.sqlite` on the course volume.
+SQLite defaults to `.data/little-post.sqlite`. Upgrades create consistent backup
+files before transactional migration. Recovery instructions and actual test
+results are in `docs/evidence/round-3/verification.md`. Desktop and phone-size
+Chrome checks cover independent owners, visitors, touch building and persistence;
+physical phones and public hosting remain unverified.
 
-## Scope still ahead
-
-This is a local C8 prototype, not a submitted or deployed Final. C9 shared
-multiplayer and C10 server logging are deferred. Map editing, additional quests,
-complex art and public deployment are outside this implementation. Student
-reflection, design argument and the COMP8020 research note remain the student’s
-work. Publication, a push to main and Fly deployment require separate approval.
+This is local work. Student writing, C10 logging and deployed validation remain
+unfinished. Push, public visibility, Fly costs/deployment and submission require
+separate approval.

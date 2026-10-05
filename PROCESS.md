@@ -71,3 +71,37 @@ argument in README.md; develop this factual record into their process argument;
 write reflections/crit-8.md; and later produce the COMP8020 research note. The
 current reflection file is explicitly unfilled. A green mechanical evidence
 check does not mean those academic requirements are complete.
+
+## Original multi-planet direction
+
+The user explicitly authorised a new main loop: claim an empty planet, build only
+on one's own planet, and visit everyone else's planet read-only. This replaces
+the earlier single-planet restriction. The courier task remains an optional
+activity in Sunseed Harbour, not the central loop.
+
+The database migration used VACUUM INTO to create a consistent v1 backup before
+adding planets, objects and per-planet visits. A second incremental migration
+adds deletion tombstones. All 32 pre-existing saved identities were compared
+field by field against their pre-migration values, with no losses or changes.
+Ownership uses a unique owner column and immediate transactions. Building writes
+derive identity from the session cookie, validate ownership and placement on the
+server, and use versions to reject stale edits. Tombstones prevent replaying a
+deleted object's original creation request. No account service was connected.
+
+The original building kit contains six object types. Owners place, rotate, move
+and remove objects; visitors receive saved scene revisions through one-second
+polling. Build mode pauses character controls. The catalogue and saved-object
+selector supplement direct 3D selection. The star map explains anonymous identity
+and the loss of access after clearing browser data.
+
+Independent Chrome contexts exercised separate ownership, read-only visits,
+live scene updates, editing and refresh/return. A phone-size context used touch
+placement, checked that building input did not move the courier, and recovered
+from offline state. One phone test tapped sky before the overview transition
+completed; it now waits for that transition before choosing a fixed screen point.
+Initial-request recovery was repaired and tested to initialise the star map
+without a reload. Reconnection also restores the acknowledged walking position.
+
+Actual checks, screenshots, backup paths, recovery instructions and remaining
+limits are recorded in `docs/evidence/round-3/verification.md`. This engineering
+record does not invent the student's design argument or user-study findings.

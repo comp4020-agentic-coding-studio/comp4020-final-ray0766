@@ -11,6 +11,7 @@ export interface PlayerState {
   position: Vec3;
   deliveries: number;
   revision: number;
+  planetId: string;
 }
 export const normalize = (p: Vec3): Vec3 => {
   const l = Math.hypot(...p);

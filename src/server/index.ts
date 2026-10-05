@@ -6,6 +6,7 @@ import { marked } from 'marked';
 import { openStore, RequestError } from './store.ts';
 
 const store = openStore(process.env.DATABASE_PATH ?? '.data/little-post.sqlite');
+if (store.migrationBackup) console.log(`Before migration, saved a consistent backup: ${store.migrationBackup}`);
 const root = resolve('dist');
 const limits = new Map<string, { start: number; count: number }>();
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -30,6 +31,10 @@ const server = createServer(async (req, res) => {
         }
         send(200, store.state(id)); return;
       }
+      if (url.pathname === '/api/universe' && req.method === 'GET') {
+        if (!id || !store.has(id)) throw new RequestError(401, 'Reload to reconnect your visit.');
+        send(200, store.universe(id)); return;
+      }
       if (req.method !== 'POST') throw new RequestError(405, 'Method not allowed.');
       if (req.headers.origin && new URL(req.headers.origin).host !== req.headers.host) throw new RequestError(403, 'Use this world’s own page.');
       if (!req.headers['content-type']?.startsWith('application/json')) throw new RequestError(415, 'Send JSON.');
@@ -45,8 +50,15 @@ const server = createServer(async (req, res) => {
       try { body = JSON.parse(text); } catch { throw new RequestError(400, 'Invalid JSON.'); }
       if (!body || Array.isArray(body) || typeof body !== 'object') throw new RequestError(400, 'Expected an object.');
       if (url.pathname === '/api/character') send(200, store.character(id, body.character));
-      else if (url.pathname === '/api/move') send(200, store.move(id, body.position));
+      else if (url.pathname === '/api/move') send(200, store.move(id, body.position, Date.now(), body.planetId));
       else if (url.pathname === '/api/interact') send(200, store.interact(id, body.action));
+      else if (url.pathname === '/api/planets/claim' || url.pathname === '/api/planets/visit') {
+        if (Object.keys(body).some(k => k !== 'planetId')) throw new RequestError(400, 'Unexpected planet field.');
+        send(200, url.pathname.endsWith('/claim') ? store.claim(id, body.planetId) : store.visit(id, body.planetId));
+      }
+      else if (url.pathname === '/api/objects/create') send(200, store.createObject(id, body));
+      else if (url.pathname === '/api/objects/update') send(200, store.updateObject(id, body));
+      else if (url.pathname === '/api/objects/delete') send(200, store.removeObject(id, body));
       else throw new RequestError(404, 'Not found.');
       return;
     }
@@ -67,9 +79,9 @@ const server = createServer(async (req, res) => {
     res.end(req.method === 'HEAD' ? undefined : body);
   } catch (error) {
     if (error instanceof RequestError) send(error.status, { error: error.message });
-    else { console.error(error instanceof Error ? error.message : 'Request failed'); send(500, { error: 'The post office is unavailable. Please retry.' }); }
+    else { console.error(error instanceof Error ? error.message : 'Request failed'); send(500, { error: 'The world is unavailable. Please retry.' }); }
   }
 });
-server.listen(Number(process.env.PORT ?? 8080), process.env.HOST ?? '0.0.0.0', () => console.log(`Little Post is ready on http://localhost:${process.env.PORT ?? 8080}`));
+server.listen(Number(process.env.PORT ?? 8080), process.env.HOST ?? '0.0.0.0', () => console.log(`Little Worlds is ready on http://localhost:${process.env.PORT ?? 8080}`));
 const stop = () => { server.close(() => { store.close(); process.exit(0); }); server.closeIdleConnections(); };
 process.on('SIGTERM', stop); process.on('SIGINT', stop);

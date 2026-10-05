@@ -1,5 +1,9 @@
 import * as T from 'three';
 import './style.css';
+import './colony.css';
+import { Colony } from './colony.ts';
+import { disposeGeometry } from './build-art.ts';
+import type { Universe } from '../shared/planets.ts';
 import { surfacePoint } from './terrain.ts';
 import { SurfaceWalker, cameraPose } from './motion.ts';
 import { createWorld, courier } from './scene.ts';
@@ -15,6 +19,8 @@ let walker: SurfaceWalker;
 let target: T.Vector3 | null = null;
 let busy = false, online = false, noticeUntil = 0, conversationUntil = 0;
 let overview = false;
+let colony: Colony | undefined;
+let activePlanet = 'hub';
 const lastSaved = new T.Vector3();
 let near: NpcId | null = null;
 let queue: Promise<unknown> = Promise.resolve();
@@ -30,7 +36,7 @@ function speak(id: NpcId, message: string) {
 }
 function notice(message: string, duration = 5000) { $('notice').textContent = message; $('notice').hidden = false; noticeUntil = performance.now() + duration; }
 class ApiError extends Error { status: number; constructor(status: number, message: string) { super(message); this.status = status; } }
-async function request(path: string, body?: unknown): Promise<PlayerState> {
+async function request<T = PlayerState>(path: string, body?: unknown): Promise<T> {
   const response = await fetch('/api/' + path, {
     method: body === undefined ? 'GET' : 'POST',
     headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
@@ -46,7 +52,14 @@ function serial<T>(run: () => Promise<T>): Promise<T> {
   const result = queue.then(run, run); queue = result.catch(() => {}); return result;
 }
 function accept(next: PlayerState) {
+  const reconnecting = !online;
   if (!state || next.revision >= state.revision) state = next;
+  if (state.planetId !== activePlanet) {
+    activePlanet = state.planetId; disposeGeometry(worldRoot); worldRoot = new T.Scene(); scene.add(worldRoot);
+    world = createWorld(worldRoot, activePlanet === 'hub'); walker = new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;near=null;
+    $('npc-mica').hidden=true;$('npc-sol').hidden=true;$('conversation').hidden=true;document.body.classList.remove('delivery-open');
+  }
+  if(reconnecting && walker){walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();}
   online = true; status('Progress saved'); renderTask();
 }
 function failed(error: unknown) {
@@ -55,7 +68,7 @@ function failed(error: unknown) {
 }
 function renderTask() {
   const carrying = state.quest === 'carrying', done = state.quest === 'delivered';
-  player.parcel.visible = carrying;
+  player.parcel.visible = carrying && activePlanet === 'hub';
   world.flowers.visible = done;
   if (done) { $('distance').textContent = 'Saved for your next visit'; $('compass').textContent = '✓'; $('compass').style.transform = ''; if (near) action.innerHTML = `Talk to ${NPCS[near].name} <kbd>E</kbd>`; }
   $('mission-title').textContent = done ? 'Something good is growing.' : carrying ? 'A little care, on its way.' : 'A seed of an idea';
@@ -79,7 +92,7 @@ renderer.setClearColor('#9cc8c4', 0);
 renderer.outputColorSpace = T.SRGBColorSpace;
 renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.03;
 $('world').append(renderer.domElement);
-renderer.domElement.setAttribute('aria-label', 'Little Post planet. Use WASD or arrow keys to walk; E to talk.');
+renderer.domElement.setAttribute('aria-label', 'Little Worlds planet. Use WASD or arrow keys to walk; open Star map to visit and build.');
 const scene = new T.Scene();
 const sky = new T.Group();scene.add(sky);
 for (let i=0;i<7;i++) {
@@ -96,7 +109,8 @@ const fill = new T.AmbientLight('#d2e5d4', .95); scene.add(fill);
 const sun = new T.DirectionalLight('#fff0cc', 2.15); sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-16;sun.shadow.camera.right=16;sun.shadow.camera.top=16;sun.shadow.camera.bottom=-16;sun.shadow.camera.far=65;sun.shadow.normalBias=.09;sun.shadow.bias=-.0003;
 scene.add(sun);scene.add(sun.target);
-const world = createWorld(scene);
+let worldRoot = new T.Scene();scene.add(worldRoot);
+let world = createWorld(worldRoot);
 const player = courier('clay');scene.add(player.root);
 const silhouette = new T.Mesh(new T.CapsuleGeometry(.22, .90, 4, 8), new T.MeshBasicMaterial({color:'#ffdfa0',transparent:true,opacity:.24,depthTest:false,depthWrite:false}));
 silhouette.visible=false;silhouette.renderOrder=100;scene.add(silhouette);
@@ -109,7 +123,7 @@ function clearInput() { keys.clear();joy.set(0,0);$('stick').style.transform='';
 window.addEventListener('blur',clearInput);
 document.addEventListener('visibilitychange',()=> { if(document.hidden) { clearInput(); void savePosition(true); } });
 window.addEventListener('keydown',event=> {
-  if(courierDialog.open || helpDialog.open || /INPUT|TEXTAREA|SELECT/.test((event.target as HTMLElement).tagName)) return;
+  if(courierDialog.open || helpDialog.open || colony?.paused || /INPUT|TEXTAREA|SELECT/.test((event.target as HTMLElement).tagName)) return;
   const key=event.key.toLowerCase();
   if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e'].includes(key)) {
     event.preventDefault();keys.add(key);target=null;
@@ -119,9 +133,9 @@ window.addEventListener('keydown',event=> {
 window.addEventListener('keyup',event=>keys.delete(event.key.toLowerCase()));
 const raycaster = new T.Raycaster();
 let pointerStart: {x:number;y:number} | null=null;
-renderer.domElement.addEventListener('pointerdown',e=> {pointerStart={x:e.clientX,y:e.clientY};});
+renderer.domElement.addEventListener('pointerdown',e=> {if(!colony?.paused)pointerStart={x:e.clientX,y:e.clientY};});
 renderer.domElement.addEventListener('pointerup',e=> {
-  if(!walker || !online || !pointerStart || Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>10) return;
+  if(colony?.paused || !walker || !online || !pointerStart || Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>10) return;
   raycaster.setFromCamera(new T.Vector2(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1),camera);
   const hit=raycaster.intersectObject(world.globe)[0];
   if(hit) {target=hit.point.normalize();destinationRing.position.copy(surfacePoint(target,.05));destinationRing.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),target);}
@@ -140,7 +154,7 @@ $('close-conversation').onclick=()=>{ $('conversation').hidden=true; conversatio
 $('wardrobe').onclick=()=>{clearInput();courierDialog.showModal();};
 $('help').onclick=()=>{clearInput();helpDialog.showModal();};
 document.querySelectorAll<HTMLButtonElement>('dialog .close, .close-help').forEach(b=>b.onclick=()=>b.closest('dialog')?.close());
-$('begin').onclick=()=>{courierDialog.close();notice('Follow the lane to Mica’s post office.');};
+$('begin').onclick=()=>{courierDialog.close();notice('Open the star map. Find a little world of your own.');};
 document.querySelectorAll<HTMLButtonElement>('[data-character]').forEach(button=>button.onclick=async()=>{
   if(busy || !state) return;
   busy=true;const old=state.character;player.setColor(button.dataset.character as Character);status('Saving coat…');
@@ -151,7 +165,8 @@ let saving=false;
 async function savePosition(force=false) {
   if(!walker || !state || saving || !online || (!force && walker.up.distanceTo(lastSaved)<.001)) return;
   saving=true;const p=walker.up.toArray() as Vec3;
-  try {const next=await serial(()=>request('move',{position:p}));lastSaved.fromArray(p);accept(next);}
+  const planetId=state.planetId;
+  try {const next=await serial(()=>request('move',{position:p,planetId}));lastSaved.fromArray(p);accept(next);}
   catch(error) {
     if(error instanceof ApiError && error.status===409) {walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();}
     failed(error);
@@ -166,7 +181,7 @@ async function interact() {
   busy=true;action.disabled=true;status('Saving delivery…');
   try {
     const p=walker.up.toArray() as Vec3;
-    const next=await serial(async()=> {await request('move',{position:p});return request('interact',{action:requestedAction});});
+    const next=await serial(async()=> {await request('move',{position:p,planetId:state.planetId});return request('interact',{action:requestedAction});});
     lastSaved.fromArray(p);accept(next);
     speak(state.quest==='carrying'?'mica':'sol',state.quest==='carrying'?'Sunseeds, for Sol. A little sunshine for the glasshouse. Keep them close, won’t you?':'You made it! A whole summer in a little packet. Let’s grow something good.');
     player.greet(elapsed);
@@ -178,17 +193,17 @@ setInterval(async()=>{
   if(online || busy) return;
   try {
     const next=await serial(()=>request('state'));accept(next);
-    walker=new SurfaceWalker(next.position);lastSaved.copy(walker.up);clearInput();notice('Back at your last saved spot. Welcome home.');
+    walker=new SurfaceWalker(next.position);lastSaved.copy(walker.up);clearInput();ensureColony();notice('Back at your last saved spot. Welcome home.');
   }catch{status('Offline · retrying',true);}
 },2500);
-window.addEventListener('online',()=>notice('Reconnecting to the post office…'));
+window.addEventListener('online',()=>notice('Reconnecting to your worlds…'));
 
 let previous=performance.now(),elapsed=0,uiTick=0,started=false;
 function animate(now:number) {
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.05);previous=now;elapsed+=dt;
   if(!walker) return;
-  const paused=courierDialog.open||helpDialog.open||!online||document.hidden;
+  const paused=courierDialog.open||helpDialog.open||!!colony?.paused||!online||document.hidden;
   let x=joy.x+Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));
   let y=joy.y+Number(keys.has('w')||keys.has('arrowup'))-Number(keys.has('s')||keys.has('arrowdown'));
   if(target && !paused) {
@@ -197,7 +212,7 @@ function animate(now:number) {
   }
   const old=walker.up.clone(),north=walker.north.clone(),face=walker.facing.clone();
   if(paused) {walker.velocity.set(0,0,0);} else walker.step(x,y,dt);
-  if(world.blocks.some(b=>walker.up.angleTo(b.point)*RADIUS<b.radius+.19)) {
+  if(world.blocks.some(b=>walker.up.angleTo(b.point)*RADIUS<b.radius+.19 && walker.up.angleTo(b.point)<=old.angleTo(b.point)+.00001)) {
     walker.up.copy(old);walker.north.copy(north);walker.facing.copy(face);walker.velocity.set(0,0,0);target=null;
   }
   destinationRing.visible=!!target;
@@ -255,8 +270,19 @@ function animate(now:number) {
     if(now>conversationUntil)$('conversation').hidden=true;
   }
 }
+function ensureColony() {
+  if(colony)return;
+  colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,
+    applyPlayer:p=>{accept(p);return state.planetId===p.planetId;},
+    obstacles:blocks=>{if(activePlanet!=='hub')world.blocks.splice(0,world.blocks.length,...blocks);},
+    pause:building=>{clearInput();overview=building;$('view-mode').setAttribute('aria-label',overview?'Walking view':'View planet');$('view-mode').innerHTML=overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>';},
+    read:()=>request<Universe>('universe'),write:(route,body)=>serial(()=>request<Universe>(route,body)),flush:async()=>{await savePosition(true);await queue;},notice,
+  });
+  $('delivery-toggle').onclick=()=>{document.body.classList.toggle('delivery-open');$('delivery-toggle').textContent=document.body.classList.contains('delivery-open')?'Hide delivery':'Try a delivery';};
+}
 requestAnimationFrame(animate);
 try {
   const initial=await request('state');state=initial;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);accept(initial);
+  ensureColony();
   if(initial.revision===0)courierDialog.showModal();else notice('A familiar little planet. Welcome back.');
 } catch(error){failed(error);}

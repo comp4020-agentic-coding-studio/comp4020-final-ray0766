@@ -1,7 +1,7 @@
 import * as T from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { NPCS, RADIUS, SPAWN, normalize } from '../shared/world.ts';
-import type { Vec3 } from '../shared/world.ts';
+import type { Vec3, NpcId } from '../shared/world.ts';
 import { box, ball, shape, beam, sign, roof, material } from './art.ts';
 import { courier } from './character.ts';
 import { surfaceHeight, surfacePoint } from './terrain.ts';
@@ -104,7 +104,7 @@ function bakeStatic(group:T.Group){
     lineGeometry.forEach(g=>g.dispose());
   }
 }
-export function createWorld(scene:T.Scene) {
+export function createWorld(scene:T.Scene,populated=true) {
   const terrainGeo=new T.IcosahedronGeometry(RADIUS,5);const attr=terrainGeo.attributes.position;const colors:number[]=[];
   for(let i=0;i<attr.count;i+=3){
     const center=new T.Vector3();for(let j=0;j<3;j++){const p=new T.Vector3().fromBufferAttribute(attr,i+j).normalize();center.add(p);attr.setXYZ(i+j,...surfacePoint(p).toArray() as Vec3);}center.normalize();
@@ -115,6 +115,7 @@ export function createWorld(scene:T.Scene) {
   const terrainMat=material('#ffffff').clone();terrainMat.vertexColors=true;
   const globe=new T.Mesh(terrainGeo,terrainMat);globe.receiveShadow=true;scene.add(globe);
   const scenery=new T.Group();scene.add(scenery);const blocks:Obstacle[]=[];
+  if(!populated) return {globe,scenery,blocks,flowers:new T.Group(),npcs:[] as {id:NpcId;anchor:T.Group;avatar:ReturnType<typeof courier>;beacon:T.Mesh}[],animate(){},height:surfaceHeight};
   const addBlock=(g:T.Group,radius:number,height:number)=>blocks.push({point:g.position.clone().normalize(),radius,height});
   const mainRoute=road(scenery,[SPAWN,normalize([.15,1,.07]),NPCS.mica.position,normalize([.01,1,-.36]),NPCS.sol.position],1.06,'#c8b598');
   const loop=road(scenery,[SPAWN,normalize([-.22,1,.22]),normalize([-.45,1,-.08]),NPCS.sol.position],.76,'#cfbd9e');

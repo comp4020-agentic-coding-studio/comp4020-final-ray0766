@@ -5,9 +5,17 @@ prototype. They do not claim to be the student's finished academic harness.
 
 - Keep the existing course Final repository lineage and its two shipped checks.
   Preserve fly.toml: one shared-cpu-1x machine, 256 MB, one /data volume.
-- Scope is one continuous spherical planet, a following camera, two NPCs, one
-  pickup/delivery, selectable coats, and server persistence. C9 real-time and C10
-  logging are future work. Do not add a map editor or large quest system.
+- Current authorised scope adds multiple claimable planets and a small original
+  building catalogue. Each server session can own at most one planet, each planet
+  has at most one owner; everyone can visit, only the owner can edit. Preserve the
+  spherical controller and keep the delivery as an optional public-harbour activity.
+  Do not expand into chat, trade, economics or large quest systems.
+- Back up existing SQLite before schema migration; preserve original coats, quest
+  state and position. Enforce ownership on every write with server-derived identity
+  and SQL constraints/transactions. Hidden UI and client owner IDs grant no rights.
+- Use revision checks and idempotent writes, validate placement/overlap/capacity,
+  and test independent sessions, concurrent claims and read-only visitors. Anonymous
+  browser identity is not a real-world person or cross-device account.
 - Original procedural assets only. Messenger is an interaction reference; do
   not extract its code, shaders, models, sounds, or textures.
 - Spherical movement must keep unit radial position and orthogonal tangent
