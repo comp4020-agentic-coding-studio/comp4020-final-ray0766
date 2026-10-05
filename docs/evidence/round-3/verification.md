@@ -3,6 +3,7 @@
 Date: 2026-10-05 (Canberra). Branch: `prototype/small-world-c8`.
 Workspace: `/Users/ray/Documents/Codex/2026-10-05/task-2/comp4020-final-ray0766`.
 Starting point: clean local commit `b98e0ce`. No push or deployment.
+Implementation and screenshots: local commit `733c543` (not pushed).
 
 ## Delivered interaction
 

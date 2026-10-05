@@ -105,3 +105,6 @@ without a reload. Reconnection also restores the acknowledged walking position.
 Actual checks, screenshots, backup paths, recovery instructions and remaining
 limits are recorded in `docs/evidence/round-3/verification.md`. This engineering
 record does not invent the student's design argument or user-study findings.
+The multi-planet implementation is recorded in local commit
+[`733c543`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/733c543),
+which has not been pushed.
