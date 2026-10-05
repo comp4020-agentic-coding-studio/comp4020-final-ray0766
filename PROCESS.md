@@ -155,3 +155,7 @@ A final close-up review found the procedural crater circles too artificial. The
 NASA SVS CGI Moon Kit page and usage terms were checked; its public-domain LROC
 colour and LOLA elevation images were downloaded, bundled locally and credited
 in ASSET-CREDITS.md and /credits/. No runtime third-party fetch is required.
+
+The completed flight implementation and visual evidence are saved in local commit
+[`f590257`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/f590257).
+It has not been pushed; this link will resolve on the remote only after an authorised push.

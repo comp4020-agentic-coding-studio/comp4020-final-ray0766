@@ -1,7 +1,8 @@
 # Round four — continuous flight and workspace relocation
 
 Date: 2026-10-05. Branch: `prototype/small-world-c8`.
-Starting commit: `a76575a`. No push, hosting change or submission.
+Starting commit: `a76575a`. Implementation: local commit `f590257`.
+No push, hosting change or submission.
 Active workspace: `/Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766`.
 
 ## Relocation and preservation
@@ -77,7 +78,8 @@ A real Chrome journey landed, claimed a world, saved a tree, took off again and
 stopped in space. After a real `docker restart`, the complete universe snapshot
 matched: identity state, owned planet, tree and second flight were unchanged.
 The private cookie/snapshots are in ignored `.data/round4-container-*` files.
-An idle memory sample was 46.09 MiB / 256 MiB, CPU 0.14%; this is not a load test.
+An earlier idle memory sample was 46.09 MiB / 256 MiB, CPU 0.14%.
+The final image sampled 45.57 MiB / 256 MiB, CPU 0.01%; neither is a load test.
 
 ## Scope and remaining work
 
