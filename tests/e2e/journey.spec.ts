@@ -75,7 +75,7 @@ test('keyboard crosses the north pole, reverses, and click-to-walk changes saved
   };
   const crossed=await read();expect(crossed.position[2]).toBeLessThan(0);expect(crossed.position[1]).toBeGreaterThan(.96);
   await expect(page.locator('#npc-mica')).toBeVisible();
-  await page.screenshot({path:'docs/evidence/north-pole.png'});
+  await page.screenshot({path:'docs/evidence/round-4/north-pole.png'});
   await page.keyboard.down('s');await page.waitForTimeout(1500);await page.keyboard.up('s');await page.waitForTimeout(550);
   const reversed=await read();expect(reversed.position[2]).toBeGreaterThan(crossed.position[2]+.1);
   await page.mouse.click(1050,620);await page.waitForTimeout(1300);

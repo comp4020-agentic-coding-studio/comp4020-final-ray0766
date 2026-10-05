@@ -14,6 +14,6 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/src/server ./src/server
 COPY --from=build /app/src/shared ./src/shared
-COPY package.json README.md ./
+COPY package.json README.md ASSET-CREDITS.md ./
 EXPOSE 8080
 CMD ["node", "src/server/index.ts"]

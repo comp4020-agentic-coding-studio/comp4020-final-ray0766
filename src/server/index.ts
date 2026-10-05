@@ -52,9 +52,13 @@ const server = createServer(async (req, res) => {
       if (url.pathname === '/api/character') send(200, store.character(id, body.character));
       else if (url.pathname === '/api/move') send(200, store.move(id, body.position, Date.now(), body.planetId));
       else if (url.pathname === '/api/interact') send(200, store.interact(id, body.action));
-      else if (url.pathname === '/api/planets/claim' || url.pathname === '/api/planets/visit') {
+      else if (url.pathname === '/api/flight/takeoff') send(200,store.takeoff(id,body));
+      else if (url.pathname === '/api/flight/checkpoint') send(200,store.flight(id,body));
+      else if (url.pathname === '/api/flight/land') send(200,store.land(id,body));
+      else if (url.pathname === '/api/planets/visit') throw new RequestError(410,'Board your ship and fly to the planet before landing.');
+      else if (url.pathname === '/api/planets/claim') {
         if (Object.keys(body).some(k => k !== 'planetId')) throw new RequestError(400, 'Unexpected planet field.');
-        send(200, url.pathname.endsWith('/claim') ? store.claim(id, body.planetId) : store.visit(id, body.planetId));
+        send(200, store.claim(id, body.planetId));
       }
       else if (url.pathname === '/api/objects/create') send(200, store.createObject(id, body));
       else if (url.pathname === '/api/objects/update') send(200, store.updateObject(id, body));
@@ -65,15 +69,16 @@ const server = createServer(async (req, res) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') throw new RequestError(405, 'Method not allowed.');
     let body: string | Buffer;
     let type: string;
-    if (url.pathname === '/readme' || url.pathname === '/readme/') {
-      const content = await marked.parse(await readFile('README.md', 'utf8'));
+    if (['/readme','/readme/','/credits','/credits/'].includes(url.pathname)) {
+      const credits=url.pathname.startsWith('/credits');
+      const content = await marked.parse(await readFile(credits?'ASSET-CREDITS.md':'README.md', 'utf8'));
       body = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>About — Little Post</title><style>body{max-width:760px;margin:64px auto;padding:0 24px;background:#f5f3ea;color:#263e36;font:17px/1.8 system-ui}a{color:#9a3b20}h1,h2,h3{line-height:1.2}pre{overflow:auto;padding:20px;background:#e9e7de}code{font-size:.88em}h2{margin-top:48px}</style><a href="/">← Back to the planet</a><main>${content}</main></html>`;
       type = 'text/html; charset=utf-8';
     } else {
       const path = resolve(root, '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname));
       if (!path.startsWith(root + '/')) throw new RequestError(404, 'Not found.');
       try { body = await readFile(path); } catch { throw new RequestError(404, 'Not found.'); }
-      type = ({ '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png' } as Record<string, string>)[extname(path)] ?? 'application/octet-stream';
+      type = ({ '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg' } as Record<string, string>)[extname(path)] ?? 'application/octet-stream';
     }
     res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-cache' });
     res.end(req.method === 'HEAD' ? undefined : body);

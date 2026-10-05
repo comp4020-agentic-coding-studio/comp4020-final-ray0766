@@ -12,7 +12,7 @@ export const CATALOGUE = {
 export type BuildKind = keyof typeof CATALOGUE;
 export const MAX_OBJECTS = 64;
 export interface PlacedObject { id: string; kind: BuildKind; position: Vec3; rotation: number; version: number }
-export interface PlanetSummary { id: string; name: string; kind: 'hub' | 'garden'; claimed: boolean; mine: boolean; revision: number; objectCount: number }
+export interface PlanetSummary { id: string; name: string; kind: 'hub' | 'garden'; claimed: boolean; mine: boolean; revision: number; objectCount: number; center:Vec3; slot:number }
 export interface PlanetView extends PlanetSummary { objects: PlacedObject[] }
 export interface Universe { player: PlayerState; planets: PlanetSummary[]; ownedPlanetId: string | null; currentPlanet: PlanetView }
 export function isBuildKind(value: unknown): value is BuildKind { return typeof value === 'string' && Object.hasOwn(CATALOGUE, value); }

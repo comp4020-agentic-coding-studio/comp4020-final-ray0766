@@ -1,3 +1,4 @@
+import type { FlightState } from './flight.ts';
 export type Vec3 = [number, number, number];
 export const RADIUS = 10;
 export const SPEED = 3;
@@ -12,6 +13,7 @@ export interface PlayerState {
   deliveries: number;
   revision: number;
   planetId: string;
+  flight: FlightState;
 }
 export const normalize = (p: Vec3): Vec3 => {
   const l = Math.hypot(...p);

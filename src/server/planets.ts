@@ -5,16 +5,18 @@ import type { PlanetSummary, PlanetView, PlacedObject } from '../shared/planets.
 import { normalize } from '../shared/world.ts';
 import type { Vec3 } from '../shared/world.ts';
 import { RequestError } from './errors.ts';
+import { MAX_PLANETS, planetCenter } from '../shared/flight.ts';
 
-interface PlanetRow { id: string; name: string; kind: 'hub' | 'garden'; owner_id: string | null; revision: number; objectCount: number }
+interface PlanetRow { id: string; name: string; kind: 'hub' | 'garden'; owner_id: string | null; revision: number; objectCount: number;slot:number }
 interface ObjectRow { id: string; kind: PlacedObject['kind']; position: string; rotation: number; version: number }
 export function planetStore(db: DatabaseSync) {
   const transaction = <T>(fn: () => T) => { db.exec('BEGIN IMMEDIATE'); try { const result = fn(); db.exec('COMMIT'); return result; } catch (error) { db.exec('ROLLBACK'); throw error; } };
   function replenish() {
     let blank = Number(db.prepare("SELECT count(*) AS n FROM planets WHERE kind='garden' AND owner_id IS NULL").get()!.n);
-    while (blank++ < 6) {
+    while (blank++ < 6 && Number(db.prepare('SELECT count(*) AS n FROM planets').get()!.n)<MAX_PLANETS) {
       const number = Number(db.prepare("SELECT count(*) AS n FROM planets WHERE kind='garden'").get()!.n) + 1;
-      db.prepare("INSERT INTO planets (id,name,kind) VALUES (?,?,'garden')").run('p-' + randomUUID(), `Little world ${String(number).padStart(2, '0')}`);
+      const slot=Number(db.prepare('SELECT COALESCE(max(slot),-1)+1 AS slot FROM planets').get()!.slot);
+      db.prepare("INSERT INTO planets (id,name,kind,slot) VALUES (?,?,'garden',?)").run('p-' + randomUUID(), `Little world ${String(number).padStart(2, '0')}`,slot);
     }
   }
   transaction(replenish);
@@ -24,7 +26,7 @@ export function planetStore(db: DatabaseSync) {
     if (!p) throw new RequestError(404, 'That planet could not be found.');
     return p;
   };
-  const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: p.revision, objectCount: p.objectCount });
+  const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: p.revision, objectCount: p.objectCount,slot:p.slot,center:planetCenter(p.slot) });
   const objects = (planetId: string): PlacedObject[] => (db.prepare('SELECT id,kind,position,rotation,version FROM planet_objects WHERE planet_id=? ORDER BY rowid').all(planetId) as unknown as ObjectRow[]).map(r => ({ ...r, position: JSON.parse(r.position) }));
   const owns = (id: string, planetId: unknown) => { const p = planet(planetId); if (p.kind === 'hub' || p.owner_id !== id) throw new RequestError(403, 'Only this planet’s owner can build here.'); return p; };
   const objectId = (value: unknown) => { if (typeof value !== 'string' || !/^[a-f0-9-]{36}$/.test(value)) throw new RequestError(400, 'Invalid object identifier.'); return value; };

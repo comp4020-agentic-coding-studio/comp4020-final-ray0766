@@ -108,3 +108,50 @@ record does not invent the student's design argument or user-study findings.
 The multi-planet implementation is recorded in local commit
 [`733c543`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/733c543),
 which has not been pushed.
+
+## Continuous travel and course-folder relocation
+
+The user authorised replacing instant star-map visits with a controllable ship in
+one spatial constellation. Planets receive persistent slots and deterministic
+centres; the Atlas now marks bearings only. Original procedural ship geometry,
+heading-based chase camera, keyboard/drag/touch controls and approach instruments
+connect takeoff to surface walking and building. Server checkpoints validate
+motion and collision clearance; landing requires saved proximity and low speed.
+Journey and sequence numbers fence stale requests. Database v4 preserves existing
+state and restores flight position, heading, target and mode after reconnecting.
+
+The user also authorised moving the whole repository into
+`/Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766`. The destination
+was absent. A consistent backup preceded the move. Directory inode, 106 file
+hashes, Git HEAD/remote/status and all pre-existing table fields were verified.
+The old workspace no longer contains a second implementation. Local schema
+migration retained 93 characters, 39 planets, 23 placed objects, 48 visit records
+and five deletion tombstones unchanged in their previous fields.
+
+Actual flight tests use keyboard/touch input and cockpit readings. They do not
+teleport the character to pass travel checks. A blocked straight bearing led to
+an explicit turn-away/climb test route and a collision-departure regression.
+Offline handling was adjusted so a late successful response cannot resume flight
+while the browser reports offline. The existing ownership/building journeys now
+fly between worlds. Real container restart retained a claimed world, saved tree
+and a second journey stopped in space. Executed checks and limits are recorded in
+`docs/evidence/round-4/verification.md`; the design boundary is in ADR 0004.
+
+Four possible Claude modules were discussed only as isolated future work. No
+external contact, source transfer or implementation of those modules occurred.
+This remains factual engineering evidence, not the student's reflection.
+
+After reviewing the first flight view, the user changed its art direction from
+cartoon low-poly to a more mature industrial science-fiction sample. The flight
+scene now uses an original mechanical ship, layered metal/glass materials,
+procedural wear and crater maps, restrained instruments, a distant scale cue and
+smoothed steering/camera/engine feedback. Actual Chrome captures guided a second
+adjustment to overly bright hull values and overly noisy planet texture. This
+scope retains earlier ground art and does not implement the proposed Claude
+workshops. `docs/evidence/round-4/visual-study.md` records the art boundary and
+sources. No proprietary game asset or paid asset service was used.
+
+A final close-up review found the procedural crater circles too artificial. The
+NASA SVS CGI Moon Kit page and usage terms were checked; its public-domain LROC
+colour and LOLA elevation images were downloaded, bundled locally and credited
+in ASSET-CREDITS.md and /credits/. No runtime third-party fetch is required.

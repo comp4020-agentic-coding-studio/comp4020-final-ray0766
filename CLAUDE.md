@@ -10,13 +10,23 @@ prototype. They do not claim to be the student's finished academic harness.
   has at most one owner; everyone can visit, only the owner can edit. Preserve the
   spherical controller and keep the delivery as an optional public-harbour activity.
   Do not expand into chat, trade, economics or large quest systems.
+- Travel is now continuous controllable arcade flight between fixed planet centres.
+  Atlas selections mark bearings only; never restore a production teleport route.
+  Server checks journey/sequence, bounded motion, collision clearance and near/slow
+  landing. Preserve both ground and flight saves; freeze/rebase after failed saves.
 - Back up existing SQLite before schema migration; preserve original coats, quest
   state and position. Enforce ownership on every write with server-derived identity
   and SQL constraints/transactions. Hidden UI and client owner IDs grant no rights.
 - Use revision checks and idempotent writes, validate placement/overlap/capacity,
   and test independent sessions, concurrent claims and read-only visitors. Anonymous
   browser identity is not a real-world person or cross-device account.
-- Original procedural assets only. Messenger is an interaction reference; do
+- Latest visual direction: an industrial science-fiction flight sample with original
+  mechanical geometry, PBR metal/glass layers, restrained HUD and readable exposure.
+  Preserve the existing ground scene until separately restyled. Do not add the
+  independently proposed workshop/blueprint/ecology/history features here.
+- Original procedural assets or explicitly documented free licensed assets only.
+  The user approved NASA SVS public-domain lunar maps for the orbital sample.
+  Messenger is an interaction reference; do
   not extract its code, shaders, models, sounds, or textures.
 - Spherical movement must keep unit radial position and orthogonal tangent
   directions at poles. Character reversal must actually turn. Camera pose must

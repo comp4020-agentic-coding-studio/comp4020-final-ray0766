@@ -25,8 +25,8 @@ it('resolves competing claims atomically and rejects every visitor write endpoin
   expect((await guest.post('objects/create', body)).status).toBe(403);
   expect((await guest.post('objects/update', { planetId: p.id, objectId: body.objectId, position: body.position, rotation: 1, expectedVersion: 1 })).status).toBe(403);
   expect((await guest.post('objects/delete', { planetId: p.id, objectId: body.objectId, expectedVersion: 1 })).status).toBe(403);
-  await guest.post('planets/visit', { planetId: p.id });
-  expect((await guest.universe()).currentPlanet.objects).toHaveLength(1);
+  expect((await guest.post('planets/visit', { planetId: p.id })).status).toBe(410);
+  expect((await guest.universe()).planets.find(x=>x.id===p.id)?.objectCount).toBe(1);
   expect((await fetch(base + '/api/objects/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).status).toBe(401);
 });
 it('prevents one identity from concurrently claiming two planets', async () => {

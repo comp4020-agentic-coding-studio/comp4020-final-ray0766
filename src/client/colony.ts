@@ -11,6 +11,7 @@ interface Bridge {
   ground: () => T.Mesh; applyPlayer: (p:PlayerState) => boolean;
   obstacles: (blocks:Obstacle[]) => void; pause: (building:boolean) => void;
   read: () => Promise<Universe>; write: (route:string, body:unknown) => Promise<Universe>;
+  universe:(u:Universe)=>void; bearing:(id:string)=>void;
   flush: () => Promise<void>; notice: (text:string) => void;
 }
 type Draft = { id: string; kind: BuildKind; position: Vec3 | null; rotation: number; version?: number };
@@ -26,9 +27,8 @@ export class Colony {
   constructor(private bridge: Bridge) {
     bridge.scene.add(this.layer);
     el('open-map').onclick=()=>{bridge.pause(this.building);this.map.showModal();void this.poll();};
-    el('find-planet').onclick=()=>this.map.showModal();
     el('close-map').onclick=()=>this.map.close();
-    el('my-planet').onclick=()=>{if(this.universe?.ownedPlanetId)void this.visit(this.universe.ownedPlanetId);};
+    el('my-planet').onclick=()=>{if(this.universe?.ownedPlanetId)this.mark(this.universe.ownedPlanetId);};
     el('claim-planet').onclick=()=>void this.claim();
     el('build-mode').onclick=()=>this.setBuilding(!this.building);
     el('finish-building').onclick=()=>this.setBuilding(false);
@@ -59,13 +59,14 @@ export class Colony {
     this.building=value&&!!this.universe?.currentPlanet.mine&&this.syncing;this.clearDraft();
     document.body.classList.toggle('building',this.building);el('builder').hidden=!this.building;this.bridge.pause(this.building);this.editor();this.hud();
   }
-  private accept(next:Universe){
+  stopBuilding(){this.setBuilding(false);}
+  accept(next:Universe){
     if(!this.bridge.applyPlayer(next.player))return;
     if(this.universe?.currentPlanet.id===next.currentPlanet.id&&this.universe.currentPlanet.revision>next.currentPlanet.revision)return;
     const changed=this.universe?.currentPlanet.id!==next.currentPlanet.id;
-    this.universe=next;this.syncing=true;
+    this.universe=next;this.syncing=true;this.bridge.universe(next);
     if(changed){this.setBuilding(false);this.clearDraft();}
-    if(this.building&&!next.currentPlanet.mine)this.setBuilding(false);
+    if(this.building&&(!next.currentPlanet.mine||next.player.flight.mode==='space'))this.setBuilding(false);
     const key=next.currentPlanet.id+':'+next.currentPlanet.revision;
     if(this.painted!==key){
       this.painted=key;for(const child of [...this.layer.children])disposeGeometry(child);this.objects.clear();
@@ -87,10 +88,7 @@ export class Colony {
     catch(error){if(error instanceof Error&&'status' in error&&error.status===409)this.clearDraft();this.bridge.notice(error instanceof Error?error.message:'Could not save. Please retry.');return false;}
     finally{this.busy=false;this.editor();this.hud();void this.poll();}
   }
-  private async visit(id:string){
-    if(this.busy)return;this.setBuilding(false);await this.bridge.flush();
-    if(await this.command('planets/visit',{planetId:id})){this.map.close();this.bridge.notice('A new little view. Welcome.');}
-  }
+  private mark(id:string){this.map.close();this.bridge.bearing(id);}
   private async claim(){
     if(!this.universe)return;
     if(await this.command('planets/claim',{planetId:this.universe.currentPlanet.id})){this.bridge.notice('This little world is yours to shape.');this.setBuilding(true);}
@@ -145,7 +143,7 @@ export class Colony {
     el<HTMLButtonElement>('claim-planet').disabled=this.busy||!this.syncing;
     el<HTMLButtonElement>('build-mode').hidden=!p.mine;el('build-mode').textContent=this.building?'Building…':'Build on my planet';
     el<HTMLButtonElement>('build-mode').disabled=this.busy||!this.syncing;
-    el('find-planet').hidden=p.kind!=='hub';el('delivery-toggle').hidden=p.kind!=='hub';
+    el('find-planet').hidden=true;el('delivery-toggle').hidden=p.kind!=='hub';
     el('my-planet').hidden=!u.ownedPlanetId||u.ownedPlanetId===p.id;
     el('ownership-note').hidden=!(p.kind==='garden'&&!p.claimed&&u.ownedPlanetId);
   }
@@ -159,7 +157,7 @@ export class Colony {
       const orb=document.createElement('div');orb.className='map-orb';orb.style.setProperty('--orb',p.kind==='hub'?'#d8b783':p.mine?'#91b499':p.claimed?'#9bb9c0':'#cdd4bc');orb.style.rotate=`${index*27}deg`;orb.textContent=p.kind==='hub'?'⌂':p.claimed?'✦':'·';
       const info=document.createElement('div'),tag=document.createElement('small'),name=document.createElement('h3'),detail=document.createElement('p');
       tag.textContent=p.kind==='hub'?'Shared':p.mine?'My planet':p.claimed?'Neighbour · read only':'Blank · unclaimed';name.textContent=p.name;detail.textContent=p.kind==='hub'?'An optional delivery awaits.':`${p.objectCount} saved object${p.objectCount===1?'':'s'}.`;
-      const button=document.createElement('button');button.className='quiet visit-planet';button.textContent=p.id===u.currentPlanet.id?'You are here':'Visit planet ↗';button.disabled=p.id===u.currentPlanet.id;button.onclick=()=>void this.visit(p.id);
+      const button=document.createElement('button');button.className='quiet visit-planet';button.textContent='Mark bearing ◇';button.onclick=()=>this.mark(p.id);
       info.append(tag,name,detail);card.append(orb,info,button);el('planet-list').append(card);
     }
   }
