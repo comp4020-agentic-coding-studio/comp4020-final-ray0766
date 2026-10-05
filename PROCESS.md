@@ -219,3 +219,7 @@ scenarios therefore have passing evidence across the full run and focused replay
 this is not described as one all-green 18-case run. Earlier stress samples and
 failures remain documented. The build hash stayed unchanged after exporting the
 existing UI bridge type for the adapter contract.
+
+The implementation, adapter contract and verification artifacts are recorded in local
+commit [`705cc35`](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/705cc35).
+It has not been pushed; this link resolves remotely only after an authorised push.

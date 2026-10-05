@@ -163,3 +163,7 @@ checks and unfilled `reflections/crit-8.md` were preserved.
 - [Outer region Atlas](outer-region-atlas.png), [outer-world flight](outer-world-approach.png)
 - [Desktop flight](desktop-industrial-flight.png), [phone flight](phone-industrial-flight.png)
 - [Container resumed flight](container-resumed-flight.png)
+
+Local implementation checkpoint: `705cc35`. The active preview is
+http://localhost:8080. Restart from the repository with `pnpm build && pnpm start`
+(Node 24 / pnpm 11). No dependency changes were needed for this iteration.
