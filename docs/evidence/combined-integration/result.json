@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "checks": [
+    "Rendered desktop, skip/help return and two independent identities with live presence",
+    "UI edits and saves unplaced geometry twice; version 2, geometry and coat survive refresh",
+    "Two identities: owner changes scene, visitor gets real 409, reconnect recovers before delayed old universe reply, next movement saves, obsolete notice clears and visitor delete is 403",
+    "390 px touch draft cancellation/skip preserve controls; saved build guides return; boarding tip is actually visible after notice expiry and both tip/button are hit-testable",
+    "Stay here and Escape cancel boarding; actual launch completes first-visit guidance"
+  ],
+  "pageErrors": [],
+  "conflicts": [
+    {
+      "status": 409,
+      "message": "A newer ground position exists. Reconnect to your saved position."
+    }
+  ],
+  "browser": "154.0.8037.98",
+  "viewports": [
+    {
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "fixtures": "Fresh temporary server DB and two browser identities. Real UI travel, claim, workshop saves and placement. A visitor movement request and old universe reply are delayed while an owner API fixture changes the scene, to exercise the real server 409 fence and stale reply recovery. No player teleport, state injection or saved cookies."
+}

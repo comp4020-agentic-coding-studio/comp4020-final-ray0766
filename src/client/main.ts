@@ -12,6 +12,7 @@ import './style.css';
 import './colony.css';
 import './flight.css';
 import './immersive.css';
+import { mountOnboarding } from './onboarding.ts';
 import { BOARD_RADIUS, portPoint } from '../shared/ports.ts';
 import { GroundPresence } from './presence.ts';
 import { canAcceptPlayer } from './sync.ts';
@@ -414,6 +415,7 @@ function ensureColony() {
     libraryRead:()=>request<import('../shared/blueprints.ts').LibraryEntry[]>('blueprints'),librarySave:body=>serial(()=>request<import('../shared/blueprints.ts').LibraryEntry>('blueprints/save',body)),
     read:()=>request<Universe>('universe'),write:(route,body)=>serial(()=>request<Universe>(route,body)),flush:async()=>{await savePosition(true);await queue;},notice,
   });
+  mountOnboarding({read:()=>colony?.universe?{universe:colony.universe,mode:state.flight.mode,building:colony.building,nearDock,online:online&&colony.syncing}:null});
   $('delivery-toggle').onclick=()=>{menu.close();document.body.classList.toggle('delivery-open');$('delivery-toggle').textContent=document.body.classList.contains('delivery-open')?'Hide delivery':'Try a delivery';};
 }
 requestAnimationFrame(animate);
