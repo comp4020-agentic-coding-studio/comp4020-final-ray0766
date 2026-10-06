@@ -1,7 +1,7 @@
 {
   "source": "planet-claude-modules",
   "commit": "a4546bb120d969774776f1fbe2cb1c990a7c3e66",
-  "scope": "Unchanged R3, ship factory and timeline codec dependency snapshot. Main adapters own persistence, physics, lifecycle and versioned URL routing.",
+  "scope": "Unchanged R3, ship factory, timeline codec and deterministic terrain dependency snapshot. Main adapters own persistence, physics, lifecycle, canvas compositing and versioned URL routing.",
   "files": {
     "blueprint/codec.ts": "ddf2d5c619e9e0f173d301e36b97dd4bb45625023f6f4617cbc1fca90ea1114c",
     "blueprint/editor.ts": "9f84b0d3f72662e30dec6b47d51cdb6acfbc11a40a7e0a10bbdf89129fb63c90",
@@ -47,7 +47,24 @@
     "ship/parts/dorsals.ts": "58a62aecb0ad616ff1a31246a383861c1d99cf006bca72d90c4ca47c87c9813a",
     "ship/parts/engines.ts": "760535b6b9206c31b19f5d4ccee5fa41bbdfcb9e760449a1e03875267bd211cd",
     "ship/parts/wings.ts": "5033e6cf10a3affc2c3745dfd0f305ac857d393a092416b56ed7eea13e27e520",
-    "timeline/codec.ts": "49ecba09f1c21152cc95d8842bbb05bfba86614295480293483391883d2ce951"
+    "timeline/codec.ts": "49ecba09f1c21152cc95d8842bbb05bfba86614295480293483391883d2ce951",
+    "terrain/env.ts": "1e3a496967f23b5bebfa3eb7e417655653c77fe4a2421d057bc472f3f23550cc",
+    "terrain/sha256.ts": "28a43c210f95023d7961bfc591c2ae1325849897431c08e8ab6b70a3c5edf6ca",
+    "terrain/field.ts": "1472ff9175ddabb245317a9f20164e2302527d648968eb2f15b3fab45e4cf696",
+    "terrain/dual.ts": "ec07e28a305b989e29187b01423dff86b7b47b92b1b1c77ebc78eb2cda4fd97d",
+    "terrain/styles/program.ts": "575f6306159a44ca54a57f3f2858b3b8581b4412cc02ea16d6d5e18d617ecaca",
+    "terrain/trig.ts": "18a8383074dcaf6211c056e4650da1e76038d323b06ddcd383d5e9b67f9a28b1",
+    "terrain/styles/ocean.ts": "a384c0c25c2d3dfd6a0a68bd6e529892f805d9852a80cd6210d6c1aef2a25877",
+    "terrain/styles/desert.ts": "301100da1fa5ef6706577bc9b632b9f749c15359292b8035458039eb4510154f",
+    "terrain/styles/ice.ts": "df1e292366c524256902bb6f19f4854b49c40dbdef6942bf0980f7402fa0c2ff",
+    "terrain/styles/temperate.ts": "67456c7b659f2cf235e510063c2a3c14aacfbc5f427dee90dfef747ce7e1294a",
+    "terrain/planet.ts": "585e0324c3f71761cb320602d48f193eaa5255ff8877b8d593c9af20cbfec0dc",
+    "terrain/flora.ts": "44e10a4034ab31bc2ab6f92681736bc73e9b9b2956cc09cd1015e51384c1d01e",
+    "terrain/icosphere.ts": "c753506b2924c99649d0690ab62c0aebe7b56d2dca32535fe579a20677c660d1",
+    "terrain/kit.ts": "21865a1e3356f941d7df1c07840371f9148d50ef4e2b5ec41417e5e9f3f39b8e",
+    "terrain/textures.ts": "36932583122a2969e597e5d37e05df6e745964a2a2bdb7eb9202c3358d2d0f87",
+    "terrain/policy.ts": "a75c9945a56f6587248d06401283043ba88b16bcf86eeeda82debd688ddeee22",
+    "terrain/pads.ts": "319cd43d369f16532aaef081f6f670a8dfc1028d6b2f04219a805ee24690f294"
   },
   "assets": [
     "public/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/basis/basis_transcoder.js",

@@ -109,7 +109,7 @@ export function createHarbour(scene:T.Scene){
   // Twilight atmosphere is a directional gradient, not a bloom overlay.
   const skyMaterial=new T.ShaderMaterial({side:T.BackSide,depthWrite:false,uniforms:{up:{value:new T.Vector3(0,1,0)}},vertexShader:'varying vec3 direction;void main(){direction=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec3 direction;uniform vec3 up;void main(){float h=dot(normalize(direction),up);vec3 dusk=mix(vec3(.16,.067,.043),vec3(.055,.078,.105),smoothstep(-.06,.23,h));vec3 c=mix(dusk,vec3(.008,.018,.039),smoothstep(.12,.85,h));gl_FragColor=vec4(c,1.);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}'});skyMaterial.userData.ownedResource=true;
   const atmosphere=new T.Mesh(new T.SphereGeometry(1500,24,16),skyMaterial);atmosphere.renderOrder=-10;scene.add(atmosphere);
-  return {globe,scenery,blocks,flowers,npcs,dock,parked,height:surfaceHeight,
+  return {globe,scenery,blocks,flowers,npcs,dock,parked,dispose(){},height:surfaceHeight,
     animate(_t:number,_reduced:boolean,eye?:T.Vector3,up?:T.Vector3){extra.visible=innerWidth>=700;if(eye)atmosphere.position.copy(eye);if(up)skyMaterial.uniforms.up.value.copy(up);},
   };
 }

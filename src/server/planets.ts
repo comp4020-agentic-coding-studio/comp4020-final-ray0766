@@ -1,3 +1,6 @@
+import { decodeEnvironment,encodeEnvironment } from '../assets/claude-geometry/terrain/env.ts';
+import { checkTerrainChange,describeConflicts } from '../assets/claude-geometry/terrain/policy.ts';
+import { fieldOf,terrainObjects,objectSeat } from '../shared/terrain.ts';
 import { historyStore } from './history.ts';
 import { UUID_PATTERN } from '../assets/claude-geometry/core/ids.ts';
 import { blueprintStore } from './blueprints.ts';
@@ -10,9 +13,9 @@ import { normalize } from '../shared/world.ts';
 import type { Vec3 } from '../shared/world.ts';
 import { RequestError } from './errors.ts';
 import { INITIAL_PLANETS } from '../shared/regions.ts';
-import { MAX_PLANETS, planetCenter } from '../shared/flight.ts';
+import { MAX_PLANETS, planetCenter, spaceDistance, SAFE_RADIUS } from '../shared/flight.ts';
 
-interface PlanetRow { id: string; name: string; kind: 'hub' | 'garden'; owner_id: string | null; revision: number; objectCount: number;slot:number }
+interface PlanetRow { id: string; name: string; kind: 'hub' | 'garden'; owner_id: string | null; revision: number; objectCount: number;slot:number;environment:string|null }
 interface ObjectRow { id: string; kind: PlacedObject['kind']; position: string; rotation: number; version: number; blueprint_hash: string | null; radius: number | null; height: number | null }
 export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), history = historyStore(db)) {
   const transaction = <T>(fn: () => T) => { db.exec('BEGIN IMMEDIATE'); try { const result = fn(); db.exec('COMMIT'); return result; } catch (error) { db.exec('ROLLBACK'); throw error; } };
@@ -34,7 +37,7 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     if (!p) throw new RequestError(404, 'That planet could not be found.');
     return p;
   };
-  const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: p.revision, objectCount: p.objectCount,slot:p.slot,center:planetCenter(p.slot) });
+  const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: p.revision, objectCount: p.objectCount,slot:p.slot,center:planetCenter(p.slot),environment:p.environment??null });
   const objects = (planetId: string): PlacedObject[] => (db.prepare('SELECT id,kind,position,rotation,version,blueprint_hash,radius,height FROM planet_objects WHERE planet_id=? ORDER BY rowid').all(planetId) as unknown as ObjectRow[]).map(r => ({ id:r.id,kind:r.kind,rotation:r.rotation,version:r.version,position:JSON.parse(r.position),...(r.blueprint_hash ? {blueprintHash:r.blueprint_hash,radius:r.radius!,height:r.height!} : {}) }));
   const owns = (id: string, planetId: unknown) => { const p = planet(planetId); if (p.kind === 'hub' || p.owner_id !== id) throw new RequestError(403, 'Only this planet’s owner can build here.'); return p; };
   const objectId = (value: unknown) => { if (typeof value !== 'string' || !UUID_PATTERN.test(value)) throw new RequestError(400, 'Invalid object identifier.'); return value; };
@@ -45,7 +48,9 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     const problem = placementProblem(kind, position, objects(planetId), ignoreId, parts ? structureSize(parts).radius : undefined);
     if (problem) throw new RequestError(400, problem);
     const point = normalize(position as Vec3);
-    if (parts) { const fit = structureFit(parts, point, rotation); if (fit.problem) throw new RequestError(400, fit.message ?? 'This ground is too uneven.'); }
+    const field=fieldOf(planet(planetId).environment);
+    if(planet(planetId).environment){const obj:PlacedObject={id:ignoreId??'preview',kind,position:point,rotation,version:1,...(parts?{blueprintHash,...structureSize(parts)}:{})};const fit=objectSeat(field,obj,parts?{[blueprintHash!]:parts}:{});if(fit.problem)throw new RequestError(409,fit.message??'This terrain cannot support the object.');}
+    if (parts) { const fit = structureFit(parts, point, rotation,field); if (fit.problem) throw new RequestError(400, fit.message ?? 'This ground is too uneven.'); }
     return { position: point, rotation };
   };
   const bump = (p: string) => db.prepare('UPDATE planets SET revision=revision+1 WHERE id=?').run(p);
@@ -70,6 +75,26 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
         replenish();
       });
     },
+    terrain(id:string,body:Record<string,unknown>){return transaction(()=>{
+      const p=owns(id,body.planetId);strict(body,['planetId','environment','expectedRevision']);
+      if(!Number.isSafeInteger(body.expectedRevision)||Number(body.expectedRevision)<0)throw new RequestError(400,'Include the planet revision.');
+      const r=decodeEnvironment(body.environment);if(!r.ok)throw new RequestError(400,r.errors.join(' '));const environment=encodeEnvironment(r.value);
+      if(environment===p.environment)return;
+      if(p.revision!==body.expectedRevision)throw new RequestError(409,'This planet changed in another tab. Reload before applying terrain.');
+      const player=db.prepare('SELECT planet_id,flight FROM players WHERE id=?').get(id)!;
+      if(player.planet_id!==p.id||(player.flight&&JSON.parse(String(player.flight)).mode==='space'))throw new RequestError(409,'Land on your planet before changing its terrain.');
+      for(const airborne of db.prepare('SELECT flight FROM players WHERE flight IS NOT NULL').all()){const f=JSON.parse(String(airborne.flight));if(f.mode==='space'&&spaceDistance(f.position,planetCenter(p.slot))<SAFE_RADIUS+1.75)throw new RequestError(409,'Terrain not applied: a ship is too close to the new surface.');}
+      const placed=objects(p.id),contents=Object.fromEntries(placed.flatMap(o=>o.blueprintHash?[[o.blueprintHash,blueprints.parts(o.blueprintHash)]]:[]));
+      const field=fieldOf(environment),check=checkTerrainChange(field,terrainObjects(placed,contents),fieldOf(p.environment));
+      if(!check.ok)throw new RequestError(409,'Terrain not applied: '+describeConflicts(check).join('; '));
+      for(const visitor of db.prepare('SELECT position,flight FROM players WHERE planet_id=?').all(p.id)){
+        if(visitor.flight&&JSON.parse(String(visitor.flight)).mode==='space')continue;
+        const position=JSON.parse(String(visitor.position));if(field.waterLevel!==null&&field.heightAt(position)<field.waterLevel+.02)throw new RequestError(409,'Terrain not applied: a visitor would be under water. Return to the landing pad first.');
+      }
+      db.prepare('UPDATE planets SET environment=?,revision=revision+1 WHERE id=?').run(environment,p.id);
+      db.prepare('DELETE FROM ground_states WHERE planet_id=?').run(p.id);
+      db.prepare('UPDATE players SET revision=revision+1 WHERE planet_id=?').run(p.id);
+    });},
     create(id: string, body: Record<string, unknown>) {
       return transaction(() => {
         const p = owns(id, body.planetId); strict(body, ['planetId', 'objectId', 'kind', 'position', 'rotation', 'blueprintHash']);

@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "planet": "p-d85ac2b2-cd06-41d8-af16-ae71fe9d072b",
+  "checks": [
+    "four independent previews; blank seed rejected; saved environment retained",
+    "real W/D surface movement follows shared field, released preview context, refresh retains position/environment",
+    "build on generated ground; private history replays same saved terrain",
+    "actual boarding, launch, refresh in flight, keyboard return flight, dry-pad landing",
+    "390×844 phone preview, close without applying, real touch movement",
+    "independent visitor HTTP apply denied 403"
+  ],
+  "pageErrors": [],
+  "viewport": "1440×900 and 390×844",
+  "browser": "154.0.8037.98"
+}

@@ -126,3 +126,11 @@ The owner-private building timeline reuses the unchanged Claude
 and replay reducer at the same `a4546bb` source commit. Main-project adapters own
 SQL transactions, labelled import baselines, session privacy and the read-only UI.
 No timeline demo server or old main-project patch was copied over the application.
+
+The opt-in terrain stage adds 17 unchanged files from the same Claude `a4546bb`
+commit: the environment codec, deterministic height field, four style programs,
+mesh/texture/vegetation kit, dense footing helpers and RESTRICT policy dependencies.
+The vendored manifest now covers 62 TypeScript files. The main project's terrain
+adapters supply persistence, ownership, collision grading, scene-light direction
+and transparent-canvas compositing; the source geometry and shaders are unchanged.
+No terrain demo server patch or additional downloaded art was used.

@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "four independent previews; blank seed rejected; saved environment retained",
+    "real W/D surface movement follows shared field, released preview context, refresh retains position/environment"
+  ],
+  "pageErrors": [],
+  "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('#save-object')\nExpected: enabled\nReceived: disabled\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" locator('#save-object') with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('#save-object')\u001b[22m\n\u001b[2m    14 × locator resolved to <button disabled class=\"primary\" id=\"save-object\">Place object</button>\u001b[22m\n\u001b[2m       - unexpected value \"disabled\"\u001b[22m\n"
+}

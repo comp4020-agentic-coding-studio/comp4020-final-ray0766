@@ -3,7 +3,7 @@ import type { Vec3 } from './world.ts';
 export const MAX_FLIGHT_SPEED=36, FLIGHT_ACCEL=14, FLIGHT_BRAKE=52, TURN_RATE=1.35;
 export const SAFE_RADIUS=RADIUS+3, LAND_RADIUS=RADIUS+10, LAND_SPEED=6, SPACE_LIMIT=5000, MAX_PLANETS=256;
 export interface FlightState { mode:'ground'|'space'; journey:number; position:Vec3; yaw:number; pitch:number; speed:number; sequence:number; targetId:string|null }
-export interface SpaceBody { id:string; center:Vec3 }
+export interface SpaceBody { id:string; center:Vec3; environment?:string|null }
 export interface FlightInput { thrust:boolean; brake:boolean; turn:number; pitch:number }
 export const groundFlight=():FlightState=>({mode:'ground',journey:0,position:[0,0,0],yaw:0,pitch:0,speed:0,sequence:0,targetId:null});
 export const length=(v:Vec3)=>Math.hypot(...v);
@@ -24,7 +24,8 @@ export function firstCollision(a:Vec3,b:Vec3,bodies:SpaceBody[],radius=SAFE_RADI
   const d=subtract(b,a),aa=d.reduce((s,v)=>s+v*v,0);if(aa<1e-12)return null;
   let earliest=Infinity;
   for(const body of bodies){
-    const f=subtract(a,body.center),bb=2*f.reduce((s,v,i)=>s+v*d[i],0),cc=f.reduce((s,v)=>s+v*v,0)-radius*radius;
+    const collisionRadius=radius+(body.environment?1.75:0);
+    const f=subtract(a,body.center),bb=2*f.reduce((s,v,i)=>s+v*d[i],0),cc=f.reduce((s,v)=>s+v*v,0)-collisionRadius*collisionRadius;
     // Contact must allow an outward departure, including rounding at the hull.
     if(cc<=1e-6&&bb>=0)continue;
     const disc=bb*bb-4*aa*cc;if(disc<0)continue;

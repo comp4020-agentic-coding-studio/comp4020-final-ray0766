@@ -2,11 +2,9 @@ import * as T from 'three';
 import { Stage } from '../assets/claude-geometry/shell/stage.ts';
 import { decodeEvent, decodeSnapshot } from '../assets/claude-geometry/timeline/codec.ts';
 import type { WorldState } from '../assets/claude-geometry/core/world.ts';
-import { legacyHeightField } from '../assets/claude-geometry/core/ground.ts';
-import { buildBlueprintModel } from '../assets/claude-geometry/blueprint/model3d.ts';
-import { placedTransform } from '../assets/claude-geometry/blueprint/placement.ts';
-import { structureFit } from '../shared/blueprints.ts';
-import { builtObject, disposeGeometry } from './build-art.ts';
+import {planetPreview} from './planet-preview.ts';
+import {structureSize} from '../shared/blueprints.ts';
+import type {PlacedObject} from '../shared/planets.ts';
 import { textureFormat } from './resource-policy.ts';
 import type { HistoryPage, HistorySnapshot } from '../shared/history.ts';
 import { HISTORY_PAGE } from '../shared/history.ts';
@@ -31,16 +29,8 @@ export class PrivateHistory {
  private clear(){for(const release of this.release)release();this.release=[];this.layer.clear();}
  private render(state:WorldState,snapshot:HistorySnapshot){
   if(!this.stage)return;this.clear();
-  const field=legacyHeightField(),geometry=new T.IcosahedronGeometry(10,4),a=geometry.attributes.position;
-  for(let i=0;i<a.count;i++){const p=new T.Vector3().fromBufferAttribute(a,i).normalize();a.setXYZ(i,...p.multiplyScalar(10+field.heightAt(p.toArray() as [number,number,number])).toArray() as [number,number,number]);}geometry.computeVertexNormals();
-  const material=new T.MeshStandardMaterial({color:'#696f66',roughness:.96});const globe=new T.Mesh(geometry,material);this.layer.add(globe);this.release.push(()=>{geometry.dispose();material.dispose();});
-  for(const o of Object.values(state.objects)){
-   let object:T.Object3D;
-   if(o.spec.kind==='structure'){
-    const parts=snapshot.blueprints[o.spec.blueprintHash];if(!parts)throw Error('Historical blueprint is missing.');const fit=structureFit(parts,o.anchor.dir,o.anchor.yaw);const model=buildBlueprintModel(parts,this.stage.library,'medium',{foundationDepth:fit.foundationDepth});object=model.object;const transform=placedTransform(o.anchor,fit);object.position.fromArray(transform.position);object.quaternion.fromArray(transform.quaternion);this.release.push(()=>model.dispose());
-   }else{object=builtObject(o.spec.prop);const normal=new T.Vector3(...o.anchor.dir);object.position.copy(normal).multiplyScalar(10+field.heightAt(o.anchor.dir)+.015);object.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),normal);object.rotateY(o.anchor.yaw);this.release.push(()=>disposeGeometry(object));}
-   this.layer.add(object);
-  }
+  const objects:PlacedObject[]=Object.values(state.objects).map(o=>({id:o.id,kind:o.spec.kind==='prop'?o.spec.prop:'structure',position:o.anchor.dir,rotation:o.anchor.yaw,version:o.version,...(o.spec.kind==='structure'?{blueprintHash:o.spec.blueprintHash,...structureSize(snapshot.blueprints[o.spec.blueprintHash])}:{})}));
+  const model=planetPreview(snapshot.environment??null,objects,snapshot.blueprints,this.stage.library);this.layer.add(model.object);this.release.push(()=>model.dispose());
   this.stage.renderer.domElement.dataset.sequence=String(state.seq);this.stage.renderer.domElement.dataset.objectCount=String(Object.keys(state.objects).length);this.stage.renderer.domElement.dataset.stateHash=snapshot.hash;
  }
  private async events(after:number){

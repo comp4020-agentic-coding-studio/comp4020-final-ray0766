@@ -1,6 +1,7 @@
 import type { Blueprint, PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
 import { blueprintFootprint } from '../assets/claude-geometry/blueprint/model.ts';
 import { fitStructureOnGround } from '../assets/claude-geometry/blueprint/placement.ts';
+import type { HeightField } from '../assets/claude-geometry/core/ground.ts';
 import { legacyHeightField } from '../assets/claude-geometry/core/ground.ts';
 import { STOREY } from '../assets/claude-geometry/blueprint/parts/kit.ts';
 import type { Vec3 } from './world.ts';
@@ -14,5 +15,5 @@ export function structureSize(parts: readonly PartPlacement[]) {
   return { radius: blueprintFootprint(parts).radius, height: Math.max(...parts.map(p => p.level * STOREY + 3.4)) };
 }
 const ground = legacyHeightField();
-export const structureFit = (parts: readonly PartPlacement[], position: Vec3, rotation: number) =>
-  fitStructureOnGround(ground, { dir: position, yaw: rotation }, { parts: [...parts] });
+export const structureFit = (parts: readonly PartPlacement[], position: Vec3, rotation: number, field:HeightField=ground) =>
+  fitStructureOnGround(field, { dir: position, yaw: rotation }, { parts: [...parts] });

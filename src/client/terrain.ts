@@ -1,11 +1,15 @@
 import * as T from 'three';
+import { fieldOf,gradedField } from '../shared/terrain.ts';
+import type { PlanetView } from '../shared/planets.ts';
 import { RADIUS } from '../shared/world.ts';
 // A bijective stereographic rescaling concentrates existing hub coordinates into a
 // shallow district on a larger display sphere. Persistent positions never change.
 export const HARBOUR_RADIUS=800;
 export const HARBOUR_COMPRESSION=.048;
-let harbour=true;
-export function setGroundWorld(publicHub:boolean){harbour=publicHub;}
+let harbour=true;let field=fieldOf();
+export const groundField=()=>field;
+export function useTerrain(planet:Pick<PlanetView,'environment'|'objects'|'blueprints'>){const raw=fieldOf(planet.environment);field=planet.environment?gradedField(raw,planet.objects,planet.blueprints):raw;}
+export function setGroundWorld(publicHub:boolean,environment?:string|null){harbour=publicHub;field=fieldOf(environment);}
 export function groundRadius(){return harbour?HARBOUR_RADIUS:RADIUS;}
 export function mapNormal(p:T.Vector3,k:number){
   const d=1+p.y+k*k*(1-p.y);
@@ -25,7 +29,6 @@ export function surfaceOrientation(p:T.Vector3,facing:T.Vector3){
 }
 export function surfaceHeight(p:T.Vector3) {
   if(harbour)return 0;
-  const amplitude=p.y>.35?.055:.20;
-  return .055+amplitude*(Math.sin(p.x*8+p.z*3)*.5+Math.cos(p.z*7-p.y*4)*.5);
+  return field.heightAt(p.toArray() as [number,number,number]);
 }
 export function surfacePoint(p:T.Vector3,offset=0){return surfaceNormal(p).multiplyScalar(groundRadius()+surfaceHeight(p)+offset);}

@@ -18,6 +18,7 @@ export interface PlayerState {
   flight: FlightState;
   ground?: GroundState;
   ship?: SavedShip;
+  environment?: string|null;
 }
 export const normalize = (p: Vec3): Vec3 => {
   const l = Math.hypot(...p);

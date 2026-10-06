@@ -18,7 +18,7 @@ interface Bridge {
 export class SpaceFlight {
   scene=new T.Scene();camera=new T.PerspectiveCamera(58,innerWidth/innerHeight,.1,18000);
   presentation=false;pilot:FlightState|null=null; planets:PlanetSummary[]=[];busy=false;
-  private ship=makeShip();private bodies=new Map<string,{root:T.Group,low:T.Mesh,detail:T.Group|null,label:HTMLButtonElement}>();
+  private ship=makeShip();private bodies=new Map<string,{root:T.Group,low:T.Mesh,detail:T.Group|null,label:HTMLButtonElement,environment?:string|null}>();
   private lowGeometry=new T.IcosahedronGeometry(RADIUS,2);private lowMaterials=['#a49d89','#758893','#9a8771'].map(color=>new T.MeshStandardMaterial({color,roughness:1}));
   private beacons:T.Points|null=null;private lodAt=-Infinity;private labelIds=new Set<string>();
   private keys=new Set<string>();private stick=new T.Vector2();private held={thrust:false,brake:false};
@@ -61,9 +61,9 @@ export class SpaceFlight {
     this.planets=u.planets;
     let changed=false;
     for(const p of u.planets){
-      const old=this.bodies.get(p.id);if(old){old.label.textContent=p.name;continue;}
+      const old=this.bodies.get(p.id);if(old){old.label.textContent=p.name;if(old.environment!==p.environment){if(old.detail)this.disposeOrbit(old.detail);old.detail=null;old.environment=p.environment;this.lodAt=-Infinity;}continue;}
       const root=new T.Group(),low=new T.Mesh(this.lowGeometry,this.lowMaterials[p.slot%3]);root.add(low);root.position.fromArray(p.center);root.visible=false;this.scene.add(root);
-      const label=document.createElement('button');label.className='space-label';label.dataset.planetId=p.id;label.textContent=p.name;label.onclick=()=>this.mark(p.id);el('flight-labels').append(label);this.bodies.set(p.id,{root,low,detail:null,label});changed=true;
+      const label=document.createElement('button');label.className='space-label';label.dataset.planetId=p.id;label.textContent=p.name;label.onclick=()=>this.mark(p.id);el('flight-labels').append(label);this.bodies.set(p.id,{root,low,detail:null,label,environment:p.environment});changed=true;
     }
     if(changed){
       if(this.beacons){this.scene.remove(this.beacons);this.beacons.geometry.dispose();(this.beacons.material as T.Material).dispose();}
@@ -71,6 +71,7 @@ export class SpaceFlight {
       this.beacons=new T.Points(g,new T.PointsMaterial({color:'#90a9b9',size:2.8,sizeAttenuation:true,transparent:true,opacity:.6}));this.scene.add(this.beacons);this.lodAt=-Infinity;
     }
   }
+  private disposeOrbit(detail:T.Group){if(typeof detail.userData.disposeOwned==='function'){detail.userData.disposeOwned();return;}detail.traverse(o=>{if(o instanceof T.Mesh){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms)if(m.userData.ownedResource)m.dispose();}});detail.removeFromParent();}
   private updateLod(now:number){
     if(!this.pilot||now-this.lodAt<250)return;this.lodAt=now;
     const sorted=[...this.planets].sort((a,b)=>spaceDistance(this.pilot!.position,a.center)-spaceDistance(this.pilot!.position,b.center));
@@ -79,8 +80,8 @@ export class SpaceFlight {
     this.labelIds=new Set(sorted.filter(p=>spaceDistance(this.pilot!.position,p.center)<400).slice(0,5).map(p=>p.id));if(this.pilot.targetId)this.labelIds.add(this.pilot.targetId);
     for(const p of this.planets){
       const body=this.bodies.get(p.id)!;body.root.visible=visible.has(p.id);body.low.visible=!detailed.has(p.id);
-      if(detailed.has(p.id)&&!body.detail){body.detail=orbitalPlanet(p.slot);body.root.add(body.detail);}
-      else if(!detailed.has(p.id)&&body.detail){body.detail.traverse(o=>{if(o instanceof T.Mesh){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms)if(m.userData.ownedResource)m.dispose();}});body.detail.removeFromParent();body.detail=null;}
+      if(detailed.has(p.id)&&!body.detail){body.detail=orbitalPlanet(p.slot,p.environment);body.root.add(body.detail);}
+      else if(!detailed.has(p.id)&&body.detail){this.disposeOrbit(body.detail);body.detail=null;}
     }
     this.bridge.canvas.dataset.orbitDetailed=String(detailed.size);this.bridge.canvas.dataset.orbitVisible=String(visible.size);this.bridge.canvas.dataset.orbitTotal=String(this.planets.length);
   }

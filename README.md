@@ -1,8 +1,11 @@
 # Little Worlds
 
 **Local Final workshop milestone:** this branch adds the server-backed assembly
-workshop described in [the workshop guide](docs/integration/workshop-v1.md), plus
-[walkable buildings and saved floor heights](docs/integration/physics-v1.md).
+workshop described in [the workshop guide](docs/integration/workshop-v1.md),
+[walkable buildings and saved floor heights](docs/integration/physics-v1.md),
+[private ship designs](docs/evidence/ships/verification.md),
+[owner-private building history](docs/evidence/history/verification.md), and
+[opt-in deterministic terrain](docs/integration/terrain-v1.md).
 The published Crit 8 release remains `09233d9`; these changes are not deployed.
 
 > Prepared with AI assistance from the student's recorded design decisions and
@@ -50,8 +53,8 @@ people leave. This is a bounded shared world, not a public-scale concurrency cla
 A random browser cookie identifies a visitor. Clearing it loses access to the owned
 home; there is no account recovery or cross-device identity. Save failures are
 shown, and travel freezes until acknowledged state is recovered. Chat, trading,
-combat, ship interiors, terrain editing and activity-history browsing remain outside
-this milestone. Assembly uses a bounded 5 × 5 × 3 grid with 120 parts per blueprint.
+combat and ship interiors remain outside this milestone. This local branch adds
+owner-private building history and opt-in terrain; the published release does not. Assembly uses a bounded 5 × 5 × 3 grid with 120 parts per blueprint.
 
 Camera comfort, readable routes and a consistent visual language require judgement.
 Agent-run Chrome journeys and screenshot review informed changes; they are not a

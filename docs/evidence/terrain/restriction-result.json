@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "checks": [
+    "real UI creates/saves a one-deck blueprint and places its new ghost on generated terrain",
+    "conflicting ocean preview disables apply",
+    "direct owner apply returns 409; all current planet objects/transforms and environment unchanged"
+  ],
+  "pageErrors": []
+}

@@ -17,7 +17,7 @@ export interface PlacedObject { id: string; kind: ObjectKind; position: Vec3; ro
 export const objectName = (o: Pick<PlacedObject, 'kind'>) => o.kind === 'structure' ? 'Custom structure' : CATALOGUE[o.kind].name;
 export const objectRadius = (o: Pick<PlacedObject, 'kind' | 'radius'>) => o.kind === 'structure' ? o.radius ?? 0 : CATALOGUE[o.kind].radius;
 export const objectHeight = (o: Pick<PlacedObject, 'kind' | 'height'>) => o.kind === 'structure' ? o.height ?? 0 : CATALOGUE[o.kind].height;
-export interface PlanetSummary { id: string; name: string; kind: 'hub' | 'garden'; claimed: boolean; mine: boolean; revision: number; objectCount: number; center:Vec3; slot:number }
+export interface PlanetSummary { id: string; name: string; kind: 'hub' | 'garden'; claimed: boolean; mine: boolean; revision: number; objectCount: number; center:Vec3; slot:number; environment?:string|null }
 export interface PlanetView extends PlanetSummary { objects: PlacedObject[]; blueprints?: BlueprintContents }
 export interface Universe { player: PlayerState; planets: PlanetSummary[]; ownedPlanetId: string | null; currentPlanet: PlanetView }
 export function isBuildKind(value: unknown): value is BuildKind { return typeof value === 'string' && Object.hasOwn(CATALOGUE, value); }

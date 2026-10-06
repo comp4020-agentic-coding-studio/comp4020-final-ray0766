@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {fieldOf,objectSeat} from '../shared/terrain.ts';
 import { REGIONS,regionFor } from '../shared/regions.ts';
 import { spaceDistance } from '../shared/flight.ts';
 import { CATALOGUE, MAX_OBJECTS, objectName, objectRadius, objectHeight, placementProblem } from '../shared/planets.ts';
@@ -82,7 +83,7 @@ export class Colony {
     if(!this.bridge.applyPlayer(next.player))return;
     if(this.universe?.currentPlanet.id===next.currentPlanet.id&&this.universe.currentPlanet.revision>next.currentPlanet.revision)return;
     const changed=this.universe?.currentPlanet.id!==next.currentPlanet.id;
-    this.universe=next;el('open-history').hidden=!next.currentPlanet.mine;this.syncing=true;this.bridge.universe(next);
+    this.universe=next;el('open-history').hidden=!next.currentPlanet.mine;el('open-terrain').hidden=!next.currentPlanet.mine||next.player.flight.mode!=='ground';this.syncing=true;this.bridge.universe(next);
     if(changed){this.setBuilding(false);this.clearDraft();}
     if(this.building&&(!next.currentPlanet.mine||next.player.flight.mode==='space'))this.setBuilding(false);
     const key=next.currentPlanet.id+':'+next.currentPlanet.revision;
@@ -114,12 +115,14 @@ export class Colony {
   private parts(hash:string){return this.universe?.currentPlanet.blueprints?.[hash]??this.localParts[hash]??[];}
   private problem(d:Draft){
     const spacing=placementProblem(d.kind,d.position,this.universe?.currentPlanet.objects??[],d.id,d.radius);
-    if(spacing||d.kind!=='structure'||!d.position)return spacing;
-    return structureFit(this.parts(d.blueprintHash!),d.position,d.rotation).message;
+    if(spacing||!d.position)return spacing;
+    if(this.universe?.currentPlanet.environment){const fit=objectSeat(fieldOf(this.universe.currentPlanet.environment),d as PlacedObject,{...this.universe.currentPlanet.blueprints,...(d.blueprintHash?{[d.blueprintHash]:this.parts(d.blueprintHash)}:{})});if(fit.problem)return fit.message;}
+    if(d.kind!=='structure')return null;
+    return structureFit(this.parts(d.blueprintHash!),d.position,d.rotation,fieldOf(this.universe?.currentPlanet.environment)).message;
   }
   private renderObject(obj:PlacedObject){
-    if(obj.kind!=='structure'){const group=builtObject(obj.kind);this.locate(group,obj.position,obj.rotation);return group;}
-    const parts=this.parts(obj.blueprintHash!), fit=structureFit(parts,obj.position,obj.rotation);
+    if(obj.kind!=='structure'){const group=builtObject(obj.kind);this.locate(group,obj.position,obj.rotation);if(this.universe?.currentPlanet.environment)group.position.set(...obj.position).multiplyScalar(objectSeat(fieldOf(this.universe.currentPlanet.environment),obj,this.universe.currentPlanet.blueprints).baseRadius+.015);return group;}
+    const parts=this.parts(obj.blueprintHash!), fit=structureFit(parts,obj.position,obj.rotation,fieldOf(this.universe?.currentPlanet.environment));
     const model=buildBlueprintModel(parts,worldMaterials(),'medium',{foundationDepth:fit.foundationDepth});
     const transform=placedTransform({dir:obj.position,yaw:obj.rotation},fit);
     model.object.position.fromArray(transform.position);model.object.quaternion.fromArray(transform.quaternion);

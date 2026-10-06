@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {terrainModel} from './terrain-model.ts';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RADIUS } from '../shared/world.ts';
 
@@ -26,7 +27,8 @@ function planetMaterial(seed:number){
   ctx.putImageData(im,0,0);rctx.putImageData(rim,0,0);
   const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;const bump=new T.CanvasTexture(relief);const material=new T.MeshStandardMaterial({map,bumpMap:bump,bumpScale:.14,roughness:.92,metalness:0,envMapIntensity:.12});worlds.set(key,material);return material;
 }
-export function orbitalPlanet(slot:number){
+export function orbitalPlanet(slot:number,environment?:string|null){
+  if(environment){const model=terrainModel(environment,[],{},'low');model.setSunDirection([-80,130,70]);return model.object;}
   const root=new T.Group();const globe=mesh(root,new T.SphereGeometry(RADIUS,64,40),planetMaterial(slot));globe.rotation.y=slot*1.37;
   if(slot===0){
     // Coarse orbital representation of the same public city, bounded to one draw.

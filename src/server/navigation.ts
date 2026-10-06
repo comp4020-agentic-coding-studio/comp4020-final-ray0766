@@ -38,7 +38,7 @@ export function navigationStore(db:DatabaseSync,planets:ReturnType<typeof planet
       const dt=Math.min(2,Math.max(0,now-r.flight_at)/1000);
       const distance=spaceDistance(old.position,next.position);
       const bodies=planets.list(id);
-      const stoppedAtSurface=next.speed===0&&bodies.some(p=>spaceDistance(next.position,p.center)<=RADIUS+3.2);
+      const stoppedAtSurface=next.speed===0&&bodies.some(p=>spaceDistance(next.position,p.center)<=RADIUS+3.2+(p.environment?1.75:0));
       const speedInvalid=next.speed-old.speed>FLIGHT_ACCEL*dt+.8||(!stoppedAtSurface&&old.speed-next.speed>FLIGHT_BRAKE*dt+.8);
       if(distance>Math.max(old.speed,next.speed)*dt+.65||speedInvalid||Math.abs(wrapAngle(next.yaw-old.yaw))>TURN_RATE*dt+.16||Math.abs(next.pitch-old.pitch)>TURN_RATE*dt+.16)throw new RequestError(409,'Flight changed too quickly. Returning to the last saved position.');
       if(firstCollision(old.position,next.position,bodies,RADIUS+2.65)!==null)throw new RequestError(409,'Keep your ship outside the planet.');

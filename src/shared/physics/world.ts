@@ -1,3 +1,5 @@
+import { fieldOf,gradedField,objectSeat } from '../terrain.ts';
+import type { HeightField } from '../../assets/claude-geometry/core/ground.ts';
 import { Vector3, Quaternion } from 'three';
 import { anchorQuaternion } from '../../assets/claude-geometry/core/anchor.ts';
 import { legacyHeightField } from '../../assets/claude-geometry/core/ground.ts';
@@ -22,19 +24,23 @@ interface Collider { center:Vector3; half:Vector3; q:Quaternion; inverse:Quatern
 interface Body { objectId:string; dir:Vector3; broad:number; colliders:Collider[]; round?:{radius:number;height:number;base:number} }
 const vec=(v:Vec3)=>new Vector3(...v);
 export const terrainRadius=(p:Vec3)=>RADIUS+ground.heightAt(p);
-export const groundPose=(p:Vec3):GroundPose=>({position:[...p],radius:terrainRadius(p),verticalSpeed:0,grounded:true});
+export const groundPose=(p:Vec3,field:HeightField=ground):GroundPose=>({position:[...p],radius:RADIUS+field.heightAt(p),verticalSpeed:0,grounded:true});
 
 /** Static planet collision world. No meshes, materials, renderer or DOM. */
 export class GroundWorld {
   readonly bodies:Body[]=[];
   readonly revision:number;
   readonly planetId:string;
-  constructor(planet:Pick<PlanetView,'id'|'revision'|'objects'|'blueprints'>){
+  readonly field:HeightField;readonly ground:HeightField;readonly generated:boolean;
+  radius(p:Vec3){return RADIUS+this.ground.heightAt(p);}
+  pose(p:Vec3){return groundPose(p,this.ground);}
+  constructor(planet:Pick<PlanetView,'id'|'revision'|'objects'|'blueprints'|'environment'>){
+    this.field=fieldOf(planet.environment);this.generated=!!planet.environment;this.ground=this.generated?gradedField(this.field,planet.objects,planet.blueprints):this.field;
     this.revision=planet.revision;this.planetId=planet.id;
     for(const object of planet.objects){
       if(object.kind==='structure')this.structure(object,planet.blueprints?.[object.blueprintHash!]??[]);
       else if(objectHeight(object)>.6){
-        const radius=objectRadius(object),h=objectHeight(object),base=terrainRadius(object.position)+.015;
+        const radius=objectRadius(object),h=objectHeight(object),base=(this.generated?objectSeat(this.field,object,planet.blueprints).baseRadius:this.radius(object.position))+.015;
         const body:Body={objectId:object.id,dir:vec(object.position),broad:radius+1,colliders:[],round:{radius,height:h,base}};
         this.add(body,object.position,object.rotation,base,{tag:'legacy solid prop',center:[0,h/2,0],half:[radius,h/2,radius]});this.bodies.push(body);
       }
@@ -47,7 +53,7 @@ export class GroundWorld {
     body.colliders.push({center,half:vec(shape.half),q,inverse:q.clone().invert(),support:!!shape.support,tag:shape.tag,objectId:body.objectId});
   }
   private structure(o:PlacedObject,parts:PartPlacement[]){
-    if(!parts.length)return;const fit=structureFit(parts,o.position,o.rotation),pivot=pivotOf(parts);
+    if(!parts.length)return;const fit=structureFit(parts,o.position,o.rotation,this.field),pivot=pivotOf(parts);
     const body:Body={objectId:o.id,dir:vec(o.position),broad:objectRadius(o)+1,colliders:[]};
     for(const part of parts){
       const t=partTransform(part,pivot),turn=new Quaternion().setFromAxisAngle(new Vector3(0,1,0),t.yaw);
@@ -64,7 +70,7 @@ export class GroundWorld {
   /** Highest reachable support, using the bottom capsule sphere against the
    * plane. This includes the small correction for radial tilt on flat floors. */
   support(position:Vec3,ceiling:number):{radius:number;objectId:string|null;tag:string}{
-    const dir=vec(position);let best={radius:terrainRadius(position),objectId:null as string|null,tag:'terrain'};
+    const dir=vec(position);let best={radius:this.radius(position),objectId:null as string|null,tag:'terrain'};
     for(const body of this.near(dir))for(const c of body.colliders){
       if(!c.support)continue;
       const u=dir.clone().applyQuaternion(c.inverse),origin=c.center.clone().applyQuaternion(c.inverse);
@@ -122,6 +128,7 @@ export class GroundWorld {
       for(let slide=0;slide<4;slide++){
         const candidate=next.clone().addScaledVector(remaining,1/RADIUS).normalize().toArray() as Vec3;
         const support=this.support(candidate,pose.radius+(pose.grounded?STEP_HEIGHT:SKIN));
+        if(this.generated&&((this.field.waterLevel!==null&&this.field.heightAt(candidate)<this.field.waterLevel+.015)||support.radius>pose.radius+STEP_HEIGHT+SKIN))break;
         let radius=pose.radius,verticalSpeed=pose.verticalSpeed,grounded=false;
         if(pose.grounded&&Math.abs(support.radius-radius)<=STEP_HEIGHT+SKIN){radius=support.radius;verticalSpeed=0;grounded=true;}
         else{verticalSpeed=Math.max(-MAX_FALL_SPEED,verticalSpeed-GRAVITY*tick);radius+=verticalSpeed*tick;
@@ -152,11 +159,12 @@ export class GroundWorld {
       const p=up.clone().addScaledVector(right,Math.cos(i*Math.PI/8)*distance/RADIUS).addScaledVector(front,Math.sin(i*Math.PI/8)*distance/RADIUS).normalize().toArray() as Vec3;
       const s=this.support(p,old.radius+STEP_HEIGHT),candidate={position:p,radius:s.radius,verticalSpeed:0,grounded:true};if(!this.blocked(candidate))return candidate;
     }
-    return groundPose(SPAWN);
+    return this.pose(SPAWN);
   }
   /** Clip a camera boom against the same solid proxies (including ceilings). */
   cameraDistance(start:Vector3,end:Vector3){
     const delta=end.clone().sub(start),length=delta.length();let best=length;
+    if(this.generated)for(let i=1;i<=32;i++){const p=start.clone().lerp(end,i/32),r=p.length();if(r<this.radius(p.normalize().toArray() as Vec3)+.12){best=Math.min(best,Math.max(.02,length*(i-1)/32));break;}}
     for(const b of this.near(start.clone().normalize()))for(const c of b.colliders){
       const p=start.clone().sub(c.center).applyQuaternion(c.inverse),d=delta.clone().applyQuaternion(c.inverse);let min=0,max=1;
       for(const axis of ['x','y','z'] as const){const extent=c.half[axis]+.06;if(Math.abs(d[axis])<1e-8){if(Math.abs(p[axis])>extent){min=2;break;}}else{let a=(-extent-p[axis])/d[axis],z=(extent-p[axis])/d[axis];if(a>z)[a,z]=[z,a];min=Math.max(min,a);max=Math.min(max,z);}}

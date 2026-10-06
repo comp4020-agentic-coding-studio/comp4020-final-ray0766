@@ -17,7 +17,7 @@ export function openStore(path: string) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-  if (schema > 8) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  if (schema > 9) { db.close(); throw new Error('Database schema is newer than this application.'); }
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
@@ -26,7 +26,7 @@ export function openStore(path: string) {
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
     );`);
   let migrationBackup: string | null = null;
-  if (schema < 8) {
+  if (schema < 9) {
     if (schema > 0 && path !== ':memory:') {
       migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
       // VACUUM INTO includes committed WAL data and produces a consistent restore point.
@@ -89,7 +89,18 @@ export function openStore(path: string) {
         version INTEGER NOT NULL CHECK(version>=1)
       );`);
       if (schema < 8) migrateHistory(db);
-      db.exec('PRAGMA user_version=8; COMMIT;');
+      if(schema<9){
+        const column=(table:string,name:string)=>db.prepare('PRAGMA table_info('+table+')').all().some(c=>c.name===name);
+        if(!column('planets','environment'))db.exec('ALTER TABLE planets ADD COLUMN environment TEXT');
+        for(const table of ['history_events','history_snapshots'])if(!column(table,'environment'))db.exec('ALTER TABLE '+table+' ADD COLUMN environment TEXT');
+        db.exec(`CREATE TABLE ground_states_v9 (
+          player_id TEXT PRIMARY KEY REFERENCES players(id), planet_id TEXT NOT NULL REFERENCES planets(id), position TEXT NOT NULL,
+          radius REAL NOT NULL CHECK(radius BETWEEN 8 AND 20), vertical_speed REAL NOT NULL CHECK(vertical_speed BETWEEN -10 AND 0),
+          grounded INTEGER NOT NULL CHECK(grounded IN (0,1)), sequence INTEGER NOT NULL, scene_revision INTEGER NOT NULL,
+          clock_credit REAL NOT NULL CHECK(clock_credit BETWEEN 0 AND 2), request_hash TEXT);
+          INSERT INTO ground_states_v9 SELECT * FROM ground_states;DROP TABLE ground_states;ALTER TABLE ground_states_v9 RENAME TO ground_states;`);
+      }
+      db.exec('PRAGMA user_version=9; COMMIT;');
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
   const history = historyStore(db);
@@ -107,7 +118,7 @@ export function openStore(path: string) {
     const initial=row(id),flight=navigation.flight(id);
     const standing=initial.planet_id!=='hub'&&flight.mode==='ground'?ground.read(id):undefined;
     const r = row(id);
-    return { ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
+    return { environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
   };
   const universe = (id: string) => { const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) }; };
   return {
@@ -171,6 +182,7 @@ export function openStore(path: string) {
       } catch (error) { db.exec('ROLLBACK'); throw error; }
       return universe(id);
     },
+    terrain(id:string,body:Record<string,unknown>){row(id);planets.terrain(id,body);return universe(id);},
     claim(id: string, planetId: unknown) { row(id); planets.claim(id, planetId); return universe(id); },
     createObject(id: string, body: Record<string, unknown>) { row(id); planets.create(id, body); return universe(id); },
     updateObject(id: string, body: Record<string, unknown>) { row(id); planets.update(id, body); return universe(id); },

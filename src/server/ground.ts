@@ -1,6 +1,6 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
-import { GroundWorld, groundPose, MAX_PATH_STEPS } from '../shared/physics/world.ts';
+import { GroundWorld, MAX_PATH_STEPS } from '../shared/physics/world.ts';
 import type { GroundPose, GroundState, GroundMotion, MotionStep } from '../shared/physics/world.ts';
 import { distance, normalize, RADIUS, SPEED, validPosition } from '../shared/world.ts';
 import type { Vec3 } from '../shared/world.ts';
@@ -23,7 +23,7 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
   function ensure(id:string):GroundRow{
     const r=player(id),old=row(id),w=world(r.planet_id);
     if(old&&old.planet_id===r.planet_id&&old.scene_revision===w.revision&&old.position===r.position)return old;
-    const start=old&&old.planet_id===r.planet_id&&old.position===r.position?pose(old):groundPose(JSON.parse(r.position));
+    const start=old&&old.planet_id===r.planet_id&&old.position===r.position?pose(old):w.pose(JSON.parse(r.position));
     const safe=w.recover(start),changed=distance(safe.position,JSON.parse(r.position))>.00001;
     db.exec('BEGIN IMMEDIATE');try{
       write(id,safe,(old?.sequence??-1)+1,w.revision,.1,null,r.planet_id);

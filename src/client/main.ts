@@ -1,4 +1,5 @@
 import * as T from 'three';
+import { TerrainWorkshop } from './terrain-workshop.ts';
 import { PrivateHistory } from './history.ts';
 import type { HistoryPage, HistorySnapshot } from '../shared/history.ts';
 import { Shipyard } from './shipyard.ts';
@@ -20,7 +21,7 @@ import { SpaceFlight } from './flight.ts';
 import { Colony } from './colony.ts';
 import { disposeGeometry } from './build-art.ts';
 import type { Universe } from '../shared/planets.ts';
-import { surfacePoint,surfaceNormal,surfaceTangent,surfaceOrientation,surfaceScale,logicalNormal,groundRadius } from './terrain.ts';
+import { surfacePoint,surfaceNormal,surfaceTangent,surfaceOrientation,surfaceScale,logicalNormal,groundRadius,groundField } from './terrain.ts';
 import { SurfaceWalker, cameraPose } from './motion.ts';
 import { createWorld, courier } from './scene.ts';
 import { distance, INTERACT_DISTANCE, NPCS, RADIUS } from '../shared/world.ts';
@@ -38,7 +39,7 @@ let overview = false;let cameraPitch=0;
 let departure:{time:number;base:T.Vector3;start:T.Vector3;rotation:T.Quaternion}|null=null;
 let colony: Colony | undefined;
 let flight: SpaceFlight | undefined;
-let activePlanet = 'hub';
+let activePlanet = 'hub';let activeEnvironment:string|null=null,terrainRevision=-1;
 let groundWorld:GroundWorld|null=null,standing:GroundPose|null=null,physicsClock=0;
 let motionPending:MotionStep[]=[];
 const lastSaved = new T.Vector3();
@@ -77,9 +78,10 @@ function accept(next: PlayerState) {
   const previousPlanet=state?.planetId;const previousMode=state?.flight.mode;
   const justLanded=state?.flight.mode==='space'&&next.flight.mode==='ground'&&next.revision>=state.revision;
   if (!state || next.revision >= state.revision) state = next;
-  if (state.planetId !== activePlanet) {
-    activePlanet = state.planetId; world.parked.dispose(); disposeGeometry(worldRoot); worldRoot = new T.Scene(); scene.add(worldRoot);
-    world = createWorld(worldRoot, activePlanet === 'hub');configureGround(); walker = new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;near=null;
+  if (state.planetId !== activePlanet||(state.environment??null)!==activeEnvironment) {
+    activeEnvironment=state.environment??null;terrainRevision=-1;
+    activePlanet = state.planetId; world.dispose();world.parked.dispose(); disposeGeometry(worldRoot); worldRoot = new T.Scene(); scene.add(worldRoot);
+    world = createWorld(worldRoot, activePlanet === 'hub',activeEnvironment);renderer.domElement.dataset.terrainId=groundField().id;configureGround(); walker = new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;near=null;
     $('npc-mica').hidden=true;$('npc-sol').hidden=true;$('conversation').hidden=true;document.body.classList.remove('delivery-open');
   }
   if((reconnecting||justLanded) && walker){cameraPitch=0;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;}
@@ -199,6 +201,8 @@ $('begin').onclick=()=>{courierDialog.close();notice('Follow the blue-lit street
 const menu=$<HTMLDialogElement>('menu-dialog');
 $('open-menu').onclick=()=>{clearInput();flight?.clear();menu.showModal();void savePosition(true);};
 $('close-menu').onclick=$('resume').onclick=()=>menu.close();
+const terrainWorkshop=new TerrainWorkshop({read:()=>request<Universe>('universe'),save:async body=>{await savePosition(true);const next=await serial(()=>request<Universe>('terrain/apply',body));colony?.accept(next);return next;},allowed:()=>!!colony?.universe?.currentPlanet.mine&&online&&state.flight.mode==='ground'});
+$('open-terrain').onclick=()=>{menu.close();clearInput();colony?.stopBuilding();void terrainWorkshop.open();};
 const history=new PrivateHistory({page:(id,after)=>request<HistoryPage>('history?planetId='+encodeURIComponent(id)+'&after='+after),snapshot:(id,seq)=>request<HistorySnapshot>('history/snapshot?planetId='+encodeURIComponent(id)+(seq===undefined?'':'&sequence='+seq))});
 $('open-history').onclick=()=>{if(!colony?.universe?.currentPlanet.mine)return;menu.close();clearInput();void history.open(colony.universe.currentPlanet.id);};
 const shipyard=new Shipyard({read:async()=>{const next=await serial(()=>request('state'));accept(next);return next.ship??defaultShip();},save:async body=>{const next=await serial(()=>request('ship/save',body));accept(next);return next.ship??defaultShip();},allowed:()=>!!state&&online&&state.flight.mode==='ground'});
@@ -266,7 +270,7 @@ let previous=performance.now(),elapsed=0,uiTick=0,started=false;
 function animate(now:number) {
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.05);previous=now;elapsed+=dt;
-  if(!walker || (document.body.classList.contains('workshop-open')||document.body.classList.contains('shipyard-open')||document.body.classList.contains('history-open'))) return;
+  if(!walker || (document.body.classList.contains('workshop-open')||document.body.classList.contains('shipyard-open')||document.body.classList.contains('history-open')||document.body.classList.contains('terrain-workshop-open'))) return;
   if(flight?.active&&departure){
     $('boarding-prompt').hidden=true;$('dock-guide').hidden=true;
     if(online&&!document.hidden&&!document.querySelector('dialog[open]'))departure.time+=dt;
@@ -309,7 +313,7 @@ function animate(now:number) {
     }
   }
   destinationRing.visible=!!target;
-  const feet=activePlanet==='hub'?surfacePoint(walker.up):walker.up.clone().multiplyScalar(standing?.radius??groundPose(walker.up.toArray() as Vec3).radius);
+  const feet=activePlanet==='hub'?surfacePoint(walker.up):walker.up.clone().multiplyScalar(standing?.radius??groundPose(walker.up.toArray() as Vec3,groundField()).radius);
   player.root.position.copy(feet).addScaledVector(walker.up,.018);player.root.quaternion.copy(surfaceOrientation(walker.up,walker.facing));player.animate(elapsed,walker.velocity.length()*surfaceScale(walker.up),reduced);
   const fov=activePlanet==='hub'?(innerWidth<600?65:55):(innerWidth<600&&!overview?58:48);if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();}
   const renderUp=surfaceNormal(walker.up),renderNorth=surfaceTangent(walker.up,walker.north),renderRight=new T.Vector3().crossVectors(renderNorth,renderUp).normalize();
@@ -348,6 +352,7 @@ function animate(now:number) {
   if(hub){sun.target.position.copy(surfacePoint(walker.up));sun.position.copy(sun.target.position).addScaledVector(renderUp,65).add(new T.Vector3(-55,0,45).projectOnPlane(renderUp));}else{sun.position.copy(walker.up).multiplyScalar(24).addScaledVector(walker.right(),-12).addScaledVector(walker.north,7);sun.target.position.set(0,0,0);}
   const skyRight=walker.right(),skyBack=walker.north.clone().negate();
   sky.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(skyRight,walker.up,skyBack));
+  if('setSunDirection' in world)world.setSunDirection(sun.position.clone().sub(sun.target.position).normalize().toArray() as Vec3);
   world.animate(elapsed,reduced,camera.position,renderUp);
   world.npcs.forEach(n=>{n.avatar.animate(elapsed,0,reduced);if(near===n.id){const local=n.anchor.worldToLocal(player.root.position.clone());const yaw=Math.atan2(local.x,local.z);const diff=Math.atan2(Math.sin(yaw-n.avatar.root.rotation.y),Math.cos(yaw-n.avatar.root.rotation.y));n.avatar.root.rotation.y+=diff*(1-Math.exp(-4*dt));}n.beacon.position.y=2.0+(reduced?0:Math.sin(elapsed*2)*.06);n.beacon.visible=state.quest!=='delivered'&&n.id===(state.quest==='available'?'mica':'sol');});
   presence.frame(now,dt,walker.up,reduced);
@@ -398,7 +403,9 @@ function ensureColony() {
   flight.setDesign((state.ship??defaultShip()).design);flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=activePlanet==='hub'?.43:.5;
   colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,
     applyPlayer:p=>{accept(p);return state.planetId===p.planetId&&state.revision<=p.revision;},
-    universe:u=>{flight?.universe(u);if(u.currentPlanet.kind==='garden'&&(!groundWorld||groundWorld.planetId!==u.currentPlanet.id||groundWorld.revision!==u.currentPlanet.revision))groundWorld=new GroundWorld(u.currentPlanet);},bearing:id=>flight?.mark(id),
+    universe:u=>{flight?.universe(u);const p=u.currentPlanet;if(p.environment&&terrainRevision!==p.revision){
+      world.dispose();world.parked.dispose();disposeGeometry(worldRoot);worldRoot=new T.Scene();scene.add(worldRoot);world=createWorld(worldRoot,false,p.environment,p.objects,p.blueprints);world.parked.setDesign((state.ship??defaultShip()).design);configureGround();terrainRevision=p.revision;renderer.domElement.dataset.terrainId=groundField().id;started=false;
+    }if(u.currentPlanet.kind==='garden'&&(!groundWorld||groundWorld.planetId!==u.currentPlanet.id||groundWorld.revision!==u.currentPlanet.revision))groundWorld=new GroundWorld(u.currentPlanet);},bearing:id=>flight?.mark(id),
     obstacles:blocks=>{if(activePlanet!=='hub')world.blocks.splice(0,world.blocks.length,...blocks);},
     pause:building=>{clearInput();overview=building;$('view-mode').setAttribute('aria-label',overview?'Walking view':'View planet');$('view-mode').innerHTML=overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>';},
     libraryRead:()=>request<import('../shared/blueprints.ts').LibraryEntry[]>('blueprints'),librarySave:body=>serial(()=>request<import('../shared/blueprints.ts').LibraryEntry>('blueprints/save',body)),
