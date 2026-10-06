@@ -1,0 +1,54 @@
+/* All colour values come from the host presentation contract. */
+.onboarding-tip {
+  color: var(--ui-dialog-text);
+  background: var(--ui-dialog-surface);
+  border: 1px solid var(--ui-dialog-border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font: 12px/1.5 system-ui, sans-serif;
+  text-align: left;
+  pointer-events: auto;
+  max-width: 100%;
+}
+.onboarding-tip .onboarding-title { display: block; font: 600 12px/1.4 system-ui, sans-serif; }
+#first-visit-tip.onboarding-tip .onboarding-copy { color: inherit; font: inherit; margin: 6px 0; max-width: none; }
+.onboarding-tip .onboarding-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.onboarding-tip button, .onboarding-reopen {
+  font: inherit;
+  color: var(--ui-dialog-text);
+  background: var(--ui-ground-paper);
+  border: 1px solid var(--ui-dialog-border);
+  border-radius: 3px;
+  min-height: 36px;
+  padding: 6px 10px;
+}
+.onboarding-tip button:focus-visible, .onboarding-reopen:focus-visible {
+  outline: 2px solid var(--ui-preview-focus);
+  outline-offset: 2px;
+}
+.onboarding-tip[data-placement="ground"] {
+  position: fixed;
+  z-index: 5;
+  top: 76px;
+  left: 24px;
+  width: 290px;
+  max-width: calc(100vw - 48px);
+}
+.onboarding-tip[data-placement="menu"], .onboarding-tip[data-placement="atlas"],
+.onboarding-tip[data-placement="builder"] { position: static; margin-top: 12px; }
+.onboarding-tip[data-placement="builder"] { font-size: 11px; padding: 8px; }
+.builder:has(> .onboarding-tip:not([hidden])) {
+  max-height: calc(100dvh - 145px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.onboarding-tip[data-placement="boarding"] { width: 250px; font-size: 11px; }
+.onboarding-reopen { display: block; margin: 16px 0; }
+@media (max-width: 700px) {
+  .builder:has(> .onboarding-tip:not([hidden])) { max-height: 43vh; }
+  .onboarding-tip[data-placement="ground"] { top: 66px; left: 17px; max-width: calc(100vw - 34px); }
+  .onboarding-tip[data-placement="boarding"] { width: 205px; }
+}
+@media (max-height: 500px) {
+  .onboarding-tip[data-placement="ground"] { max-height: calc(100dvh - 140px); overflow-y: auto; }
+}
