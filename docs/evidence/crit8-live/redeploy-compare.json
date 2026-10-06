@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-06T05:16:24.420645+00:00",
+  "mode": "compare",
+  "results": [
+    {
+      "case": "desktop-delivery",
+      "unchanged": true,
+      "compared": "saved player state"
+    },
+    {
+      "case": "phone-delivery",
+      "unchanged": true,
+      "compared": "saved player state"
+    },
+    {
+      "case": "desktop-build",
+      "unchanged": true,
+      "compared": "saved player, planet and object transforms"
+    },
+    {
+      "case": "phone-build",
+      "unchanged": true,
+      "compared": "saved player, planet and object transforms"
+    }
+  ]
+}

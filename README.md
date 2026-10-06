@@ -50,9 +50,10 @@ this version.
 
 Camera comfort, readable routes and a consistent visual language require judgement.
 Agent-run Chrome journeys and screenshot review informed changes; they are not a
-user study. Desktop and 390×844 touch layouts have local evidence. Physical phones,
-public-network behaviour and hosted persistence still need validation. [Verification](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/evidence/round-6/verification.md)
-records both failures and successful focused replays.
+user study. Hosted Chrome checks at 1920×1080 and 390×844 verified both core loops,
+visitor permissions and saved state across redeployment. Physical phones and public
+load remain untested. [Verification](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/evidence/crit8-live/verification.md)
+records the interrupted test-driver attempt and successful focused replay.
 
 ## Play and release status
 
@@ -62,7 +63,8 @@ Escape opens Pause, M opens the Atlas, and the harbour street leads to STARPORT 
 [Course Fly site](https://comp4020-final-ray0766.fly.dev/) ·
 [Source repository](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766) ·
 [Build and deploy status](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/actions/workflows/checks.yml).
-The release uses the existing course allocation; hosted acceptance is being verified.
+The release is deployed within the existing course allocation. Hosted checks cover
+walking, delivery, flight, building, visitor permissions and durable saved state.
 
 For local use, install Node 24 and pnpm 11, then run `pnpm install`, `pnpm build`
 and `pnpm start`. Open http://localhost:8080 and `/readme/`.

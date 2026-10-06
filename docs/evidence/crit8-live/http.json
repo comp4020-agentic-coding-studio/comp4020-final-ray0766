@@ -1,0 +1,26 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "bytes": 12093,
+    "bundles": [
+      "/assets/index-BfIgytnH.js"
+    ]
+  },
+  {
+    "path": "/readme/",
+    "status": 200,
+    "bytes": 5058,
+    "all_readme_headings_present": true
+  },
+  {
+    "path": "/credits/",
+    "status": 200,
+    "bytes": 4541
+  },
+  {
+    "path": "/healthz",
+    "status": 200,
+    "bytes": 11
+  }
+]

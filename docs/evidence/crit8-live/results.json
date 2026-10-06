@@ -1,0 +1,53 @@
+{
+  "application_commit": "89b8e099eae97599ecf16aa77c63ffe0e3befc42",
+  "application_bundle": "index-BfIgytnH.js",
+  "initial_ci": {
+    "id": 37416393816,
+    "check": "success",
+    "deploy": "success"
+  },
+  "restart_ci": {
+    "id": 37417440868,
+    "check": "success",
+    "deploy": "success"
+  },
+  "chrome": {
+    "channel": "installed Chrome 154",
+    "headed": true,
+    "workers": 1,
+    "viewports": [
+      [
+        1920,
+        1080
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "initial_run": {
+      "passed": 3,
+      "interrupted": 1,
+      "runner_exit": -2,
+      "reason": "Temporary phone driver selected the default world already claimed in the preceding desktop test; interrupted before its long timeout."
+    },
+    "focused_replay": {
+      "passed": 1,
+      "exit": 0,
+      "duration_seconds": 35.9,
+      "change": "Driver explicitly selects an unclaimed world. No application changes."
+    },
+    "physical_phone": false
+  },
+  "privacy": {
+    "session_values_published": false,
+    "private_test_state_location": "outside repository",
+    "user_cookies_cleared": false
+  },
+  "cleanup": {
+    "owned_test_runners_exited": true,
+    "first_owned_browser_exited": true,
+    "temporary_local_server_started": false
+  },
+  "local_original_save_migrated": false
+}

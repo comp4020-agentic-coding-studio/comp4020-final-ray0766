@@ -1,4 +1,4 @@
-# Process — Little Worlds, Crit 8 candidate
+# Process — Little Worlds, Crit 8
 
 > AI-assisted account based on recorded instructions, commits and executed
 > checks. Implementation, automated tests and browser captures were performed by agents;
@@ -101,14 +101,22 @@ a final paused-position flush and walking at the expanded south pole.
 
 [Round 6 verification](docs/evidence/round-6/verification.md) links screenshots and
 failed-run evidence. Its desktop performance captures were 1600×1000; the phone
-viewport was 390×844 on a Mac, not a physical phone. Final hosted acceptance must
-use the course's 1920×1080 and 390×844 sizes. A startup comparison preserved all
-rows in five existing tables. Earlier container restart evidence remains separate
-from this round; hosted persistence has not yet been established.
+viewport was 390×844 on a Mac, not a physical phone. A startup comparison preserved all
+rows in five existing tables. These older local results remain separate from the
+new hosted release evidence.
 
-The student approved public release of the complete repository history and revised
-the reflection to begin with topic selection. Publication, CI and Fly deployment
-are being carried out as explicit release steps, not inferred from local success.
-This overview replaces the accumulated chronology; earlier accounts remain in Git
-history. Fresh preparation results are in [the preflight record](docs/evidence/crit8-preflight.md);
-hosted results will be recorded separately without rewriting earlier evidence.
+The student approved public release of the complete history and revised the reflection
+to begin with topic selection. [89b8e09](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/89b8e09)
+contains that writing. Existing Actions credentials deployed it to the course Fly
+app; check and deploy jobs passed. Headed Chrome at 1920×1080 and 390×844 then
+verified delivery, flight, building, reopening and visitor permissions. Three cases
+passed initially; the phone build driver selected an already-owned destination
+and was interrupted. Selecting an unclaimed world fixed the driver; its focused
+replay passed without an application change.
+
+A second deployment of the same commit updated the existing Fly machine. Complete
+saved player state and building transforms for four isolated test identities
+matched their settled pre-deploy baselines. [Hosted evidence](docs/evidence/crit8-live/verification.md)
+links both successful CI runs, screenshots and comparison results. Original local
+saves were not uploaded. Physical phones and public load remain untested. This
+overview replaces the accumulated chronology; earlier accounts stay in Git history.
