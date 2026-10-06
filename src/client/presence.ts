@@ -6,11 +6,22 @@ import type { PresenceSnapshot,Visitor } from '../shared/presence.ts';
 import { MAX_NEIGHBOURS,PRESENCE_TTL } from '../shared/presence.ts';
 import { RADIUS } from '../shared/world.ts';
 interface Remote {visitor:Visitor;root:T.Group;low:T.Group;body:T.MeshStandardMaterial;avatar:ReturnType<typeof courier>|null;position:T.Vector3;from:T.Vector3;facing:T.Vector3;at:number;speed:number}
+export interface PresenceTicket {readonly epoch:number;readonly request:number;readonly planetId:string}
 export class GroundPresence {
   private people=new Map<string,Remote>();private planet='';private receivedAt=0;
+  private epoch=0;private requested=0;private accepted=0;
   constructor(private scene:T.Scene,private canvas:HTMLCanvasElement){}
-  clear(){for(const r of this.people.values())disposeGeometry(r.root);this.people.clear();this.canvas.dataset.visitors='0';this.canvas.dataset.nearbyVisitors='0';document.getElementById('presence-summary')!.textContent='No other visitors nearby.';}
-  receive(snapshot:PresenceSnapshot,now=performance.now()){
+  ticket(planetId:string):PresenceTicket{return {epoch:this.epoch,request:++this.requested,planetId};}
+  clear(){
+    this.epoch++;this.planet='';this.receivedAt=0;
+    for(const r of this.people.values())disposeGeometry(r.root);this.people.clear();
+    for(const key of ['visitors','nearbyVisitors','visibleVisitors','detailedVisitors'])this.canvas.dataset[key]='0';
+    delete this.canvas.dataset.presencePlanet;
+    document.getElementById('presence-summary')!.textContent='No other visitors nearby.';
+  }
+  receive(snapshot:PresenceSnapshot,now=performance.now(),ticket=this.ticket(snapshot.planetId)){
+    if(ticket.epoch!==this.epoch||ticket.request<=this.accepted||ticket.planetId!==snapshot.planetId)return false;
+    this.accepted=ticket.request;
     if(snapshot.planetId!==this.planet){this.clear();this.planet=snapshot.planetId;}
     this.receivedAt=now;const ids=new Set(snapshot.visitors.map(v=>v.id));
     for(const[id,r]of this.people)if(!ids.has(id)){disposeGeometry(r.root);this.people.delete(id);}
@@ -27,6 +38,7 @@ export class GroundPresence {
       const target=new T.Vector3(...visitor.position);r.speed=Math.min(3,r.position.angleTo(target)*RADIUS/Math.max(.3,(now-r.at)/1000));r.from.copy(r.position);r.visitor=visitor;r.at=now;r.body.color.set(PALETTES[visitor.character]);r.avatar?.setColor(visitor.character);
     }
     this.canvas.dataset.visitors=String(this.people.size);this.canvas.dataset.nearbyVisitors=String(snapshot.nearbyCount);this.canvas.dataset.presencePlanet=snapshot.planetId;document.getElementById('presence-summary')!.textContent=snapshot.nearbyCount?`${snapshot.nearbyCount} other visitor${snapshot.nearbyCount===1?'':'s'} on this world · cyan foot rings`:'No other visitors nearby.';
+    return true;
   }
   frame(now:number,dt:number,self:T.Vector3,reduced:boolean){
     if(now-this.receivedAt>PRESENCE_TTL){if(this.people.size)this.clear();return;}

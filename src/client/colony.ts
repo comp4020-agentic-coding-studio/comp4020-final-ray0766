@@ -7,6 +7,7 @@ import type { BuildKind, PlacedObject, Universe } from '../shared/planets.ts';
 import type { PlayerState, Vec3 } from '../shared/world.ts';
 import { builtObject, disposeGeometry } from './build-art.ts';
 import type { Workshop } from './workshop.ts';
+import { canAcceptUniverse } from './sync.ts';
 import {lazyPanel,openPanel} from './lazy-panel.ts';
 import type { LibraryEntry } from '../shared/blueprints.ts';
 import { structureFit, structureSize } from '../shared/blueprints.ts';
@@ -93,8 +94,7 @@ export class Colony {
   }
   stopBuilding(){return this.setBuilding(false);}
   accept(next:Universe){
-    if(!this.bridge.applyPlayer(next.player))return;
-    if(this.universe?.currentPlanet.id===next.currentPlanet.id&&this.universe.currentPlanet.revision>next.currentPlanet.revision)return;
+    if(!canAcceptUniverse(this.universe,next)||!this.bridge.applyPlayer(next.player))return;
     const changed=this.universe?.currentPlanet.id!==next.currentPlanet.id;
     this.universe=next;el('open-history').hidden=!next.currentPlanet.mine;el('open-terrain').hidden=!next.currentPlanet.mine||next.player.flight.mode!=='ground';this.syncing=true;this.bridge.universe(next);
     if(changed){this.setBuilding(false,true);this.clearDraft();}
@@ -112,7 +112,8 @@ export class Colony {
   }
   private async poll(){
     if(this.pollBusy||this.busy||this.workshop?.opened)return;this.pollBusy=true;
-    try{this.accept(await this.bridge.read());}catch{this.syncing=false;this.hud();this.editor();}finally{this.pollBusy=false;}
+    const before=this.universe;
+    try{this.accept(await this.bridge.read());}catch{if(this.universe===before){this.syncing=false;this.hud();this.editor();}}finally{this.pollBusy=false;}
   }
   private async command(route:string,body:unknown){
     if(this.busy||!this.syncing)return false;this.busy=true;this.editor();this.hud();

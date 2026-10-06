@@ -15,7 +15,9 @@ export function presenceStore(state:(id:string)=>PlayerState){
       sweep(now);
       if(Object.keys(body).some(k=>!['planetId','facing'].includes(k))||!validPosition(body.facing))throw new RequestError(400,'Send only the current planet and a finite unit facing direction.');
       const self=state(id);
-      if(self.flight.mode!=='ground'||body.planetId!==self.planetId){entries.delete(id);throw new RequestError(409,'Your surface visit has changed.');}
+      if(self.flight.mode!=='ground'){entries.delete(id);throw new RequestError(409,'Your surface visit has changed.');}
+      // A delayed request from the previous planet must not erase a newer visit.
+      if(body.planetId!==self.planetId)throw new RequestError(409,'Your surface visit has changed.');
       const radial=body.facing.reduce((n,v,i)=>n+v*self.position[i],0);
       if(Math.abs(radial)>.35)throw new RequestError(400,'Facing must follow the planet surface.');
       const facing=normalize(body.facing.map((v,i)=>v-radial*self.position[i]) as Vec3);

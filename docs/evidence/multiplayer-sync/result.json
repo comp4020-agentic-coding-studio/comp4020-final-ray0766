@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "checks": [
+    "Fresh owner/visitor presence expires offline and reconnects",
+    "Owner moves a saved lamp with real build controls; visitor scene revision and visible world update",
+    "Visitor walks onto upper floor; owner removes it with real controls; visitor falls and lands on terrain; visitor delete remains forbidden",
+    "Real return flight leaves both planets with isolated presence"
+  ],
+  "pageErrors": [],
+  "browser": "154.0.8037.98",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "fixtures": "Two fresh browser identities; owned fixtures only; normal APIs create the stair blueprint; movement, object move/delete and flight use real controls. No storageState or cookies saved."
+}

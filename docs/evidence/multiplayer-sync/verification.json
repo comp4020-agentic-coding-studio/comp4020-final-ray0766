@@ -1,0 +1,51 @@
+{
+  "baseCommit": "13a3e1e008e462dea499e084929d9c1eb680f230",
+  "focusedTests": {
+    "files": [
+      "spec/multiplayer-sync.test.ts",
+      "spec/presence-client.test.ts"
+    ],
+    "passed": 8,
+    "failed": 0,
+    "database": ":memory:",
+    "identities": [
+      "owner",
+      "visitor"
+    ],
+    "command": "node node_modules/vitest/vitest.mjs run --config /tmp/final-multiplayer-tests/vitest.config.mjs",
+    "config": "Selected the two listed files only; no global HTTP setup."
+  },
+  "baselineRegression": {
+    "source": "base versions of src/client/colony.ts and src/server/presence.ts",
+    "selected": 3,
+    "failedAsExpected": 3,
+    "restoredFixedFiles": true
+  },
+  "checks": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "productionBuild": "passed",
+    "mainPatchTemporarilyAppliedForIntegrationChecks": true
+  },
+  "browser": {
+    "command": "APP_URL=http://127.0.0.1:8102 MULTIPLAYER_EVIDENCE=docs/evidence/multiplayer-sync node node_modules/@playwright/test/cli.js test tests/e2e/multiplayer-sync.spec.ts --workers=1 --reporter=line",
+    "result": "passed",
+    "tests": 1,
+    "duration": "1.5m",
+    "resultFile": "result.json",
+    "screenshotsVisuallyInspected": true,
+    "observedLimitation": "Existing newer-ground-position recovery notice after owner removes support; visitor lands and successfully completes return flight."
+  },
+  "cleanup": {
+    "contextsClosed": true,
+    "serverExited": true,
+    "port8102Free": true,
+    "cookiesSaved": false
+  },
+  "notRun": [
+    "full suite",
+    "393 sentinel",
+    "push",
+    "deploy"
+  ]
+}
