@@ -109,3 +109,14 @@ WebP fallbacks remain bundled. The Basis transcoder JS/WASM pair is the unchange
 three.js 0.186.1 distribution of Binomial's Apache-2.0 transcoder. Source and notices:
 https://github.com/BinomialLLC/basis_universal. No KitBash assets were downloaded or
 added. Medium detail defaults to WebP; `?textures=ktx2` is a diagnostic override.
+
+## Ship integration (local workshop branch)
+
+The ship factory, design codec, socket specifications, markings and six part
+families are copied unchanged from `planet-claude-modules` commit
+`a4546bb120d969774776f1fbe2cb1c990a7c3e66`. They were authored in the independent
+Claude module workspace; this integration adds server storage, editor controls
+and scene/lifecycle adapters, and does not claim authorship of the geometry.
+The 12 added source files have SHA-256 entries in
+`src/assets/claude-geometry/PROVENANCE.json`. Existing shared material and texture
+credits above continue to apply. The prior procedural ship is no longer rendered.

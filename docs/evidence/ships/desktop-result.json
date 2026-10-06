@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "checks": [
+    "server save, normalized registration, failed-save recovery, released preview context, refresh",
+    "real controls: board, launch, refresh in flight, fly to bearing, land with same design"
+  ],
+  "landedPlanet": "p-c08edc5a-915f-45d9-ac61-741d4d1b5336",
+  "shipVersion": 1,
+  "pageErrors": []
+}

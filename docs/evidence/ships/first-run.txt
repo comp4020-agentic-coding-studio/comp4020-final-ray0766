@@ -1,0 +1,1 @@
+First headed Chrome run reached successful server save and intentional 503 draft preservation, then timed out trying to click Reload saved design. The trace showed the main HUD absolute footer overlaid the scroll panel. Scoped static footer positioning fixes the application layout; the rerun uses a bounded action timeout. No flight/landing success was claimed from this run.

@@ -1,7 +1,7 @@
 {
   "source": "planet-claude-modules",
   "commit": "a4546bb120d969774776f1fbe2cb1c990a7c3e66",
-  "scope": "Unchanged R3 dependency snapshot. Main adapters own persistence, physics, lifecycle and versioned URL routing.",
+  "scope": "Unchanged R3 and ship factory dependency snapshot. Main adapters own persistence, physics, lifecycle and versioned URL routing.",
   "files": {
     "blueprint/codec.ts": "ddf2d5c619e9e0f173d301e36b97dd4bb45625023f6f4617cbc1fca90ea1114c",
     "blueprint/editor.ts": "9f84b0d3f72662e30dec6b47d51cdb6acfbc11a40a7e0a10bbdf89129fb63c90",
@@ -34,7 +34,19 @@
     "style/practical.ts": "3c8b8f017288892008d425e4a67e48ea49763df42c4b85a42c049beda9914810",
     "style/scans.ts": "167d61efbd3a0c515c6266b124bc48c9c977f33c55753f531d3cba010affe914",
     "style/textures.ts": "7b87efb493db2da876a94a3f6eabef3a075473a42856ef41c6a309914977f6cc",
-    "style/tokens.ts": "8cabff6f6765a9fed1a2652245dcef1ef64c98feb5cd1f1062241c6b683fc9a9"
+    "style/tokens.ts": "8cabff6f6765a9fed1a2652245dcef1ef64c98feb5cd1f1062241c6b683fc9a9",
+    "ship/design.ts": "c89bc87ec95092b2688a8fef415d1b0f4476e37707e71ea1dc4801c0c749249d",
+    "ship/spec.ts": "9028815533c9c968f7c587e87507bc134f97c06cebf713516f5a80aba32ae3b9",
+    "ship/factory.ts": "d7bd29dfb2d04c9118759d6208818d71a5541cafc3ce6c7cb7a549e166079cba",
+    "ship/kit.ts": "eedbf25acaed6065a9800829c71c69a61416a89dc582115d5e82fdd41865ab6d",
+    "ship/geom.ts": "69065937425b6f37bed02bb333225d50915d82e36d25f9ea010754a21f3a4bf7",
+    "ship/markings.ts": "e03d05370fd75dc5f95e355850f095ee3cc713818abeec237a0813bc2f6fbc8d",
+    "ship/parts/tails.ts": "a8af5ac1648d5484c2272906e637f879076954a795f469dfe629f5f186bf4ddb",
+    "ship/parts/cockpits.ts": "7cc4b8ad37abb3493bb602eeb76539cbff076445e6a6b73c535097f35e6655f9",
+    "ship/parts/hulls.ts": "2495c9bd8b39360a1dbea38677152cda6f489f4e1b30af0c8e2e316fdeedc49e",
+    "ship/parts/dorsals.ts": "58a62aecb0ad616ff1a31246a383861c1d99cf006bca72d90c4ca47c87c9813a",
+    "ship/parts/engines.ts": "760535b6b9206c31b19f5d4ccee5fa41bbdfcb9e760449a1e03875267bd211cd",
+    "ship/parts/wings.ts": "5033e6cf10a3affc2c3745dfd0f305ac857d393a092416b56ed7eea13e27e520"
   },
   "assets": [
     "public/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/basis/basis_transcoder.js",

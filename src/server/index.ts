@@ -59,6 +59,7 @@ const server = createServer(async (req, res) => {
       try { body = JSON.parse(text); } catch { throw new RequestError(400, 'Invalid JSON.'); }
       if (!body || Array.isArray(body) || typeof body !== 'object') throw new RequestError(400, 'Expected an object.');
       if (url.pathname === '/api/blueprints/save') send(200, store.saveBlueprint(id, body));
+      else if(url.pathname==='/api/ship/save')send(200,store.saveShip(id,body));
       else if(url.pathname==='/api/presence')send(200,presence.heartbeat(id,body));
       else if (url.pathname === '/api/character') send(200, store.character(id, body.character));
       else if (url.pathname === '/api/move') {

@@ -1,6 +1,8 @@
 import * as T from 'three';
 import { ORBIT_DETAIL_BUDGET,ORBIT_VISIBLE_BUDGET,regionFor } from '../shared/regions.ts';
-import { makeShip, orbitalPlanet, configureSpace } from './space-art.ts';
+import { makeShip } from './ship-model.ts';
+import type { ShipDesign } from '../assets/claude-geometry/ship/design.ts';
+import { orbitalPlanet, configureSpace } from './space-art.ts';
 import { bearing, flightStep, forward, LAND_RADIUS, LAND_SPEED, spaceDistance, wrapAngle } from '../shared/flight.ts';
 import type { FlightState } from '../shared/flight.ts';
 import type { PlanetSummary, Universe } from '../shared/planets.ts';
@@ -86,6 +88,12 @@ export class SpaceFlight {
   mark(id:string){
     if(this.active)this.pilot!.targetId=id;else this.pendingTarget=id;
     this.clear();this.bridge.notice(this.active?'Bearing marked. Turn toward the diamond and fly.':'Bearing marked. Board your ship when you are ready.');
+  }
+  setDesign(design: ShipDesign) {
+    this.ship.setDesign(design);
+    el('flight-hud').dataset.shipDesign = this.ship.document;
+    document.querySelector('.flight-ident b')!.textContent = design.registration || design.name;
+    document.querySelector('.flight-ident span')!.textContent = design.name;
   }
   openLaunch(){if(this.active||this.busy||!this.bridge.player())return;if(!this.bridge.canBoard()){this.bridge.notice('Walk to the boarding gate beside your parked ship.');return;}this.clear();this.bridge.clearGround();this.action='launch';el('flight-title').textContent='Boarding clearance';el('flight-detail').textContent='Your ship is docked at this gate. Confirm boarding and departure, or stay on the surface. W to thrust, A / D to turn, ↑ / ↓ to climb or dive, S to brake.';el('confirm-flight').textContent='Launch ship';this.dialog.showModal();}
   private nearby(){if(!this.pilot)return null;return [...this.planets].sort((a,b)=>spaceDistance(this.pilot!.position,a.center)-spaceDistance(this.pilot!.position,b.center))[0]??null;}

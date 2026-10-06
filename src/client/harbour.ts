@@ -6,7 +6,7 @@ import type { Vec3,NpcId } from '../shared/world.ts';
 import { HUB_DOCK } from '../shared/ports.ts';
 import { groundRadius,logicalNormal,surfaceNormal,surfacePoint,surfaceScale,surfaceHeight } from './terrain.ts';
 import { courier } from './character.ts';
-import { makeShip } from './space-art.ts';
+import { makeShip } from './ship-model.ts';
 import { harbourMaterials } from './harbour-materials.ts';
 import { sharedParts,habitatCabin } from './shared-assets.ts';
 import type { Obstacle } from './scene.ts';
@@ -84,7 +84,7 @@ export function createHarbour(scene:T.Scene){
   for(const [x,z,yaw]of [[7,-14,-Math.PI/2],[-7,-22,Math.PI/2]]){const g=atMetres(near,x,z,yaw);g.add(habitatCabin());const n=logicalNormal(g.position.clone().normalize());blocks.push({point:n,radius:1.2/surfaceScale(n),height:2.5});}
   for(const [x,z]of [[-4.8,-9],[4.8,-21]]){const g=atMetres(near,x,z);g.add(sharedParts([{part:'service.light',position:[0,0,0]}]));}
   const direction=atMetres(near,-3.2,8);box(direction,.07,2.7,.07,0,1.35,0,dark);sign(direction,'STARPORT  ↑','BOARDING / FOLLOW BLUE LINE',2.75,0,2.3,.055);
-  // Actual boardable terminal and parked utility vessel with landing gear.
+  // Boardable terminal and the player’s currently saved ship.
   const dock=anchor(scene,HUB_DOCK),gate=anchor(near,HUB_DOCK);
   for(const side of [-1,1]){box(gate,.65,6.1,.9,side*5.2,3.05,-1.6,metal);box(gate,.075,4.5,.075,side*4.84,2.95,-1.12,cyan);box(gate,1.2,.6,1.45,side*5.2,.3,-1.6,concrete);beam(gate,new T.Vector3(side*5.2,4.0,-1.6),new T.Vector3(side*3.0,5.9,-1.6),.10,pale);}
   box(gate,11.3,.55,5.0,0,6.2,-2.2,dark);box(gate,11.7,.15,5.3,0,6.55,-2.2,pale);for(let x=-5;x<=5;x+=.9)box(gate,.12,.16,4.7,x,5.87,-2.2,metal);sign(gate,'SUNSEED / STARPORT','GATE 01   /   FLIGHT SERVICES   /   OPEN',7.9,0,6.2,.35);
@@ -93,8 +93,7 @@ export function createHarbour(scene:T.Scene){
   const apron=[];for(let x=-2;x<=2;x++)for(let z=-2;z<=2;z++)apron.push({part:'pad.tile' as const,position:[x,.34,z] as Vec3});pad.add(sharedParts(apron, 'low'));mesh(pad,new T.CylinderGeometry(8.6,8.6,.3,64),dark,[0,.13,0]);const rim=mesh(pad,new T.TorusGeometry(8.1,.04,6,96),amber,[0,.32,0],false);rim.rotation.x=-Math.PI/2;
   for(const x of [-3,3]){box(pad,.07,.02,9,x,.32,0,pale);for(const z of [-5.4,5.4])box(pad,3,.024,.10,x,.33,z,pale);}
   for(let i=0;i<16;i++){const a=i/16*Math.PI*2;box(pad,.3,.08,.15,Math.cos(a)*7.7,.35,Math.sin(a)*7.7,cyan);}
-  const parked=makeShip();const shipAnchor=anchor(scene,shipPoint);shipAnchor.add(parked.root);parked.root.scale.setScalar(1.35);parked.root.position.y=1.05;parked.flame.visible=false;
-  for(const x of [-.85,.85])for(const z of [-1.6,1.5]){cylinder(parked.root,.048,.62,x,-.55,z,dark);box(parked.root,.38,.09,.44,x,-.84,z,metal);}
+  const parked=makeShip();const shipAnchor=anchor(scene,shipPoint);shipAnchor.add(parked.root);parked.root.position.y=1.05;parked.animate(0,false);
   const shipN=new T.Vector3(...shipPoint);blocks.push({point:shipN,radius:3.6/surfaceScale(shipN),height:2.5});
   // A distant cargo hall and an identifiable mast terminate the landing axis.
   const hall=building(far,0,-104,39,22,16,0,false);box(hall,26,9,.22,0,4.6,11.25,dark);for(let x=-12;x<=12;x+=3)box(hall,.16,8.9,.3,x,4.6,11.4,metal);sign(hall,'ORBITAL / FREIGHT','SUNSEED CIVIL SPACEPORT',24,0,13.1,11.4);

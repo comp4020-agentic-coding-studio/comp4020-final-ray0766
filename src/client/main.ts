@@ -1,4 +1,6 @@
 import * as T from 'three';
+import { Shipyard } from './shipyard.ts';
+import { defaultShip } from '../shared/ships.ts';
 import { PracticalLights } from '../assets/claude-geometry/style/practical.ts';
 import { worldMaterials } from './shared-assets.ts';
 import { textureFormat } from './resource-policy.ts';
@@ -74,7 +76,7 @@ function accept(next: PlayerState) {
   const justLanded=state?.flight.mode==='space'&&next.flight.mode==='ground'&&next.revision>=state.revision;
   if (!state || next.revision >= state.revision) state = next;
   if (state.planetId !== activePlanet) {
-    activePlanet = state.planetId; disposeGeometry(worldRoot); worldRoot = new T.Scene(); scene.add(worldRoot);
+    activePlanet = state.planetId; world.parked.dispose(); disposeGeometry(worldRoot); worldRoot = new T.Scene(); scene.add(worldRoot);
     world = createWorld(worldRoot, activePlanet === 'hub');configureGround(); walker = new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;near=null;
     $('npc-mica').hidden=true;$('npc-sol').hidden=true;$('conversation').hidden=true;document.body.classList.remove('delivery-open');
   }
@@ -85,6 +87,7 @@ function accept(next: PlayerState) {
   }
   if(state.planetId==='hub'){standing=null;groundWorld=null;motionPending=[];physicsClock=0;}
   if(previousPlanet!==state.planetId||previousMode!==state.flight.mode)presence.clear();
+  const design=(state.ship??defaultShip()).design;world.parked.setDesign(design);flight?.setDesign(design);renderer.domElement.dataset.shipDesign=world.parked.document;
   flight?.receive(state.flight,reconnecting);
   if(previousMode==='ground'&&state.flight.mode==='space'&&activePlanet==='hub'&&!reduced&&flight){departure={time:0,base:world.parked.root.position.clone(),start:camera.position.clone(),rotation:camera.quaternion.clone()};flight.presentation=true;document.body.classList.add('departing');notice('Departure clearance granted · Sunseed Harbour',4200);}
   online = navigator.onLine; status(online?'Progress saved':'Offline · retrying',!online); renderTask();
@@ -194,6 +197,8 @@ $('begin').onclick=()=>{courierDialog.close();notice('Follow the blue-lit street
 const menu=$<HTMLDialogElement>('menu-dialog');
 $('open-menu').onclick=()=>{clearInput();flight?.clear();menu.showModal();void savePosition(true);};
 $('close-menu').onclick=$('resume').onclick=()=>menu.close();
+const shipyard=new Shipyard({read:async()=>{const next=await serial(()=>request('state'));accept(next);return next.ship??defaultShip();},save:async body=>{const next=await serial(()=>request('ship/save',body));accept(next);return next.ship??defaultShip();},allowed:()=>!!state&&online&&state.flight.mode==='ground'});
+$('open-shipyard').onclick=()=>{menu.close();clearInput();if(state?.flight.mode==='space'){notice('Land before changing your ship.');return;}void shipyard.open();};
 $('guide-port').onclick=()=>{guideDock=true;menu.close();notice('Your parked ship is marked. Walk there to board.');};
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('dialog[open]')){e.preventDefault();clearInput();flight?.clear();menu.showModal();void savePosition(true);}if(e.key.toLowerCase()==='m'&&!document.querySelector('dialog[open]')){$('open-map').click();}});
 document.querySelectorAll<HTMLButtonElement>('[data-character]').forEach(button=>button.onclick=async()=>{
@@ -257,7 +262,7 @@ let previous=performance.now(),elapsed=0,uiTick=0,started=false;
 function animate(now:number) {
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.05);previous=now;elapsed+=dt;
-  if(!walker || document.body.classList.contains('workshop-open')) return;
+  if(!walker || (document.body.classList.contains('workshop-open')||document.body.classList.contains('shipyard-open'))) return;
   if(flight?.active&&departure){
     $('boarding-prompt').hidden=true;$('dock-guide').hidden=true;
     if(online&&!document.hidden&&!document.querySelector('dialog[open]'))departure.time+=dt;
@@ -268,7 +273,7 @@ function animate(now:number) {
     poseCamera.position.copy(shot);poseCamera.up.copy(up);poseCamera.lookAt(pos.clone().addScaledVector(north,10));
     camera.position.copy(departure.start).lerp(shot,Math.min(1,t*3));camera.quaternion.copy(departure.rotation).slerp(poseCamera.quaternion,Math.min(1,t*3));
     world.animate(elapsed,reduced,camera.position,up);renderer.domElement.dataset.departure=String(t);practical.update(scene,camera,dt);renderer.render(scene,camera);
-    if(t>=1){ship.position.copy(departure.base);world.parked.flame.visible=false;departure=null;flight.presentation=false;flight.clear();document.body.classList.remove('departing');delete renderer.domElement.dataset.departure;}return;
+    if(t>=1){ship.position.copy(departure.base);world.parked.animate(0,false);departure=null;flight.presentation=false;flight.clear();document.body.classList.remove('departing');delete renderer.domElement.dataset.departure;}return;
   }
   if(flight?.active){$('boarding-prompt').hidden=true;$('dock-guide').hidden=true;flight.frame(dt,now,renderer);if(now>noticeUntil)$('notice').hidden=true;return;}
   const paused=!!document.querySelector('dialog[open]')||courierDialog.open||helpDialog.open||!!colony?.paused||!online||document.hidden;
@@ -386,7 +391,7 @@ function animate(now:number) {
 function ensureColony() {
   if(colony)return;
   flight=new SpaceFlight({canvas:renderer.domElement,renderer,online:()=>online,player:()=>state,checkpoint:body=>serial(()=>request('flight/checkpoint',body)),command:(route,body)=>serial(()=>request<Universe>(route,body)),apply:accept,applyUniverse:u=>colony?.accept(u),flushGround:async()=>{await savePosition(true);await queue;},clearGround:()=>{clearInput();colony?.stopBuilding();},canBoard:()=>!!walker&&!colony?.building&&distance(walker.up.toArray() as Vec3,portPoint(activePlanet))<BOARD_RADIUS-.12,failed,notice});
-  flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=activePlanet==='hub'?.43:.5;
+  flight.setDesign((state.ship??defaultShip()).design);flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=activePlanet==='hub'?.43:.5;
   colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,
     applyPlayer:p=>{accept(p);return state.planetId===p.planetId&&state.revision<=p.revision;},
     universe:u=>{flight?.universe(u);if(u.currentPlanet.kind==='garden'&&(!groundWorld||groundWorld.planetId!==u.currentPlanet.id||groundWorld.revision!==u.currentPlanet.revision))groundWorld=new GroundWorld(u.currentPlanet);},bearing:id=>flight?.mark(id),
