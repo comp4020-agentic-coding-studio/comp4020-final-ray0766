@@ -1,0 +1,10 @@
+{
+  "phase": "after-phone",
+  "browser": "154.0.8037.98",
+  "checks": [],
+  "errors": [],
+  "rejections": [],
+  "samples": [],
+  "status": "interrupted",
+  "error": "Error: Walking did not reach waypoint: {\"position\":[-0.45488954287149996,0.7700363079319278,0.4473472792503866],\"radius\":10.350124676729266,\"north\":{\"x\":0.32283129601855887,\"y\":0.6107464609208368,\"z\":-0.7230274647505794},\"grounded\":true}"
+}

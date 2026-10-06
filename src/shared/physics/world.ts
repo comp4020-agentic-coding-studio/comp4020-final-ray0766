@@ -83,7 +83,7 @@ export class GroundWorld {
     }
     return best;
   }
-  private hit(p:Vec3,radius:number):{normal:Vector3;tag:string}|null{
+  private hit(p:Vec3,radius:number):{normal:Vector3;tag:string;depth:number}|null{
     const dir=vec(p);let deepest:{normal:Vector3;tag:string;depth:number}|null=null;
     for(const body of this.near(dir)){
       if(body.round){const b=body.round,d=body.dir.angleTo(dir)*RADIUS;
@@ -137,8 +137,13 @@ export class GroundWorld {
         if(!hit){pose={position:candidate,radius,verticalSpeed,grounded};accepted=true;break;}
         const normal=hit.normal.projectOnPlane(next);
         if(normal.lengthSq()<1e-6){remaining.set(0,0,0);break;}
-        normal.normalize();const inward=remaining.dot(normal);if(inward<0)remaining.addScaledVector(normal,-inward);
-        if(remaining.lengthSq()<1e-10)break;
+        normal.normalize();const inward=remaining.dot(normal);
+        if(inward<0)remaining.addScaledVector(normal,-inward);
+        // Projection alone can leave the candidate capsule overlapping a corner
+        // (or a leaf after a radial step-up). Resolve that penetration as part
+        // of the slide, within the remaining input distance; never add speed.
+        const budget=remaining.length();if(budget<1e-5)break;
+        remaining.addScaledVector(normal,hit.depth+SKIN).clampLength(0,budget);
       }
       if(!accepted&&!pose.grounded){
         const support=this.support(pose.position,pose.radius+SKIN),v=Math.max(-MAX_FALL_SPEED,pose.verticalSpeed-GRAVITY*tick),r=Math.max(support.radius,pose.radius+v*tick);

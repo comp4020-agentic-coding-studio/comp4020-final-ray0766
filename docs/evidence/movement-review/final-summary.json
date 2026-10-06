@@ -1,0 +1,26 @@
+[
+  {
+    "phase": "final-phone",
+    "status": "completed",
+    "samples": 7,
+    "blockedSamples": 0,
+    "maxCameraOverrunMetres": 0.0,
+    "moveResponses": 37,
+    "moveStatusCounts": {
+      "200": 37
+    },
+    "pageErrors": []
+  },
+  {
+    "phase": "final-camera",
+    "status": "completed",
+    "samples": 37,
+    "blockedSamples": 0,
+    "maxCameraOverrunMetres": 0.0,
+    "moveResponses": 10,
+    "moveStatusCounts": {
+      "200": 10
+    },
+    "pageErrors": []
+  }
+]
