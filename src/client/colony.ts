@@ -82,7 +82,7 @@ export class Colony {
     if(!this.bridge.applyPlayer(next.player))return;
     if(this.universe?.currentPlanet.id===next.currentPlanet.id&&this.universe.currentPlanet.revision>next.currentPlanet.revision)return;
     const changed=this.universe?.currentPlanet.id!==next.currentPlanet.id;
-    this.universe=next;this.syncing=true;this.bridge.universe(next);
+    this.universe=next;el('open-history').hidden=!next.currentPlanet.mine;this.syncing=true;this.bridge.universe(next);
     if(changed){this.setBuilding(false);this.clearDraft();}
     if(this.building&&(!next.currentPlanet.mine||next.player.flight.mode==='space'))this.setBuilding(false);
     const key=next.currentPlanet.id+':'+next.currentPlanet.revision;

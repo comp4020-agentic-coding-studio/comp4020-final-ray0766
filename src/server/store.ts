@@ -3,6 +3,7 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { CHARACTERS, distance, INTERACT_DISTANCE, NPCS, normalize, SPAWN, SPEED, validPosition } from '../shared/world.ts';
 import type { Character, PlayerState, Quest } from '../shared/world.ts';
+import { historyStore, migrateHistory } from './history.ts';
 import { shipStore } from './ships.ts';
 import { groundStore } from './ground.ts';
 import { blueprintStore } from './blueprints.ts';
@@ -16,7 +17,7 @@ export function openStore(path: string) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-  if (schema > 7) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  if (schema > 8) { db.close(); throw new Error('Database schema is newer than this application.'); }
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
@@ -25,7 +26,7 @@ export function openStore(path: string) {
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
     );`);
   let migrationBackup: string | null = null;
-  if (schema < 7) {
+  if (schema < 8) {
     if (schema > 0 && path !== ':memory:') {
       migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
       // VACUUM INTO includes committed WAL data and produces a consistent restore point.
@@ -87,12 +88,14 @@ export function openStore(path: string) {
         player_id TEXT PRIMARY KEY REFERENCES players(id), document TEXT NOT NULL,
         version INTEGER NOT NULL CHECK(version>=1)
       );`);
-      db.exec('PRAGMA user_version=7; COMMIT;');
+      if (schema < 8) migrateHistory(db);
+      db.exec('PRAGMA user_version=8; COMMIT;');
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
+  const history = historyStore(db);
   const ships = shipStore(db);
   const blueprints = blueprintStore(db);
-  const planets = planetStore(db, blueprints);
+  const planets = planetStore(db, blueprints, history);
   const navigation=navigationStore(db,planets);
   const ground=groundStore(db,planets);
   const row = (id: string): Row => {
@@ -109,6 +112,8 @@ export function openStore(path: string) {
   const universe = (id: string) => { const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) }; };
   return {
     db, state, universe, migrationBackup,
+    historyPage(id:string,planet:unknown,after?:unknown,limit?:unknown){row(id);return history.page(id,planet,after,limit);},
+    historySnapshot(id:string,planet:unknown,sequence?:unknown){row(id);return history.snapshot(id,planet,sequence);},
     saveShip(id: string, body: Record<string, unknown>) { row(id); ships.save(id, body); return state(id); },
     library(id: string) { row(id); return blueprints.list(id); },
     saveBlueprint(id: string, body: Record<string, unknown>) { row(id); return blueprints.save(id, body); },

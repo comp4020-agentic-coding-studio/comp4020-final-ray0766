@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "checks": [
+    "real UI create, move+rotate, delete append exactly four events",
+    "baseline, slider, play, historical deleted object, refresh, released context and unchanged live objects",
+    "390×844 touch replay controls and layout",
+    "independent visitor denied history and snapshots by server"
+  ],
+  "pageErrors": []
+}

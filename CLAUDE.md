@@ -95,3 +95,12 @@ prototype. They do not claim to be the student's finished academic harness.
   pinned release directory; old resource URLs remain served. Do not silently
   overwrite an immutable resource directory or mix transcoder versions. Physics,
   collision proxies and the custom harbour service.light stay independent.
+
+- The user explicitly authorised the next two local playable stages: owner-private
+  building history, then deterministic terrain selection/preview/apply. Keep current
+  building tables authoritative and append history in the same transaction. Import
+  old objects as a labelled baseline, never fabricated past events. Every history
+  read is owner-only; playback cannot write to the world. Terrain remains opt-in:
+  preserve null legacy environments and the public harbour, apply RESTRICT to all
+  existing buildings, and share ground semantics across rendering, physics and server
+  validation. No broad historical terrain migration, source-art changes or deployment.

@@ -1,4 +1,6 @@
 import * as T from 'three';
+import { PrivateHistory } from './history.ts';
+import type { HistoryPage, HistorySnapshot } from '../shared/history.ts';
 import { Shipyard } from './shipyard.ts';
 import { defaultShip } from '../shared/ships.ts';
 import { PracticalLights } from '../assets/claude-geometry/style/practical.ts';
@@ -197,6 +199,8 @@ $('begin').onclick=()=>{courierDialog.close();notice('Follow the blue-lit street
 const menu=$<HTMLDialogElement>('menu-dialog');
 $('open-menu').onclick=()=>{clearInput();flight?.clear();menu.showModal();void savePosition(true);};
 $('close-menu').onclick=$('resume').onclick=()=>menu.close();
+const history=new PrivateHistory({page:(id,after)=>request<HistoryPage>('history?planetId='+encodeURIComponent(id)+'&after='+after),snapshot:(id,seq)=>request<HistorySnapshot>('history/snapshot?planetId='+encodeURIComponent(id)+(seq===undefined?'':'&sequence='+seq))});
+$('open-history').onclick=()=>{if(!colony?.universe?.currentPlanet.mine)return;menu.close();clearInput();void history.open(colony.universe.currentPlanet.id);};
 const shipyard=new Shipyard({read:async()=>{const next=await serial(()=>request('state'));accept(next);return next.ship??defaultShip();},save:async body=>{const next=await serial(()=>request('ship/save',body));accept(next);return next.ship??defaultShip();},allowed:()=>!!state&&online&&state.flight.mode==='ground'});
 $('open-shipyard').onclick=()=>{menu.close();clearInput();if(state?.flight.mode==='space'){notice('Land before changing your ship.');return;}void shipyard.open();};
 $('guide-port').onclick=()=>{guideDock=true;menu.close();notice('Your parked ship is marked. Walk there to board.');};
@@ -262,7 +266,7 @@ let previous=performance.now(),elapsed=0,uiTick=0,started=false;
 function animate(now:number) {
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.05);previous=now;elapsed+=dt;
-  if(!walker || (document.body.classList.contains('workshop-open')||document.body.classList.contains('shipyard-open'))) return;
+  if(!walker || (document.body.classList.contains('workshop-open')||document.body.classList.contains('shipyard-open')||document.body.classList.contains('history-open'))) return;
   if(flight?.active&&departure){
     $('boarding-prompt').hidden=true;$('dock-guide').hidden=true;
     if(online&&!document.hidden&&!document.querySelector('dialog[open]'))departure.time+=dt;

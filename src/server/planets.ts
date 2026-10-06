@@ -1,3 +1,5 @@
+import { historyStore } from './history.ts';
+import { UUID_PATTERN } from '../assets/claude-geometry/core/ids.ts';
 import { blueprintStore } from './blueprints.ts';
 import { MAX_STRUCTURES, structureFit, structureSize } from '../shared/blueprints.ts';
 import type { DatabaseSync } from 'node:sqlite';
@@ -12,7 +14,7 @@ import { MAX_PLANETS, planetCenter } from '../shared/flight.ts';
 
 interface PlanetRow { id: string; name: string; kind: 'hub' | 'garden'; owner_id: string | null; revision: number; objectCount: number;slot:number }
 interface ObjectRow { id: string; kind: PlacedObject['kind']; position: string; rotation: number; version: number; blueprint_hash: string | null; radius: number | null; height: number | null }
-export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db)) {
+export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), history = historyStore(db)) {
   const transaction = <T>(fn: () => T) => { db.exec('BEGIN IMMEDIATE'); try { const result = fn(); db.exec('COMMIT'); return result; } catch (error) { db.exec('ROLLBACK'); throw error; } };
   function replenish() {
     let blank = Number(db.prepare("SELECT count(*) AS n FROM planets WHERE kind='garden' AND owner_id IS NULL").get()!.n);
@@ -21,7 +23,8 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db)) {
       blank++;total++;
       const number = Number(db.prepare("SELECT count(*) AS n FROM planets WHERE kind='garden'").get()!.n) + 1;
       const slot=Number(db.prepare('SELECT COALESCE(max(slot),-1)+1 AS slot FROM planets').get()!.slot);
-      db.prepare("INSERT INTO planets (id,name,kind,slot) VALUES (?,?,'garden',?)").run('p-' + randomUUID(), `Little world ${String(number).padStart(2, '0')}`,slot);
+      const id='p-'+randomUUID();
+      db.prepare("INSERT INTO planets (id,name,kind,slot) VALUES (?,?,'garden',?)").run(id, `Little world ${String(number).padStart(2, '0')}`,slot);history.baseline(id);
     }
   }
   transaction(replenish);
@@ -34,7 +37,7 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db)) {
   const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: p.revision, objectCount: p.objectCount,slot:p.slot,center:planetCenter(p.slot) });
   const objects = (planetId: string): PlacedObject[] => (db.prepare('SELECT id,kind,position,rotation,version,blueprint_hash,radius,height FROM planet_objects WHERE planet_id=? ORDER BY rowid').all(planetId) as unknown as ObjectRow[]).map(r => ({ id:r.id,kind:r.kind,rotation:r.rotation,version:r.version,position:JSON.parse(r.position),...(r.blueprint_hash ? {blueprintHash:r.blueprint_hash,radius:r.radius!,height:r.height!} : {}) }));
   const owns = (id: string, planetId: unknown) => { const p = planet(planetId); if (p.kind === 'hub' || p.owner_id !== id) throw new RequestError(403, 'Only this planet’s owner can build here.'); return p; };
-  const objectId = (value: unknown) => { if (typeof value !== 'string' || !/^[a-f0-9-]{36}$/.test(value)) throw new RequestError(400, 'Invalid object identifier.'); return value; };
+  const objectId = (value: unknown) => { if (typeof value !== 'string' || !UUID_PATTERN.test(value)) throw new RequestError(400, 'Invalid object identifier.'); return value; };
   const strict = (body: Record<string, unknown>, keys: string[]) => { if (Object.keys(body).some(k => !keys.includes(k))) throw new RequestError(400, 'Unexpected building field.'); };
   const placement = (kind: PlacedObject['kind'], position: unknown, rotation: unknown, planetId: string, ignoreId?: string, blueprintHash?: string) => {
     if (typeof rotation !== 'number' || !Number.isFinite(rotation) || rotation < 0 || rotation >= Math.PI * 2) throw new RequestError(400, 'Rotation must be between 0 and one full turn.');
@@ -84,6 +87,7 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db)) {
         if (blueprintHash && placed.filter(o => o.kind === 'structure').length >= MAX_STRUCTURES) throw new RequestError(409, `This planet has room for ${MAX_STRUCTURES} custom structures.`);
         const size = blueprintHash ? structureSize(blueprints.parts(blueprintHash)) : null;
         db.prepare('INSERT INTO planet_objects (id,planet_id,kind,position,rotation,blueprint_hash,radius,height) VALUES (?,?,?,?,?,?,?,?)').run(oid, p.id, body.kind, JSON.stringify(position.position), position.rotation, blueprintHash ?? null, size?.radius ?? null, size?.height ?? null); bump(p.id);
+        history.append(p.id,null,objects(p.id).find(o=>o.id===oid)!);
       });
     },
     update(id: string, body: Record<string, unknown>) {
@@ -96,6 +100,7 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db)) {
         if (same(old, position.position, position.rotation)) return;
         if (old.version !== body.expectedVersion) throw new RequestError(409, 'This object changed in another tab. Select it again.');
         db.prepare('UPDATE planet_objects SET position=?,rotation=?,version=version+1 WHERE planet_id=? AND id=?').run(JSON.stringify(position.position), position.rotation, p.id, oid); bump(p.id);
+        history.append(p.id,old,objects(p.id).find(o=>o.id===oid)!);
       });
     },
     remove(id: string, body: Record<string, unknown>) {
@@ -107,6 +112,7 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db)) {
         if (old.version !== body.expectedVersion) throw new RequestError(409, 'This object changed in another tab. Select it again.');
         db.prepare('INSERT INTO object_tombstones (id,planet_id) VALUES (?,?)').run(oid,p.id);
         db.prepare('DELETE FROM planet_objects WHERE id=? AND planet_id=?').run(oid, p.id); bump(p.id);
+        history.append(p.id,old,null);
       });
     },
   };

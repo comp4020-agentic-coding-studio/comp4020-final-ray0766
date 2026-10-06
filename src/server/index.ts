@@ -42,6 +42,13 @@ const server = createServer(async (req, res) => {
         if (!id || !store.has(id)) throw new RequestError(401, 'Reload to reconnect your visit.');
         send(200, store.library(id)); return;
       }
+      if ((url.pathname === '/api/history' || url.pathname === '/api/history/snapshot') && req.method === 'GET') {
+        if (!id || !store.has(id)) throw new RequestError(401, 'Reload to reconnect your visit.');
+        const snapshot=url.pathname.endsWith('/snapshot'),keys=snapshot?['planetId','sequence']:['planetId','after','limit'];
+        if([...url.searchParams.keys()].some(k=>!keys.includes(k)||url.searchParams.getAll(k).length>1))throw new RequestError(400,'Unexpected history parameter.');
+        const number=(key:string)=>url.searchParams.has(key)?Number(url.searchParams.get(key)):undefined;
+        send(200,snapshot?store.historySnapshot(id,url.searchParams.get('planetId'),number('sequence')):store.historyPage(id,url.searchParams.get('planetId'),number('after'),number('limit')));return;
+      }
       if (req.method !== 'POST') throw new RequestError(405, 'Method not allowed.');
       if (req.headers.origin && new URL(req.headers.origin).host !== req.headers.host) throw new RequestError(403, 'Use this world’s own page.');
       if (!req.headers['content-type']?.startsWith('application/json')) throw new RequestError(415, 'Send JSON.');

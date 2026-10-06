@@ -120,3 +120,9 @@ and scene/lifecycle adapters, and does not claim authorship of the geometry.
 The 12 added source files have SHA-256 entries in
 `src/assets/claude-geometry/PROVENANCE.json`. Existing shared material and texture
 credits above continue to apply. The prior procedural ship is no longer rendered.
+
+The owner-private building timeline reuses the unchanged Claude
+`src/timeline/codec.ts` and the already vendored `src/core/world.ts` event decision
+and replay reducer at the same `a4546bb` source commit. Main-project adapters own
+SQL transactions, labelled import baselines, session privacy and the read-only UI.
+No timeline demo server or old main-project patch was copied over the application.
