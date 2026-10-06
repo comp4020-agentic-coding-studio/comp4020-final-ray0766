@@ -1,7 +1,8 @@
 # Little Worlds
 
 **Local Final workshop milestone:** this branch adds the server-backed assembly
-workshop described in [the workshop guide](docs/integration/workshop-v1.md).
+workshop described in [the workshop guide](docs/integration/workshop-v1.md), plus
+[walkable buildings and saved floor heights](docs/integration/physics-v1.md).
 The published Crit 8 release remains `09233d9`; these changes are not deployed.
 
 > Prepared with AI assistance from the student's recorded design decisions and

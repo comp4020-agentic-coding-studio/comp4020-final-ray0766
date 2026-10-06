@@ -39,7 +39,7 @@ export class GroundPresence {
       r.low.visible=!detail;r.avatar?.animate(now/1000,t<1?r.speed*surfaceScale(r.position):0,reduced);
       r.facing.lerp(new T.Vector3(...r.visitor.facing),reduced?1:1-Math.exp(-8*dt)).projectOnPlane(r.position);
       if(r.facing.lengthSq()<.01)r.facing.set(0,0,1).projectOnPlane(r.position);r.facing.normalize();
-      r.root.quaternion.copy(surfaceOrientation(r.position,r.facing));r.root.position.copy(surfacePoint(r.position,.02));
+      r.root.quaternion.copy(surfaceOrientation(r.position,r.facing));r.root.position.copy(r.visitor.radius===undefined?surfacePoint(r.position,.02):r.position.clone().multiplyScalar(r.visitor.radius+.02));
     }
     this.canvas.dataset.visibleVisitors=String(visible);this.canvas.dataset.detailedVisitors=String(detailed);
   }

@@ -91,7 +91,7 @@ export class Colony {
       for(const obj of next.currentPlanet.objects){const group=this.renderObject(obj);group.userData.objectId=obj.id;this.layer.add(group);this.objects.set(obj.id,group);}
       const list=el<HTMLSelectElement>('built-list');list.replaceChildren(new Option('Select a saved object…',''));
       next.currentPlanet.objects.forEach((o,i)=>list.add(new Option(`${objectName(o)} ${i+1}`,o.id)));list.value=this.selected??'';
-      this.bridge.obstacles(next.currentPlanet.objects.filter(o=>objectHeight(o)>.6).map(o=>({point:new T.Vector3(...o.position),radius:objectRadius(o),height:objectHeight(o)})));
+      this.bridge.obstacles(next.currentPlanet.objects.filter(o=>o.kind!=='structure'&&objectHeight(o)>.6).map(o=>({point:new T.Vector3(...o.position),radius:objectRadius(o),height:objectHeight(o)})));
       if(this.selected&&!next.currentPlanet.objects.some(o=>o.id===this.selected))this.clearDraft();
     }
     this.hud();this.editor();this.starMap();

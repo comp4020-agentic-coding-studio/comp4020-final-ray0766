@@ -5,7 +5,7 @@ import { MAX_NEIGHBOURS,MAX_PRESENCE,PRESENCE_TTL } from '../shared/presence.ts'
 import type { PresenceSnapshot,Visitor } from '../shared/presence.ts';
 import { RequestError } from './errors.ts';
 interface Entry {publicId:string;planetId:string;facing:Vec3;seenAt:number}
-/** Ephemeral presence has no account rights and never changes a player save. */
+/** Ephemeral presence has no account rights; positions come from validated saves. */
 export function presenceStore(state:(id:string)=>PlayerState){
   const entries=new Map<string,Entry>();
   const sweep=(now:number)=>{for(const[id,e]of entries)if(now-e.seenAt>=PRESENCE_TTL)entries.delete(id);};
@@ -26,7 +26,7 @@ export function presenceStore(state:(id:string)=>PlayerState){
         if(other===id||e.planetId!==self.planetId)continue;
         // Re-read authoritative saves: no client position or exposed session hash.
         const p=state(other);if(p.planetId!==self.planetId||p.flight.mode!=='ground'){entries.delete(other);continue;}
-        nearby.push({id:e.publicId,position:p.position,facing:e.facing,character:p.character});
+        nearby.push({id:e.publicId,position:p.position,facing:e.facing,character:p.character,...(p.ground?{radius:p.ground.radius}:{})});
       }
       nearby.sort((a,b)=>distance(a.position,self.position)-distance(b.position,self.position)||a.id.localeCompare(b.id));
       return{planetId:self.planetId,selfId:entry.publicId,visitors:nearby.slice(0,MAX_NEIGHBOURS),nearbyCount:nearby.length,ttlMs:PRESENCE_TTL};

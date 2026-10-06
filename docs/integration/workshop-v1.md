@@ -82,9 +82,9 @@ See [verification](../evidence/workshop-v1/verification.md) for exact checks and
 screenshots. The build still reports an 858 kB minified main JS chunk (234 kB gzip);
 code splitting and physical-device performance are not claimed by this milestone.
 A phone viewport in Mac Chrome does not establish physical-phone performance.
-Placed structures currently use conservative solid footprint collision, so walking
-through their modeled doorways is not implemented. Interior viewing is available
-in the workshop. Library deletion/export/import and cross-device accounts are not
+At the original workshop milestone, structures used conservative solid footprint
+collision. The subsequent [physics milestone](physics-v1.md) adds doorway traversal,
+stairs, floors and saved height. Interior viewing remains available in the workshop. Library deletion/export/import and cross-device accounts are not
 included. Ship workshops, terrain editing and timeline integration remain deferred.
 
 The currently published Crit 8 `main` and its local database were left untouched.

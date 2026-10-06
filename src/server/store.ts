@@ -3,6 +3,7 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { CHARACTERS, distance, INTERACT_DISTANCE, NPCS, normalize, SPAWN, SPEED, validPosition } from '../shared/world.ts';
 import type { Character, PlayerState, Quest } from '../shared/world.ts';
+import { groundStore } from './ground.ts';
 import { blueprintStore } from './blueprints.ts';
 import { planetStore } from './planets.ts';
 import { RequestError } from './errors.ts';
@@ -14,7 +15,7 @@ export function openStore(path: string) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-  if (schema > 5) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  if (schema > 6) { db.close(); throw new Error('Database schema is newer than this application.'); }
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
@@ -23,7 +24,7 @@ export function openStore(path: string) {
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
     );`);
   let migrationBackup: string | null = null;
-  if (schema < 5) {
+  if (schema < 6) {
     if (schema > 0 && path !== ':memory:') {
       migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
       // VACUUM INTO includes committed WAL data and produces a consistent restore point.
@@ -55,7 +56,7 @@ export function openStore(path: string) {
       existing.forEach((p,i)=>db.prepare('UPDATE planets SET slot=? WHERE id=?').run(i,p.id));
       db.exec('CREATE UNIQUE INDEX planet_space_slot ON planets(slot);');
       }
-      db.exec(`CREATE TABLE blueprint_contents (hash TEXT PRIMARY KEY CHECK(length(hash)=64), content TEXT NOT NULL);
+      if (schema < 5) db.exec(`CREATE TABLE blueprint_contents (hash TEXT PRIMARY KEY CHECK(length(hash)=64), content TEXT NOT NULL);
         CREATE TABLE blueprint_library (
           owner_id TEXT NOT NULL REFERENCES players(id), id TEXT NOT NULL, document TEXT NOT NULL,
           hash TEXT NOT NULL REFERENCES blueprint_contents(hash), version INTEGER NOT NULL CHECK(version>=1), PRIMARY KEY(owner_id,id)
@@ -74,27 +75,36 @@ export function openStore(path: string) {
         DROP TABLE planet_objects;
         ALTER TABLE planet_objects_v5 RENAME TO planet_objects;
         CREATE INDEX objects_by_planet ON planet_objects(planet_id);
-        PRAGMA user_version=5; COMMIT;`);
+        PRAGMA user_version=5;`);
+      db.exec(`CREATE TABLE IF NOT EXISTS ground_states (
+        player_id TEXT PRIMARY KEY REFERENCES players(id), planet_id TEXT NOT NULL REFERENCES planets(id), position TEXT NOT NULL,
+        radius REAL NOT NULL CHECK(radius BETWEEN 9 AND 20), vertical_speed REAL NOT NULL CHECK(vertical_speed BETWEEN -10 AND 0),
+        grounded INTEGER NOT NULL CHECK(grounded IN (0,1)), sequence INTEGER NOT NULL, scene_revision INTEGER NOT NULL,
+        clock_credit REAL NOT NULL CHECK(clock_credit BETWEEN 0 AND 2), request_hash TEXT
+      ); PRAGMA user_version=6; COMMIT;`);
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
   const blueprints = blueprintStore(db);
   const planets = planetStore(db, blueprints);
   const navigation=navigationStore(db,planets);
+  const ground=groundStore(db,planets);
   const row = (id: string): Row => {
     const result = db.prepare('SELECT * FROM players WHERE id=?').get(id) as unknown as Row | undefined;
     if (!result) throw new RequestError(401, 'Your session has expired. Reload to start a new visit.');
     return result;
   };
   const state = (id: string): PlayerState => {
+    const initial=row(id),flight=navigation.flight(id);
+    const standing=initial.planet_id!=='hub'&&flight.mode==='ground'?ground.read(id):undefined;
     const r = row(id);
-    return { character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
+    return { ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
   };
   const universe = (id: string) => { const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) }; };
   return {
     db, state, universe, migrationBackup,
     library(id: string) { row(id); return blueprints.list(id); },
     saveBlueprint(id: string, body: Record<string, unknown>) { row(id); return blueprints.save(id, body); },
-    takeoff(id:string,body:Record<string,unknown>,now=Date.now()){navigation.takeoff(id,body,now);return universe(id);},
+    takeoff(id:string,body:Record<string,unknown>,now=Date.now()){navigation.takeoff(id,body,now);ground.reset(id);return universe(id);},
     flight(id:string,body:Record<string,unknown>,now=Date.now()){navigation.checkpoint(id,body,now);return state(id);},
     land(id:string,body:Record<string,unknown>,now=Date.now()){navigation.land(id,body,now);return universe(id);},
     has: (id: string) => Boolean(db.prepare('SELECT id FROM players WHERE id=?').get(id)),
@@ -108,11 +118,13 @@ export function openStore(path: string) {
       db.prepare('UPDATE players SET character=?,revision=revision+1 WHERE id=?').run(value as string, id);
       return state(id);
     },
-    move(id: string, value: unknown, now = Date.now(), expectedPlanet?: unknown) {
+    move(id: string, value: unknown, now = Date.now(), expectedPlanet?: unknown,motion?:unknown) {
       if (!validPosition(value)) throw new RequestError(400, 'Position must be a finite point on the planet.');
       const r = row(id);
       if(navigation.flight(id).mode==='space')throw new RequestError(409,'Land before walking on the surface.');
       if ((expectedPlanet === undefined && r.planet_id !== 'hub') || (expectedPlanet !== undefined && expectedPlanet !== r.planet_id)) throw new RequestError(409, 'Your visit moved to another planet. Reconnecting…');
+      if(r.planet_id!=='hub'){ground.move(id,normalize(value),now,motion);return state(id);}
+      if(motion!==undefined)throw new RequestError(400,'Ground paths belong to private planet visits.');
       // A bounded travel budget prevents a forged jump straight to a destination.
       const budget = SPEED * Math.min(2, Math.max(0, now - r.moved_at) / 1000) + 0.35;
       const p = normalize(value);

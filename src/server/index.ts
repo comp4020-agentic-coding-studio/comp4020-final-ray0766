@@ -61,7 +61,10 @@ const server = createServer(async (req, res) => {
       if (url.pathname === '/api/blueprints/save') send(200, store.saveBlueprint(id, body));
       else if(url.pathname==='/api/presence')send(200,presence.heartbeat(id,body));
       else if (url.pathname === '/api/character') send(200, store.character(id, body.character));
-      else if (url.pathname === '/api/move') send(200, store.move(id, body.position, Date.now(), body.planetId));
+      else if (url.pathname === '/api/move') {
+        if(Object.keys(body).some(k=>!['position','planetId','motion'].includes(k)))throw new RequestError(400,'Unexpected movement field.');
+        send(200, store.move(id, body.position, Date.now(), body.planetId,body.motion));
+      }
       else if (url.pathname === '/api/interact') send(200, store.interact(id, body.action));
       else if (url.pathname === '/api/flight/takeoff') {const result=store.takeoff(id,body);presence.leave(id);send(200,result);}
       else if (url.pathname === '/api/flight/checkpoint') send(200,store.flight(id,body));

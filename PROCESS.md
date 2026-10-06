@@ -149,3 +149,42 @@ release on close. These are agent-run engineering checks, not a user study.
 interrupted attempts, screenshots and remaining limits. [The integration guide](docs/integration/workshop-v1.md)
 contains startup and data contracts. No push, deployment, paid allocation or
 submission was performed. Broader module integration remains outside this milestone.
+
+## Ground physics — first local milestone
+
+The user then assigned art to Claude and authorised this branch to implement
+walkable building physics. The project retains the exact 31-file vendored resource
+snapshot; collision proxies are separately authored from stable part IDs and anchor
+conventions. No art, material, lighting, texture or independent Claude source file
+was changed. The published `main` remains at `09233d9`.
+
+The client and server now share radial capsule collision, floor/step support,
+gravity and static-scene recovery. Doors with an open leaf are traversable;
+closed leaves, wall segments, columns and railings remain barriers. Saved unit
+surface directions remain unchanged in meaning; schema 6 adds a separate foot
+height and motion state. Movement checkpoints have bounded samples, server-time
+and speed checks, sequence/retry handling, and collision replay. This is validated
+client checkpoint movement, not a fully server-authoritative rigid-body simulation.
+
+Before the working database was upgraded, a consistent schema-5 backup was made
+and a separate copy was migrated. Every original column and row in seven tables
+matched, and integrity/foreign-key checks passed. Existing state/flight/ownership
+tests and six new physics tests passed (37 total); a later focused run covered the
+final speed bound and validated visitor floor height. TypeScript, lint, production
+build and course evidence checks passed. The build still warns about its large
+main JavaScript chunk.
+
+Headed installed Chrome completed desktop keyboard/mouse and 390×844 touch
+navigation: rotated doorway entry/exit, wall blocking, stairs, upper-floor refresh,
+reconnection on a phone context, and a real round-trip flight with terrain landing.
+Test blueprints were seeded through ordinary authenticated APIs; player travel used
+actual controls. Early automated attempts hit a back wall, double-ended a touch,
+or pressed into a stair rail due to coarse heading/resume logic. These driver issues
+were corrected and the final workflow passed. An initial physical edge-support
+failure was corrected in the shared solver before those browser runs. Screenshot
+inspection also led to hiding the local avatar when the camera is too close indoors.
+
+[Physics evidence](docs/evidence/physics-v1/verification.md) and
+[the physics contract](docs/integration/physics-v1.md) record exact checks and remaining
+limits. These are engineering checks, not student reflection or a user study.
+No push, deployment or submission was performed; further physics features are deferred.

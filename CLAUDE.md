@@ -77,3 +77,10 @@ prototype. They do not claim to be the student's finished academic harness.
   orbital coordinates. Compensate walking speed; transform visitor frames and
   ground picking consistently. Private saved object transforms remain unchanged.
 - Store round 6 screenshots/results separately; keep earlier failed-run evidence.
+
+- Physics milestone: the user assigned art to Claude and ground physics to this
+  project. Keep the vendored db79d73 files and art adapters unchanged. Author static
+  collision metadata independently in `src/shared/physics`; use stable part IDs and
+  anchors. Persist height separately from spherical direction, validate movement
+  on the server, and preserve flight, ownership and existing saves. Do not expand
+  this milestone into a rigid-body engine or subsequent feature phase.

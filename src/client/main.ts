@@ -1,4 +1,6 @@
 import * as T from 'three';
+import { GroundWorld, groundPose, FIXED_STEP, MAX_PATH_STEPS } from '../shared/physics/world.ts';
+import type { GroundPose, MotionStep } from '../shared/physics/world.ts';
 import './style.css';
 import './colony.css';
 import './flight.css';
@@ -30,6 +32,8 @@ let departure:{time:number;base:T.Vector3;start:T.Vector3;rotation:T.Quaternion}
 let colony: Colony | undefined;
 let flight: SpaceFlight | undefined;
 let activePlanet = 'hub';
+let groundWorld:GroundWorld|null=null,standing:GroundPose|null=null,physicsClock=0;
+let motionPending:MotionStep[]=[];
 const lastSaved = new T.Vector3();
 let near: NpcId | null = null;let nearDock=false,guideDock=false;
 let queue: Promise<unknown> = Promise.resolve();
@@ -62,6 +66,7 @@ function serial<T>(run: () => Promise<T>): Promise<T> {
 }
 function accept(next: PlayerState) {
   const reconnecting = !online;
+  const previousGround=state?.ground;
   const previousPlanet=state?.planetId;const previousMode=state?.flight.mode;
   const justLanded=state?.flight.mode==='space'&&next.flight.mode==='ground'&&next.revision>=state.revision;
   if (!state || next.revision >= state.revision) state = next;
@@ -71,6 +76,11 @@ function accept(next: PlayerState) {
     $('npc-mica').hidden=true;$('npc-sol').hidden=true;$('conversation').hidden=true;document.body.classList.remove('delivery-open');
   }
   if((reconnecting||justLanded) && walker){cameraPitch=0;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;}
+  const newGeometry=state.ground?.sceneRevision!==previousGround?.sceneRevision;
+  if(state.ground&&(!standing||reconnecting||justLanded||newGeometry||previousPlanet!==state.planetId)){
+    standing={position:[...state.position],...state.ground};motionPending=[];physicsClock=0;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);started=false;
+  }
+  if(state.planetId==='hub'){standing=null;groundWorld=null;motionPending=[];physicsClock=0;}
   if(previousPlanet!==state.planetId||previousMode!==state.flight.mode)presence.clear();
   flight?.receive(state.flight,reconnecting);
   if(previousMode==='ground'&&state.flight.mode==='space'&&activePlanet==='hub'&&!reduced&&flight){departure={time:0,base:world.parked.root.position.clone(),start:camera.position.clone(),rotation:camera.quaternion.clone()};flight.presentation=true;document.body.classList.add('departing');notice('Departure clearance granted · Sunseed Harbour',4200);}
@@ -148,7 +158,7 @@ const raycaster = new T.Raycaster();
 let pointerStart: {x:number;y:number;lastX:number;lastY:number;dragged:boolean} | null=null;
 renderer.domElement.addEventListener('pointerdown',e=> {if(!flight?.active&&!document.querySelector('dialog[open]')&&!colony?.paused){pointerStart={x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,dragged:false};renderer.domElement.setPointerCapture(e.pointerId);}});
 renderer.domElement.addEventListener('pointermove',e=>{
-  if(!pointerStart||!walker||activePlanet!=='hub'||flight?.active||document.querySelector('dialog[open]')||colony?.paused)return;
+  if(!pointerStart||!walker||flight?.active||document.querySelector('dialog[open]')||colony?.paused)return;
   if(Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>7)pointerStart.dragged=true;
   if(pointerStart.dragged){walker.north.applyAxisAngle(walker.up,-(e.clientX-pointerStart.lastX)*.004).projectOnPlane(walker.up).normalize();cameraPitch=T.MathUtils.clamp(cameraPitch+(e.clientY-pointerStart.lastY)*.003,-.3,.7);target=null;}
   pointerStart.lastX=e.clientX;pointerStart.lastY=e.clientY;
@@ -190,13 +200,18 @@ document.querySelectorAll<HTMLButtonElement>('[data-character]').forEach(button=
 let saving:Promise<void>|null=null;
 async function savePosition(force=false):Promise<void> {
   if(saving){await saving;if(force)return savePosition(true);return;}
-  if(!walker||!state||state.flight.mode==='space'||!online||(!force&&walker.up.distanceTo(lastSaved)<.001))return;
-  const p=walker.up.toArray() as Vec3,planetId=state.planetId;
+  if(!walker||!state||state.flight.mode==='space'||!online)return;
+  const privateWorld=activePlanet!=='hub';
+  if(privateWorld&&!motionPending.length)return;
+  if(!privateWorld&&!force&&walker.up.distanceTo(lastSaved)<.001)return;
+  const steps=privateWorld?motionPending.splice(0,MAX_PATH_STEPS):[],p=steps.length?steps.at(-1)!.slice(0,3) as Vec3:walker.up.toArray() as Vec3,planetId=state.planetId;
+  const motion=steps.length?{sequence:(state.ground?.sequence??0)+1,steps}:undefined;
   saving=(async()=>{
-    try{const next=await serial(()=>request('move',{position:p,planetId}));lastSaved.fromArray(p);accept(next);}
-    catch(error){if(error instanceof ApiError&&error.status===409){walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();}failed(error);}
+    try{const next=await serial(()=>request('move',{position:p,planetId,...(motion?{motion}:{})}));lastSaved.fromArray(next.position);accept(next);}
+    catch(error){motionPending=[];if(error instanceof ApiError&&error.status===409){walker=new SurfaceWalker(state.position);standing=state.ground?{position:[...state.position],...state.ground}:null;lastSaved.copy(walker.up);clearInput();}failed(error);}
   })().finally(()=>{saving=null;});
   await saving;
+  if(force&&motionPending.length&&online)await savePosition(true);
 }
 async function interact() {
   if(state?.flight.mode==='space' || !near || busy || !online) return;
@@ -258,20 +273,47 @@ function animate(now:number) {
     const d=target.clone().projectOnPlane(walker.up);
     if(walker.up.angleTo(target)*RADIUS<.2){target=null;}else{d.normalize();x=d.dot(walker.right());y=d.dot(walker.north);}
   }
-  const old=walker.up.clone(),north=walker.north.clone(),face=walker.facing.clone();
-  if(paused) {walker.velocity.set(0,0,0);} else walker.step(x,y,dt,1/surfaceScale(walker.up));
-  if(world.blocks.some(b=>walker.up.angleTo(b.point)*RADIUS<b.radius+.19 && walker.up.angleTo(b.point)<=old.angleTo(b.point)+.00001)) {
-    walker.up.copy(old);walker.north.copy(north);walker.facing.copy(face);walker.velocity.set(0,0,0);target=null;
+  if(activePlanet==='hub'){
+    const old=walker.up.clone(),north=walker.north.clone(),face=walker.facing.clone();
+    if(paused)walker.velocity.set(0,0,0);else walker.step(x,y,dt,1/surfaceScale(walker.up));
+    if(world.blocks.some(b=>walker.up.angleTo(b.point)*RADIUS<b.radius+.19&&walker.up.angleTo(b.point)<=old.angleTo(b.point)+.00001)){
+      walker.up.copy(old);walker.north.copy(north);walker.facing.copy(face);walker.velocity.set(0,0,0);target=null;
+    }
+  }else if(groundWorld&&standing){
+    if(paused){walker.velocity.set(0,0,0);physicsClock=0;}else{
+      physicsClock=Math.min(.05,physicsClock+dt);
+      while(physicsClock>=FIXED_STEP&&motionPending.length<MAX_PATH_STEPS){
+        physicsClock-=FIXED_STEP;const before=standing;
+        walker.step(x,y,FIXED_STEP,RADIUS/standing.radius);
+        const resolved=groundWorld.move(before,walker.up.toArray() as Vec3,FIXED_STEP),normal=new T.Vector3(...resolved.position);
+        const correction=new T.Quaternion().setFromUnitVectors(walker.up,normal);
+        walker.up.copy(normal);walker.north.applyQuaternion(correction).projectOnPlane(normal).normalize();walker.facing.applyQuaternion(correction).projectOnPlane(normal).normalize();walker.velocity.applyQuaternion(correction).projectOnPlane(normal);
+        standing=resolved;
+        if(distance(before.position,resolved.position)>.000001||Math.abs(before.radius-resolved.radius)>.000001||before.grounded!==resolved.grounded||before.verticalSpeed!==resolved.verticalSpeed)
+          motionPending.push([...resolved.position.map(v=>Number(v.toFixed(7))),Number(FIXED_STEP.toFixed(7))] as MotionStep);
+      }
+    }
   }
   destinationRing.visible=!!target;
-  player.root.position.copy(surfacePoint(walker.up,.018));player.root.quaternion.copy(surfaceOrientation(walker.up,walker.facing));player.animate(elapsed,walker.velocity.length()*surfaceScale(walker.up),reduced);
+  const feet=activePlanet==='hub'?surfacePoint(walker.up):walker.up.clone().multiplyScalar(standing?.radius??groundPose(walker.up.toArray() as Vec3).radius);
+  player.root.position.copy(feet).addScaledVector(walker.up,.018);player.root.quaternion.copy(surfaceOrientation(walker.up,walker.facing));player.animate(elapsed,walker.velocity.length()*surfaceScale(walker.up),reduced);
   const fov=activePlanet==='hub'?(innerWidth<600?65:55):(innerWidth<600&&!overview?58:48);if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();}
   const renderUp=surfaceNormal(walker.up),renderNorth=surfaceTangent(walker.up,walker.north),renderRight=new T.Vector3().crossVectors(renderNorth,renderUp).normalize();
   const hub=activePlanet==='hub',phone=innerWidth<600;
   const pose=hub?{position:surfacePoint(walker.up,overview?65:(phone?2.75:2.35)).addScaledVector(renderNorth,overview?-72:(phone?-6.4:-4.7)).addScaledVector(renderRight,overview?0:.45),target:surfacePoint(walker.up,overview?4:1.48+Math.tan(cameraPitch)*9).addScaledVector(renderNorth,overview?-12:6)}:cameraPose(walker,phone,overview);
   pose.position.addScaledVector(walker.up,world.height(walker.up));
   pose.target.addScaledVector(walker.up,world.height(walker.up));
-  const headPoint=surfacePoint(walker.up,1.35);
+  if(!hub&&standing){const lift=standing.radius-RADIUS-world.height(walker.up);pose.position.addScaledVector(walker.up,lift);pose.target.addScaledVector(walker.up,lift);}
+  const headPoint=feet.clone().addScaledVector(renderUp,1.35);
+  player.root.visible=true;
+  if(!hub&&!overview&&groundWorld){
+    let clipped=groundWorld.cameraDistance(headPoint,pose.position);
+    if(clipped<2.5){
+      pose.position.copy(headPoint).addScaledVector(walker.north,-1.2);pose.target.copy(headPoint).addScaledVector(walker.north,3).addScaledVector(walker.up,Math.tan(cameraPitch)*3);
+      clipped=groundWorld.cameraDistance(headPoint,pose.position);player.root.visible=clipped>1.35;
+    }
+    const boom=pose.position.clone().sub(headPoint);if(clipped<boom.length())pose.position.copy(headPoint).addScaledVector(boom.normalize(),Math.max(.02,clipped));
+  }
   if(hub&&!overview){
     // Shorten the camera boom before it penetrates a facade when looking sideways.
     const offset=pose.position.clone().sub(headPoint),length=offset.length();raycaster.set(headPoint,offset.normalize());raycaster.far=length;
@@ -284,10 +326,11 @@ function animate(now:number) {
     const center=surfacePoint(b.point,b.height*.50),along=center.clone().sub(sight.origin).dot(sight.direction);
     return along>.4&&along<sightLength-.5&&sight.distanceSqToPoint(center)<Math.pow(Math.max(b.radius,b.height*.28),2);
   });
-  silhouette.position.copy(surfacePoint(walker.up,.84));silhouette.quaternion.copy(player.root.quaternion);
+  silhouette.position.copy(feet).addScaledVector(walker.up,.84);silhouette.quaternion.copy(player.root.quaternion);
   poseCamera.position.copy(pose.position);poseCamera.up.copy(renderUp);poseCamera.lookAt(pose.target);
   if(!started){camera.position.copy(pose.position);camera.quaternion.copy(poseCamera.quaternion);started=true;}
   camera.position.lerp(pose.position,reduced?1:1-Math.exp(-7*dt));camera.quaternion.slerp(poseCamera.quaternion,reduced?1:1-Math.exp(-8*dt));
+  if(!hub&&!overview&&groundWorld){const boom=camera.position.clone().sub(headPoint),limit=groundWorld.cameraDistance(headPoint,camera.position);if(limit<boom.length())camera.position.copy(headPoint).addScaledVector(boom.normalize(),Math.max(.02,limit));}
   if(hub){sun.target.position.copy(surfacePoint(walker.up));sun.position.copy(sun.target.position).addScaledVector(renderUp,65).add(new T.Vector3(-55,0,45).projectOnPlane(renderUp));}else{sun.position.copy(walker.up).multiplyScalar(24).addScaledVector(walker.right(),-12).addScaledVector(walker.north,7);sun.target.position.set(0,0,0);}
   const skyRight=walker.right(),skyBack=walker.north.clone().negate();
   sky.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(skyRight,walker.up,skyBack));
@@ -297,6 +340,7 @@ function animate(now:number) {
   renderer.render(scene,camera);
   uiTick+=dt;
   if(uiTick>.1) {
+    renderer.domElement.dataset.feetRadius=String(standing?.radius??RADIUS);renderer.domElement.dataset.grounded=String(standing?.grounded??true);renderer.domElement.dataset.groundSupport=groundWorld&&standing?groundWorld.support(standing.position,standing.radius+.01).tag:'terrain';
     renderer.domElement.dataset.cameraHeading=JSON.stringify(walker.north.toArray());renderer.domElement.dataset.cameraPitch=String(cameraPitch);renderer.domElement.dataset.groundScale=String(surfaceScale(walker.up));renderer.domElement.dataset.groundRadius=String(groundRadius());renderer.domElement.dataset.quality=innerWidth<700?'compact':'full';
     renderer.domElement.dataset.drawCalls=String(renderer.info.render.calls);
     renderer.domElement.dataset.triangles=String(renderer.info.render.triangles);
@@ -339,7 +383,7 @@ function ensureColony() {
   flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=activePlanet==='hub'?.43:.5;
   colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,
     applyPlayer:p=>{accept(p);return state.planetId===p.planetId&&state.revision<=p.revision;},
-    universe:u=>flight?.universe(u),bearing:id=>flight?.mark(id),
+    universe:u=>{flight?.universe(u);if(u.currentPlanet.kind==='garden'&&(!groundWorld||groundWorld.planetId!==u.currentPlanet.id||groundWorld.revision!==u.currentPlanet.revision))groundWorld=new GroundWorld(u.currentPlanet);},bearing:id=>flight?.mark(id),
     obstacles:blocks=>{if(activePlanet!=='hub')world.blocks.splice(0,world.blocks.length,...blocks);},
     pause:building=>{clearInput();overview=building;$('view-mode').setAttribute('aria-label',overview?'Walking view':'View planet');$('view-mode').innerHTML=overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>';},
     libraryRead:()=>request<import('../shared/blueprints.ts').LibraryEntry[]>('blueprints'),librarySave:body=>serial(()=>request<import('../shared/blueprints.ts').LibraryEntry>('blueprints/save',body)),

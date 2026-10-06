@@ -1,0 +1,36 @@
+{
+  "fromSchema": 5,
+  "toSchema": 6,
+  "tables": {
+    "players": {
+      "originalRows": 111,
+      "allOriginalColumnsAndRowsEqual": true
+    },
+    "planets": {
+      "originalRows": 49,
+      "allOriginalColumnsAndRowsEqual": true
+    },
+    "visits": {
+      "originalRows": 52,
+      "allOriginalColumnsAndRowsEqual": true
+    },
+    "object_tombstones": {
+      "originalRows": 5,
+      "allOriginalColumnsAndRowsEqual": true
+    },
+    "blueprint_contents": {
+      "originalRows": 1,
+      "allOriginalColumnsAndRowsEqual": true
+    },
+    "blueprint_library": {
+      "originalRows": 4,
+      "allOriginalColumnsAndRowsEqual": true
+    },
+    "planet_objects": {
+      "originalRows": 27,
+      "allOriginalColumnsAndRowsEqual": true
+    }
+  },
+  "integrity": "ok",
+  "foreignKeyViolations": []
+}
