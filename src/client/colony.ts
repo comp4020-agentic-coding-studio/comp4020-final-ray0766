@@ -34,7 +34,7 @@ export class Colony {
   private layer = new T.Group(); private ghost: T.Group | null = null;
   private objects = new Map<string,T.Group>(); private draft: Draft | null = null;
   private placing = false; private selected: string | null = null;
-  private painted = ''; private cards = ''; private pointer: {x:number;y:number} | null = null;
+  private painted = ''; private cards = ''; private pointer: {id:number;x:number;y:number} | null = null;
   private workshop: Workshop|null=null;
   private localParts: Record<string,PartPlacement[]> = {};
   private ray = new T.Raycaster(); private pollBusy = false;
@@ -54,7 +54,7 @@ export class Colony {
     el('finish-building').onclick=()=>this.setBuilding(false);
     el('rotate-object').onclick=()=>{if(this.draft){this.draft.rotation=(this.draft.rotation+Math.PI/4)%(Math.PI*2);this.preview();this.editor();}};
     el('move-object').onclick=()=>{this.placing=true;this.editor();};
-    el('cancel-object').onclick=()=>{this.clearDraft();this.editor();};
+    el('cancel-object').onclick=()=>{if(!this.discardPlacement())return;this.clearDraft();this.editor();};
     el('save-object').onclick=()=>void this.save();
     el('remove-object').onclick=()=>void this.remove();
     el<HTMLSelectElement>('built-list').onchange=()=>this.select(el<HTMLSelectElement>('built-list').value);
@@ -63,19 +63,27 @@ export class Colony {
       const icon=document.createElement('span');icon.textContent=CATALOGUE[kind].icon;const name=document.createElement('strong');name.textContent=CATALOGUE[kind].name;
       button.append(icon,name);button.onclick=()=>{if(this.busy||!this.discardPlacement())return;this.clearDraft();this.draft={id:crypto.randomUUID(),kind,position:null,rotation:0};this.placing=true;this.editor();};el('catalogue').append(button);
     }
-    bridge.canvas.addEventListener('pointerdown',e=>{if(this.building)this.pointer={x:e.clientX,y:e.clientY};});
-    bridge.canvas.addEventListener('pointerup',e=>{
-      if(!this.building||this.busy||!this.pointer||Math.hypot(e.clientX-this.pointer.x,e.clientY-this.pointer.y)>10)return;
-      this.pointer=null;this.point(e.clientX,e.clientY);
+    bridge.canvas.addEventListener('pointerdown',e=>{
+      this.pointer=this.building&&!this.busy&&!document.querySelector('dialog[open]')&&e.button===0&&e.isPrimary!==false?{id:e.pointerId,x:e.clientX,y:e.clientY}:null;
     });
-    window.addEventListener('keydown',e=>{if(this.building&&!document.querySelector('dialog[open]')&&!/INPUT|TEXTAREA|SELECT/.test((e.target as HTMLElement).tagName)&&e.key.toLowerCase()==='r'){e.preventDefault();el('rotate-object').click();}});
+    bridge.canvas.addEventListener('pointermove',e=>{if(this.pointer&&Math.hypot(e.clientX-this.pointer.x,e.clientY-this.pointer.y)>10)this.pointer=null;});
+    for(const name of ['pointercancel','lostpointercapture'])bridge.canvas.addEventListener(name,()=>{this.pointer=null;});
+    bridge.canvas.addEventListener('pointerup',e=>{
+      const pointer=this.pointer;this.pointer=null;
+      if(!this.building||this.busy||document.querySelector('dialog[open]')||!pointer||pointer.id!==e.pointerId||Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>10)return;
+      this.point(e.clientX,e.clientY);
+    });
+    window.addEventListener('keydown',e=>{
+      const target=e.target instanceof Element?e.target:null;
+      if(this.building&&!document.querySelector('dialog[open]')&&!target?.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])')&&!e.defaultPrevented&&!e.isComposing&&!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.key.toLowerCase()==='r'){e.preventDefault();el('rotate-object').click();}
+    });
     window.addEventListener('beforeunload',e=>{if(this.hasDraft())e.preventDefault();});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)void this.poll();});
     setInterval(()=>{if(!document.hidden)void this.poll();},1000);
     void this.poll();
   }
   get paused() { return this.building || this.map.open || this.busy || this.workshop?.opened; }
-  private clearDraft(){this.draft=null;this.selected=null;this.placing=false;el<HTMLSelectElement>('built-list').value='';if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}}
+  private clearDraft(){this.pointer=null;this.draft=null;this.selected=null;this.placing=false;el<HTMLSelectElement>('built-list').value='';if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}}
   private hasDraft(){const d=this.draft;if(!d?.position)return false;const old=this.universe?.currentPlanet.objects.find(o=>o.id===d.id);return !old||old.rotation!==d.rotation||old.position.some((v,i)=>Math.abs(v-d.position![i])>1e-8);}
   private discardPlacement(){return !this.hasDraft()||window.confirm('Discard the unsaved building placement or changes?');}
   private setBuilding(value:boolean,force=false){
