@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "before": {
+    "slots": {
+      "spots": 2,
+      "points": 2,
+      "shadows": 0
+    },
+    "lit": 2,
+    "litShadows": 0,
+    "assigned": [
+      "ceiling:5.4,9.9,4.0"
+    ],
+    "fittingsInReach": 4,
+    "clustersInReach": 1,
+    "enabled": true
+  },
+  "preview": {
+    "slots": {
+      "spots": 2,
+      "points": 2,
+      "shadows": 0
+    },
+    "lit": 1,
+    "litShadows": 0,
+    "assigned": [
+      "ceiling:5.4,9.9,4.0"
+    ],
+    "fittingsInReach": 4,
+    "clustersInReach": 1,
+    "enabled": true
+  },
+  "pageErrors": []
+}

@@ -181,6 +181,13 @@ export class WorkshopView {
     inst.selected = [line, fill];
   }
 
+  /** World bounds of the drawn building (every level), or null while it is empty. */
+  bounds(): T.Box3 | null {
+    const box = new T.Box3();
+    for (const entry of this.levels) if (entry) box.expandByObject(entry.model.object);
+    return box.isEmpty() ? null : box;
+  }
+
   /** Show `draft` as a green (fits) or red (refused) ghost; null hides it. */
   setGhost(draft: Draft | null, ok = true) {
     const key = draft ? `${draft.part}|${ok}` : '';
@@ -194,6 +201,8 @@ export class WorkshopView {
       line.renderOrder = 11;
       object.add(line);
       object.traverse(o => { o.raycast = () => {}; });
+      // A preview, not a fitting: its lamps must not light the room.
+      object.userData.noPracticalLights = true;
       this.root.add(object);
       this.ghost = { object, key };
     }

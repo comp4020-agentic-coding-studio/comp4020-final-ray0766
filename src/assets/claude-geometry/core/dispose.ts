@@ -6,8 +6,9 @@ import * as T from 'three';
 //    dispose() exactly once; a second call is a no-op.
 // 2. dispose() removes the object from its parent and frees every geometry,
 //    material and texture the handle created, except resources registered with
-//    markShared(). Shared resources (the style library's cached textures and the
-//    environment map) belong to their library and are freed by it.
+//    markShared() or flagged userData.sharedResource. Shared resources (the
+//    style library's cached textures and the environment map) belong to their
+//    library and are freed by it.
 // 3. Tests count live resources with ResourceTracker; the browser demos read
 //    renderer.info.memory. Both must return to their baseline after a
 //    create/dispose cycle.
@@ -31,7 +32,13 @@ export function markShared<R extends object>(resource: R): R {
   if (data && typeof data === 'object') data.sharedResource = true;
   return resource;
 }
-export const isShared = (resource: object) => shared.has(resource);
+/**
+ * Shared if registered with markShared() or flagged userData.sharedResource by
+ * someone else: the main project marks its harbour palette that way only, and
+ * disposing a structure built from it must not free that palette.
+ */
+export const isShared = (resource: object) =>
+  shared.has(resource) || (resource as { userData?: { sharedResource?: unknown } }).userData?.sharedResource === true;
 
 const TEXTURE_SLOTS = ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'emissiveMap', 'aoMap', 'alphaMap', 'bumpMap', 'clearcoatNormalMap', 'envMap', 'lightMap', 'displacementMap'] as const;
 
@@ -54,12 +61,12 @@ export function disposeObject3D(root: T.Object3D): void {
   const seen = new Set<object>();
   root.traverse(object => {
     const geometry = (object as T.Mesh).geometry as T.BufferGeometry | undefined;
-    if (geometry && !shared.has(geometry) && !seen.has(geometry)) { seen.add(geometry); geometry.dispose(); }
+    if (geometry && !isShared(geometry) && !seen.has(geometry)) { seen.add(geometry); geometry.dispose(); }
     for (const material of materialsOf(object)) {
-      if (shared.has(material) || seen.has(material)) continue;
+      if (isShared(material) || seen.has(material)) continue;
       seen.add(material);
       for (const texture of materialTextures(material)) {
-        if (!shared.has(texture) && !seen.has(texture)) { seen.add(texture); texture.dispose(); }
+        if (!isShared(texture) && !seen.has(texture)) { seen.add(texture); texture.dispose(); }
       }
       material.dispose();
     }

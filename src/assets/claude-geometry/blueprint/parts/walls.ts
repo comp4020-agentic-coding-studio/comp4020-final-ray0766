@@ -32,6 +32,8 @@ function doorFrame(k: Kit) {
   // Status lamp: a recessed housing with a short warm strip, not a neon bar.
   b.box(steel, [0.26, 0.06, 0.05], { position: [0, doorTop + 0.11, WALL_T / 2 + 0.03] }, 0.006);
   b.box(k.m('lamp'), [0.2, 0.018, 0.012], { position: [0, doorTop + 0.1, WALL_T / 2 + 0.056] }, 0);
+  // It lights the threshold and the first steps outside (src/style/practical.ts).
+  b.emitter('door', [0, doorTop + 0.1, WALL_T / 2 + 0.062], [0, -0.6, 0.8]);
   // Skirting either side of the opening on the inside.
   interiorFinish(k, { raceway: false, x0: -0.45, x1: -0.4 });
   interiorFinish(k, { raceway: false, x0: 0.4, x1: 0.45 });

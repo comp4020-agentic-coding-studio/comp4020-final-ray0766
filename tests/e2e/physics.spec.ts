@@ -12,7 +12,7 @@ import {normalize} from '../../src/shared/world.ts';
 import type {Vec3} from '../../src/shared/world.ts';
 import type {PlacedObject} from '../../src/shared/planets.ts';
 import {visit,menuAction,readUniverse,closeVisit} from './flight-helper.ts';
-const evidence='docs/evidence/physics-v1',stateFile='.data/physics-browser-owner.json';
+const evidence=process.env.PHYSICS_EVIDENCE??'docs/evidence/physics-v1',stateFile='.data/physics-browser-owner.json';
 async function begin(page:Page){await page.goto('/');if(await page.locator('#courier-dialog').isVisible()){await page.getByRole('button',{name:'Fern A little leafy'}).click();await page.getByRole('button',{name:'Let’s wander'}).click();}await expect(page.locator('#scene-sync')).toContainText('Live');}
 async function readFeet(page:Page){const d=await page.locator('#world canvas').evaluate(e=>({...((e as HTMLElement).dataset)}));return {position:JSON.parse(d.groundPosition!) as Vec3,radius:Number(d.feetRadius),north:new Vector3(...JSON.parse(d.cameraHeading!)),grounded:d.grounded==='true'};}
 function frame(o:PlacedObject,parts:PartPlacement[]){const anchor={dir:o.position,yaw:o.rotation},base=structureFit(parts,o.position,o.rotation).baseRadius,inverse=new Quaternion().fromArray(anchorQuaternion(anchor)).invert();return {at:(x:number,z:number,y=0)=>localToDir(anchor,base,[x,y,z]),local:(p:{position:Vec3;radius:number})=>new Vector3(...p.position).multiplyScalar(p.radius).addScaledVector(new Vector3(...o.position),-base).applyQuaternion(inverse)};}

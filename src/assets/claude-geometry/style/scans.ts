@@ -45,7 +45,7 @@ export const SCAN_TEXTURE_SIZE: Record<LodTier, Record<ScanMap, number>> = {
 /** HDR environments (Poly Haven, CC0, 1K equirectangular) per lighting mood. */
 export const HDRI_FILES = {
   hangar: 'assets/hdri/aircraft_workshop_01_1k.hdr',
-  dusk: 'assets/hdri/hanger_exterior_cloudy_1k.hdr',
+  dusk: 'assets/hdri/qwantani_dusk_2_puresky_1k.hdr',
 } as const;
 
 /** Site-root URL for a file under public/, honouring Vite's base path. */
@@ -54,7 +54,25 @@ export function assetUrl(path: string): string {
   return base.replace(/\/?$/, '/') + path;
 }
 
-export const scanPath = (id: ScanId, map: ScanMap, size: number) => `assets/scans/${id}/${size}/${map}.webp`;
+/** How texture sets travel: WebP (decoded to RGBA8) or KTX2 (Basis UASTC, transcoded to the GPU's compressed format). */
+export type TextureFormat = 'webp' | 'ktx2';
+
+/**
+ * Default delivery per texture-set tier (the sizes loaded, SCAN_TEXTURE_SIZE),
+ * chosen by measurement (docs/STYLE.md, "Texture delivery"). KTX2 cuts GPU
+ * memory fourfold on every tier and makes every download six- to eightfold
+ * larger. With 1024 px maps it also removes the main-thread upload stalls of
+ * RGBA8 (up to 29 ms per map), so it is worth its download there; with 512 px
+ * and smaller those stalls are 1 ms or less and the network matters more, so
+ * they stay WebP. ?textures= and StageOptions override it; KTX2 falls back to
+ * WebP where unsupported.
+ */
+export const TEXTURE_FORMAT: Record<LodTier, TextureFormat> = { high: 'ktx2', medium: 'webp', low: 'webp' };
+
+/** Where three.js's Basis transcoder (basis_transcoder.js/.wasm) is served, under public/. */
+export const TRANSCODER_PATH = 'assets/basis/';
+
+export const scanPath = (id: ScanId, map: ScanMap, size: number, format: TextureFormat = 'webp') => `assets/scans/${id}/${size}/${map}.${format}`;
 
 /**
  * UV repeat that maps the 2 m metre-UVs of PartBuilder onto a texture covering

@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "browser": "Installed Google Chrome, headed; 1440×900 and 390×844 touch emulation",
+  "fixtures": "Blueprints and placements created through authenticated normal APIs; player movement uses keyboard/touch only.",
+  "checks": [
+    "Rotated cabin: actual keyboard entry through open door",
+    "Solid cabin wall blocks continued walking",
+    "Keyboard climbs stairs; upper-floor height survives server save and refresh",
+    "390×844 phone: real joystick descent/ascent; same server floor after reconnect",
+    "Return flight lands on terrain with no stale upper-floor height",
+    "No browser page errors"
+  ],
+  "pageErrors": []
+}

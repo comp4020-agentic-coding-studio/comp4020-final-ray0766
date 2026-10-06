@@ -85,3 +85,27 @@ The snapshot also includes the optional CC0 Aircraft Workshop 01 HDRI
 Jarod Guest). The integrated workshop currently uses a procedural environment
 and bounded real fill lighting rather than loading these HDRIs. Three.js
 OrbitControls and postprocessing helpers are also covered by its MIT license.
+
+## R3 local integration
+
+The current dependency snapshot contains 32 unchanged TypeScript files from
+`planet-claude-modules@a4546bb120d969774776f1fbe2cb1c990a7c3e66`. It replaces ten
+files of the prior snapshot and adds the practical-light pool. Main owns only
+adapters, resource URL routing, persistence and physics; Claude's geometry and
+lighting parameters are unchanged.
+
+Current module assets live under
+`public/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/`; the manifest and
+per-file SHA256 values are recorded in `src/assets/claude-geometry/PROVENANCE.json`.
+Legacy unversioned assets remain available to previously loaded pages. The new
+CC0 dusk environment is **Qwantani Dusk 2 (Pure Sky)** by Greg Zaal and Jarod Guest,
+https://polyhaven.com/a/qwantani_dusk_2_puresky. It replaces the old Hanger Exterior
+Cloudy selection within the new snapshot; the old file is retained only for URL
+compatibility. Aircraft Workshop 01 and the seven texture sets keep their credits
+above. The main workshop still uses the procedural hangar environment.
+
+The 56 KTX2 files are Claude's UASTC + Zstandard encodings of those same CC0 maps;
+WebP fallbacks remain bundled. The Basis transcoder JS/WASM pair is the unchanged
+three.js 0.186.1 distribution of Binomial's Apache-2.0 transcoder. Source and notices:
+https://github.com/BinomialLLC/basis_universal. No KitBash assets were downloaded or
+added. Medium detail defaults to WebP; `?textures=ktx2` is a diagnostic override.

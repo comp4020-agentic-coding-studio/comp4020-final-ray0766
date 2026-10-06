@@ -92,9 +92,13 @@ const server = createServer(async (req, res) => {
       const path = resolve(root, '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname));
       if (!path.startsWith(root + '/')) throw new RequestError(404, 'Not found.');
       try { body = await readFile(path); } catch { throw new RequestError(404, 'Not found.'); }
-      type = ({ '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg' } as Record<string, string>)[extname(path)] ?? 'application/octet-stream';
+      type = ({ '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg','.webp':'image/webp','.ktx2':'image/ktx2','.wasm':'application/wasm','.json':'application/json','.hdr':'image/vnd.radiance' } as Record<string, string>)[extname(path)] ?? 'application/octet-stream';
     }
-    res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-cache' });
+    const cache=/^\/assets\/claude\/[a-f0-9]{40}\//.test(url.pathname)?'public, max-age=31536000, immutable':'no-cache';
+    const etag='"'+createHash('sha256').update(body).digest('hex')+'"';
+    const headers={'Content-Type':type,'Cache-Control':cache,ETag:etag};
+    if(req.headers['if-none-match']===etag){res.writeHead(304,headers);res.end();return;}
+    res.writeHead(200, headers);
     res.end(req.method === 'HEAD' ? undefined : body);
   } catch (error) {
     if (error instanceof RequestError) send(error.status, { error: error.message });

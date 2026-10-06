@@ -66,6 +66,8 @@ function ceiling(k: Kit) {
   // Luminaire: folded steel body, warm diffuser, end caps.
   b.box(k.m('leaf'), [0.72, 0.05, 0.12], { position: [0, soffit - 0.075, -0.05] }, small(k, 0.006));
   b.box(k.m('lamp'), [0.66, 0.008, 0.075], { position: [0, soffit - 0.1, -0.05] }, 0);
+  // A real downlight for the room below; neighbouring panels share one light (src/style/practical.ts).
+  b.emitter('ceiling', [0, soffit - 0.105, -0.05], [0, -1, 0]);
   if (!k.low) for (const x of [-0.3, 0.3]) b.cylinder(k.m('steel'), 0.005, 0.005, 0.05, { position: [x, soffit - 0.025, -0.05] }, { segments: 6 });
   // Cable tray: a shallow U on two hangers, running the length of the cell.
   if (k.low) return;

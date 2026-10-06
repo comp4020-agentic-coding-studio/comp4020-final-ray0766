@@ -1,4 +1,7 @@
 import * as T from 'three';
+import { PracticalLights } from '../assets/claude-geometry/style/practical.ts';
+import { worldMaterials } from './shared-assets.ts';
+import { textureFormat } from './resource-policy.ts';
 import { GroundWorld, groundPose, FIXED_STEP, MAX_PATH_STEPS } from '../shared/physics/world.ts';
 import type { GroundPose, MotionStep } from '../shared/physics/world.ts';
 import './style.css';
@@ -117,7 +120,9 @@ renderer.outputColorSpace = T.SRGBColorSpace;
 renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.03;
 $('world').append(renderer.domElement);
 renderer.domElement.setAttribute('aria-label', 'Little Worlds planet. Use WASD or arrow keys to walk; board your ship to fly between worlds.');
+worldMaterials().attachRenderer(renderer,textureFormat());
 const scene = new T.Scene();
+const practical=new PracticalLights('medium');scene.add(practical.group);
 const sky = new T.Group();scene.add(sky);
 const stars:number[]=[];for(let i=0;i<260;i++){const p=new T.Vector3(Math.sin(i*21.2),Math.cos(i*14.3),Math.sin(i*9.2)).normalize().multiplyScalar(65);stars.push(...p.toArray());}
 const starGeo=new T.BufferGeometry();starGeo.setAttribute('position',new T.Float32BufferAttribute(stars,3));sky.add(new T.Points(starGeo,new T.PointsMaterial({color:'#819dab',size:.085,fog:false})));
@@ -262,7 +267,7 @@ function animate(now:number) {
     const shot=pos.clone().addScaledVector(up,5+8*t).addScaledVector(north,-17-8*t).addScaledVector(right,10);
     poseCamera.position.copy(shot);poseCamera.up.copy(up);poseCamera.lookAt(pos.clone().addScaledVector(north,10));
     camera.position.copy(departure.start).lerp(shot,Math.min(1,t*3));camera.quaternion.copy(departure.rotation).slerp(poseCamera.quaternion,Math.min(1,t*3));
-    world.animate(elapsed,reduced,camera.position,up);renderer.domElement.dataset.departure=String(t);renderer.render(scene,camera);
+    world.animate(elapsed,reduced,camera.position,up);renderer.domElement.dataset.departure=String(t);practical.update(scene,camera,dt);renderer.render(scene,camera);
     if(t>=1){ship.position.copy(departure.base);world.parked.flame.visible=false;departure=null;flight.presentation=false;flight.clear();document.body.classList.remove('departing');delete renderer.domElement.dataset.departure;}return;
   }
   if(flight?.active){$('boarding-prompt').hidden=true;$('dock-guide').hidden=true;flight.frame(dt,now,renderer);if(now>noticeUntil)$('notice').hidden=true;return;}
@@ -337,9 +342,10 @@ function animate(now:number) {
   world.animate(elapsed,reduced,camera.position,renderUp);
   world.npcs.forEach(n=>{n.avatar.animate(elapsed,0,reduced);if(near===n.id){const local=n.anchor.worldToLocal(player.root.position.clone());const yaw=Math.atan2(local.x,local.z);const diff=Math.atan2(Math.sin(yaw-n.avatar.root.rotation.y),Math.cos(yaw-n.avatar.root.rotation.y));n.avatar.root.rotation.y+=diff*(1-Math.exp(-4*dt));}n.beacon.position.y=2.0+(reduced?0:Math.sin(elapsed*2)*.06);n.beacon.visible=state.quest!=='delivered'&&n.id===(state.quest==='available'?'mica':'sol');});
   presence.frame(now,dt,walker.up,reduced);
-  renderer.render(scene,camera);
+  practical.update(scene,camera,dt);renderer.render(scene,camera);
   uiTick+=dt;
   if(uiTick>.1) {
+    renderer.domElement.dataset.practical=JSON.stringify(practical.stats());renderer.domElement.dataset.textureFormat=worldMaterials().textureFormat;renderer.domElement.dataset.scanFormats=JSON.stringify(worldMaterials().scanStats().map(s=>s.format));
     renderer.domElement.dataset.feetRadius=String(standing?.radius??RADIUS);renderer.domElement.dataset.grounded=String(standing?.grounded??true);renderer.domElement.dataset.groundSupport=groundWorld&&standing?groundWorld.support(standing.position,standing.radius+.01).tag:'terrain';
     renderer.domElement.dataset.cameraHeading=JSON.stringify(walker.north.toArray());renderer.domElement.dataset.cameraPitch=String(cameraPitch);renderer.domElement.dataset.groundScale=String(surfaceScale(walker.up));renderer.domElement.dataset.groundRadius=String(groundRadius());renderer.domElement.dataset.quality=innerWidth<700?'compact':'full';
     renderer.domElement.dataset.drawCalls=String(renderer.info.render.calls);

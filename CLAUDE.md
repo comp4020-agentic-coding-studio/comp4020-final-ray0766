@@ -84,3 +84,14 @@ prototype. They do not claim to be the student's finished academic harness.
   anchors. Persist height separately from spherical direction, validate movement
   on the server, and preserve flight, ownership and existing saves. Do not expand
   this milestone into a rigid-body engine or subsequent feature phase.
+
+- The user subsequently authorised continuous local integration after physics:
+  first Claude R3 (`a4546bb`), then private ship designs reflected consistently in
+  the parked, flying and landed craft; then assess terrain and owner-private
+  history separately. Earlier scope limits do not block these authorised steps.
+  Keep independent commits and bounded verification. Preserve published 09233d9,
+  Crit 8 reflection/evidence and the independent Claude source workspace.
+- R3 vendored source remains byte-identical. Vite routes its asset URLs into the
+  pinned release directory; old resource URLs remain served. Do not silently
+  overwrite an immutable resource directory or mix transcoder versions. Physics,
+  collision proxies and the custom harbour service.light stay independent.

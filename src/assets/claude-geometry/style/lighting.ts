@@ -18,6 +18,18 @@ export const ENVIRONMENT_SUN_DIRECTION: readonly [number, number, number] = (() 
   return [12 / l, 7 / l, 9 / l] as const;
 })();
 
+/**
+ * Colour of a mood's procedural sky dome at elevation sine `y` (−1 nadir … 1
+ * zenith), linear, scaled as rendered. The dome and the HDRI grade both use it,
+ * so a graded photograph keeps the mood's palette.
+ */
+export function domeColour(mood: 'dusk' | 'orbit', y: number): T.Color {
+  const zenith = mood === 'dusk' ? hdr('#1d2c3a', 1.2) : hdr('#05070a', 1);
+  const horizon = mood === 'dusk' ? hdr('#d7925a', 1.6) : hdr('#1a2430', 0.8);
+  const ground = hdr('#0c0e10', 1);
+  return y >= 0 ? horizon.clone().lerp(zenith, Math.pow(y, 0.55)) : horizon.clone().lerp(ground, Math.min(1, -y * 4));
+}
+
 function environmentScene(mood: Mood): T.Scene {
   const scene = new T.Scene();
   const basic = (color: T.Color, side: T.Side = T.FrontSide) => new T.MeshBasicMaterial({ color, side });
@@ -36,13 +48,9 @@ function environmentScene(mood: Mood): T.Scene {
     // Sky dome: vertex colours from horizon to zenith.
     const dome = new T.SphereGeometry(20, 32, 16);
     const colors: number[] = [];
-    const zenith = mood === 'dusk' ? hdr('#1d2c3a', 1.2) : hdr('#05070a', 1);
-    const horizon = mood === 'dusk' ? hdr('#d7925a', 1.6) : hdr('#1a2430', 0.8);
-    const ground = hdr('#0c0e10', 1);
     const p = dome.getAttribute('position');
     for (let i = 0; i < p.count; i++) {
-      const y = p.getY(i) / 20;
-      const c = y >= 0 ? horizon.clone().lerp(zenith, Math.pow(y, 0.55)) : horizon.clone().lerp(ground, Math.min(1, -y * 4));
+      const c = domeColour(mood, p.getY(i) / 20);
       colors.push(c.r, c.g, c.b);
     }
     dome.setAttribute('color', new T.Float32BufferAttribute(colors, 3));
@@ -74,7 +82,17 @@ export async function loadHdriEnvironment(renderer: T.WebGLRenderer, mood: Mood)
   const file = mood === 'orbit' ? null : HDRI_FILES[mood];
   if (!file) return null;
   const equirect = await new HDRLoader().setDataType(T.HalfFloatType).loadAsync(assetUrl(file));
+  // Outdoors, turn the photograph so its sun stands at the procedural
+  // environment's sun azimuth: pages that aim the environment at their key light
+  // (the showcase) then get one sun in reflections, where the key light is.
+  if (mood !== 'hangar') {
+    const sun = findSun(equirect);
+    if (sun) turnEquirect(equirect, sun, new T.Vector3(...ENVIRONMENT_SUN_DIRECTION));
+  }
   capRadiance(equirect, HDRI_PEAK);
+  // Outdoors the photograph's own colour would replace the scene's (a pink-white
+  // desert, cold blue buildings at dusk): grade it to the mood's dome instead.
+  if (mood !== 'hangar') gradeToMood(equirect, mood);
   equirect.mapping = T.EquirectangularReflectionMapping;
   const pmrem = new T.PMREMGenerator(renderer);
   const target = pmrem.fromEquirectangular(equirect);
@@ -92,6 +110,81 @@ export async function loadHdriEnvironment(renderer: T.WebGLRenderer, mood: Mood)
  * the shadows.
  */
 export const HDRI_PEAK = 8;
+
+/** Read texel `i` (RGBA) of a half-float or float data texture as linear luminance. */
+function texelLuminance(data: Uint16Array | Float32Array, i: number): number {
+  const half = data instanceof Uint16Array;
+  const v = (k: number) => (half ? T.DataUtils.fromHalfFloat(data[k]) : data[k]);
+  return 0.2126 * v(i) + 0.7152 * v(i + 1) + 0.0722 * v(i + 2);
+}
+
+/**
+ * Direction of the brightest texel above the horizon of an equirectangular
+ * texture, in three.js's equirect convention (u from atan2(z, x), first row at
+ * the zenith), or null when it is no brighter than 4x the sky's mean (overcast).
+ */
+export function findSun(texture: T.DataTexture): T.Vector3 | null {
+  const { width: w, height: h } = texture.image as { width: number; height: number };
+  const data = texture.image.data as Uint16Array | Float32Array;
+  let best = -1, at = 0, sum = 0, n = 0;
+  for (let r = 0; r < h / 2; r++) for (let c = 0; c < w; c++) {
+    const i = (r * w + c) * 4, l = texelLuminance(data, i);
+    sum += l; n++;
+    if (l > best) { best = l; at = r * w + c; }
+  }
+  if (best <= 4 * (sum / Math.max(1, n))) return null;
+  const r = Math.floor(at / w), c = at % w;
+  const elevation = (0.5 - (r + 0.5) / h) * Math.PI, azimuth = ((c + 0.5) / w - 0.5) * Math.PI * 2;
+  return new T.Vector3(Math.cos(elevation) * Math.cos(azimuth), Math.sin(elevation), Math.cos(elevation) * Math.sin(azimuth));
+}
+
+/** Rotate an equirectangular texture about +Y (shifting its columns) so `from`'s azimuth lands on `to`'s. */
+export function turnEquirect(texture: T.DataTexture, from: T.Vector3, to: T.Vector3) {
+  const { width: w, height: h } = texture.image as { width: number; height: number };
+  const data = texture.image.data as Uint16Array | Float32Array;
+  const turn = Math.atan2(to.z, to.x) - Math.atan2(from.z, from.x);
+  const shift = ((Math.round((turn / (Math.PI * 2)) * w) % w) + w) % w;
+  if (!shift) return;
+  const row = data.slice(0, w * 4);
+  for (let r = 0; r < h; r++) {
+    const start = r * w * 4;
+    row.set(data.subarray(start, start + w * 4));
+    // new[c] = old[c - shift]
+    data.set(row.subarray((w - shift) * 4), start);
+    data.set(row.subarray(0, (w - shift) * 4), start + shift * 4);
+  }
+  texture.needsUpdate = true;
+}
+
+/**
+ * Grade an equirectangular texture to a mood's dome: each row (one elevation)
+ * is scaled per channel so its mean colour becomes domeColour at that
+ * elevation (means smoothed over ±6 rows). Clouds, gradients and the sun keep
+ * their variation within the row; the average colour and level are the mood's.
+ */
+export function gradeToMood(texture: T.DataTexture, mood: 'dusk' | 'orbit') {
+  const { width: w, height: h } = texture.image as { width: number; height: number };
+  const data = texture.image.data as Uint16Array | Float32Array;
+  const half = data instanceof Uint16Array;
+  const read = (i: number) => (half ? T.DataUtils.fromHalfFloat(data[i]) : data[i]);
+  const write = (i: number, v: number) => { data[i] = half ? T.DataUtils.toHalfFloat(v) : v; };
+  const means: [number, number, number][] = [];
+  for (let r = 0; r < h; r++) {
+    const m: [number, number, number] = [0, 0, 0];
+    for (let c = 0; c < w; c++) for (let k = 0; k < 3; k++) m[k] += read((r * w + c) * 4 + k) / w;
+    means.push(m);
+  }
+  for (let r = 0; r < h; r++) {
+    const m = [0, 0, 0];
+    let n = 0;
+    for (let q = Math.max(0, r - 6); q <= Math.min(h - 1, r + 6); q++, n++) for (let k = 0; k < 3; k++) m[k] += means[q][k];
+    const y = Math.sin((0.5 - (r + 0.5) / h) * Math.PI);
+    const target = domeColour(mood, y).toArray();
+    const f = m.map((v, k) => target[k] / Math.max(1e-4, v / n));
+    for (let c = 0; c < w; c++) for (let k = 0; k < 3; k++) { const i = (r * w + c) * 4 + k; write(i, read(i) * f[k]); }
+  }
+  texture.needsUpdate = true;
+}
 
 /** Scales every texel brighter than `peak` down to it, keeping its colour. */
 export function capRadiance(texture: T.DataTexture, peak: number) {

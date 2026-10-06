@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "checks": [
+    "desktop WebP: medium pools, framing, edit/undo, close/reopen resource release",
+    "phone touch + KTX2 per-map fallback: medium pools, framing, edit/undo, close/reopen resource release"
+  ],
+  "pageErrors": [],
+  "resourceNamespace": "assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/",
+  "uniqueResourceRequests": 26
+}

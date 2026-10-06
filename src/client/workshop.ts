@@ -12,6 +12,7 @@ import { PartTemplates } from '../assets/claude-geometry/blueprint/view/template
 import { Stage } from '../assets/claude-geometry/shell/stage.ts';
 import type { LibraryEntry } from '../shared/blueprints.ts';
 import './workshop.css';
+import { textureFormat } from './resource-policy.ts';
 
 export interface WorkshopBridge {
   read: () => Promise<LibraryEntry[]>;
@@ -84,20 +85,20 @@ export class Workshop {
     this.dialog.showModal();document.body.classList.add('workshop-open');
     this.busy=true;this.changed();this.status('Opening your saved library…');
     try{
-      this.stage=new Stage({container:this.get('stage'),lod:'medium',mood:'hangar',scans:true,environment:'procedural',ambientOcclusion:false,backdrop:false,fog:null,background:'#151e24',fov:44});
-      this.stage.scene.environmentIntensity=.85;this.stage.renderer.toneMappingExposure=1.12;
-      this.stage.lights.fill.intensity=1.4;
-      // One bounded local fill light makes the cabin's underside/interior legible.
-      const light=new T.PointLight('#ffe5bb',18,8,2);light.position.set(-.5,1.5,-.5);this.stage.scene.add(light);
+      this.stage=new Stage({container:this.get('stage'),lod:'medium',mood:'hangar',scans:true,textures:textureFormat(),environment:'procedural',ambientOcclusion:false,backdrop:false,fog:null,background:'#151e24',fov:44});
       this.templates=new PartTemplates(this.stage.library);this.view=new WorkshopView(this.stage,this.editor,this.templates);
       const canvas=this.stage.renderer.domElement;canvas.setAttribute('aria-label','Workshop 3D preview');
-      canvas.addEventListener('pointerdown',e=>{this.pointer={x:e.clientX,y:e.clientY};});
+      const pressed=new Set<number>();let pinched=false;
+      canvas.addEventListener('pointerdown',e=>{pressed.add(e.pointerId);if(pressed.size>1){pinched=true;this.pointer=null;}else{pinched=false;this.pointer={x:e.clientX,y:e.clientY};}});
+      canvas.addEventListener('pointercancel',e=>{pressed.delete(e.pointerId);this.pointer=null;});
+      canvas.addEventListener('touchend',e=>{if(e.cancelable)e.preventDefault();},{passive:false});
       canvas.addEventListener('pointermove',e=>{if(this.busy||e.buttons)return;const d=this.draftAt(e.clientX,e.clientY);this.view?.setGhost(d,d?!this.editor.placeProblem(d):true);});
       canvas.addEventListener('pointerleave',()=>this.view?.setGhost(null));
-      canvas.addEventListener('pointerup',e=>{const p=this.pointer;this.pointer=null;if(this.busy||!p||Math.hypot(p.x-e.clientX,p.y-e.clientY)>7)return;
+      canvas.addEventListener('pointerup',e=>{pressed.delete(e.pointerId);const p=this.pointer;this.pointer=null;if(this.busy||pinched||!p||Math.hypot(p.x-e.clientX,p.y-e.clientY)>7)return;
         if(this.get<HTMLSelectElement>('tool').value==='select')this.editor.select(this.view!.pickPart(e.clientX,e.clientY),e.shiftKey);
         else{const d=this.draftAt(e.clientX,e.clientY);if(d)this.result(this.editor.add(d));}
       });
+      this.stage.onFrame(()=>{if(this.stage){canvas.dataset.practical=JSON.stringify(this.stage.practical.stats());canvas.dataset.resources=JSON.stringify(this.stage.stats());canvas.dataset.textureFormat=this.stage.library.textureFormat;}});
       this.stage.start();this.entries=await this.bridge.read();this.libraryOptions();
       if(this.entries.length)this.load(this.entries[0]);else this.starter();
       this.status(this.entries.length?'Library loaded from the server.':'Start with this cabin, or create a new blueprint.');
@@ -129,16 +130,14 @@ export class Workshop {
     this.result(this.editor.add({part:part as PartId,x:Number(this.get<HTMLSelectElement>('x').value),z:Number(this.get<HTMLSelectElement>('z').value),level:this.level,rot:Number(this.get<HTMLSelectElement>('rot').value) as Rot}));}
   private frame(){
     if(!this.stage||!this.templates)return;
-    const box=new T.Box3();
-    for(const p of this.editor.parts){const t=partTransform(p,{x:2.5,z:2.5});const m=new T.Matrix4().compose(new T.Vector3(...t.position),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),t.yaw),new T.Vector3(1,1,1));box.union(this.templates.get(p.part).box.clone().applyMatrix4(m));}
+    const box=this.view?.bounds()??new T.Box3();
     if(box.isEmpty())box.set(new T.Vector3(-2.5,-.15,-2.5),new T.Vector3(2.5,STOREY*this.level+.2,2.5));
     // Include the active plane, but keep the actual model centred on narrow screens.
     box.expandByPoint(new T.Vector3(box.getCenter(new T.Vector3()).x,this.level*STOREY,box.getCenter(new T.Vector3()).z));
     this.stage.camera.fov=44;this.stage.camera.updateProjectionMatrix();
-    const size=box.getSize(new T.Vector3()), centre=box.getCenter(new T.Vector3());this.stage.resize();
-    const halfFov=T.MathUtils.degToRad(this.stage.camera.fov/2),aspect=this.stage.camera.aspect;
-    const distance=Math.max(5,size.length()*.64/Math.sin(Math.min(halfFov,Math.atan(Math.tan(halfFov)*aspect))));
-    this.stage.frame(centre,distance,new T.Vector3(.8,.55,1));
+    this.stage.resize();
+    // Header, tools and footer occupy separate grid rows; none overlay this canvas.
+    this.stage.frameBox(box,{direction:new T.Vector3(.8,.55,1),topInset:0,bottomInset:0,minDistance:4,margin:1.1});
   }
   private inside(){
     if(!this.stage||!this.editor.parts.length)return;

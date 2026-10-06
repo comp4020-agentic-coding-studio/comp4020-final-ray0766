@@ -4,6 +4,7 @@ import { LOD } from './lod.ts';
 import type { LodTier } from './lod.ts';
 import { SCALE } from './tokens.ts';
 import type { Vec3 } from '../core/vec.ts';
+import type { Emitter, EmitterKind } from './practical.ts';
 
 // Geometry helpers shared by the building and ship kits.
 //
@@ -85,6 +86,8 @@ export interface BuiltPart {
   group: T.Group;
   triangles: number;
   drawCalls: number;
+  /** Light fittings in the group's frame; also on `group.userData.emitters` when there are any. */
+  emitters: Emitter[];
 }
 
 /**
@@ -97,6 +100,7 @@ export class PartBuilder {
   readonly lod: LodTier;
   private buckets = new Map<T.Material, T.BufferGeometry[]>();
   private frame: T.Matrix4 = new T.Matrix4();
+  private emitters: Emitter[] = [];
   constructor(lod: LodTier) { this.lod = lod; }
 
   get settings() { return LOD[this.lod]; }
@@ -127,6 +131,19 @@ export class PartBuilder {
     const list = this.buckets.get(material) ?? [];
     list.push(g);
     this.buckets.set(material, list);
+  }
+
+  /**
+   * Record a light fitting at `position`, shining along `direction`, both in
+   * the current frame, optionally in its lamp's own colour (default: the
+   * kind's). Only the anchor is recorded: the fitting's geometry is drawn like
+   * any other piece, and src/style/practical.ts decides which fittings get a
+   * real light.
+   */
+  emitter(kind: EmitterKind, position: Vec3, direction: Vec3 = [0, -1, 0], color?: string) {
+    const p = new T.Vector3(...position).applyMatrix4(this.frame);
+    const d = new T.Vector3(...direction).transformDirection(this.frame);
+    this.emitters.push({ kind, position: [p.x, p.y, p.z], direction: [d.x, d.y, d.z], ...(color ? { color } : {}) });
   }
 
   /** Chamfered box; chamfer collapses to a hard box at low LOD. */
@@ -178,7 +195,10 @@ export class PartBuilder {
       triangles += merged.getAttribute('position').count / 3;
     }
     this.buckets.clear();
-    return { group, triangles, drawCalls: group.children.length };
+    const emitters = this.emitters;
+    this.emitters = [];
+    if (emitters.length) group.userData.emitters = emitters;
+    return { group, triangles, drawCalls: group.children.length, emitters };
   }
 }
 

@@ -5,8 +5,8 @@ import type { LodTier } from './lod.ts';
 import { finishMap, makeDataTexture, patternTextures } from './textures.ts';
 import type { FinishName, PatternName, PatternTextures } from './textures.ts';
 import { GLOW, PALETTE } from './tokens.ts';
-import { assetUrl, SCAN_TEXTURE_SIZE, SCANS, scanPath, scanRepeat } from './scans.ts';
-import type { ScanId, ScanMap } from './scans.ts';
+import { assetUrl, SCAN_TEXTURE_SIZE, SCANS, scanPath, scanRepeat, TRANSCODER_PATH } from './scans.ts';
+import type { ScanId, ScanMap, TextureFormat } from './scans.ts';
 
 // The material vocabulary every module draws from. A StyleLibrary owns its
 // textures and preset materials (all marked shared, freed by library.dispose()).
@@ -20,6 +20,12 @@ import type { ScanId, ScanMap } from './scans.ts';
 // scan's normal unless the recipe keeps the procedural one (panel and hull
 // seams that must line up with the 1 m module grid). A failed load leaves the
 // procedural look. ready() resolves once every requested set has settled.
+//
+// Texture sets travel as WebP (decoded to RGBA8, mipmapped on the GPU) unless
+// attachRenderer() asks for KTX2 and the GPU has a compressed format (ASTC,
+// BC7, ETC2 or S3TC): then each map is fetched as KTX2 and transcoded in a
+// worker, with its mips, and a map that fails falls back to its WebP.
+// scanStats() records bytes, timings, the GPU format and GPU bytes per map.
 
 export interface SurfaceRecipe {
   finish: FinishName;
@@ -58,7 +64,38 @@ export function defaultScan(recipe: SurfaceRecipe): { id: ScanId; normal: boolea
 export interface StyleLibraryOptions {
   /** Upgrade materials with the CC0 texture sets (needs a browser). Default off. */
   scans?: boolean;
+  /**
+   * Which tier's texture-set sizes to load (default: the library's LOD). Pages
+   * that show buildings small on screen (a planet from orbit) pass 'medium'
+   * at high LOD: 1024 px maps would cost download and memory for no visible detail.
+   */
+  scanDetail?: LodTier;
 }
+
+/** One loaded texture-set map: what crossed the network, what it cost, what the GPU holds. */
+export interface ScanStat {
+  url: string;
+  format: TextureFormat;
+  /** Bytes fetched (the file size; HTTP compression aside). */
+  bytes: number;
+  fetchMs: number;
+  /** createImageBitmap for WebP, worker transcode for KTX2. */
+  decodeMs: number;
+  /** renderer.initTexture on the main thread (0 when no renderer is attached). */
+  uploadMs: number;
+  /** GPU texture format the map ended up in. */
+  gpuFormat: string;
+  /** Bytes of texture data handed to the GPU, all mips. Exact for KTX2; RGBA8 with a full mip chain for WebP (an estimate: the driver builds the mips). */
+  gpuBytes: number;
+  gpuBytesEstimated: boolean;
+}
+
+const COMPRESSED_EXTENSIONS = ['WEBGL_compressed_texture_astc', 'EXT_texture_compression_bptc', 'WEBGL_compressed_texture_etc', 'WEBGL_compressed_texture_s3tc'];
+const FORMAT_NAMES: Record<number, string> = {
+  [T.RGBA_ASTC_4x4_Format]: 'ASTC 4x4', [T.RGBA_BPTC_Format]: 'BC7', [T.RGB_ETC2_Format]: 'ETC2 RGB', [T.RGBA_ETC2_EAC_Format]: 'ETC2 RGBA',
+  [T.RGB_ETC1_Format]: 'ETC1', [T.RGBA_S3TC_DXT1_Format]: 'BC1', [T.RGB_S3TC_DXT1_Format]: 'BC1', [T.RGBA_S3TC_DXT5_Format]: 'BC3', [T.RGBAFormat]: 'RGBA8',
+};
+interface Ktx2Like { parse(buffer: ArrayBuffer, onLoad: (t: T.CompressedTexture) => void, onError: (e: unknown) => void): unknown; dispose(): void }
 
 export const PRESETS = {
   /** Insulated sandwich cladding, painted. */
@@ -92,14 +129,23 @@ export class StyleLibrary {
   private anisotropy = 1;
   private disposed = false;
   readonly scans: boolean;
+  /** Tier whose SCAN_TEXTURE_SIZE row the texture sets are loaded at. */
+  readonly scanDetail: LodTier;
   private scanTextures = new Map<string, Promise<T.Texture>>();
   private scanLoaded: T.Texture[] = [];
   private pending = new Set<Promise<void>>();
   private scanBytes = new Map<string, number>();
+  private scanStatList: ScanStat[] = [];
+  private renderer: T.WebGLRenderer | null = null;
+  private ktx2: Promise<Ktx2Like | null> = Promise.resolve(null);
+  private ktx2Loader: Ktx2Like | null = null;
+  /** The delivery actually in use once attachRenderer has settled. */
+  textureFormat: TextureFormat = 'webp';
 
   constructor(lod: LodTier = 'high', options: StyleLibraryOptions = {}) {
     this.lod = lod;
     this.scans = !!options.scans && typeof document !== 'undefined';
+    this.scanDetail = options.scanDetail ?? lod;
   }
 
   /** Resolves once every texture set requested so far has loaded or failed. */
@@ -107,37 +153,106 @@ export class StyleLibrary {
     while (this.pending.size) await Promise.all([...this.pending]);
   }
 
-  /** Bytes fetched for scan textures, per URL (transfer size of the WebP files). */
+  /** Bytes fetched for scan textures, per URL (transfer size of the files actually used). */
   scanFiles(): { url: string; bytes: number }[] {
     return [...this.scanBytes].map(([url, bytes]) => ({ url, bytes }));
   }
 
+  /** Per map: bytes, fetch/decode/upload time, GPU format and GPU bytes (see ScanStat). */
+  scanStats(): ScanStat[] { return this.scanStatList.map(s => ({ ...s })); }
+
+  /**
+   * Give the library its renderer. Textures are then uploaded as soon as they
+   * arrive (and the upload is timed). With `format` 'ktx2' the texture sets are
+   * fetched as KTX2 and transcoded to the GPU's compressed format, provided the
+   * GPU has one, workers and WebAssembly exist, and the transcoder loads;
+   * otherwise they stay WebP. Call before materials are created.
+   */
+  attachRenderer(renderer: T.WebGLRenderer, format: TextureFormat = 'webp') {
+    this.renderer = renderer;
+    if (format !== 'ktx2' || !this.scans) return;
+    const compressed = COMPRESSED_EXTENSIONS.some(name => renderer.extensions.has(name));
+    if (!compressed || typeof Worker === 'undefined' || typeof WebAssembly === 'undefined') return;
+    this.ktx2 = import('three/addons/loaders/KTX2Loader.js').then(({ KTX2Loader }) => {
+      if (this.disposed) return null;
+      const loader = new KTX2Loader().setTranscoderPath(assetUrl(TRANSCODER_PATH)).setWorkerLimit(2).detectSupport(renderer);
+      this.ktx2Loader = loader as unknown as Ktx2Like;
+      this.textureFormat = 'ktx2';
+      return this.ktx2Loader;
+    }).catch(error => { console.warn('KTX2 unavailable; texture sets stay WebP.', error); return null; });
+  }
+
   private scanTexture(id: ScanId, map: ScanMap): Promise<T.Texture> {
-    const size = SCAN_TEXTURE_SIZE[this.lod][map];
+    const size = SCAN_TEXTURE_SIZE[this.scanDetail][map];
     const key = `${id}|${map}|${size}`;
     let texture = this.scanTextures.get(key);
     if (!texture) {
-      const url = assetUrl(scanPath(id, map, size));
-      texture = fetch(url).then(async response => {
-        if (!response.ok) throw new Error(`${url}: ${response.status}`);
-        const blob = await response.blob();
-        this.scanBytes.set(url, blob.size);
-        const image = await createImageBitmap(blob, { imageOrientation: 'flipY' });
-        const t = markShared(new T.Texture(image as unknown as HTMLImageElement));
-        t.flipY = false; // flipped while decoding: ImageBitmaps ignore flipY at upload
-        t.wrapS = t.wrapT = T.RepeatWrapping;
-        t.repeat.setScalar(scanRepeat(id));
-        t.colorSpace = map === 'albedo' ? T.SRGBColorSpace : T.NoColorSpace;
-        t.anisotropy = this.anisotropy;
-        t.name = `scan:${key}`;
-        t.needsUpdate = true;
-        if (this.disposed) { t.dispose(); image.close(); throw new Error('StyleLibrary disposed while loading.'); }
-        this.scanLoaded.push(t);
-        return t;
-      });
+      texture = this.ktx2.then(loader => loader
+        ? this.loadKtx2(loader, id, map, size).catch(error => { console.warn(`KTX2 ${key} failed; using WebP.`, error); return this.loadWebp(id, map, size); })
+        : this.loadWebp(id, map, size))
+        .then(({ t, stat }) => {
+          t.wrapS = t.wrapT = T.RepeatWrapping;
+          t.repeat.setScalar(scanRepeat(id));
+          t.colorSpace = map === 'albedo' ? T.SRGBColorSpace : T.NoColorSpace;
+          t.anisotropy = this.anisotropy;
+          t.name = `scan:${key}`;
+          t.needsUpdate = true;
+          if (this.disposed) { this.free(t); throw new Error('StyleLibrary disposed while loading.'); }
+          markShared(t);
+          this.scanLoaded.push(t);
+          stat.uploadMs = this.upload(t);
+          this.scanBytes.set(stat.url, stat.bytes);
+          this.scanStatList.push(stat);
+          return t;
+        });
       this.scanTextures.set(key, texture);
     }
     return texture;
+  }
+
+  private async loadWebp(id: ScanId, map: ScanMap, size: number): Promise<{ t: T.Texture; stat: ScanStat }> {
+    const url = assetUrl(scanPath(id, map, size, 'webp'));
+    const t0 = performance.now();
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`${url}: ${response.status}`);
+    const blob = await response.blob();
+    const t1 = performance.now();
+    const image = await createImageBitmap(blob, { imageOrientation: 'flipY' });
+    const t2 = performance.now();
+    const stat: ScanStat = { url, format: 'webp', bytes: blob.size, fetchMs: t1 - t0, decodeMs: t2 - t1, uploadMs: 0, gpuFormat: 'RGBA8', gpuBytes: Math.round(image.width * image.height * 4 * 4 / 3), gpuBytesEstimated: true };
+    const t = new T.Texture(image as unknown as HTMLImageElement);
+    t.flipY = false; // flipped while decoding: ImageBitmaps ignore flipY at upload
+    return { t, stat };
+  }
+
+  private async loadKtx2(loader: Ktx2Like, id: ScanId, map: ScanMap, size: number): Promise<{ t: T.Texture; stat: ScanStat }> {
+    const url = assetUrl(scanPath(id, map, size, 'ktx2'));
+    const t0 = performance.now();
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`${url}: ${response.status}`);
+    const buffer = await response.arrayBuffer();
+    // Read before parsing: the buffer is transferred to a worker and detached.
+    const bytes = buffer.byteLength;
+    const t1 = performance.now();
+    // Rows were flipped when encoding (scripts/assets/build_scans.py), matching the WebP path.
+    const t = await new Promise<T.CompressedTexture>((resolve, reject) => { loader.parse(buffer, resolve, reject); });
+    const t2 = performance.now();
+    const gpuBytes = (t.mipmaps as unknown as { data: ArrayBufferView }[]).reduce((sum, m) => sum + m.data.byteLength, 0);
+    const stat: ScanStat = { url, format: 'ktx2', bytes, fetchMs: t1 - t0, decodeMs: t2 - t1, uploadMs: 0, gpuFormat: FORMAT_NAMES[t.format] ?? String(t.format), gpuBytes, gpuBytesEstimated: false };
+    return { t, stat };
+  }
+
+  /** Upload now, on the main thread, and return how long it took (ms). */
+  private upload(t: T.Texture): number {
+    if (!this.renderer) return 0;
+    const begin = performance.now();
+    this.renderer.initTexture(t);
+    return performance.now() - begin;
+  }
+
+  private free(t: T.Texture) {
+    t.dispose();
+    (t.image as unknown as ImageBitmap | undefined)?.close?.();
   }
 
   private upgrade(material: T.MeshStandardMaterial, recipe: SurfaceRecipe) {
@@ -329,8 +444,10 @@ export class StyleLibrary {
     for (const p of this.patterns.values()) { p.normal.dispose(); p.albedo.dispose(); }
     for (const f of this.finishes.values()) f.dispose();
     this.hazardTexture?.dispose();
-    for (const t of this.scanLoaded) { t.dispose(); (t.image as unknown as ImageBitmap | undefined)?.close?.(); }
+    for (const t of this.scanLoaded) this.free(t);
     this.scanLoaded = [];
+    this.ktx2Loader?.dispose();
+    this.ktx2Loader = null;
     this.presets.clear(); this.paints.clear(); this.specials.clear(); this.patterns.clear(); this.finishes.clear();
   }
 }

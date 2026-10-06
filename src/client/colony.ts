@@ -124,8 +124,6 @@ export class Colony {
     const transform=placedTransform({dir:obj.position,yaw:obj.rotation},fit);
     model.object.position.fromArray(transform.position);model.object.quaternion.fromArray(transform.quaternion);
     model.object.userData.disposeOwned=()=>model.dispose();
-    // A maximum of eight structures means a maximum of eight unshadowed cabin lights.
-    if(parts.some(p=>p.part==='roof.deck')){const lamp=new T.PointLight('#ffe5bb',10,5,2);lamp.position.set(0,1.55,0);model.object.add(lamp);}
     return model.object;
   }
   private locate(group:T.Object3D,position:Vec3,rotation:number){const n=new T.Vector3(...position);group.position.copy(surfacePoint(n,.015));group.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),n);group.rotateY(rotation);}
@@ -143,6 +141,7 @@ export class Colony {
     if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}
     if(!this.draft?.position)return;
     this.ghost=this.renderObject(this.draft as PlacedObject);
+    this.ghost.userData.noPracticalLights=true;
     const invalid=this.problem(this.draft);
     this.ghost.traverse(o=>{if(o instanceof T.Mesh){const original=Array.isArray(o.material)?o.material:[o.material];o.userData.ghostOriginal=original;o.material=new T.MeshBasicMaterial({color:invalid?'#c87055':'#c8df9b',transparent:true,opacity:.45,depthWrite:false});o.castShadow=false;}});
     const ghost=this.ghost, dispose=ghost.userData.disposeOwned;ghost.userData.disposeOwned=()=>{ghost.traverse(o=>{if(o instanceof T.Mesh&&o.userData.ghostOriginal){(o.material as T.Material).dispose();o.material=o.userData.ghostOriginal.length===1?o.userData.ghostOriginal[0]:o.userData.ghostOriginal;delete o.userData.ghostOriginal;}});delete ghost.userData.disposeOwned;if(dispose)dispose();else disposeGeometry(ghost);};

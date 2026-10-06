@@ -99,6 +99,7 @@ export function serviceLight(k: Kit) {
   b.box(k.m('post'), [0.05, 0.05, 0.7], { position: [px, top - 0.02, pz + 0.33] }, small(k, 0.004));
   b.box(k.m('leaf'), [0.24, 0.07, 0.42], { position: [px, top - 0.045, pz + 0.66] }, small(k, 0.008));
   b.box(k.m('lamp'), [0.18, 0.008, 0.34], { position: [px, top - 0.084, pz + 0.66] }, 0);
+  b.emitter('street', [px, top - 0.09, pz + 0.66], [0, -1, 0]);
   // Cable gland and a small identification plate.
   if (!k.low) {
     b.cylinder(k.m('steel'), 0.018, 0.018, 0.04, { position: [px, top - 0.02, pz + 0.05], rotation: [Math.PI / 2, 0, 0] });
@@ -135,6 +136,7 @@ export function padQuarter(k: Kit) {
   for (const [x, z] of [[0.43, 0.43], [0.43, -0.25], [-0.25, 0.43]]) {
     b.cylinder(k.m('steel'), 0.045, 0.05, 0.012, { position: [x, 0.002, z] }, { segments: k.low ? 6 : 12 });
     b.cylinder(k.m('lamp'), 0.03, 0.03, 0.006, { position: [x, 0.008, z] }, { segments: k.low ? 6 : 12 });
+    b.emitter('pad', [x, 0.011, z], [0, 1, 0]);
   }
   // Tie-down eye.
   if (!k.low) b.box(k.m('steel'), [0.06, 0.012, 0.06], { position: [0.05, 0.004, 0.05] }, small(k, 0.003));
