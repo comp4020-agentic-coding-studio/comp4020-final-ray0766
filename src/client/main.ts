@@ -14,6 +14,7 @@ import './flight.css';
 import './immersive.css';
 import { BOARD_RADIUS, portPoint } from '../shared/ports.ts';
 import { GroundPresence } from './presence.ts';
+import { canAcceptPlayer } from './sync.ts';
 import { PRESENCE_INTERVAL } from '../shared/presence.ts';
 import type { PresenceSnapshot } from '../shared/presence.ts';
 import { SpaceFlight } from './flight.ts';
@@ -72,6 +73,7 @@ function serial<T>(run: () => Promise<T>): Promise<T> {
   const result = queue.then(run, run); queue = result.catch(() => {}); return result;
 }
 function accept(next: PlayerState) {
+  if(!canAcceptPlayer(state,next))return false;
   const reconnecting = !online;
   const previousGround=state?.ground;
   const previousPlanet=state?.planetId;const previousMode=state?.flight.mode;
@@ -94,8 +96,10 @@ function accept(next: PlayerState) {
   flight?.receive(state.flight,reconnecting);
   if(previousMode==='ground'&&state.flight.mode==='space'&&activePlanet==='hub'&&!reduced&&flight){departure={time:0,base:world.parked.root.position.clone(),start:camera.position.clone(),rotation:camera.quaternion.clone()};flight.presentation=true;document.body.classList.add('departing');notice('Departure clearance granted · Sunseed Harbour',4200);}
   online = navigator.onLine; status(online?'Progress saved':'Offline · retrying',!online); renderTask();
+  return true;
 }
 function failed(error: unknown) {
+  presence.clear();
   online = false; status('Offline · retrying', true);
   notice(error instanceof Error ? error.message : 'Could not save. Reconnecting…');
 }
@@ -248,20 +252,20 @@ setInterval(()=>void savePosition(),350);
 let presenceBusy=false;
 setInterval(async()=>{
   if(presenceBusy||!online||!walker||state?.flight.mode!=='ground'||document.hidden)return;
-  presenceBusy=true;const planetId=activePlanet;
-  try{const snapshot=await request<PresenceSnapshot>('presence',{planetId,facing:walker.facing.toArray()});if(activePlanet===planetId&&state.flight.mode==='ground')presence.receive(snapshot);}
+  presenceBusy=true;const planetId=activePlanet,ticket=presence.ticket(planetId);
+  try{const snapshot=await request<PresenceSnapshot>('presence',{planetId,facing:walker.facing.toArray()});if(activePlanet===planetId&&state.flight.mode==='ground')presence.receive(snapshot,performance.now(),ticket);}
   catch{/* Presence is ephemeral; a failed heartbeat must not alter durable saves. */}
   finally{presenceBusy=false;}
 },PRESENCE_INTERVAL);
 setInterval(async()=>{
   if(online || busy) return;
   try {
-    const next=await serial(()=>request('state'));accept(next);
+    const next=await serial(()=>request('state'));if(!accept(next))return;
     walker=new SurfaceWalker(next.position);lastSaved.copy(walker.up);clearInput();ensureColony();notice('Back at your last saved spot. Welcome home.');
   }catch{status('Offline · retrying',true);}
 },2500);
 window.addEventListener('online',()=>notice('Reconnecting to your worlds…'));
-window.addEventListener('offline',()=>{online=false;clearInput();flight?.clear();status('Offline · retrying',true);});
+window.addEventListener('offline',()=>{presence.clear();online=false;clearInput();flight?.clear();status('Offline · retrying',true);});
 
 let previous=performance.now(),elapsed=0,uiTick=0,started=false;
 function animate(now:number) {
@@ -401,7 +405,7 @@ function ensureColony() {
   flight=new SpaceFlight({canvas:renderer.domElement,renderer,online:()=>online,player:()=>state,checkpoint:body=>serial(()=>request('flight/checkpoint',body)),command:(route,body)=>serial(()=>request<Universe>(route,body)),apply:accept,applyUniverse:u=>colony?.accept(u),flushGround:async()=>{await savePosition(true);await queue;},clearGround:()=>{clearInput();colony?.stopBuilding();},canBoard:()=>!!walker&&!colony?.building&&distance(walker.up.toArray() as Vec3,portPoint(activePlanet))<BOARD_RADIUS-.12,failed,notice});
   flight.setDesign((state.ship??defaultShip()).design);flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=groundPresentation(activePlanet).environmentIntensity;
   colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,
-    applyPlayer:p=>{accept(p);return state.planetId===p.planetId&&state.revision<=p.revision;},
+    applyPlayer:accept,
     universe:u=>{flight?.universe(u);const p=u.currentPlanet;if(p.environment&&terrainRevision!==p.revision){
       world.dispose();world.parked.dispose();disposeGeometry(worldRoot);worldRoot=new T.Scene();scene.add(worldRoot);world=createWorld(worldRoot,false,p.environment,p.objects,p.blueprints);world.parked.setDesign((state.ship??defaultShip()).design);configureGround();terrainRevision=p.revision;renderer.domElement.dataset.terrainId=groundField().id;started=false;
     }if(u.currentPlanet.kind==='garden'&&(!groundWorld||groundWorld.planetId!==u.currentPlanet.id||groundWorld.revision!==u.currentPlanet.revision))groundWorld=new GroundWorld(u.currentPlanet);},bearing:id=>flight?.mark(id),
