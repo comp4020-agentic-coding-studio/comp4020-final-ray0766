@@ -49,11 +49,11 @@ export function blueprintStore(db: DatabaseSync) {
         db.prepare('INSERT OR IGNORE INTO blueprint_contents (hash,content) VALUES (?,?)').run(hash, content);
         db.prepare(`INSERT INTO blueprint_library (owner_id,id,document,hash,version) VALUES (?,?,?,?,?)
           ON CONFLICT(owner_id,id) DO UPDATE SET document=excluded.document,hash=excluded.hash,version=excluded.version`).run(owner, bp.id, document, hash, version);
-        // Keep content referenced by placed objects or any private library; edits cannot grow an unbounded registry.
-        db.exec('DELETE FROM blueprint_contents WHERE hash NOT IN (SELECT hash FROM blueprint_library) AND hash NOT IN (SELECT blueprint_hash FROM planet_objects WHERE blueprint_hash IS NOT NULL)');
+        // Schema 8 makes content append-only: history can reference a hash even
+        // after its last placement is removed and its library document is edited.
         db.exec('COMMIT');
         return { blueprint: bp, hash, version };
-      } catch (error) { db.exec('ROLLBACK'); throw error; }
+      } catch (error) { if (db.isTransaction) db.exec('ROLLBACK'); throw error; }
     },
   };
 }

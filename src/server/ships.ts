@@ -28,6 +28,6 @@ export function shipStore(db: DatabaseSync) {
       db.prepare('INSERT INTO player_ships (player_id,document,version) VALUES (?,?,?) ON CONFLICT(player_id) DO UPDATE SET document=excluded.document,version=excluded.version').run(owner, document, current.version + 1);
       db.prepare('UPDATE players SET revision=revision+1 WHERE id=?').run(owner);
       db.exec('COMMIT');
-    } catch (e) { db.exec('ROLLBACK'); throw e; }
+    } catch (e) { if (db.isTransaction) db.exec('ROLLBACK'); throw e; }
   } };
 }
