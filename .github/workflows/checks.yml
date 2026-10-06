@@ -17,7 +17,7 @@ jobs:
   check:
     # Runs once the repo is public; until then `pnpm check` is the same
     # sensors, locally.
-    if: ${{ !github.event.repository.private }}
+    if: ${{ !github.event.repository.private && !(github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main') }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -67,6 +67,21 @@ jobs:
             --include-detectors=CustomRegex --results=unverified
             --no-verification
 
+  # Dispatch on a release branch to verify the live DB before changing main.
+  preflight:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1
+      - name: Back up live SQLite and rehearse migration on a private copy
+        run: node scripts/release/preflight.mjs
+
   deploy:
     needs: check
     # The template repo itself has no Fly app; only student repos deploy.
@@ -86,6 +101,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # 1.6
+      - name: Back up live SQLite and rehearse migration on a private copy
+        run: node scripts/release/preflight.mjs
       - name: Deploy
         # --remote-only builds the Dockerfile on Fly's builders; --ha=false
         # keeps the app at one machine and one volume.
