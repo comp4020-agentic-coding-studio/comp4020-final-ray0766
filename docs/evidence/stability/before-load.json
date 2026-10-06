@@ -1,0 +1,289 @@
+{
+  "browser": "154.0.8037.98",
+  "chunks": [
+    {
+      "file": "assets/index-CGJv1FZs.js",
+      "entry": true,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js"
+      ],
+      "dynamicImports": [
+        "assets/KTX2Loader-DcV1qBPf.js"
+      ],
+      "bytes": 785920,
+      "gzip": 227670,
+      "modules": [
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/build/three.module.js",
+          "bytes": 542821
+        },
+        {
+          "id": "src/client/main.ts",
+          "bytes": 38469
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/controls/OrbitControls.js",
+          "bytes": 27409
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/kit.ts",
+          "bytes": 24973
+        },
+        {
+          "id": "src/client/colony.ts",
+          "bytes": 18523
+        },
+        {
+          "id": "src/client/flight.ts",
+          "bytes": 18260
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/flora.ts",
+          "bytes": 17811
+        },
+        {
+          "id": "src/client/harbour.ts",
+          "bytes": 16807
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/postprocessing/GTAOPass.js",
+          "bytes": 14803
+        },
+        {
+          "id": "src/client/workshop.ts",
+          "bytes": 14789
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/model.ts",
+          "bytes": 14183
+        },
+        {
+          "id": "src/assets/claude-geometry/style/materials.ts",
+          "bytes": 13487
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/parts/hulls.ts",
+          "bytes": 12761
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/markings.ts",
+          "bytes": 11949
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/view/workshop-view.ts",
+          "bytes": 11682
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/planet.ts",
+          "bytes": 11659
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/postprocessing/UnrealBloomPass.js",
+          "bytes": 11484
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/math/SimplexNoise.js",
+          "bytes": 11262
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/shaders/GTAOShader.js",
+          "bytes": 11092
+        },
+        {
+          "id": "src/shared/physics/world.ts",
+          "bytes": 10901
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/parts/cockpits.ts",
+          "bytes": 10844
+        },
+        {
+          "id": "src/assets/claude-geometry/shell/stage.ts",
+          "bytes": 10459
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/factory.ts",
+          "bytes": 10283
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/parts/structure.ts",
+          "bytes": 9862
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/editor.ts",
+          "bytes": 9813
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/parts/engines.ts",
+          "bytes": 9296
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/textures.ts",
+          "bytes": 8156
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/env.ts",
+          "bytes": 8075
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/dual.ts",
+          "bytes": 8034
+        },
+        {
+          "id": "src/assets/claude-geometry/style/practical.ts",
+          "bytes": 8023
+        }
+      ]
+    },
+    {
+      "file": "assets/KTX2Loader-DcV1qBPf.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js"
+      ],
+      "dynamicImports": [],
+      "bytes": 58998,
+      "gzip": 23983,
+      "modules": [
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/libs/zstddec.module.js",
+          "bytes": 39974
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/loaders/KTX2Loader.js",
+          "bytes": 23292
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/libs/ktx-parse.module.js",
+          "bytes": 5837
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/utils/WorkerPool.js",
+          "bytes": 1671
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/math/ColorSpaces.js",
+          "bytes": 386
+        }
+      ]
+    },
+    {
+      "file": "assets/three.core-Dkq4OJcO.js",
+      "entry": false,
+      "imports": [],
+      "dynamicImports": [],
+      "bytes": 250552,
+      "gzip": 67676,
+      "modules": [
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/build/three.core.js",
+          "bytes": 430403
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "path": "/assets/index-CGJv1FZs.js",
+      "bytes": 785920,
+      "transfer": 786220,
+      "type": "script"
+    },
+    {
+      "path": "/assets/three.core-Dkq4OJcO.js",
+      "bytes": 250552,
+      "transfer": 250852,
+      "type": "other"
+    },
+    {
+      "path": "/assets/index-Cf5UwTzq.css",
+      "bytes": 51157,
+      "transfer": 51457,
+      "type": "link"
+    },
+    {
+      "path": "/textures/lola-height-1k.jpg",
+      "bytes": 111552,
+      "transfer": 111852,
+      "type": "img"
+    },
+    {
+      "path": "/textures/lroc-color-2k.jpg",
+      "bytes": 457942,
+      "transfer": 458242,
+      "type": "img"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/blue_metal_plate/512/albedo.webp",
+      "bytes": 6452,
+      "transfer": 6752,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/blue_metal_plate/256/arm.webp",
+      "bytes": 3180,
+      "transfer": 3480,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/blue_metal_plate/512/normal.webp",
+      "bytes": 5124,
+      "transfer": 5424,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate_02/512/albedo.webp",
+      "bytes": 22898,
+      "transfer": 23198,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate_02/256/arm.webp",
+      "bytes": 21896,
+      "transfer": 22196,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate_02/512/normal.webp",
+      "bytes": 8298,
+      "transfer": 8598,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate/512/albedo.webp",
+      "bytes": 23438,
+      "transfer": 23738,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate/256/arm.webp",
+      "bytes": 25616,
+      "transfer": 25916,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate/512/normal.webp",
+      "bytes": 60438,
+      "transfer": 60738,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/hangar_concrete_floor/512/albedo.webp",
+      "bytes": 22440,
+      "transfer": 22740,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/hangar_concrete_floor/256/arm.webp",
+      "bytes": 3610,
+      "transfer": 3910,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/hangar_concrete_floor/512/normal.webp",
+      "bytes": 64374,
+      "transfer": 64674,
+      "type": "fetch"
+    }
+  ]
+}

@@ -109,7 +109,10 @@ export class Workshop {
     if(this.busy||(!force&&!this.discard()))return;
     this.dialog.close();document.body.classList.remove('workshop-open');
     this.view?.dispose();this.templates?.dispose();this.stage?.dispose();this.stage?.renderer.forceContextLoss();this.view=null;this.templates=null;this.stage=null;
-    this.saved=null;this.editor.reset();
+    // The source view subscribes to its editor for the view's lifetime. Retire
+    // that editor with the disposed view; reusing it would call a dead library.
+    this.saved=null;this.editor=new BlueprintEditor();this.editor.onChange(()=>this.changed());
+    this.level=0;this.get<HTMLSelectElement>('level').value='0';this.get<HTMLSelectElement>('tool').value='select';
   }
   private starter(){const bp=industrialCabin();bp.id=crypto.randomUUID() as Blueprint['id'];this.saved=null;this.editor.load(bp);this.level=0;this.get<HTMLSelectElement>('level').value='0';this.view?.setLevel(0);this.changed();this.frame();}
   private load(entry:LibraryEntry){this.saved=entry;this.editor.load(entry.blueprint);this.level=0;this.get<HTMLSelectElement>('level').value='0';this.view?.setLevel(0);this.changed();this.frame();this.status('Saved blueprint opened.');}

@@ -1,0 +1,847 @@
+{
+  "browser": "154.0.8037.98",
+  "chunks": [
+    {
+      "file": "assets/index-BDg7fVq1.js",
+      "entry": true,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js",
+        "assets/lighting-DELQ1vCQ.js",
+        "assets/factory-pW4hcU_C.js",
+        "assets/model3d-Bxu4N6Yd.js",
+        "assets/terrain-model-CSxRUS1j.js"
+      ],
+      "dynamicImports": [
+        "assets/workshop-CIT2ODwN.js",
+        "assets/terrain-workshop-bKKQINST.js",
+        "assets/history-lK3O8rUi.js",
+        "assets/shipyard-CrdfnLhP.js"
+      ],
+      "bytes": 94388,
+      "gzip": 33845,
+      "modules": [
+        {
+          "id": "src/client/main.ts",
+          "bytes": 39557
+        },
+        {
+          "id": "src/client/colony.ts",
+          "bytes": 19654
+        },
+        {
+          "id": "src/client/flight.ts",
+          "bytes": 18260
+        },
+        {
+          "id": "src/client/harbour.ts",
+          "bytes": 16807
+        },
+        {
+          "id": "src/shared/physics/world.ts",
+          "bytes": 10901
+        },
+        {
+          "id": "src/client/space-art.ts",
+          "bytes": 7721
+        },
+        {
+          "id": "src/client/character.ts",
+          "bytes": 4935
+        },
+        {
+          "id": "src/client/presence.ts",
+          "bytes": 4373
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js",
+          "bytes": 3954
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/environments/RoomEnvironment.js",
+          "bytes": 3438
+        },
+        {
+          "id": "src/client/scene.ts",
+          "bytes": 3403
+        },
+        {
+          "id": "src/shared/flight.ts",
+          "bytes": 2604
+        },
+        {
+          "id": "src/shared/physics/parts.ts",
+          "bytes": 2532
+        },
+        {
+          "id": "src/client/motion.ts",
+          "bytes": 2421
+        },
+        {
+          "id": "src/client/terrain.ts",
+          "bytes": 1751
+        },
+        {
+          "id": "\u0000vite/modulepreload-polyfill.js",
+          "bytes": 1205
+        },
+        {
+          "id": "src/client/lazy-panel.ts",
+          "bytes": 1069
+        },
+        {
+          "id": "src/client/ship-model.ts",
+          "bytes": 842
+        },
+        {
+          "id": "src/shared/regions.ts",
+          "bytes": 536
+        },
+        {
+          "id": "src/shared/ports.ts",
+          "bytes": 187
+        },
+        {
+          "id": "src/shared/presence.ts",
+          "bytes": 99
+        },
+        {
+          "id": "src/client/style.css",
+          "bytes": 0
+        },
+        {
+          "id": "src/client/colony.css",
+          "bytes": 0
+        },
+        {
+          "id": "src/client/flight.css",
+          "bytes": 0
+        },
+        {
+          "id": "src/client/immersive.css",
+          "bytes": 0
+        },
+        {
+          "id": "index.html",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "file": "assets/KTX2Loader-DcV1qBPf.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js"
+      ],
+      "dynamicImports": [],
+      "bytes": 58998,
+      "gzip": 23983,
+      "modules": [
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/libs/zstddec.module.js",
+          "bytes": 39974
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/loaders/KTX2Loader.js",
+          "bytes": 23292
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/libs/ktx-parse.module.js",
+          "bytes": 5837
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/utils/WorkerPool.js",
+          "bytes": 1671
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/math/ColorSpaces.js",
+          "bytes": 386
+        }
+      ]
+    },
+    {
+      "file": "assets/factory-pW4hcU_C.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js",
+        "assets/lighting-DELQ1vCQ.js"
+      ],
+      "dynamicImports": [],
+      "bytes": 52580,
+      "gzip": 18427,
+      "modules": [
+        {
+          "id": "src/assets/claude-geometry/ship/parts/hulls.ts",
+          "bytes": 12761
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/markings.ts",
+          "bytes": 11949
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/parts/cockpits.ts",
+          "bytes": 10844
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/factory.ts",
+          "bytes": 10283
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/parts/engines.ts",
+          "bytes": 9296
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/kit.ts",
+          "bytes": 7569
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/parts/wings.ts",
+          "bytes": 6439
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/geom.ts",
+          "bytes": 5864
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/spec.ts",
+          "bytes": 5804
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/design.ts",
+          "bytes": 4048
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/parts/tails.ts",
+          "bytes": 3246
+        },
+        {
+          "id": "src/assets/claude-geometry/ship/parts/dorsals.ts",
+          "bytes": 2363
+        },
+        {
+          "id": "src/shared/ships.ts",
+          "bytes": 121
+        }
+      ]
+    },
+    {
+      "file": "assets/history-lK3O8rUi.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js",
+        "assets/lighting-DELQ1vCQ.js",
+        "assets/terrain-model-CSxRUS1j.js",
+        "assets/stage-qkyZULZq.js",
+        "assets/planet-preview-DWQhqwC2.js"
+      ],
+      "dynamicImports": [],
+      "bytes": 7259,
+      "gzip": 2899,
+      "modules": [
+        {
+          "id": "src/client/history.ts",
+          "bytes": 7008
+        },
+        {
+          "id": "src/assets/claude-geometry/timeline/codec.ts",
+          "bytes": 2447
+        },
+        {
+          "id": "src/client/history.css",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "file": "assets/lighting-DELQ1vCQ.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js"
+      ],
+      "dynamicImports": [
+        "assets/KTX2Loader-DcV1qBPf.js"
+      ],
+      "bytes": 397311,
+      "gzip": 101046,
+      "modules": [
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/build/three.module.js",
+          "bytes": 542821
+        },
+        {
+          "id": "src/assets/claude-geometry/style/materials.ts",
+          "bytes": 13487
+        },
+        {
+          "id": "src/assets/claude-geometry/style/practical.ts",
+          "bytes": 8023
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/loaders/HDRLoader.js",
+          "bytes": 7778
+        },
+        {
+          "id": "src/assets/claude-geometry/style/geometry.ts",
+          "bytes": 7551
+        },
+        {
+          "id": "src/assets/claude-geometry/style/lighting.ts",
+          "bytes": 7332
+        },
+        {
+          "id": "src/assets/claude-geometry/style/textures.ts",
+          "bytes": 6836
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js",
+          "bytes": 6318
+        },
+        {
+          "id": "src/assets/claude-geometry/core/doc.ts",
+          "bytes": 5236
+        },
+        {
+          "id": "src/assets/claude-geometry/core/noise.ts",
+          "bytes": 2992
+        },
+        {
+          "id": "\u0000vite/preload-helper.js",
+          "bytes": 2610
+        },
+        {
+          "id": "src/assets/claude-geometry/core/vec.ts",
+          "bytes": 2190
+        },
+        {
+          "id": "src/assets/claude-geometry/core/dispose.ts",
+          "bytes": 1751
+        },
+        {
+          "id": "src/assets/claude-geometry/style/lod.ts",
+          "bytes": 1570
+        },
+        {
+          "id": "src/assets/claude-geometry/style/scans.ts",
+          "bytes": 1463
+        },
+        {
+          "id": "src/assets/claude-geometry/style/tokens.ts",
+          "bytes": 1079
+        },
+        {
+          "id": "src/assets/claude-geometry/core/ids.ts",
+          "bytes": 424
+        },
+        {
+          "id": "src/client/resource-policy.ts",
+          "bytes": 162
+        }
+      ]
+    },
+    {
+      "file": "assets/model3d-Bxu4N6Yd.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js",
+        "assets/lighting-DELQ1vCQ.js"
+      ],
+      "dynamicImports": [],
+      "bytes": 36436,
+      "gzip": 12182,
+      "modules": [
+        {
+          "id": "src/assets/claude-geometry/blueprint/model.ts",
+          "bytes": 14181
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/parts/structure.ts",
+          "bytes": 9862
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/parts/walls.ts",
+          "bytes": 7962
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/parts/kit.ts",
+          "bytes": 6677
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/parts/street.ts",
+          "bytes": 5454
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/parts/catalogue.ts",
+          "bytes": 4874
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/parts/decks.ts",
+          "bytes": 4696
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/codec.ts",
+          "bytes": 4454
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/model3d.ts",
+          "bytes": 1875
+        }
+      ]
+    },
+    {
+      "file": "assets/planet-preview-DWQhqwC2.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js",
+        "assets/model3d-Bxu4N6Yd.js",
+        "assets/terrain-model-CSxRUS1j.js"
+      ],
+      "dynamicImports": [],
+      "bytes": 1335,
+      "gzip": 737,
+      "modules": [
+        {
+          "id": "src/client/planet-preview.ts",
+          "bytes": 2022
+        }
+      ]
+    },
+    {
+      "file": "assets/shipyard-CrdfnLhP.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js",
+        "assets/lighting-DELQ1vCQ.js",
+        "assets/factory-pW4hcU_C.js",
+        "assets/stage-qkyZULZq.js"
+      ],
+      "dynamicImports": [],
+      "bytes": 5626,
+      "gzip": 2263,
+      "modules": [
+        {
+          "id": "src/client/shipyard.ts",
+          "bytes": 7044
+        },
+        {
+          "id": "src/client/shipyard.css",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "file": "assets/stage-qkyZULZq.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js",
+        "assets/lighting-DELQ1vCQ.js"
+      ],
+      "dynamicImports": [],
+      "bytes": 76006,
+      "gzip": 18693,
+      "modules": [
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/controls/OrbitControls.js",
+          "bytes": 27409
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/postprocessing/GTAOPass.js",
+          "bytes": 14803
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/postprocessing/UnrealBloomPass.js",
+          "bytes": 11484
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/math/SimplexNoise.js",
+          "bytes": 11262
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/shaders/GTAOShader.js",
+          "bytes": 11092
+        },
+        {
+          "id": "src/assets/claude-geometry/shell/stage.ts",
+          "bytes": 10459
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/shaders/PoissonDenoiseShader.js",
+          "bytes": 6451
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/postprocessing/EffectComposer.js",
+          "bytes": 4048
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/postprocessing/OutputPass.js",
+          "bytes": 2135
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/postprocessing/MaskPass.js",
+          "bytes": 1852
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/postprocessing/RenderPass.js",
+          "bytes": 1719
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/shaders/OutputShader.js",
+          "bytes": 1650
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/postprocessing/ShaderPass.js",
+          "bytes": 1361
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/postprocessing/Pass.js",
+          "bytes": 1158
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/shaders/LuminosityHighPassShader.js",
+          "bytes": 1056
+        },
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/examples/jsm/shaders/CopyShader.js",
+          "bytes": 581
+        }
+      ]
+    },
+    {
+      "file": "assets/terrain-model-CSxRUS1j.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js",
+        "assets/lighting-DELQ1vCQ.js",
+        "assets/model3d-Bxu4N6Yd.js"
+      ],
+      "dynamicImports": [],
+      "bytes": 86628,
+      "gzip": 32874,
+      "modules": [
+        {
+          "id": "src/assets/claude-geometry/terrain/kit.ts",
+          "bytes": 24973
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/flora.ts",
+          "bytes": 17811
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/planet.ts",
+          "bytes": 11659
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/textures.ts",
+          "bytes": 8156
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/env.ts",
+          "bytes": 8075
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/dual.ts",
+          "bytes": 8034
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/styles/ocean.ts",
+          "bytes": 7888
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/styles/ice.ts",
+          "bytes": 7030
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/styles/desert.ts",
+          "bytes": 6195
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/styles/temperate.ts",
+          "bytes": 4875
+        },
+        {
+          "id": "src/client/shared-assets.ts",
+          "bytes": 4365
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/field.ts",
+          "bytes": 3703
+        },
+        {
+          "id": "src/assets/claude-geometry/core/world.ts",
+          "bytes": 3615
+        },
+        {
+          "id": "src/client/build-art.ts",
+          "bytes": 3557
+        },
+        {
+          "id": "src/assets/claude-geometry/core/ground.ts",
+          "bytes": 3423
+        },
+        {
+          "id": "src/client/harbour-materials.ts",
+          "bytes": 3134
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/icosphere.ts",
+          "bytes": 2687
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/sha256.ts",
+          "bytes": 2624
+        },
+        {
+          "id": "src/shared/terrain.ts",
+          "bytes": 2398
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/styles/program.ts",
+          "bytes": 2076
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/pads.ts",
+          "bytes": 1739
+        },
+        {
+          "id": "src/shared/planets.ts",
+          "bytes": 1620
+        },
+        {
+          "id": "src/client/terrain-model.ts",
+          "bytes": 1166
+        },
+        {
+          "id": "src/assets/claude-geometry/core/anchor.ts",
+          "bytes": 798
+        },
+        {
+          "id": "src/shared/world.ts",
+          "bytes": 748
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/trig.ts",
+          "bytes": 626
+        },
+        {
+          "id": "src/shared/blueprints.ts",
+          "bytes": 392
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/placement.ts",
+          "bytes": 355
+        },
+        {
+          "id": "src/assets/claude-geometry/core/placement.ts",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "file": "assets/terrain-workshop-bKKQINST.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js",
+        "assets/lighting-DELQ1vCQ.js",
+        "assets/terrain-model-CSxRUS1j.js",
+        "assets/stage-qkyZULZq.js",
+        "assets/planet-preview-DWQhqwC2.js"
+      ],
+      "dynamicImports": [],
+      "bytes": 6299,
+      "gzip": 2621,
+      "modules": [
+        {
+          "id": "src/client/terrain-workshop.ts",
+          "bytes": 6792
+        },
+        {
+          "id": "src/assets/claude-geometry/terrain/policy.ts",
+          "bytes": 946
+        },
+        {
+          "id": "src/client/terrain-workshop.css",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "file": "assets/three.core-Dkq4OJcO.js",
+      "entry": false,
+      "imports": [],
+      "dynamicImports": [],
+      "bytes": 250552,
+      "gzip": 67676,
+      "modules": [
+        {
+          "id": "node_modules/.pnpm/three@0.186.1/node_modules/three/build/three.core.js",
+          "bytes": 430403
+        }
+      ]
+    },
+    {
+      "file": "assets/workshop-CIT2ODwN.js",
+      "entry": false,
+      "imports": [
+        "assets/three.core-Dkq4OJcO.js",
+        "assets/lighting-DELQ1vCQ.js",
+        "assets/model3d-Bxu4N6Yd.js",
+        "assets/stage-qkyZULZq.js"
+      ],
+      "dynamicImports": [],
+      "bytes": 27998,
+      "gzip": 9488,
+      "modules": [
+        {
+          "id": "src/client/workshop.ts",
+          "bytes": 14937
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/view/workshop-view.ts",
+          "bytes": 11682
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/editor.ts",
+          "bytes": 9809
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/samples.ts",
+          "bytes": 1324
+        },
+        {
+          "id": "src/assets/claude-geometry/blueprint/view/templates.ts",
+          "bytes": 1294
+        },
+        {
+          "id": "src/client/workshop.css",
+          "bytes": 0
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "path": "/assets/index-BDg7fVq1.js",
+      "bytes": 94388,
+      "transfer": 94688,
+      "type": "script"
+    },
+    {
+      "path": "/assets/model3d-Bxu4N6Yd.js",
+      "bytes": 36436,
+      "transfer": 36736,
+      "type": "other"
+    },
+    {
+      "path": "/assets/factory-pW4hcU_C.js",
+      "bytes": 52580,
+      "transfer": 52880,
+      "type": "other"
+    },
+    {
+      "path": "/assets/three.core-Dkq4OJcO.js",
+      "bytes": 250552,
+      "transfer": 250852,
+      "type": "other"
+    },
+    {
+      "path": "/assets/lighting-DELQ1vCQ.js",
+      "bytes": 397311,
+      "transfer": 397611,
+      "type": "other"
+    },
+    {
+      "path": "/assets/index-Bm1CevEF.css",
+      "bytes": 41250,
+      "transfer": 41550,
+      "type": "link"
+    },
+    {
+      "path": "/assets/terrain-model-CSxRUS1j.js",
+      "bytes": 86628,
+      "transfer": 86928,
+      "type": "other"
+    },
+    {
+      "path": "/textures/lola-height-1k.jpg",
+      "bytes": 111552,
+      "transfer": 111852,
+      "type": "img"
+    },
+    {
+      "path": "/textures/lroc-color-2k.jpg",
+      "bytes": 457942,
+      "transfer": 458242,
+      "type": "img"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/blue_metal_plate/256/arm.webp",
+      "bytes": 3180,
+      "transfer": 3480,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/blue_metal_plate/512/albedo.webp",
+      "bytes": 6452,
+      "transfer": 6752,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/blue_metal_plate/512/normal.webp",
+      "bytes": 5124,
+      "transfer": 5424,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate_02/512/albedo.webp",
+      "bytes": 22898,
+      "transfer": 23198,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate_02/256/arm.webp",
+      "bytes": 21896,
+      "transfer": 22196,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate_02/512/normal.webp",
+      "bytes": 8298,
+      "transfer": 8598,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate/512/albedo.webp",
+      "bytes": 23438,
+      "transfer": 23738,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate/256/arm.webp",
+      "bytes": 25616,
+      "transfer": 25916,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/metal_plate/512/normal.webp",
+      "bytes": 60438,
+      "transfer": 60738,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/hangar_concrete_floor/512/albedo.webp",
+      "bytes": 22440,
+      "transfer": 22740,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/hangar_concrete_floor/256/arm.webp",
+      "bytes": 3610,
+      "transfer": 3910,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/claude/a4546bb120d969774776f1fbe2cb1c990a7c3e66/scans/hangar_concrete_floor/512/normal.webp",
+      "bytes": 64374,
+      "transfer": 64674,
+      "type": "fetch"
+    }
+  ]
+}

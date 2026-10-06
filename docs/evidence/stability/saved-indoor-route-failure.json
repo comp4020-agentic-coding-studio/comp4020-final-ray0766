@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "Browser cached the failed optional import; explicit reload recovered the saved world",
+    "Optional UI chunks absent on first screen; failed import stays in pause and recovers",
+    "Terrain preview and cancelled irreversible-apply confirmation leave the legacy planet unchanged",
+    "Blueprint keyboard input cannot move player; discard can be cancelled; saved new blueprint places; unsaved placement exit is protected"
+  ],
+  "pageErrors": [],
+  "error": "Error: Walking did not reach waypoint: {\"position\":[0.39222697436424236,0.8315398117784696,0.393318626572019],\"radius\":10.086334124147257,\"north\":{\"x\":-0.7258608399002284,\"y\":0.0171311279722019,\"z\":0.6876282175374533},\"grounded\":true}"
+}

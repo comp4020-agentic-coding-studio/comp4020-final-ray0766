@@ -1,0 +1,9 @@
+{
+  "checks": [
+    "Browser cached the failed optional import; explicit reload recovered the saved world",
+    "Optional UI chunks absent on first screen; failed import stays in pause and recovers",
+    "Terrain preview and cancelled irreversible-apply confirmation leave the legacy planet unchanged"
+  ],
+  "pageErrors": [],
+  "error": "TypeError: expect(...).toContainValue is not a function"
+}

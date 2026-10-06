@@ -6,7 +6,8 @@ import { CATALOGUE, MAX_OBJECTS, objectName, objectRadius, objectHeight, placeme
 import type { BuildKind, PlacedObject, Universe } from '../shared/planets.ts';
 import type { PlayerState, Vec3 } from '../shared/world.ts';
 import { builtObject, disposeGeometry } from './build-art.ts';
-import { Workshop } from './workshop.ts';
+import type { Workshop } from './workshop.ts';
+import {lazyPanel,openPanel} from './lazy-panel.ts';
 import type { LibraryEntry } from '../shared/blueprints.ts';
 import { structureFit, structureSize } from '../shared/blueprints.ts';
 import { buildBlueprintModel } from '../assets/claude-geometry/blueprint/model3d.ts';
@@ -34,16 +35,16 @@ export class Colony {
   private objects = new Map<string,T.Group>(); private draft: Draft | null = null;
   private placing = false; private selected: string | null = null;
   private painted = ''; private cards = ''; private pointer: {x:number;y:number} | null = null;
-  private workshop: Workshop;
+  private workshop: Workshop|null=null;
   private localParts: Record<string,PartPlacement[]> = {};
   private ray = new T.Raycaster(); private pollBusy = false;
   constructor(private bridge: ColonyBridge) {
     bridge.scene.add(this.layer);
-    this.workshop = new Workshop({read:bridge.libraryRead,save:bridge.librarySave,allowed:()=>!!this.universe?.currentPlanet.mine&&this.universe.player.flight.mode==='ground'&&this.syncing,
-      place:entry=>{this.localParts[entry.hash]=entry.blueprint.parts;this.setBuilding(true);this.draft={id:crypto.randomUUID(),kind:'structure',blueprintHash:entry.hash,...structureSize(entry.blueprint.parts),position:null,rotation:0};this.placing=true;this.editor();bridge.notice('Tap an open spot, turn the structure, then Place object.');}});
+    const loadWorkshop=lazyPanel(async()=>{const {Workshop}=await import('./workshop.ts');return this.workshop = new Workshop({read:bridge.libraryRead,save:bridge.librarySave,allowed:()=>!!this.universe?.currentPlanet.mine&&this.universe.player.flight.mode==='ground'&&this.syncing,
+      place:entry=>{this.localParts[entry.hash]=entry.blueprint.parts;this.setBuilding(true);this.draft={id:crypto.randomUUID(),kind:'structure',blueprintHash:entry.hash,...structureSize(entry.blueprint.parts),position:null,rotation:0};this.placing=true;this.editor();bridge.notice('Tap an open spot, turn the structure, then Place object.');}});});
     const workshopButton=document.createElement('button');workshopButton.id='open-workshop';workshopButton.className='primary';workshopButton.textContent='Open workshop';workshopButton.hidden=true;
     el('build-mode').after(workshopButton);
-    workshopButton.onclick=()=>{el<HTMLDialogElement>('menu-dialog').close();this.setBuilding(false);void bridge.flush().then(()=>this.workshop.open()).catch(e=>bridge.notice(e instanceof Error?e.message:'Reconnect before opening the workshop.'));};
+    workshopButton.onclick=()=>void openPanel(workshopButton,loadWorkshop,async panel=>{if(!this.universe?.currentPlanet.mine||this.universe.player.flight.mode!=='ground'||!this.setBuilding(false))return;await bridge.flush();el<HTMLDialogElement>('menu-dialog').close();await panel.open();});
     el<HTMLSelectElement>('region-select').onchange=()=>{this.cards='';this.starMap();};
     el('open-map').onclick=()=>{el<HTMLDialogElement>('menu-dialog').close();bridge.pause(this.building);this.cards='';if(this.universe)this.starMap();this.map.showModal();void this.poll();};
     el('close-map').onclick=()=>this.map.close();
@@ -60,32 +61,36 @@ export class Colony {
     for(const kind of Object.keys(CATALOGUE) as BuildKind[]) {
       const button=document.createElement('button');button.className='catalogue-item';button.dataset.kind=kind;button.setAttribute('aria-label',`Add ${CATALOGUE[kind].name.toLowerCase()}`);
       const icon=document.createElement('span');icon.textContent=CATALOGUE[kind].icon;const name=document.createElement('strong');name.textContent=CATALOGUE[kind].name;
-      button.append(icon,name);button.onclick=()=>{if(this.busy)return;this.clearDraft();this.draft={id:crypto.randomUUID(),kind,position:null,rotation:0};this.placing=true;this.editor();};el('catalogue').append(button);
+      button.append(icon,name);button.onclick=()=>{if(this.busy||!this.discardPlacement())return;this.clearDraft();this.draft={id:crypto.randomUUID(),kind,position:null,rotation:0};this.placing=true;this.editor();};el('catalogue').append(button);
     }
     bridge.canvas.addEventListener('pointerdown',e=>{if(this.building)this.pointer={x:e.clientX,y:e.clientY};});
     bridge.canvas.addEventListener('pointerup',e=>{
       if(!this.building||this.busy||!this.pointer||Math.hypot(e.clientX-this.pointer.x,e.clientY-this.pointer.y)>10)return;
       this.pointer=null;this.point(e.clientX,e.clientY);
     });
-    window.addEventListener('keydown',e=>{if(this.building&&!document.querySelector('dialog[open]')&&e.key.toLowerCase()==='r'){e.preventDefault();el('rotate-object').click();}});
+    window.addEventListener('keydown',e=>{if(this.building&&!document.querySelector('dialog[open]')&&!/INPUT|TEXTAREA|SELECT/.test((e.target as HTMLElement).tagName)&&e.key.toLowerCase()==='r'){e.preventDefault();el('rotate-object').click();}});
+    window.addEventListener('beforeunload',e=>{if(this.hasDraft())e.preventDefault();});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)void this.poll();});
     setInterval(()=>{if(!document.hidden)void this.poll();},1000);
     void this.poll();
   }
-  get paused() { return this.building || this.map.open || this.busy || this.workshop.opened; }
+  get paused() { return this.building || this.map.open || this.busy || this.workshop?.opened; }
   private clearDraft(){this.draft=null;this.selected=null;this.placing=false;el<HTMLSelectElement>('built-list').value='';if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}}
-  private setBuilding(value:boolean){
+  private hasDraft(){const d=this.draft;if(!d?.position)return false;const old=this.universe?.currentPlanet.objects.find(o=>o.id===d.id);return !old||old.rotation!==d.rotation||old.position.some((v,i)=>Math.abs(v-d.position![i])>1e-8);}
+  private discardPlacement(){return !this.hasDraft()||window.confirm('Discard the unsaved building placement or changes?');}
+  private setBuilding(value:boolean,force=false){
+    if(!value&&!force&&!this.discardPlacement())return false;
     this.building=value&&!!this.universe?.currentPlanet.mine&&this.syncing;this.clearDraft();
-    document.body.classList.toggle('building',this.building);el('builder').hidden=!this.building;this.bridge.pause(this.building);if(this.building)el<HTMLDialogElement>('menu-dialog').close();this.editor();this.hud();
+    document.body.classList.toggle('building',this.building);el('builder').hidden=!this.building;this.bridge.pause(this.building);if(this.building)el<HTMLDialogElement>('menu-dialog').close();this.editor();this.hud();return true;
   }
-  stopBuilding(){this.setBuilding(false);}
+  stopBuilding(){return this.setBuilding(false);}
   accept(next:Universe){
     if(!this.bridge.applyPlayer(next.player))return;
     if(this.universe?.currentPlanet.id===next.currentPlanet.id&&this.universe.currentPlanet.revision>next.currentPlanet.revision)return;
     const changed=this.universe?.currentPlanet.id!==next.currentPlanet.id;
     this.universe=next;el('open-history').hidden=!next.currentPlanet.mine;el('open-terrain').hidden=!next.currentPlanet.mine||next.player.flight.mode!=='ground';this.syncing=true;this.bridge.universe(next);
-    if(changed){this.setBuilding(false);this.clearDraft();}
-    if(this.building&&(!next.currentPlanet.mine||next.player.flight.mode==='space'))this.setBuilding(false);
+    if(changed){this.setBuilding(false,true);this.clearDraft();}
+    if(this.building&&(!next.currentPlanet.mine||next.player.flight.mode==='space'))this.setBuilding(false,true);
     const key=next.currentPlanet.id+':'+next.currentPlanet.revision;
     if(this.painted!==key){
       this.painted=key;this.bridge.canvas.dataset.placedAssetKit=SHARED_ASSET_VERSION;this.bridge.canvas.dataset.placedAssetKinds=next.currentPlanet.objects.map(o=>o.kind).join(',');for(const child of [...this.layer.children])disposeGeometry(child);this.objects.clear();
@@ -98,7 +103,7 @@ export class Colony {
     this.hud();this.editor();this.starMap();
   }
   private async poll(){
-    if(this.pollBusy||this.busy||this.workshop.opened)return;this.pollBusy=true;
+    if(this.pollBusy||this.busy||this.workshop?.opened)return;this.pollBusy=true;
     try{this.accept(await this.bridge.read());}catch{this.syncing=false;this.hud();this.editor();}finally{this.pollBusy=false;}
   }
   private async command(route:string,body:unknown){
@@ -135,11 +140,11 @@ export class Colony {
     if(this.placing&&this.draft){const hit=this.ray.intersectObject(this.bridge.ground())[0];if(hit){this.draft.position=hit.point.normalize().toArray() as Vec3;this.preview();this.editor();}return;}
     const hit=this.ray.intersectObjects([...this.objects.values()],true)[0];
     const surface=this.ray.intersectObject(this.bridge.ground())[0];
-    if(!hit||(surface&&hit.distance>surface.distance+.15)){this.clearDraft();this.editor();return;}
+    if(!hit||(surface&&hit.distance>surface.distance+.15)){if(!this.discardPlacement())return;this.clearDraft();this.editor();return;}
     let obj:T.Object3D|null=hit.object;while(obj&&!obj.userData.objectId)obj=obj.parent;
     if(obj?.userData.objectId)this.select(obj.userData.objectId);
   }
-  private select(id:string){if(this.busy)return;const found=this.universe?.currentPlanet.objects.find(o=>o.id===id);this.clearDraft();if(found){this.selected=found.id;this.draft={...found,position:[...found.position]};this.preview();}el<HTMLSelectElement>('built-list').value=id;this.editor();}
+  private select(id:string){if(this.busy||!this.discardPlacement()){el<HTMLSelectElement>('built-list').value=this.selected??'';return;}const found=this.universe?.currentPlanet.objects.find(o=>o.id===id);this.clearDraft();if(found){this.selected=found.id;this.draft={...found,position:[...found.position]};this.preview();}el<HTMLSelectElement>('built-list').value=id;this.editor();}
   private preview(){
     if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}
     if(!this.draft?.position)return;

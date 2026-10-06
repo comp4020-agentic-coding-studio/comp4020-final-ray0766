@@ -6,6 +6,8 @@ workshop described in [the workshop guide](docs/integration/workshop-v1.md),
 [private ship designs](docs/evidence/ships/verification.md),
 [owner-private building history](docs/evidence/history/verification.md), and
 [opt-in deterministic terrain](docs/integration/terrain-v1.md).
+[Cross-module stability and loading evidence](docs/evidence/stability/verification.md)
+records the bounded desktop/phone replay, deferred editors and measured first-screen resources.
 The published Crit 8 release remains `09233d9`; these changes are not deployed.
 
 > Prepared with AI assistance from the student's recorded design decisions and

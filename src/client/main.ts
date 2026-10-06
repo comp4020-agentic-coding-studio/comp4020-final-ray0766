@@ -1,8 +1,6 @@
 import * as T from 'three';
-import { TerrainWorkshop } from './terrain-workshop.ts';
-import { PrivateHistory } from './history.ts';
+import { lazyPanel,openPanel } from './lazy-panel.ts';
 import type { HistoryPage, HistorySnapshot } from '../shared/history.ts';
-import { Shipyard } from './shipyard.ts';
 import { defaultShip } from '../shared/ships.ts';
 import { PracticalLights } from '../assets/claude-geometry/style/practical.ts';
 import { worldMaterials } from './shared-assets.ts';
@@ -201,12 +199,12 @@ $('begin').onclick=()=>{courierDialog.close();notice('Follow the blue-lit street
 const menu=$<HTMLDialogElement>('menu-dialog');
 $('open-menu').onclick=()=>{clearInput();flight?.clear();menu.showModal();void savePosition(true);};
 $('close-menu').onclick=$('resume').onclick=()=>menu.close();
-const terrainWorkshop=new TerrainWorkshop({read:()=>request<Universe>('universe'),save:async body=>{await savePosition(true);const next=await serial(()=>request<Universe>('terrain/apply',body));colony?.accept(next);return next;},allowed:()=>!!colony?.universe?.currentPlanet.mine&&online&&state.flight.mode==='ground'});
-$('open-terrain').onclick=()=>{menu.close();clearInput();colony?.stopBuilding();void terrainWorkshop.open();};
-const history=new PrivateHistory({page:(id,after)=>request<HistoryPage>('history?planetId='+encodeURIComponent(id)+'&after='+after),snapshot:(id,seq)=>request<HistorySnapshot>('history/snapshot?planetId='+encodeURIComponent(id)+(seq===undefined?'':'&sequence='+seq))});
-$('open-history').onclick=()=>{if(!colony?.universe?.currentPlanet.mine)return;menu.close();clearInput();void history.open(colony.universe.currentPlanet.id);};
-const shipyard=new Shipyard({read:async()=>{const next=await serial(()=>request('state'));accept(next);return next.ship??defaultShip();},save:async body=>{const next=await serial(()=>request('ship/save',body));accept(next);return next.ship??defaultShip();},allowed:()=>!!state&&online&&state.flight.mode==='ground'});
-$('open-shipyard').onclick=()=>{menu.close();clearInput();if(state?.flight.mode==='space'){notice('Land before changing your ship.');return;}void shipyard.open();};
+const terrainWorkshop=lazyPanel(async()=>{const {TerrainWorkshop}=await import('./terrain-workshop.ts');return new TerrainWorkshop({read:()=>request<Universe>('universe'),save:async body=>{await savePosition(true);const next=await serial(()=>request<Universe>('terrain/apply',body));colony?.accept(next);return next;},allowed:()=>!!colony?.universe?.currentPlanet.mine&&online&&state.flight.mode==='ground'});});
+$('open-terrain').onclick=()=>void openPanel($<HTMLButtonElement>('open-terrain'),terrainWorkshop,async panel=>{if(!colony?.universe?.currentPlanet.mine||state.flight.mode!=='ground'||!colony.stopBuilding())return;clearInput();await savePosition(true);menu.close();await panel.open();});
+const history=lazyPanel(async()=>{const {PrivateHistory}=await import('./history.ts');return new PrivateHistory({page:(id,after)=>request<HistoryPage>('history?planetId='+encodeURIComponent(id)+'&after='+after),snapshot:(id,seq)=>request<HistorySnapshot>('history/snapshot?planetId='+encodeURIComponent(id)+(seq===undefined?'':'&sequence='+seq))});});
+$('open-history').onclick=()=>void openPanel($<HTMLButtonElement>('open-history'),history,async panel=>{if(!colony?.universe?.currentPlanet.mine)return;clearInput();await savePosition(true);menu.close();await panel.open(colony.universe.currentPlanet.id);});
+const shipyard=lazyPanel(async()=>{const {Shipyard}=await import('./shipyard.ts');return new Shipyard({read:async()=>{const next=await serial(()=>request('state'));accept(next);return next.ship??defaultShip();},save:async body=>{const next=await serial(()=>request('ship/save',body));accept(next);return next.ship??defaultShip();},allowed:()=>!!state&&online&&state.flight.mode==='ground'});});
+$('open-shipyard').onclick=()=>{if(state?.flight.mode==='space'){notice('Land before changing your ship.');return;}void openPanel($<HTMLButtonElement>('open-shipyard'),shipyard,async panel=>{if(state.flight.mode==='space')return;clearInput();await savePosition(true);menu.close();await panel.open();});};
 $('guide-port').onclick=()=>{guideDock=true;menu.close();notice('Your parked ship is marked. Walk there to board.');};
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('dialog[open]')){e.preventDefault();clearInput();flight?.clear();menu.showModal();void savePosition(true);}if(e.key.toLowerCase()==='m'&&!document.querySelector('dialog[open]')){$('open-map').click();}});
 document.querySelectorAll<HTMLButtonElement>('[data-character]').forEach(button=>button.onclick=async()=>{

@@ -5,7 +5,7 @@ import {fieldOf} from '../../src/shared/terrain.ts';
 const evidence='docs/evidence/terrain';
 test('owner previews and applies terrain, walks, refreshes, flies and lands; phone preview stays read-only',async({browser})=>{
  test.setTimeout(210_000);mkdirSync(evidence,{recursive:true});const errors:string[]=[],checks:string[]=[];
- const context=await browser.newContext({storageState:'.data/ship-browser-owner.json',viewport:{width:1440,height:900}}),page=await context.newPage();page.setDefaultTimeout(15_000);page.on('pageerror',e=>errors.push(e.message));let planet:string,saved:string;
+ const context=await browser.newContext({storageState:'.data/ship-browser-owner.json',viewport:{width:1440,height:900}}),page=await context.newPage();page.setDefaultTimeout(15_000);page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());let planet:string,saved:string;
  try{
  await page.goto('/');await expect(page.locator('#scene-sync')).toContainText('Live');let u=await readUniverse(page);
  if(u.currentPlanet.claimed&&!u.currentPlanet.mine){await visit(page);u=await readUniverse(page);}if(!u.currentPlanet.mine){await menuAction(page,'claim-planet');await expect(page.locator('#build-mode')).toBeVisible();}

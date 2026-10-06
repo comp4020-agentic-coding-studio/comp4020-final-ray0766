@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "checks": [
+    "Browser cached the failed optional import; explicit reload recovered the saved world",
+    "Optional UI chunks absent on first screen; failed import stays in pause and recovers",
+    "Terrain preview and cancelled irreversible-apply confirmation leave the legacy planet unchanged",
+    "Blueprint keyboard input cannot move player; discard can be cancelled; saved new blueprint places; unsaved placement exit is protected",
+    "Real keyboard traverses the existing open door and climbs to the saved upper floor",
+    "History seek/close returns to the same live upper floor without restoring objects",
+    "Ship draft discard preserves saved custom design; real descent, departure, return landing and refresh keep ship/buildings/terrain",
+    "390×844 touch: lazy panels, protected ship draft, private replay, preview cancel, movement and refreshed save; no horizontal overflow",
+    "Independent visitor cannot read either history endpoint, obtain owner library or delete a building"
+  ],
+  "pageErrors": [],
+  "browser": "154.0.8037.98",
+  "fixtures": "Existing physics owner, original cabin and stairs retained; only the newly created temporary floor was deleted."
+}
