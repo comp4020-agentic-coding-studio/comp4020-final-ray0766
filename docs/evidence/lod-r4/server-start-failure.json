@@ -1,0 +1,8 @@
+{
+  "phase": "before",
+  "browser": "154.0.8037.98",
+  "checks": [],
+  "errors": [],
+  "status": "failed",
+  "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:8098/\", waiting until \"load\"\u001b[22m\n"
+}

@@ -58,6 +58,38 @@ export function chamferBox(w: number, h: number, d: number, c: number): T.Buffer
   return g;
 }
 
+/**
+ * Hex bolt head of `radius` and `height`, centred on the origin, +Y up: six
+ * sides and the top, without the bottom face, which always sits on the surface
+ * the bolt is fixed to and is never seen. Sixteen triangles (the top as four)
+ * where a closed six-sided CylinderGeometry has twenty-four; the faces drawn
+ * have the same positions and normals as the cylinder's, so it shades the same.
+ * Non-indexed.
+ */
+export function hexHead(radius: number, height: number): T.BufferGeometry {
+  const corner = Array.from({ length: 6 }, (_, i) => [Math.sin((i * Math.PI) / 3), Math.cos((i * Math.PI) / 3)] as const);
+  const top = height / 2, bottom = -height / 2;
+  const positions: number[] = [], normals: number[] = [];
+  const vertex = (i: number, y: number, normal: readonly [number, number, number]) => {
+    const [s, c] = corner[i % 6];
+    positions.push(radius * s, y, radius * c);
+    normals.push(...normal);
+  };
+  // Sides, wound and smooth-shaded as CylinderGeometry's torso.
+  const side = (i: number) => [corner[i % 6][0], 0, corner[i % 6][1]] as const;
+  for (let i = 0; i < 6; i++) {
+    vertex(i, top, side(i)); vertex(i, bottom, side(i)); vertex(i + 1, top, side(i + 1));
+    vertex(i, bottom, side(i)); vertex(i + 1, bottom, side(i + 1)); vertex(i + 1, top, side(i + 1));
+  }
+  // Top: a fan from one corner.
+  const up = [0, 1, 0] as const;
+  for (let i = 1; i < 5; i++) { vertex(0, top, up); vertex(i, top, up); vertex(i + 1, top, up); }
+  const g = new T.BufferGeometry();
+  g.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
+  g.setAttribute('normal', new T.Float32BufferAttribute(normals, 3));
+  return g;
+}
+
 /** Box-projected UVs in metres (one texture repeat per SCALE.textureMetres). */
 export function metreUVs(geometry: T.BufferGeometry, metres: number = SCALE.textureMetres): T.BufferGeometry {
   const pos = geometry.getAttribute('position'), nor = geometry.getAttribute('normal');
@@ -101,6 +133,12 @@ export class PartBuilder {
   private buckets = new Map<T.Material, T.BufferGeometry[]>();
   private frame: T.Matrix4 = new T.Matrix4();
   private emitters: Emitter[] = [];
+  /**
+   * A chamfer that would come out smaller than this (metres, after chamferBox
+   * limits it to the piece's size) is drawn as a hard edge. 0 keeps them all;
+   * the building kit raises it at medium LOD (blueprint/parts/kit.ts).
+   */
+  minChamfer = 0;
   constructor(lod: LodTier) { this.lod = lod; }
 
   get settings() { return LOD[this.lod]; }
@@ -146,9 +184,12 @@ export class PartBuilder {
     this.emitters.push({ kind, position: [p.x, p.y, p.z], direction: [d.x, d.y, d.z], ...(color ? { color } : {}) });
   }
 
-  /** Chamfered box; chamfer collapses to a hard box at low LOD. */
+  /** Chamfered box; chamfer collapses to a hard box at low LOD, and below `minChamfer`. */
   box(material: T.Material, size: Vec3, placement?: Placement, chamfer: number = SCALE.bevel) {
-    this.geometry(material, chamferBox(size[0], size[1], size[2], this.settings.bevelSegments ? chamfer : 0), placement);
+    let c = this.settings.bevelSegments ? chamfer : 0;
+    // chamferBox limits a chamfer to 0.45 of each half-size; judge the one it would draw.
+    if (c > 0 && Math.min(c, ...size.map(s => s * 0.225)) < this.minChamfer) c = 0;
+    this.geometry(material, chamferBox(size[0], size[1], size[2], c), placement);
   }
 
   cylinder(material: T.Material, radiusTop: number, radiusBottom: number, height: number, placement?: Placement, options: { segments?: number; open?: boolean } = {}) {
@@ -159,7 +200,7 @@ export class PartBuilder {
   /** Hex bolt head lying on a surface whose normal is +Y in the placement frame. Skipped when LOD drops hardware. */
   bolt(material: T.Material, placement: Placement, radius = 0.014) {
     if (!this.settings.hardware) return;
-    this.within(placement, () => this.cylinder(material, radius, radius, radius * 0.9, { position: [0, radius * 0.45, 0] }, { segments: 6 }));
+    this.within(placement, () => this.geometry(material, hexHead(radius, radius * 0.9), { position: [0, radius * 0.45, 0] }));
   }
 
   /** Lathe a 2D profile (x = radius, y = height) around +Y. */

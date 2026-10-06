@@ -8,6 +8,8 @@ workshop described in [the workshop guide](docs/integration/workshop-v1.md),
 [opt-in deterministic terrain](docs/integration/terrain-v1.md).
 [Cross-module stability and loading evidence](docs/evidence/stability/verification.md)
 records the bounded desktop/phone replay, deferred editors and measured first-screen resources.
+[LOD R4 integration evidence](docs/evidence/lod-r4/verification.md) records the three-file
+geometry update, measured main-world frame counts and its sub-millimetre window-hood difference.
 The published Crit 8 release remains `09233d9`; these changes are not deployed.
 
 > Prepared with AI assistance from the student's recorded design decisions and

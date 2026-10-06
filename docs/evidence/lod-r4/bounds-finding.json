@@ -1,0 +1,46 @@
+{
+  "initialTargetedRun": {
+    "passed": 14,
+    "failed": 1,
+    "failure": "Exact-bound assumption failed for wall.window medium by 0.0007946789264678955 m."
+  },
+  "cause": "The 4 mm chamfer on the 0.2-radian sloped window hood becomes a hard corner; projected bound grows sin(0.2)*0.004 metres. No source correction or physics change made.",
+  "changes": [
+    {
+      "id": "wall.window",
+      "lod": "medium",
+      "boundsDeltaMetres": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0007946789264678955
+      ]
+    },
+    {
+      "id": "cabin",
+      "lod": "medium",
+      "boundsDeltaMetres": [
+        -0.0007946491241455078,
+        0.0,
+        -0.0007946491241455078,
+        0.0007946491241455078,
+        0.0,
+        0.0007946491241455078
+      ]
+    },
+    {
+      "id": "survey",
+      "lod": "medium",
+      "boundsDeltaMetres": [
+        0.0,
+        0.0,
+        -0.0007946491241455078,
+        0.0007946491241455078,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

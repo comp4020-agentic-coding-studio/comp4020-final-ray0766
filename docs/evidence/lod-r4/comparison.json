@@ -1,0 +1,38 @@
+{
+  "desktop": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "before": {
+      "triangles": 65222,
+      "drawCalls": 114
+    },
+    "after": {
+      "triangles": 54374,
+      "drawCalls": 113
+    },
+    "triangleReductionPercent": 16.63,
+    "identicalPose": true,
+    "identicalPractical": true,
+    "all12SamplesStable": true
+  },
+  "phone": {
+    "viewport": [
+      390,
+      844
+    ],
+    "before": {
+      "triangles": 53398,
+      "drawCalls": 97
+    },
+    "after": {
+      "triangles": 43190,
+      "drawCalls": 96
+    },
+    "triangleReductionPercent": 19.12,
+    "identicalPose": true,
+    "identicalPractical": true,
+    "all12SamplesStable": true
+  }
+}

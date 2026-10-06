@@ -7,7 +7,7 @@ import type { StyleLibrary } from '../style/materials.ts';
 import { groundCells, partTransform, pivotOf } from './model.ts';
 import type { PartPlacement } from './model.ts';
 import { PARTS } from './parts/catalogue.ts';
-import { libraryMaterials, makeKit, SLAB } from './parts/kit.ts';
+import { libraryMaterials, liningCastsNoShadow, makeKit, SLAB } from './parts/kit.ts';
 
 // The placed form of a blueprint: every part emitted into one PartBuilder, so
 // the whole building merges into one mesh per kit material (≤ 14 draw calls,
@@ -57,6 +57,7 @@ export function buildBlueprintModel(parts: readonly PartPlacement[] | { parts: r
   }
   const built = b.build('blueprint');
   const group = built.group;
+  liningCastsNoShadow(group, source, lod);
   if (options.sockets !== false) {
     for (const p of ordered) {
       const t = partTransform(p, pivot);

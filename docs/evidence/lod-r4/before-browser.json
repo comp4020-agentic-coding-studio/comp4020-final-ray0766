@@ -1,0 +1,802 @@
+{
+  "phase": "before",
+  "browser": "154.0.8037.98",
+  "checks": [],
+  "errors": [],
+  "desktop": {
+    "context": {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "overflow": false
+    },
+    "frames": [
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 65222,
+        "drawCalls": 114,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      }
+    ]
+  },
+  "shipDesign": "{\"format\":\"planet-modules/ship-design\",\"glow\":\"sodium\",\"id\":\"d83d38fb-bfe5-416e-9837-e347eed16699\",\"name\":\"Local stability hauler\",\"paint\":{\"primary\":\"olive\",\"secondary\":\"gunmetal\",\"trim\":\"amber\"},\"parts\":{\"cockpit\":\"raised-bridge\",\"dorsal\":\"comms-dish\",\"engines\":\"single-heavy\",\"hull\":\"boxy-hauler\",\"tail\":\"twin-fin\",\"wings\":\"stub-pylon\"},\"registration\":\"STB-01\",\"version\":1}",
+  "phone": {
+    "context": {
+      "viewport": [
+        390,
+        844
+      ],
+      "dpr": 1,
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "overflow": false
+    },
+    "frames": [
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      },
+      {
+        "triangles": 53398,
+        "drawCalls": 97,
+        "practical": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 2,
+          "litShadows": 0,
+          "assigned": [
+            "ceiling:5.4,9.9,4.0",
+            "door:6.4,9.3,4.4"
+          ],
+          "fittingsInReach": 5,
+          "clustersInReach": 2,
+          "enabled": true
+        },
+        "position": [
+          0.6085707948087672,
+          0.705026293985982,
+          0.36411469689401066
+        ],
+        "radius": 10.072784183858008,
+        "heading": [
+          0.2379219320817697,
+          0.2756313964857686,
+          -0.9313541149883768
+        ],
+        "pitch": 0
+      }
+    ]
+  },
+  "status": "passed"
+}

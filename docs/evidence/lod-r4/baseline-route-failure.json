@@ -1,0 +1,8 @@
+{
+  "phase": "before",
+  "browser": "154.0.8037.98",
+  "checks": [],
+  "errors": [],
+  "status": "failed",
+  "error": "Error: Walking did not reach waypoint: {\"position\":[0.3451853021630482,0.9122157691455991,0.22070228293497185],\"radius\":10.03337060965822,\"north\":{\"x\":0.9243567421663863,\"y\":-0.2897175074355939,\"z\":-0.2482506376564853},\"grounded\":true}"
+}

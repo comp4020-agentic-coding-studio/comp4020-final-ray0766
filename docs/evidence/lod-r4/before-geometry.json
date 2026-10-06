@@ -1,0 +1,8398 @@
+{
+  "parts": {
+    "floor.deck": {
+      "id": "floor.deck",
+      "label": "Floor deck",
+      "blurb": "Concrete slab, tread plate",
+      "category": "Floor",
+      "mount": "cell",
+      "role": "deck",
+      "floor": true
+    },
+    "floor.grate": {
+      "id": "floor.grate",
+      "label": "Grated catwalk",
+      "blurb": "Open grating on channels",
+      "category": "Floor",
+      "mount": "cell",
+      "role": "deck",
+      "floor": true
+    },
+    "wall.solid": {
+      "id": "wall.solid",
+      "label": "Solid wall",
+      "blurb": "Clad panel, conduit",
+      "category": "Wall",
+      "mount": "edge",
+      "role": "wall"
+    },
+    "wall.door": {
+      "id": "wall.door",
+      "label": "Door wall",
+      "blurb": "Steel door, status lamp",
+      "category": "Wall",
+      "mount": "edge",
+      "role": "wall",
+      "door": true
+    },
+    "wall.window": {
+      "id": "wall.window",
+      "label": "Window wall",
+      "blurb": "Double glazed, sun hood",
+      "category": "Wall",
+      "mount": "edge",
+      "role": "wall"
+    },
+    "wall.louvre": {
+      "id": "wall.louvre",
+      "label": "Louvre wall",
+      "blurb": "Vent blades, weather hood",
+      "category": "Wall",
+      "mount": "edge",
+      "role": "wall"
+    },
+    "wall.corrugated": {
+      "id": "wall.corrugated",
+      "label": "Shed wall",
+      "blurb": "Corrugated sheet on girts",
+      "category": "Wall",
+      "mount": "edge",
+      "role": "wall"
+    },
+    "structure.column": {
+      "id": "structure.column",
+      "label": "Corner column",
+      "blurb": "Steel post at a vertex",
+      "category": "Structure",
+      "mount": "vertex",
+      "role": "column"
+    },
+    "stair.straight": {
+      "id": "stair.straight",
+      "label": "Straight stair",
+      "blurb": "1×2 cells, one storey",
+      "category": "Structure",
+      "mount": "cell",
+      "role": "stair"
+    },
+    "rail.guard": {
+      "id": "rail.guard",
+      "label": "Guard railing",
+      "blurb": "Balcony and roof edge",
+      "category": "Structure",
+      "mount": "edge",
+      "role": "guard"
+    },
+    "roof.deck": {
+      "id": "roof.deck",
+      "label": "Roof deck",
+      "blurb": "Membrane and pavers",
+      "category": "Roof",
+      "mount": "cell",
+      "role": "deck",
+      "floor": true,
+      "roof": true
+    },
+    "roof.parapet": {
+      "id": "roof.parapet",
+      "label": "Parapet",
+      "blurb": "Roof edge with coping",
+      "category": "Roof",
+      "mount": "edge",
+      "role": "guard"
+    },
+    "roof.slope": {
+      "id": "roof.slope",
+      "label": "Sloped roof",
+      "blurb": "Standing seam, gutter",
+      "category": "Roof",
+      "mount": "cell",
+      "role": "slope",
+      "roof": true
+    },
+    "roof.plant": {
+      "id": "roof.plant",
+      "label": "Plant unit",
+      "blurb": "Condenser on a skid",
+      "category": "Roof",
+      "mount": "cell",
+      "role": "equipment"
+    },
+    "wall.door.open": {
+      "id": "wall.door.open",
+      "label": "Open door",
+      "blurb": "Door held open inward",
+      "category": "Wall",
+      "mount": "edge",
+      "role": "wall",
+      "door": true
+    },
+    "street.paving": {
+      "id": "street.paving",
+      "label": "Footway",
+      "blurb": "Precast paving slabs",
+      "category": "Street",
+      "mount": "cell",
+      "role": "deck",
+      "floor": true
+    },
+    "street.road": {
+      "id": "street.road",
+      "label": "Roadway",
+      "blurb": "Asphalt, centre line",
+      "category": "Street",
+      "mount": "cell",
+      "role": "deck",
+      "floor": true
+    },
+    "street.kerb": {
+      "id": "street.kerb",
+      "label": "Kerb",
+      "blurb": "Precast kerb, gully grate",
+      "category": "Street",
+      "mount": "edge",
+      "role": "guard"
+    },
+    "street.pipes": {
+      "id": "street.pipes",
+      "label": "Pipe rack",
+      "blurb": "Lagged main and return",
+      "category": "Street",
+      "mount": "edge",
+      "role": "guard"
+    },
+    "service.light": {
+      "id": "service.light",
+      "label": "Street light",
+      "blurb": "3.4 m column, warm head",
+      "category": "Street",
+      "mount": "cell",
+      "role": "equipment"
+    },
+    "pad.quarter": {
+      "id": "pad.quarter",
+      "label": "Pad quarter",
+      "blurb": "Quarter of a 2×2 pad",
+      "category": "Street",
+      "mount": "cell",
+      "role": "deck",
+      "floor": true
+    }
+  },
+  "entries": [
+    {
+      "id": "floor.deck",
+      "lod": "high",
+      "triangles": 360,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        0.004800000227987766,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "floor.grate",
+      "lod": "high",
+      "triangles": 792,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.12000000476837158,
+        -0.5,
+        0.5,
+        0.00989999994635582,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.solid",
+      "lod": "high",
+      "triangles": 952,
+      "calls": 7,
+      "bounds": [
+        -0.5,
+        8.940696516468449e-10,
+        -0.11999999731779099,
+        0.5,
+        2.0399999618530273,
+        0.1420000046491623
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.door",
+      "lod": "high",
+      "triangles": 1504,
+      "calls": 10,
+      "bounds": [
+        -0.5,
+        -1.8626451769865326e-10,
+        -0.14000000059604645,
+        0.5,
+        2.0399999618530273,
+        0.15199999511241913
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            0,
+            1.9800000000000002,
+            0.152
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "wall.window",
+      "lod": "high",
+      "triangles": 1624,
+      "calls": 8,
+      "bounds": [
+        -0.5,
+        8.940696516468449e-10,
+        -0.11999999731779099,
+        0.5,
+        2.0399999618530273,
+        0.289000004529953
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.louvre",
+      "lod": "high",
+      "triangles": 1424,
+      "calls": 6,
+      "bounds": [
+        -0.5,
+        8.940696516468449e-10,
+        -0.10499999672174454,
+        0.5,
+        2.0399999618530273,
+        0.2473229318857193
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.corrugated",
+      "lod": "high",
+      "triangles": 948,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        3.5762786065873797e-9,
+        -0.10499999672174454,
+        0.5,
+        2.0399999618530273,
+        0.13272836804389954
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "structure.column",
+      "lod": "high",
+      "triangles": 228,
+      "calls": 3,
+      "bounds": [
+        -0.15000000596046448,
+        3.3527614018424856e-10,
+        -0.15000000596046448,
+        0.15000000596046448,
+        2.0399999618530273,
+        0.15000000596046448
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "stair.straight",
+      "lod": "high",
+      "triangles": 2736,
+      "calls": 5,
+      "bounds": [
+        -0.37599998712539673,
+        -5.215406578829018e-11,
+        -1.5,
+        0.37599998712539673,
+        3.0529463291168213,
+        0.4896363615989685
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "rail.guard",
+      "lod": "high",
+      "triangles": 720,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -5.215406578829018e-11,
+        -0.12999999523162842,
+        0.5,
+        1.097000002861023,
+        0.010000000707805157
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "roof.deck",
+      "lod": "high",
+      "triangles": 608,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        -0.30000001192092896,
+        -0.5,
+        0.5,
+        0.044999998062849045,
+        0.5
+      ],
+      "emitters": [
+        {
+          "kind": "ceiling",
+          "position": [
+            0,
+            -0.265,
+            -0.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "roof.parapet",
+      "lod": "high",
+      "triangles": 340,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        -5.9604645663569045e-9,
+        -0.14025777578353882,
+        0.5,
+        0.6256325840950012,
+        0.14025777578353882
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "roof.slope",
+      "lod": "high",
+      "triangles": 572,
+      "calls": 6,
+      "bounds": [
+        -0.5,
+        -0.16387194395065308,
+        -0.5398173928260803,
+        0.5,
+        0.42195990681648254,
+        0.675000011920929
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "roof.plant",
+      "lod": "high",
+      "triangles": 1652,
+      "calls": 6,
+      "bounds": [
+        -0.3553447127342224,
+        2.2351741291171123e-10,
+        -0.36399999260902405,
+        0.3553447127342224,
+        0.7749999761581421,
+        0.36000001430511475
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.door.open",
+      "lod": "high",
+      "triangles": 1504,
+      "calls": 10,
+      "bounds": [
+        -0.5499098300933838,
+        -1.8626451769865326e-10,
+        -0.8600000143051147,
+        0.5,
+        2.0399999618530273,
+        0.15199999511241913
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            0,
+            1.9800000000000002,
+            0.152
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "street.paving",
+      "lod": "high",
+      "triangles": 100,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        0.0020000000949949026,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "street.road",
+      "lod": "high",
+      "triangles": 68,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        0.003000000026077032,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "street.kerb",
+      "lod": "high",
+      "triangles": 160,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.05000000074505806,
+        -0.07500000298023224,
+        0.5,
+        0.1454852819442749,
+        0.23999999463558197
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "street.pipes",
+      "lod": "high",
+      "triangles": 968,
+      "calls": 4,
+      "bounds": [
+        -0.5,
+        -5.215406578829018e-11,
+        -0.010000001639127731,
+        0.5,
+        0.4869999885559082,
+        0.33000001311302185
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "service.light",
+      "lod": "high",
+      "triangles": 408,
+      "calls": 5,
+      "bounds": [
+        -0.4300000071525574,
+        2.2351741291171123e-10,
+        -0.4300000071525574,
+        -0.17000000178813934,
+        3.4200000762939453,
+        0.5699999928474426
+      ],
+      "emitters": [
+        {
+          "kind": "street",
+          "position": [
+            -0.3,
+            3.31,
+            0.36000000000000004
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "pad.quarter",
+      "lod": "high",
+      "triangles": 840,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        0.010999999940395355,
+        0.5
+      ],
+      "emitters": [
+        {
+          "kind": "pad",
+          "position": [
+            0.43,
+            0.011,
+            0.43
+          ],
+          "direction": [
+            0,
+            1,
+            0
+          ]
+        },
+        {
+          "kind": "pad",
+          "position": [
+            0.43,
+            0.011,
+            -0.25
+          ],
+          "direction": [
+            0,
+            1,
+            0
+          ]
+        },
+        {
+          "kind": "pad",
+          "position": [
+            -0.25,
+            0.011,
+            0.43
+          ],
+          "direction": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "cabin",
+      "lod": "high",
+      "triangles": 20060,
+      "calls": 13,
+      "bounds": [
+        -1.2890000343322754,
+        -0.6600000262260437,
+        -1.2890000343322754,
+        1.2890000343322754,
+        2.9749999046325684,
+        1.2890000343322754
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            -0.5,
+            1.9800000000000002,
+            1.152
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            -0.5,
+            1.935,
+            -0.55
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            -0.5,
+            1.935,
+            0.45
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0.5,
+            1.935,
+            -0.55
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0.5,
+            1.935,
+            0.45
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": [
+        {
+          "name": "part:1",
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 1,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:2",
+          "position": [
+            -0.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 2,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:3",
+          "position": [
+            0.5,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 3,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:4",
+          "position": [
+            0.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 4,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:5",
+          "position": [
+            -0.5,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 5,
+            "part": "wall.door.open"
+          }
+        },
+        {
+          "name": "part:6",
+          "position": [
+            0.5,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 6,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:7",
+          "position": [
+            -0.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 7,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:8",
+          "position": [
+            0.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 8,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:9",
+          "position": [
+            -1,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 9,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:10",
+          "position": [
+            -1,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 10,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:11",
+          "position": [
+            1,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 11,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:12",
+          "position": [
+            1,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 12,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:13",
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 13,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:14",
+          "position": [
+            1,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 14,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:15",
+          "position": [
+            -1,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 15,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:16",
+          "position": [
+            1,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 16,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:17",
+          "position": [
+            -0.5,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 17,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:18",
+          "position": [
+            -0.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 18,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:19",
+          "position": [
+            0.5,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 19,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:20",
+          "position": [
+            0.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 20,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:21",
+          "position": [
+            -0.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 21,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:22",
+          "position": [
+            0.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 22,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:23",
+          "position": [
+            -0.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 23,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:24",
+          "position": [
+            0.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 24,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:25",
+          "position": [
+            -1,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 25,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:26",
+          "position": [
+            -1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 26,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:27",
+          "position": [
+            1,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 27,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:28",
+          "position": [
+            1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 28,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:29",
+          "position": [
+            0.5,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 29,
+            "part": "roof.plant"
+          }
+        }
+      ]
+    },
+    {
+      "id": "survey",
+      "lod": "high",
+      "triangles": 53092,
+      "calls": 14,
+      "bounds": [
+        -2.509999990463257,
+        -0.6600000262260437,
+        -1.7890000343322754,
+        2.7890000343322754,
+        5.175000190734863,
+        1.5099999904632568
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            1,
+            1.9800000000000002,
+            0.652
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        },
+        {
+          "kind": "door",
+          "position": [
+            2,
+            4.180000000000001,
+            0.652
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0,
+            4.135000000000001,
+            -1.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0,
+            4.135000000000001,
+            -0.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            1,
+            4.135000000000001,
+            -1.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            1,
+            4.135000000000001,
+            -0.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": [
+        {
+          "name": "part:1",
+          "position": [
+            0,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 1,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:2",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 2,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:3",
+          "position": [
+            1,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 3,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:4",
+          "position": [
+            1,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 4,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:5",
+          "position": [
+            2,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 5,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:6",
+          "position": [
+            2,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 6,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:7",
+          "position": [
+            -2,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 7,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:8",
+          "position": [
+            -2,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 8,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:9",
+          "position": [
+            0,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 9,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:10",
+          "position": [
+            1,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 10,
+            "part": "wall.door"
+          }
+        },
+        {
+          "name": "part:11",
+          "position": [
+            2,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 11,
+            "part": "wall.louvre"
+          }
+        },
+        {
+          "name": "part:12",
+          "position": [
+            0,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 12,
+            "part": "wall.corrugated"
+          }
+        },
+        {
+          "name": "part:13",
+          "position": [
+            1,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 13,
+            "part": "wall.corrugated"
+          }
+        },
+        {
+          "name": "part:14",
+          "position": [
+            2,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 14,
+            "part": "wall.corrugated"
+          }
+        },
+        {
+          "name": "part:15",
+          "position": [
+            -0.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 15,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:16",
+          "position": [
+            -0.5,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 16,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:17",
+          "position": [
+            2.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 17,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:18",
+          "position": [
+            2.5,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 18,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:19",
+          "position": [
+            -0.5,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 19,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:20",
+          "position": [
+            2.5,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 20,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:21",
+          "position": [
+            -0.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 21,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:22",
+          "position": [
+            2.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 22,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:23",
+          "position": [
+            -2,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 23,
+            "part": "stair.straight"
+          }
+        },
+        {
+          "name": "part:24",
+          "position": [
+            -1.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 24,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:25",
+          "position": [
+            0,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 25,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:26",
+          "position": [
+            0,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 26,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:27",
+          "position": [
+            1,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 27,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:28",
+          "position": [
+            1,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 28,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:29",
+          "position": [
+            2,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 29,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:30",
+          "position": [
+            2,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 30,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:31",
+          "position": [
+            -2,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 31,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:32",
+          "position": [
+            -1,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 32,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:33",
+          "position": [
+            0,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 33,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:34",
+          "position": [
+            1,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 34,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:35",
+          "position": [
+            2,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 35,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:36",
+          "position": [
+            0,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 36,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:37",
+          "position": [
+            1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 37,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:38",
+          "position": [
+            2,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 38,
+            "part": "wall.door"
+          }
+        },
+        {
+          "name": "part:39",
+          "position": [
+            0,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 39,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:40",
+          "position": [
+            1,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 40,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:41",
+          "position": [
+            2,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 41,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:42",
+          "position": [
+            -0.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 42,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:43",
+          "position": [
+            -0.5,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 43,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:44",
+          "position": [
+            2.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 44,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:45",
+          "position": [
+            2.5,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 45,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:46",
+          "position": [
+            -0.5,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 46,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:47",
+          "position": [
+            2.5,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 47,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:48",
+          "position": [
+            -0.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 48,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:49",
+          "position": [
+            2.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 49,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:50",
+          "position": [
+            -2,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 50,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:51",
+          "position": [
+            -1,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 51,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:52",
+          "position": [
+            0,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 52,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:53",
+          "position": [
+            1,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 53,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:54",
+          "position": [
+            2,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 54,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:55",
+          "position": [
+            2.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 55,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:56",
+          "position": [
+            -2.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 56,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:57",
+          "position": [
+            -1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 57,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:58",
+          "position": [
+            0,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 58,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:59",
+          "position": [
+            0,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 59,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:60",
+          "position": [
+            1,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 60,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:61",
+          "position": [
+            1,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 61,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:62",
+          "position": [
+            2,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 62,
+            "part": "roof.slope"
+          }
+        },
+        {
+          "name": "part:63",
+          "position": [
+            2,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 63,
+            "part": "roof.slope"
+          }
+        },
+        {
+          "name": "part:64",
+          "position": [
+            0,
+            4.4,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 64,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:65",
+          "position": [
+            1,
+            4.4,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 65,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:66",
+          "position": [
+            0,
+            4.4,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 66,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:67",
+          "position": [
+            1,
+            4.4,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 67,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:68",
+          "position": [
+            -0.5,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 68,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:69",
+          "position": [
+            -0.5,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 69,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:70",
+          "position": [
+            1.5,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 70,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:71",
+          "position": [
+            1.5,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 71,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:72",
+          "position": [
+            0,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 72,
+            "part": "roof.plant"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ship:0",
+      "lod": "high",
+      "triangles": 21693,
+      "calls": 12,
+      "bounds": [
+        -1.5604000091552734,
+        -0.5064997673034668,
+        -2.388000011444092,
+        1.5604000091552734,
+        0.8472131490707397,
+        2.2386239022016525
+      ],
+      "emitters": [],
+      "sockets": [
+        {
+          "name": "hull-structure",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {}
+        },
+        {
+          "name": "exhaust.0",
+          "position": [
+            0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.1216
+          }
+        },
+        {
+          "name": "exhaust.1",
+          "position": [
+            -0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.1216
+          }
+        }
+      ],
+      "solidBounds": [
+        -1.5604000091552734,
+        -0.5064997673034668,
+        -2.388000011444092,
+        1.5604000091552734,
+        0.8472131490707397,
+        2.0999999046325684
+      ],
+      "radius": 2.388523404685725,
+      "exhausts": [
+        {
+          "position": [
+            0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ship:1",
+      "lod": "high",
+      "triangles": 16952,
+      "calls": 12,
+      "bounds": [
+        -1.4099301099777222,
+        -0.6147814393043518,
+        -2.2049999237060547,
+        1.4099301099777222,
+        0.921999990940094,
+        2.5434000492095947
+      ],
+      "emitters": [],
+      "sockets": [
+        {
+          "name": "hull-structure",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {}
+        },
+        {
+          "name": "exhaust.0",
+          "position": [
+            0,
+            -0.02,
+            2.19
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.31
+          }
+        }
+      ],
+      "solidBounds": [
+        -1.4099301099777222,
+        -0.6147814393043518,
+        -2.2049999237060547,
+        1.4099301099777222,
+        0.921999990940094,
+        2.191999912261963
+      ],
+      "radius": 2.228788664127785,
+      "exhausts": [
+        {
+          "position": [
+            0,
+            -0.02,
+            2.19
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ship:2",
+      "lod": "high",
+      "triangles": 14110,
+      "calls": 12,
+      "bounds": [
+        -1.6647089719772339,
+        -0.41189029812812805,
+        -2.3949999809265137,
+        1.6647089719772339,
+        0.7427123188972473,
+        2.243904083967209
+      ],
+      "emitters": [],
+      "sockets": [
+        {
+          "name": "hull-structure",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {}
+        },
+        {
+          "name": "exhaust.0",
+          "position": [
+            1.0103336092965665e-17,
+            0.14500000000000002,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.0736
+          }
+        },
+        {
+          "name": "exhaust.1",
+          "position": [
+            -0.1428941916244324,
+            -0.10249999999999997,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.0736
+          }
+        },
+        {
+          "name": "exhaust.2",
+          "position": [
+            0.14289419162443234,
+            -0.10250000000000008,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.0736
+          }
+        }
+      ],
+      "solidBounds": [
+        -1.649562954902649,
+        -0.41189029812812805,
+        -2.3949999809265137,
+        1.649562954902649,
+        0.7427123188972473,
+        2.1600000858306885
+      ],
+      "radius": 2.3952857676430357,
+      "exhausts": [
+        {
+          "position": [
+            1.0103336092965665e-17,
+            0.14500000000000002,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.1428941916244324,
+            -0.10249999999999997,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "position": [
+            0.14289419162443234,
+            -0.10250000000000008,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "floor.deck",
+      "lod": "medium",
+      "triangles": 360,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        0.004800000227987766,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "floor.grate",
+      "lod": "medium",
+      "triangles": 600,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.12000000476837158,
+        -0.5,
+        0.5,
+        0.00989999994635582,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.solid",
+      "lod": "medium",
+      "triangles": 760,
+      "calls": 7,
+      "bounds": [
+        -0.5,
+        8.940696516468449e-10,
+        -0.11999999731779099,
+        0.5,
+        2.0399999618530273,
+        0.1420000046491623
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.door",
+      "lod": "medium",
+      "triangles": 1248,
+      "calls": 10,
+      "bounds": [
+        -0.5,
+        -1.8626451769865326e-10,
+        -0.14000000059604645,
+        0.5,
+        2.0399999618530273,
+        0.15199999511241913
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            0,
+            1.9800000000000002,
+            0.152
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "wall.window",
+      "lod": "medium",
+      "triangles": 1368,
+      "calls": 8,
+      "bounds": [
+        -0.5,
+        8.940696516468449e-10,
+        -0.11999999731779099,
+        0.5,
+        2.0399999618530273,
+        0.289000004529953
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.louvre",
+      "lod": "medium",
+      "triangles": 1232,
+      "calls": 6,
+      "bounds": [
+        -0.5,
+        8.940696516468449e-10,
+        -0.10499999672174454,
+        0.5,
+        2.0399999618530273,
+        0.24845536053180695
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.corrugated",
+      "lod": "medium",
+      "triangles": 692,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        3.5762786065873797e-9,
+        -0.10499999672174454,
+        0.5,
+        2.0399999618530273,
+        0.13339635729789734
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "structure.column",
+      "lod": "medium",
+      "triangles": 228,
+      "calls": 3,
+      "bounds": [
+        -0.15000000596046448,
+        3.3527614018424856e-10,
+        -0.15000000596046448,
+        0.15000000596046448,
+        2.0399999618530273,
+        0.15000000596046448
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "stair.straight",
+      "lod": "medium",
+      "triangles": 1232,
+      "calls": 5,
+      "bounds": [
+        -0.37599998712539673,
+        -4.128351704935085e-8,
+        -1.5,
+        0.37599998712539673,
+        3.0529463291168213,
+        0.4896363615989685
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "rail.guard",
+      "lod": "medium",
+      "triangles": 432,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -5.215406578829018e-11,
+        -0.12999999523162842,
+        0.5,
+        1.097000002861023,
+        0.010000000707805157
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "roof.deck",
+      "lod": "medium",
+      "triangles": 544,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        -0.30000001192092896,
+        -0.5,
+        0.5,
+        0.044999998062849045,
+        0.5
+      ],
+      "emitters": [
+        {
+          "kind": "ceiling",
+          "position": [
+            0,
+            -0.265,
+            -0.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "roof.parapet",
+      "lod": "medium",
+      "triangles": 244,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        -5.9604645663569045e-9,
+        -0.140497624874115,
+        0.5,
+        0.6258724927902222,
+        0.140497624874115
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "roof.slope",
+      "lod": "medium",
+      "triangles": 380,
+      "calls": 6,
+      "bounds": [
+        -0.5,
+        -0.16387194395065308,
+        -0.5398173928260803,
+        0.5,
+        0.42195990681648254,
+        0.675000011920929
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "roof.plant",
+      "lod": "medium",
+      "triangles": 1124,
+      "calls": 6,
+      "bounds": [
+        -0.3553447127342224,
+        2.2351741291171123e-10,
+        -0.36399999260902405,
+        0.3553447127342224,
+        0.7749999761581421,
+        0.36000001430511475
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.door.open",
+      "lod": "medium",
+      "triangles": 1248,
+      "calls": 10,
+      "bounds": [
+        -0.5499098300933838,
+        -1.8626451769865326e-10,
+        -0.8600000143051147,
+        0.5,
+        2.0399999618530273,
+        0.15199999511241913
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            0,
+            1.9800000000000002,
+            0.152
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "street.paving",
+      "lod": "medium",
+      "triangles": 36,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        0.0020000000949949026,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "street.road",
+      "lod": "medium",
+      "triangles": 36,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        0.003000000026077032,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "street.kerb",
+      "lod": "medium",
+      "triangles": 128,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.05000000074505806,
+        -0.07500000298023224,
+        0.5,
+        0.1454852819442749,
+        0.23999999463558197
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "street.pipes",
+      "lod": "medium",
+      "triangles": 552,
+      "calls": 4,
+      "bounds": [
+        -0.5,
+        -5.215406578829018e-11,
+        -0.010000001639127731,
+        0.5,
+        0.4869999885559082,
+        0.33000001311302185
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "service.light",
+      "lod": "medium",
+      "triangles": 248,
+      "calls": 5,
+      "bounds": [
+        -0.4300000071525574,
+        2.2351741291171123e-10,
+        -0.4300000071525574,
+        -0.17000000178813934,
+        3.4200000762939453,
+        0.5699999928474426
+      ],
+      "emitters": [
+        {
+          "kind": "street",
+          "position": [
+            -0.3,
+            3.31,
+            0.36000000000000004
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "pad.quarter",
+      "lod": "medium",
+      "triangles": 776,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        0.010999999940395355,
+        0.5
+      ],
+      "emitters": [
+        {
+          "kind": "pad",
+          "position": [
+            0.43,
+            0.011,
+            0.43
+          ],
+          "direction": [
+            0,
+            1,
+            0
+          ]
+        },
+        {
+          "kind": "pad",
+          "position": [
+            0.43,
+            0.011,
+            -0.25
+          ],
+          "direction": [
+            0,
+            1,
+            0
+          ]
+        },
+        {
+          "kind": "pad",
+          "position": [
+            -0.25,
+            0.011,
+            0.43
+          ],
+          "direction": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "cabin",
+      "lod": "medium",
+      "triangles": 16652,
+      "calls": 13,
+      "bounds": [
+        -1.2890000343322754,
+        -0.6600000262260437,
+        -1.2890000343322754,
+        1.2890000343322754,
+        2.9749999046325684,
+        1.2890000343322754
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            -0.5,
+            1.9800000000000002,
+            1.152
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            -0.5,
+            1.935,
+            -0.55
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            -0.5,
+            1.935,
+            0.45
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0.5,
+            1.935,
+            -0.55
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0.5,
+            1.935,
+            0.45
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": [
+        {
+          "name": "part:1",
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 1,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:2",
+          "position": [
+            -0.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 2,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:3",
+          "position": [
+            0.5,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 3,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:4",
+          "position": [
+            0.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 4,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:5",
+          "position": [
+            -0.5,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 5,
+            "part": "wall.door.open"
+          }
+        },
+        {
+          "name": "part:6",
+          "position": [
+            0.5,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 6,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:7",
+          "position": [
+            -0.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 7,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:8",
+          "position": [
+            0.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 8,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:9",
+          "position": [
+            -1,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 9,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:10",
+          "position": [
+            -1,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 10,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:11",
+          "position": [
+            1,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 11,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:12",
+          "position": [
+            1,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 12,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:13",
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 13,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:14",
+          "position": [
+            1,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 14,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:15",
+          "position": [
+            -1,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 15,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:16",
+          "position": [
+            1,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 16,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:17",
+          "position": [
+            -0.5,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 17,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:18",
+          "position": [
+            -0.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 18,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:19",
+          "position": [
+            0.5,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 19,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:20",
+          "position": [
+            0.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 20,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:21",
+          "position": [
+            -0.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 21,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:22",
+          "position": [
+            0.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 22,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:23",
+          "position": [
+            -0.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 23,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:24",
+          "position": [
+            0.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 24,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:25",
+          "position": [
+            -1,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 25,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:26",
+          "position": [
+            -1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 26,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:27",
+          "position": [
+            1,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 27,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:28",
+          "position": [
+            1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 28,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:29",
+          "position": [
+            0.5,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 29,
+            "part": "roof.plant"
+          }
+        }
+      ]
+    },
+    {
+      "id": "survey",
+      "lod": "medium",
+      "triangles": 41460,
+      "calls": 14,
+      "bounds": [
+        -2.509999990463257,
+        -0.6600000262260437,
+        -1.7890000343322754,
+        2.7890000343322754,
+        5.175000190734863,
+        1.5099999904632568
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            1,
+            1.9800000000000002,
+            0.652
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        },
+        {
+          "kind": "door",
+          "position": [
+            2,
+            4.180000000000001,
+            0.652
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0,
+            4.135000000000001,
+            -1.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0,
+            4.135000000000001,
+            -0.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            1,
+            4.135000000000001,
+            -1.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            1,
+            4.135000000000001,
+            -0.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": [
+        {
+          "name": "part:1",
+          "position": [
+            0,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 1,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:2",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 2,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:3",
+          "position": [
+            1,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 3,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:4",
+          "position": [
+            1,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 4,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:5",
+          "position": [
+            2,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 5,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:6",
+          "position": [
+            2,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 6,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:7",
+          "position": [
+            -2,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 7,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:8",
+          "position": [
+            -2,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 8,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:9",
+          "position": [
+            0,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 9,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:10",
+          "position": [
+            1,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 10,
+            "part": "wall.door"
+          }
+        },
+        {
+          "name": "part:11",
+          "position": [
+            2,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 11,
+            "part": "wall.louvre"
+          }
+        },
+        {
+          "name": "part:12",
+          "position": [
+            0,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 12,
+            "part": "wall.corrugated"
+          }
+        },
+        {
+          "name": "part:13",
+          "position": [
+            1,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 13,
+            "part": "wall.corrugated"
+          }
+        },
+        {
+          "name": "part:14",
+          "position": [
+            2,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 14,
+            "part": "wall.corrugated"
+          }
+        },
+        {
+          "name": "part:15",
+          "position": [
+            -0.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 15,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:16",
+          "position": [
+            -0.5,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 16,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:17",
+          "position": [
+            2.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 17,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:18",
+          "position": [
+            2.5,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 18,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:19",
+          "position": [
+            -0.5,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 19,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:20",
+          "position": [
+            2.5,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 20,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:21",
+          "position": [
+            -0.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 21,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:22",
+          "position": [
+            2.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 22,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:23",
+          "position": [
+            -2,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 23,
+            "part": "stair.straight"
+          }
+        },
+        {
+          "name": "part:24",
+          "position": [
+            -1.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 24,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:25",
+          "position": [
+            0,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 25,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:26",
+          "position": [
+            0,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 26,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:27",
+          "position": [
+            1,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 27,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:28",
+          "position": [
+            1,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 28,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:29",
+          "position": [
+            2,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 29,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:30",
+          "position": [
+            2,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 30,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:31",
+          "position": [
+            -2,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 31,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:32",
+          "position": [
+            -1,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 32,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:33",
+          "position": [
+            0,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 33,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:34",
+          "position": [
+            1,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 34,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:35",
+          "position": [
+            2,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 35,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:36",
+          "position": [
+            0,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 36,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:37",
+          "position": [
+            1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 37,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:38",
+          "position": [
+            2,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 38,
+            "part": "wall.door"
+          }
+        },
+        {
+          "name": "part:39",
+          "position": [
+            0,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 39,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:40",
+          "position": [
+            1,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 40,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:41",
+          "position": [
+            2,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 41,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:42",
+          "position": [
+            -0.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 42,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:43",
+          "position": [
+            -0.5,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 43,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:44",
+          "position": [
+            2.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 44,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:45",
+          "position": [
+            2.5,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 45,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:46",
+          "position": [
+            -0.5,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 46,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:47",
+          "position": [
+            2.5,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 47,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:48",
+          "position": [
+            -0.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 48,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:49",
+          "position": [
+            2.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 49,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:50",
+          "position": [
+            -2,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 50,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:51",
+          "position": [
+            -1,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 51,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:52",
+          "position": [
+            0,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 52,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:53",
+          "position": [
+            1,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 53,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:54",
+          "position": [
+            2,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 54,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:55",
+          "position": [
+            2.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 55,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:56",
+          "position": [
+            -2.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 56,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:57",
+          "position": [
+            -1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 57,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:58",
+          "position": [
+            0,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 58,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:59",
+          "position": [
+            0,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 59,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:60",
+          "position": [
+            1,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 60,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:61",
+          "position": [
+            1,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 61,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:62",
+          "position": [
+            2,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 62,
+            "part": "roof.slope"
+          }
+        },
+        {
+          "name": "part:63",
+          "position": [
+            2,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 63,
+            "part": "roof.slope"
+          }
+        },
+        {
+          "name": "part:64",
+          "position": [
+            0,
+            4.4,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 64,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:65",
+          "position": [
+            1,
+            4.4,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 65,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:66",
+          "position": [
+            0,
+            4.4,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 66,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:67",
+          "position": [
+            1,
+            4.4,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 67,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:68",
+          "position": [
+            -0.5,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 68,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:69",
+          "position": [
+            -0.5,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 69,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:70",
+          "position": [
+            1.5,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 70,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:71",
+          "position": [
+            1.5,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 71,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:72",
+          "position": [
+            0,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 72,
+            "part": "roof.plant"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ship:0",
+      "lod": "medium",
+      "triangles": 14073,
+      "calls": 12,
+      "bounds": [
+        -1.5604000091552734,
+        -0.5064997673034668,
+        -2.388000011444092,
+        1.5604000091552734,
+        0.8472131490707397,
+        2.2386239022016525
+      ],
+      "emitters": [],
+      "sockets": [
+        {
+          "name": "hull-structure",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {}
+        },
+        {
+          "name": "exhaust.0",
+          "position": [
+            0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.1216
+          }
+        },
+        {
+          "name": "exhaust.1",
+          "position": [
+            -0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.1216
+          }
+        }
+      ],
+      "solidBounds": [
+        -1.5604000091552734,
+        -0.5064997673034668,
+        -2.388000011444092,
+        1.5604000091552734,
+        0.8472131490707397,
+        2.0999999046325684
+      ],
+      "radius": 2.388523404685725,
+      "exhausts": [
+        {
+          "position": [
+            0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ship:1",
+      "lod": "medium",
+      "triangles": 11432,
+      "calls": 12,
+      "bounds": [
+        -1.4092551469802856,
+        -0.6147814393043518,
+        -2.2049999237060547,
+        1.4092551469802856,
+        0.921999990940094,
+        2.5434000492095947
+      ],
+      "emitters": [],
+      "sockets": [
+        {
+          "name": "hull-structure",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {}
+        },
+        {
+          "name": "exhaust.0",
+          "position": [
+            0,
+            -0.02,
+            2.19
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.31
+          }
+        }
+      ],
+      "solidBounds": [
+        -1.4091397523880005,
+        -0.6147814393043518,
+        -2.2049999237060547,
+        1.4091397523880005,
+        0.921999990940094,
+        2.191999912261963
+      ],
+      "radius": 2.228788664127785,
+      "exhausts": [
+        {
+          "position": [
+            0,
+            -0.02,
+            2.19
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ship:2",
+      "lod": "medium",
+      "triangles": 10518,
+      "calls": 12,
+      "bounds": [
+        -1.6647089719772339,
+        -0.41189029812812805,
+        -2.3949999809265137,
+        1.6647089719772339,
+        0.7427123188972473,
+        2.243904083967209
+      ],
+      "emitters": [],
+      "sockets": [
+        {
+          "name": "hull-structure",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {}
+        },
+        {
+          "name": "exhaust.0",
+          "position": [
+            1.0103336092965665e-17,
+            0.14500000000000002,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.0736
+          }
+        },
+        {
+          "name": "exhaust.1",
+          "position": [
+            -0.1428941916244324,
+            -0.10249999999999997,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.0736
+          }
+        },
+        {
+          "name": "exhaust.2",
+          "position": [
+            0.14289419162443234,
+            -0.10250000000000008,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.0736
+          }
+        }
+      ],
+      "solidBounds": [
+        -1.649562954902649,
+        -0.41189029812812805,
+        -2.3949999809265137,
+        1.649562954902649,
+        0.7427123188972473,
+        2.1600000858306885
+      ],
+      "radius": 2.3952857676430357,
+      "exhausts": [
+        {
+          "position": [
+            1.0103336092965665e-17,
+            0.14500000000000002,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.1428941916244324,
+            -0.10249999999999997,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "position": [
+            0.14289419162443234,
+            -0.10250000000000008,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "floor.deck",
+      "lod": "low",
+      "triangles": 72,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        7.450580430390374e-11,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "floor.grate",
+      "lod": "low",
+      "triangles": 216,
+      "calls": 2,
+      "bounds": [
+        -0.5,
+        -0.12000000476837158,
+        -0.5,
+        0.5,
+        -3.3527614018424856e-10,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.solid",
+      "lod": "low",
+      "triangles": 176,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        8.940696516468449e-10,
+        -0.10499999672174454,
+        0.5,
+        2.0399999618530273,
+        0.1420000046491623
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.door",
+      "lod": "low",
+      "triangles": 472,
+      "calls": 8,
+      "bounds": [
+        -0.5,
+        -1.8626451769865326e-10,
+        -0.14000000059604645,
+        0.5,
+        2.0399999618530273,
+        0.15199999511241913
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            0,
+            1.9800000000000002,
+            0.152
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "wall.window",
+      "lod": "low",
+      "triangles": 360,
+      "calls": 6,
+      "bounds": [
+        -0.5,
+        8.940696516468449e-10,
+        -0.11500000208616257,
+        0.5,
+        2.0399999618530273,
+        0.2897946834564209
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.louvre",
+      "lod": "low",
+      "triangles": 312,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        8.940696516468449e-10,
+        -0.10499999672174454,
+        0.5,
+        2.0399999618530273,
+        0.24845536053180695
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.corrugated",
+      "lod": "low",
+      "triangles": 132,
+      "calls": 4,
+      "bounds": [
+        -0.5,
+        3.5762786065873797e-9,
+        -0.10499999672174454,
+        0.5,
+        2.0399999618530273,
+        0.13339635729789734
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "structure.column",
+      "lod": "low",
+      "triangles": 36,
+      "calls": 3,
+      "bounds": [
+        -0.15000000596046448,
+        3.3527614018424856e-10,
+        -0.15000000596046448,
+        0.15000000596046448,
+        2.0399999618530273,
+        0.15000000596046448
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "stair.straight",
+      "lod": "low",
+      "triangles": 448,
+      "calls": 4,
+      "bounds": [
+        -0.37599998712539673,
+        -5.215406578829018e-11,
+        -1.5,
+        0.37599998712539673,
+        3.0529463291168213,
+        0.4896363615989685
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "rail.guard",
+      "lod": "low",
+      "triangles": 100,
+      "calls": 2,
+      "bounds": [
+        -0.5,
+        -5.215406578829018e-11,
+        -0.12999999523162842,
+        0.5,
+        1.0920000076293945,
+        0.010000000707805157
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "roof.deck",
+      "lod": "low",
+      "triangles": 144,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        -0.2639999985694885,
+        -0.5,
+        0.5,
+        0.044999998062849045,
+        0.5
+      ],
+      "emitters": [
+        {
+          "kind": "ceiling",
+          "position": [
+            0,
+            -0.265,
+            -0.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "roof.parapet",
+      "lod": "low",
+      "triangles": 108,
+      "calls": 4,
+      "bounds": [
+        -0.5,
+        -5.9604645663569045e-9,
+        -0.140497624874115,
+        0.5,
+        0.6258724927902222,
+        0.140497624874115
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "roof.slope",
+      "lod": "low",
+      "triangles": 196,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        -0.16387194395065308,
+        -0.5398173928260803,
+        0.5,
+        0.42195990681648254,
+        0.6600000262260437
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "roof.plant",
+      "lod": "low",
+      "triangles": 300,
+      "calls": 4,
+      "bounds": [
+        -0.3499999940395355,
+        2.2351741291171123e-10,
+        -0.36000001430511475,
+        0.3499999940395355,
+        0.7749999761581421,
+        0.36000001430511475
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "wall.door.open",
+      "lod": "low",
+      "triangles": 472,
+      "calls": 8,
+      "bounds": [
+        -0.5,
+        -1.8626451769865326e-10,
+        -0.8600000143051147,
+        0.5,
+        2.0399999618530273,
+        0.15199999511241913
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            0,
+            1.9800000000000002,
+            0.152
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "street.paving",
+      "lod": "low",
+      "triangles": 24,
+      "calls": 1,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        3.7252903539730653e-10,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "street.road",
+      "lod": "low",
+      "triangles": 36,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        0.003000000026077032,
+        0.5
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "street.kerb",
+      "lod": "low",
+      "triangles": 56,
+      "calls": 2,
+      "bounds": [
+        -0.5,
+        -0.05000000074505806,
+        -0.07500000298023224,
+        0.5,
+        0.1454852819442749,
+        0.23999999463558197
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "street.pipes",
+      "lod": "low",
+      "triangles": 168,
+      "calls": 3,
+      "bounds": [
+        -0.5,
+        -5.215406578829018e-11,
+        -0.010000001639127731,
+        0.5,
+        0.48499998450279236,
+        0.33000001311302185
+      ],
+      "emitters": [],
+      "sockets": []
+    },
+    {
+      "id": "service.light",
+      "lod": "low",
+      "triangles": 84,
+      "calls": 4,
+      "bounds": [
+        -0.4300000071525574,
+        2.2351741291171123e-10,
+        -0.4300000071525574,
+        -0.17000000178813934,
+        3.4200000762939453,
+        0.5699999928474426
+      ],
+      "emitters": [
+        {
+          "kind": "street",
+          "position": [
+            -0.3,
+            3.31,
+            0.36000000000000004
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "pad.quarter",
+      "lod": "low",
+      "triangles": 280,
+      "calls": 5,
+      "bounds": [
+        -0.5,
+        -0.1599999964237213,
+        -0.5,
+        0.5,
+        0.010999999940395355,
+        0.5
+      ],
+      "emitters": [
+        {
+          "kind": "pad",
+          "position": [
+            0.43,
+            0.011,
+            0.43
+          ],
+          "direction": [
+            0,
+            1,
+            0
+          ]
+        },
+        {
+          "kind": "pad",
+          "position": [
+            0.43,
+            0.011,
+            -0.25
+          ],
+          "direction": [
+            0,
+            1,
+            0
+          ]
+        },
+        {
+          "kind": "pad",
+          "position": [
+            -0.25,
+            0.011,
+            0.43
+          ],
+          "direction": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "sockets": []
+    },
+    {
+      "id": "cabin",
+      "lod": "low",
+      "triangles": 4660,
+      "calls": 9,
+      "bounds": [
+        -1.289794683456421,
+        -0.6600000262260437,
+        -1.289794683456421,
+        1.289794683456421,
+        2.9749999046325684,
+        1.289794683456421
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            -0.5,
+            1.9800000000000002,
+            1.152
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            -0.5,
+            1.935,
+            -0.55
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            -0.5,
+            1.935,
+            0.45
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0.5,
+            1.935,
+            -0.55
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0.5,
+            1.935,
+            0.45
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": [
+        {
+          "name": "part:1",
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 1,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:2",
+          "position": [
+            -0.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 2,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:3",
+          "position": [
+            0.5,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 3,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:4",
+          "position": [
+            0.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 4,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:5",
+          "position": [
+            -0.5,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 5,
+            "part": "wall.door.open"
+          }
+        },
+        {
+          "name": "part:6",
+          "position": [
+            0.5,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 6,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:7",
+          "position": [
+            -0.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 7,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:8",
+          "position": [
+            0.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 8,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:9",
+          "position": [
+            -1,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 9,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:10",
+          "position": [
+            -1,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 10,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:11",
+          "position": [
+            1,
+            0,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 11,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:12",
+          "position": [
+            1,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 12,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:13",
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 13,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:14",
+          "position": [
+            1,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 14,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:15",
+          "position": [
+            -1,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 15,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:16",
+          "position": [
+            1,
+            0,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 16,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:17",
+          "position": [
+            -0.5,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 17,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:18",
+          "position": [
+            -0.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 18,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:19",
+          "position": [
+            0.5,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 19,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:20",
+          "position": [
+            0.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 20,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:21",
+          "position": [
+            -0.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 21,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:22",
+          "position": [
+            0.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 22,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:23",
+          "position": [
+            -0.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 23,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:24",
+          "position": [
+            0.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 24,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:25",
+          "position": [
+            -1,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 25,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:26",
+          "position": [
+            -1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 26,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:27",
+          "position": [
+            1,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 27,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:28",
+          "position": [
+            1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 28,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:29",
+          "position": [
+            0.5,
+            2.2,
+            -0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 29,
+            "part": "roof.plant"
+          }
+        }
+      ]
+    },
+    {
+      "id": "survey",
+      "lod": "low",
+      "triangles": 11396,
+      "calls": 10,
+      "bounds": [
+        -2.509999990463257,
+        -0.6600000262260437,
+        -1.789794683456421,
+        2.789794683456421,
+        5.175000190734863,
+        1.5099999904632568
+      ],
+      "emitters": [
+        {
+          "kind": "door",
+          "position": [
+            1,
+            1.9800000000000002,
+            0.652
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        },
+        {
+          "kind": "door",
+          "position": [
+            2,
+            4.180000000000001,
+            0.652
+          ],
+          "direction": [
+            0,
+            -0.6,
+            0.8
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0,
+            4.135000000000001,
+            -1.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            0,
+            4.135000000000001,
+            -0.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            1,
+            4.135000000000001,
+            -1.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "kind": "ceiling",
+          "position": [
+            1,
+            4.135000000000001,
+            -0.05
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "sockets": [
+        {
+          "name": "part:1",
+          "position": [
+            0,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 1,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:2",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 2,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:3",
+          "position": [
+            1,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 3,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:4",
+          "position": [
+            1,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 4,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:5",
+          "position": [
+            2,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 5,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:6",
+          "position": [
+            2,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 6,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:7",
+          "position": [
+            -2,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 7,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:8",
+          "position": [
+            -2,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 8,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:9",
+          "position": [
+            0,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 9,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:10",
+          "position": [
+            1,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 10,
+            "part": "wall.door"
+          }
+        },
+        {
+          "name": "part:11",
+          "position": [
+            2,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 11,
+            "part": "wall.louvre"
+          }
+        },
+        {
+          "name": "part:12",
+          "position": [
+            0,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 12,
+            "part": "wall.corrugated"
+          }
+        },
+        {
+          "name": "part:13",
+          "position": [
+            1,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 13,
+            "part": "wall.corrugated"
+          }
+        },
+        {
+          "name": "part:14",
+          "position": [
+            2,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 14,
+            "part": "wall.corrugated"
+          }
+        },
+        {
+          "name": "part:15",
+          "position": [
+            -0.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 15,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:16",
+          "position": [
+            -0.5,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 16,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:17",
+          "position": [
+            2.5,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 17,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:18",
+          "position": [
+            2.5,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 18,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:19",
+          "position": [
+            -0.5,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 19,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:20",
+          "position": [
+            2.5,
+            0,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 20,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:21",
+          "position": [
+            -0.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 21,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:22",
+          "position": [
+            2.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 22,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:23",
+          "position": [
+            -2,
+            0,
+            -1
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 23,
+            "part": "stair.straight"
+          }
+        },
+        {
+          "name": "part:24",
+          "position": [
+            -1.5,
+            0,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 24,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:25",
+          "position": [
+            0,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 25,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:26",
+          "position": [
+            0,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 26,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:27",
+          "position": [
+            1,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 27,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:28",
+          "position": [
+            1,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 28,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:29",
+          "position": [
+            2,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 29,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:30",
+          "position": [
+            2,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 30,
+            "part": "floor.deck"
+          }
+        },
+        {
+          "name": "part:31",
+          "position": [
+            -2,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 31,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:32",
+          "position": [
+            -1,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 32,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:33",
+          "position": [
+            0,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 33,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:34",
+          "position": [
+            1,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 34,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:35",
+          "position": [
+            2,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 35,
+            "part": "floor.grate"
+          }
+        },
+        {
+          "name": "part:36",
+          "position": [
+            0,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 36,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:37",
+          "position": [
+            1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 37,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:38",
+          "position": [
+            2,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 38,
+            "part": "wall.door"
+          }
+        },
+        {
+          "name": "part:39",
+          "position": [
+            0,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 39,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:40",
+          "position": [
+            1,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 40,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:41",
+          "position": [
+            2,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 41,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:42",
+          "position": [
+            -0.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 42,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:43",
+          "position": [
+            -0.5,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 43,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:44",
+          "position": [
+            2.5,
+            2.2,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 44,
+            "part": "wall.window"
+          }
+        },
+        {
+          "name": "part:45",
+          "position": [
+            2.5,
+            2.2,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 45,
+            "part": "wall.solid"
+          }
+        },
+        {
+          "name": "part:46",
+          "position": [
+            -0.5,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 46,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:47",
+          "position": [
+            2.5,
+            2.2,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 47,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:48",
+          "position": [
+            -0.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 48,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:49",
+          "position": [
+            2.5,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 49,
+            "part": "structure.column"
+          }
+        },
+        {
+          "name": "part:50",
+          "position": [
+            -2,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 50,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:51",
+          "position": [
+            -1,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 51,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:52",
+          "position": [
+            0,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 52,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:53",
+          "position": [
+            1,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 53,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:54",
+          "position": [
+            2,
+            2.2,
+            1.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 54,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:55",
+          "position": [
+            2.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 55,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:56",
+          "position": [
+            -2.5,
+            2.2,
+            1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 56,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:57",
+          "position": [
+            -1,
+            2.2,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 57,
+            "part": "rail.guard"
+          }
+        },
+        {
+          "name": "part:58",
+          "position": [
+            0,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 58,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:59",
+          "position": [
+            0,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 59,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:60",
+          "position": [
+            1,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 60,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:61",
+          "position": [
+            1,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 61,
+            "part": "roof.deck"
+          }
+        },
+        {
+          "name": "part:62",
+          "position": [
+            2,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 62,
+            "part": "roof.slope"
+          }
+        },
+        {
+          "name": "part:63",
+          "position": [
+            2,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 63,
+            "part": "roof.slope"
+          }
+        },
+        {
+          "name": "part:64",
+          "position": [
+            0,
+            4.4,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 64,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:65",
+          "position": [
+            1,
+            4.4,
+            0.5
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 65,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:66",
+          "position": [
+            0,
+            4.4,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 66,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:67",
+          "position": [
+            1,
+            4.4,
+            -1.5
+          ],
+          "quaternion": [
+            0,
+            1,
+            0,
+            6.123233995736766e-17
+          ],
+          "data": {
+            "n": 67,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:68",
+          "position": [
+            -0.5,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 68,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:69",
+          "position": [
+            -0.5,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865476,
+            0,
+            -0.7071067811865475
+          ],
+          "data": {
+            "n": 69,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:70",
+          "position": [
+            1.5,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 70,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:71",
+          "position": [
+            1.5,
+            4.4,
+            0
+          ],
+          "quaternion": [
+            0,
+            0.7071067811865475,
+            0,
+            0.7071067811865476
+          ],
+          "data": {
+            "n": 71,
+            "part": "roof.parapet"
+          }
+        },
+        {
+          "name": "part:72",
+          "position": [
+            0,
+            4.4,
+            -1
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "n": 72,
+            "part": "roof.plant"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ship:0",
+      "lod": "low",
+      "triangles": 3769,
+      "calls": 9,
+      "bounds": [
+        -1.5604000091552734,
+        -0.3886675536632538,
+        -2.388000011444092,
+        1.5604000091552734,
+        0.8331042528152466,
+        2.2386239022016525
+      ],
+      "emitters": [],
+      "sockets": [
+        {
+          "name": "hull-structure",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {}
+        },
+        {
+          "name": "exhaust.0",
+          "position": [
+            0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.1216
+          }
+        },
+        {
+          "name": "exhaust.1",
+          "position": [
+            -0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.1216
+          }
+        }
+      ],
+      "solidBounds": [
+        -1.5604000091552734,
+        -0.3886675536632538,
+        -2.388000011444092,
+        1.5604000091552734,
+        0.821858823299408,
+        2.0999999046325684
+      ],
+      "radius": 2.388523404685725,
+      "exhausts": [
+        {
+          "position": [
+            0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.6799999999999999,
+            0.1,
+            2.0999999999999996
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ship:1",
+      "lod": "low",
+      "triangles": 3316,
+      "calls": 9,
+      "bounds": [
+        -1.4092551469802856,
+        -0.5299999713897705,
+        -2.184999942779541,
+        1.4092551469802856,
+        0.921999990940094,
+        2.5434000492095947
+      ],
+      "emitters": [],
+      "sockets": [
+        {
+          "name": "hull-structure",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {}
+        },
+        {
+          "name": "exhaust.0",
+          "position": [
+            0,
+            -0.02,
+            2.19
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.31
+          }
+        }
+      ],
+      "solidBounds": [
+        -1.4091397523880005,
+        -0.5299999713897705,
+        -2.184999942779541,
+        1.4091397523880005,
+        0.921999990940094,
+        2.191999912261963
+      ],
+      "radius": 2.2212761737529925,
+      "exhausts": [
+        {
+          "position": [
+            0,
+            -0.02,
+            2.19
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ship:2",
+      "lod": "low",
+      "triangles": 3254,
+      "calls": 9,
+      "bounds": [
+        -1.6647089719772339,
+        -0.3338625133037567,
+        -2.3949999809265137,
+        1.6647089719772339,
+        0.6778977513313293,
+        2.243904083967209
+      ],
+      "emitters": [],
+      "sockets": [
+        {
+          "name": "hull-structure",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {}
+        },
+        {
+          "name": "exhaust.0",
+          "position": [
+            1.0103336092965665e-17,
+            0.14500000000000002,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.0736
+          }
+        },
+        {
+          "name": "exhaust.1",
+          "position": [
+            -0.1428941916244324,
+            -0.10249999999999997,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.0736
+          }
+        },
+        {
+          "name": "exhaust.2",
+          "position": [
+            0.14289419162443234,
+            -0.10250000000000008,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "data": {
+            "radius": 0.0736
+          }
+        }
+      ],
+      "solidBounds": [
+        -1.649562954902649,
+        -0.3338625133037567,
+        -2.3949999809265137,
+        1.649562954902649,
+        0.6729638576507568,
+        2.1600000858306885
+      ],
+      "radius": 2.3952857676430357,
+      "exhausts": [
+        {
+          "position": [
+            1.0103336092965665e-17,
+            0.14500000000000002,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.1428941916244324,
+            -0.10249999999999997,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "position": [
+            0.14289419162443234,
+            -0.10250000000000008,
+            2.16
+          ],
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -144,17 +144,44 @@ export interface Kit {
   low: boolean;
 }
 
+/**
+ * Chamfers below this size are drawn as hard edges, per tier. At medium the
+ * 3–4.5 mm chamfers on thin plates, edge angles, clips, sills and tread plates
+ * go: each costs 44 triangles against a plain box's 12, and the plate's own
+ * edge still shows. The 5–12 mm chamfers on posts, beams, panels, slabs and
+ * columns stay, so outlines and members keep their bevels. High keeps every
+ * chamfer; low draws none (its settings have no bevels).
+ */
+export const KIT_MIN_CHAMFER: Record<LodTier, number> = { high: 0, medium: 0.005, low: 0 };
+
+/** Wraps a builder for kit parts, raising its minimum chamfer to the tier's (KIT_MIN_CHAMFER). */
 export function makeKit(b: PartBuilder, source: MaterialSource): Kit {
   const s = b.settings;
+  b.minChamfer = Math.max(b.minChamfer, KIT_MIN_CHAMFER[b.lod]);
   return { b, m: name => source.get(name), lod: b.lod, hardware: s.hardware, fine: b.lod === 'high', low: b.lod === 'low' };
+}
+
+/**
+ * The interior lining sits inside the exterior skin of the same wall, and a
+ * wall's openings are framed by members that span its whole thickness, so the
+ * skin already casts the lining's shadow. Drawing the lining into the shadow
+ * map again only costs triangles; it still receives shadows.
+ */
+export function liningCastsNoShadow(group: T.Object3D, source: MaterialSource, lod: LodTier) {
+  if (kitMaterialFor('skinInner', lod) !== 'skinInner') return;   // at low it shares a material with door leaves
+  const lining = source.get('skinInner');
+  group.traverse(o => { if ((o as T.Mesh).isMesh && (o as T.Mesh).material === lining) o.castShadow = false; });
 }
 
 export type Emit = (k: Kit) => void;
 
 /** Build one part on its own (its own builder and lamp). */
 export function buildEmit(emit: Emit, name: string, lib: StyleLibrary, b = new PartBuilder(lib.lod)): BuiltPart {
-  emit(makeKit(b, libraryMaterials(lib)));
-  return b.build(name);
+  const source = libraryMaterials(lib);
+  emit(makeKit(b, source));
+  const built = b.build(name);
+  liningCastsNoShadow(built.group, source, b.lod);
+  return built;
 }
 
 // ------------------------------------------------------------ shared pieces
