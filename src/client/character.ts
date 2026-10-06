@@ -1,11 +1,12 @@
 import * as T from 'three';
+import { COURIER_LOOK } from './presentation-materials.ts';
 import type { Character } from '../shared/world.ts';
-export const PALETTES={clay:'#876247',fern:'#4e6a60',sky:'#4d6675'};
+export const PALETTES=COURIER_LOOK.coats;
 const cache=new Map<string,T.MeshStandardMaterial>();
-const material=(color:string)=>{if(!cache.has(color))cache.set(color,new T.MeshStandardMaterial({color,metalness:.25,roughness:.65}));return cache.get(color)!;};
+const material=(color:string)=>{if(!cache.has(color))cache.set(color,new T.MeshStandardMaterial({color,...COURIER_LOOK.surface}));return cache.get(color)!;};
 export function courier(identity:Character|'mica'|'sol'){
   const root=new T.Group(),rig=new T.Group(),torso=new T.Group(),head=new T.Group();root.add(rig);rig.add(torso);torso.position.y=.93;
-  const coat=identity==='mica'?'#a17a48':identity==='sol'?'#52766c':PALETTES[identity],colored:T.Mesh[]=[];
+  const coat=identity==='mica'?COURIER_LOOK.neighbours.mica:identity==='sol'?COURIER_LOOK.neighbours.sol:PALETTES[identity],colored:T.Mesh[]=[];
   const add=(p:T.Object3D,g:T.BufferGeometry,c:string,pos:number[],tint=false)=>{const m=new T.Mesh(g,material(c));m.position.fromArray(pos);m.castShadow=true;m.receiveShadow=true;p.add(m);if(tint)colored.push(m);return m;};
   const box=(p:T.Object3D,size:[number,number,number],c:string,pos:number[],tint=false)=>add(p,new T.BoxGeometry(...size),c,pos,tint);
   add(torso,new T.CapsuleGeometry(.19,.3,6,12),coat,[0,.02,0],true).scale.z=.77;
@@ -13,7 +14,7 @@ export function courier(identity:Character|'mica'|'sol'){
   box(torso,[.30,.40,.17],'#3b474b',[0,.04,-.22]);for(const x of [-.13,.13])box(torso,[.047,.47,.045],'#8a948c',[x,.05,-.14]);
   torso.add(head);head.position.y=.47;
   add(head,new T.SphereGeometry(.19,20,14),'#a6adaa',[0,.03,0]);
-  const visor=new T.Mesh(new T.SphereGeometry(.18,20,12),new T.MeshPhysicalMaterial({color:'#132c38',metalness:.55,roughness:.14,clearcoat:1}));visor.material.userData.ownedResource=true;visor.scale.set(1,.63,.82);visor.position.set(0,.025,.105);head.add(visor);
+  const visor=new T.Mesh(new T.SphereGeometry(.18,20,12),new T.MeshPhysicalMaterial(COURIER_LOOK.visor));visor.material.userData.ownedResource=true;visor.scale.set(1,.63,.82);visor.position.set(0,.025,.105);head.add(visor);
   for(const x of [-.19,.19])box(head,[.05,.15,.12],'#445158',[x,.025,.01]);box(head,[.13,.025,.12],'#b9c8c4',[0,.208,0]);
   const arms=[-1,1].map(side=>{const upper=new T.Group(),forearm=new T.Group();torso.add(upper);upper.position.set(side*.27,.19,0);add(upper,new T.CapsuleGeometry(.075,.21,4,10),coat,[0,-.15,0],true);box(upper,[.17,.12,.2],'#7a8888',[0,-.04,0]);upper.add(forearm);forearm.position.y=-.30;add(forearm,new T.CapsuleGeometry(.067,.16,4,10),coat,[0,-.12,0],true);add(forearm,new T.SphereGeometry(.073,10,8),'#283a42',[0,-.275,.015]);return{upper,forearm};});
   const legs=[-1,1].map(side=>{const hip=new T.Group(),knee=new T.Group();rig.add(hip);hip.position.set(side*.105,.67,0);add(hip,new T.CapsuleGeometry(.095,.20,4,10),'#384c53',[0,-.15,0]);hip.add(knee);knee.position.y=-.3;add(knee,new T.CapsuleGeometry(.07,.17,4,10),'#35464e',[0,-.13,0]);box(knee,[.14,.14,.09],'#7d8b8b',[0,.0,.07]);box(knee,[.15,.105,.27],'#22313a',[0,-.265,.04]);return{hip,knee};});

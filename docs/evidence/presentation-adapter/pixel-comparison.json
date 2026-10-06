@@ -1,0 +1,68 @@
+{
+  "method": "Pillow RGB pixel difference; same Mac Chrome, saved pose and reduced-motion setting",
+  "comparisons": [
+    {
+      "view": "desktop",
+      "width": 1920,
+      "height": 1080,
+      "pixelIdentical": true,
+      "meanAbsoluteRGBDifference": 0.0,
+      "beforeSha256": "b553702f844bbb3c74cf3670d3ee8c61d9cee4a4190e70c1373b22cd83078650",
+      "afterSha256": "b553702f844bbb3c74cf3670d3ee8c61d9cee4a4190e70c1373b22cd83078650"
+    },
+    {
+      "view": "phone",
+      "width": 390,
+      "height": 844,
+      "pixelIdentical": true,
+      "meanAbsoluteRGBDifference": 0.0,
+      "beforeSha256": "3c94ae8e05edb5c1b1b618631a0b9ad4d376bd1f038994df959785c9be0c8b01",
+      "afterSha256": "3c94ae8e05edb5c1b1b618631a0b9ad4d376bd1f038994df959785c9be0c8b01"
+    },
+    {
+      "view": "harbour",
+      "width": 1920,
+      "height": 1080,
+      "pixelIdentical": true,
+      "meanAbsoluteRGBDifference": 0.0,
+      "beforeSha256": "20821d5a9c7352262252ea2c77770e4c76d321182ec82a610c5fc432df05acce",
+      "afterSha256": "20821d5a9c7352262252ea2c77770e4c76d321182ec82a610c5fc432df05acce"
+    },
+    {
+      "view": "workshop",
+      "width": 1920,
+      "height": 1080,
+      "pixelIdentical": true,
+      "meanAbsoluteRGBDifference": 0.0,
+      "beforeSha256": "0b6380fd92c95963b9fc472bd711527c4655e080933097f5ec6841386c7c6c9a",
+      "afterSha256": "0b6380fd92c95963b9fc472bd711527c4655e080933097f5ec6841386c7c6c9a"
+    },
+    {
+      "view": "shipyard",
+      "width": 1920,
+      "height": 1080,
+      "pixelIdentical": true,
+      "meanAbsoluteRGBDifference": 0.0,
+      "beforeSha256": "37d146890388c1ddb48573d44509fd4915720194cf2fb199320dff963ef1397b",
+      "afterSha256": "37d146890388c1ddb48573d44509fd4915720194cf2fb199320dff963ef1397b"
+    },
+    {
+      "view": "history",
+      "width": 1920,
+      "height": 1080,
+      "pixelIdentical": true,
+      "meanAbsoluteRGBDifference": 0.0,
+      "beforeSha256": "f291c2a92be423ff6c5a4ed490847c09d8d526fc697c45f19e0c675dbc01bab9",
+      "afterSha256": "f291c2a92be423ff6c5a4ed490847c09d8d526fc697c45f19e0c675dbc01bab9"
+    },
+    {
+      "view": "terrain",
+      "width": 1920,
+      "height": 1080,
+      "pixelIdentical": true,
+      "meanAbsoluteRGBDifference": 0.0,
+      "beforeSha256": "06ba835a074742f0b682739fbcf07a1eae32ccca08702350ed42e3323374ee02",
+      "afterSha256": "06ba835a074742f0b682739fbcf07a1eae32ccca08702350ed42e3323374ee02"
+    }
+  ]
+}

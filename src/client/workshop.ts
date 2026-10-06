@@ -9,10 +9,10 @@ import type { PartId } from '../assets/claude-geometry/blueprint/parts/catalogue
 import { STOREY } from '../assets/claude-geometry/blueprint/parts/kit.ts';
 import { WorkshopView } from '../assets/claude-geometry/blueprint/view/workshop-view.ts';
 import { PartTemplates } from '../assets/claude-geometry/blueprint/view/templates.ts';
-import { Stage } from '../assets/claude-geometry/shell/stage.ts';
+import type { Stage } from '../assets/claude-geometry/shell/stage.ts';
 import type { LibraryEntry } from '../shared/blueprints.ts';
 import './workshop.css';
-import { textureFormat } from './resource-policy.ts';
+import { createPresentationStage } from './presentation-stage.ts';
 
 export interface WorkshopBridge {
   read: () => Promise<LibraryEntry[]>;
@@ -85,7 +85,7 @@ export class Workshop {
     this.dialog.showModal();document.body.classList.add('workshop-open');
     this.busy=true;this.changed();this.status('Opening your saved library…');
     try{
-      this.stage=new Stage({container:this.get('stage'),lod:'medium',mood:'hangar',scans:true,textures:textureFormat(),environment:'procedural',ambientOcclusion:false,backdrop:false,fog:null,background:'#151e24',fov:44});
+      this.stage=createPresentationStage('workshop',this.get('stage'));
       this.templates=new PartTemplates(this.stage.library);this.view=new WorkshopView(this.stage,this.editor,this.templates);
       const canvas=this.stage.renderer.domElement;canvas.setAttribute('aria-label','Workshop 3D preview');
       const pressed=new Set<number>();let pinched=false;

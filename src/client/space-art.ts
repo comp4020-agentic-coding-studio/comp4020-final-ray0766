@@ -1,4 +1,5 @@
 import * as T from 'three';
+import { PRESENTATION } from './presentation.ts';
 import {terrainModel} from './terrain-model.ts';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RADIUS } from '../shared/world.ts';
@@ -28,7 +29,7 @@ function planetMaterial(seed:number){
   const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;const bump=new T.CanvasTexture(relief);const material=new T.MeshStandardMaterial({map,bumpMap:bump,bumpScale:.14,roughness:.92,metalness:0,envMapIntensity:.12});worlds.set(key,material);return material;
 }
 export function orbitalPlanet(slot:number,environment?:string|null){
-  if(environment){const model=terrainModel(environment,[],{},'low');model.setSunDirection([-80,130,70]);return model.object;}
+  if(environment){const model=terrainModel(environment,[],{},'low');model.setSunDirection([...PRESENTATION.space.sun.position]);return model.object;}
   const root=new T.Group();const globe=mesh(root,new T.SphereGeometry(RADIUS,64,40),planetMaterial(slot));globe.rotation.y=slot*1.37;
   if(slot===0){
     // Coarse orbital representation of the same public city, bounded to one draw.
@@ -40,11 +41,12 @@ export function orbitalPlanet(slot:number,environment?:string|null){
   atmosphere.userData.ownedResource=true;mesh(root,new T.SphereGeometry(RADIUS*1.028,48,24),atmosphere);return root;
 }
 export function configureSpace(scene:T.Scene,renderer:T.WebGLRenderer){
-  scene.background=new T.Color('#040810');scene.fog=new T.FogExp2('#080e18',.00013);
-  const environment=new RoomEnvironment();const generator=new T.PMREMGenerator(renderer);scene.environment=generator.fromScene(environment,.08).texture;scene.environmentIntensity=.42;environment.dispose();generator.dispose();
-  scene.add(new T.HemisphereLight('#7196b4','#070a0e',.5));
-  const sun=new T.DirectionalLight('#eedcca',3.5);sun.position.set(-80,130,70);scene.add(sun);
-  const rim=new T.DirectionalLight('#587a9b',1.3);rim.position.set(65,-20,-80);scene.add(rim);
+  const look=PRESENTATION.space;
+  scene.background=new T.Color(look.background);scene.fog=new T.FogExp2(look.fog.color,look.fog.density);
+  const environment=new RoomEnvironment();const generator=new T.PMREMGenerator(renderer);scene.environment=generator.fromScene(environment,look.pmremSigma).texture;scene.environmentIntensity=look.environmentIntensity;environment.dispose();generator.dispose();
+  scene.add(new T.HemisphereLight(look.fill.sky,look.fill.ground,look.fill.intensity));
+  const sun=new T.DirectionalLight(look.sun.color,look.sun.intensity);sun.position.fromArray(look.sun.position);scene.add(sun);
+  const rim=new T.DirectionalLight(look.rim.color,look.rim.intensity);rim.position.fromArray(look.rim.position);scene.add(rim);
   // Sparse geometry supplies scale and parallax; no particle wall or bloom veil.
   const positions:number[]=[],colors:number[]=[];let seed=103;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
   for(let i=0;i<950;i++){const p=new T.Vector3(random()-.5,random()-.5,random()-.5).normalize().multiplyScalar(900+random()*1300);positions.push(...p.toArray());const b=.32+random()*.58;colors.push(b,b*.94,b*.86);}

@@ -1,0 +1,51 @@
+{
+  "phase": "after",
+  "browser": "154.0.8037.98",
+  "checks": [],
+  "pageErrors": [],
+  "desktop": {
+    "feet": "[-0.45544102177648277,0.8536783408178245,0.25260001207782934]",
+    "radius": "12.30415582727788",
+    "heading": "[-0.11890024872176341,0.2228665451691266,-0.9675707901225009]",
+    "width": 1920,
+    "overflow": false,
+    "styles": [
+      {
+        "selector": "body",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#world",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#menu-dialog",
+        "background": "rgba(18, 35, 45, 0.93)",
+        "color": "rgb(187, 204, 210)",
+        "border": "rgb(81, 111, 126)"
+      },
+      {
+        "selector": "#workshop",
+        "missing": true
+      },
+      {
+        "selector": "#shipyard",
+        "missing": true
+      },
+      {
+        "selector": "#history",
+        "missing": true
+      },
+      {
+        "selector": "#terrain-workshop",
+        "missing": true
+      }
+    ]
+  },
+  "status": "failed",
+  "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 3\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[33m@@ -1,10 +1,10 @@\u001b[39m\n\u001b[2m  Object {\u001b[22m\n\u001b[32m-   \"feet\": \"[-0.4554410217764829,0.8536783408178247,0.2526000120778294]\",\u001b[39m\n\u001b[32m-   \"heading\": \"[-0.11890024872176343,0.2228665451691266,-0.9675707901225009]\",\u001b[39m\n\u001b[31m+   \"feet\": \"[-0.45544102177648277,0.8536783408178245,0.25260001207782934]\",\u001b[39m\n\u001b[31m+   \"heading\": \"[-0.11890024872176341,0.2228665451691266,-0.9675707901225009]\",\u001b[39m\n\u001b[2m    \"overflow\": false,\u001b[22m\n\u001b[32m-   \"radius\": \"12.304155827277878\",\u001b[39m\n\u001b[31m+   \"radius\": \"12.30415582727788\",\u001b[39m\n\u001b[2m    \"styles\": Array [\u001b[22m\n\u001b[2m      Object {\u001b[22m\n\u001b[2m        \"background\": \"rgba(0, 0, 0, 0)\",\u001b[22m\n\u001b[2m        \"border\": \"rgb(184, 200, 205)\",\u001b[22m\n\u001b[2m        \"color\": \"rgb(184, 200, 205)\",\u001b[22m"
+}

@@ -1,11 +1,11 @@
 import * as T from 'three';
-import { Stage } from '../assets/claude-geometry/shell/stage.ts';
+import type { Stage } from '../assets/claude-geometry/shell/stage.ts';
 import { decodeEvent, decodeSnapshot } from '../assets/claude-geometry/timeline/codec.ts';
 import type { WorldState } from '../assets/claude-geometry/core/world.ts';
 import {planetPreview} from './planet-preview.ts';
 import {structureSize} from '../shared/blueprints.ts';
 import type {PlacedObject} from '../shared/planets.ts';
-import { textureFormat } from './resource-policy.ts';
+import { createPresentationStage } from './presentation-stage.ts';
 import type { HistoryPage, HistorySnapshot } from '../shared/history.ts';
 import { HISTORY_PAGE } from '../shared/history.ts';
 import './history.css';
@@ -48,7 +48,7 @@ export class PrivateHistory {
  }
  async open(planet:string){
   if(this.dialog.open)return;this.planet=planet;this.dialog.showModal();document.body.classList.add('history-open');
-  try{this.stage=new Stage({container:this.get('stage'),lod:'medium',mood:'dusk',scans:true,textures:textureFormat(),environment:'procedural',backdrop:false,fog:null,fov:44});this.layer=new T.Group();this.stage.scene.add(this.layer);this.stage.start();const page=await this.bridge.page(planet,0);await this.events(Math.max(0,page.head-HISTORY_PAGE));await this.seek();this.stage.frameBox(new T.Box3(new T.Vector3(-12,-12,-12),new T.Vector3(12,15,12)),{direction:new T.Vector3(1,1.6,1),topInset:0,bottomInset:0});}
+  try{this.stage=createPresentationStage('history',this.get('stage'));this.layer=new T.Group();this.stage.scene.add(this.layer);this.stage.start();const page=await this.bridge.page(planet,0);await this.events(Math.max(0,page.head-HISTORY_PAGE));await this.seek();this.stage.frameBox(new T.Box3(new T.Vector3(-12,-12,-12),new T.Vector3(12,15,12)),{direction:new T.Vector3(1,1.6,1),topInset:0,bottomInset:0});}
   catch(e){this.status(e instanceof Error?e.message:'Could not open history.');}
  }
  private close(){this.stop();this.ticket++;this.clear();const renderer=this.stage?.renderer;this.stage?.dispose();renderer?.forceContextLoss();this.stage=null;this.dialog.close();document.body.classList.remove('history-open');}

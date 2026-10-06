@@ -1,0 +1,22 @@
+/* Host UI colour inputs. Preserve the current cascade and all existing layouts.
+   Panel-specific colours remain in their own CSS until an approved sample maps them. */
+:root {
+  --ui-ground-paper: #13222c;
+  --ui-ground-ink: #b8c8cd;
+  --ui-space-paper: #121b23;
+  --ui-space-ink: #bdcad0;
+  --ui-page-background: #08131d;
+  --ui-delivery-accent: #a85f42;
+  --ui-line: #cad1c2;
+  --ui-dialog-surface: #12232ded;
+  --ui-dialog-border: #516f7e;
+  --ui-dialog-text: #bbccd2;
+  --ui-preview-surface: #152129;
+  --ui-preview-bar: #21313a;
+  --ui-preview-bar-text: #d4dfe1;
+  --ui-preview-focus: #f0bc77;
+  --paper: var(--ui-ground-paper);
+  --ink: var(--ui-ground-ink);
+  --rust: var(--ui-delivery-accent);
+  --line: var(--ui-line);
+}

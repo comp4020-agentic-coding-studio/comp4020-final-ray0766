@@ -1,0 +1,10 @@
+{
+  "phase": "continue",
+  "browser": "154.0.8037.98",
+  "checks": [
+    "Existing building can be selected and cancelled; saved objects unchanged",
+    "Actual launch, thrust/brake, return landing and refresh preserve existing buildings"
+  ],
+  "pageErrors": [],
+  "status": "passed"
+}

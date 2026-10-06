@@ -2,11 +2,12 @@ import * as T from 'three';
 import { lazyPanel,openPanel } from './lazy-panel.ts';
 import type { HistoryPage, HistorySnapshot } from '../shared/history.ts';
 import { defaultShip } from '../shared/ships.ts';
-import { PracticalLights } from '../assets/claude-geometry/style/practical.ts';
+import { configureRenderer, configureGroundLighting, groundPresentation, createWorldPracticalLights } from './presentation.ts';
 import { worldMaterials } from './shared-assets.ts';
 import { textureFormat } from './resource-policy.ts';
 import { GroundWorld, groundPose, FIXED_STEP, MAX_PATH_STEPS } from '../shared/physics/world.ts';
 import type { GroundPose, MotionStep } from '../shared/physics/world.ts';
+import './presentation.css';
 import './style.css';
 import './colony.css';
 import './flight.css';
@@ -121,26 +122,24 @@ catch {
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
 renderer.setClearColor('#9cc8c4', 0);
-renderer.outputColorSpace = T.SRGBColorSpace;
-renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.03;
+configureRenderer(renderer, 'world');
 $('world').append(renderer.domElement);
 renderer.domElement.setAttribute('aria-label', 'Little Worlds planet. Use WASD or arrow keys to walk; board your ship to fly between worlds.');
 worldMaterials().attachRenderer(renderer,textureFormat());
 const scene = new T.Scene();
-const practical=new PracticalLights('medium');scene.add(practical.group);
+const practical=createWorldPracticalLights();scene.add(practical.group);
 const sky = new T.Group();scene.add(sky);
 const stars:number[]=[];for(let i=0;i<260;i++){const p=new T.Vector3(Math.sin(i*21.2),Math.cos(i*14.3),Math.sin(i*9.2)).normalize().multiplyScalar(65);stars.push(...p.toArray());}
 const starGeo=new T.BufferGeometry();starGeo.setAttribute('position',new T.Float32BufferAttribute(stars,3));sky.add(new T.Points(starGeo,new T.PointsMaterial({color:'#819dab',size:.085,fog:false})));
-scene.fog = new T.Fog('#0f202b', 28, 65);
 const camera = new T.PerspectiveCamera(52, innerWidth / innerHeight, .08, 2400);
-const fill = new T.AmbientLight('#839aaf', 1.1); scene.add(fill);
-const sun = new T.DirectionalLight('#efd4b0', 2.5); sun.castShadow=true;
-sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-16;sun.shadow.camera.right=16;sun.shadow.camera.top=16;sun.shadow.camera.bottom=-16;sun.shadow.camera.far=65;sun.shadow.normalBias=.09;sun.shadow.bias=-.0003;
+const fill = new T.AmbientLight(); scene.add(fill);
+const sun = new T.DirectionalLight(); sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048); sun.shadow.normalBias=.09;sun.shadow.bias=-.0003;
 scene.add(sun);scene.add(sun.target);
 let worldRoot = new T.Scene();scene.add(worldRoot);
 let world = createWorld(worldRoot);
 function configureGround(){
- const hub=activePlanet==='hub';sky.visible=!hub;scene.fog=hub?new T.FogExp2('#665b60',.0033):new T.Fog('#0f202b',28,65);fill.color.set(hub?'#839bad':'#839aaf');fill.intensity=hub?.48:1.1;sun.color.set(hub?'#e8bd99':'#efd4b0');sun.intensity=hub?2.35:2.5;sun.shadow.camera.left=hub?-45:-16;sun.shadow.camera.right=hub?45:16;sun.shadow.camera.top=hub?45:16;sun.shadow.camera.bottom=hub?-45:-16;sun.shadow.camera.far=hub?180:65;sun.shadow.camera.updateProjectionMatrix();scene.environmentIntensity=hub?.43:.5;
+ sky.visible=activePlanet!=='hub';configureGroundLighting(activePlanet,scene,fill,sun);
 }
 configureGround();
 const player = courier('clay');scene.add(player.root);
@@ -398,7 +397,7 @@ function animate(now:number) {
 function ensureColony() {
   if(colony)return;
   flight=new SpaceFlight({canvas:renderer.domElement,renderer,online:()=>online,player:()=>state,checkpoint:body=>serial(()=>request('flight/checkpoint',body)),command:(route,body)=>serial(()=>request<Universe>(route,body)),apply:accept,applyUniverse:u=>colony?.accept(u),flushGround:async()=>{await savePosition(true);await queue;},clearGround:()=>{clearInput();colony?.stopBuilding();},canBoard:()=>!!walker&&!colony?.building&&distance(walker.up.toArray() as Vec3,portPoint(activePlanet))<BOARD_RADIUS-.12,failed,notice});
-  flight.setDesign((state.ship??defaultShip()).design);flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=activePlanet==='hub'?.43:.5;
+  flight.setDesign((state.ship??defaultShip()).design);flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=groundPresentation(activePlanet).environmentIntensity;
   colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,
     applyPlayer:p=>{accept(p);return state.planetId===p.planetId&&state.revision<=p.revision;},
     universe:u=>{flight?.universe(u);const p=u.currentPlanet;if(p.environment&&terrainRevision!==p.revision){

@@ -1,5 +1,5 @@
 import * as T from 'three';
-import { Stage } from '../assets/claude-geometry/shell/stage.ts';
+import type { Stage } from '../assets/claude-geometry/shell/stage.ts';
 import { createShipModel } from '../assets/claude-geometry/ship/factory.ts';
 import type { ShipHandle } from '../assets/claude-geometry/ship/factory.ts';
 import { cloneDesign, decodeShipDesign, encodeShipDesign, fromStarter, normalizeRegistration, PAINT_ZONES, STARTERS } from '../assets/claude-geometry/ship/design.ts';
@@ -8,7 +8,7 @@ import { CATEGORIES, PART_IDS } from '../assets/claude-geometry/ship/spec.ts';
 import { PAINT_CHOICES, GLOW_CHOICES } from '../assets/claude-geometry/style/tokens.ts';
 import { defaultShip } from '../shared/ships.ts';
 import type { SavedShip } from '../shared/ships.ts';
-import { textureFormat } from './resource-policy.ts';
+import { createPresentationStage } from './presentation-stage.ts';
 import './shipyard.css';
 interface Bridge { read:()=>Promise<SavedShip>; save:(body:unknown)=>Promise<SavedShip>; allowed:()=>boolean }
 export class Shipyard {
@@ -70,7 +70,7 @@ export class Shipyard {
   async open(){
     if(this.dialog.open||!this.bridge.allowed())return;
     this.dialog.showModal();document.body.classList.add('shipyard-open');
-    try{this.stage=new Stage({container:this.get('stage'),lod:'medium',mood:'hangar',scans:true,textures:textureFormat(),environment:'procedural',backdrop:false,fog:null,fov:44});
+    try{this.stage=createPresentationStage('shipyard',this.get('stage'));
       this.stage.renderer.domElement.setAttribute('aria-label','Ship 3D preview');this.stage.start();await this.load();
     }catch(e){this.status(e instanceof Error?e.message:'Could not open ship preview.');}
   }

@@ -1,12 +1,12 @@
 import * as T from 'three';
-import { Stage } from '../assets/claude-geometry/shell/stage.ts';
+import type { Stage } from '../assets/claude-geometry/shell/stage.ts';
 import { STYLES,defaultEnvironment,decodeEnvironment,encodeEnvironment } from '../assets/claude-geometry/terrain/env.ts';
 import type { TerrainStyle } from '../assets/claude-geometry/terrain/env.ts';
 import { checkTerrainChange,describeConflicts } from '../assets/claude-geometry/terrain/policy.ts';
 import { fieldOf,terrainObjects } from '../shared/terrain.ts';
 import type { Universe } from '../shared/planets.ts';
 import { planetPreview } from './planet-preview.ts';
-import { textureFormat } from './resource-policy.ts';
+import { createPresentationStage } from './presentation-stage.ts';
 import './terrain-workshop.css';
 interface Bridge {read:()=>Promise<Universe>;save:(body:unknown)=>Promise<Universe>;allowed:()=>boolean}
 export class TerrainWorkshop{
@@ -34,7 +34,7 @@ export class TerrainWorkshop{
   try{const u=await this.bridge.read();if(!u.currentPlanet.mine||u.player.flight.mode!=='ground')throw Error('Land on your own planet to edit terrain.');this.saved=u;const r=u.currentPlanet.environment?decodeEnvironment(u.currentPlanet.environment):null,env=r?.ok?r.value:defaultEnvironment('temperate');this.get<HTMLSelectElement>('style').value=env.style;this.get<HTMLInputElement>('seed').value=String(env.seed);this.get('current').textContent=u.currentPlanet.environment?'Saved terrain is preserved until you apply.':'Current terrain: original landscape. It stays unchanged until you apply.';this.lock(false);this.preview();}
   catch(e){this.status(e instanceof Error?e.message:'Could not load terrain.');this.lock(false);this.get<HTMLButtonElement>('apply').disabled=true;}
  }
- async open(){if(this.dialog.open||!this.bridge.allowed())return;this.dialog.showModal();document.body.classList.add('terrain-workshop-open');try{this.stage=new Stage({container:this.get('stage'),lod:'medium',mood:'dusk',scans:true,textures:textureFormat(),environment:'procedural',backdrop:false,fog:null,fov:44});this.stage.start();await this.load();}catch(e){this.status(e instanceof Error?e.message:'Could not create preview.');}}
+ async open(){if(this.dialog.open||!this.bridge.allowed())return;this.dialog.showModal();document.body.classList.add('terrain-workshop-open');try{this.stage=createPresentationStage('terrain',this.get('stage'));this.stage.start();await this.load();}catch(e){this.status(e instanceof Error?e.message:'Could not create preview.');}}
  private async apply(){
   if(this.busy||!this.saved||!this.draft||!this.valid||!this.dirty||!this.bridge.allowed())return;if(!window.confirm('Apply this terrain to your planet? Existing buildings will re-seat on the new ground. This replaces the current terrain and cannot be undone here.'))return;this.lock(true);this.status('Checking buildings and saving terrain…');
   try{this.saved=await this.bridge.save({planetId:this.saved.currentPlanet.id,environment:this.draft,expectedRevision:this.saved.currentPlanet.revision});this.dirty=false;this.get('close').textContent='Done ×';this.status('Terrain saved · ground and flight views updated.');this.get('current').textContent='Saved terrain applied.';}

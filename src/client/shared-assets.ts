@@ -3,15 +3,16 @@ import { PartBuilder } from '../assets/claude-geometry/style/geometry.ts';
 import type { LodTier } from '../assets/claude-geometry/style/lod.ts';
 import { PART_IDS,PARTS } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
 import type { PartId } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
-import { StyleLibrary } from '../assets/claude-geometry/style/materials.ts';
+import type { StyleLibrary } from '../assets/claude-geometry/style/materials.ts';
 import { disposeObject3D } from '../assets/claude-geometry/core/dispose.ts';
 import { libraryMaterials, makeKit } from '../assets/claude-geometry/blueprint/parts/kit.ts';
+import { createWorldStyleLibrary } from './presentation.ts';
 import { harbourMaterials } from './harbour-materials.ts';
 import type { Vec3 } from '../shared/world.ts';
 
 export const SHARED_ASSET_VERSION='sunseed-structure/2';
 let materialLibrary: StyleLibrary | null = null;
-export const worldMaterials = () => materialLibrary ??= new StyleLibrary('medium', {scans: typeof document !== 'undefined'});
+export const worldMaterials = () => materialLibrary ??= createWorldStyleLibrary();
 export type SharedAssetId=PartId|'service.pipe'|'service.light'|'pad.tile';
 export interface AssetInstance {part:SharedAssetId;position:Vec3;yaw?:number}
 // Same metre / +Y-up / +Z-exterior convention as Claude's committed geometry kit.

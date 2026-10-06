@@ -1,0 +1,330 @@
+{
+  "phase": "before",
+  "browser": "154.0.8037.98",
+  "checks": [
+    "Same saved pose, desktop/phone layout and computed UI colours; four preview panels open/close without world edits"
+  ],
+  "pageErrors": [],
+  "desktop": {
+    "feet": "[-0.4554410217764829,0.8536783408178247,0.2526000120778294]",
+    "radius": "12.304155827277878",
+    "heading": "[-0.11890024872176343,0.2228665451691266,-0.9675707901225009]",
+    "width": 1920,
+    "overflow": false,
+    "styles": [
+      {
+        "selector": "body",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#world",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#menu-dialog",
+        "background": "rgba(18, 35, 45, 0.93)",
+        "color": "rgb(187, 204, 210)",
+        "border": "rgb(81, 111, 126)"
+      },
+      {
+        "selector": "#workshop",
+        "missing": true
+      },
+      {
+        "selector": "#shipyard",
+        "missing": true
+      },
+      {
+        "selector": "#history",
+        "missing": true
+      },
+      {
+        "selector": "#terrain-workshop",
+        "missing": true
+      }
+    ]
+  },
+  "workshop": {
+    "feet": "[-0.45544102177648277,0.8536783408178245,0.25260001207782934]",
+    "radius": "12.30415582727788",
+    "heading": "[-0.11890024872176341,0.2228665451691266,-0.9675707901225009]",
+    "width": 1920,
+    "overflow": false,
+    "styles": [
+      {
+        "selector": "body",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#world",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#menu-dialog",
+        "background": "rgba(18, 35, 45, 0.93)",
+        "color": "rgb(187, 204, 210)",
+        "border": "rgb(81, 111, 126)"
+      },
+      {
+        "selector": "#workshop",
+        "background": "rgb(23, 32, 39)",
+        "color": "rgb(228, 235, 234)",
+        "border": "rgb(70, 86, 97)"
+      },
+      {
+        "selector": "#shipyard",
+        "missing": true
+      },
+      {
+        "selector": "#history",
+        "missing": true
+      },
+      {
+        "selector": "#terrain-workshop",
+        "missing": true
+      }
+    ]
+  },
+  "shipyard": {
+    "feet": "[-0.45544102177648277,0.8536783408178245,0.25260001207782934]",
+    "radius": "12.30415582727788",
+    "heading": "[-0.11890024872176341,0.2228665451691266,-0.9675707901225009]",
+    "width": 1920,
+    "overflow": false,
+    "styles": [
+      {
+        "selector": "body",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#world",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#menu-dialog",
+        "background": "rgba(18, 35, 45, 0.93)",
+        "color": "rgb(187, 204, 210)",
+        "border": "rgb(81, 111, 126)"
+      },
+      {
+        "selector": "#workshop",
+        "background": "rgb(23, 32, 39)",
+        "color": "rgb(228, 235, 234)",
+        "border": "rgb(70, 86, 97)"
+      },
+      {
+        "selector": "#shipyard",
+        "background": "rgb(17, 28, 36)",
+        "color": "rgb(214, 224, 227)",
+        "border": "rgb(75, 98, 108)"
+      },
+      {
+        "selector": "#history",
+        "missing": true
+      },
+      {
+        "selector": "#terrain-workshop",
+        "missing": true
+      }
+    ]
+  },
+  "history": {
+    "feet": "[-0.4554410217764829,0.8536783408178247,0.2526000120778294]",
+    "radius": "12.304155827277878",
+    "heading": "[-0.11890024872176343,0.2228665451691266,-0.9675707901225009]",
+    "width": 1920,
+    "overflow": false,
+    "styles": [
+      {
+        "selector": "body",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#world",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#menu-dialog",
+        "background": "rgba(18, 35, 45, 0.93)",
+        "color": "rgb(187, 204, 210)",
+        "border": "rgb(81, 111, 126)"
+      },
+      {
+        "selector": "#workshop",
+        "background": "rgb(23, 32, 39)",
+        "color": "rgb(228, 235, 234)",
+        "border": "rgb(70, 86, 97)"
+      },
+      {
+        "selector": "#shipyard",
+        "background": "rgb(17, 28, 36)",
+        "color": "rgb(214, 224, 227)",
+        "border": "rgb(75, 98, 108)"
+      },
+      {
+        "selector": "#history",
+        "background": "rgb(21, 33, 41)",
+        "color": "rgb(207, 219, 223)",
+        "border": "rgb(138, 117, 89)"
+      },
+      {
+        "selector": "#terrain-workshop",
+        "missing": true
+      }
+    ]
+  },
+  "terrain": {
+    "feet": "[-0.45544102177648277,0.8536783408178245,0.25260001207782934]",
+    "radius": "12.30415582727788",
+    "heading": "[-0.11890024872176341,0.2228665451691266,-0.9675707901225009]",
+    "width": 1920,
+    "overflow": false,
+    "styles": [
+      {
+        "selector": "body",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#world",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#menu-dialog",
+        "background": "rgba(18, 35, 45, 0.93)",
+        "color": "rgb(187, 204, 210)",
+        "border": "rgb(81, 111, 126)"
+      },
+      {
+        "selector": "#workshop",
+        "background": "rgb(23, 32, 39)",
+        "color": "rgb(228, 235, 234)",
+        "border": "rgb(70, 86, 97)"
+      },
+      {
+        "selector": "#shipyard",
+        "background": "rgb(17, 28, 36)",
+        "color": "rgb(214, 224, 227)",
+        "border": "rgb(75, 98, 108)"
+      },
+      {
+        "selector": "#history",
+        "background": "rgb(21, 33, 41)",
+        "color": "rgb(207, 219, 223)",
+        "border": "rgb(138, 117, 89)"
+      },
+      {
+        "selector": "#terrain-workshop",
+        "background": "rgb(21, 33, 41)",
+        "color": "rgb(213, 225, 227)",
+        "border": "rgb(107, 134, 116)"
+      }
+    ]
+  },
+  "phone": {
+    "feet": "[-0.45544102177648277,0.8536783408178245,0.25260001207782934]",
+    "radius": "12.30415582727788",
+    "heading": "[-0.11890024872176341,0.2228665451691266,-0.9675707901225009]",
+    "width": 390,
+    "overflow": false,
+    "styles": [
+      {
+        "selector": "body",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#world",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#menu-dialog",
+        "background": "rgba(18, 35, 45, 0.93)",
+        "color": "rgb(187, 204, 210)",
+        "border": "rgb(81, 111, 126)"
+      },
+      {
+        "selector": "#workshop",
+        "missing": true
+      },
+      {
+        "selector": "#shipyard",
+        "missing": true
+      },
+      {
+        "selector": "#history",
+        "missing": true
+      },
+      {
+        "selector": "#terrain-workshop",
+        "missing": true
+      }
+    ]
+  },
+  "harbour": {
+    "feet": "[0,0.9654290825583874,0.2606658522907646]",
+    "radius": "10",
+    "heading": "[0,0.26066585229076455,-0.9654290825583873]",
+    "width": 1920,
+    "overflow": false,
+    "styles": [
+      {
+        "selector": "body",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#world",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(184, 200, 205)",
+        "border": "rgb(184, 200, 205)"
+      },
+      {
+        "selector": "#menu-dialog",
+        "background": "rgba(18, 35, 45, 0.93)",
+        "color": "rgb(187, 204, 210)",
+        "border": "rgb(81, 111, 126)"
+      },
+      {
+        "selector": "#workshop",
+        "missing": true
+      },
+      {
+        "selector": "#shipyard",
+        "missing": true
+      },
+      {
+        "selector": "#history",
+        "missing": true
+      },
+      {
+        "selector": "#terrain-workshop",
+        "missing": true
+      }
+    ]
+  },
+  "status": "passed"
+}
