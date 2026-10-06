@@ -1,0 +1,14 @@
+{
+  "browser": "Installed Google Chrome; headed desktop and emulated phone",
+  "checks": [
+    "Owner landed and claimed via real controls",
+    "Named and grouped blueprint saved; add/undo/redo exercised",
+    "Failed save retains draft; reconnect save succeeds",
+    "Conflict keeps draft; Save as copy recovers",
+    "Placed object and private groups survive refresh",
+    "Independent visitor sees structure; all three edit routes reject",
+    "Phone L2 visible, touch save/place/refresh passed"
+  ],
+  "pageErrors": [],
+  "status": "passed"
+}

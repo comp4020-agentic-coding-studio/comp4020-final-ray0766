@@ -10,7 +10,7 @@ test('player places the shared cabin, deck and service light; refresh and visito
     for(const [x,y]of positions){await owner.mouse.click(x,y);if(await owner.locator('#save-object').isEnabled()){await owner.locator('#save-object').click();placed=true;break;}}
     expect(placed).toBe(true);await expect(owner.locator('#planet-count')).toHaveText(`${count+1} / 64 objects`);
   }
-  const saved=(await readUniverse(owner)).currentPlanet.objects;expect(saved.map(o=>o.kind)).toEqual(['cottage','path','lamp']);await expect(owner.locator('canvas')).toHaveAttribute('data-placed-asset-kit','sunseed-structure/1');await owner.screenshot({path:'docs/evidence/round-6/player-shared-kit.png'});
+  const saved=(await readUniverse(owner)).currentPlanet.objects;expect(saved.map(o=>o.kind)).toEqual(['cottage','path','lamp']);await expect(owner.locator('canvas')).toHaveAttribute('data-placed-asset-kit','sunseed-structure/2');await owner.screenshot({path:'docs/evidence/round-6/player-shared-kit.png'});
   await owner.locator('#finish-building').click();await owner.reload();expect((await readUniverse(owner)).currentPlanet.objects).toEqual(saved);await expect(owner.locator('canvas')).toHaveAttribute('data-placed-asset-kinds','cottage,path,lamp');
   const visitorContext=await browser.newContext({viewport:{width:1000,height:800}}),visitor=await visitorContext.newPage();visitor.on('pageerror',e=>errors.push(e.message));await visitor.goto('/');await visitor.getByRole('button',{name:'Let’s wander'}).click();await visit(visitor,target);
   await expect(visitor.locator('canvas')).toHaveAttribute('data-placed-asset-kinds','cottage,path,lamp');expect((await readUniverse(visitor)).currentPlanet.objects).toEqual(saved);

@@ -15,9 +15,9 @@ import { GLOW, PALETTE, SCALE } from '../../style/tokens.ts';
 // Walls rise to the underside of the next slab (storey − slab = 2.04 m).
 //
 // Parts never pick materials directly. They name a logical kit material and
-// the source resolves it, so one placed building merges into at most 14 draw
-// calls (one per kit material) and only 10 at low LOD, where close look-alikes
-// share a material.
+// the source resolves it, so one placed building merges into at most 17 draw
+// calls (one per kit material; 14 without the street surfaces) and only 10 at
+// low LOD, where close look-alikes share a material.
 
 export const STOREY = SCALE.storey;
 export const SLAB = SCALE.slab;
@@ -42,11 +42,14 @@ export const KIT_MATERIALS = [
   'lamp',        // the one emissive material, owned per model
   'corrugated',
   'membrane',    // rubber: roof membrane, pads, pipe lagging
+  'pavers',      // precast paving slabs (street)
+  'asphalt',     // road surface (street)
+  'marking',     // road and pad paint
 ] as const;
 export type KitMaterial = typeof KIT_MATERIALS[number];
 
 /** At low LOD look-alikes share one material, keeping a building at ten draw calls. */
-const LOW_SHARE: Partial<Record<KitMaterial, KitMaterial>> = { bright: 'steel', skinInner: 'leaf', glassSmoked: 'glass', membrane: 'post' };
+const LOW_SHARE: Partial<Record<KitMaterial, KitMaterial>> = { bright: 'steel', skinInner: 'leaf', glassSmoked: 'glass', membrane: 'post', pavers: 'concrete', asphalt: 'post', marking: 'skin' };
 export const kitMaterialFor = (name: KitMaterial, lod: LodTier): KitMaterial => (lod === 'low' ? LOW_SHARE[name] ?? name : name);
 export const kitMaterialsAt = (lod: LodTier): KitMaterial[] => [...new Set(KIT_MATERIALS.map(m => kitMaterialFor(m, lod)))];
 
@@ -71,6 +74,14 @@ export interface MaterialSource {
 export const KIT_LOOKS = {
   tube: { finish: 'metal', pattern: 'plain', color: PALETTE.steel, envIntensity: 0.55 },
   precast: { finish: 'concrete', pattern: 'plain', color: PALETTE.concrete, relief: 1.6 },
+  // Interior lining: light grey painted steel, as cabins and plant rooms are lined, so a
+  // room lit only through its door and windows still reads instead of going black.
+  lining: { finish: 'paint', pattern: 'panel', color: '#8b8e8c' },
+  // Street surfaces: with scans on they use the CC0 paving and asphalt sets in their
+  // own colours; without, a plain concrete finish in the nearest palette tone.
+  pavers: { finish: 'concrete', pattern: 'concrete', color: PALETTE.concrete, scan: 'concrete_pavement' },
+  asphalt: { finish: 'concrete', pattern: 'plain', color: '#34373a', scan: 'clean_asphalt' },
+  marking: { finish: 'paint', pattern: 'plain', color: '#c8c3b4', scan: 'blue_metal_plate', scanRoughness: 2.2 },
 } as const satisfies Record<string, SurfaceRecipe>;
 
 export function libraryMaterials(lib: StyleLibrary): MaterialSource {
@@ -81,7 +92,7 @@ export function libraryMaterials(lib: StyleLibrary): MaterialSource {
       case 'steel': return lib.preset('frame');
       case 'bright': return lib.custom('blueprint:tube', KIT_LOOKS.tube);
       case 'skin': return lib.preset('cladding');
-      case 'skinInner': return lib.preset('claddingDark');
+      case 'skinInner': return lib.custom('blueprint:lining', KIT_LOOKS.lining);
       case 'tread': return lib.preset('deck');
       case 'concrete': return lib.custom('blueprint:precast', KIT_LOOKS.precast);
       case 'hazard': return lib.hazard();
@@ -90,6 +101,9 @@ export function libraryMaterials(lib: StyleLibrary): MaterialSource {
       case 'glassSmoked': return lib.glass('smoked');
       case 'corrugated': return lib.preset('corrugated');
       case 'membrane': return lib.preset('rubber');
+      case 'pavers': return lib.custom('blueprint:pavers', KIT_LOOKS.pavers);
+      case 'asphalt': return lib.custom('blueprint:asphalt', KIT_LOOKS.asphalt);
+      case 'marking': return lib.custom('blueprint:marking', KIT_LOOKS.marking);
       case 'lamp':
         if (!lamp) { lamp = lib.createGlow(PALETTE.sodium, GLOW.lit); lamp.name = 'blueprint:lamp'; }
         return lamp;
@@ -159,11 +173,35 @@ export function wallFrame(k: Kit, opts: { track?: boolean; height?: number } = {
   }
 }
 
-/** Cladding between y0 and y1 across x0..x1: exterior and interior skins. */
+/**
+ * Cladding between y0 and y1 across x0..x1: exterior and interior skins. Above
+ * low LOD the exterior gets joint cover strips on the 0.5 m panel rows (the
+ * same rows the panel normal map draws), so the joints cast real shadow lines.
+ */
 export function cladding(k: Kit, x0: number, x1: number, y0: number, y1: number) {
   const w = x1 - x0, h = y1 - y0, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
   k.b.box(k.m('skin'), [w, h, 0.05], { position: [cx, cy, WALL_T / 2 - 0.025] }, 0.006);
   k.b.box(k.m('skinInner'), [w, h, 0.05], { position: [cx, cy, -WALL_T / 2 + 0.025] }, 0.006);
+  if (k.low) return;
+  for (const y of [0.5, 1.0, 1.5, 2.0]) {
+    if (y < y0 + 0.04 || y > y1 - 0.04) continue;
+    k.b.box(k.m('skin'), [w - 0.004, 0.022, 0.008], { position: [cx, y, WALL_T / 2 + 0.004] }, small(k, 0.002));
+  }
+}
+
+/**
+ * Inside face of a wall module: a painted steel skirting at the floor and, where the
+ * wall has no opening at the top, a cable raceway under the head beam. Inside detail
+ * stands at most 30 mm off the wall face (window boards 25 mm), so a wall on a stair
+ * side with its inside to the stair still clears the handrails (STAIR.reach).
+ */
+export function interiorFinish(k: Kit, opts: { raceway?: boolean; x0?: number; x1?: number } = {}) {
+  const x0 = opts.x0 ?? -0.45, x1 = opts.x1 ?? 0.45, cx = (x0 + x1) / 2, w = x1 - x0;
+  k.b.box(k.m('post'), [w, 0.09, 0.012], { position: [cx, 0.045 + TRACK * 0.25, -WALL_T / 2 - 0.006] }, small(k, 0.002));
+  if (opts.raceway === false || k.low) return;
+  const y = WALL_H - BEAM - 0.05;
+  k.b.box(k.m('leaf'), [0.9, 0.055, 0.025], { position: [0, y, -WALL_T / 2 - 0.0125] }, small(k, 0.004));
+  if (k.hardware) for (const x of [-0.3, 0.3]) k.b.box(k.m('steel'), [0.02, 0.07, 0.03], { position: [x, y, -WALL_T / 2 - 0.015] }, 0);
 }
 
 export function kickPlate(k: Kit, x0: number, x1: number) {

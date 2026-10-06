@@ -20,8 +20,17 @@ export interface ModelHandle<O extends T.Object3D = T.Object3D> extends Disposab
 }
 
 const shared = new WeakSet<object>();
-/** Mark a geometry/material/texture as owned by a library rather than a model. */
-export function markShared<R extends object>(resource: R): R { shared.add(resource); return resource; }
+/**
+ * Mark a geometry/material/texture as owned by a library rather than a model.
+ * Also sets userData.sharedResource, the flag the main project's disposer
+ * (src/client/build-art.ts disposeGeometry at 68279a9) skips on.
+ */
+export function markShared<R extends object>(resource: R): R {
+  shared.add(resource);
+  const data = (resource as { userData?: Record<string, unknown> }).userData;
+  if (data && typeof data === 'object') data.sharedResource = true;
+  return resource;
+}
 export const isShared = (resource: object) => shared.has(resource);
 
 const TEXTURE_SLOTS = ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'emissiveMap', 'aoMap', 'alphaMap', 'bumpMap', 'clearcoatNormalMap', 'envMap', 'lightMap', 'displacementMap'] as const;

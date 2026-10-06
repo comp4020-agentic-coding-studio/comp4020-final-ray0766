@@ -120,3 +120,32 @@ matched their settled pre-deploy baselines. [Hosted evidence](docs/evidence/crit
 links both successful CI runs, screenshots and comparison results. Original local
 saves were not uploaded. Physical phones and public load remain untested. This
 overview replaces the accumulated chronology; earlier accounts stay in Git history.
+
+## Final workshop-v1 — separate local development
+
+After the Crit 8 release was frozen, the user authorised one local workshop
+milestone. A separate worktree and `final/workshop-v1` branch start from `09233d9`;
+`release-before-workshop-20261006` records that recovery point. Neither published
+`main`, Crit 7 nor the deleted earlier implementation was used as an edit target.
+The existing local SQLite was copied consistently and migrated only in that copy.
+
+The implementation reuses 31 unchanged committed files from Claude's independent
+module repository at `db79d7350decb4167d12e1a980a293cdb77cea83`, including its editor,
+codec, grouping/undo, view and updated material/geometry code. An adapter adds the
+owner-only workshop, reserved mobile viewport, interior camera/fill light, private
+server blueprint library, immutable placed content and schema-5 migration. It does
+not implement a competing assembly model. The source workspace remained untouched.
+
+The initial migration comparison preserved every original field in five tables.
+The 25 existing tests passed; six new focused tests ultimately passed after two
+test fixture errors were corrected. Headed Chrome completed the desktop/phone
+edit-save-place-refresh loop, offline/conflict recovery and an independently flown
+visitor's read-only access. A driver expected different add-command wording on its
+first attempt. Screenshot inspection then prompted a doorway camera correction;
+a small final replay checked both viewports, server restart persistence and WebGL
+release on close. These are agent-run engineering checks, not a user study.
+
+[Workshop verification](docs/evidence/workshop-v1/verification.md) records passes,
+interrupted attempts, screenshots and remaining limits. [The integration guide](docs/integration/workshop-v1.md)
+contains startup and data contracts. No push, deployment, paid allocation or
+submission was performed. Broader module integration remains outside this milestone.

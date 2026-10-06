@@ -3,6 +3,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import { marked } from 'marked';
+import { BLUEPRINT_BODY_LIMIT } from '../shared/blueprints.ts';
 import { presenceStore } from './presence.ts';
 import { openStore, RequestError } from './store.ts';
 
@@ -37,6 +38,10 @@ const server = createServer(async (req, res) => {
         if (!id || !store.has(id)) throw new RequestError(401, 'Reload to reconnect your visit.');
         send(200, store.universe(id)); return;
       }
+      if (url.pathname === '/api/blueprints' && req.method === 'GET') {
+        if (!id || !store.has(id)) throw new RequestError(401, 'Reload to reconnect your visit.');
+        send(200, store.library(id)); return;
+      }
       if (req.method !== 'POST') throw new RequestError(405, 'Method not allowed.');
       if (req.headers.origin && new URL(req.headers.origin).host !== req.headers.host) throw new RequestError(403, 'Use this world’s own page.');
       if (!req.headers['content-type']?.startsWith('application/json')) throw new RequestError(415, 'Send JSON.');
@@ -46,12 +51,15 @@ const server = createServer(async (req, res) => {
       const rate = limits.get(id);
       if (!rate || now - rate.start > 10_000) limits.set(id, { start: now, count: 1 });
       else if (++rate.count > 90) throw new RequestError(429, 'A little too fast. Try again in a moment.');
-      let text = '';
-      for await (const chunk of req) { text += chunk; if (Buffer.byteLength(text) > 2048) throw new RequestError(413, 'Request too large.'); }
+      const bodyLimit = url.pathname === '/api/blueprints/save' ? BLUEPRINT_BODY_LIMIT : 2048;
+      const chunks: Buffer[] = []; let byteLength = 0;
+      for await (const chunk of req) { const bytes = Buffer.from(chunk); byteLength += bytes.length; if (byteLength > bodyLimit) throw new RequestError(413, 'Request too large.'); chunks.push(bytes); }
+      const text = Buffer.concat(chunks).toString('utf8');
       let body: Record<string, unknown>;
       try { body = JSON.parse(text); } catch { throw new RequestError(400, 'Invalid JSON.'); }
       if (!body || Array.isArray(body) || typeof body !== 'object') throw new RequestError(400, 'Expected an object.');
-      if(url.pathname==='/api/presence')send(200,presence.heartbeat(id,body));
+      if (url.pathname === '/api/blueprints/save') send(200, store.saveBlueprint(id, body));
+      else if(url.pathname==='/api/presence')send(200,presence.heartbeat(id,body));
       else if (url.pathname === '/api/character') send(200, store.character(id, body.character));
       else if (url.pathname === '/api/move') send(200, store.move(id, body.position, Date.now(), body.planetId));
       else if (url.pathname === '/api/interact') send(200, store.interact(id, body.action));

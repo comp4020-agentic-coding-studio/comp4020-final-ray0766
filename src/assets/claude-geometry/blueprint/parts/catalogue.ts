@@ -7,7 +7,8 @@ import { floorDeck, grateDeck, roofDeck, slopeRoof } from './decks.ts';
 import { buildEmit, countingMaterials, makeKit } from './kit.ts';
 import type { Emit } from './kit.ts';
 import { cornerColumn, guardRail, parapet, plantUnit, stair } from './structure.ts';
-import { corrugatedWall, doorWall, louvreWall, solidWall, windowWall } from './walls.ts';
+import { corrugatedWall, doorOpenWall, doorWall, louvreWall, solidWall, windowWall } from './walls.ts';
+import { padQuarter, serviceLight, streetKerb, streetPaving, streetPipes, streetRoad } from './street.ts';
 
 // The parts a blueprint is made of. Each entry says how it mounts on the grid
 // (cell, edge or vertex) and what structural role it plays; the occupancy and
@@ -29,6 +30,7 @@ export type Role = 'deck' | 'wall' | 'guard' | 'column' | 'stair' | 'slope' | 'e
 export const PART_IDS = [
   'floor.deck', 'floor.grate', 'wall.solid', 'wall.door', 'wall.window', 'wall.louvre', 'wall.corrugated',
   'structure.column', 'stair.straight', 'rail.guard', 'roof.deck', 'roof.parapet', 'roof.slope', 'roof.plant',
+  'wall.door.open', 'street.paving', 'street.road', 'street.kerb', 'street.pipes', 'service.light', 'pad.quarter',
 ] as const;
 export type PartId = typeof PART_IDS[number];
 export const isPartId = (v: unknown): v is PartId => typeof v === 'string' && (PART_IDS as readonly string[]).includes(v);
@@ -38,7 +40,7 @@ export interface PartDef {
   label: string;
   /** One line for the palette tile. */
   blurb: string;
-  category: 'Floor' | 'Wall' | 'Structure' | 'Roof';
+  category: 'Floor' | 'Wall' | 'Structure' | 'Roof' | 'Street';
   mount: Mount;
   role: Role;
   /** Decks that count as a floor for walls, columns, stairs and equipment standing on them. */
@@ -65,6 +67,13 @@ export const PARTS: Record<PartId, PartDef> = {
   'roof.parapet': { id: 'roof.parapet', label: 'Parapet', blurb: 'Roof edge with coping', category: 'Roof', mount: 'edge', role: 'guard', emit: parapet },
   'roof.slope': { id: 'roof.slope', label: 'Sloped roof', blurb: 'Standing seam, gutter', category: 'Roof', mount: 'cell', role: 'slope', roof: true, emit: slopeRoof },
   'roof.plant': { id: 'roof.plant', label: 'Plant unit', blurb: 'Condenser on a skid', category: 'Roof', mount: 'cell', role: 'equipment', emit: plantUnit },
+  'wall.door.open': { id: 'wall.door.open', label: 'Open door', blurb: 'Door held open inward', category: 'Wall', mount: 'edge', role: 'wall', door: true, emit: doorOpenWall },
+  'street.paving': { id: 'street.paving', label: 'Footway', blurb: 'Precast paving slabs', category: 'Street', mount: 'cell', role: 'deck', floor: true, emit: streetPaving },
+  'street.road': { id: 'street.road', label: 'Roadway', blurb: 'Asphalt, centre line', category: 'Street', mount: 'cell', role: 'deck', floor: true, emit: streetRoad },
+  'street.kerb': { id: 'street.kerb', label: 'Kerb', blurb: 'Precast kerb, gully grate', category: 'Street', mount: 'edge', role: 'guard', emit: streetKerb },
+  'street.pipes': { id: 'street.pipes', label: 'Pipe rack', blurb: 'Lagged main and return', category: 'Street', mount: 'edge', role: 'guard', emit: streetPipes },
+  'service.light': { id: 'service.light', label: 'Street light', blurb: '3.4 m column, warm head', category: 'Street', mount: 'cell', role: 'equipment', emit: serviceLight },
+  'pad.quarter': { id: 'pad.quarter', label: 'Pad quarter', blurb: 'Quarter of a 2×2 pad', category: 'Street', mount: 'cell', role: 'deck', floor: true, emit: padQuarter },
 };
 
 /** Build one part with library materials (its own builder, merged per material). */

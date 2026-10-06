@@ -237,7 +237,7 @@ let previous=performance.now(),elapsed=0,uiTick=0,started=false;
 function animate(now:number) {
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.05);previous=now;elapsed+=dt;
-  if(!walker) return;
+  if(!walker || document.body.classList.contains('workshop-open')) return;
   if(flight?.active&&departure){
     $('boarding-prompt').hidden=true;$('dock-guide').hidden=true;
     if(online&&!document.hidden&&!document.querySelector('dialog[open]'))departure.time+=dt;
@@ -342,6 +342,7 @@ function ensureColony() {
     universe:u=>flight?.universe(u),bearing:id=>flight?.mark(id),
     obstacles:blocks=>{if(activePlanet!=='hub')world.blocks.splice(0,world.blocks.length,...blocks);},
     pause:building=>{clearInput();overview=building;$('view-mode').setAttribute('aria-label',overview?'Walking view':'View planet');$('view-mode').innerHTML=overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>';},
+    libraryRead:()=>request<import('../shared/blueprints.ts').LibraryEntry[]>('blueprints'),librarySave:body=>serial(()=>request<import('../shared/blueprints.ts').LibraryEntry>('blueprints/save',body)),
     read:()=>request<Universe>('universe'),write:(route,body)=>serial(()=>request<Universe>(route,body)),flush:async()=>{await savePosition(true);await queue;},notice,
   });
   $('delivery-toggle').onclick=()=>{menu.close();document.body.classList.toggle('delivery-open');$('delivery-toggle').textContent=document.body.classList.contains('delivery-open')?'Hide delivery':'Try a delivery';};

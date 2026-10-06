@@ -59,3 +59,29 @@ its uncommitted editor, blueprint, server, terrain, history and spacecraft work.
 Source path and per-file SHA-256 values: `docs/integration/shared-geometry-source.json`.
 Use and integration boundary: `docs/integration/shared-assets.md`. This is local
 reuse of the user's own project resources, not a third-party public asset pack.
+
+## Final workshop-v1 — committed editor and updated materials
+
+This local branch supersedes the round 6 source snapshot with **31 unchanged
+TypeScript files** from the user's `planet-claude-modules` commit
+`db79d7350decb4167d12e1a980a293cdb77cea83`. This is reuse of Claude's editor,
+codec, assembly view, ground fitting and geometry/material dependencies; the
+main-project adapter adds the UI, lifecycle and authoritative server library.
+The source workspace was read-only. Per-file hashes and imported assets are
+recorded in `src/assets/claude-geometry/PROVENANCE.json`. Earlier round 6
+provenance remains historical evidence, not the current dependency inventory.
+
+Seven locally bundled [Poly Haven](https://polyhaven.com) texture sets use
+[CC0 1.0](https://polyhaven.com/license). Source URLs, authors, preparation
+steps and hashes are in `public/assets/scans/manifest.json`: Hangar Concrete
+Floor and Clean Asphalt (Dimitrios Savva), Concrete Pavement (Charlotte
+Baglioni), Metal Plate, Metal Plate 02 and Blue Metal Plate (Rob Tuytel),
+and Corrugated Iron 02 (Jenelle van Heerden, Sergej Majboroda). Medium detail
+uses 512 px albedo/normal and 256 px packed ARM WebP maps. Capture methods
+are not established; these are not described as photogrammetry assets.
+
+The snapshot also includes the optional CC0 Aircraft Workshop 01 HDRI
+(Oliksiy Yakovlyev) and Hanger Exterior Cloudy HDRI (Dimitrios Savva,
+Jarod Guest). The integrated workshop currently uses a procedural environment
+and bounded real fill lighting rather than loading these HDRIs. Three.js
+OrbitControls and postprocessing helpers are also covered by its MIT license.

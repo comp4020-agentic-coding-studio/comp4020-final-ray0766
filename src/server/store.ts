@@ -3,6 +3,7 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { CHARACTERS, distance, INTERACT_DISTANCE, NPCS, normalize, SPAWN, SPEED, validPosition } from '../shared/world.ts';
 import type { Character, PlayerState, Quest } from '../shared/world.ts';
+import { blueprintStore } from './blueprints.ts';
 import { planetStore } from './planets.ts';
 import { RequestError } from './errors.ts';
 import { navigationStore } from './navigation.ts';
@@ -13,7 +14,7 @@ export function openStore(path: string) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-  if (schema > 4) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  if (schema > 5) { db.close(); throw new Error('Database schema is newer than this application.'); }
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
@@ -22,7 +23,7 @@ export function openStore(path: string) {
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
     );`);
   let migrationBackup: string | null = null;
-  if (schema < 4) {
+  if (schema < 5) {
     if (schema > 0 && path !== ':memory:') {
       migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
       // VACUUM INTO includes committed WAL data and produces a consistent restore point.
@@ -46,15 +47,38 @@ export function openStore(path: string) {
         CREATE TABLE visits (player_id TEXT NOT NULL REFERENCES players(id), planet_id TEXT NOT NULL REFERENCES planets(id),
           position TEXT NOT NULL, PRIMARY KEY(player_id,planet_id));`);
       if(schema<3)db.exec('CREATE TABLE object_tombstones (id TEXT PRIMARY KEY, planet_id TEXT NOT NULL REFERENCES planets(id));');
+      if (schema < 4) {
       db.exec(`ALTER TABLE planets ADD COLUMN slot INTEGER;
         ALTER TABLE players ADD COLUMN flight TEXT;
         ALTER TABLE players ADD COLUMN flight_at INTEGER NOT NULL DEFAULT 0;`);
       const existing=db.prepare('SELECT id FROM planets ORDER BY rowid').all();
       existing.forEach((p,i)=>db.prepare('UPDATE planets SET slot=? WHERE id=?').run(i,p.id));
-      db.exec('CREATE UNIQUE INDEX planet_space_slot ON planets(slot); PRAGMA user_version=4; COMMIT;');
+      db.exec('CREATE UNIQUE INDEX planet_space_slot ON planets(slot);');
+      }
+      db.exec(`CREATE TABLE blueprint_contents (hash TEXT PRIMARY KEY CHECK(length(hash)=64), content TEXT NOT NULL);
+        CREATE TABLE blueprint_library (
+          owner_id TEXT NOT NULL REFERENCES players(id), id TEXT NOT NULL, document TEXT NOT NULL,
+          hash TEXT NOT NULL REFERENCES blueprint_contents(hash), version INTEGER NOT NULL CHECK(version>=1), PRIMARY KEY(owner_id,id)
+        );
+        CREATE INDEX library_by_hash ON blueprint_library(hash);
+        CREATE TABLE planet_objects_v5 (
+          id TEXT PRIMARY KEY, planet_id TEXT NOT NULL REFERENCES planets(id),
+          kind TEXT NOT NULL CHECK(kind IN ('cottage','tree','path','flowers','bench','lamp','structure')),
+          position TEXT NOT NULL, rotation REAL NOT NULL, version INTEGER NOT NULL DEFAULT 1,
+          blueprint_hash TEXT REFERENCES blueprint_contents(hash), radius REAL, height REAL,
+          CHECK((kind='structure' AND blueprint_hash IS NOT NULL AND radius IS NOT NULL AND height IS NOT NULL AND radius>0 AND height>0)
+            OR (kind!='structure' AND blueprint_hash IS NULL AND radius IS NULL AND height IS NULL))
+        );
+        INSERT INTO planet_objects_v5 (rowid,id,planet_id,kind,position,rotation,version)
+          SELECT rowid,id,planet_id,kind,position,rotation,version FROM planet_objects;
+        DROP TABLE planet_objects;
+        ALTER TABLE planet_objects_v5 RENAME TO planet_objects;
+        CREATE INDEX objects_by_planet ON planet_objects(planet_id);
+        PRAGMA user_version=5; COMMIT;`);
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
-  const planets = planetStore(db);
+  const blueprints = blueprintStore(db);
+  const planets = planetStore(db, blueprints);
   const navigation=navigationStore(db,planets);
   const row = (id: string): Row => {
     const result = db.prepare('SELECT * FROM players WHERE id=?').get(id) as unknown as Row | undefined;
@@ -68,6 +92,8 @@ export function openStore(path: string) {
   const universe = (id: string) => { const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) }; };
   return {
     db, state, universe, migrationBackup,
+    library(id: string) { row(id); return blueprints.list(id); },
+    saveBlueprint(id: string, body: Record<string, unknown>) { row(id); return blueprints.save(id, body); },
     takeoff(id:string,body:Record<string,unknown>,now=Date.now()){navigation.takeoff(id,body,now);return universe(id);},
     flight(id:string,body:Record<string,unknown>,now=Date.now()){navigation.checkpoint(id,body,now);return state(id);},
     land(id:string,body:Record<string,unknown>,now=Date.now()){navigation.land(id,body,now);return universe(id);},

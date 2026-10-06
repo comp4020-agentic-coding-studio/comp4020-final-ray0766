@@ -1,0 +1,386 @@
+{
+  "generatedBy": "scripts/assets/build_scans.py",
+  "hdris": [
+    {
+      "authors": [
+        "Oliksiy Yakovlyev"
+      ],
+      "bytes": 1771415,
+      "categories": [
+        "indoor",
+        "urban",
+        "morning-afternoon",
+        "medium contrast",
+        "natural light",
+        "artificial light"
+      ],
+      "file": "assets/hdri/aircraft_workshop_01_1k.hdr",
+      "id": "aircraft_workshop_01",
+      "name": "Aircraft Workshop 01",
+      "page": "https://polyhaven.com/a/aircraft_workshop_01",
+      "sha256": "056899b97c20ab6ddcaa598a266b4aae651fa2dab3c0e2a02f349f08e0e1f2d1",
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/aircraft_workshop_01_1k.hdr"
+    },
+    {
+      "authors": [
+        "Dimitrios Savva",
+        "Jarod Guest"
+      ],
+      "bytes": 1603575,
+      "categories": [
+        "outdoor",
+        "natural light",
+        "overcast",
+        "midday",
+        "urban",
+        "low contrast"
+      ],
+      "file": "assets/hdri/hanger_exterior_cloudy_1k.hdr",
+      "id": "hanger_exterior_cloudy",
+      "name": "Hanger Exterior Cloudy",
+      "page": "https://polyhaven.com/a/hanger_exterior_cloudy",
+      "sha256": "a703c2c6a94ee6c438dd193f647dd1a3519aa1a37bec5e1941bd016ec035faee",
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/hanger_exterior_cloudy_1k.hdr"
+    }
+  ],
+  "license": "CC0 1.0 (https://polyhaven.com/license)",
+  "textures": [
+    {
+      "authors": [
+        "Dimitrios Savva"
+      ],
+      "captureMethod": "not stated by Poly Haven for this asset; not claimed as a scan",
+      "id": "hangar_concrete_floor",
+      "mode": "natural",
+      "name": "Hangar Concrete Floor",
+      "page": "https://polyhaven.com/a/hangar_concrete_floor",
+      "sizeMetres": [
+        2.0,
+        2.0
+      ],
+      "sources": {
+        "albedo": {
+          "bytes": 614854,
+          "sha256": "8c365cc65bc3026045c4e3ecba9642cbe0bee1cf705edafe4a8fed5b78c08a4d",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/hangar_concrete_floor/hangar_concrete_floor_diff_1k.jpg"
+        },
+        "arm": {
+          "bytes": 686273,
+          "sha256": "1ab24eea5a341ee35e19e766600b75bf06ddd03f2dc4d76633795c5a6b10a660",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/hangar_concrete_floor/hangar_concrete_floor_arm_1k.jpg"
+        },
+        "normal": {
+          "bytes": 792876,
+          "sha256": "b1fc3146e62c5d5cd7859eb0d8174480e1ea87c80c92ba4364229547d1f8dda7",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/hangar_concrete_floor/hangar_concrete_floor_nor_gl_1k.jpg"
+        }
+      },
+      "webpBytes": {
+        "1024": {
+          "albedo": 106330,
+          "arm": 72774,
+          "normal": 254662
+        },
+        "256": {
+          "albedo": 4546,
+          "arm": 3610,
+          "normal": 13914
+        },
+        "512": {
+          "albedo": 22440,
+          "arm": 16438,
+          "normal": 64374
+        }
+      }
+    },
+    {
+      "authors": [
+        "Charlotte Baglioni"
+      ],
+      "captureMethod": "not stated by Poly Haven for this asset; not claimed as a scan",
+      "id": "concrete_pavement",
+      "mode": "natural",
+      "name": "Concrete Pavement",
+      "page": "https://polyhaven.com/a/concrete_pavement",
+      "sizeMetres": [
+        1.8000000715255737,
+        1.8000000715255737
+      ],
+      "sources": {
+        "albedo": {
+          "bytes": 926197,
+          "sha256": "70d3ff969a7421c7ae057b5d16386d11f5e59c6740db643352e1039413f419c4",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_pavement/concrete_pavement_diff_1k.jpg"
+        },
+        "arm": {
+          "bytes": 802384,
+          "sha256": "2895506708adad25d64c3d7c3d0f922a6df0468af4a9afe3d5d3a0fb35bb3afd",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_pavement/concrete_pavement_arm_1k.jpg"
+        },
+        "normal": {
+          "bytes": 1184345,
+          "sha256": "a5009e409ff0f7b2d19e1316fe5e2b2b4f28e4a6b79990a664be69d4e8a0e690",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_pavement/concrete_pavement_nor_gl_1k.jpg"
+        }
+      },
+      "webpBytes": {
+        "1024": {
+          "albedo": 290204,
+          "arm": 130730,
+          "normal": 568026
+        },
+        "256": {
+          "albedo": 10162,
+          "arm": 2810,
+          "normal": 9762
+        },
+        "512": {
+          "albedo": 58226,
+          "arm": 18998,
+          "normal": 97568
+        }
+      }
+    },
+    {
+      "authors": [
+        "Dimitrios Savva"
+      ],
+      "captureMethod": "not stated by Poly Haven for this asset; not claimed as a scan",
+      "id": "clean_asphalt",
+      "mode": "natural",
+      "name": "Clean Asphalt",
+      "page": "https://polyhaven.com/a/clean_asphalt",
+      "sizeMetres": [
+        2.0999999046325684,
+        2.0999999046325684
+      ],
+      "sources": {
+        "albedo": {
+          "bytes": 697630,
+          "sha256": "ddf9224e9cfa3eb2998d9097e4cd34bd3630c85e0e6798e5a0a000415a684083",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/clean_asphalt/clean_asphalt_diff_1k.jpg"
+        },
+        "arm": {
+          "bytes": 760451,
+          "sha256": "dedb9a28ebadd2848856af8672eeabed1286b5729c3387c0734efa66819dbed3",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/clean_asphalt/clean_asphalt_arm_1k.jpg"
+        },
+        "normal": {
+          "bytes": 776360,
+          "sha256": "99cdf6b6f0b8a319d206e1d561bf2a5d9933d8d33e1d685f8e25388101d21310",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/clean_asphalt/clean_asphalt_nor_gl_1k.jpg"
+        }
+      },
+      "webpBytes": {
+        "1024": {
+          "albedo": 184438,
+          "arm": 101204,
+          "normal": 278762
+        },
+        "256": {
+          "albedo": 1144,
+          "arm": 2044,
+          "normal": 1066
+        },
+        "512": {
+          "albedo": 15558,
+          "arm": 11694,
+          "normal": 13928
+        }
+      }
+    },
+    {
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "captureMethod": "not stated by Poly Haven for this asset; not claimed as a scan",
+      "id": "metal_plate",
+      "mode": "tread",
+      "name": "Metal Plate",
+      "page": "https://polyhaven.com/a/metal_plate",
+      "sizeMetres": [
+        0.5,
+        0.5
+      ],
+      "sources": {
+        "albedo": {
+          "bytes": 692234,
+          "sha256": "c6b6739eac2c75ccc898e753d7833df24eafbdb9aa92fb6eabfb92abd1a680a5",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_diff_1k.jpg"
+        },
+        "arm": {
+          "bytes": 1004043,
+          "sha256": "fc4708b6700a2cc387654b693091dd0ac0cd1797ae803d75c894e62554fbef07",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_arm_1k.jpg"
+        },
+        "normal": {
+          "bytes": 770307,
+          "sha256": "994f851a84d52b51e97906021a1b7070ee6eac9a789fef041132268de47d8e6b",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_nor_gl_1k.jpg"
+        }
+      },
+      "webpBytes": {
+        "1024": {
+          "albedo": 74712,
+          "arm": 247322,
+          "normal": 221326
+        },
+        "256": {
+          "albedo": 8586,
+          "arm": 25616,
+          "normal": 18556
+        },
+        "512": {
+          "albedo": 23438,
+          "arm": 75948,
+          "normal": 60438
+        }
+      }
+    },
+    {
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "captureMethod": "not stated by Poly Haven for this asset; not claimed as a scan",
+      "id": "metal_plate_02",
+      "mode": "steel",
+      "name": "Metal Plate 02",
+      "page": "https://polyhaven.com/a/metal_plate_02",
+      "sizeMetres": [
+        2.0,
+        2.0
+      ],
+      "sources": {
+        "albedo": {
+          "bytes": 625917,
+          "sha256": "6e80877d0e9d5973d96298c6091df7ace906b0a6760afc4f3592e4855f3f1d4c",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate_02/metal_plate_02_diff_1k.jpg"
+        },
+        "arm": {
+          "bytes": 1075839,
+          "sha256": "e099a8385d53f4a515b7e0ce94f85d88657fcac49c23979474f5394b22dd550b",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate_02/metal_plate_02_arm_1k.jpg"
+        },
+        "normal": {
+          "bytes": 183264,
+          "sha256": "58736fbb8aa4fc6690cf8152b174db65caf22a766375b625fb0087e1bc955bc7",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate_02/metal_plate_02_nor_gl_1k.jpg"
+        }
+      },
+      "webpBytes": {
+        "1024": {
+          "albedo": 92562,
+          "arm": 308902,
+          "normal": 26032
+        },
+        "256": {
+          "albedo": 6372,
+          "arm": 21896,
+          "normal": 2764
+        },
+        "512": {
+          "albedo": 22898,
+          "arm": 78196,
+          "normal": 8298
+        }
+      }
+    },
+    {
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "captureMethod": "not stated by Poly Haven for this asset; not claimed as a scan",
+      "id": "blue_metal_plate",
+      "mode": "paint",
+      "name": "Blue Metal Plate",
+      "page": "https://polyhaven.com/a/blue_metal_plate",
+      "sizeMetres": [
+        2.5,
+        2.5
+      ],
+      "sources": {
+        "albedo": {
+          "bytes": 395923,
+          "sha256": "a0162bffce47d4a35613a12af22571b28c18412dc5805cbb69eac343554ef750",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/blue_metal_plate/blue_metal_plate_diff_1k.jpg"
+        },
+        "arm": {
+          "bytes": 419910,
+          "sha256": "9321b539fe9cf0136ea04c3405b95ae82383f31c258b9c0e37ff8a1e577b637f",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/blue_metal_plate/blue_metal_plate_arm_1k.jpg"
+        },
+        "normal": {
+          "bytes": 238025,
+          "sha256": "970f0273c9e2e3b4fc8338bfd58a28c413b70ac4d1734d9dc8a136724bde56e6",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/blue_metal_plate/blue_metal_plate_nor_gl_1k.jpg"
+        }
+      },
+      "webpBytes": {
+        "1024": {
+          "albedo": 22146,
+          "arm": 31510,
+          "normal": 20638
+        },
+        "256": {
+          "albedo": 1998,
+          "arm": 3180,
+          "normal": 1332
+        },
+        "512": {
+          "albedo": 6452,
+          "arm": 10060,
+          "normal": 5124
+        }
+      }
+    },
+    {
+      "authors": [
+        "Jenelle van Heerden",
+        "Sergej Majboroda"
+      ],
+      "captureMethod": "not stated by Poly Haven for this asset; not claimed as a scan",
+      "id": "corrugated_iron_02",
+      "mode": "paint",
+      "name": "Corrugated Iron 02",
+      "page": "https://polyhaven.com/a/corrugated_iron_02",
+      "sizeMetres": [
+        2.700000047683716,
+        2.700000047683716
+      ],
+      "sources": {
+        "albedo": {
+          "bytes": 568492,
+          "sha256": "7a7b43099d015c1b08ebb175da5965caeae44b86de65a727b3fffa20a7c69a93",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_diff_1k.jpg"
+        },
+        "arm": {
+          "bytes": 904443,
+          "sha256": "da4197f5b3e199ef693082836ca803f9d5cad2b4998a1c1c3dc4ac384f93a890",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_arm_1k.jpg"
+        },
+        "normal": {
+          "bytes": 489773,
+          "sha256": "9743c93668689c36a67e9c4dc8d6a0870fe91202f82dcdaf70ddc330c12f9ecb",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_nor_gl_1k.jpg"
+        }
+      },
+      "webpBytes": {
+        "1024": {
+          "albedo": 51250,
+          "arm": 211782,
+          "normal": 33790
+        },
+        "256": {
+          "albedo": 1836,
+          "arm": 2578,
+          "normal": 3054
+        },
+        "512": {
+          "albedo": 7878,
+          "arm": 28064,
+          "normal": 10258
+        }
+      }
+    }
+  ]
+}

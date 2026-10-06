@@ -1,11 +1,17 @@
 import * as T from 'three';
 import { REGIONS,regionFor } from '../shared/regions.ts';
 import { spaceDistance } from '../shared/flight.ts';
-import { CATALOGUE, MAX_OBJECTS, placementProblem } from '../shared/planets.ts';
-import type { BuildKind, Universe } from '../shared/planets.ts';
+import { CATALOGUE, MAX_OBJECTS, objectName, objectRadius, objectHeight, placementProblem } from '../shared/planets.ts';
+import type { BuildKind, PlacedObject, Universe } from '../shared/planets.ts';
 import type { PlayerState, Vec3 } from '../shared/world.ts';
 import { builtObject, disposeGeometry } from './build-art.ts';
-import { SHARED_ASSET_VERSION } from './shared-assets.ts';
+import { Workshop } from './workshop.ts';
+import type { LibraryEntry } from '../shared/blueprints.ts';
+import { structureFit, structureSize } from '../shared/blueprints.ts';
+import { buildBlueprintModel } from '../assets/claude-geometry/blueprint/model3d.ts';
+import { placedTransform } from '../assets/claude-geometry/blueprint/placement.ts';
+import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
+import { SHARED_ASSET_VERSION, worldMaterials } from './shared-assets.ts';
 import { surfacePoint } from './terrain.ts';
 import type { Obstacle } from './scene.ts';
 const el = <E extends HTMLElement = HTMLElement>(id:string) => document.getElementById(id) as E;
@@ -14,10 +20,11 @@ export interface ColonyBridge {
   ground: () => T.Mesh; applyPlayer: (p:PlayerState) => boolean;
   obstacles: (blocks:Obstacle[]) => void; pause: (building:boolean) => void;
   read: () => Promise<Universe>; write: (route:string, body:unknown) => Promise<Universe>;
+  libraryRead: () => Promise<LibraryEntry[]>; librarySave: (body:unknown) => Promise<LibraryEntry>;
   universe:(u:Universe)=>void; bearing:(id:string)=>void;
   flush: () => Promise<void>; notice: (text:string) => void;
 }
-type Draft = { id: string; kind: BuildKind; position: Vec3 | null; rotation: number; version?: number };
+type Draft = Omit<PlacedObject,'position'|'version'> & {position:Vec3|null;version?:number};
 export class Colony {
   universe: Universe | null = null;
   building = false; syncing = true; busy = false;
@@ -26,9 +33,16 @@ export class Colony {
   private objects = new Map<string,T.Group>(); private draft: Draft | null = null;
   private placing = false; private selected: string | null = null;
   private painted = ''; private cards = ''; private pointer: {x:number;y:number} | null = null;
+  private workshop: Workshop;
+  private localParts: Record<string,PartPlacement[]> = {};
   private ray = new T.Raycaster(); private pollBusy = false;
   constructor(private bridge: ColonyBridge) {
     bridge.scene.add(this.layer);
+    this.workshop = new Workshop({read:bridge.libraryRead,save:bridge.librarySave,allowed:()=>!!this.universe?.currentPlanet.mine&&this.universe.player.flight.mode==='ground'&&this.syncing,
+      place:entry=>{this.localParts[entry.hash]=entry.blueprint.parts;this.setBuilding(true);this.draft={id:crypto.randomUUID(),kind:'structure',blueprintHash:entry.hash,...structureSize(entry.blueprint.parts),position:null,rotation:0};this.placing=true;this.editor();bridge.notice('Tap an open spot, turn the structure, then Place object.');}});
+    const workshopButton=document.createElement('button');workshopButton.id='open-workshop';workshopButton.className='primary';workshopButton.textContent='Open workshop';workshopButton.hidden=true;
+    el('build-mode').after(workshopButton);
+    workshopButton.onclick=()=>{el<HTMLDialogElement>('menu-dialog').close();this.setBuilding(false);void bridge.flush().then(()=>this.workshop.open()).catch(e=>bridge.notice(e instanceof Error?e.message:'Reconnect before opening the workshop.'));};
     el<HTMLSelectElement>('region-select').onchange=()=>{this.cards='';this.starMap();};
     el('open-map').onclick=()=>{el<HTMLDialogElement>('menu-dialog').close();bridge.pause(this.building);this.cards='';if(this.universe)this.starMap();this.map.showModal();void this.poll();};
     el('close-map').onclick=()=>this.map.close();
@@ -57,7 +71,7 @@ export class Colony {
     setInterval(()=>{if(!document.hidden)void this.poll();},1000);
     void this.poll();
   }
-  get paused() { return this.building || this.map.open || this.busy; }
+  get paused() { return this.building || this.map.open || this.busy || this.workshop.opened; }
   private clearDraft(){this.draft=null;this.selected=null;this.placing=false;el<HTMLSelectElement>('built-list').value='';if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}}
   private setBuilding(value:boolean){
     this.building=value&&!!this.universe?.currentPlanet.mine&&this.syncing;this.clearDraft();
@@ -74,16 +88,16 @@ export class Colony {
     const key=next.currentPlanet.id+':'+next.currentPlanet.revision;
     if(this.painted!==key){
       this.painted=key;this.bridge.canvas.dataset.placedAssetKit=SHARED_ASSET_VERSION;this.bridge.canvas.dataset.placedAssetKinds=next.currentPlanet.objects.map(o=>o.kind).join(',');for(const child of [...this.layer.children])disposeGeometry(child);this.objects.clear();
-      for(const obj of next.currentPlanet.objects){const group=builtObject(obj.kind);this.locate(group,obj.position,obj.rotation);group.userData.objectId=obj.id;this.layer.add(group);this.objects.set(obj.id,group);}
+      for(const obj of next.currentPlanet.objects){const group=this.renderObject(obj);group.userData.objectId=obj.id;this.layer.add(group);this.objects.set(obj.id,group);}
       const list=el<HTMLSelectElement>('built-list');list.replaceChildren(new Option('Select a saved object…',''));
-      next.currentPlanet.objects.forEach((o,i)=>list.add(new Option(`${CATALOGUE[o.kind].name} ${i+1}`,o.id)));list.value=this.selected??'';
-      this.bridge.obstacles(next.currentPlanet.objects.filter(o=>CATALOGUE[o.kind].height>.6).map(o=>({point:new T.Vector3(...o.position),radius:CATALOGUE[o.kind].radius,height:CATALOGUE[o.kind].height})));
+      next.currentPlanet.objects.forEach((o,i)=>list.add(new Option(`${objectName(o)} ${i+1}`,o.id)));list.value=this.selected??'';
+      this.bridge.obstacles(next.currentPlanet.objects.filter(o=>objectHeight(o)>.6).map(o=>({point:new T.Vector3(...o.position),radius:objectRadius(o),height:objectHeight(o)})));
       if(this.selected&&!next.currentPlanet.objects.some(o=>o.id===this.selected))this.clearDraft();
     }
     this.hud();this.editor();this.starMap();
   }
   private async poll(){
-    if(this.pollBusy||this.busy)return;this.pollBusy=true;
+    if(this.pollBusy||this.busy||this.workshop.opened)return;this.pollBusy=true;
     try{this.accept(await this.bridge.read());}catch{this.syncing=false;this.hud();this.editor();}finally{this.pollBusy=false;}
   }
   private async command(route:string,body:unknown){
@@ -96,6 +110,23 @@ export class Colony {
   private async claim(){
     if(!this.universe)return;
     if(await this.command('planets/claim',{planetId:this.universe.currentPlanet.id})){this.bridge.notice('This world is yours. Enter Build mode when you are ready.');}
+  }
+  private parts(hash:string){return this.universe?.currentPlanet.blueprints?.[hash]??this.localParts[hash]??[];}
+  private problem(d:Draft){
+    const spacing=placementProblem(d.kind,d.position,this.universe?.currentPlanet.objects??[],d.id,d.radius);
+    if(spacing||d.kind!=='structure'||!d.position)return spacing;
+    return structureFit(this.parts(d.blueprintHash!),d.position,d.rotation).message;
+  }
+  private renderObject(obj:PlacedObject){
+    if(obj.kind!=='structure'){const group=builtObject(obj.kind);this.locate(group,obj.position,obj.rotation);return group;}
+    const parts=this.parts(obj.blueprintHash!), fit=structureFit(parts,obj.position,obj.rotation);
+    const model=buildBlueprintModel(parts,worldMaterials(),'medium',{foundationDepth:fit.foundationDepth});
+    const transform=placedTransform({dir:obj.position,yaw:obj.rotation},fit);
+    model.object.position.fromArray(transform.position);model.object.quaternion.fromArray(transform.quaternion);
+    model.object.userData.disposeOwned=()=>model.dispose();
+    // A maximum of eight structures means a maximum of eight unshadowed cabin lights.
+    if(parts.some(p=>p.part==='roof.deck')){const lamp=new T.PointLight('#ffe5bb',10,5,2);lamp.position.set(0,1.55,0);model.object.add(lamp);}
+    return model.object;
   }
   private locate(group:T.Object3D,position:Vec3,rotation:number){const n=new T.Vector3(...position);group.position.copy(surfacePoint(n,.015));group.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),n);group.rotateY(rotation);}
   private point(x:number,y:number){
@@ -111,23 +142,24 @@ export class Colony {
   private preview(){
     if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}
     if(!this.draft?.position)return;
-    this.ghost=builtObject(this.draft.kind);this.locate(this.ghost,this.draft.position,this.draft.rotation);
-    const invalid=placementProblem(this.draft.kind,this.draft.position,this.universe!.currentPlanet.objects,this.draft.id);
-    this.ghost.traverse(o=>{if(o instanceof T.Mesh){o.material=new T.MeshBasicMaterial({color:invalid?'#c87055':'#c8df9b',transparent:true,opacity:.45,depthWrite:false});o.castShadow=false;}});
+    this.ghost=this.renderObject(this.draft as PlacedObject);
+    const invalid=this.problem(this.draft);
+    this.ghost.traverse(o=>{if(o instanceof T.Mesh){const original=Array.isArray(o.material)?o.material:[o.material];o.userData.ghostOriginal=original;o.material=new T.MeshBasicMaterial({color:invalid?'#c87055':'#c8df9b',transparent:true,opacity:.45,depthWrite:false});o.castShadow=false;}});
+    const ghost=this.ghost, dispose=ghost.userData.disposeOwned;ghost.userData.disposeOwned=()=>{ghost.traverse(o=>{if(o instanceof T.Mesh&&o.userData.ghostOriginal){(o.material as T.Material).dispose();o.material=o.userData.ghostOriginal.length===1?o.userData.ghostOriginal[0]:o.userData.ghostOriginal;delete o.userData.ghostOriginal;}});delete ghost.userData.disposeOwned;if(dispose)dispose();else disposeGeometry(ghost);};
     this.bridge.scene.add(this.ghost);
   }
   private async save(){
     const d=this.draft;if(!d?.position||!this.universe)return;
     const route=d.version?'objects/update':'objects/create';
-    const body={planetId:this.universe.currentPlanet.id,objectId:d.id,position:d.position,rotation:d.rotation,...(d.version?{expectedVersion:d.version}:{kind:d.kind})};
+    const body={planetId:this.universe.currentPlanet.id,objectId:d.id,position:d.position,rotation:d.rotation,...(d.version?{expectedVersion:d.version}:{kind:d.kind,...(d.blueprintHash?{blueprintHash:d.blueprintHash}:{})})};
     if(await this.command(route,body)){this.clearDraft();this.editor();this.bridge.notice('Saved. Everyone visiting can see your change.');}
   }
   private async remove(){const d=this.draft;if(!d?.version||!this.universe)return;if(await this.command('objects/delete',{planetId:this.universe.currentPlanet.id,objectId:d.id,expectedVersion:d.version})){this.clearDraft();this.editor();this.bridge.notice('Removed from your planet.');}}
   private editor(){
     const d=this.draft;el('object-tools').hidden=!d;
     el('build-instruction').textContent=this.busy?'Saving your change…':!this.syncing?'Connection lost. Building is paused.':d?(this.placing?'Tap an open spot on the planet, then save.':'Object selected. Move, rotate or remove it.'):'Choose something to add, or tap an existing object.';
-    el('build-selection').textContent=d?CATALOGUE[d.kind].name:'Sunseed building kit';
-    const problem=d?.position?placementProblem(d.kind,d.position,this.universe?.currentPlanet.objects??[],d.id):null;
+    el('build-selection').textContent=d?objectName(d):'Sunseed building kit';
+    const problem=d?.position?this.problem(d):null;
     el('placement-status').textContent=problem??(d?.position?`Turn: ${Math.round(d.rotation*180/Math.PI)}°`:'');
     el<HTMLButtonElement>('save-object').disabled=this.busy||!this.syncing||!d?.position||!!problem;
     el('save-object').textContent=this.busy?'Saving…':d?.version?'Save changes':'Place object';
@@ -147,6 +179,7 @@ export class Colony {
     el<HTMLButtonElement>('claim-planet').disabled=this.busy||!this.syncing;
     el<HTMLButtonElement>('build-mode').hidden=!p.mine;el('build-mode').textContent=this.building?'Building…':'Build on my planet';
     el<HTMLButtonElement>('build-mode').disabled=this.busy||!this.syncing;
+    el<HTMLButtonElement>('open-workshop').hidden=!p.mine||u.player.flight.mode!=='ground';el<HTMLButtonElement>('open-workshop').disabled=this.busy||!this.syncing;
     el('delivery-toggle').hidden=p.kind!=='hub';
     el('my-planet').hidden=!u.ownedPlanetId||u.ownedPlanetId===p.id;
     el('ownership-note').hidden=!(p.kind==='garden'&&!p.claimed&&u.ownedPlanetId);

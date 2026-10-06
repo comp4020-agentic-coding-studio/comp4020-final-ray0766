@@ -1,5 +1,5 @@
 import { SCALE } from '../../style/tokens.ts';
-import { BEAM, cladding, conduit, extrudeZY, kickPlate, small, TRACK, WALL_H, WALL_T, wallFrame } from './kit.ts';
+import { BEAM, cladding, conduit, extrudeZY, interiorFinish, kickPlate, small, TRACK, WALL_H, WALL_T, wallFrame } from './kit.ts';
 import type { Kit } from './kit.ts';
 
 // Edge parts that close a storey: origin on the cell edge at the top of the
@@ -11,12 +11,14 @@ export function solidWall(k: Kit) {
   cladding(k, -0.45, 0.45, TRACK, WALL_H - BEAM);
   kickPlate(k, -0.45, 0.45);
   conduit(k, WALL_H - BEAM - 0.12);
+  interiorFinish(k);
 }
 
-export function doorWall(k: Kit) {
+/** Door frame, infill, threshold and status lamp: everything of a door wall but the leaf. */
+function doorFrame(k: Kit) {
   const { b } = k;
   wallFrame(k, { track: false });
-  const steel = k.m('steel'), leafPaint = k.m('leaf');
+  const steel = k.m('steel');
   const doorTop = SCALE.doorHeight + 0.02;
   // Jambs and head, deeper than the wall so the opening has a real reveal.
   for (const x of [-0.425, 0.425]) b.box(steel, [0.05, doorTop + 0.05, WALL_T + 0.04], { position: [x, (doorTop + 0.05) / 2, 0] }, 0.006);
@@ -27,26 +29,58 @@ export function doorWall(k: Kit) {
   for (const x of [-0.425, 0.425]) b.box(k.m('hazard'), [0.03, 1.1, 0.004], { position: [x, 0.62, WALL_T / 2 + 0.022] }, 0);
   // Threshold plate.
   b.box(k.m('tread'), [0.8, 0.025, WALL_T + 0.1], { position: [0, 0.0125, 0] }, 0.004);
-  // Door leaf, set back from the exterior face.
-  const leafW = 0.78, leafH = SCALE.doorHeight - 0.01, z = 0.015;
-  b.within({ position: [0, 0.025, z] }, () => {
-    b.box(leafPaint, [leafW, leafH, 0.05], { position: [0, leafH / 2, 0] }, 0.008);
-    // Raised stiffener panel and a kick plate.
-    b.box(leafPaint, [leafW - 0.16, 0.5, 0.012], { position: [0, 0.75, 0.031] }, 0.004);
-    b.box(k.m('tread'), [leafW - 0.06, 0.24, 0.008], { position: [0, 0.16, 0.029] }, 0.003);
-    // Vision slot with a frame and glass.
-    b.box(steel, [0.16, 0.5, 0.02], { position: [0.16, 1.38, 0.03] }, 0.004);
-    b.box(k.m('glassSmoked'), [0.11, 0.45, 0.01], { position: [0.16, 1.38, 0.041] }, 0);
-    // Lever handle on a rose plate.
-    b.box(steel, [0.05, 0.16, 0.012], { position: [0.31, 1.0, 0.031] }, 0.003);
-    b.box(k.m('bright'), [0.14, 0.022, 0.022], { position: [0.26, 1.03, 0.06] }, 0.006);
-    b.cylinder(k.m('bright'), 0.012, 0.012, 0.04, { position: [0.32, 1.03, 0.043], rotation: [Math.PI / 2, 0, 0] });
-    // Hinge knuckles.
-    for (const y of [0.25, 0.95, 1.65]) b.cylinder(steel, 0.016, 0.016, 0.12, { position: [-leafW / 2 - 0.005, y, 0.0] });
-  });
   // Status lamp: a recessed housing with a short warm strip, not a neon bar.
   b.box(steel, [0.26, 0.06, 0.05], { position: [0, doorTop + 0.11, WALL_T / 2 + 0.03] }, 0.006);
   b.box(k.m('lamp'), [0.2, 0.018, 0.012], { position: [0, doorTop + 0.1, WALL_T / 2 + 0.056] }, 0);
+  // Skirting either side of the opening on the inside.
+  interiorFinish(k, { raceway: false, x0: -0.45, x1: -0.4 });
+  interiorFinish(k, { raceway: false, x0: 0.4, x1: 0.45 });
+}
+
+export const DOOR_LEAF = { width: 0.78, height: SCALE.doorHeight - 0.01, thickness: 0.05, hingeX: -0.39 - 0.005 } as const;
+
+/**
+ * The door leaf in its own frame: hinge edge on x = 0, the leaf running along
+ * +x, exterior face +Z. Lever and vision slot on both faces, a closer inside.
+ */
+function doorLeaf(k: Kit) {
+  const { b } = k;
+  const steel = k.m('steel'), leafPaint = k.m('leaf');
+  const { width: w, height: h, thickness: t } = DOOR_LEAF;
+  const cx = w / 2 + 0.005;
+  b.box(leafPaint, [w, h, t], { position: [cx, h / 2, 0] }, 0.008);
+  // Raised stiffener panel and a kick plate on the outside.
+  b.box(leafPaint, [w - 0.16, 0.5, 0.012], { position: [cx, 0.75, t / 2 + 0.006] }, 0.004);
+  b.box(k.m('tread'), [w - 0.06, 0.24, 0.008], { position: [cx, 0.16, t / 2 + 0.004] }, 0.003);
+  // Vision slot: frame through the leaf, smoked glass.
+  b.box(steel, [0.16, 0.5, t + 0.01], { position: [cx + 0.16, 1.38, 0] }, 0.004);
+  b.box(k.m('glassSmoked'), [0.11, 0.45, t + 0.014], { position: [cx + 0.16, 1.38, 0] }, 0);
+  // Lever handles on rose plates, both faces.
+  for (const side of [1, -1]) {
+    const z = side * (t / 2);
+    b.box(steel, [0.05, 0.16, 0.012], { position: [cx + 0.31, 1.0, z + side * 0.006] }, 0.003);
+    b.box(k.m('bright'), [0.14, 0.022, 0.022], { position: [cx + 0.26, 1.03, z + side * 0.035] }, 0.006);
+    b.cylinder(k.m('bright'), 0.012, 0.012, 0.04, { position: [cx + 0.32, 1.03, z + side * 0.018], rotation: [Math.PI / 2, 0, 0] });
+  }
+  // Hinge knuckles on the hinge edge.
+  for (const y of [0.25, 0.95, 1.65]) b.cylinder(steel, 0.016, 0.016, 0.12, { position: [0, y, 0] });
+  // Overhead closer on the inside face, with its arm.
+  if (!k.low) {
+    b.box(steel, [0.3, 0.055, 0.06], { position: [0.22, h - 0.07, -t / 2 - 0.03] }, small(k, 0.006));
+    b.box(k.m('bright'), [0.26, 0.014, 0.022], { position: [0.36, h - 0.035, -t / 2 - 0.075], rotation: [0, 0.35, 0] }, 0);
+  }
+}
+
+export function doorWall(k: Kit) {
+  doorFrame(k);
+  k.b.within({ position: [DOOR_LEAF.hingeX, 0.025, 0.015] }, () => doorLeaf(k));
+}
+
+/** The same door held open 90° into the room, so a placed structure can be entered and seen into. */
+export function doorOpenWall(k: Kit) {
+  doorFrame(k);
+  // Hinge on the interior face; rotating +90° about Y swings the leaf from +X to −Z (inwards).
+  k.b.within({ position: [DOOR_LEAF.hingeX, 0.025, -WALL_T / 2 + DOOR_LEAF.thickness / 2 - 0.01], rotation: [0, Math.PI / 2, 0] }, () => doorLeaf(k));
 }
 
 export function windowWall(k: Kit) {
@@ -74,6 +108,12 @@ export function windowWall(k: Kit) {
   b.box(k.m('steel'), [2 * half + 0.12, 0.02, 0.1], { position: [0, sill - 0.005, WALL_T / 2 + 0.04], rotation: [0.18, 0, 0] }, 0.004);
   b.box(k.m('post'), [2 * half + 0.14, 0.018, 0.2], { position: [0, head + 0.07, WALL_T / 2 + 0.1], rotation: [0.2, 0, 0] }, 0.004);
   for (const x of [-half, half]) b.box(steel, [0.016, 0.1, 0.16], { position: [x, head + 0.03, WALL_T / 2 + 0.07] }, 0.003);
+  // Inside: a sill board, rubber glazing gaskets top and bottom, skirting and raceway.
+  b.box(k.m('leaf'), [2 * half + 0.08, 0.025, 0.045], { position: [0, sill - 0.0125, -WALL_T / 2 - 0.0025] }, small(k, 0.004));
+  if (!k.low) for (const y of [sill + 0.056, head - 0.056]) for (const z of [0.044, -0.044]) {
+    b.box(k.m('membrane'), [2 * half - 0.02, 0.012, 0.01], { position: [0, y, z] }, 0);
+  }
+  interiorFinish(k);
 }
 
 /**

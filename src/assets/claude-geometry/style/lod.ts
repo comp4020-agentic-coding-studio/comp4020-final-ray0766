@@ -37,8 +37,12 @@ export const BUDGET: Record<'part' | 'building' | 'ship' | 'terrain' | 'scene', 
    * the first measurement: the door module needs 9 materials (glass, hazard, glow…).
    */
   part: { high: { triangles: 4_000, drawCalls: 10 }, medium: { triangles: 1_800, drawCalls: 10 }, low: { triangles: 500, drawCalls: 10 } },
-  /** A merged, placed blueprint of up to 120 parts. */
-  building: { high: { triangles: 150_000, drawCalls: 14 }, medium: { triangles: 70_000, drawCalls: 14 }, low: { triangles: 20_000, drawCalls: 10 } },
+  /**
+   * A merged, placed blueprint of up to 120 parts: one draw call per kit
+   * material. Raised from 14 to 17 when the street surfaces (pavers, asphalt,
+   * marking) joined the kit; low LOD folds them into existing materials.
+   */
+  building: { high: { triangles: 150_000, drawCalls: 17 }, medium: { triangles: 70_000, drawCalls: 17 }, low: { triangles: 20_000, drawCalls: 10 } },
   /** One assembled ship including engine effects. */
   ship: { high: { triangles: 45_000, drawCalls: 16 }, medium: { triangles: 18_000, drawCalls: 14 }, low: { triangles: 5_000, drawCalls: 10 } },
   /** Planet ground + water + all vegetation instances. */

@@ -25,8 +25,9 @@ prototype. They do not claim to be the student's finished academic harness.
   The authorised ground restyle adds an industrial public hub, connected routes,
   original suits and a physical gate. Board only beside the saved port position;
   no global takeoff button or client-supplied proximity bypass. Private return
-  beacons/craft are temporary travel scenery, never placed owner objects. Do not add the
-  independently proposed workshop/blueprint/ecology/history features here.
+  beacons/craft are temporary travel scenery, never placed owner objects. Final workshop-v1 now reuses Claude’s committed editor to save private named/grouped
+  blueprints on the server and place immutable structures on owned planets.
+  Ship workshops, terrain editing and public history remain out of scope.
 - Original procedural assets or explicitly documented free licensed assets only.
   The user approved NASA SVS public-domain lunar maps for the orbital sample.
   Messenger is an interaction reference; do

@@ -10,7 +10,8 @@ export function cornerColumn(k: Kit) {
   b.box(steel, [0.22, WALL_H, 0.22], { position: [0, WALL_H / 2, 0] }, 0.012);
   b.box(bare, [0.3, 0.03, 0.3], { position: [0, 0.015, 0] }, 0.006);
   for (const [x, z] of [[0.11, 0.11], [-0.11, 0.11], [0.11, -0.11], [-0.11, -0.11]]) b.bolt(bare, { position: [x, 0.03, z] }, 0.013);
-  b.box(k.m('hazard'), [0.226, 0.4, 0.226], { position: [0, 0.32, 0] }, 0.012);
+  // A narrow hazard band at kerb height marks the post without dominating it.
+  b.box(k.m('hazard'), [0.226, 0.12, 0.226], { position: [0, 0.16, 0] }, 0.012);
 }
 
 /**

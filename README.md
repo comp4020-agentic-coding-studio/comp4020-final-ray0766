@@ -1,5 +1,9 @@
 # Little Worlds
 
+**Local Final workshop milestone:** this branch adds the server-backed assembly
+workshop described in [the workshop guide](docs/integration/workshop-v1.md).
+The published Crit 8 release remains `09233d9`; these changes are not deployed.
+
 > Prepared with AI assistance from the student's recorded design decisions and
 > the implementation evidence.
 
@@ -29,8 +33,8 @@ The student repeatedly asked for more convincing scale and materials than the ea
 low-poly hamlet. Official [Area18 and New Babbage imagery](https://support.robertsspaceindustries.com/hc/en-us/articles/360008085873-Locations-in-Star-Citizen)
 informed the industrial harbour's depth and structure. The design also requires
 player buildings to share the public district's material and geometry quality.
-An impressive background alone would not meet that goal. The present kit has six
-placeable kinds; the separate component workshop is not integrated. [Asset credits](/credits/)
+An impressive background alone would not meet that goal. The published kit has six
+placeable kinds. This local branch also integrates the component workshop. [Asset credits](/credits/)
 document original procedural work, the user's shared geometry and NASA orbital maps.
 
 ## Promises and their limits
@@ -45,8 +49,8 @@ people leave. This is a bounded shared world, not a public-scale concurrency cla
 A random browser cookie identifies a visitor. Clearing it loses access to the owned
 home; there is no account recovery or cross-device identity. Save failures are
 shown, and travel freezes until acknowledged state is recovered. Chat, trading,
-combat, ship interiors, arbitrary assembly and activity-history browsing are outside
-this version.
+combat, ship interiors, terrain editing and activity-history browsing remain outside
+this milestone. Assembly uses a bounded 5 × 5 × 3 grid with 120 parts per blueprint.
 
 Camera comfort, readable routes and a consistent visual language require judgement.
 Agent-run Chrome journeys and screenshot review informed changes; they are not a

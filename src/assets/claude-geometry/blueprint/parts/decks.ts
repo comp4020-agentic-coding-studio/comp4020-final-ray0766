@@ -13,6 +13,8 @@ export function floorDeck(k: Kit) {
   for (const [x, z, w, d] of [[0, 0.49, 1, 0.02], [0, -0.49, 1, 0.02], [0.49, 0, 0.02, 0.96], [-0.49, 0, 0.02, 0.96]] as const) {
     k.b.box(angle, [w, 0.035, d], { position: [x, -0.0175, z] }, 0.003);
   }
+  // Countersunk fixings holding the plate to the slab.
+  for (const [x, z] of [[-0.43, -0.43], [0.43, -0.43], [-0.43, 0.43], [0.43, 0.43]]) k.b.bolt(k.m('steel'), { position: [x, -0.006, z] }, 0.012);
 }
 
 /**
@@ -50,6 +52,27 @@ export function roofDeck(k: Kit) {
   for (const x of [-0.245, 0.245]) for (const z of [-0.245, 0.245]) {
     b.box(k.m('concrete'), [pv, 0.04, pv], { position: [x, 0.025, z] }, 0.008);
   }
+  ceiling(k);
+}
+
+/**
+ * The underside of a roof deck is the ceiling of the room below: a linear
+ * luminaire on drop rods across the cell and a cable tray beside it, both
+ * clear of the 1.86 m door opening (they sit 0.1–0.2 m under a 2.04 m soffit).
+ */
+function ceiling(k: Kit) {
+  const { b } = k;
+  const soffit = -SLAB;
+  // Luminaire: folded steel body, warm diffuser, end caps.
+  b.box(k.m('leaf'), [0.72, 0.05, 0.12], { position: [0, soffit - 0.075, -0.05] }, small(k, 0.006));
+  b.box(k.m('lamp'), [0.66, 0.008, 0.075], { position: [0, soffit - 0.1, -0.05] }, 0);
+  if (!k.low) for (const x of [-0.3, 0.3]) b.cylinder(k.m('steel'), 0.005, 0.005, 0.05, { position: [x, soffit - 0.025, -0.05] }, { segments: 6 });
+  // Cable tray: a shallow U on two hangers, running the length of the cell.
+  if (k.low) return;
+  const ty = soffit - 0.14, tz = 0.3;
+  extrudeZY(k, k.m('steel'), [[tz - 0.05, ty + 0.035], [tz - 0.05, ty], [tz + 0.05, ty], [tz + 0.05, ty + 0.035], [tz + 0.046, ty + 0.035], [tz + 0.046, ty + 0.004], [tz - 0.046, ty + 0.004], [tz - 0.046, ty + 0.035]], -0.5, 0.5);
+  for (const x of [-0.25, 0.25]) b.box(k.m('steel'), [0.012, 0.14, 0.012], { position: [x, soffit - 0.07, tz] }, 0);
+  b.box(k.m('membrane'), [1.0, 0.018, 0.06], { position: [0, ty + 0.013, tz] }, 0);
 }
 
 /**

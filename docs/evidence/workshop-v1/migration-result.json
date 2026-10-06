@@ -1,0 +1,53 @@
+{
+  "schemaBefore": 4,
+  "schemaAfter": 5,
+  "immediatelyAfterMigration": {
+    "object_tombstones": {
+      "rows": 5,
+      "identical": true
+    },
+    "planet_objects": {
+      "rows": 24,
+      "identical": true
+    },
+    "planets": {
+      "rows": 42,
+      "identical": true
+    },
+    "players": {
+      "rows": 99,
+      "identical": true
+    },
+    "visits": {
+      "rows": 50,
+      "identical": true
+    }
+  },
+  "afterLocalPlaytests": {
+    "object_tombstones": {
+      "originalRows": 5,
+      "unchangedAfterPlaytests": 5
+    },
+    "planet_objects": {
+      "originalRows": 24,
+      "unchangedAfterPlaytests": 24
+    },
+    "planets": {
+      "originalRows": 42,
+      "unchangedAfterPlaytests": 36,
+      "originalOwnedPlanetsUnchanged": 35,
+      "formerlyBlankPlanetsClaimedByIsolatedTests": 6
+    },
+    "players": {
+      "originalRows": 99,
+      "unchangedAfterPlaytests": 99
+    },
+    "visits": {
+      "originalRows": 50,
+      "unchangedAfterPlaytests": 50
+    }
+  },
+  "integrity": "ok",
+  "foreignKeyErrors": 0,
+  "notes": "The tests claim blank planets in the working copy. The original source database is read-only and unchanged. No identifiers or cookie data are included."
+}

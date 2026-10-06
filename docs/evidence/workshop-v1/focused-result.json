@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "checks": [
+    "Server restart retains both structures and grouped library",
+    "Desktop and 390×844 L2/interior camera screenshots",
+    "Close releases WebGL context; reopen creates one canvas",
+    "No page errors"
+  ],
+  "pageErrors": []
+}
