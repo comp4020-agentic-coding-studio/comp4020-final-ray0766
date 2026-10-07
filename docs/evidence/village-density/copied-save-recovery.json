@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "source": "Read-only SQLite backup from original local 8098; only the copy was opened by new code",
+  "playersRead": 205,
+  "publicRecovered": 177,
+  "privateRead": 28,
+  "privateGroundPreserved": 0,
+  "unchangedTables": {
+    "blueprint_contents": 4,
+    "blueprint_library": 22,
+    "history_events": 15,
+    "history_heads": 85,
+    "history_snapshots": 85,
+    "object_tombstones": 10,
+    "planet_objects": 35,
+    "planets": 86,
+    "player_ships": 13,
+    "visits": 57
+  },
+  "schema": 12,
+  "integrity": "ok",
+  "foreignKeys": "ok",
+  "note": "Public standing pose may recover against changed construction. Private v3 saved pose fields remain unchanged when safe; movement version/sequence and player revision fence older clients."
+}

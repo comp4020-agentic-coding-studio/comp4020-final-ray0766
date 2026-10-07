@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "browser": "154.0.8037.98",
+  "checks": [
+    "Central paired rooms are entered/exited through real open doors; wall-adjacent jump lands and camera boom stays clear",
+    "Both NPC routes and port reachable; pickup/delivery replay is idempotent; reload preserves character and delivery",
+    "All three public combinations pass ordinary server blueprint validation, retain identical hashes and load visibly in the player Workshop",
+    "390px Chinese layout and persisted character/quest still work after private-world flight",
+    "390px actual touch joystick crosses the new public village to the boarding point"
+  ],
+  "errors": [],
+  "rejectedMoves": [],
+  "measurements": {
+    "sprintMetres": 2.6195641965158383,
+    "room": {
+      "feet": {
+        "position": [
+          -0.14097644800848166,
+          0.9799777812842441,
+          -0.1406029491017969
+        ],
+        "radius": 14.181298375229083,
+        "north": {
+          "x": -0.05644794915728626,
+          "y": -0.1497469117036914,
+          "z": -0.9871116914874138
+        },
+        "grounded": true
+      },
+      "cameraClippedDistance": 1.2000009472852866
+    }
+  },
+  "fixture": "Fresh identity on isolated 8115 SQLite. Real keyboard/mouse walking and flight. Normal blueprint save API followed by actual Workshop UI loading; no test teleport. 390px touch is Mac emulation."
+}

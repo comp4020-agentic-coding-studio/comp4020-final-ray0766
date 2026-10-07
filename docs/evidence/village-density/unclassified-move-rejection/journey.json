@@ -1,0 +1,37 @@
+{
+  "status": "failed",
+  "browser": "154.0.8037.98",
+  "checks": [
+    "Central paired rooms are entered/exited through real open doors; wall-adjacent jump lands and camera boom stays clear",
+    "Both NPC routes and port reachable; pickup/delivery replay is idempotent; reload preserves character and delivery",
+    "All three public combinations pass ordinary server blueprint validation, retain identical hashes and load visibly in the player Workshop",
+    "390px Chinese layout and persisted character/quest still work after private-world flight"
+  ],
+  "errors": [],
+  "rejectedMoves": [
+    409,
+    409
+  ],
+  "measurements": {
+    "sprintMetres": 2.6343410926393687,
+    "room": {
+      "feet": {
+        "position": [
+          -0.14086368682314873,
+          0.9800660986490773,
+          -0.1400994789903481
+        ],
+        "radius": 14.180539955356664,
+        "north": {
+          "x": -0.042239636772046424,
+          "y": -0.14733110162418195,
+          "z": -0.988184881274537
+        },
+        "grounded": true
+      },
+      "cameraClippedDistance": 1.2000000156400328
+    }
+  },
+  "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   409,\u001b[39m\n\u001b[31m+   409,\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+  "fixture": "Fresh identity on isolated 8115 SQLite. Real keyboard/mouse walking and flight. Normal blueprint save API followed by actual Workshop UI loading; no test teleport. 390px touch is Mac emulation."
+}

@@ -9,7 +9,7 @@ import { defaultShip } from '../shared/ships.ts';
 import { configureRenderer, configureGroundLighting, groundPresentation, createWorldPracticalLights } from './presentation.ts';
 import { worldMaterials } from './shared-assets.ts';
 import { textureFormat } from './resource-policy.ts';
-import { GroundWorld, groundPose, FIXED_STEP, MAX_PATH_STEPS, PHYSICS_VERSION } from '../shared/physics/world.ts';
+import { GroundWorld, groundPose, FIXED_STEP, MAX_PATH_STEPS, physicsVersionFor } from '../shared/physics/world.ts';
 import type { GroundPose, MotionStep } from '../shared/physics/world.ts';
 import './presentation.css';
 import './style.css';
@@ -82,7 +82,7 @@ function serial<T>(run: () => Promise<T>): Promise<T> {
   const result = queue.then(run, run); queue = result.catch(() => {}); return result;
 }
 function accept(next: PlayerState) {
-  if(next.flight.mode==='ground'&&next.ground?.physicsVersion!==PHYSICS_VERSION){
+  if(next.flight.mode==='ground'&&next.ground?.physicsVersion!==physicsVersionFor(next.planetId)){
     physicsMismatch=true;online=false;clearGroundMotion();clearInput();presence.clear();
     status('Update ready · reload this page',true);notice('The walking model was updated. Reload this page to continue safely.',30000);return false;
   }
@@ -242,7 +242,7 @@ async function savePosition(force=false):Promise<void> {
   if(!walker||!state||state.flight.mode==='space'||!online)return;
   if(!motionPending.length)return;
   const steps=motionPending.splice(0,MAX_PATH_STEPS),p=steps.at(-1)!.slice(0,3) as Vec3,planetId=state.planetId;
-  const epoch=motionEpoch,motion=steps.length?{sequence:(state.ground?.sequence??0)+1,physicsVersion:PHYSICS_VERSION,steps}:undefined;
+  const epoch=motionEpoch,motion=steps.length?{sequence:(state.ground?.sequence??0)+1,physicsVersion:physicsVersionFor(planetId),steps}:undefined;
   saving=(async()=>{
     try{
       // A refresh/recovery can happen while this save waits in the mutation
@@ -382,7 +382,7 @@ function animate(now:number) {
   practical.update(scene,camera,dt);renderer.render(scene,camera);
   uiTick+=dt;
   if(uiTick>.1) {
-    renderer.domElement.dataset.practical=JSON.stringify(practical.stats());renderer.domElement.dataset.textureFormat=worldMaterials().textureFormat;renderer.domElement.dataset.scanFormats=JSON.stringify(worldMaterials().scanStats().map(s=>s.format));
+    renderer.domElement.dataset.publicCounts=JSON.stringify(world.scenery.userData.publicCounts??null);renderer.domElement.dataset.practical=JSON.stringify(practical.stats());renderer.domElement.dataset.textureFormat=worldMaterials().textureFormat;renderer.domElement.dataset.scanFormats=JSON.stringify(worldMaterials().scanStats().map(s=>s.format));
     renderer.domElement.dataset.feetRadius=String(standing?.radius??groundRadius());renderer.domElement.dataset.verticalSpeed=String(standing?.verticalSpeed??0);renderer.domElement.dataset.sprinting=String(keys.has('shift'));renderer.domElement.dataset.jumpHeld=String(!!standing?.jumpHeld);renderer.domElement.dataset.grounded=String(standing?.grounded??true);renderer.domElement.dataset.groundSupport=groundWorld&&standing?groundWorld.support(standing.position,standing.radius+.01).tag:'terrain';
     // Read-only pose evidence for obstruction checks; never an input to movement or saves.
     renderer.domElement.dataset.cameraPosition=JSON.stringify(camera.position.toArray());renderer.domElement.dataset.cameraHead=JSON.stringify(headPoint.toArray());renderer.domElement.dataset.playerVisible=String(player.root.visible);

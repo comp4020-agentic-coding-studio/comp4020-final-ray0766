@@ -1,13 +1,20 @@
+import {Vector3} from 'three';
+import {GroundWorld,FIXED_STEP,PHYSICS_VERSION} from '../src/shared/physics/world.ts';
 import { expect, it } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { openStore } from '../src/server/store.ts';
-import { NPCS, SPAWN, normalize } from '../src/shared/world.ts';
+import { NPCS, SPAWN } from '../src/shared/world.ts';
 import type { Vec3 } from '../src/shared/world.ts';
 const travel = (store:ReturnType<typeof openStore>,id:string,destination:Vec3,start:number) => {
-  const from=store.state(id).position;
-  for(let i=1;i<=10;i++) store.move(id,normalize(from.map((v,j)=>v+(destination[j]-v)*i/10) as Vec3),start+i*1000);
+ const world=new GroundWorld(store.universe(id).currentPlanet);let state=store.state(id),pose={position:state.position,...state.ground!};let time=Math.max(start,Number(store.db.prepare('SELECT moved_at FROM players WHERE id=?').get(id)!.moved_at));
+ // Follow the authored clear bearings through the landing plaza, using the
+ // same bounded, collision-resolved motion samples as the current client.
+ for(const target of [SPAWN,destination]){let reached=false;for(let i=0;i<1500;i++){
+  const a=new Vector3(...pose.position),b=new Vector3(...target),d=a.angleTo(b)*14;if(d<.03){reached=true;break;}
+  const next=world.move(pose,a.lerp(b,Math.min(1,.045/d)).normalize().toArray() as Vec3,FIXED_STEP);state=store.move(id,next.position,time+=FIXED_STEP*1000,'hub',{sequence:state.ground!.sequence+1,physicsVersion:PHYSICS_VERSION,steps:[[...next.position,FIXED_STEP,0]]});pose={position:state.position,...state.ground!};
+ }expect(reached).toBe(true);}
 };
 it('requires pickup and proximity, and replays both transitions without duplicate delivery',()=>{
   const s=openStore(':memory:');s.create('a',0);

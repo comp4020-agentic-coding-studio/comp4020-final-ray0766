@@ -1,0 +1,243 @@
+{
+  "baseCommit": "7dc0b017d1df16a9686ddc3a09af49f2f65cecb4",
+  "counts": {
+    "buildings": 16,
+    "walkInRooms": 16,
+    "structures": 8,
+    "objects": 64,
+    "tree": 20,
+    "path": 22,
+    "bench": 4,
+    "flowers": 8,
+    "lamp": 2,
+    "blueprintLamps": 8
+  },
+  "browser": "154.0.8037.98",
+  "samples": [
+    {
+      "label": "after 1440 close",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "drawingBuffer": {
+        "width": 1440,
+        "height": 900
+      },
+      "seconds": 2.506899999976158,
+      "frames": 150,
+      "drawCalls": {
+        "median": 136,
+        "p95": 136,
+        "max": 136
+      },
+      "triangles": {
+        "median": 117344,
+        "p95": 117344,
+        "max": 117344
+      },
+      "rafCadenceMs": {
+        "median": 16.699999999999818,
+        "p95": 16.700000000000728,
+        "max": 16.800000000000182
+      },
+      "renderCpuMs": {
+        "median": 0.81,
+        "p95": 0.903,
+        "max": 0.903
+      },
+      "cameraPosition": [
+        0,
+        16.184453140008806,
+        11.413302614005257
+      ],
+      "cameraHeading": [
+        0,
+        0.2606658522907646,
+        -0.9654290825583873
+      ],
+      "groundPosition": [
+        0,
+        0.9654290825583872,
+        0.26066585229076455
+      ],
+      "visitors": 0,
+      "quality": "full",
+      "shadowObjects": 0,
+      "shadowObjectsTotal": 0,
+      "objects": 0,
+      "structures": 0,
+      "timingNote": "Main scene, 2.5 s stationary capture. Draw/triangle counters update about 10 Hz. rAF is browser cadence; optional render CPU counter is a 30-frame submission mean, not GPU time. Phone dimensions emulate a handset on this Mac."
+    },
+    {
+      "label": "after 1440 overview",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "drawingBuffer": {
+        "width": 1440,
+        "height": 900
+      },
+      "seconds": 2.5137000000476837,
+      "frames": 150,
+      "drawCalls": {
+        "median": 139,
+        "p95": 139,
+        "max": 139
+      },
+      "triangles": {
+        "median": 117452,
+        "p95": 117452,
+        "max": 117452
+      },
+      "rafCadenceMs": {
+        "median": 16.69999999999891,
+        "p95": 16.700000000000728,
+        "max": 16.80000000000109
+      },
+      "renderCpuMs": {
+        "median": 0.86,
+        "p95": 1.083,
+        "max": 1.083
+      },
+      "cameraPosition": [
+        0,
+        38.411543583820304,
+        -13.149650927236593
+      ],
+      "cameraHeading": [
+        0,
+        0.2606658522907646,
+        -0.9654290825583873
+      ],
+      "groundPosition": [
+        0,
+        0.9654290825583872,
+        0.26066585229076455
+      ],
+      "visitors": 0,
+      "quality": "full",
+      "shadowObjects": 0,
+      "shadowObjectsTotal": 0,
+      "objects": 0,
+      "structures": 0,
+      "timingNote": "Main scene, 2.5 s stationary capture. Draw/triangle counters update about 10 Hz. rAF is browser cadence; optional render CPU counter is a 30-frame submission mean, not GPU time. Phone dimensions emulate a handset on this Mac."
+    },
+    {
+      "label": "after 390 close",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "drawingBuffer": {
+        "width": 390,
+        "height": 844
+      },
+      "seconds": 2.514600000023842,
+      "frames": 150,
+      "drawCalls": {
+        "median": 130,
+        "p95": 131,
+        "max": 131
+      },
+      "triangles": {
+        "median": 116864,
+        "p95": 116948,
+        "max": 116948
+      },
+      "rafCadenceMs": {
+        "median": 16.69999999999891,
+        "p95": 16.799999999999272,
+        "max": 16.80000000000109
+      },
+      "renderCpuMs": {
+        "median": 0.747,
+        "p95": 0.76,
+        "max": 0.76
+      },
+      "cameraPosition": [
+        0,
+        17.348760613574438,
+        14.0064451297568
+      ],
+      "cameraHeading": [
+        0,
+        0.2606658522907646,
+        -0.9654290825583873
+      ],
+      "groundPosition": [
+        0,
+        0.9654290825583872,
+        0.26066585229076455
+      ],
+      "visitors": 0,
+      "quality": "compact",
+      "shadowObjects": 0,
+      "shadowObjectsTotal": 0,
+      "objects": 0,
+      "structures": 0,
+      "timingNote": "Main scene, 2.5 s stationary capture. Draw/triangle counters update about 10 Hz. rAF is browser cadence; optional render CPU counter is a 30-frame submission mean, not GPU time. Phone dimensions emulate a handset on this Mac."
+    },
+    {
+      "label": "after 390 overview",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "drawingBuffer": {
+        "width": 390,
+        "height": 844
+      },
+      "seconds": 2.512399999976158,
+      "frames": 150,
+      "drawCalls": {
+        "median": 139,
+        "p95": 139,
+        "max": 139
+      },
+      "triangles": {
+        "median": 117452,
+        "p95": 117452,
+        "max": 117452
+      },
+      "rafCadenceMs": {
+        "median": 16.700000000000728,
+        "p95": 16.700000000000728,
+        "max": 16.80000000000291
+      },
+      "renderCpuMs": {
+        "median": 1.017,
+        "p95": 1.067,
+        "max": 1.067
+      },
+      "cameraPosition": [
+        0,
+        71.52494322504442,
+        -24.48555689899276
+      ],
+      "cameraHeading": [
+        0,
+        0.2606658522907646,
+        -0.9654290825583873
+      ],
+      "groundPosition": [
+        0,
+        0.9654290825583872,
+        0.26066585229076455
+      ],
+      "visitors": 0,
+      "quality": "compact",
+      "shadowObjects": 0,
+      "shadowObjectsTotal": 0,
+      "objects": 0,
+      "structures": 0,
+      "timingNote": "Main scene, 2.5 s stationary capture. Draw/triangle counters update about 10 Hz. rAF is browser cadence; optional render CPU counter is a 30-frame submission mean, not GPU time. Phone dimensions emulate a handset on this Mac."
+    }
+  ],
+  "errors": []
+}

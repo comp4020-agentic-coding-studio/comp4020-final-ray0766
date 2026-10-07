@@ -3,7 +3,7 @@ import {Vector3,Quaternion} from 'three';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {GroundWorld,FIXED_STEP,JUMP_FLAG,SPRINT_FLAG,JUMP_SPEED,PHYSICS_VERSION} from '../src/shared/physics/world.ts';
+import {GroundWorld,FIXED_STEP,JUMP_FLAG,SPRINT_FLAG,JUMP_SPEED,HUB_PHYSICS_VERSION} from '../src/shared/physics/world.ts';
 import type {GroundPose,MotionStep} from '../src/shared/physics/world.ts';
 import {normalize,SPAWN,SPEED,SPRINT_SPEED,distance} from '../src/shared/world.ts';
 import type {Vec3} from '../src/shared/world.ts';
@@ -31,7 +31,7 @@ function building(parts:PartPlacement[],radius=12,dir:Vec3=normalize([.55,1,.4])
 }
 it('jumps and lands once per press at both poles on every radius, with no midair repeat or held-key bouncing',()=>{
  for(const radius of [10,11,12,14])for(const position of [[0,1,0],[0,-1,0]] as Vec3[]){
-  const w=new GroundWorld({id:radius===14?'hub':'garden',radius,revision:0,objects:[]});let p=w.pose(position);const base=p.radius;let max=base,takeoffs=0,wasGrounded=true;
+  const w=new GroundWorld({id:radius===14?'hub':'garden',radius,revision:0,objects:[]});let p=w.recover(w.pose(position));const base=p.radius;let max=base,takeoffs=0,wasGrounded=true;
   for(let i=0;i<180;i++){p=w.move(p,p.position,FIXED_STEP,JUMP_FLAG);max=Math.max(max,p.radius);if(wasGrounded&&!p.grounded)takeoffs++;wasGrounded=p.grounded;expect(w.blocked(p)).toBe(false);expect(Math.hypot(...p.position)).toBeCloseTo(1,10);}
   expect(max-base).toBeGreaterThan(1);expect(max-base).toBeLessThan(1.14);expect(takeoffs).toBe(1);expect(p.grounded).toBe(true);expect(p.radius).toBeCloseTo(base,8);
   p=w.move(p,p.position,FIXED_STEP,0);p=w.move(p,p.position,FIXED_STEP,JUMP_FLAG);expect(p.verticalSpeed).toBeGreaterThan(4.9);expect(p.grounded).toBe(false);
@@ -60,10 +60,10 @@ it('validates sprint/jump inputs, persists airborne state and latches, and sends
  const folder=mkdtempSync(join(tmpdir(),'jump-save-')),path=join(folder,'save.sqlite');let s=openStore(path);
  try{
   s.create('a',0);s.create('b',0);let state=s.state('a'),time=0;const w=new GroundWorld(s.universe('a').currentPlanet);let p:GroundPose={position:state.position,...state.ground!};
-  function send(flags:number,target:Vec3=p.position){p=w.move(p,target,FIXED_STEP,flags);const steps:MotionStep[]=[[...p.position,FIXED_STEP,flags]],motion={physicsVersion:PHYSICS_VERSION,sequence:state.ground!.sequence+1,steps};state=s.move('a',p.position,time+=FIXED_STEP*1000,'hub',motion);expect(state.ground!.radius).toBeCloseTo(p.radius,7);return motion;}
+  function send(flags:number,target:Vec3=p.position){p=w.move(p,target,FIXED_STEP,flags);const steps:MotionStep[]=[[...p.position,FIXED_STEP,flags]],motion={physicsVersion:HUB_PHYSICS_VERSION,sequence:state.ground!.sequence+1,steps};state=s.move('a',p.position,time+=FIXED_STEP*1000,'hub',motion);expect(state.ground!.radius).toBeCloseTo(p.radius,7);return motion;}
   const beyondWalk=new Vector3(...p.position).applyAxisAngle(new Vector3(1,0,0),4*FIXED_STEP/p.radius).toArray() as Vec3;
-  expect(()=>s.move('a',beyondWalk,100,'hub',{physicsVersion:PHYSICS_VERSION,sequence:state.ground!.sequence+1,steps:[[...beyondWalk,FIXED_STEP,0]]})).toThrow('speed');send(SPRINT_FLAG,beyondWalk);
-  for(const flags of [-1,4,1.2,null,'jump'])expect(()=>s.move('a',p.position,time+50,'hub',{physicsVersion:PHYSICS_VERSION,sequence:state.ground!.sequence+1,steps:[[...p.position,FIXED_STEP,flags]]})).toThrow('Invalid');
+  expect(()=>s.move('a',beyondWalk,100,'hub',{physicsVersion:HUB_PHYSICS_VERSION,sequence:state.ground!.sequence+1,steps:[[...beyondWalk,FIXED_STEP,0]]})).toThrow('speed');send(SPRINT_FLAG,beyondWalk);
+  for(const flags of [-1,4,1.2,null,'jump'])expect(()=>s.move('a',p.position,time+50,'hub',{physicsVersion:HUB_PHYSICS_VERSION,sequence:state.ground!.sequence+1,steps:[[...p.position,FIXED_STEP,flags]]})).toThrow('Invalid');
   let motion=send(JUMP_FLAG);for(let i=0;i<15;i++)motion=send(JUMP_FLAG);expect(state.ground!.radius).toBeGreaterThan(14.8);expect(state.ground!.verticalSpeed).toBeGreaterThan(0);expect(state.ground!.jumpHeld).toBe(true);
   expect(s.move('a',p.position,time,'hub',motion)).toEqual(state);expect(()=>s.takeoff('a',{planetId:'hub',journey:0},time)).toThrow('feet');
   s.close();s=openStore(path);expect(s.state('a')).toEqual(state);
@@ -78,7 +78,7 @@ it('backs up schema11 and preserves old stored columns before lazy physics recov
   s.create('a',0);s.character('a','fern');s.db.exec('UPDATE ground_states SET physics_version=2;ALTER TABLE ground_states DROP COLUMN jump_held;PRAGMA user_version=11');
   const old=s.db.prepare('SELECT * FROM ground_states').get()!,player=s.db.prepare('SELECT * FROM players').get();s.close();s=openStore(path);
   expect(s.migrationBackup).toContain('.v11-');const raw=s.db.prepare('SELECT * FROM ground_states').get()!;expect(raw).toEqual({...old,jump_held:0});expect(s.db.prepare('SELECT * FROM players').get()).toEqual(player);
-  const state=s.state('a');expect(state.character).toBe('fern');expect(state.position).toEqual(SPAWN);expect(state.ground).toMatchObject({physicsVersion:PHYSICS_VERSION,jumpHeld:false,grounded:true});
+  const state=s.state('a');expect(state.character).toBe('fern');expect(state.position).toEqual(SPAWN);expect(state.ground).toMatchObject({physicsVersion:HUB_PHYSICS_VERSION,jumpHeld:false,grounded:true});
   expect(s.db.prepare('PRAGMA integrity_check').get()!.integrity_check).toBe('ok');
  }finally{s.close();rmSync(folder,{recursive:true,force:true});}
 });

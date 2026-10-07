@@ -1,6 +1,6 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
-import { GroundWorld, MAX_PATH_STEPS, PHYSICS_VERSION,SPRINT_FLAG } from '../shared/physics/world.ts';
+import { GroundWorld, MAX_PATH_STEPS, physicsVersionFor,SPRINT_FLAG } from '../shared/physics/world.ts';
 import type { GroundPose, GroundState, GroundMotion, MotionStep } from '../shared/physics/world.ts';
 import { distance, normalize, RADIUS, SPEED, SPRINT_SPEED, validPosition } from '../shared/world.ts';
 import type { Vec3 } from '../shared/world.ts';
@@ -18,19 +18,22 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
   function write(id:string,p:GroundPose,sequence:number,revision:number,credit:number,hash:string|null,planetId:string){
     db.prepare(`INSERT INTO ground_states (player_id,planet_id,position,radius,vertical_speed,grounded,sequence,scene_revision,physics_version,clock_credit,request_hash,jump_held) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
       ON CONFLICT(player_id) DO UPDATE SET planet_id=excluded.planet_id,position=excluded.position,radius=excluded.radius,vertical_speed=excluded.vertical_speed,grounded=excluded.grounded,sequence=excluded.sequence,scene_revision=excluded.scene_revision,physics_version=excluded.physics_version,clock_credit=excluded.clock_credit,request_hash=excluded.request_hash,jump_held=excluded.jump_held`)
-      .run(id,planetId,JSON.stringify(p.position),p.radius,p.verticalSpeed,Number(p.grounded),sequence,revision,PHYSICS_VERSION,credit,hash,Number(!!p.jumpHeld));
+      .run(id,planetId,JSON.stringify(p.position),p.radius,p.verticalSpeed,Number(p.grounded),sequence,revision,physicsVersionFor(planetId),credit,hash,Number(!!p.jumpHeld));
   }
   function ensure(id:string):GroundRow{
     const r=player(id),old=row(id),w=world(r.planet_id);
-    if(old&&old.planet_id===r.planet_id&&old.scene_revision===w.revision&&old.physics_version===PHYSICS_VERSION&&old.position===r.position)return old;
+    if(old&&old.planet_id===r.planet_id&&old.scene_revision===w.revision&&old.physics_version===physicsVersionFor(r.planet_id)&&old.position===r.position)return old;
     const start=old&&old.planet_id===r.planet_id&&old.position===r.position?pose(old):w.pose(JSON.parse(r.position));
-    const safe=w.recover(start),changed=distance(safe.position,JSON.parse(r.position))>.00001;
+    // A private v3 -> v4 upgrade changes ascent clipping, not geometry. Keep
+    // its valid saved pose (including a jump in progress) byte-for-byte.
+    const preserve=old&&r.planet_id!=='hub'&&old.physics_version===3&&old.planet_id===r.planet_id&&old.scene_revision===w.revision&&old.position===r.position&&!w.blocked(start);
+    const safe=preserve?start:w.recover(start),changed=distance(safe.position,JSON.parse(r.position))>.00001;
     db.exec('BEGIN IMMEDIATE');try{
       write(id,safe,(old?.sequence??-1)+1,w.revision,.1,null,r.planet_id);
       // A physics upgrade also fences older player responses when only the
       // standing height changed. Ordinary scene edits retain their sequence /
       // scene-revision fence and do not invent a new player mutation.
-      if(changed||(old&&old.physics_version!==PHYSICS_VERSION))db.prepare('UPDATE players SET position=?,revision=revision+1 WHERE id=?').run(JSON.stringify(safe.position),id);
+      if(changed||(old&&old.physics_version!==physicsVersionFor(r.planet_id)))db.prepare('UPDATE players SET position=?,revision=revision+1 WHERE id=?').run(JSON.stringify(safe.position),id);
       db.exec('COMMIT');
     }catch(error){db.exec('ROLLBACK');throw error;}
     return row(id)!;
@@ -44,7 +47,7 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
       if(motion!==undefined){
         if(!motion||typeof motion!=='object'||Array.isArray(motion)||Object.keys(motion).some(k=>!['sequence','physicsVersion','steps'].includes(k)))throw new RequestError(400,'Invalid ground motion.');
         const m=motion as GroundMotion;
-        if(m.physicsVersion!==PHYSICS_VERSION)throw new RequestError(409,'The walking model was updated. Reload this page before moving.');
+        if(m.physicsVersion!==physicsVersionFor(r.planet_id))throw new RequestError(409,'The walking model was updated. Reload this page before moving.');
         if(!Number.isSafeInteger(m.sequence)||!Array.isArray(m.steps)||!m.steps.length||m.steps.length>MAX_PATH_STEPS)throw new RequestError(400,'Send a bounded movement path and sequence.');
         for(const s of m.steps)if(!Array.isArray(s)||(s.length!==4&&s.length!==5)||!validPosition(s.slice(0,3))||typeof s[3]!=='number'||!Number.isFinite(s[3])||s[3]<=0||s[3]>.050001||(s[4]!==undefined&&(!Number.isInteger(s[4])||s[4]<0||s[4]>3)))throw new RequestError(400,'Invalid movement sample.');
         hash=createHash('sha256').update(JSON.stringify({target,motion})).digest('hex');

@@ -1,5 +1,5 @@
-import {HABITAT_CABIN,HUB_CABINS,HUB_TREES,HUB_SHIP} from '../harbour-layout.ts';
-import {HUB_DOCK} from '../ports.ts';
+import {HUB_SHIP} from '../harbour-layout.ts';
+import {HUB_OBJECTS,PUBLIC_CONTENTS,PUBLIC_FIELD} from '../public-village.ts';
 import { fieldOf,gradedField,objectSeat } from '../terrain.ts';
 import type { HeightField } from '../../assets/claude-geometry/core/ground.ts';
 import { Vector3, Quaternion } from 'three';
@@ -20,7 +20,10 @@ export const SPRINT_FLAG=1, JUMP_FLAG=2;
 export const FIXED_STEP=1/60, MAX_PATH_STEPS=28;
 // Bump whenever static collision semantics change. Durable ground rows and
 // movement batches use this same value; a scene revision alone is not enough.
-export const PHYSICS_VERSION=3;
+export const PHYSICS_VERSION=4;
+// Shared radial-ascent fix and public layout are released together.
+export const HUB_PHYSICS_VERSION=4;
+export const physicsVersionFor=(planetId:string)=>planetId==='hub'?HUB_PHYSICS_VERSION:PHYSICS_VERSION;
 const SKIN=.002, SUBSTEP=.035, ground=legacyHeightField();
 export interface GroundPose { position:Vec3; radius:number; verticalSpeed:number; grounded:boolean; jumpHeld?:boolean }
 export interface GroundState extends Omit<GroundPose,'position'> { sequence:number; sceneRevision:number; physicsVersion:number }
@@ -41,11 +44,13 @@ export class GroundWorld {
   radius(p:Vec3){return RADIUS+this.ground.heightAt(p);}
   pose(p:Vec3){return groundPose(p,this.ground);}
   constructor(planet:Pick<PlanetView,'id'|'revision'|'objects'|'blueprints'|'environment'|'radius'>){
-    this.baseRadius=planet.radius??RADIUS;this.field=planet.id==='hub'?{id:'compact-harbour',waterLevel:null,heightAt:()=>this.baseRadius-RADIUS,normalAt:p=>[...p]}:fieldOf(planet.environment,this.baseRadius);this.generated=!!planet.environment;this.ground=this.generated?gradedField(this.field,planet.objects,planet.blueprints):this.field;
+    this.baseRadius=planet.radius??RADIUS;this.field=planet.id==='hub'?PUBLIC_FIELD:fieldOf(planet.environment,this.baseRadius);this.generated=!!planet.environment;this.ground=this.generated?gradedField(this.field,planet.objects,planet.blueprints):this.field;
     this.revision=planet.revision;this.planetId=planet.id;
     if(planet.id==='hub')this.harbour();
-    for(const object of planet.objects){
-      if(object.kind==='structure')this.structure(object,planet.blueprints?.[object.blueprintHash!]??[]);
+    const objects=planet.id==='hub'?[...HUB_OBJECTS,...planet.objects]:planet.objects;
+    const blueprints=planet.id==='hub'?{...PUBLIC_CONTENTS,...planet.blueprints}:planet.blueprints;
+    for(const object of objects){
+      if(object.kind==='structure')this.structure(object,blueprints?.[object.blueprintHash!]??[]);
       else if(objectHeight(object)>.6){
         const radius=objectRadius(object),h=objectHeight(object),base=(this.generated?objectSeat(this.field,object,planet.blueprints).baseRadius:this.radius(object.position))+.015;
         const body:Body={objectId:object.id,dir:vec(object.position),broad:radius+1,colliders:[],round:{radius,height:h,base}};
@@ -54,18 +59,9 @@ export class GroundWorld {
     }
   }
   private harbour(){
-    for(const [i,site] of HUB_CABINS.entries()){
-      const body:Body={objectId:'hub-cabin-'+i,dir:vec(site.point),broad:2.5,colliders:[]};
-      for(const part of HABITAT_CABIN){if(part.part==='service.pipe')continue;const turn=new Quaternion().setFromAxisAngle(new Vector3(0,1,0),part.yaw??0);
-        for(const shape of PART_COLLIDERS[part.part]())this.add(body,site.point,site.yaw,this.baseRadius,{...shape,center:vec(shape.center).applyQuaternion(turn).add(vec(part.position)).toArray() as Vec3,yaw:(part.yaw??0)+(shape.yaw??0)});
-      }this.bodies.push(body);
-    }
-    for(const [i,dir] of [...HUB_TREES,HUB_SHIP].entries()){
-      const ship=i===HUB_TREES.length;this.bodies.push({objectId:'hub-prop-'+i,dir:vec(dir),broad:ship?3.2:1.4,colliders:[],round:{radius:ship?2.1:.4,height:ship?2.5:2.1,base:this.baseRadius}});
-    }
-    const gate:Body={objectId:'hub-gate',dir:vec(HUB_DOCK),broad:3.5,colliders:[]};
-    for(const x of [-1.55,1.55])this.add(gate,HUB_DOCK,0,this.baseRadius,{center:[x,1.3,-.15],half:[.09,1.3,.09],tag:'gate post'});
-    this.add(gate,HUB_DOCK,0,this.baseRadius,{center:[0,2.64,-.15],half:[1.75,.09,.19],tag:'gate lintel'});this.bodies.push(gate);
+    // Craft is a travel-system object. All village construction below goes
+    // through the exact same object/structure path as a player's colony.
+    this.bodies.push({objectId:'hub-ship',dir:vec(HUB_SHIP),broad:3.2,colliders:[],round:{radius:2.1,height:2.5,base:this.baseRadius}});
   }
   private add(body:Body,dir:Vec3,yaw:number,base:number,shape:PartBox){
     const anchor=new Quaternion().fromArray(anchorQuaternion({dir,yaw}));
@@ -142,12 +138,14 @@ export class GroundWorld {
     let verticalSpeed=Math.max(-MAX_FALL_SPEED,pose.verticalSpeed-GRAVITY*dt);
     let radius=pose.radius+(pose.verticalSpeed+verticalSpeed)*.5*dt,grounded=false;
     if(verticalSpeed<=0&&radius<=support.radius&&support.radius<=pose.radius+STEP_HEIGHT){radius=support.radius;verticalSpeed=0;grounded=true;}
+    // A radial rise can enter a tilted side wall as well as a ceiling.
+    // Clip any inward ascent; otherwise a rejected frame can freeze velocity.
     if(radius>pose.radius){
       const up=vec(position),count=Math.max(1,Math.ceil((radius-pose.radius)/SUBSTEP));let safe=pose.radius;
       for(let i=1;i<=count;i++){
         const next=pose.radius+(radius-pose.radius)*i/count,hit=this.hit(position,next);
-        if(hit&&hit.normal.dot(up)<-.45){
-          let low=safe,high=next;for(let j=0;j<10;j++){const mid=(low+high)/2,h=this.hit(position,mid);if(h&&h.normal.dot(up)<-.45)high=mid;else low=mid;}
+        if(hit&&hit.normal.dot(up)<-1e-5){
+          let low=safe,high=next;for(let j=0;j<10;j++){const mid=(low+high)/2,h=this.hit(position,mid);if(h&&h.normal.dot(up)<-1e-5)high=mid;else low=mid;}
           radius=low;verticalSpeed=0;break;
         }safe=next;
       }

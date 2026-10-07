@@ -1,0 +1,12 @@
+{
+  "status": "failed",
+  "browser": "154.0.8037.98",
+  "checks": [],
+  "errors": [],
+  "rejectedMoves": [],
+  "measurements": {
+    "sprintMetres": 2.8568162203489766
+  },
+  "error": "Error: Walking did not reach waypoint: {\"position\":[-0.18892278060303988,0.9819917620099342,0.0006019251122408872],\"radius\":14,\"north\":{\"x\":0.9819481394053385,\"y\":0.1889201069777486,\"z\":-0.009329774804893635},\"grounded\":true}",
+  "fixture": "Fresh identity on isolated 8115 SQLite. Real keyboard/mouse walking and flight. Normal blueprint save API followed by actual Workshop UI loading; no test teleport. 390px touch is Mac emulation."
+}

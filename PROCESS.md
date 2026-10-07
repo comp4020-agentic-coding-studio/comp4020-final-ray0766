@@ -281,3 +281,32 @@ unchanged base commit; these are documented instead of counted as passes. See th
 [bilingual record](docs/integration/bilingual.md) and its evidence. IAB is still
 unverified; its earlier empty new tab and unavailable control/Accessibility tools
 are separate from the Chrome results. No student reflection or deployment added.
+
+## Catalogue-built public village: authorised local density pass (7 October 2026)
+
+The user requested more public content and then required the actual player kit,
+including construction rules. Replaced the provisional bespoke 24-house layout
+with eight legal paired-house blueprints: sixteen rooms, paving, hedges/fences and
+lanterns, plus ordinary quick-build props. The final scene uses 64 objects and eight
+structures without widening limits. Public rendering and physics consume the same
+placements, blueprint builder, foundation fit and collision code as player content.
+The original private quick cottage and immutable resource snapshot are unchanged.
+
+Testing exposed radial ascent into a flat side wall freezing jump velocity. Physics
+version 4 clips that ascent and fences stale clients; a valid private v3 airborne
+pose keeps its physical state during the lazy upgrade. SQLite stays at schema12.
+The actual save was copied read-only and all construction, terrain, blueprint,
+ship and history tables were verified unchanged after reading the copy with new code.
+
+Chrome verified same-camera desktop/phone views, real door/room walking, wall-adjacent
+jump landing, both delivery NPCs, replay idempotency, refresh, flight, three public
+blueprints saved through the ordinary API and loaded in the player workshop, and
+phone touch boarding. The final diagnostic run had no page errors or rejected moves.
+Earlier driver overshoot and an unclassified two-409 replay remain archived as failures.
+Targeted checks passed after replacing the old straight-checkpoint task fixture with
+collision-resolved walking. One older fake-schema migration fixture still fails as
+previously reproduced on the unchanged bilingual base; it is not counted as passing.
+
+See [source mapping, screenshots and measured counters](docs/integration/village-density.md)
+and the [full workshop inventory](docs/integration/workshop-module-audit.md). No new
+Claude work, student reflection, push or public deployment was performed.

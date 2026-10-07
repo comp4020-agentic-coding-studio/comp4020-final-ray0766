@@ -1,0 +1,54 @@
+{
+  "beforeCommit": "7dc0b017d1df16a9686ddc3a09af49f2f65cecb4",
+  "countsAfter": {
+    "buildings": 16,
+    "walkInRooms": 16,
+    "structures": 8,
+    "objects": 64,
+    "tree": 20,
+    "path": 22,
+    "bench": 4,
+    "flowers": 8,
+    "lamp": 2,
+    "blueprintLamps": 8
+  },
+  "views": [
+    {
+      "view": "1440 close",
+      "drawCallsBefore": 142,
+      "drawCallsAfter": 136,
+      "trianglesAfter": 117344,
+      "cpuMedianMsAfter": 0.81,
+      "cpuP95MsAfter": 0.903,
+      "maxPoseComponentDifference": 0
+    },
+    {
+      "view": "1440 overview",
+      "drawCallsBefore": 147,
+      "drawCallsAfter": 139,
+      "trianglesAfter": 117452,
+      "cpuMedianMsAfter": 0.86,
+      "cpuP95MsAfter": 1.083,
+      "maxPoseComponentDifference": 2.149391775674303e-13
+    },
+    {
+      "view": "390 close",
+      "drawCallsBefore": 131,
+      "drawCallsAfter": 130,
+      "trianglesAfter": 116864,
+      "cpuMedianMsAfter": 0.747,
+      "cpuP95MsAfter": 0.76,
+      "maxPoseComponentDifference": 1.7763568394002505e-13
+    },
+    {
+      "view": "390 overview",
+      "drawCallsBefore": 147,
+      "drawCallsAfter": 139,
+      "trianglesAfter": 117452,
+      "cpuMedianMsAfter": 1.017,
+      "cpuP95MsAfter": 1.067,
+      "maxPoseComponentDifference": 4.405364961712621e-13
+    }
+  ],
+  "limits": "Observed public-scene counters only; CPU submission, not GPU timing. Phone viewport is emulated. Does not fix private capacity-scene overbudget."
+}

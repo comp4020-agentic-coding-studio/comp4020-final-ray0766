@@ -18,6 +18,8 @@ persisted 10–12 m new planets and protected old layouts.
 Space jumping with shared collision, server validation and saved airborne state.
 [Chinese / English interface](docs/integration/bilingual.md) adds an always-available
 language selector, browser-local preference and in-place translation without losing drafts.
+[Player-built public village](docs/integration/village-density.md) adds sixteen rooms in eight
+legal blueprint plots, with the same catalogue, dimensions and collisions used by players.
 The published Crit 8 release remains `09233d9`; these changes are not deployed.
 
 > Prepared with AI assistance from the student's recorded design decisions and
@@ -30,6 +32,15 @@ The first visit follows the browser language (`zh` → Chinese; otherwise Englis
 An explicit choice stays in local storage; no account or database change is needed.
 Changing language keeps the current world, flight, editor draft and saved progress.
 Player-authored names and technical IDs remain unchanged.
+
+## Public village examples
+
+The local public village uses 8 ordinary blueprint structures and 56 quick-build
+props, within the existing limits. Its three reproducible documents are
+[Garden pair](/examples/village/garden.json), [Loft pair](/examples/village/loft.json)
+and [Port pair](/examples/village/port.json). These are standard blueprint JSON;
+the current workshop does not yet expose an import button. The part grid, saved
+library, placement and collision rules are the same as player construction.
 
 ## What good means here
 
@@ -86,7 +97,7 @@ records the interrupted test-driver attempt and successful focused replay.
 ## Play and release status
 
 Walk with WASD/arrows or the touch stick; use E or nearby buttons to interact.
-Escape opens Pause, M opens the Atlas, and the harbour street leads to STARPORT / 01.
+Escape opens Pause, M opens the Atlas, and the harbour path leads to the two boarding lanterns.
 
 [Course Fly site](https://comp4020-final-ray0766.fly.dev/) ·
 [Source repository](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766) ·
