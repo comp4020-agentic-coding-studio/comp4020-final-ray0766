@@ -14,6 +14,8 @@ geometry update, measured main-world frame counts and its sub-millimetre window-
 and terracotta presentation, village ship parts and compatible ground collision.
 [Compact worlds](docs/integration/compact-worlds.md) restores a 14 m public village,
 persisted 10–12 m new planets and protected old layouts.
+[Sprint and jump](docs/integration/sprint-jump.md) adds hold-Shift running and
+Space jumping with shared collision, server validation and saved airborne state.
 The published Crit 8 release remains `09233d9`; these changes are not deployed.
 
 > Prepared with AI assistance from the student's recorded design decisions and

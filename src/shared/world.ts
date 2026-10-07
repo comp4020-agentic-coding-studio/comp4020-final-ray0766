@@ -4,6 +4,7 @@ import type { FlightState } from './flight.ts';
 export type Vec3 = [number, number, number];
 export const RADIUS = 10;
 export const SPEED = 3;
+export const SPRINT_SPEED = 4.8;
 export const INTERACT_DISTANCE = 1.65;
 export const CHARACTERS = ['clay', 'fern', 'sky'] as const;
 export type Character = typeof CHARACTERS[number];

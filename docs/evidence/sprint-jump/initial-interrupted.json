@@ -1,0 +1,31 @@
+{
+  "status": "interrupted",
+  "browser": "154.0.8037.98",
+  "checks": [
+    "Space rises and lands once while held/repeated; a second identity visibly receives authoritative jump height",
+    "Shift increases measured travel, release/blur stop sprint, and Space/Shift type normally in a modal input"
+  ],
+  "errors": [],
+  "rejectedMoves": [],
+  "measurements": {
+    "publicJump": {
+      "peak": 15.111666666666666,
+      "last": {
+        "radius": 14,
+        "grounded": true
+      },
+      "takeoffs": 1,
+      "frames": 91
+    },
+    "visitorPeak": 15.06647034374662,
+    "speed": {
+      "walked": 3.1241649891387526,
+      "ran": 5.844496333093032,
+      "intervalMs": 1200
+    }
+  },
+  "physicsVersion": 3,
+  "error": "Error: locator.click: Test ended.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Pause menu' })\u001b[22m\n\u001b[2m    - locator resolved to <button id=\"open-menu\" aria-label=\"Pause menu\">\u2026</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 \u00d7 waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <dialog open=\"\" id=\"shipyard\" aria-labelledby=\"shipyard-title\">\u2026</dialog> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 \u00d7 waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <dialog open=\"\" id=\"shipyard\" aria-labelledby=\"shipyard-title\">\u2026</dialog> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    282 \u00d7 waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m        - element is visible, enabled and stable\u001b[22m\n\u001b[2m        - scrolling into view if needed\u001b[22m\n\u001b[2m        - done scrolling\u001b[22m\n\u001b[2m        - <dialog open=\"\" id=\"shipyard\" aria-labelledby=\"shipyard-title\">\u2026</dialog> intercepts pointer events\u001b[22m\n\u001b[2m      - retrying click action\u001b[22m\n\u001b[2m        - waiting 500ms\u001b[22m\n",
+  "fixtures": "Fresh anonymous test sessions on isolated SQLite. Ordinary owner APIs create two fixture buildings. All travel, walking, sprint and jump use actual Chrome keyboard/touch. Blur handler is explicitly dispatched; no storage state, cookie or trace files are saved. 390px is desktop touch emulation.",
+  "driverIssue": "After editing a fixture ship name, the test did not accept the unsaved-change discard confirmation. The subsequent pause-menu click was blocked. Driver interrupted and corrected; not a completed gameplay run."
+}

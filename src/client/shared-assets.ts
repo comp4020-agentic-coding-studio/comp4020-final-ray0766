@@ -1,3 +1,5 @@
+import {HABITAT_CABIN} from '../shared/harbour-layout.ts';
+export {HABITAT_CABIN} from '../shared/harbour-layout.ts';
 import * as T from 'three';
 import { PartBuilder } from '../assets/claude-geometry/style/geometry.ts';
 import type { LodTier } from '../assets/claude-geometry/style/lod.ts';
@@ -51,12 +53,4 @@ export function sharedParts(instances:readonly AssetInstance[],lod:LodTier='medi
   let disposed=false;built.group.userData.disposeOwned=()=>{if(disposed)return;disposed=true;disposeObject3D(built.group);};
   return built.group;
 }
-export const HABITAT_CABIN:readonly AssetInstance[]=[
-  {part:'floor.deck',position:[-.5,.10,0]},{part:'floor.deck',position:[.5,.10,0]},
-  {part:'wall.door',position:[-.5,.10,.5]},{part:'wall.window',position:[.5,.10,.5]},
-  {part:'wall.solid',position:[-.5,.10,-.5],yaw:Math.PI},{part:'wall.louvre',position:[.5,.10,-.5],yaw:Math.PI},
-  {part:'wall.window',position:[1,.10,0],yaw:Math.PI/2},{part:'wall.solid',position:[-1,.10,0],yaw:-Math.PI/2},
-  {part:'roof.deck',position:[-.5,2.3,0]},{part:'roof.deck',position:[.5,2.3,0]},
-  {part:'service.pipe',position:[.88,.12,-.64]},
-];
 export const habitatCabin=()=>sharedParts(HABITAT_CABIN);

@@ -246,3 +246,21 @@ framing; focused route/view checks followed. See the factual
 [compact scale record](docs/integration/compact-worlds.md) and its retained evidence.
 No capacity claim, student reflection or public deployment was made. Shift sprint
 and Space jump were newly authorised during this pass and remain the next stage.
+
+## Sprint and jump: authorised local movement pass (7 October 2026)
+
+After the compact scale milestone, the user requested Shift sprint and Space jump.
+Added bounded movement flags to the shared client/server solver, radial jump and
+ceiling sweeps, a held-key latch, input isolation and the public village collision
+contract. Schema 12 preserves existing values and backs up v11; physics version 3
+recovers standing state on return. Existing world sizes and saved layouts remain.
+
+The Mac transport interruption left the original test session without a result;
+work resumed on the same branch. 70 focused tests subsequently passed, alongside
+typecheck, lint, build and evidence validation. A Chrome test-driver interruption
+was traced to the unchanged unsaved-edit confirmation and corrected; the final
+55-second journey passed with zero page errors or rejected moves. It includes real
+travel, sprinting jump, ceiling/roof/stair collision, another visitor's height,
+airborne refresh and phone touch. A final short visual check followed removal of
+the floating contact blob. See the [movement record](docs/integration/sprint-jump.md).
+Only local delivery is authorised; no deployment or student reflection was added.

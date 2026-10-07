@@ -18,7 +18,7 @@ export class SurfaceWalker {
     const desired = this.right().multiplyScalar(x).addScaledVector(this.north, y);
     if (desired.length() > 1) desired.normalize();
     desired.multiplyScalar(SPEED*speedScale);
-    this.velocity.lerp(desired, 1 - Math.exp(-12 * dt));
+    this.velocity.lerp(desired, 1 - Math.exp(-12 * dt)).clampLength(0,SPEED*speedScale);
     const speed = this.velocity.length();
     if (speed < 0.002 * speedScale) { this.velocity.set(0, 0, 0); return; }
     const dir = this.velocity.clone().normalize();

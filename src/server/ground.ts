@@ -1,14 +1,14 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
-import { GroundWorld, MAX_PATH_STEPS, PHYSICS_VERSION } from '../shared/physics/world.ts';
+import { GroundWorld, MAX_PATH_STEPS, PHYSICS_VERSION,SPRINT_FLAG } from '../shared/physics/world.ts';
 import type { GroundPose, GroundState, GroundMotion, MotionStep } from '../shared/physics/world.ts';
-import { distance, normalize, RADIUS, SPEED, validPosition } from '../shared/world.ts';
+import { distance, normalize, RADIUS, SPEED, SPRINT_SPEED, validPosition } from '../shared/world.ts';
 import type { Vec3 } from '../shared/world.ts';
 import type { planetStore } from './planets.ts';
 import { RequestError } from './errors.ts';
 interface PlayerRow {position:string;planet_id:string;moved_at:number}
-interface GroundRow {planet_id:string;position:string;radius:number;vertical_speed:number;grounded:number;sequence:number;scene_revision:number;physics_version:number;clock_credit:number;request_hash:string|null}
-const view=(r:GroundRow):GroundState=>({radius:r.radius,verticalSpeed:r.vertical_speed,grounded:!!r.grounded,sequence:r.sequence,sceneRevision:r.scene_revision,physicsVersion:r.physics_version});
+interface GroundRow {planet_id:string;position:string;radius:number;vertical_speed:number;grounded:number;sequence:number;scene_revision:number;physics_version:number;jump_held:number;clock_credit:number;request_hash:string|null}
+const view=(r:GroundRow):GroundState=>({radius:r.radius,verticalSpeed:r.vertical_speed,grounded:!!r.grounded,sequence:r.sequence,sceneRevision:r.scene_revision,physicsVersion:r.physics_version,jumpHeld:!!r.jump_held});
 const pose=(r:GroundRow):GroundPose=>({position:JSON.parse(r.position),...view(r)});
 export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>){
   const cache=new Map<string,GroundWorld>();
@@ -16,9 +16,9 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
   function row(id:string){return db.prepare('SELECT * FROM ground_states WHERE player_id=?').get(id) as unknown as GroundRow|undefined;}
   const player=(id:string)=>db.prepare('SELECT position,planet_id,moved_at FROM players WHERE id=?').get(id) as unknown as PlayerRow;
   function write(id:string,p:GroundPose,sequence:number,revision:number,credit:number,hash:string|null,planetId:string){
-    db.prepare(`INSERT INTO ground_states (player_id,planet_id,position,radius,vertical_speed,grounded,sequence,scene_revision,physics_version,clock_credit,request_hash) VALUES (?,?,?,?,?,?,?,?,?,?,?)
-      ON CONFLICT(player_id) DO UPDATE SET planet_id=excluded.planet_id,position=excluded.position,radius=excluded.radius,vertical_speed=excluded.vertical_speed,grounded=excluded.grounded,sequence=excluded.sequence,scene_revision=excluded.scene_revision,physics_version=excluded.physics_version,clock_credit=excluded.clock_credit,request_hash=excluded.request_hash`)
-      .run(id,planetId,JSON.stringify(p.position),p.radius,p.verticalSpeed,Number(p.grounded),sequence,revision,PHYSICS_VERSION,credit,hash);
+    db.prepare(`INSERT INTO ground_states (player_id,planet_id,position,radius,vertical_speed,grounded,sequence,scene_revision,physics_version,clock_credit,request_hash,jump_held) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+      ON CONFLICT(player_id) DO UPDATE SET planet_id=excluded.planet_id,position=excluded.position,radius=excluded.radius,vertical_speed=excluded.vertical_speed,grounded=excluded.grounded,sequence=excluded.sequence,scene_revision=excluded.scene_revision,physics_version=excluded.physics_version,clock_credit=excluded.clock_credit,request_hash=excluded.request_hash,jump_held=excluded.jump_held`)
+      .run(id,planetId,JSON.stringify(p.position),p.radius,p.verticalSpeed,Number(p.grounded),sequence,revision,PHYSICS_VERSION,credit,hash,Number(!!p.jumpHeld));
   }
   function ensure(id:string):GroundRow{
     const r=player(id),old=row(id),w=world(r.planet_id);
@@ -46,7 +46,7 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
         const m=motion as GroundMotion;
         if(m.physicsVersion!==PHYSICS_VERSION)throw new RequestError(409,'The walking model was updated. Reload this page before moving.');
         if(!Number.isSafeInteger(m.sequence)||!Array.isArray(m.steps)||!m.steps.length||m.steps.length>MAX_PATH_STEPS)throw new RequestError(400,'Send a bounded movement path and sequence.');
-        for(const s of m.steps)if(!Array.isArray(s)||s.length!==4||!validPosition(s.slice(0,3))||typeof s[3]!=='number'||!Number.isFinite(s[3])||s[3]<=0||s[3]>.050001)throw new RequestError(400,'Invalid movement sample.');
+        for(const s of m.steps)if(!Array.isArray(s)||(s.length!==4&&s.length!==5)||!validPosition(s.slice(0,3))||typeof s[3]!=='number'||!Number.isFinite(s[3])||s[3]<=0||s[3]>.050001||(s[4]!==undefined&&(!Number.isInteger(s[4])||s[4]<0||s[4]>3)))throw new RequestError(400,'Invalid movement sample.');
         hash=createHash('sha256').update(JSON.stringify({target,motion})).digest('hex');
         if(m.sequence===old.sequence&&hash===old.request_hash)return;
         if(m.sequence!==old.sequence+1)throw new RequestError(409,'A newer ground position exists. Reconnect to your saved position.');
@@ -64,8 +64,8 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
       let current=pose(old);
       for(const s of steps){
         const next=normalize(s.slice(0,3) as Vec3);
-        if(distance(current.position,next)*current.radius/RADIUS>SPEED*s[3]+.002)throw new RequestError(409,'Ground movement exceeded the walking speed.');
-        const resolved=w.move(current,next,s[3]);
+        if(distance(current.position,next)*current.radius/RADIUS>((s[4]??0)&SPRINT_FLAG?SPRINT_SPEED:SPEED)*s[3]+.002)throw new RequestError(409,'Ground movement exceeded the walking speed.');
+        const resolved=w.move(current,next,s[3],s[4]??0);
         if(distance(resolved.position,next)>.006)throw new RequestError(409,'A wall or an unsupported step blocks this path. Reconnect to your saved position.');
         current=resolved;
       }

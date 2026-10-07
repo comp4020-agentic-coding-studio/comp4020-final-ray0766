@@ -3,7 +3,7 @@ import { HUB_RADIUS } from '../shared/world-size.ts';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { CHARACTERS, distance, INTERACT_DISTANCE, NPCS, normalize, SPAWN, SPEED, validPosition } from '../shared/world.ts';
+import { CHARACTERS, distance, INTERACT_DISTANCE, NPCS, normalize, SPAWN, validPosition } from '../shared/world.ts';
 import type { Character, PlayerState, Quest } from '../shared/world.ts';
 import { historyStore, migrateHistory } from './history.ts';
 import { shipStore } from './ships.ts';
@@ -19,7 +19,7 @@ export function openStore(path: string) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-  if (schema > 11) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  if (schema > 12) { db.close(); throw new Error('Database schema is newer than this application.'); }
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
@@ -28,7 +28,7 @@ export function openStore(path: string) {
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
     );`);
   let migrationBackup: string | null = null;
-  if (schema < 11) {
+  if (schema < 12) {
     if (schema > 0 && path !== ':memory:') {
       migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
       // VACUUM INTO includes committed WAL data and produces a consistent restore point.
@@ -128,7 +128,18 @@ export function openStore(path: string) {
           }
         }
       }
-      db.exec('PRAGMA user_version=11; COMMIT;');
+      if(schema<12){
+        db.exec(`CREATE TABLE ground_states_v12 (
+          player_id TEXT PRIMARY KEY REFERENCES players(id), planet_id TEXT NOT NULL REFERENCES planets(id), position TEXT NOT NULL,
+          radius REAL NOT NULL CHECK(radius BETWEEN 8 AND 24), vertical_speed REAL NOT NULL CHECK(vertical_speed BETWEEN -10 AND 5.2),
+          grounded INTEGER NOT NULL CHECK(grounded IN (0,1)), sequence INTEGER NOT NULL, scene_revision INTEGER NOT NULL,
+          clock_credit REAL NOT NULL CHECK(clock_credit BETWEEN 0 AND 2), request_hash TEXT,
+          physics_version INTEGER NOT NULL DEFAULT 0 CHECK(physics_version>=0),jump_held INTEGER NOT NULL DEFAULT 0 CHECK(jump_held IN (0,1)));
+          INSERT INTO ground_states_v12 (player_id,planet_id,position,radius,vertical_speed,grounded,sequence,scene_revision,clock_credit,request_hash,physics_version)
+          SELECT player_id,planet_id,position,radius,vertical_speed,grounded,sequence,scene_revision,clock_credit,request_hash,physics_version FROM ground_states;
+          DROP TABLE ground_states;ALTER TABLE ground_states_v12 RENAME TO ground_states;`);
+      }
+      db.exec('PRAGMA user_version=12; COMMIT;');
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
   const history = historyStore(db);
@@ -143,8 +154,8 @@ export function openStore(path: string) {
     return result;
   };
   const state = (id: string): PlayerState => {
-    const initial=row(id),flight=navigation.flight(id);
-    const standing=initial.planet_id!=='hub'&&flight.mode==='ground'?ground.read(id):undefined;
+    row(id);const flight=navigation.flight(id);
+    const standing=flight.mode==='ground'?ground.read(id):undefined;
     const r = row(id);
     return { worldRadius:planets.planet(r.planet_id).radius, environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
   };
@@ -156,7 +167,7 @@ export function openStore(path: string) {
     saveShip(id: string, body: Record<string, unknown>) { row(id); ships.save(id, body); return state(id); },
     library(id: string) { row(id); return blueprints.list(id); },
     saveBlueprint(id: string, body: Record<string, unknown>) { row(id); return blueprints.save(id, body); },
-    takeoff(id:string,body:Record<string,unknown>,now=Date.now()){navigation.takeoff(id,body,now);ground.reset(id);return universe(id);},
+    takeoff(id:string,body:Record<string,unknown>,now=Date.now()){if(navigation.flight(id).mode==='ground'&&!ground.read(id).grounded)throw new RequestError(409,'Land on your feet before boarding.');navigation.takeoff(id,body,now);ground.reset(id);return universe(id);},
     flight(id:string,body:Record<string,unknown>,now=Date.now()){navigation.checkpoint(id,body,now);return state(id);},
     land(id:string,body:Record<string,unknown>,now=Date.now()){navigation.land(id,body,now);return universe(id);},
     has: (id: string) => Boolean(db.prepare('SELECT id FROM players WHERE id=?').get(id)),
@@ -175,14 +186,7 @@ export function openStore(path: string) {
       const r = row(id);
       if(navigation.flight(id).mode==='space')throw new RequestError(409,'Land before walking on the surface.');
       if ((expectedPlanet === undefined && r.planet_id !== 'hub') || (expectedPlanet !== undefined && expectedPlanet !== r.planet_id)) throw new RequestError(409, 'Your visit moved to another planet. Reconnecting…');
-      if(r.planet_id!=='hub'){ground.move(id,normalize(value),now,motion);return state(id);}
-      if(motion!==undefined)throw new RequestError(400,'Ground paths belong to private planet visits.');
-      // A bounded travel budget prevents a forged jump straight to a destination.
-      const budget = SPEED * Math.min(2, Math.max(0, now - r.moved_at) / 1000) + 0.35;
-      const p = normalize(value);
-      if (distance(JSON.parse(r.position), p, HUB_RADIUS) > budget) throw new RequestError(409, 'You moved too far while disconnected. Return to your saved spot.');
-      db.prepare('UPDATE players SET position=?,moved_at=?,revision=revision+1 WHERE id=?').run(JSON.stringify(p), now, id);
-      return state(id);
+      ground.move(id,normalize(value),now,motion);return state(id);
     },
     interact(id: string, action: unknown) {
       if (action !== 'pickup' && action !== 'deliver') throw new RequestError(400, 'Unknown delivery action.');

@@ -121,3 +121,8 @@ prototype. They do not claim to be the student's finished academic harness.
   is archived; do not delete it. Use shared radius for rendering and validation.
 - The user additionally authorised hold-Shift sprint and Space jump in a separate
   bounded movement stage, preserving collisions, persistence and input isolation.
+
+- Sprint/jump milestone: public and private worlds now share validated ground
+  batches, schema 12 and physics version 3. Preserve the jump-press latch and
+  airborne saves; never accept client height/velocity. Shared public anchors
+  belong in harbour-layout.ts. Keep ordinary walking at 3 m/s and sprint at 4.8 m/s.

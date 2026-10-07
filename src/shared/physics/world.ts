@@ -1,3 +1,5 @@
+import {HABITAT_CABIN,HUB_CABINS,HUB_TREES,HUB_SHIP} from '../harbour-layout.ts';
+import {HUB_DOCK} from '../ports.ts';
 import { fieldOf,gradedField,objectSeat } from '../terrain.ts';
 import type { HeightField } from '../../assets/claude-geometry/core/ground.ts';
 import { Vector3, Quaternion } from 'three';
@@ -13,15 +15,16 @@ import type { Vec3 } from '../world.ts';
 import { PART_COLLIDERS } from './parts.ts';
 import type { PartBox } from './parts.ts';
 
-export const BODY_RADIUS=.18, BODY_HEIGHT=1.60, STEP_HEIGHT=.26, GRAVITY=12, MAX_FALL_SPEED=10;
+export const BODY_RADIUS=.18, BODY_HEIGHT=1.60, STEP_HEIGHT=.26, GRAVITY=12, MAX_FALL_SPEED=10, JUMP_SPEED=5.2;
+export const SPRINT_FLAG=1, JUMP_FLAG=2;
 export const FIXED_STEP=1/60, MAX_PATH_STEPS=28;
 // Bump whenever static collision semantics change. Durable ground rows and
 // movement batches use this same value; a scene revision alone is not enough.
-export const PHYSICS_VERSION=2;
+export const PHYSICS_VERSION=3;
 const SKIN=.002, SUBSTEP=.035, ground=legacyHeightField();
-export interface GroundPose { position:Vec3; radius:number; verticalSpeed:number; grounded:boolean }
+export interface GroundPose { position:Vec3; radius:number; verticalSpeed:number; grounded:boolean; jumpHeld?:boolean }
 export interface GroundState extends Omit<GroundPose,'position'> { sequence:number; sceneRevision:number; physicsVersion:number }
-export type MotionStep=[number,number,number,number];
+export type MotionStep=[number,number,number,number]|[number,number,number,number,number];
 export interface GroundMotion { sequence:number; physicsVersion:number; steps:MotionStep[] }
 interface Collider { center:Vector3; half:Vector3; q:Quaternion; inverse:Quaternion; support:boolean; tag:string; objectId:string }
 interface Body { objectId:string; dir:Vector3; broad:number; colliders:Collider[]; round?:{radius:number;height:number;base:number} }
@@ -38,8 +41,9 @@ export class GroundWorld {
   radius(p:Vec3){return RADIUS+this.ground.heightAt(p);}
   pose(p:Vec3){return groundPose(p,this.ground);}
   constructor(planet:Pick<PlanetView,'id'|'revision'|'objects'|'blueprints'|'environment'|'radius'>){
-    this.baseRadius=planet.radius??RADIUS;this.field=fieldOf(planet.environment,this.baseRadius);this.generated=!!planet.environment;this.ground=this.generated?gradedField(this.field,planet.objects,planet.blueprints):this.field;
+    this.baseRadius=planet.radius??RADIUS;this.field=planet.id==='hub'?{id:'compact-harbour',waterLevel:null,heightAt:()=>this.baseRadius-RADIUS,normalAt:p=>[...p]}:fieldOf(planet.environment,this.baseRadius);this.generated=!!planet.environment;this.ground=this.generated?gradedField(this.field,planet.objects,planet.blueprints):this.field;
     this.revision=planet.revision;this.planetId=planet.id;
+    if(planet.id==='hub')this.harbour();
     for(const object of planet.objects){
       if(object.kind==='structure')this.structure(object,planet.blueprints?.[object.blueprintHash!]??[]);
       else if(objectHeight(object)>.6){
@@ -48,6 +52,20 @@ export class GroundWorld {
         this.add(body,object.position,object.rotation,base,{tag:'legacy solid prop',center:[0,h/2,0],half:[radius,h/2,radius]});this.bodies.push(body);
       }
     }
+  }
+  private harbour(){
+    for(const [i,site] of HUB_CABINS.entries()){
+      const body:Body={objectId:'hub-cabin-'+i,dir:vec(site.point),broad:2.5,colliders:[]};
+      for(const part of HABITAT_CABIN){if(part.part==='service.pipe')continue;const turn=new Quaternion().setFromAxisAngle(new Vector3(0,1,0),part.yaw??0);
+        for(const shape of PART_COLLIDERS[part.part]())this.add(body,site.point,site.yaw,this.baseRadius,{...shape,center:vec(shape.center).applyQuaternion(turn).add(vec(part.position)).toArray() as Vec3,yaw:(part.yaw??0)+(shape.yaw??0)});
+      }this.bodies.push(body);
+    }
+    for(const [i,dir] of [...HUB_TREES,HUB_SHIP].entries()){
+      const ship=i===HUB_TREES.length;this.bodies.push({objectId:'hub-prop-'+i,dir:vec(dir),broad:ship?3.2:1.4,colliders:[],round:{radius:ship?2.1:.4,height:ship?2.5:2.1,base:this.baseRadius}});
+    }
+    const gate:Body={objectId:'hub-gate',dir:vec(HUB_DOCK),broad:3.5,colliders:[]};
+    for(const x of [-1.55,1.55])this.add(gate,HUB_DOCK,0,this.baseRadius,{center:[x,1.3,-.15],half:[.09,1.3,.09],tag:'gate post'});
+    this.add(gate,HUB_DOCK,0,this.baseRadius,{center:[0,2.64,-.15],half:[1.75,.09,.19],tag:'gate lintel'});this.bodies.push(gate);
   }
   private add(body:Body,dir:Vec3,yaw:number,base:number,shape:PartBox){
     const anchor=new Quaternion().fromArray(anchorQuaternion({dir,yaw}));
@@ -118,12 +136,31 @@ export class GroundWorld {
     return deepest;
   }
   blocked(pose:GroundPose){return !!this.hit(pose.position,pose.radius);}
+  private radial(pose:GroundPose,position:Vec3,dt:number):GroundPose{
+    const support=this.support(position,pose.radius+(pose.grounded?STEP_HEIGHT:SKIN));
+    if(pose.grounded&&Math.abs(support.radius-pose.radius)<=STEP_HEIGHT+SKIN)return {...pose,position,radius:support.radius,verticalSpeed:0,grounded:true};
+    let verticalSpeed=Math.max(-MAX_FALL_SPEED,pose.verticalSpeed-GRAVITY*dt);
+    let radius=pose.radius+(pose.verticalSpeed+verticalSpeed)*.5*dt,grounded=false;
+    if(verticalSpeed<=0&&radius<=support.radius&&support.radius<=pose.radius+STEP_HEIGHT){radius=support.radius;verticalSpeed=0;grounded=true;}
+    if(radius>pose.radius){
+      const up=vec(position),count=Math.max(1,Math.ceil((radius-pose.radius)/SUBSTEP));let safe=pose.radius;
+      for(let i=1;i<=count;i++){
+        const next=pose.radius+(radius-pose.radius)*i/count,hit=this.hit(position,next);
+        if(hit&&hit.normal.dot(up)<-.45){
+          let low=safe,high=next;for(let j=0;j<10;j++){const mid=(low+high)/2,h=this.hit(position,mid);if(h&&h.normal.dot(up)<-.45)high=mid;else low=mid;}
+          radius=low;verticalSpeed=0;break;
+        }safe=next;
+      }
+    }
+    return {...pose,position,radius,verticalSpeed,grounded};
+  }
   /** Bounded swept movement; collision normals remove inward motion so corners
    * slide instead of cancelling the entire step. Both client and server call it. */
-  move(old:GroundPose,target:Vec3,dt:number):GroundPose{
+  move(old:GroundPose,target:Vec3,dt:number,flags=0):GroundPose{
     dt=Math.max(0,Math.min(.05,dt));const from=vec(old.position),to=vec(target).normalize();
     const count=Math.max(1,Math.ceil(from.angleTo(to)*Math.max(this.baseRadius,old.radius)/SUBSTEP));
-    let pose={...old,position:[...old.position] as Vec3};
+    const jumpHeld=!!(flags&JUMP_FLAG);let pose={...old,jumpHeld,position:[...old.position] as Vec3};
+    if(jumpHeld&&!old.jumpHeld&&old.grounded){pose.grounded=false;pose.verticalSpeed=JUMP_SPEED;}
     for(let i=1;i<=count;i++){
       const desired=from.clone().lerp(to,i/count).normalize();const prior=vec(pose.position);
       const remaining=desired.clone().sub(prior).projectOnPlane(prior).multiplyScalar(pose.radius),next=prior.clone();
@@ -132,12 +169,9 @@ export class GroundWorld {
         const candidate=next.clone().addScaledVector(remaining,1/pose.radius).normalize().toArray() as Vec3;
         const support=this.support(candidate,pose.radius+(pose.grounded?STEP_HEIGHT:SKIN));
         if(this.generated&&((this.field.waterLevel!==null&&this.field.heightAt(candidate)<this.field.waterLevel+.015)||support.radius>pose.radius+STEP_HEIGHT+SKIN))break;
-        let radius=pose.radius,verticalSpeed=pose.verticalSpeed,grounded=false;
-        if(pose.grounded&&Math.abs(support.radius-radius)<=STEP_HEIGHT+SKIN){radius=support.radius;verticalSpeed=0;grounded=true;}
-        else{verticalSpeed=Math.max(-MAX_FALL_SPEED,verticalSpeed-GRAVITY*tick);radius+=verticalSpeed*tick;
-          if(radius<=support.radius&&support.radius<=pose.radius+STEP_HEIGHT){radius=support.radius;verticalSpeed=0;grounded=true;}}
+        const radial=this.radial(pose,candidate,tick),{radius}=radial;
         const hit=this.hit(candidate,radius);
-        if(!hit){pose={position:candidate,radius,verticalSpeed,grounded};accepted=true;break;}
+        if(!hit){pose={...radial,jumpHeld};accepted=true;break;}
         const normal=hit.normal.projectOnPlane(next);
         if(normal.lengthSq()<1e-6){remaining.set(0,0,0);break;}
         normal.normalize();const inward=remaining.dot(normal);
@@ -149,8 +183,7 @@ export class GroundWorld {
         remaining.addScaledVector(normal,hit.depth+SKIN).clampLength(0,budget);
       }
       if(!accepted&&!pose.grounded){
-        const support=this.support(pose.position,pose.radius+SKIN),v=Math.max(-MAX_FALL_SPEED,pose.verticalSpeed-GRAVITY*tick),r=Math.max(support.radius,pose.radius+v*tick);
-        if(!this.hit(pose.position,r))pose={...pose,radius:r,verticalSpeed:r<=support.radius?0:v,grounded:r<=support.radius};
+        const radial=this.radial(pose,pose.position,tick);if(!this.hit(radial.position,radial.radius))pose={...radial,jumpHeld};
       }
     }
     return pose;
@@ -159,7 +192,7 @@ export class GroundWorld {
    * Removed supports start a fall; an overlapping moved wall cannot trap a user. */
   recover(old:GroundPose):GroundPose{
     const support=this.support(old.position,old.radius+STEP_HEIGHT);
-    const pose={...old,radius:Math.max(old.radius,support.radius),grounded:Math.abs(old.radius-support.radius)<STEP_HEIGHT,verticalSpeed:0};
+    const pose={...old,radius:Math.max(old.radius,support.radius),grounded:Math.abs(old.radius-support.radius)<STEP_HEIGHT,verticalSpeed:0,jumpHeld:false};
     if(pose.grounded)pose.radius=support.radius;
     if(!this.blocked(pose))return pose;
     const up=vec(old.position),right=new Vector3(1,0,0).projectOnPlane(up);if(right.lengthSq()<.01)right.set(0,0,1).projectOnPlane(up);right.normalize();const front=new Vector3().crossVectors(up,right);

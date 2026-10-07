@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "browser": "154.0.8037.98",
+  "checks": [
+    "Space rises and lands once while held/repeated; a second identity visibly receives authoritative jump height",
+    "Shift increases measured travel, release/blur stop sprint, and Space/Shift type normally in a modal input",
+    "Actual flight ignores ground shortcuts; 12 m cabin ceiling stops ascent and the existing stairs/flat roof support jumping and landing",
+    "Reload resumes the saved airborne state and lands on the same roof; 390px joystick still descends the staircase"
+  ],
+  "errors": [],
+  "rejectedMoves": [],
+  "measurements": {
+    "publicJump": {
+      "peak": 15.125,
+      "last": {
+        "radius": 14,
+        "grounded": true
+      },
+      "takeoffs": 1,
+      "frames": 91
+    },
+    "visitorPeak": 15.017611546553693,
+    "speed": {
+      "walked": 3.1241649891387526,
+      "ran": 5.794496372952849,
+      "intervalMs": 1200
+    },
+    "movingJump": {
+      "peak": 13.182016633383057,
+      "last": {
+        "radius": 12.049221129684746,
+        "grounded": true
+      },
+      "takeoffs": 1,
+      "frames": 91
+    },
+    "ceiling": {
+      "floor": 12.054325541916933,
+      "peak": 12.468811197132121,
+      "last": {
+        "radius": 12.054332716370514,
+        "grounded": true
+      },
+      "takeoffs": 1,
+      "frames": 91
+    },
+    "roof": {
+      "roof": 14.296992507902806,
+      "peak": 15.416834511663302,
+      "last": {
+        "radius": 14.296752893793311,
+        "grounded": true
+      },
+      "takeoffs": 1,
+      "frames": 91
+    }
+  },
+  "physicsVersion": 3,
+  "fixtures": "Fresh anonymous test sessions on isolated SQLite. Ordinary owner APIs create two fixture buildings. All travel, walking, sprint and jump use actual Chrome keyboard/touch. Blur handler is explicitly dispatched; no storage state, cookie or trace files are saved. 390px is desktop touch emulation."
+}

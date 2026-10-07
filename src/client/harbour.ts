@@ -1,3 +1,4 @@
+import {HUB_CABINS,HUB_TREES,HUB_SHIP} from '../shared/harbour-layout.ts';
 import * as T from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { NPCS, SPAWN, normalize } from '../shared/world.ts';
@@ -48,19 +49,15 @@ export function createHarbour(scene:T.Scene){
     return root;
   }
   // Put each shop behind its unchanged NPC, facing the short central walk.
-  for(const id of ['mica','sol'] as const){
-    const up=new T.Vector3(...NPCS[id].position),front=new T.Vector3(0,1,.12).projectOnPlane(up).normalize();
-    const site=up.clone().addScaledVector(front,-2.15/radius).normalize(),q=new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),site);
-    const localFront=front.clone().projectOnPlane(site).normalize().applyQuaternion(q.clone().invert());
-    const root=cabin(site.toArray() as Vec3,Math.atan2(localFront.x,localFront.z),id==='mica'?'MICA · POST':'SOL · GARDEN');
-    const planter=builtObject('flowers');planter.position.set(-1.15,.03,1.05);root.add(planter);
+  for(const site of HUB_CABINS){
+    const root=cabin(site.point,site.yaw,site.npc?site.npc==='mica'?'MICA · POST':'SOL · GARDEN':undefined);
+    if(site.npc){const planter=builtObject('flowers');planter.position.set(-1.15,.03,1.05);root.add(planter);}
   }
   const quiet=normalize([.8,.6,.2]),orchard=normalize([-.75,.5,.35]);
   route(NPCS.mica.position,quiet,.9);route(SPAWN,orchard,.9);
-  cabin(normalize([.38,1,.48]),-Math.PI/2);cabin(normalize([-.38,1,.48]),Math.PI/2);
   route(SPAWN,normalize([.25,1,.34]),.9);route(SPAWN,normalize([-.25,1,.34]),.9);
   for(const [point,yaw] of [[quiet,-.7],[orchard,.7],[normalize([.12,.45,.95]),Math.PI]] as [Vec3,number][]){const g=anchor(scenery,point,yaw);g.add(builtObject('bench'));}
-  for(const point of [[.6,1,.1],[-.6,1,.1],[.82,.5,-.7],[-.7,.48,-.8],[.45,.5,.93],[-.44,.42,.94],[.95,-.2,.34],[-.9,-.3,.2],[.12,-.8,.55]] as Vec3[]){
+  for(const point of HUB_TREES){
     const up=normalize(point),g=anchor(scenery,up);g.add(builtObject('tree'));blocks.push({point:new T.Vector3(...up),radius:.40,height:2.1});
   }
   for(const point of [[.12,1,.14],[-.13,1,-.25],[.21,1,-.52],[-.42,.85,-.4]] as Vec3[])anchor(scenery,point).add(sharedParts([{part:'service.light',position:[0,0,0]}]));
@@ -68,8 +65,7 @@ export function createHarbour(scene:T.Scene){
   for(const x of [-1.55,1.55]){box(gate,[.18,2.6,.18],[x,1.3,-.15],p.dark);box(gate,[.30,.24,.30],[x,.12,-.15],p.concrete);}
   box(gate,[3.5,.18,.38],[0,2.64,-.15],p.copper);label(gate,'SUNSEED · PORT',2.6,2.3,.06);
   box(dock,[.30,.9,.30],[-.75,.45,.05],p.dark);box(dock,[.38,.09,.36],[-.75,.92,.05],p.copper);
-  const dockUp=new T.Vector3(...HUB_DOCK),away=new T.Vector3(0,0,-1).projectOnPlane(dockUp).normalize();
-  const shipPoint=dockUp.clone().addScaledVector(away,5.0/radius).normalize().toArray() as Vec3;
+  const shipPoint=HUB_SHIP;
   route(HUB_DOCK,shipPoint,1.35);
   // Curved paving follows the small sphere; no enormous flat landing disc.
   const padUp=new T.Vector3(...shipPoint),right=new T.Vector3(1,0,0).projectOnPlane(padUp).normalize(),front=new T.Vector3().crossVectors(right,padUp).normalize();
