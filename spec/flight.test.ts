@@ -6,8 +6,9 @@ import { bearing, flightStep, groundFlight, planetCenter, SAFE_RADIUS, spaceDist
 import type { FlightState } from '../src/shared/flight.ts';
 import { openStore } from '../src/server/store.ts';
 import { SPAWN, normalize } from '../src/shared/world.ts';
+import { HUB_RADIUS } from '../src/shared/world-size.ts';
 import { HUB_DOCK } from '../src/shared/ports.ts';
-const walkToDock=(s:ReturnType<typeof openStore>,id:string,now:number)=>{s.move(id,normalize([0,1,-.2]),now+2000,'hub');s.move(id,HUB_DOCK,now+4000,'hub');return now+4000;};
+const walkToDock=(s:ReturnType<typeof openStore>,id:string,now:number)=>{s.move(id,normalize([0,1,0]),now+2000,'hub');s.move(id,normalize([0,1,-.35]),now+4000,'hub');s.move(id,HUB_DOCK,now+6000,'hub');return now+6000;};
 const idle={thrust:false,brake:false,turn:0,pitch:0};
 const body=(f:FlightState)=>({journey:f.journey,sequence:f.sequence,position:f.position,yaw:f.yaw,pitch:f.pitch,speed:f.speed,targetId:f.targetId});
 it('lays planets at stable non-overlapping coordinates and integrates a full stop without tunnelling',()=>{
@@ -50,7 +51,7 @@ it('accepts a collision stop but rejects a segment that crosses a planet',()=>{
   const s=openStore(':memory:');s.create('a',-5000);walkToDock(s,'a',-5000);s.takeoff('a',{planetId:'hub',journey:0},0);
   const f={...s.state('a').flight,position:[0,0,30] as [number,number,number],yaw:0,pitch:0,speed:36};
   s.db.prepare('UPDATE players SET flight=?,flight_at=0 WHERE id=?').run(JSON.stringify(f),'a');
-  const stopped={...f,position:[0,0,13] as [number,number,number],speed:0,sequence:1};expect(()=>s.flight('a',body(stopped),500)).not.toThrow();
+  const stopped={...f,position:[0,0,HUB_RADIUS+3] as [number,number,number],speed:0,sequence:1};expect(()=>s.flight('a',body(stopped),500)).not.toThrow();
   s.db.prepare('UPDATE players SET flight=?,flight_at=0 WHERE id=?').run(JSON.stringify(f),'a');
-  expect(()=>s.flight('a',body({...stopped,position:[0,0,-14],speed:36}),2000)).toThrow('outside');s.close();
+  expect(()=>s.flight('a',body({...stopped,position:[0,0,-HUB_RADIUS-4],speed:36}),2000)).toThrow('outside');s.close();
 });

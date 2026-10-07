@@ -10,7 +10,7 @@ describe('public display scale preserves saved navigation',()=>{
   for(let i=0;i<=800;i++){
    const angle=i/800*Math.PI*2,p=new Vector3(Math.sin(angle)*.6,Math.cos(angle),Math.sin(angle)*.8).normalize();
    const render=surfaceNormal(p),restored=logicalNormal(render);
-   expect(render.length()).toBeCloseTo(1,10);expect(restored.distanceTo(p)).toBeLessThan(1e-10);expect(surfacePoint(p).length()).toBeCloseTo(800,9);
+   expect(render.length()).toBeCloseTo(1,10);expect(restored.distanceTo(p)).toBeLessThan(1e-10);expect(surfacePoint(p).length()).toBeCloseTo(14,9);
    const tangent=new Vector3(1,0,0).projectOnPlane(p).normalize(),direction=surfaceTangent(p,tangent);
    expect(Math.abs(direction.dot(render))).toBeLessThan(1e-6);expect(surfaceOrientation(p,tangent).toArray().every(Number.isFinite)).toBe(true);
   }

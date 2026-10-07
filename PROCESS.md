@@ -229,3 +229,20 @@ failed zero-rejection assertions are retained. The final diagnostic-aware replay
 passed without any rejected moves, and separately verified persisted landing after
 support removal. It does not retroactively classify the earlier unlogged response.
 Application code was then frozen for the local preview update.
+
+## Compact worlds: authorised local scale pass (7 October 2026)
+
+Replaced the large projected harbour with a real 14 m village and persisted stable
+10–12 m dimensions only for new/safely untouched gardens. Existing player layouts
+retain their scale. Preserved the previous harbour source and immutable vendor
+assets. Shared radius now reaches terrain, collision, previews and flight. Schema11
+backs up v10 and aborts safely if a saved flight conflicts with hub clearance.
+
+Typecheck, lint, build and 57 targeted checks passed. Chrome completed copied-save
+recovery, public delivery, real travel and construction/interior walking on two
+sizes, refresh and phone touch without page errors or rejected moves. Screenshot
+review led to a bounded relocation of two existing cottages and complete-globe
+framing; focused route/view checks followed. See the factual
+[compact scale record](docs/integration/compact-worlds.md) and its retained evidence.
+No capacity claim, student reflection or public deployment was made. Shift sprint
+and Space jump were newly authorised during this pass and remain the next stage.

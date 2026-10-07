@@ -1,0 +1,301 @@
+{
+  "status": "passed",
+  "browser": "154.0.8037.98",
+  "checks": [
+    "Schema10 browser identity keeps coat, parcel, deliveries, position and custom ship; comparable spawn close/overview views render at 1440px and 390px",
+    "Actual keys walk the short public pickup → delivery → boarding route without movement rejections",
+    "11 m actual flight/landing, owner building, door/interior walking, refresh and 390px joystick retain metre-sized geometry",
+    "12 m actual flight/landing, owner building, door/interior walking, refresh and 390px joystick retain metre-sized geometry"
+  ],
+  "errors": [],
+  "movementFailures": [],
+  "samples": [
+    {
+      "label": "compact hub walking view",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "drawingBuffer": {
+        "width": 1440,
+        "height": 900
+      },
+      "seconds": 2.510800000011921,
+      "frames": 150,
+      "drawCalls": {
+        "median": 140,
+        "p95": 140,
+        "max": 140
+      },
+      "triangles": {
+        "median": 38814,
+        "p95": 38814,
+        "max": 38814
+      },
+      "rafCadenceMs": {
+        "median": 16.699999999999818,
+        "p95": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "renderCpuMs": {
+        "median": 1.427,
+        "p95": 1.683,
+        "max": 1.683
+      },
+      "cameraPosition": [
+        0,
+        16.184453140008806,
+        11.413302614005257
+      ],
+      "cameraHeading": [
+        0,
+        0.26066585229076455,
+        -0.9654290825583873
+      ],
+      "groundPosition": [
+        0,
+        0.9654290825583874,
+        0.2606658522907646
+      ],
+      "visitors": 0,
+      "quality": "full",
+      "shadowObjects": 0,
+      "shadowObjectsTotal": 0,
+      "objects": 0,
+      "structures": 0,
+      "timingNote": "Main scene, 2.5 s stationary capture. Draw/triangle counters update about 10 Hz. rAF is browser cadence; optional render CPU counter is a 30-frame submission mean, not GPU time. Phone dimensions emulate a handset on this Mac."
+    },
+    {
+      "label": "radius 11 cabin walking view",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "drawingBuffer": {
+        "width": 1440,
+        "height": 900
+      },
+      "seconds": 2.505399999976158,
+      "frames": 150,
+      "drawCalls": {
+        "median": 102,
+        "p95": 102,
+        "max": 102
+      },
+      "triangles": {
+        "median": 31904,
+        "p95": 31904,
+        "max": 31904
+      },
+      "rafCadenceMs": {
+        "median": 16.699999999999818,
+        "p95": 16.700000000000728,
+        "max": 16.800000000000182
+      },
+      "renderCpuMs": {
+        "median": 1.497,
+        "p95": 1.617,
+        "max": 1.617
+      },
+      "cameraPosition": [
+        7.956392234016407,
+        9.415260170378382,
+        11.824391333115328
+      ],
+      "cameraHeading": [
+        0.22444574885806712,
+        0.265599665964099,
+        -0.9375931544434933
+      ],
+      "groundPosition": [
+        0.6051714072345259,
+        0.7161344085610496,
+        0.3477342041569962
+      ],
+      "visitors": 0,
+      "quality": "full",
+      "shadowObjects": 1,
+      "shadowObjectsTotal": 1,
+      "objects": 1,
+      "structures": 1,
+      "timingNote": "Main scene, 2.5 s stationary capture. Draw/triangle counters update about 10 Hz. rAF is browser cadence; optional render CPU counter is a 30-frame submission mean, not GPU time. Phone dimensions emulate a handset on this Mac."
+    },
+    {
+      "label": "radius 11 phone walking view",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "drawingBuffer": {
+        "width": 390,
+        "height": 844
+      },
+      "seconds": 2.5045999999642374,
+      "frames": 150,
+      "drawCalls": {
+        "median": 94,
+        "p95": 94,
+        "max": 94
+      },
+      "triangles": {
+        "median": 25790,
+        "p95": 25790,
+        "max": 25790
+      },
+      "rafCadenceMs": {
+        "median": 16.699999999999818,
+        "p95": 16.700000000000728,
+        "max": 16.800000000000182
+      },
+      "renderCpuMs": {
+        "median": 1.68,
+        "p95": 1.83,
+        "max": 1.83
+      },
+      "cameraPosition": [
+        7.196126816573227,
+        8.326598740269706,
+        16.28007144834034
+      ],
+      "cameraHeading": [
+        0.31021142335056323,
+        0.366272001267622,
+        -0.877276292800751
+      ],
+      "groundPosition": [
+        0.5717655716982862,
+        0.6653622605468905,
+        0.47997624239170805
+      ],
+      "visitors": 0,
+      "quality": "compact",
+      "shadowObjects": 1,
+      "shadowObjectsTotal": 1,
+      "objects": 1,
+      "structures": 1,
+      "timingNote": "Main scene, 2.5 s stationary capture. Draw/triangle counters update about 10 Hz. rAF is browser cadence; optional render CPU counter is a 30-frame submission mean, not GPU time. Phone dimensions emulate a handset on this Mac."
+    },
+    {
+      "label": "radius 12 cabin walking view",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "drawingBuffer": {
+        "width": 1440,
+        "height": 900
+      },
+      "seconds": 2.511199999988079,
+      "frames": 150,
+      "drawCalls": {
+        "median": 102,
+        "p95": 102,
+        "max": 102
+      },
+      "triangles": {
+        "median": 31904,
+        "p95": 31904,
+        "max": 31904
+      },
+      "rafCadenceMs": {
+        "median": 16.699999999999818,
+        "p95": 16.700000000000728,
+        "max": 16.800000000000182
+      },
+      "renderCpuMs": {
+        "median": 1.453,
+        "p95": 1.97,
+        "max": 1.97
+      },
+      "cameraPosition": [
+        8.377485414544905,
+        10.284389179400081,
+        12.167620326831711
+      ],
+      "cameraHeading": [
+        0.21946408516850754,
+        0.2694190381824196,
+        -0.9376827273582521
+      ],
+      "groundPosition": [
+        0.5922073896008551,
+        0.7270070872337842,
+        0.34749259389804266
+      ],
+      "visitors": 0,
+      "quality": "full",
+      "shadowObjects": 1,
+      "shadowObjectsTotal": 1,
+      "objects": 1,
+      "structures": 1,
+      "timingNote": "Main scene, 2.5 s stationary capture. Draw/triangle counters update about 10 Hz. rAF is browser cadence; optional render CPU counter is a 30-frame submission mean, not GPU time. Phone dimensions emulate a handset on this Mac."
+    },
+    {
+      "label": "radius 12 phone walking view",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "drawingBuffer": {
+        "width": 390,
+        "height": 844
+      },
+      "seconds": 2.520599999964237,
+      "frames": 151,
+      "drawCalls": {
+        "median": 94,
+        "p95": 94,
+        "max": 94
+      },
+      "triangles": {
+        "median": 25790,
+        "p95": 25790,
+        "max": 25790
+      },
+      "rafCadenceMs": {
+        "median": 16.699999999999818,
+        "p95": 16.700000000000728,
+        "max": 16.800000000000182
+      },
+      "renderCpuMs": {
+        "median": 1.89,
+        "p95": 2.07,
+        "max": 2.07
+      },
+      "cameraPosition": [
+        7.9168552305939075,
+        9.52711572782293,
+        16.391922640113133
+      ],
+      "cameraHeading": [
+        0.286473921799614,
+        0.35106482231585906,
+        -0.8914517276112504
+      ],
+      "groundPosition": [
+        0.5682279581203187,
+        0.6868846453708253,
+        0.4531075717356852
+      ],
+      "visitors": 0,
+      "quality": "compact",
+      "shadowObjects": 1,
+      "shadowObjectsTotal": 1,
+      "objects": 1,
+      "structures": 1,
+      "timingNote": "Main scene, 2.5 s stationary capture. Draw/triangle counters update about 10 Hz. rAF is browser cadence; optional render CPU counter is a 30-frame submission mean, not GPU time. Phone dimensions emulate a handset on this Mac."
+    }
+  ],
+  "routesMetres": {
+    "spawnMica": 7.367675576531686,
+    "micaSol": 11.37239201821204,
+    "solDock": 5.272581713091387,
+    "spawnDock": 12.428288424146324
+  },
+  "fixtures": "Isolated SQLite copies and new anonymous sessions. Normal owner APIs create buildings; real keyboard/touch performs travel and walking. Cookies remain in memory. 390px is desktop Chrome touch emulation. Capacity benchmark not rerun."
+}

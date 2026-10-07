@@ -30,7 +30,7 @@ export class PrivateHistory {
  private render(state:WorldState,snapshot:HistorySnapshot){
   if(!this.stage)return;this.clear();
   const objects:PlacedObject[]=Object.values(state.objects).map(o=>({id:o.id,kind:o.spec.kind==='prop'?o.spec.prop:'structure',position:o.anchor.dir,rotation:o.anchor.yaw,version:o.version,...(o.spec.kind==='structure'?{blueprintHash:o.spec.blueprintHash,...structureSize(snapshot.blueprints[o.spec.blueprintHash])}:{})}));
-  const model=planetPreview(snapshot.environment??null,objects,snapshot.blueprints,this.stage.library);this.layer.add(model.object);this.release.push(()=>model.dispose());
+  const model=planetPreview(snapshot.environment??null,objects,snapshot.blueprints,this.stage.library,snapshot.radius);this.layer.add(model.object);this.stage.frameBox(new T.Box3().setFromObject(model.object),{direction:new T.Vector3(1,1.6,1),topInset:0,bottomInset:0});this.release.push(()=>model.dispose());
   this.stage.renderer.domElement.dataset.sequence=String(state.seq);this.stage.renderer.domElement.dataset.objectCount=String(Object.keys(state.objects).length);this.stage.renderer.domElement.dataset.stateHash=snapshot.hash;
  }
  private async events(after:number){
@@ -48,7 +48,7 @@ export class PrivateHistory {
  }
  async open(planet:string){
   if(this.dialog.open)return;this.planet=planet;this.dialog.showModal();document.body.classList.add('history-open');
-  try{this.stage=createPresentationStage('history',this.get('stage'));this.layer=new T.Group();this.stage.scene.add(this.layer);this.stage.start();const page=await this.bridge.page(planet,0);await this.events(Math.max(0,page.head-HISTORY_PAGE));await this.seek();this.stage.frameBox(new T.Box3(new T.Vector3(-12,-12,-12),new T.Vector3(12,15,12)),{direction:new T.Vector3(1,1.6,1),topInset:0,bottomInset:0});}
+  try{this.stage=createPresentationStage('history',this.get('stage'));this.layer=new T.Group();this.stage.scene.add(this.layer);this.stage.start();const page=await this.bridge.page(planet,0);await this.events(Math.max(0,page.head-HISTORY_PAGE));await this.seek();}
   catch(e){this.status(e instanceof Error?e.message:'Could not open history.');}
  }
  private close(){this.stop();this.ticket++;this.clear();const renderer=this.stage?.renderer;this.stage?.dispose();renderer?.forceContextLoss();this.stage=null;this.dialog.close();document.body.classList.remove('history-open');}

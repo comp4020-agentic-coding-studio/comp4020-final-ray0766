@@ -2,9 +2,10 @@ import type { DatabaseSync } from 'node:sqlite';
 import type { planetStore } from './planets.ts';
 import { RequestError } from './errors.ts';
 import { RADIUS } from '../shared/world.ts';
+import { bodyRadius, safeRadius, landingRadius } from '../shared/world-size.ts';
 import type { Vec3 } from '../shared/world.ts';
 import { canBoard, portPoint } from '../shared/ports.ts';
-import { bearing, firstCollision, groundFlight, LAND_RADIUS, LAND_SPEED, MAX_FLIGHT_SPEED, FLIGHT_ACCEL, FLIGHT_BRAKE, TURN_RATE, planetCenter, spaceDistance, validSpacePosition, wrapAngle } from '../shared/flight.ts';
+import { bearing, firstCollision, groundFlight, LAND_SPEED, MAX_FLIGHT_SPEED, FLIGHT_ACCEL, FLIGHT_BRAKE, TURN_RATE, planetCenter, spaceDistance, validSpacePosition, wrapAngle } from '../shared/flight.ts';
 import type { FlightState } from '../shared/flight.ts';
 interface FlightRow {flight:string|null;flight_at:number;planet_id:string;position:string}
 export function navigationStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>){
@@ -19,9 +20,9 @@ export function navigationStore(db:DatabaseSync,planets:ReturnType<typeof planet
       if(body.planetId!==r.planet_id||!Number.isSafeInteger(body.journey))throw new RequestError(409,'Your departure point changed. Reconnect first.');
       if(f.mode==='space'&&body.journey===f.journey-1)return;
       if(f.mode!=='ground'||body.journey!==f.journey)throw new RequestError(409,'This departure is no longer current.');
-      if(!canBoard(r.planet_id,JSON.parse(r.position)))throw new RequestError(409,'Walk to the starport boarding gate or your parked ship first.');
+      if(!canBoard(r.planet_id,JSON.parse(r.position),planets.planet(r.planet_id).radius))throw new RequestError(409,'Walk to the starport boarding gate or your parked ship first.');
       const center=planetCenter(planets.planet(r.planet_id).slot),up=portPoint(r.planet_id);
-      const position=center.map((v,i)=>v+up[i]*(RADIUS+20)) as Vec3;
+      const position=center.map((v,i)=>v+up[i]*(bodyRadius(planets.planet(r.planet_id))+20)) as Vec3;
       const other=planets.list(id).filter(p=>p.id!==r.planet_id).sort((a,b)=>spaceDistance(position,a.center)-spaceDistance(position,b.center))[0];
       const aim=other?bearing(position,other.center):{yaw:0,pitch:0};
       save(id,{mode:'space',journey:f.journey+1,position,yaw:aim.yaw,pitch:Math.max(-1.3,Math.min(1.3,aim.pitch)),speed:0,sequence:0,targetId:other?.id??null},now);
@@ -38,7 +39,7 @@ export function navigationStore(db:DatabaseSync,planets:ReturnType<typeof planet
       const dt=Math.min(2,Math.max(0,now-r.flight_at)/1000);
       const distance=spaceDistance(old.position,next.position);
       const bodies=planets.list(id);
-      const stoppedAtSurface=next.speed===0&&bodies.some(p=>spaceDistance(next.position,p.center)<=RADIUS+3.2+(p.environment?1.75:0));
+      const stoppedAtSurface=next.speed===0&&bodies.some(p=>spaceDistance(next.position,p.center)<=safeRadius(p,3.2));
       const speedInvalid=next.speed-old.speed>FLIGHT_ACCEL*dt+.8||(!stoppedAtSurface&&old.speed-next.speed>FLIGHT_BRAKE*dt+.8);
       if(distance>Math.max(old.speed,next.speed)*dt+.65||speedInvalid||Math.abs(wrapAngle(next.yaw-old.yaw))>TURN_RATE*dt+.16||Math.abs(next.pitch-old.pitch)>TURN_RATE*dt+.16)throw new RequestError(409,'Flight changed too quickly. Returning to the last saved position.');
       if(firstCollision(old.position,next.position,bodies,RADIUS+2.65)!==null)throw new RequestError(409,'Keep your ship outside the planet.');
@@ -49,7 +50,7 @@ export function navigationStore(db:DatabaseSync,planets:ReturnType<typeof planet
       if(body.journey!==f.journey)throw new RequestError(409,'This landing belongs to an earlier flight.');
       if(f.mode==='ground'&&r.planet_id===p.id)return;
       if(f.mode!=='space')throw new RequestError(409,'Board your ship before travelling.');
-      if(spaceDistance(f.position,planetCenter(p.slot))>LAND_RADIUS||f.speed>LAND_SPEED)throw new RequestError(409,'Fly closer and slow below 6 before landing.');
+      if(spaceDistance(f.position,planetCenter(p.slot))>landingRadius(p)||f.speed>LAND_SPEED)throw new RequestError(409,'Fly closer and slow below 6 before landing.');
       db.exec('BEGIN IMMEDIATE');
       try {
         db.prepare('INSERT INTO visits (player_id,planet_id,position) VALUES (?,?,?) ON CONFLICT(player_id,planet_id) DO UPDATE SET position=excluded.position').run(id,r.planet_id,r.position);

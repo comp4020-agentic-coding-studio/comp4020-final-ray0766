@@ -114,3 +114,10 @@ prototype. They do not claim to be the student's finished academic harness.
   buildings, blueprint hashes, ships or history. Preserve the existing capacities,
   terrain semantics and interaction flows. Back up SQLite before updating local
   preview 8098. Published Crit 8, Crit 7 and Claude's independent source stay untouched.
+
+- Latest user direction supersedes the projected city: a compact Messenger-inspired
+  village with actual public radius14, stable new private radii10–12 and metre-sized
+  assets. Preserve old owned/built/occupied layouts at10. The previous city source
+  is archived; do not delete it. Use shared radius for rendering and validation.
+- The user additionally authorised hold-Shift sprint and Space jump in a separate
+  bounded movement stage, preserving collisions, persistence and input isolation.

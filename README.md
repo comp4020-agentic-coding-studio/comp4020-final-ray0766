@@ -12,6 +12,8 @@ records the bounded desktop/phone replay, deferred editors and measured first-sc
 geometry update, measured main-world frame counts and its sub-millimetre window-hood difference.
 [R7 village integration](docs/integration/r7-village.md) adds the shared cream, timber
 and terracotta presentation, village ship parts and compatible ground collision.
+[Compact worlds](docs/integration/compact-worlds.md) restores a 14 m public village,
+persisted 10–12 m new planets and protected old layouts.
 The published Crit 8 release remains `09233d9`; these changes are not deployed.
 
 > Prepared with AI assistance from the student's recorded design decisions and

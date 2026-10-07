@@ -19,6 +19,7 @@ export interface PlayerState {
   ground?: GroundState;
   ship?: SavedShip;
   environment?: string|null;
+  worldRadius?: number;
 }
 export const normalize = (p: Vec3): Vec3 => {
   const l = Math.hypot(...p);
@@ -30,8 +31,8 @@ export const NPCS = {
   sol: { name: 'Sol', place: 'The glasshouse', position: normalize([-0.4, 0.85, -0.56]) },
 };
 export type NpcId = keyof typeof NPCS;
-export function distance(a: Vec3, b: Vec3): number {
-  return Math.acos(Math.max(-1, Math.min(1, a.reduce((sum, v, i) => sum + v * b[i], 0)))) * RADIUS;
+export function distance(a: Vec3, b: Vec3, radius=RADIUS): number {
+  return Math.acos(Math.max(-1, Math.min(1, a.reduce((sum, v, i) => sum + v * b[i], 0)))) * radius;
 }
 export function validPosition(p: unknown): p is Vec3 {
   return Array.isArray(p) && p.length === 3 && p.every(v => typeof v === 'number' && Number.isFinite(v))

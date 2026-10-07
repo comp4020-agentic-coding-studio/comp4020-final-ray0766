@@ -55,7 +55,7 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
       }else{
         // Compatibility for old clients: sweep their straight checkpoint path.
         // It cannot jump through walls or select a different floor by sending height.
-        const from=JSON.parse(old.position) as Vec3,d=distance(from,target),n=Math.max(1,Math.ceil(d/.035));
+        const from=JSON.parse(old.position) as Vec3,d=distance(from,target,old.radius),n=Math.max(1,Math.ceil(d/.035));
         if(d>SPEED*Math.min(2,Math.max(0,now-r.moved_at)/1000)+.35)throw new RequestError(409,'You moved too far while disconnected.');
         steps=Array.from({length:n},(_,i)=>{const p=normalize(from.map((v,k)=>v+(target[k]-v)*(i+1)/n) as Vec3);return [...p,Math.max(.001,d/SPEED/n)] as MotionStep;});
       }

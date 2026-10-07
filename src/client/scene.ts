@@ -2,6 +2,7 @@ import * as T from 'three';
 import {terrainModel} from './terrain-model.ts';
 import type {PlacedObject} from '../shared/planets.ts';
 import type {BlueprintContents} from '../shared/blueprints.ts';
+import { HUB_RADIUS } from '../shared/world-size.ts';
 import { RADIUS,normalize } from '../shared/world.ts';
 import type { Vec3,NpcId } from '../shared/world.ts';
 import { portPoint } from '../shared/ports.ts';
@@ -12,9 +13,9 @@ import { createHarbour } from './harbour.ts';
 import { harbourMaterials } from './harbour-materials.ts';
 export { courier } from './character.ts';
 export interface Obstacle {point:T.Vector3;radius:number;height:number}
-export function createWorld(scene:T.Scene,populated=true,environment:string|null=null,objects:PlacedObject[]=[],blueprints:BlueprintContents={}){
-  setGroundWorld(populated,environment);if(populated)return createHarbour(scene);useTerrain({environment,objects,blueprints});
-  const terrain=environment?terrainModel(environment,objects,blueprints,'medium',true):null;let globe:T.Mesh;
+export function createWorld(scene:T.Scene,populated=true,environment:string|null=null,objects:PlacedObject[]=[],blueprints:BlueprintContents={},radius=populated?HUB_RADIUS:RADIUS){
+  setGroundWorld(populated,environment,radius);if(populated)return createHarbour(scene);useTerrain({environment,objects,blueprints,radius});
+  const terrain=environment?terrainModel(environment,objects,blueprints,'medium',true,radius):null;let globe:T.Mesh;
   if(terrain){globe=terrain.ground;scene.add(terrain.object);}else{
   const geo=new T.IcosahedronGeometry(RADIUS,5),a=geo.attributes.position,colors:number[]=[];
   for(let i=0;i<a.count;i++){const p=new T.Vector3().fromBufferAttribute(a,i).normalize();a.setXYZ(i,...surfacePoint(p).toArray() as Vec3);const shade=.9+.08*Math.sin(p.x*18+p.z*9)*Math.cos(p.z*13);const color=new T.Color('#93a571').multiplyScalar(shade);colors.push(color.r,color.g,color.b);}

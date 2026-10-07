@@ -1,10 +1,9 @@
 import * as T from 'three';
 import { courier,PALETTES } from './character.ts';
-import { surfacePoint,surfaceScale,surfaceOrientation } from './terrain.ts';
+import { surfacePoint,surfaceScale,surfaceOrientation,groundRadius } from './terrain.ts';
 import { disposeGeometry } from './build-art.ts';
 import type { PresenceSnapshot,Visitor } from '../shared/presence.ts';
 import { MAX_NEIGHBOURS,PRESENCE_TTL } from '../shared/presence.ts';
-import { RADIUS } from '../shared/world.ts';
 import { COURIER_LOOK } from './presentation-materials.ts';
 import { applyCel } from '../assets/claude-geometry/style/cel.ts';
 import { VILLAGE } from '../assets/claude-geometry/style/look.ts';
@@ -39,7 +38,7 @@ export class GroundPresence {
         const ring=new T.Mesh(new T.RingGeometry(.28,.32,20),new T.MeshBasicMaterial({color:'#326e68',transparent:true,opacity:.65,side:T.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=.03;root.add(ring);
         r={visitor,root,low,body,avatar:null,position:new T.Vector3(...visitor.position),from:new T.Vector3(...visitor.position),facing:new T.Vector3(...visitor.facing),at:now,speed:0};this.people.set(visitor.id,r);
       }
-      const target=new T.Vector3(...visitor.position);r.speed=Math.min(3,r.position.angleTo(target)*RADIUS/Math.max(.3,(now-r.at)/1000));r.from.copy(r.position);r.visitor=visitor;r.at=now;r.body.color.set(PALETTES[visitor.character]);r.avatar?.setColor(visitor.character);
+      const target=new T.Vector3(...visitor.position);r.speed=Math.min(3,r.position.angleTo(target)*groundRadius()/Math.max(.3,(now-r.at)/1000));r.from.copy(r.position);r.visitor=visitor;r.at=now;r.body.color.set(PALETTES[visitor.character]);r.avatar?.setColor(visitor.character);
     }
     this.canvas.dataset.visitors=String(this.people.size);this.canvas.dataset.nearbyVisitors=String(snapshot.nearbyCount);this.canvas.dataset.presencePlanet=snapshot.planetId;document.getElementById('presence-summary')!.textContent=snapshot.nearbyCount?`${snapshot.nearbyCount} other visitor${snapshot.nearbyCount===1?'':'s'} on this world · teal foot rings`:'No other visitors nearby.';
     return true;
@@ -49,7 +48,7 @@ export class GroundPresence {
     const ordered=[...this.people.values()].sort((a,b)=>self.angleTo(a.position)-self.angleTo(b.position));let detailed=0,visible=0;
     for(const r of ordered){
       const t=Math.min(1,(now-r.at)/900),target=new T.Vector3(...r.visitor.position);r.position.copy(r.from).lerp(target,reduced?1:t).normalize();
-      const near=self.angleTo(r.position)*RADIUS,detail=near<6&&detailed<4;r.root.visible=near<21;if(r.root.visible)visible++;
+      const near=self.angleTo(r.position)*groundRadius(),detail=near<6&&detailed<4;r.root.visible=near<21;if(r.root.visible)visible++;
       if(detail){detailed++;if(!r.avatar){r.avatar=courier(r.visitor.character);r.avatar.root.traverse(o=>{if(o instanceof T.Mesh)o.castShadow=false;});r.root.add(r.avatar.root);}}
       else if(r.avatar){disposeGeometry(r.avatar.root);r.avatar=null;}
       r.low.visible=!detail;r.avatar?.animate(now/1000,t<1?r.speed*surfaceScale(r.position):0,reduced);

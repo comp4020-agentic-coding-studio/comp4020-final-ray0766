@@ -17,7 +17,7 @@ export const BODY_RADIUS=.18, BODY_HEIGHT=1.60, STEP_HEIGHT=.26, GRAVITY=12, MAX
 export const FIXED_STEP=1/60, MAX_PATH_STEPS=28;
 // Bump whenever static collision semantics change. Durable ground rows and
 // movement batches use this same value; a scene revision alone is not enough.
-export const PHYSICS_VERSION=1;
+export const PHYSICS_VERSION=2;
 const SKIN=.002, SUBSTEP=.035, ground=legacyHeightField();
 export interface GroundPose { position:Vec3; radius:number; verticalSpeed:number; grounded:boolean }
 export interface GroundState extends Omit<GroundPose,'position'> { sequence:number; sceneRevision:number; physicsVersion:number }
@@ -34,11 +34,11 @@ export class GroundWorld {
   readonly bodies:Body[]=[];
   readonly revision:number;
   readonly planetId:string;
-  readonly field:HeightField;readonly ground:HeightField;readonly generated:boolean;
+  readonly field:HeightField;readonly ground:HeightField;readonly generated:boolean;readonly baseRadius:number;
   radius(p:Vec3){return RADIUS+this.ground.heightAt(p);}
   pose(p:Vec3){return groundPose(p,this.ground);}
-  constructor(planet:Pick<PlanetView,'id'|'revision'|'objects'|'blueprints'|'environment'>){
-    this.field=fieldOf(planet.environment);this.generated=!!planet.environment;this.ground=this.generated?gradedField(this.field,planet.objects,planet.blueprints):this.field;
+  constructor(planet:Pick<PlanetView,'id'|'revision'|'objects'|'blueprints'|'environment'|'radius'>){
+    this.baseRadius=planet.radius??RADIUS;this.field=fieldOf(planet.environment,this.baseRadius);this.generated=!!planet.environment;this.ground=this.generated?gradedField(this.field,planet.objects,planet.blueprints):this.field;
     this.revision=planet.revision;this.planetId=planet.id;
     for(const object of planet.objects){
       if(object.kind==='structure')this.structure(object,planet.blueprints?.[object.blueprintHash!]??[]);
@@ -69,7 +69,7 @@ export class GroundWorld {
     for(const [x,z] of groundCells(parts))this.add(body,o.position,o.rotation,fit.baseRadius,{tag:'foundation',center:[x+.5-pivot.x,-depth/2,z+.5-pivot.z],half:[.5,depth/2,.5]});
     this.bodies.push(body);
   }
-  private near(dir:Vector3){return this.bodies.filter(b=>b.dir.angleTo(dir)*RADIUS<b.broad+BODY_HEIGHT*.5);}
+  private near(dir:Vector3){return this.bodies.filter(b=>b.dir.angleTo(dir)*this.baseRadius<b.broad+BODY_HEIGHT*.5);}
   /** Highest reachable support, using the bottom capsule sphere against the
    * plane. This includes the small correction for radial tilt on flat floors. */
   support(position:Vec3,ceiling:number):{radius:number;objectId:string|null;tag:string}{
@@ -89,7 +89,7 @@ export class GroundWorld {
   private hit(p:Vec3,radius:number):{normal:Vector3;tag:string;depth:number}|null{
     const dir=vec(p);let deepest:{normal:Vector3;tag:string;depth:number}|null=null;
     for(const body of this.near(dir)){
-      if(body.round){const b=body.round,d=body.dir.angleTo(dir)*RADIUS;
+      if(body.round){const b=body.round,d=body.dir.angleTo(dir)*this.baseRadius;
         if(radius<b.base+b.height&&radius+BODY_HEIGHT>b.base&&d<b.radius+BODY_RADIUS-SKIN){
           const normal=dir.clone().addScaledVector(body.dir,-dir.dot(body.dir));if(normal.lengthSq()<1e-8)normal.set(1,0,0).projectOnPlane(dir);
           const depth=b.radius+BODY_RADIUS-d;if(!deepest||depth>deepest.depth)deepest={normal:normal.normalize(),tag:'legacy solid prop',depth};
@@ -122,14 +122,14 @@ export class GroundWorld {
    * slide instead of cancelling the entire step. Both client and server call it. */
   move(old:GroundPose,target:Vec3,dt:number):GroundPose{
     dt=Math.max(0,Math.min(.05,dt));const from=vec(old.position),to=vec(target).normalize();
-    const count=Math.max(1,Math.ceil(from.angleTo(to)*Math.max(RADIUS,old.radius)/SUBSTEP));
+    const count=Math.max(1,Math.ceil(from.angleTo(to)*Math.max(this.baseRadius,old.radius)/SUBSTEP));
     let pose={...old,position:[...old.position] as Vec3};
     for(let i=1;i<=count;i++){
       const desired=from.clone().lerp(to,i/count).normalize();const prior=vec(pose.position);
-      const remaining=desired.clone().sub(prior).projectOnPlane(prior).multiplyScalar(RADIUS),next=prior.clone();
+      const remaining=desired.clone().sub(prior).projectOnPlane(prior).multiplyScalar(pose.radius),next=prior.clone();
       const tick=dt/count;let accepted=false;
       for(let slide=0;slide<4;slide++){
-        const candidate=next.clone().addScaledVector(remaining,1/RADIUS).normalize().toArray() as Vec3;
+        const candidate=next.clone().addScaledVector(remaining,1/pose.radius).normalize().toArray() as Vec3;
         const support=this.support(candidate,pose.radius+(pose.grounded?STEP_HEIGHT:SKIN));
         if(this.generated&&((this.field.waterLevel!==null&&this.field.heightAt(candidate)<this.field.waterLevel+.015)||support.radius>pose.radius+STEP_HEIGHT+SKIN))break;
         let radius=pose.radius,verticalSpeed=pose.verticalSpeed,grounded=false;
@@ -164,7 +164,7 @@ export class GroundWorld {
     if(!this.blocked(pose))return pose;
     const up=vec(old.position),right=new Vector3(1,0,0).projectOnPlane(up);if(right.lengthSq()<.01)right.set(0,0,1).projectOnPlane(up);right.normalize();const front=new Vector3().crossVectors(up,right);
     for(let distance=.25;distance<=3;distance+=.25)for(let i=0;i<16;i++){
-      const p=up.clone().addScaledVector(right,Math.cos(i*Math.PI/8)*distance/RADIUS).addScaledVector(front,Math.sin(i*Math.PI/8)*distance/RADIUS).normalize().toArray() as Vec3;
+      const p=up.clone().addScaledVector(right,Math.cos(i*Math.PI/8)*distance/this.baseRadius).addScaledVector(front,Math.sin(i*Math.PI/8)*distance/this.baseRadius).normalize().toArray() as Vec3;
       const s=this.support(p,old.radius+STEP_HEIGHT),candidate={position:p,radius:s.radius,verticalSpeed:0,grounded:true};if(!this.blocked(candidate))return candidate;
     }
     return this.pose(SPAWN);

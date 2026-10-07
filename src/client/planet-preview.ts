@@ -8,9 +8,9 @@ import type { PlacedObject } from '../shared/planets.ts';
 import { fieldOf,objectSeat } from '../shared/terrain.ts';
 import { terrainModel } from './terrain-model.ts';
 import { builtObject,disposeGeometry } from './build-art.ts';
-export function planetPreview(environment:string|null,objects:PlacedObject[],blueprints:BlueprintContents,library:StyleLibrary){
- const root=new T.Group(),release:(()=>void)[]=[],field=fieldOf(environment);
- if(environment){const model=terrainModel(environment,objects,blueprints);root.add(model.object);release.push(()=>model.dispose());}
+export function planetPreview(environment:string|null,objects:PlacedObject[],blueprints:BlueprintContents,library:StyleLibrary,radius=10){
+ const root=new T.Group(),release:(()=>void)[]=[],field=fieldOf(environment,radius);
+ if(environment){const model=terrainModel(environment,objects,blueprints,'medium',false,radius);root.add(model.object);release.push(()=>model.dispose());}
  else{const geometry=new T.IcosahedronGeometry(10,4),a=geometry.attributes.position;for(let i=0;i<a.count;i++){const p=new T.Vector3().fromBufferAttribute(a,i).normalize();a.setXYZ(i,...p.multiplyScalar(10+field.heightAt(p.toArray() as [number,number,number])).toArray() as [number,number,number]);}geometry.computeVertexNormals();const material=new T.MeshStandardMaterial({color:'#93a77e',roughness:.96});root.add(new T.Mesh(geometry,material));release.push(()=>{geometry.dispose();material.dispose();});}
  for(const o of objects){
   if(o.kind==='structure'){const parts=blueprints[o.blueprintHash!];if(!parts)throw Error('Preview blueprint is missing.');const fit=structureFit(parts,o.position,o.rotation,field),model=buildBlueprintModel(parts,library,'medium',{foundationDepth:fit.foundationDepth}),t=placedTransform({dir:o.position,yaw:o.rotation},fit);model.object.position.fromArray(t.position);model.object.quaternion.fromArray(t.quaternion);root.add(model.object);release.push(()=>model.dispose());}

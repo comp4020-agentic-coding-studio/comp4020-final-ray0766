@@ -1,3 +1,5 @@
+import { planetCenter, spaceDistance } from '../shared/flight.ts';
+import { HUB_RADIUS } from '../shared/world-size.ts';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -17,7 +19,7 @@ export function openStore(path: string) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-  if (schema > 10) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  if (schema > 11) { db.close(); throw new Error('Database schema is newer than this application.'); }
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
@@ -26,7 +28,7 @@ export function openStore(path: string) {
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
     );`);
   let migrationBackup: string | null = null;
-  if (schema < 10) {
+  if (schema < 11) {
     if (schema > 0 && path !== ':memory:') {
       migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
       // VACUUM INTO includes committed WAL data and produces a consistent restore point.
@@ -104,7 +106,29 @@ export function openStore(path: string) {
       // when that player next returns; no building/history migration is needed.
       if(!db.prepare('PRAGMA table_info(ground_states)').all().some(c=>c.name==='physics_version'))
         db.exec('ALTER TABLE ground_states ADD COLUMN physics_version INTEGER NOT NULL DEFAULT 0 CHECK(physics_version>=0)');
-      db.exec('PRAGMA user_version=10; COMMIT;');
+      if(schema<11){
+        if(!db.prepare('PRAGMA table_info(planets)').all().some(c=>c.name==='radius'))db.exec('ALTER TABLE planets ADD COLUMN radius REAL NOT NULL DEFAULT 10 CHECK(radius IN (10,11,12,14))');
+        db.prepare("UPDATE planets SET radius=? WHERE kind='hub'").run(HUB_RADIUS);
+        // Only untouched, unclaimed, unoccupied worlds can acquire a size.
+        // Owned worlds, old structures, visit positions and history stay intact.
+        db.exec(`UPDATE planets SET radius=10+((slot-1)%3),revision=revision+1
+          WHERE kind='garden' AND owner_id IS NULL
+          AND NOT EXISTS(SELECT 1 FROM planet_objects o WHERE o.planet_id=planets.id)
+          AND NOT EXISTS(SELECT 1 FROM players p WHERE p.planet_id=planets.id)
+          AND NOT EXISTS(SELECT 1 FROM history_events h WHERE h.planet_id=planets.id)
+          AND NOT EXISTS(SELECT 1 FROM visits v WHERE v.planet_id=planets.id)`);
+        const airborne=db.prepare('SELECT flight FROM players WHERE flight IS NOT NULL').all().map(r=>JSON.parse(String(r.flight))).filter(f=>f.mode==='space');
+        // Never put an old flight inside an enlarged surface. An occupied empty
+        // garden keeps 10 m; a conflicting hub flight aborts the transaction.
+        const sizes=db.prepare('SELECT id,slot,kind,radius,environment FROM planets WHERE radius>10').all();
+        for(const p of sizes){const center=planetCenter(Number(p.slot)),clearance=Number(p.radius)+3.2+(p.environment?1.75:0);
+          if(airborne.some(f=>spaceDistance(f.position,center)<clearance)){
+            if(p.kind==='hub')throw Error('Compact harbour migration paused: land the saved nearby spacecraft before upgrading. No saved data was changed.');
+            db.prepare('UPDATE planets SET radius=10 WHERE id=?').run(p.id);
+          }
+        }
+      }
+      db.exec('PRAGMA user_version=11; COMMIT;');
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
   const history = historyStore(db);
@@ -122,13 +146,13 @@ export function openStore(path: string) {
     const initial=row(id),flight=navigation.flight(id);
     const standing=initial.planet_id!=='hub'&&flight.mode==='ground'?ground.read(id):undefined;
     const r = row(id);
-    return { environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
+    return { worldRadius:planets.planet(r.planet_id).radius, environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
   };
   const universe = (id: string) => { const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) }; };
   return {
     db, state, universe, migrationBackup,
     historyPage(id:string,planet:unknown,after?:unknown,limit?:unknown){row(id);return history.page(id,planet,after,limit);},
-    historySnapshot(id:string,planet:unknown,sequence?:unknown){row(id);return history.snapshot(id,planet,sequence);},
+    historySnapshot(id:string,planet:unknown,sequence?:unknown){row(id);return {...history.snapshot(id,planet,sequence),radius:planets.planet(planet).radius};},
     saveShip(id: string, body: Record<string, unknown>) { row(id); ships.save(id, body); return state(id); },
     library(id: string) { row(id); return blueprints.list(id); },
     saveBlueprint(id: string, body: Record<string, unknown>) { row(id); return blueprints.save(id, body); },
@@ -156,7 +180,7 @@ export function openStore(path: string) {
       // A bounded travel budget prevents a forged jump straight to a destination.
       const budget = SPEED * Math.min(2, Math.max(0, now - r.moved_at) / 1000) + 0.35;
       const p = normalize(value);
-      if (distance(JSON.parse(r.position), p) > budget) throw new RequestError(409, 'You moved too far while disconnected. Return to your saved spot.');
+      if (distance(JSON.parse(r.position), p, HUB_RADIUS) > budget) throw new RequestError(409, 'You moved too far while disconnected. Return to your saved spot.');
       db.prepare('UPDATE players SET position=?,moved_at=?,revision=revision+1 WHERE id=?').run(JSON.stringify(p), now, id);
       return state(id);
     },
@@ -169,7 +193,7 @@ export function openStore(path: string) {
       if (action === 'deliver' && r.quest === 'delivered') return state(id);
       if (action === 'deliver' && r.quest !== 'carrying') throw new RequestError(409, 'Collect the parcel from Mica first.');
       const npc = action === 'pickup' ? NPCS.mica : NPCS.sol;
-      if (distance(JSON.parse(r.position), npc.position) > INTERACT_DISTANCE) throw new RequestError(409, `Walk closer to ${npc.name} first.`);
+      if (distance(JSON.parse(r.position), npc.position, HUB_RADIUS) > INTERACT_DISTANCE) throw new RequestError(409, `Walk closer to ${npc.name} first.`);
       db.prepare('UPDATE players SET quest=?,deliveries=?,revision=revision+1 WHERE id=?')
         .run(action === 'pickup' ? 'carrying' : 'delivered', action === 'pickup' ? 0 : 1, id);
       return state(id);

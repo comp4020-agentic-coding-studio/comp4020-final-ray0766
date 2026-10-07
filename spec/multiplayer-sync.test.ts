@@ -5,6 +5,7 @@ import { Group,Vector3 } from 'three';
 import { openStore } from '../src/server/store.ts';
 import { presenceStore } from '../src/server/presence.ts';
 import { canAcceptPlayer,canAcceptUniverse } from '../src/client/sync.ts';
+import { PlacedObjectShadows } from '../src/client/placed-shadows.ts';
 import { Colony } from '../src/client/colony.ts';
 import type { ColonyBridge } from '../src/client/colony.ts';
 import type { Universe } from '../src/shared/planets.ts';
@@ -32,7 +33,7 @@ function colonyFixture(current:Universe,read:()=>Promise<Universe>=async()=>curr
   // Exercise the real acceptance/polling methods without the editor's event setup.
   const colony:Colony=Object.assign(Object.create(Colony.prototype) as Colony,{universe:current,building:false,syncing:true,busy:false,
     bridge:{applyPlayer,universe:paint,obstacles,canvas:document.querySelector('canvas'),read} as Partial<ColonyBridge>,
-    layer:new Group(),objects:new Map(),painted:'',selected:null,pollBusy:false,
+    layer:new Group(),objects:new Map(),shadows:new PlacedObjectShadows(),painted:'',selected:null,pollBusy:false,
     hud:vi.fn(),editor:vi.fn(),starMap:vi.fn(),renderObject:vi.fn(()=>new Group())});
   return {colony,applyPlayer,paint,obstacles};
 }

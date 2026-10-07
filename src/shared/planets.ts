@@ -17,18 +17,18 @@ export interface PlacedObject { id: string; kind: ObjectKind; position: Vec3; ro
 export const objectName = (o: Pick<PlacedObject, 'kind'>) => o.kind === 'structure' ? 'Custom structure' : CATALOGUE[o.kind].name;
 export const objectRadius = (o: Pick<PlacedObject, 'kind' | 'radius'>) => o.kind === 'structure' ? o.radius ?? 0 : CATALOGUE[o.kind].radius;
 export const objectHeight = (o: Pick<PlacedObject, 'kind' | 'height'>) => o.kind === 'structure' ? o.height ?? 0 : CATALOGUE[o.kind].height;
-export interface PlanetSummary { id: string; name: string; kind: 'hub' | 'garden'; claimed: boolean; mine: boolean; revision: number; objectCount: number; center:Vec3; slot:number; environment?:string|null }
+export interface PlanetSummary { id: string; name: string; kind: 'hub' | 'garden'; claimed: boolean; mine: boolean; revision: number; objectCount: number; center:Vec3; slot:number; radius?:number; environment?:string|null }
 export interface PlanetView extends PlanetSummary { objects: PlacedObject[]; blueprints?: BlueprintContents }
 export interface Universe { player: PlayerState; planets: PlanetSummary[]; ownedPlanetId: string | null; currentPlanet: PlanetView }
 export function isBuildKind(value: unknown): value is BuildKind { return typeof value === 'string' && Object.hasOwn(CATALOGUE, value); }
-export function placementProblem(kind: ObjectKind, position: unknown, objects: PlacedObject[], ignoreId?: string, radius?: number) {
+export function placementProblem(kind: ObjectKind, position: unknown, objects: PlacedObject[], ignoreId?: string, radius?: number, worldRadius=10) {
   if (!validPosition(position)) return 'Choose a point on the planet.';
   const point=normalize(position);
   const size = objectRadius({kind, radius});
-  if (distance(point, SPAWN) < size + 1.0) return 'Leave a little space around the landing spot.';
+  if (distance(point, SPAWN, worldRadius) < size + 1.0) return 'Leave a little space around the landing spot.';
   for (const item of objects) {
     if (item.id === ignoreId || (item.kind === 'path' && kind === 'path')) continue;
-    if (distance(point, item.position) < size + objectRadius(item) + .06)
+    if (distance(point, item.position, worldRadius) < size + objectRadius(item) + .06)
       return 'A little too close. Leave room between objects.';
   }
   return null;

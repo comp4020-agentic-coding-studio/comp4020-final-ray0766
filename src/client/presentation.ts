@@ -12,7 +12,7 @@ export const PRESENTATION = {
   materials: { lod: 'medium', scans: false, look: 'village' },
   practical: { lod: 'medium', enabled: true },
   ground: {
-    hub: { fill: VILLAGE.light.sky, fillIntensity: .85, sun: VILLAGE.light.key, sunIntensity: VILLAGE.light.keyIntensity, environmentIntensity: .22, shadowExtent: 45, shadowFar: 180, fog: { color: VILLAGE.fog, density: .0033 } },
+    hub: { fill: VILLAGE.light.sky, fillIntensity: .85, sun: VILLAGE.light.key, sunIntensity: VILLAGE.light.keyIntensity, environmentIntensity: .22, shadowExtent: 18, shadowFar: 75, fog: { color: VILLAGE.fog, density: .0033 } },
     garden: { fill: VILLAGE.light.sky, fillIntensity: VILLAGE.light.fillIntensity, sun: VILLAGE.light.key, sunIntensity: VILLAGE.light.keyIntensity, environmentIntensity: .22, shadowExtent: 16, shadowFar: 65, fog: { color: VILLAGE.fog, near: 28, far: 65 } },
   },
   space: {

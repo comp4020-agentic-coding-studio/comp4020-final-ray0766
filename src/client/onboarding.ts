@@ -58,7 +58,7 @@ export function firstVisitTip(context: OnboardingContext, atlas = false): Tip {
   return {
     id: 'port', title: p.kind === 'hub' ? 'Walk to the starport' : 'Walk back to your ship',
     text: p.kind === 'hub'
-      ? 'Walk along the street to STARPORT / 01. Board your ship appears beside the gate. Find my ship adds a walking direction; Atlas marks a destination.'
+      ? 'Follow the short path to SUNSEED · PORT. Board your ship appears beside the gate. Find my ship adds a walking direction; Atlas marks a destination.'
       : 'Done building returns to walking. Find my ship marks your landing point. Walk to its return beacon; Board your ship appears when you are close.',
     action: { label: 'Find my ship', target: 'guide-port' },
   };
