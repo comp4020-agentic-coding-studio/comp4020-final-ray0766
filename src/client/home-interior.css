@@ -1,0 +1,31 @@
+.home-interior-ui{position:fixed;inset:0;z-index:45;pointer-events:none;color:#304e43;font-family:inherit}
+.home-interior-ui[hidden],.home-interior-ui [hidden]{display:none!important}
+.home-interior-ui button,.home-interior-ui select,.home-interior-ui .home-joystick{pointer-events:auto}
+.home-interior-ui button,.home-interior-ui select{font:inherit;color:#345a4a;border:1px solid #b4bda1;background:#f7efda;border-radius:12px;padding:11px 16px;min-height:44px;cursor:pointer;box-shadow:0 2px 0 #233d3512}
+.home-interior-ui button:focus-visible,.home-interior-ui select:focus-visible{outline:3px solid #cc8e54;outline-offset:3px}
+.home-interior-ui button:disabled{opacity:.5;cursor:default}
+.home-interior-ui button[aria-pressed=true],#home-save{background:#456b58;color:#fff4dc;border-color:#456b58}
+.home-room-header{position:absolute;top:max(20px,env(safe-area-inset-top));left:28px;right:28px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.home-room-header>div{background:#f6efdbeF;border:1px solid #d7d7b9;border-radius:18px;padding:16px 22px;box-shadow:0 5px 24px #3e64511b}
+.home-room-eyebrow{font-size:10px;letter-spacing:.18em;opacity:.7}
+.home-room-header h2{margin:5px 0 4px;font-size:24px;line-height:1.15;font-weight:600}
+#home-room-status{margin:0;font-size:12px;min-height:1.5em;max-width:400px}
+#home-exit{font-weight:600;background:#f6efdc}
+.home-room-tools{position:absolute;bottom:max(24px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);text-align:center;max-width:calc(100% - 32px);width:560px}
+.home-room-tools>button{margin:0 4px 8px}
+#home-room-hint{margin:0;font-size:12px;letter-spacing:.025em;line-height:1.6;color:#2b4d41;background:#f2eddccf;border-radius:16px;padding:6px 12px;display:inline-block}
+.home-room-editor{pointer-events:auto;position:absolute;right:28px;bottom:78px;width:340px;background:#f7efddef;border:1px solid #c3c7a9;border-radius:18px;padding:18px;box-shadow:0 6px 30px #355a4426;display:flex;flex-direction:column;gap:14px}
+.home-material-row{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.home-material-row>span{width:100%;font-size:12px}
+.home-material-row>button{font-size:12px;padding:8px 13px;min-height:40px}
+.home-room-editor label{font-size:12px;display:flex;align-items:center;gap:10px}
+.home-room-editor select{flex:1;min-width:0}
+.home-item-moves,.home-save-row{display:flex;gap:6px}
+.home-item-moves button{padding:8px 12px;flex:1}
+.home-item-moves button:last-child{flex:1.7;font-size:12px}
+.home-save-row{justify-content:flex-end;border-top:1px solid #d5d5b9;padding-top:12px}
+.home-joystick{position:absolute;left:28px;bottom:max(28px,env(safe-area-inset-bottom));width:102px;height:102px;border-radius:50%;background:#f5efdbe6;border:1px solid #c6cfb3;touch-action:none;user-select:none;box-shadow:0 3px 16px #44675121;display:none;align-items:center;justify-content:center}
+.home-joystick>span{display:block;width:40px;height:40px;border-radius:50%;background:#7fa18c;border:1px solid #547b63;pointer-events:none}
+.home-joystick small{position:absolute;top:109px;font-size:9px;letter-spacing:.15em;white-space:nowrap}
+@media(pointer:coarse),(max-width:700px){.home-joystick{display:flex}.home-room-header{top:max(12px,env(safe-area-inset-top));left:12px;right:12px;gap:8px}.home-room-header>div{padding:11px 14px;min-width:0}.home-room-header h2{font-size:19px}.home-room-eyebrow{font-size:8px}.home-room-header>button{font-size:12px;padding:10px 12px;white-space:nowrap}#home-room-status{font-size:10px;max-width:220px}.home-room-tools{bottom:max(26px,env(safe-area-inset-bottom));left:auto;right:12px;transform:none;width:calc(100% - 150px);max-width:330px}#home-room-hint{font-size:10px}.home-room-tools>button{font-size:12px;padding:10px 14px}.home-room-editor{right:12px;left:12px;bottom:100px;width:auto;padding:14px;gap:9px}.home-room-editor label{font-size:11px}.home-joystick{left:20px;bottom:max(34px,env(safe-area-inset-bottom));width:90px;height:90px}.home-joystick small{top:96px}}
+@media(prefers-reduced-motion:reduce){.home-interior-ui *{scroll-behavior:auto}}
