@@ -34,6 +34,7 @@ export class Workshop {
   private saved: LibraryEntry | null = null;
   private level = 0;
   private busy = false;
+  private applyToPlaced: ((entry: LibraryEntry) => Promise<void>) | null = null;
   private pointer: {x:number;y:number} | null = null;
   private hover: {x:number;y:number} | null = null;
   private unload = (e: BeforeUnloadEvent) => { if (this.opened && this.unsaved) e.preventDefault(); };
@@ -41,7 +42,7 @@ export class Workshop {
     this.dialog.id = 'workshop'; this.dialog.setAttribute('aria-labelledby', 'workshop-title');
     setHTML(this.dialog, `
       <header class="ws-head"><div><small>MY PLANET / ASSEMBLY BAY</small><h2 id="workshop-title">Workshop</h2></div><button id="ws-close" aria-label="Close workshop">Done ×</button></header>
-      <div class="ws-bar"><label>Name <input id="ws-name" maxlength="60" autocomplete="off" value=""></label><div class="ws-actions"><button id="ws-save" aria-describedby="ws-save-state">Save blueprint</button><button id="ws-place" aria-describedby="ws-save-state">Place on planet ↗</button></div></div>
+      <div class="ws-bar"><label>Name <input id="ws-name" maxlength="60" autocomplete="off" value=""></label><div class="ws-actions"><button id="ws-save" aria-describedby="ws-save-state">Save blueprint</button><button id="ws-place" aria-describedby="ws-save-state">Place on planet ↗</button><button id="ws-apply" hidden>Apply to my home</button></div></div>
       <div class="ws-body"><section class="ws-view" aria-label="Blueprint preview"><div class="ws-camera"><label>Level <select id="ws-level"><option value="0">L1 · ground</option><option value="1">L2 · upper</option><option value="2">L3 · top</option></select></label><button id="ws-frame">Frame model</button><button id="ws-inside">Look inside</button></div><div id="ws-stage"></div><p id="ws-hint" class="ws-hint" role="status" aria-live="polite">Drag to orbit · pinch or scroll to zoom · tap to add or select</p></section>
       <aside class="ws-panel"><fieldset id="ws-fields"><div class="ws-row"><button id="ws-new">New</button><button id="ws-cabin">Cabin starter</button><button id="ws-copy">Save as copy</button></div>
       <div class="ws-row"><label>Example <select id="ws-example"><option value="home">Lived-in cottage</option><option value="lane">Corner lane and courtyard</option><option value="stall">Pad-side stall</option></select></label><button id="ws-example-load">Load example</button></div>
@@ -59,6 +60,7 @@ export class Workshop {
     this.on('close',()=>this.close());
     this.dialog.addEventListener('cancel',e=>{e.preventDefault();this.close();});
     this.on('save',()=>void this.save());this.on('place',()=>this.place());
+    this.on('apply',()=>void this.applyPlaced());
     this.on('new',()=>{if(!this.discard())return;this.hover=null;this.saved=null;this.editor.reset();this.editor.rename('Untitled structure');this.changed();this.frame();});
     this.on('cabin',()=>{if(this.discard())this.starter();});
     this.on('example-load',()=>{if(!this.discard())return;const key=this.get<HTMLSelectElement>('example').value;const bp=(key==='home'?homeCottage:key==='lane'?cornerLane:padStall)();bp.id=crypto.randomUUID() as Blueprint['id'];this.hover=null;this.saved=null;this.editor.load(bp);this.changed();this.frame();this.status('Example loaded · save your own copy.');});
@@ -86,8 +88,10 @@ export class Workshop {
   private discard(){return !this.unsaved||window.confirm(translate('Discard the unsaved blueprint changes?'));}
   private status(text:string){setText(this.get('status'), text);}
   private result(result:{message:string}){this.status(result.message);}
-  async open(){
+  async open(initial?: Blueprint, applyToPlaced?: (entry: LibraryEntry) => Promise<void>){
     if(this.opened||!this.bridge.allowed())return;
+    this.applyToPlaced=applyToPlaced??null;
+    this.get('apply').hidden=!this.applyToPlaced;this.get('place').hidden=!!this.applyToPlaced;
     this.dialog.showModal();document.body.classList.add('workshop-open');
     this.busy=true;this.changed();this.status('Opening your saved library…');
     try{
@@ -106,8 +110,9 @@ export class Workshop {
       });
       this.stage.onFrame(()=>{if(this.stage){canvas.dataset.practical=JSON.stringify(this.stage.practical.stats());canvas.dataset.resources=JSON.stringify(this.stage.stats());canvas.dataset.textureFormat=this.stage.library.textureFormat;}});
       this.stage.start();this.entries=await this.bridge.read();this.libraryOptions();
-      if(this.entries.length)this.load(this.entries[0]);else this.starter();
-      this.status(this.entries.length?'Library loaded from the server.':'Start with this cabin, or create a new blueprint.');
+      if(initial){const existing=this.entries.find(entry=>entry.blueprint.id===initial.id);this.saved=existing??null;this.editor.load(initial);this.changed();}
+      else if(this.entries.length)this.load(this.entries[0]);else this.starter();
+      this.status(initial?'Edit your home. Applying keeps its room and furniture.':this.entries.length?'Library loaded from the server.':'Start with this cabin, or create a new blueprint.');
     }catch(error){this.status(error instanceof Error?error.message:'Workshop unavailable. Close and retry.');}
     finally{this.busy=false;this.changed();this.frame();}
   }
@@ -134,6 +139,15 @@ export class Workshop {
     finally{this.busy=false;this.changed();}
   }
   private place(){if(!this.saved||this.unsaved||!this.bridge.allowed())return;const entry=this.saved;this.close(true);this.bridge.place(entry);}
+  private async applyPlaced(){
+    if(!this.applyToPlaced||!this.bridge.allowed())return;
+    if(this.unsaved||!this.saved)await this.save();
+    if(this.unsaved||!this.saved)return;
+    this.busy=true;this.changed();
+    try{await this.applyToPlaced(this.saved);this.busy=false;this.close(true);}
+    catch(error){this.status(error instanceof Error?error.message:'Could not update your home. Your draft is safe.');}
+    finally{this.busy=false;this.changed();}
+  }
   private draftAt(x:number,y:number){const part=this.get<HTMLSelectElement>('tool').value;if(part==='select')return null;const point=this.view?.pointToGrid(x,y);return point?this.view!.slotAt(part as PartId,point.gx,point.gz,Number(this.get<HTMLSelectElement>('rot').value) as Rot,false):null;}
   private cellDraft():Omit<PartPlacement,'n'>|null {
     const part=this.get<HTMLSelectElement>('tool').value;
@@ -180,6 +194,7 @@ export class Workshop {
     this.get<HTMLButtonElement>('close').disabled=this.busy;
     const saveProblem=this.editor.saveProblem();
     this.get<HTMLButtonElement>('save').disabled=this.busy||!!saveProblem;
+    this.get<HTMLButtonElement>('apply').disabled=this.busy||!!saveProblem;
     const saveState=this.get('save-state'),saveText=this.busy?'':saveProblem??(this.unsaved?'Save your changes before placing on the planet.':'');
     if(saveState.textContent!==saveText)setText(saveState, saveText);
     this.get<HTMLButtonElement>('place').disabled=this.busy||this.unsaved||!this.saved;

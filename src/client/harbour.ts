@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {HUB_SHIP} from '../shared/harbour-layout.ts';
-import {HUB_OBJECTS,PUBLIC_CONTENTS,PUBLIC_FIELD,HUB_COUNTS} from '../shared/public-village.ts';
+import {HUB_OBJECTS,PUBLIC_CONTENTS,publicField,HUB_COUNTS} from '../shared/public-village.ts';
 import {structureFit} from '../shared/blueprints.ts';
 import {objectRadius,objectHeight} from '../shared/planets.ts';
 import type {BuildKind} from '../shared/planets.ts';
@@ -29,7 +29,7 @@ export function createHarbour(scene:T.Scene){
  const prototypes=new Map<BuildKind,T.Group>();
  for(const o of HUB_OBJECTS){
   if(o.kind==='structure'){
-   const parts=PUBLIC_CONTENTS[o.blueprintHash!],fit=structureFit(parts,o.position,o.rotation,PUBLIC_FIELD),model=buildBlueprintModel(parts,worldMaterials(),'medium',{foundationDepth:fit.foundationDepth}),t=placedTransform({dir:o.position,yaw:o.rotation},fit);
+   const parts=PUBLIC_CONTENTS[o.blueprintHash!],fit=structureFit(parts,o.position,o.rotation,publicField(radius)),model=buildBlueprintModel(parts,worldMaterials(),'medium',{foundationDepth:fit.foundationDepth}),t=placedTransform({dir:o.position,yaw:o.rotation},fit);
    model.object.position.fromArray(t.position);model.object.quaternion.fromArray(t.quaternion);scenery.add(model.object);
   }else{
    let source=prototypes.get(o.kind);if(!source){source=builtObject(o.kind,o.assetVersion??1);prototypes.set(o.kind,source);}

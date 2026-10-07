@@ -1,6 +1,7 @@
 import type { SavedShip } from './ships.ts';
 import type { GroundState } from './physics/world.ts';
 import type { FlightState } from './flight.ts';
+import type { HomeDescriptor, HomeLocation } from './home.ts';
 export type Vec3 = [number, number, number];
 export const RADIUS = 10;
 export const SPEED = 3;
@@ -21,6 +22,8 @@ export interface PlayerState {
   ship?: SavedShip;
   environment?: string|null;
   worldRadius?: number;
+  home?: HomeDescriptor | null;
+  location?: HomeLocation;
 }
 export const normalize = (p: Vec3): Vec3 => {
   const l = Math.hypot(...p);

@@ -1,6 +1,6 @@
 import { QUICK_PARTS } from '../quick-parts.ts';
 import {HUB_SHIP} from '../harbour-layout.ts';
-import {HUB_OBJECTS,PUBLIC_CONTENTS,PUBLIC_FIELD} from '../public-village.ts';
+import {HUB_OBJECTS,PUBLIC_CONTENTS,publicField} from '../public-village.ts';
 import { fieldOf,gradedField,objectSeat } from '../terrain.ts';
 import type { HeightField } from '../../assets/claude-geometry/core/ground.ts';
 import { Vector3, Quaternion } from 'three';
@@ -45,7 +45,7 @@ export class GroundWorld {
   radius(p:Vec3){return RADIUS+this.ground.heightAt(p);}
   pose(p:Vec3){return groundPose(p,this.ground);}
   constructor(planet:Pick<PlanetView,'id'|'revision'|'objects'|'blueprints'|'environment'|'radius'>){
-    this.baseRadius=planet.radius??RADIUS;this.field=planet.id==='hub'?PUBLIC_FIELD:fieldOf(planet.environment,this.baseRadius);this.generated=!!planet.environment;this.ground=this.generated?gradedField(this.field,planet.objects,planet.blueprints):this.field;
+    this.baseRadius=planet.radius??RADIUS;this.field=planet.id==='hub'?publicField(planet.radius):fieldOf(planet.environment,this.baseRadius);this.generated=!!planet.environment;this.ground=this.generated?gradedField(this.field,planet.objects,planet.blueprints):this.field;
     this.revision=planet.revision;this.planetId=planet.id;
     if(planet.id==='hub')this.harbour();
     const objects=planet.id==='hub'?[...HUB_OBJECTS,...planet.objects]:planet.objects;

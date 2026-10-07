@@ -1,0 +1,55 @@
+{
+  "recordedAt": "2026-10-07T17:19:05.211Z",
+  "scope": "Final pure and HTTP spec regression for the home sample integration; browser E2E is recorded separately.",
+  "application": {
+    "mode": "normal",
+    "url": "http://127.0.0.1:8127",
+    "database": ".data/regression.sqlite"
+  },
+  "spec": {
+    "command": "APP_URL=http://127.0.0.1:8127 node node_modules/vitest/vitest.mjs run --maxWorkers=2",
+    "include": "spec/**/*.test.ts",
+    "success": true,
+    "files": {
+      "total": 37,
+      "passed": 37,
+      "failed": 0
+    },
+    "tests": {
+      "total": 173,
+      "passed": 173,
+      "failed": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "durationSeconds": 21.72
+  },
+  "eslint": {
+    "command": "node node_modules/eslint/bin/eslint.js .",
+    "exitCode": 0,
+    "files": 269,
+    "errors": 0,
+    "warnings": 0
+  },
+  "typescript": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit",
+    "exitCode": 0
+  },
+  "additionalChecks": {
+    "gitDiffCheckPassed": true,
+    "vendoredGeometryUnchanged": true
+  },
+  "serverCleanup": {
+    "exitCode": 0,
+    "port8127ListeningAfterStop": false,
+    "otherServicesUntouched": true
+  },
+  "baselineFixtureVerification": {
+    "commit": "d06a54a7ab7ba849b5e90db1984a27a4b053ae0d",
+    "shipTestsReproducedAsFailing": 2,
+    "changes": "Updated the existing dock approach fixture and explicit ground-physics migration expectation; no walking-speed or migration behavior changes for these fixes."
+  },
+  "limitations": [
+    "This regression does not establish real-device frame-rate or mobile memory performance."
+  ]
+}

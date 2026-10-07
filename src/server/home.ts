@@ -1,0 +1,148 @@
+import { createHash, randomUUID } from 'node:crypto';
+import type { DatabaseSync } from 'node:sqlite';
+import { defaultHomeInterior, HOME_ENTRY, HOME_EXIT, HOME_ITEM_KINDS, HOME_MATERIALS, HOME_MAX_ITEMS, HOME_MOVE_SPEED, HOME_ROOM, homeItemBounds, homePathAllowed, homePositionAllowed } from '../shared/home.ts';
+import type { HomeDescriptor, HomeInterior, HomeItem, HomeLocation } from '../shared/home.ts';
+import { distance } from '../shared/world.ts';
+import type { Vec3 } from '../shared/world.ts';
+import { structureFit, structureSize } from '../shared/blueprints.ts';
+import { fieldOf } from '../shared/terrain.ts';
+import { localToDir } from '../assets/claude-geometry/core/anchor.ts';
+import { partTransform, pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
+import { encodeBlueprint, hashInput } from '../assets/claude-geometry/blueprint/codec.ts';
+import type { Blueprint } from '../assets/claude-geometry/blueprint/model.ts';
+import { canonicalJson } from '../assets/claude-geometry/core/doc.ts';
+import { HOME_DOOR_PART, HOME_ENVIRONMENT, homeVariant, starterManifest } from '../shared/home-layout.ts';
+import type { planetStore } from './planets.ts';
+import type { blueprintStore } from './blueprints.ts';
+import type { historyStore } from './history.ts';
+import { RequestError } from './errors.ts';
+
+export function migrateHomes(db: DatabaseSync) {
+  if (!db.prepare('PRAGMA table_info(planets)').all().some(c=>c.name==='sample_radius')) db.exec('ALTER TABLE planets ADD COLUMN sample_radius REAL CHECK(sample_radius IS NULL OR sample_radius>0)');
+  // Larger sample planets still use metre-sized floors above their surfaces.
+  const groundSql=String(db.prepare("SELECT sql FROM sqlite_master WHERE name='ground_states'").get()?.sql??'');
+  if(groundSql.includes('BETWEEN 8 AND 24'))db.exec(`CREATE TABLE ground_states_home (
+    player_id TEXT PRIMARY KEY REFERENCES players(id), planet_id TEXT NOT NULL REFERENCES planets(id), position TEXT NOT NULL,
+    radius REAL NOT NULL CHECK(radius BETWEEN 1 AND 128), vertical_speed REAL NOT NULL CHECK(vertical_speed BETWEEN -10 AND 5.2),
+    grounded INTEGER NOT NULL CHECK(grounded IN (0,1)), sequence INTEGER NOT NULL, scene_revision INTEGER NOT NULL,
+    clock_credit REAL NOT NULL CHECK(clock_credit BETWEEN 0 AND 2), request_hash TEXT,
+    physics_version INTEGER NOT NULL DEFAULT 0 CHECK(physics_version>=0),jump_held INTEGER NOT NULL DEFAULT 0 CHECK(jump_held IN (0,1)));
+    INSERT INTO ground_states_home SELECT * FROM ground_states;DROP TABLE ground_states;ALTER TABLE ground_states_home RENAME TO ground_states;`);
+  db.exec(`CREATE TABLE IF NOT EXISTS home_sample_config (id INTEGER PRIMARY KEY CHECK(id=1), enabled INTEGER NOT NULL CHECK(enabled IN (0,1)));
+    CREATE TABLE IF NOT EXISTS home_interiors (
+      planet_id TEXT PRIMARY KEY REFERENCES planets(id), building_id TEXT NOT NULL UNIQUE REFERENCES planet_objects(id),
+      interior_id TEXT NOT NULL UNIQUE, document TEXT NOT NULL CHECK(json_valid(document)), variant TEXT NOT NULL DEFAULT 'base');
+    CREATE TABLE IF NOT EXISTS home_locations (
+      player_id TEXT PRIMARY KEY REFERENCES players(id), document TEXT NOT NULL CHECK(json_valid(document)), moved_at INTEGER NOT NULL, request_hash TEXT);
+    CREATE TABLE IF NOT EXISTS home_manifests (
+      planet_id TEXT PRIMARY KEY REFERENCES planets(id), version INTEGER NOT NULL, document TEXT NOT NULL CHECK(json_valid(document)), hash TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS object_replacements (
+      seq INTEGER PRIMARY KEY AUTOINCREMENT, planet_id TEXT NOT NULL REFERENCES planets(id), object_id TEXT NOT NULL,
+      before_hash TEXT NOT NULL, after_hash TEXT NOT NULL, before_variant TEXT NOT NULL, after_variant TEXT NOT NULL,
+      object_version INTEGER NOT NULL, undone INTEGER NOT NULL DEFAULT 0);
+    CREATE TRIGGER IF NOT EXISTS home_building_no_delete BEFORE DELETE ON planet_objects
+      WHEN EXISTS(SELECT 1 FROM home_interiors WHERE building_id=OLD.id)
+      BEGIN SELECT RAISE(ABORT,'The home contains a persistent interior and cannot be deleted'); END;`);
+}
+const strict=(body:Record<string,unknown>,keys:string[])=>{if(Object.keys(body).some(k=>!keys.includes(k)))throw new RequestError(400,'Unexpected home field.');};
+const vec=(v:unknown):v is Vec3=>Array.isArray(v)&&v.length===3&&v.every(n=>typeof n==='number'&&Number.isFinite(n));
+const digest=(v:unknown)=>createHash('sha256').update(canonicalJson(v)).digest('hex');
+interface HomeRow { planet_id:string;building_id:string;interior_id:string;document:string;variant:HomeDescriptor['variant'] }
+
+export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>,blueprints:ReturnType<typeof blueprintStore>,history:ReturnType<typeof historyStore>,enabled:boolean) {
+  const transaction=<T>(fn:()=>T):T=>{if(db.isTransaction)return fn();db.exec('BEGIN IMMEDIATE');try{const out=fn();db.exec('COMMIT');return out;}catch(e){if(db.isTransaction)db.exec('ROLLBACK');throw e;}};
+  const player=(id:string)=>{const p=db.prepare('SELECT planet_id,position,flight FROM players WHERE id=?').get(id);if(!p)throw new RequestError(401,'Your visit expired.');return p;};
+  const home=(planetId:string)=>db.prepare('SELECT * FROM home_interiors WHERE planet_id=?').get(planetId) as unknown as HomeRow|undefined;
+  const byBuilding=(buildingId:unknown)=>{if(typeof buildingId!=='string')throw new RequestError(400,'Choose a home.');const h=db.prepare('SELECT * FROM home_interiors WHERE building_id=?').get(buildingId) as unknown as HomeRow|undefined;if(!h)throw new RequestError(404,'This building has no home interior.');return h;};
+  const location=(id:string):HomeLocation=>{const p=player(id),r=db.prepare('SELECT document FROM home_locations WHERE player_id=?').get(id);return r?JSON.parse(String(r.document)):{kind:'exterior',planetId:String(p.planet_id),visitEpoch:0};};
+  const writeLocation=(id:string,loc:HomeLocation,now=Date.now(),requestHash:string|null=null)=>db.prepare('INSERT INTO home_locations(player_id,document,moved_at,request_hash) VALUES(?,?,?,?) ON CONFLICT(player_id) DO UPDATE SET document=excluded.document,moved_at=excluded.moved_at,request_hash=excluded.request_hash').run(id,JSON.stringify(loc),now,requestHash);
+  const epoch=(old:HomeLocation,value:unknown)=>{if(!Number.isSafeInteger(value)||old.visitEpoch!==value)throw new RequestError(409,'Your home visit changed. Reconnect before moving.');};
+  const requireOutside=(id:string)=>{if(enabled&&location(id).kind==='interior')throw new RequestError(409,'Leave your home before using surface actions.');};
+  const exterior=(id:string,value?:unknown)=>{if(!enabled)return;const loc=location(id);if(loc.kind==='interior')throw new RequestError(409,'Leave your home before using surface actions.');epoch(loc,value);};
+  function door(h:HomeRow) {
+    const p=planets.planet(h.planet_id),o=planets.view('',h.planet_id).objects.find(o=>o.id===h.building_id);
+    if(!o?.blueprintHash)throw new RequestError(409,'Your home exterior is unavailable; its contents are preserved.');
+    const parts=blueprints.parts(o.blueprintHash),part=parts.find(p=>p.n===HOME_DOOR_PART&&p.part==='wall.door.open');
+    if(!part)throw new RequestError(409,'The home entrance is unavailable; its contents are preserved.');
+    const t=partTransform(part,pivotOf(parts)),fit=structureFit(parts,o.position,o.rotation,fieldOf(p.environment,p.radius));
+    const point:Vec3=[t.position[0]+Math.sin(t.yaw)*.9,0,t.position[2]+Math.cos(t.yaw)*.9];
+    return {position:localToDir({dir:o.position,yaw:o.rotation},fit.baseRadius,point),yaw:(o.rotation+t.yaw)%(Math.PI*2)};
+  }
+  function descriptor(id:string,planetId=String(player(id).planet_id)):HomeDescriptor|null {
+    const h=home(planetId);if(!h)return null;const p=planets.planet(planetId),o=planets.view(id,planetId).objects.find(o=>o.id===h.building_id)!;
+    return {planetId,buildingId:h.building_id,interiorId:h.interior_id,door:door(h),interior:JSON.parse(h.document),canEdit:p.owner_id===id,buildingVersion:o.version,variant:h.variant,canUndo:!!db.prepare('SELECT 1 FROM object_replacements WHERE object_id=? AND undone=0').get(o.id)};
+  }
+  function content(bp:Blueprint) {const value=canonicalJson(hashInput(bp.parts)),hash=createHash('sha256').update(value).digest('hex');db.prepare('INSERT OR IGNORE INTO blueprint_contents(hash,content) VALUES(?,?)').run(hash,value);return hash;}
+  function initialise(planetId:string) {
+    if(!enabled||home(planetId))return;
+    const p=planets.planet(planetId);if(p.kind!=='garden'||p.sample_radius===null||!p.owner_id)return;
+    // Never populate an existing or edited save. Only fresh sample worlds qualify.
+    if(planets.view(String(p.owner_id),planetId).objects.length)return;
+    transaction(()=>{
+      const manifest=starterManifest(p.radius),made:{id:string;kind:string;blueprintHash?:string;position:Vec3;rotation:number}[]=[];
+      const insertStructure=(spec:{blueprint:Blueprint;position:Vec3;rotation:number},id=randomUUID())=>{
+        const hash=content(spec.blueprint),size=structureSize(spec.blueprint.parts);
+        db.prepare("INSERT INTO planet_objects(id,planet_id,kind,position,rotation,blueprint_hash,radius,height) VALUES(?,?,'structure',?,?,?,?,?)").run(id,planetId,JSON.stringify(spec.position),spec.rotation,hash,size.radius,size.height);
+        made.push({id,kind:'structure',blueprintHash:hash,position:spec.position,rotation:spec.rotation});
+        history.append(planetId,null,planets.view('',planetId).objects.find(o=>o.id===id)!);return {id,hash};
+      };
+      const building=insertStructure(manifest.home);
+      for(const item of manifest.infrastructure??[])insertStructure(item);
+      for(const spec of manifest.objects){const id=randomUUID();db.prepare('INSERT INTO planet_objects(id,planet_id,kind,position,rotation) VALUES(?,?,?,?,?)').run(id,planetId,spec.kind,JSON.stringify(spec.position),spec.rotation);db.prepare('INSERT INTO object_assets(object_id,planet_id,asset_version) VALUES(?,?,2)').run(id,planetId);made.push({id,...spec});history.append(planetId,null,planets.view('',planetId).objects.find(o=>o.id===id)!);}
+      db.prepare('INSERT INTO home_interiors(planet_id,building_id,interior_id,document) VALUES(?,?,?,?)').run(planetId,building.id,randomUUID(),JSON.stringify(defaultHomeInterior()));
+      const bp={...manifest.home.blueprint,id:randomUUID() as Blueprint['id']};
+      db.prepare('INSERT INTO blueprint_library(owner_id,id,document,hash,version) VALUES(?,?,?,?,1)').run(p.owner_id,bp.id,encodeBlueprint(bp),building.hash);
+      const document={generator:'home-sample',version:1,seed:20261008,radius:p.radius,environment:HOME_ENVIRONMENT,catalogueVersion:'home-kit-v1',routes:manifest.routes??[],homeBuildingId:building.id,objects:made};
+      db.prepare('INSERT INTO home_manifests(planet_id,version,document,hash) VALUES(?,1,?,?)').run(planetId,JSON.stringify(document),digest(document));
+      db.prepare('UPDATE planets SET revision=revision+1 WHERE id=?').run(planetId);
+    });
+  }
+  const indoor=(id:string,body:Record<string,unknown>)=>{const loc=location(id);epoch(loc,body.visitEpoch);if(loc.kind!=='interior'||loc.buildingId!==body.buildingId)throw new RequestError(409,'This is not your current home visit.');return loc;};
+  function validateInterior(body:Record<string,unknown>):Pick<HomeInterior,'material'|'items'> {
+    if(!HOME_MATERIALS.includes(body.material as never)||!Array.isArray(body.items)||body.items.length>HOME_MAX_ITEMS)throw new RequestError(400,'Choose a room finish and at most 12 furniture pieces.');
+    const ids=new Set<string>();const items:HomeItem[]=body.items.map(raw=>{
+      if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new RequestError(400,'Invalid furniture.');
+      const a=raw as Record<string,unknown>;strict(a,['id','kind','position','yaw']);
+      if(typeof a.id!=='string'||!/^[a-zA-Z0-9_-]{1,64}$/.test(a.id)||ids.has(a.id)||!HOME_ITEM_KINDS.includes(a.kind as never)||!vec(a.position)||a.position[1]!==0||typeof a.yaw!=='number'||!Number.isFinite(a.yaw)||a.yaw<0||a.yaw>=Math.PI*2)throw new RequestError(400,'Invalid furniture position or identifier.');
+      ids.add(a.id);return {id:a.id,kind:a.kind as HomeItem['kind'],position:a.position,yaw:a.yaw};
+    });
+    for(let i=0;i<items.length;i++){const a=homeItemBounds(items[i]);if(a.minX< -HOME_ROOM.width/2+.08||a.maxX>HOME_ROOM.width/2-.08||a.minZ< -HOME_ROOM.depth/2+.08||a.maxZ>HOME_ROOM.depth/2-.08)throw new RequestError(400,'Keep furniture inside the room.');if(a.minX<.65&&a.maxX>-.65&&a.maxZ>.5)throw new RequestError(400,'Keep the route to the door clear.');for(let j=0;j<i;j++){const b=homeItemBounds(items[j]);if(a.minX<b.maxX+.04&&a.maxX>b.minX-.04&&a.minZ<b.maxZ+.04&&a.maxZ>b.minZ-.04)throw new RequestError(400,'Furniture overlaps another piece.');}}
+    if(!homePositionAllowed(HOME_ENTRY,items))throw new RequestError(400,'Keep the entry clear.');return {material:body.material as HomeInterior['material'],items};
+  }
+  return {
+    enabled,location,descriptor,initialise,exterior,requireOutside,
+    door:(planetId:string)=>{const h=home(planetId);return h?door(h):null;},
+    movedExterior(id:string){if(!enabled)return;const old=location(id);writeLocation(id,{kind:'exterior',planetId:String(player(id).planet_id),visitEpoch:old.visitEpoch+1});},
+    enter(id:string,body:Record<string,unknown>,now=Date.now()){
+      strict(body,['planetId','buildingId','visitEpoch']);if(!enabled)throw new RequestError(404,'Home sample is unavailable.');
+      const loc=location(id),h=byBuilding(body.buildingId);epoch(loc,body.visitEpoch);const p=player(id);
+      if(loc.kind!=='exterior'||p.planet_id!==h.planet_id||body.planetId!==h.planet_id||JSON.parse(String(p.flight??'{"mode":"ground"}')).mode!=='ground')throw new RequestError(409,'Walk to this home first.');
+      if(distance(JSON.parse(String(p.position)),door(h).position,planets.planet(h.planet_id).radius)>1.7)throw new RequestError(409,'Walk closer to the home door.');
+      transaction(()=>{writeLocation(id,{kind:'interior',planetId:h.planet_id,buildingId:h.building_id,interiorId:h.interior_id,position:[...HOME_ENTRY],yaw:Math.PI,sequence:0,visitEpoch:loc.visitEpoch+1},now);db.prepare('UPDATE players SET revision=revision+1 WHERE id=?').run(id);});
+    },
+    move(id:string,body:Record<string,unknown>,now=Date.now()){
+      strict(body,['buildingId','visitEpoch','sequence','position','yaw']);const loc=indoor(id,body),h=byBuilding(loc.buildingId);
+      if(!Number.isSafeInteger(body.sequence)||!vec(body.position)||typeof body.yaw!=='number'||!Number.isFinite(body.yaw)||body.yaw<0||body.yaw>=Math.PI*2)throw new RequestError(400,'Invalid home movement.');
+      const saved=db.prepare('SELECT moved_at,request_hash FROM home_locations WHERE player_id=?').get(id)!,hash=digest(body);
+      if(body.sequence===loc.sequence&&saved.request_hash===hash)return;
+      if(body.sequence!==loc.sequence+1)throw new RequestError(409,'A newer home position exists.');
+      const elapsed=Math.min(1.5,Math.max(0,now-Number(saved.moved_at))/1000),d=Math.hypot(...body.position.map((n,i)=>n-loc.position[i]));
+      if(d>HOME_MOVE_SPEED*elapsed+.25||!homePathAllowed(loc.position,body.position,JSON.parse(h.document).items))throw new RequestError(409,'A wall or furniture blocks this home movement.');
+      transaction(()=>{writeLocation(id,{...loc,position:body.position as Vec3,yaw:body.yaw as number,sequence:Number(body.sequence)},now,hash);db.prepare('UPDATE players SET revision=revision+1 WHERE id=?').run(id);});
+    },
+    exit(id:string,body:Record<string,unknown>,now=Date.now()){
+      strict(body,['buildingId','visitEpoch']);const loc=indoor(id,body),h=byBuilding(loc.buildingId);
+      if(Math.hypot(loc.position[0]-HOME_EXIT[0],loc.position[2]-HOME_EXIT[2])>1.25)throw new RequestError(409,'Walk to the inside door to leave.');
+      const point=door(h).position;
+      transaction(()=>{db.prepare('UPDATE players SET position=?,moved_at=?,revision=revision+1 WHERE id=?').run(JSON.stringify(point),now,id);db.prepare('DELETE FROM ground_states WHERE player_id=?').run(id);writeLocation(id,{kind:'exterior',planetId:h.planet_id,visitEpoch:loc.visitEpoch+1},now);});
+    },
+    save(id:string,body:Record<string,unknown>){
+      strict(body,['buildingId','expectedVersion','material','items']);const h=byBuilding(body.buildingId);if(planets.planet(h.planet_id).owner_id!==id)throw new RequestError(403,'Only the home owner can edit the room.');
+      const loc=location(id);if(loc.kind!=='interior'||loc.buildingId!==h.building_id)throw new RequestError(409,'Enter your home before arranging it.');
+      const old=JSON.parse(h.document) as HomeInterior;if(body.expectedVersion!==old.version)throw new RequestError(409,'This room changed in another tab.');const next=validateInterior(body);
+      for(const r of db.prepare('SELECT document FROM home_locations').all()){const at=JSON.parse(String(r.document)) as HomeLocation;if(at.kind==='interior'&&at.buildingId===h.building_id&&!homePositionAllowed(at.position,next.items))throw new RequestError(409,'A visitor is standing there. Leave their space clear.');}
+      db.prepare('UPDATE home_interiors SET document=? WHERE planet_id=?').run(JSON.stringify({...old,...next,version:old.version+1}),h.planet_id);
+    },
+    remodelBlueprint(variant:unknown):Blueprint {if(!['base','terrace','roof','extended'].includes(String(variant)))throw new RequestError(400,'Choose a home variation.');return homeVariant(variant==='base'?'starter':variant==='extended'?'extension':variant as 'terrace'|'roof');},
+  };
+}

@@ -1,7 +1,7 @@
 import {expect,it,inject} from 'vitest';
 import {randomUUID,createHash} from 'node:crypto';
 import {openStore} from '../src/server/store.ts';
-import {decodeEvent,decodeSnapshot} from '../src/assets/claude-geometry/timeline/codec.ts';
+import {decodeEvent,decodeSnapshot} from '../src/shared/timeline-codec.ts';
 import {normalize} from '../src/shared/world.ts';
 import {migrateHistory} from '../src/server/history.ts';
 const setup=()=>{const s=openStore(':memory:');s.create('owner');s.create('visitor');const planet=s.universe('owner').planets.find(p=>p.kind==='garden')!.id;s.claim('owner',planet);return {s,planet};};

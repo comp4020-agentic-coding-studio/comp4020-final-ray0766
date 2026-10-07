@@ -43,6 +43,10 @@ export function cameraPose(walker: SurfaceWalker, portrait: boolean, overview = 
     target: new Vector3(),
   };
   const lookAhead = walker.velocity.clone().multiplyScalar(.13);
+  if (radius > 20) return {
+    position: walker.up.clone().multiplyScalar(radius + 2.8).addScaledVector(walker.north, portrait ? -5.2 : -4.8),
+    target: walker.up.clone().multiplyScalar(radius + 1.05).addScaledVector(walker.north, .65).add(lookAhead),
+  };
   return {
     position: walker.up.clone().multiplyScalar(radius + (portrait ? 6.4 : 4.6)).addScaledVector(walker.north, portrait ? -9.0 : -6.8),
     target: walker.up.clone().multiplyScalar(radius + .85).addScaledVector(walker.north, 1.6).add(lookAhead),

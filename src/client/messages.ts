@@ -1,6 +1,23 @@
 // Host-owned UI translations. English source strings are the stable fallback.
 // Saved names, IDs, resource snapshots and server payloads are not translated.
 export const messages: Record<string, string> = {
+  "Your home is ready. Choose a suit, enter through its door, then make the room and garden yours.": "家已经准备好了。选一套衣服，从家门进入，布置房间，再改造小屋和庭院。",
+  "Walk to your home’s door, then choose Enter home.": "走到家门前，选择“进入家中”。",
+  "My home": "我的家",
+  "A neighbour’s home": "邻居的家",
+  "Enter home · E": "进入家中 · E",
+  "Make it yours": "改造我的家",
+  "Add a terrace": "添加露台",
+  "Change the roof": "更换屋顶",
+  "Extend the home": "扩建房屋",
+  "Original cottage": "恢复初始小屋",
+  "Undo last remodel": "撤销上次改造",
+  "Edit with building parts": "用构件编辑",
+  "One home, one room. Your furniture stays with your home.": "一座家，一个房间。外观改造会保留室内布置。",
+  "Home updated. Your room and furniture are safe.": "房屋已更新，室内布置已保留。",
+  "Last remodel undone.": "已撤销上次改造。",
+  "Apply to my home": "应用到我的家",
+  "Home replaced. The room and furniture are unchanged.": "房屋构件已更新，室内布置已保留。",
   "Example": "样例",
   "Lived-in cottage": "生活小屋",
   "Corner lane and courtyard": "街角与庭院",

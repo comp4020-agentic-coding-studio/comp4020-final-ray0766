@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "viewport": "390×844",
+  "realPhone": false,
+  "exterior": {
+    "drawCalls": "74",
+    "triangles": "98546",
+    "quality": "compact"
+  },
+  "interior": {
+    "drawCalls": "122"
+  },
+  "pageErrors": [],
+  "checks": [
+    "Touch enter/save/exit",
+    "Room material survives reload",
+    "No horizontal overflow",
+    "No page errors"
+  ]
+}

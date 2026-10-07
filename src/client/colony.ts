@@ -16,7 +16,7 @@ import type { LibraryEntry } from '../shared/blueprints.ts';
 import { structureFit, structureSize } from '../shared/blueprints.ts';
 import { buildBlueprintModel } from '../assets/claude-geometry/blueprint/model3d.ts';
 import { placedTransform } from '../assets/claude-geometry/blueprint/placement.ts';
-import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
+import type { Blueprint, PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
 import { SHARED_ASSET_VERSION, worldMaterials } from './shared-assets.ts';
 import { surfacePoint } from './terrain.ts';
 import type { Obstacle } from './scene.ts';
@@ -42,11 +42,12 @@ export class Colony {
   private placing = false; private selected: string | null = null;
   private painted = ''; private cards = ''; private pointer: {id:number;x:number;y:number} | null = null;
   private workshop: Workshop|null=null;
+  private loadWorkshop: () => Promise<Workshop>;
   private localParts: Record<string,PartPlacement[]> = {};
   private ray = new T.Raycaster(); private pollBusy = false;
   constructor(private bridge: ColonyBridge) {
     bridge.scene.add(this.layer);
-    const loadWorkshop=lazyPanel(async()=>{const {Workshop}=await import('./workshop.ts');return this.workshop = new Workshop({read:bridge.libraryRead,save:bridge.librarySave,allowed:()=>!!this.universe?.currentPlanet.mine&&this.universe.player.flight.mode==='ground'&&this.syncing,
+    const loadWorkshop=this.loadWorkshop=lazyPanel(async()=>{const {Workshop}=await import('./workshop.ts');return this.workshop = new Workshop({read:bridge.libraryRead,save:bridge.librarySave,allowed:()=>!!this.universe?.currentPlanet.mine&&this.universe.player.flight.mode==='ground'&&this.universe.player.location?.kind!=='interior'&&this.syncing,
       place:entry=>{this.localParts[entry.hash]=entry.blueprint.parts;this.setBuilding(true);this.draft={id:crypto.randomUUID(),kind:'structure',blueprintHash:entry.hash,...structureSize(entry.blueprint.parts),position:null,rotation:0};this.placing=true;this.editor();bridge.notice('Tap an open spot, turn the structure, then Place object.');}});});
     const workshopButton=document.createElement('button');workshopButton.id='open-workshop';workshopButton.className='primary';setText(workshopButton, 'Open workshop');workshopButton.hidden=true;
     el('build-mode').after(workshopButton);
@@ -94,10 +95,26 @@ export class Colony {
   private discardPlacement(){return !this.hasDraft()||window.confirm(translate('Discard the unsaved building placement or changes?'));}
   private setBuilding(value:boolean,force=false){
     if(!value&&!force&&!this.discardPlacement())return false;
-    this.building=value&&!!this.universe?.currentPlanet.mine&&this.syncing;this.clearDraft();
+    this.building=value&&!!this.universe?.currentPlanet.mine&&this.universe.player.location?.kind!=='interior'&&this.syncing;this.clearDraft();
     document.body.classList.toggle('building',this.building);el('builder').hidden=!this.building;this.bridge.pause(this.building);if(this.building)el<HTMLDialogElement>('menu-dialog').close();this.editor();this.hud();return true;
   }
   stopBuilding(){return this.setBuilding(false);}
+  async openHomeWorkshop(){
+    const u=this.universe,home=u?.player.home;
+    if(!u||!home?.canEdit||u.player.location?.kind==='interior'||!this.syncing||!this.setBuilding(false))return;
+    const object=u.currentPlanet.objects.find(o=>o.id===home.buildingId);
+    if(!object?.blueprintHash)return;
+    try{
+      await this.bridge.flush();el<HTMLDialogElement>('menu-dialog').close();
+      const [panel,entries]=await Promise.all([this.loadWorkshop(),this.bridge.libraryRead()]);
+      const existing=entries.find(entry=>entry.hash===object.blueprintHash);
+      const blueprint:Blueprint=existing?structuredClone(existing.blueprint):{id:crypto.randomUUID() as Blueprint['id'],name:'My home',parts:structuredClone(this.parts(object.blueprintHash)),groups:[]};
+      await panel.open(blueprint,async entry=>{
+        const next=await this.bridge.write('objects/replace',{planetId:u.currentPlanet.id,objectId:object.id,expectedVersion:object.version,blueprintHash:entry.hash});
+        this.accept(next);this.bridge.notice('Home updated. Your room and furniture are safe.');
+      });
+    }catch(error){this.bridge.notice(error instanceof Error?error.message:'Could not open your home in the workshop.');}
+  }
   updateShadows(feet:T.Vector3){
     const stats=this.shadows.update(feet,this.building?this.selected:null);
     this.bridge.canvas.dataset.placedShadowObjects=String(stats.active);
@@ -108,7 +125,7 @@ export class Colony {
     const changed=this.universe?.currentPlanet.id!==next.currentPlanet.id;
     this.universe=next;el('open-history').hidden=!next.currentPlanet.mine;el('open-terrain').hidden=!next.currentPlanet.mine||next.player.flight.mode!=='ground';this.syncing=true;this.bridge.universe(next);
     if(changed){this.setBuilding(false,true);this.clearDraft();}
-    if(this.building&&(!next.currentPlanet.mine||next.player.flight.mode==='space'))this.setBuilding(false,true);
+    if(this.building&&(!next.currentPlanet.mine||next.player.flight.mode==='space'||next.player.location?.kind==='interior'))this.setBuilding(false,true);
     const key=next.currentPlanet.id+':'+next.currentPlanet.revision;
     if(this.painted!==key){
       this.painted=key;this.bridge.canvas.dataset.placedAssetKit=SHARED_ASSET_VERSION;this.bridge.canvas.dataset.placedAssetKinds=next.currentPlanet.objects.map(o=>o.kind).join(',');this.shadows.clear();for(const child of [...this.layer.children])disposeGeometry(child);this.objects.clear();

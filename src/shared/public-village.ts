@@ -16,6 +16,10 @@ import {HUB_SHIP,facePoint,villagePoint,localPoint} from './harbour-layout.ts';
 // System-owned composition, authored within the unchanged player limits:
 // eight structures / sixty-four placed objects. No bespoke prop geometry.
 export const PUBLIC_FIELD:HeightField={id:'compact-harbour',waterLevel:null,heightAt:()=>HUB_RADIUS-10,normalAt:p=>[...p]};
+/** Rebase the public ground without stretching metre-sized construction. */
+export const publicField=(radius=HUB_RADIUS):HeightField=>radius===HUB_RADIUS?PUBLIC_FIELD:{
+ id:`public-harbour:${radius}`,waterLevel:null,heightAt:()=>radius-10,normalAt:p=>[...p],
+};
 function terrace(id:string,name:string,tall=false,port=false):Blueprint{
  const parts:PartPlacement[]=[];
  const add=(part:PartId,x:number,level:number,z:number,rot:Rot=0)=>parts.push({part,x,level,z,rot,n:parts.length+1});

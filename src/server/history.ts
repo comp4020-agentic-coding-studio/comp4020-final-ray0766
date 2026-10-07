@@ -1,9 +1,9 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
-import { applyEvent, decide, parseCommand } from '../assets/claude-geometry/core/world.ts';
-import type { ObjectSpec, WorldState } from '../assets/claude-geometry/core/world.ts';
+import { applyEvent, decide, parseCommand } from '../shared/world-events.ts';
+import type { ObjectSpec, WorldState } from '../shared/world-events.ts';
 import type { ActorId, EventId, ObjectId, PlanetId } from '../assets/claude-geometry/core/ids.ts';
-import { canonicalEvent, decodeEvent, decodeSnapshot, encodeEvent, encodeSnapshot } from '../assets/claude-geometry/timeline/codec.ts';
+import { canonicalEvent, decodeEvent, decodeSnapshot, encodeEvent, encodeSnapshot } from '../shared/timeline-codec.ts';
 import { HISTORY_PAGE, HISTORY_PAGE_MAX, HISTORY_SNAPSHOT_EVERY } from '../shared/history.ts';
 import type { HistoryPage, HistorySnapshot } from '../shared/history.ts';
 import type { PlacedObject } from '../shared/planets.ts';
@@ -50,10 +50,10 @@ export function historyStore(db:DatabaseSync){
   },
   // Only called after an accepted authoritative write, inside the SAME SQL transaction.
   append(planet:string,before:PlacedObject|null,after:PlacedObject|null){
-   let current=state(planet);const o=after??before!;const verbs=!before?['create']:!after?['delete']:[...(before.position.some((v,i)=>Math.abs(v-after.position[i])>1e-8)?['move']:[]),...(Math.abs(before.rotation-after.rotation)>1e-8?['rotate']:[])];
+   let current=state(planet);const o=after??before!;const verbs=!before?['create']:!after?['delete']:[...(before.blueprintHash!==after.blueprintHash?['replace']:[]),...(before.position.some((v,i)=>Math.abs(v-after.position[i])>1e-8)?['move']:[]),...(Math.abs(before.rotation-after.rotation)>1e-8?['rotate']:[])];
    for(const verb of verbs){
     const commandId=uuid(JSON.stringify([planet,o.id,verb,before?.version??0]));
-    const command={v:1,type:'object.'+verb,planetId:planet,objectId:o.id,commandId,...(verb==='create'?{spec:spec(o),anchor:{dir:o.position,yaw:o.rotation}}:{expectedVersion:current.objects[o.id].version}),...(verb==='move'?{dir:o.position}:{}),...(verb==='rotate'?{yaw:o.rotation}:{})};
+    const command={v:1,type:'object.'+verb,planetId:planet,objectId:o.id,commandId,...(verb==='create'?{spec:spec(o),anchor:{dir:o.position,yaw:o.rotation}}:{expectedVersion:current.objects[o.id].version}),...(verb==='replace'?{spec:spec(o)}:{}),...(verb==='move'?{dir:o.position}:{}),...(verb==='rotate'?{yaw:o.rotation}:{})};
     const parsed=parseCommand(command);if(!parsed.ok)throw Error('History command invalid: '+parsed.errors.join('; '));
     const decision=decide(current,parsed.value,{eventId:randomUUID() as EventId,actorId:'owner' as ActorId,seq:current.seq+1,recordedAt:new Date().toISOString()});if(!decision.ok)throw Error('History refused the accepted change: '+decision.message);
     const event=canonicalEvent(decision.event),document=encodeEvent(event);if(!decodeEvent(document).ok)throw Error('History event is unreadable.');

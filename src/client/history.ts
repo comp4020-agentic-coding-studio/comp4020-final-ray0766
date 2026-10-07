@@ -1,8 +1,8 @@
 import { localizedOption, setHTML, setText } from './i18n.ts';
 import * as T from 'three';
 import type { Stage } from '../assets/claude-geometry/shell/stage.ts';
-import { decodeEvent, decodeSnapshot } from '../assets/claude-geometry/timeline/codec.ts';
-import type { WorldState } from '../assets/claude-geometry/core/world.ts';
+import { decodeEvent, decodeSnapshot } from '../shared/timeline-codec.ts';
+import type { WorldState } from '../shared/world-events.ts';
 import {planetPreview} from './planet-preview.ts';
 import {structureSize} from '../shared/blueprints.ts';
 import type {PlacedObject} from '../shared/planets.ts';

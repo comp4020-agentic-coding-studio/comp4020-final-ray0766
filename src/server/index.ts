@@ -7,7 +7,11 @@ import { BLUEPRINT_BODY_LIMIT } from '../shared/blueprints.ts';
 import { presenceStore } from './presence.ts';
 import { openStore, RequestError } from './store.ts';
 
-const store = openStore(process.env.DATABASE_PATH ?? '.data/little-post.sqlite');
+const homeSample=process.env.HOME_SAMPLE==='1';
+if(homeSample&&!process.env.DATABASE_PATH)throw new Error('HOME_SAMPLE requires a dedicated DATABASE_PATH.');
+const store = openStore(process.env.DATABASE_PATH ?? '.data/little-post.sqlite',{homeSample});
+if(homeSample&&!store.homeSample){store.close();throw new Error('HOME_SAMPLE refuses an existing non-sample database. Use a fresh isolated path.');}
+const cookieName=homeSample?'little_home_sample':'little_post';
 if (store.migrationBackup) console.log(`Before migration, saved a consistent backup: ${store.migrationBackup}`);
 const presence=presenceStore(store.state);
 const root = resolve('dist');
@@ -24,13 +28,13 @@ const server = createServer(async (req, res) => {
     const url = new URL(req.url ?? '/', 'http://localhost');
     if (url.pathname === '/healthz') { send(200, { ok: true }); return; }
     if (url.pathname.startsWith('/api/')) {
-      const cookie = /(?:^|;\s*)little_post=([a-f0-9]{64})(?:;|$)/.exec(req.headers.cookie ?? '')?.[1];
+      const cookie = new RegExp('(?:^|;\\s*)'+cookieName+'=([a-f0-9]{64})(?:;|$)').exec(req.headers.cookie ?? '')?.[1];
       let id = cookie ? hash(cookie) : '';
       if (url.pathname === '/api/state' && req.method === 'GET') {
         if (!id || !store.has(id)) {
           const token = randomBytes(32).toString('hex'); id = hash(token); store.create(id);
           const secure = req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : '';
-          res.setHeader('Set-Cookie', `little_post=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=31536000${secure}`);
+          res.setHeader('Set-Cookie', `${cookieName}=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=31536000${secure}`);
         }
         send(200, store.state(id)); return;
       }
@@ -58,7 +62,7 @@ const server = createServer(async (req, res) => {
       const rate = limits.get(id);
       if (!rate || now - rate.start > 10_000) limits.set(id, { start: now, count: 1 });
       else if (++rate.count > 90) throw new RequestError(429, 'A little too fast. Try again in a moment.');
-      const bodyLimit = url.pathname === '/api/blueprints/save' ? BLUEPRINT_BODY_LIMIT : 2048;
+      const bodyLimit = ['/api/blueprints/save','/api/home/save'].includes(url.pathname) ? BLUEPRINT_BODY_LIMIT : 2048;
       const chunks: Buffer[] = []; let byteLength = 0;
       for await (const chunk of req) { const bytes = Buffer.from(chunk); byteLength += bytes.length; if (byteLength > bodyLimit) throw new RequestError(413, 'Request too large.'); chunks.push(bytes); }
       const text = Buffer.concat(chunks).toString('utf8');
@@ -66,13 +70,21 @@ const server = createServer(async (req, res) => {
       try { body = JSON.parse(text); } catch { throw new RequestError(400, 'Invalid JSON.'); }
       if (!body || Array.isArray(body) || typeof body !== 'object') throw new RequestError(400, 'Expected an object.');
       if (url.pathname === '/api/blueprints/save') send(200, store.saveBlueprint(id, body));
+      else if(url.pathname==='/api/home/enter'){const result=store.enterHome(id,body);presence.leave(id);send(200,result);}
+      else if(url.pathname==='/api/home/move')send(200,store.moveHome(id,body));
+      else if(url.pathname==='/api/home/exit'){const result=store.exitHome(id,body);presence.leave(id);send(200,result);}
+      else if(url.pathname==='/api/home/save')send(200,store.saveHome(id,body));
+      else if(url.pathname==='/api/home/remodel')send(200,store.remodelHome(id,body));
+      else if(url.pathname==='/api/home/undo')send(200,store.undoHome(id,body));
+      else if(url.pathname==='/api/objects/replace')send(200,store.replaceObject(id,body));
+      else if(url.pathname==='/api/objects/undo')send(200,store.undoObject(id,body));
       else if(url.pathname==='/api/terrain/apply')send(200,store.terrain(id,body));
       else if(url.pathname==='/api/ship/save')send(200,store.saveShip(id,body));
       else if(url.pathname==='/api/presence')send(200,presence.heartbeat(id,body));
       else if (url.pathname === '/api/character') send(200, store.character(id, body.character));
       else if (url.pathname === '/api/move') {
-        if(Object.keys(body).some(k=>!['position','planetId','motion'].includes(k)))throw new RequestError(400,'Unexpected movement field.');
-        send(200, store.move(id, body.position, Date.now(), body.planetId,body.motion));
+        if(Object.keys(body).some(k=>!['position','planetId','motion','visitEpoch'].includes(k)))throw new RequestError(400,'Unexpected movement field.');
+        send(200, store.move(id, body.position, Date.now(), body.planetId,body.motion,body.visitEpoch));
       }
       else if (url.pathname === '/api/interact') send(200, store.interact(id, body.action));
       else if (url.pathname === '/api/flight/takeoff') {const result=store.takeoff(id,body);presence.leave(id);send(200,result);}
@@ -114,6 +126,7 @@ const server = createServer(async (req, res) => {
     else { console.error(error instanceof Error ? error.message : 'Request failed'); send(500, { error: 'The world is unavailable. Please retry.' }); }
   }
 });
-server.listen(Number(process.env.PORT ?? 8080), process.env.HOST ?? '0.0.0.0', () => console.log(`Little Worlds is ready on http://localhost:${process.env.PORT ?? 8080}`));
+const port=homeSample?8126:Number(process.env.PORT??8080),host=homeSample?'127.0.0.1':process.env.HOST??'0.0.0.0';
+server.listen(port,host,()=>console.log(`Little Worlds is ready on http://${host}:${port}`));
 const stop = () => { server.close(() => { store.close(); process.exit(0); }); server.closeIdleConnections(); };
 process.on('SIGTERM', stop); process.on('SIGINT', stop);

@@ -213,7 +213,12 @@ export class HomeInterior {
     this.avatar.setColor(player.character); this.populateItems(); this.updateControls();
   }
 
-  setOnline(online: boolean) { this.online = online; if (!online) { this.clearInput(); this.setStatus('offline'); } this.updateControls(); }
+  setOnline(online: boolean) {
+    if(online&&!this.online&&this.acknowledged?.location?.kind==='interior'){
+      this.position=[...this.acknowledged.location.position];this.yaw=this.acknowledged.location.yaw;this.clearInput();this.setStatus('entering');
+    }
+    this.online = online; if (!online) { this.clearInput(); this.setStatus('offline'); } this.updateControls();
+  }
 
   /** Only scoped indoor visitors belong here. Position is planar, never normalized. */
   receivePresence(snapshot: PresenceSnapshot) {

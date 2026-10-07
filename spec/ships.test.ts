@@ -14,6 +14,9 @@ import { SAFE_RADIUS } from '../src/shared/flight.ts';
 import { RADIUS, normalize } from '../src/shared/world.ts';
 import { HUB_DOCK } from '../src/shared/ports.ts';
 const body=(index=1,version=0)=>({document:encodeShipDesign(STARTERS[index]),version});
+// Use the same bounded harbour waypoints as flight.test.ts; the old two-hop
+// fixture exceeded the 14 m harbour's authoritative walking budget.
+const walkToDock=(s:ReturnType<typeof openStore>,id:string,now:number)=>{s.move(id,normalize([0,1,0]),now+2000,'hub');s.move(id,normalize([0,1,-.35]),now+4000,'hub');s.move(id,HUB_DOCK,now+6000,'hub');return now+6000;};
 it('keeps private ships isolated, retries idempotent, stale tabs rejected and in-flight changes fenced',()=>{
  const s=openStore(':memory:');try{
  s.create('owner',0);s.create('visitor',0);const before=s.state('owner');const saved=s.saveShip('owner',body());
@@ -22,18 +25,21 @@ it('keeps private ships isolated, retries idempotent, stale tabs rejected and in
  expect(()=>s.saveShip('owner',body(2))).toThrow('another tab');
  for(const invalid of [{...body(),owner:'visitor'}, {...body(),version:-1},{...body(),version:.5},{...body(),document:{...JSON.parse(body().document),parts:{...STARTERS[0].parts,hull:'invented'}}}])expect(()=>s.saveShip('owner',invalid)).toThrow();
  expect(s.state('owner')).toEqual(saved);
- s.move('owner',normalize([0,1,-.2]),2000,'hub');s.move('owner',HUB_DOCK,4000,'hub');s.takeoff('owner',{planetId:'hub',journey:0},4000);
+ const departedAt=walkToDock(s,'owner',0);s.takeoff('owner',{planetId:'hub',journey:0},departedAt);
  expect(()=>s.saveShip('owner',body(2,1))).toThrow('Land');expect(s.saveShip('owner',body()).ship).toEqual(saved.ship);
  }finally{s.close();}
 });
-it('backs up schema 6 without changing existing rows and keeps saved designs across reopen',()=>{
+it('backs up schema 6, preserves content and invalidates old ground physics before lazy recovery',()=>{
  const dir=mkdtempSync(join(tmpdir(),'ship-save-')),path=join(dir,'save.sqlite');let s=openStore(path);
  try{
  s.create('owner');s.character('owner','fern');const tables=['players','planets','visits','planet_objects','ground_states'];
  const rows=Object.fromEntries(tables.map(t=>[t,s.db.prepare(`SELECT * FROM ${t}`).all()]));
  s.db.exec('DROP TABLE player_ships;PRAGMA user_version=6;');s.close();s=openStore(path);
- expect(existsSync(s.migrationBackup!)).toBe(true);const backup=new DatabaseSync(s.migrationBackup!);expect(backup.prepare('PRAGMA user_version').get()!.user_version).toBe(6);backup.close();
- for(const table of tables)expect(s.db.prepare(`SELECT * FROM ${table}`).all()).toEqual(rows[table]);
+ expect(existsSync(s.migrationBackup!)).toBe(true);const backup=new DatabaseSync(s.migrationBackup!);
+ try{expect(backup.prepare('PRAGMA user_version').get()!.user_version).toBe(6);for(const table of tables)expect(backup.prepare(`SELECT * FROM ${table}`).all()).toEqual(rows[table]);}finally{backup.close();}
+ // Schema 6 predates authoritative ground physics. Its stored pose remains
+ // intact; version 0 deliberately requests recovery on the player's next read.
+ for(const table of tables)expect(s.db.prepare(`SELECT * FROM ${table}`).all()).toEqual(table==='ground_states'?rows[table].map(row=>({...row,physics_version:0})):rows[table]);
  const saved=s.saveShip('owner',body(2));s.close();s=openStore(path);expect(s.state('owner')).toEqual(saved);expect(s.migrationBackup).toBeNull();
  }finally{s.close();rmSync(dir,{recursive:true});}
 });

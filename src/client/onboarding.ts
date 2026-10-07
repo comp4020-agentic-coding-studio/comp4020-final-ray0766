@@ -117,6 +117,7 @@ export function mountOnboarding({ read }: { read: () => OnboardingContext | null
     const context = read();
     const hide = () => { card.hidden = true; };
     if (!context || !context.online || document.hidden) return hide();
+    if (context.universe.player?.home) return hide();
     if (preference === null) remember(hasBuiltHome(context) ? 'done' : 'active');
     if (preference === 'hidden' || preference === 'done') return hide();
     if (hasBuiltHome(context) && context.mode === 'ground') remember('built');

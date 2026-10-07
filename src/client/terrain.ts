@@ -18,7 +18,7 @@ export function mapNormal(p:T.Vector3,k:number){
 }
 export function surfaceNormal(p:T.Vector3){return harbour?mapNormal(p,HARBOUR_COMPRESSION):p.clone();}
 export function logicalNormal(p:T.Vector3){return harbour?mapNormal(p,1/HARBOUR_COMPRESSION):p.clone();}
-export function surfaceScale(p:T.Vector3){return harbour?HARBOUR_RADIUS/RADIUS*2*HARBOUR_COMPRESSION/(1+p.y+HARBOUR_COMPRESSION**2*(1-p.y)):baseRadius/RADIUS;}
+export function surfaceScale(p:T.Vector3){return harbour?baseRadius/RADIUS*2*HARBOUR_COMPRESSION/(1+p.y+HARBOUR_COMPRESSION**2*(1-p.y)):baseRadius/RADIUS;}
 export function surfaceTangent(p:T.Vector3,tangent:T.Vector3){
   if(!harbour)return tangent.clone().projectOnPlane(p).normalize();
   const e=.0001;
