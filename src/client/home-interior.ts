@@ -186,6 +186,12 @@ export class HomeInterior {
 
   receive(player: PlayerState) {
     const location = player.location;
+    // A move callback may resolve after a newer poll or another space change.
+    // Do not let this module bypass the host's stale-response protection.
+    const previous = this.acknowledged?.location;
+    if (this.acknowledged && player.revision < this.acknowledged.revision) return;
+    if (previous && location && location.visitEpoch < previous.visitEpoch) return;
+    if (previous?.kind === 'interior' && location?.kind === 'interior' && previous.visitEpoch === location.visitEpoch && location.sequence < previous.sequence) return;
     if (!player.home || location?.kind !== 'interior') { if (this.active) this.close(); return; }
     const visit = `${location.interiorId}:${location.visitEpoch}`;
     const arriving = visit !== this.currentVisit;
@@ -202,6 +208,7 @@ export class HomeInterior {
       this.sourceKey = sourceKey;
       if (!this.editing || this.pendingAction) { this.draft = copy(player.home.interior); this.draftVersion = this.draft.version; }
       this.buildRoom(); this.buildFurniture(); this.applyTheme((this.draft ?? player.home.interior).material);
+      if (!homePositionAllowed(this.position, player.home.interior.items)) this.position = [...location.position];
     }
     this.avatar.setColor(player.character); this.populateItems(); this.updateControls();
   }
