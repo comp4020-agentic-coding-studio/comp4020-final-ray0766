@@ -30,7 +30,7 @@ export class PrivateHistory {
  private clear(){for(const release of this.release)release();this.release=[];this.layer.clear();}
  private render(state:WorldState,snapshot:HistorySnapshot){
   if(!this.stage)return;this.clear();
-  const objects:PlacedObject[]=Object.values(state.objects).map(o=>({id:o.id,kind:o.spec.kind==='prop'?o.spec.prop:'structure',position:o.anchor.dir,rotation:o.anchor.yaw,version:o.version,...(o.spec.kind==='structure'?{blueprintHash:o.spec.blueprintHash,...structureSize(snapshot.blueprints[o.spec.blueprintHash])}:{})}));
+  const objects:PlacedObject[]=Object.values(state.objects).map(o=>({id:o.id,kind:o.spec.kind==='prop'?o.spec.prop:'structure',position:o.anchor.dir,rotation:o.anchor.yaw,version:o.version,...(snapshot.assetVersions?.[o.id]===2?{assetVersion:2 as const}:{}),...(o.spec.kind==='structure'?{blueprintHash:o.spec.blueprintHash,...structureSize(snapshot.blueprints[o.spec.blueprintHash])}:{})}));
   const model=planetPreview(snapshot.environment??null,objects,snapshot.blueprints,this.stage.library,snapshot.radius);this.layer.add(model.object);this.stage.frameBox(new T.Box3().setFromObject(model.object),{direction:new T.Vector3(1,1.6,1),topInset:0,bottomInset:0});this.release.push(()=>model.dispose());
   this.stage.renderer.domElement.dataset.sequence=String(state.seq);this.stage.renderer.domElement.dataset.objectCount=String(Object.keys(state.objects).length);this.stage.renderer.domElement.dataset.stateHash=snapshot.hash;
  }

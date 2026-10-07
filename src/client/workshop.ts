@@ -2,7 +2,7 @@ import { localizedOption, setAttribute, setHTML, setText, translate } from './i1
 import * as T from 'three';
 import { BlueprintEditor } from '../assets/claude-geometry/blueprint/editor.ts';
 import { encodeBlueprint } from '../assets/claude-geometry/blueprint/codec.ts';
-import { industrialCabin } from '../assets/claude-geometry/blueprint/samples.ts';
+import { industrialCabin, homeCottage, cornerLane, padStall } from '../assets/claude-geometry/blueprint/samples.ts';
 import { partTransform } from '../assets/claude-geometry/blueprint/model.ts';
 import type { Blueprint, PartPlacement, Rot } from '../assets/claude-geometry/blueprint/model.ts';
 import { PART_IDS, partLabel } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
@@ -44,6 +44,7 @@ export class Workshop {
       <div class="ws-bar"><label>Name <input id="ws-name" maxlength="60" autocomplete="off" value=""></label><div class="ws-actions"><button id="ws-save" aria-describedby="ws-save-state">Save blueprint</button><button id="ws-place" aria-describedby="ws-save-state">Place on planet ↗</button></div></div>
       <div class="ws-body"><section class="ws-view" aria-label="Blueprint preview"><div class="ws-camera"><label>Level <select id="ws-level"><option value="0">L1 · ground</option><option value="1">L2 · upper</option><option value="2">L3 · top</option></select></label><button id="ws-frame">Frame model</button><button id="ws-inside">Look inside</button></div><div id="ws-stage"></div><p id="ws-hint" class="ws-hint" role="status" aria-live="polite">Drag to orbit · pinch or scroll to zoom · tap to add or select</p></section>
       <aside class="ws-panel"><fieldset id="ws-fields"><div class="ws-row"><button id="ws-new">New</button><button id="ws-cabin">Cabin starter</button><button id="ws-copy">Save as copy</button></div>
+      <div class="ws-row"><label>Example <select id="ws-example"><option value="home">Lived-in cottage</option><option value="lane">Corner lane and courtyard</option><option value="stall">Pad-side stall</option></select></label><button id="ws-example-load">Load example</button></div>
       <label>Tool <select id="ws-tool"><option value="select">Select / inspect</option></select></label>
       <div class="ws-row"><label>Column <select id="ws-x"></select></label><label>Row <select id="ws-z"></select></label><label>Turn <select id="ws-rot"><option value="0">0°</option><option value="1">90°</option><option value="2">180°</option><option value="3">270°</option></select></label></div>
       <button id="ws-add">Add at cell</button><small>Walls snap to the chosen cell edge. Upper parts need support.</small>
@@ -60,6 +61,7 @@ export class Workshop {
     this.on('save',()=>void this.save());this.on('place',()=>this.place());
     this.on('new',()=>{if(!this.discard())return;this.hover=null;this.saved=null;this.editor.reset();this.editor.rename('Untitled structure');this.changed();this.frame();});
     this.on('cabin',()=>{if(this.discard())this.starter();});
+    this.on('example-load',()=>{if(!this.discard())return;const key=this.get<HTMLSelectElement>('example').value;const bp=(key==='home'?homeCottage:key==='lane'?cornerLane:padStall)();bp.id=crypto.randomUUID() as Blueprint['id'];this.hover=null;this.saved=null;this.editor.load(bp);this.changed();this.frame();this.status('Example loaded · save your own copy.');});
     this.on('copy',()=>{const bp=this.editor.toBlueprint();bp.id=crypto.randomUUID() as Blueprint['id'];this.saved=null;this.editor.load(bp);this.changed();void this.save();});
     this.on('load',()=>{if(!this.discard())return;const e=this.entries.find(e=>e.blueprint.id===this.get<HTMLSelectElement>('library').value);if(e)this.load(e);});
     this.get<HTMLInputElement>('name').oninput=()=>this.editor.rename(this.get<HTMLInputElement>('name').value);

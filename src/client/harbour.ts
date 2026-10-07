@@ -32,7 +32,7 @@ export function createHarbour(scene:T.Scene){
    const parts=PUBLIC_CONTENTS[o.blueprintHash!],fit=structureFit(parts,o.position,o.rotation,PUBLIC_FIELD),model=buildBlueprintModel(parts,worldMaterials(),'medium',{foundationDepth:fit.foundationDepth}),t=placedTransform({dir:o.position,yaw:o.rotation},fit);
    model.object.position.fromArray(t.position);model.object.quaternion.fromArray(t.quaternion);scenery.add(model.object);
   }else{
-   let source=prototypes.get(o.kind);if(!source){source=builtObject(o.kind);prototypes.set(o.kind,source);}
+   let source=prototypes.get(o.kind);if(!source){source=builtObject(o.kind,o.assetVersion??1);prototypes.set(o.kind,source);}
    const root=anchor(scenery,o.position,o.rotation);root.position.multiplyScalar((radius+.015)/radius);root.add(source.clone(true));
   }
   if(objectHeight(o)>.6)blocks.push({point:new T.Vector3(...o.position),radius:objectRadius(o),height:objectHeight(o)});

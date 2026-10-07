@@ -131,3 +131,16 @@ prototype. They do not claim to be the student's finished academic harness.
   adapter; do not edit the immutable art snapshot or translate user-authored names
   and technical IDs. Language changes update text in place, preserving drafts,
   selection, inputs and current gameplay. Persist only a local language preference.
+
+- R8 integration is now authorised from committed Claude source c499dee against
+  actual host baseline 5a73b228. Keep copied source byte-identical; adapt physics
+  and translations outside the vendor snapshot. New quick tree/pot/bench use the
+  same unscaled parts and colliders as blueprints; schema13 stores immutable
+  per-instance versions so existing objects and history retain legacy models.
+  Physics5 adds pitched entrance ramps, roof corners/verges and low fixtures.
+  Do not apply the source demo's display lift to actual terrain placement.
+- Public enrichment reuses the ordinary player kit inside eight blueprint plots
+  and 64 objects. Preserve entrances and task/port routes. The existing medium
+  practical-light budget stays two point and two spot slots, with no light shadows.
+  Use isolated browser saves and back up/compare every original SQLite table
+  before updating local8098. No published release, source workspace or reflection edits.

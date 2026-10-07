@@ -78,6 +78,15 @@ export function stairTop(p: Pick<PartPlacement, 'x' | 'z' | 'rot'>): [number, nu
 }
 
 const cellKey = (x: number, z: number, l: number) => `cell ${x},${z} L${l}`;
+const wrap = (d: number) => ((d % 4) + 4) % 4;
+/** The band inside cell (x, z) along its side `dir` (a rot) where a furnishing stands; each cell has four. */
+const sideKey = (x: number, z: number, dir: number, l: number) => `side ${x},${z} ${wrap(dir)} L${l}`;
+/** The face, looking into cell (x, z), of whatever wall stands on its side `dir`: where a fixture hangs. */
+const faceKey = (x: number, z: number, dir: number, l: number) => `face ${x},${z} ${wrap(dir)} L${l}`;
+/** The top of an edge, under the slab above, where a beam runs. Walls fill it. */
+const beamKey = (edge: string) => `beam ${edge}`;
+/** A cell at a level that something from the level below rises into (a street light, a tree): eaves added since round 8 keep off it. */
+const riseKey = (x: number, z: number, l: number) => `rise ${x},${z} L${l}`;
 
 /** A slot a part needs left empty, and how to say so from either side. */
 export interface ClearSlot { key: string; its: string; own: string }
@@ -90,13 +99,19 @@ export interface ClearSlot { key: string; its: string; own: string }
 export interface EdgeRule {
   key: string;
   /** Where the edge is, for the refusal message. */
-  place: 'stair side' | 'landing edge' | 'stairwell' | 'top exit';
+  place: 'stair side' | 'landing edge' | 'stairwell' | 'top exit' | 'furniture back' | 'furniture flank' | 'tree' | 'step top' | 'doorway';
   /** Cells an edge part here must not face into (its outside detail would cut into the stair). */
   faceAway: string[];
   guards: boolean;
   doors: boolean;
   /** Only a door may stand here. */
   doorOnly: boolean;
+  /** Railings, hedges and kerbs here must face away too (their outside reaches up to 0.33 m off the edge). */
+  guardsFaceAway?: boolean;
+  /** No wall at all may stand here. */
+  noWalls?: boolean;
+  /** A wall with plain faces (no sill, hood or planting outside) may face either way here. */
+  plainMayFace?: boolean;
 }
 
 export interface Slots {
@@ -107,9 +122,11 @@ export interface Slots {
   /** Conditions this part sets on edge parts beside it. */
   edgeRules: EdgeRule[];
   /** Edge parts: their edge slot, the cell their outside (+Z) faces, and what kind of edge part they are. */
-  edge: { key: string; faces: string; guard: boolean; door: boolean } | null;
+  edge: { key: string; faces: string; guard: boolean; door: boolean; plain?: boolean } | null;
   /** Cells this part stands over, for the footprint and the plinth. */
   cells: [number, number][];
+  /** Edges a part that is not an edge part still covers (a trim, a beam): stair rules on them apply to it. */
+  edgesTouched?: string[];
   /** Why the part does not fit the build volume, if it does not. */
   outside: string | null;
 }
@@ -119,23 +136,101 @@ export function slotsOf(p: PartPlacement): Slots {
   const { x, z, level: l, rot } = p;
   const outside = !inGrid(x, z) || !inLevels(l) ? `Outside the build volume (${GRID.cells} × ${GRID.cells} cells, levels 0–${GRID.levels - 1}).` : null;
   const plain = (occupies: string[]): Slots => ({ occupies, keepsClear: [], edgeRules: [], edge: null, cells: [[x, z]], outside });
+  const clear = (key: string, its: string, own: string): ClearSlot => ({ key, its, own });
+  // Parts that fill a cell keep its furnishing sides (and, if tall, its wall faces) clear.
+  const wholeCell = (cx: number, cz: number, faces: boolean): ClearSlot[] => [0, 1, 2, 3].flatMap(d => [
+    clear(sideKey(cx, cz, d, l), 'its cell’s sides', 'this cell’s sides'),
+    ...(faces ? [clear(faceKey(cx, cz, d, l), 'its cell’s wall faces', 'this cell’s wall faces')] : []),
+  ]);
+  const edgeRule = (key: string, place: EdgeRule['place'], o: Partial<EdgeRule> = {}): EdgeRule => ({ key, place, faceAway: [], guards: true, doors: true, doorOnly: false, ...o });
   switch (def.role) {
     case 'deck': return plain([deckKey(x, z, l)]);
-    case 'equipment': return plain([spaceKey(x, z, l)]);
+    case 'equipment': {
+      const keepsClear: ClearSlot[] = def.sides ? [] : wholeCell(x, z, !!def.tall);
+      if (def.sides && def.tall) keepsClear.push(...[0, 1, 2, 3].map(d => clear(faceKey(x, z, d, l), 'its cell’s wall faces', 'this cell’s wall faces')));
+      // A part rising into the level above takes that cell's deck, so neither a floor nor a roof's eave can come over it.
+      if (def.above) keepsClear.push(clear(spaceKey(x, z, l + 1), 'the space above it', 'the space above this part'));
+      if (def.reach) for (const side of [1, 3]) keepsClear.push(clear(edgeKey(x, z, rot + side, l), 'the edges its ends cross', 'the edges this part’s ends cross'));
+      const edgeRules = def.noWalls ? [0, 1, 2, 3].map(d => edgeRule(edgeKey(x, z, d, l), 'tree', { noWalls: true }))
+        // Tables, beds and benches stay out of doorways, so a door always leads somewhere to walk.
+        : def.clearOfDoors ? [0, 1, 2, 3].map(d => edgeRule(edgeKey(x, z, d, l), 'doorway', { doors: false })) : [];
+      return { ...plain([spaceKey(x, z, l), ...(def.above ? [deckKey(x, z, l + 1)] : []), ...(def.tall ? [riseKey(x, z, l + 1)] : [])]), keepsClear, edgeRules };
+    }
     case 'wall': case 'guard': {
       const [dx, dz] = rotDir(rot);
       const key = edgeKey(x, z, rot, l);
-      return { ...plain([key]), edge: { key, faces: cellKey(x + dx, z + dz, l), guard: def.role === 'guard', door: !!def.door } };
+      const keepsClear: ClearSlot[] = def.role === 'wall' ? [clear(beamKey(key), 'its edge', 'this edge')] : [];
+      // Nothing stands in a doorway, either side, nor where the leaf swings open (inward, hinged on its local −X side).
+      if (def.door) keepsClear.push(clear(sideKey(x, z, rot, l), 'its doorway', 'this doorway'), clear(sideKey(x + dx, z + dz, rot + 2, l), 'its doorway', 'this doorway'), clear(sideKey(x, z, rot + 3, l), 'the swing of its leaf', 'the swing of this leaf'));
+      return { ...plain([key]), keepsClear, edge: { key, faces: cellKey(x + dx, z + dz, l), guard: def.role === 'guard', door: !!def.door, plain: !!def.plainFaces } };
     }
     case 'column': {
       const [vx, vz] = vertexOf(x, z, rot);
       return plain([vertexKey(vx, vz, l)]);
     }
     case 'slope': {
-      const [dx, dz] = rotDir(rot);
-      const keepsClear: ClearSlot[] = [{ key: edgeKey(x, z, rot, l), its: 'its gutter side', own: 'this roof’s gutter side' }];
-      if (inGrid(x + dx, z + dz)) keepsClear.push({ key: deckKey(x + dx, z + dz, l), its: 'its gutter side', own: 'this roof’s gutter side' });
+      const keepsClear: ClearSlot[] = wholeCell(x, z, true);
+      const eaves = def.eaves ?? [0];
+      // Roof corners added in round 8 also keep their eaves off a street light or tree rising from the
+      // level below; the first panel (no `eaves` entry) keeps its rules, so earlier blueprints stay valid.
+      const rising = def.eaves !== undefined;
+      for (const e of eaves) {
+        const [dx, dz] = rotDir(rot + e);
+        keepsClear.push(clear(edgeKey(x, z, rot + e, l), 'its gutter side', 'this roof’s gutter side'));
+        if (inGrid(x + dx, z + dz)) keepsClear.push(clear(deckKey(x + dx, z + dz, l), 'its gutter side', 'this roof’s gutter side'));
+        if (rising) keepsClear.push(clear(riseKey(x + dx, z + dz, l), 'its eave', 'this roof’s eave'));
+      }
+      // Eaves on two neighbouring sides overhang the cell diagonally beyond their corner too.
+      if (eaves.includes(0) && eaves.includes(1)) {
+        const [ax, az] = rotDir(rot), [bx, bz] = rotDir(rot + 1);
+        if (inGrid(x + ax + bx, z + az + bz)) keepsClear.push(clear(deckKey(x + ax + bx, z + az + bz, l), 'its eave corner', 'this roof’s eave corner'));
+        if (rising) keepsClear.push(clear(riseKey(x + ax + bx, z + az + bz, l), 'its eave corner', 'this roof’s eave corner'));
+      }
       return { ...plain([deckKey(x, z, l), spaceKey(x, z, l)]), keepsClear };
+    }
+    case 'furnishing': {
+      // Inside cell (x, z), against its side `rot`: one per side, never on two sides that meet at a corner.
+      const occupies = [sideKey(x, z, rot, l), ...(def.tall ? [faceKey(x, z, rot, l)] : [])];
+      const keepsClear = [1, 3].map(d => clear(sideKey(x, z, rot + d, l), 'the sides beside it', 'the sides beside this piece'));
+      if (!def.tuck) keepsClear.push(clear(spaceKey(x, z, l), 'the middle of its cell', 'the middle of this cell'));
+      const here = [cellKey(x, z, l)];
+      const edgeRules = [
+        edgeRule(edgeKey(x, z, rot, l), 'furniture back', { faceAway: here, doors: false, guardsFaceAway: true, plainMayFace: !def.tall }),
+        ...[1, 3].map(d => edgeRule(edgeKey(x, z, rot + d, l), 'furniture flank', { faceAway: here, guardsFaceAway: true, plainMayFace: !def.tall })),
+      ];
+      return { ...plain(occupies), keepsClear, edgeRules };
+    }
+    case 'fixture':
+      return plain([faceKey(x, z, rot, l)]);
+    case 'entry': {
+      // Top cell (x, z) first, then on towards local +Z; the top edge (local −Z) joins the floor behind.
+      const [dx, dz] = rotDir(rot), n = def.cells ?? 1;
+      const cells: [number, number][] = Array.from({ length: n }, (_, i) => [x + dx * i, z + dz * i]);
+      const occupies = cells.flatMap(([cx, cz]) => [deckKey(cx, cz, l), spaceKey(cx, cz, l)]);
+      for (let i = 1; i < n; i++) occupies.push(edgeKey(cells[i - 1][0], cells[i - 1][1], rot, l));
+      const [fx, fz] = cells[n - 1];
+      const keepsClear = [clear(edgeKey(fx, fz, rot, l), 'its foot', `this ${def.label.toLowerCase()}’s foot`)];
+      const edgeRules = [edgeRule(edgeKey(x, z, rot + 2, l), 'step top', { doorOnly: true })];
+      const why = outside ?? (l !== 0 ? 'Entrance steps and ramps stand on level 0, from the ground floor down to the ground.'
+        : !cells.every(([cx, cz]) => inGrid(cx, cz)) ? `The ${def.label.toLowerCase()} runs out of the build area; turn it or move it inwards.` : null);
+      return { occupies, keepsClear, edgeRules, edge: null, cells, outside: why };
+    }
+    case 'trim': {
+      const sides = def.trim?.sides ?? [];
+      const edges = sides.map(d => edgeKey(x, z, rot + d, l));
+      const occupies = [...edges];
+      // Two neighbouring sides meet at a vertex the trim turns round.
+      if (sides.includes(0) && sides.includes(1)) { const [vx, vz] = vertexOf(x, z, rot); occupies.push(vertexKey(vx, vz, l)); }
+      const keepsClear: ClearSlot[] = [];
+      if (def.trim?.on === 'slope') for (const d of sides) {
+        const [dx, dz] = rotDir(rot + d);
+        if (inGrid(x + dx, z + dz)) keepsClear.push(clear(deckKey(x + dx, z + dz, l), 'its open gable', 'this open gable'), clear(riseKey(x + dx, z + dz, l), 'its open gable', 'this open gable'));
+      }
+      return { ...plain(occupies), keepsClear, edgesTouched: edges };
+    }
+    case 'beam': {
+      const key = edgeKey(x, z, rot, l);
+      return { ...plain([beamKey(key)]), edgesTouched: [key] };
     }
     case 'stair': {
       // Bottom cell (x, z), top cell (x2, z2) behind it; the foot faces local +Z, the landing edge local −Z.
@@ -152,6 +247,7 @@ export function slotsOf(p: PartPlacement): Slots {
       edgeRules.push(rule(edgeKey(x2, z2, rot + 2, l + 1), 'top exit', [], false, true));
       const why = outside ?? (!inGrid(x2, z2) ? 'The stair runs out of the build area; turn it or move it inwards.'
         : !inLevels(l + 1) ? `A stair needs a level above it; level ${GRID.levels - 1} is the top.` : null);
+      keepsClear.push(...wholeCell(x, z, true), ...(inGrid(x2, z2) ? wholeCell(x2, z2, true) : []));
       return { occupies, keepsClear, edgeRules, edge: null, cells: [[x, z], [x2, z2]], outside: why };
     }
   }
@@ -159,18 +255,33 @@ export function slotsOf(p: PartPlacement): Slots {
 
 /** Why edge part `e` may not stand where `rule` applies, or null. */
 function breaks(rule: EdgeRule, e: NonNullable<Slots['edge']>): string | null {
-  if (rule.doorOnly) return e.door ? null : 'its top exit must stay clear; only a door may stand there';
+  if (rule.doorOnly) return e.door ? null : rule.place === 'step top' ? 'the top of entrance steps must stay open; only a door may stand there' : 'its top exit must stay clear; only a door may stand there';
+  if (rule.noWalls && !e.guard) return 'a tree’s crown reaches over its cell’s edges; no wall may stand on them';
   if (e.door && !rule.doors) {
     return rule.place === 'stair side' ? 'a door cannot open onto the side of a stair'
-      : rule.place === 'stairwell' ? 'a door cannot open into a stairwell' : 'a door cannot open under the top of a stair';
+      : rule.place === 'stairwell' ? 'a door cannot open into a stairwell'
+      : rule.place === 'furniture back' || rule.place === 'doorway' ? 'furniture cannot stand in a doorway' : 'a door cannot open under the top of a stair';
   }
   if (e.guard && !rule.guards) return 'a stair has its own handrails; no railing or parapet along its sides';
-  if (e.guard || !rule.faceAway.includes(e.faces)) return null;
-  return rule.place === 'stairwell' ? 'walls round a stairwell must face away from it, or their sills and kick plates hit the handrails'
-    : 'walls beside a stair must face away from it, or their sills, hoods and conduits cut into it';
+  if (!rule.faceAway.includes(e.faces) || (e.guard && !rule.guardsFaceAway) || (rule.plainMayFace && e.plain)) return null;
+  switch (rule.place) {
+    case 'stairwell': return 'walls round a stairwell must face away from it, or their sills and kick plates hit the handrails';
+    case 'furniture back': return 'the wall or railing behind furniture must face away from it, or its sill, hood or planting cuts into it';
+    case 'furniture flank': return 'walls and railings beside furniture must face away from it, or their sills, hoods or planting cut into it';
+    default: return 'walls beside a stair must face away from it, or their sills, hoods and conduits cut into it';
+  }
 }
 
 export const partName = (p: Pick<PartPlacement, 'part' | 'n'>) => `${PARTS[p.part].label} #${p.n}`;
+
+const def = (p: PartPlacement) => PARTS[p.part];
+const isStairRule = (r: EdgeRule) => r.place === 'stair side' || r.place === 'landing edge' || r.place === 'stairwell' || r.place === 'top exit';
+/** A trim on one of the edges it covers, seen as an edge part: a railing whose outside faces away from the trim's cell. */
+function trimEdge(p: PartPlacement, key: string): NonNullable<Slots['edge']> {
+  const d = (def(p).trim?.sides ?? []).map(side => p.rot + side).find(r => edgeKey(p.x, p.z, r, p.level) === key) ?? p.rot;
+  const [dx, dz] = rotDir(d);
+  return { key, faces: cellKey(p.x + dx, p.z + dz, p.level), guard: true, door: false };
+}
 
 /** What stops a part from going in: the part in the way and, when it is not plain overlap, why. */
 export interface Blocker { part: PartPlacement; why: string }
@@ -212,11 +323,24 @@ export class Layout {
         if (why) return { part: r.part, why };
       }
     }
+    // A trim counts as a railing facing out of its cell on each edge it covers; a beam runs
+    // above head height and only a stair's rules keep it off an edge.
+    for (const k of s.edgesTouched ?? []) {
+      for (const r of this.rules.get(k) ?? []) {
+        if (skip(r.part)) continue;
+        const why = def(p).role === 'beam' ? (isStairRule(r.rule) ? `its ${r.rule.place} must stay clear` : null) : breaks(r.rule, trimEdge(p, k));
+        if (why) return { part: r.part, why };
+      }
+    }
     for (const rule of s.edgeRules) {
       const o = this.occupied.get(rule.key);
-      const e = o && !skip(o) ? slotsOf(o).edge : null;
-      const why = e ? breaks(rule, e) : null;
-      if (why) return { part: o!, why };
+      if (o && !skip(o)) {
+        const e = slotsOf(o).edge ?? (def(o).role === 'trim' ? trimEdge(o, rule.key) : null);
+        const why = e ? breaks(rule, e) : `the ${rule.place} must stay clear`;
+        if (why) return { part: o, why };
+      }
+      const b = this.occupied.get(beamKey(rule.key));
+      if (b && !skip(b) && isStairRule(rule)) return { part: b, why: `the ${rule.place} must stay clear` };
     }
     return null;
   }
@@ -264,6 +388,28 @@ export class Layout {
       }
       case 'equipment':
         return this.floorAt(x, z, l) ? null : `${def.id === 'roof.plant' ? 'Plant' : `A ${def.label.toLowerCase()}`} needs a floor or roof deck under it.`;
+      case 'furnishing':
+        return this.floorAt(x, z, l) ? null : `A ${def.label.toLowerCase()} needs a floor or roof deck under its cell.`;
+      case 'fixture': {
+        const o = this.occupied.get(edgeKey(x, z, rot, l));
+        return o && PARTS[o.part].plainFaces ? null : `A ${def.label.toLowerCase()} hangs on a plain wall (${PARTS['wall.solid'].label}) on its edge.`;
+      }
+      case 'entry': {
+        const [dx, dz] = rotDir(rot);
+        return this.floorAt(x - dx, z - dz, l) ? null : `${def.label} lead${def.cells === 2 ? 's' : ''} down from a ground-floor deck behind ${def.cells === 2 ? 'its' : 'their'} top edge.`;
+      }
+      case 'trim': {
+        if (def.trim?.on === 'slope') {
+          const o = this.occupied.get(deckKey(x, z, l));
+          const run = o && PARTS[o.part].role === 'slope' && JSON.stringify(PARTS[o.part].eaves ?? [0]) === '[0]' && o.rot === rot;
+          return run ? null : `A ${def.label.toLowerCase()} finishes the open end of a sloped roof panel turned the same way, in the same cell.`;
+        }
+        return this.floorAt(x, z, l) ? null : `A ${def.label.toLowerCase()} needs a floor in its cell.`;
+      }
+      case 'beam': {
+        const ends = [vertexOf(x, z, rot), vertexOf(x, z, rot + 3)];
+        return ends.every(([vx, vz]) => this.columnAt(vertexKey(vx, vz, l))) ? null : `A ${def.label.toLowerCase()} needs a corner post at each end.`;
+      }
     }
   }
 }
@@ -290,7 +436,8 @@ export function footprintCells(parts: readonly PartPlacement[]): [number, number
 /** Cells that stand on the ground (level-0 cell parts); they get the foundation plinth. */
 export function groundCells(parts: readonly PartPlacement[]): [number, number][] {
   const seen = new Map<string, [number, number]>();
-  for (const p of parts) if (p.level === 0 && PARTS[p.part].mount === 'cell') for (const c of slotsOf(p).cells) seen.set(`${c[0]},${c[1]}`, c);
+  // Entrance steps and ramps reach the ground themselves; they get no plinth.
+  for (const p of parts) if (p.level === 0 && PARTS[p.part].mount === 'cell' && PARTS[p.part].role !== 'entry') for (const c of slotsOf(p).cells) seen.set(`${c[0]},${c[1]}`, c);
   return [...seen.values()].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
 }
 

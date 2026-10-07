@@ -1,5 +1,5 @@
 import {expect,it} from 'vitest';
-import {readFileSync,writeFileSync} from 'node:fs';
+import {readFileSync} from 'node:fs';
 import * as T from 'three';
 import {geometrySnapshot} from './lod-r4-fixture.ts';
 import {StyleLibrary} from '../src/assets/claude-geometry/style/materials.ts';
@@ -11,8 +11,8 @@ import {disposeObject3D,ResourceTracker} from '../src/assets/claude-geometry/cor
 import {createShipModel} from '../src/assets/claude-geometry/ship/factory.ts';
 import {STARTERS} from '../src/assets/claude-geometry/ship/design.ts';
 it('retains pre-R4 contracts across 78 fixtures, accounting for the measured rotated window hood corner',()=>{
- const before=JSON.parse(readFileSync('docs/evidence/lod-r4/before-geometry.json','utf8')) as ReturnType<typeof geometrySnapshot>,after=geometrySnapshot();
- expect(after.parts).toEqual(before.parts);expect(after.entries.length).toBe(78);
+ const before=JSON.parse(readFileSync('docs/evidence/lod-r4/before-geometry.json','utf8')) as ReturnType<typeof geometrySnapshot>,current=geometrySnapshot(),after={...current,entries:current.entries.filter(row=>before.entries.some(old=>old.id===row.id&&old.lod===row.lod))};
+ expect(after.parts).toMatchObject(before.parts);expect(after.entries.length).toBe(78);
  for(const [i,row] of after.entries.entries()){
   const old=before.entries[i];expect([row.id,row.lod]).toEqual([old.id,old.lod]);
   // Removing the 4 mm chamfer on the window's 0.2-radian sun hood restores
@@ -25,7 +25,7 @@ it('retains pre-R4 contracts across 78 fixtures, accounting for the measured rot
   if('radius' in row&&'radius' in old){expect(row.radius).toBe(old.radius);expect(row.solidBounds).toEqual(old.solidBounds);expect(row.exhausts).toEqual(old.exhausts);}
  }
  const medium=(s:typeof after)=>s.entries.filter(r=>r.lod==='medium').reduce((n,r)=>n+r.triangles,0);expect(medium(after)).toBeLessThan(medium(before));
- writeFileSync('docs/evidence/lod-r4/after-geometry.json',JSON.stringify(after,null,2)+'\n');
+ // Historical R4 evidence stays immutable; this check covers its original 78 fixtures.
 });
 it('preserves visible bolt surfaces and default chamfers for non-kit builders',()=>{
  const radius=.014,height=radius*.9,head=hexHead(radius,height),old=new T.CylinderGeometry(radius,radius,height,6).toNonIndexed();

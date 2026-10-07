@@ -12,12 +12,12 @@ import { allPartCombinations, SHIP_ENVELOPE } from '../src/assets/claude-geometr
 import { makePlacementPreview } from '../src/client/placement-preview.ts';
 import { createWorldStyleLibrary } from '../src/client/presentation.ts';
 
-it('keeps every vendored file byte-identical to its provenance and pins only the 32 R7 updates', () => {
+it('keeps every vendored file byte-identical to its provenance and records the pinned R7 and R8 source revisions', () => {
   const root = new URL('../src/assets/claude-geometry/', import.meta.url);
   const manifest = JSON.parse(readFileSync(new URL('PROVENANCE.json', root), 'utf8'));
   for (const [file, hash] of Object.entries(manifest.files)) expect(createHash('sha256').update(readFileSync(new URL(file, root))).digest('hex'), file).toBe(hash);
-  expect(Object.keys(manifest.files)).toHaveLength(79);
-  expect(Object.values(manifest.fileCommits).filter(c => c === '5a73b228f13b8b20460ea6f9403167fdfedc08be')).toHaveLength(32);
+  expect(Object.keys(manifest.files)).toHaveLength(106);
+  expect(Object.values(manifest.fileCommits).filter(c => c === '5a73b228f13b8b20460ea6f9403167fdfedc08be')).toHaveLength(27);
   expect(manifest.commit).toBe('a4546bb120d969774776f1fbe2cb1c990a7c3e66');
 });
 

@@ -1,0 +1,19 @@
+{
+  "schema": 13,
+  "originalTablesIdentical": {
+    "players": 206,
+    "planets": 86,
+    "visits": 57,
+    "object_tombstones": 10,
+    "blueprint_contents": 4,
+    "blueprint_library": 22,
+    "planet_objects": 35,
+    "player_ships": 13,
+    "history_heads": 85,
+    "history_events": 15,
+    "history_snapshots": 85,
+    "ground_states": 7
+  },
+  "newAssetRows": 0,
+  "integrity": "ok"
+}

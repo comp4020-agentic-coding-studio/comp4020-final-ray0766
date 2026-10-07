@@ -33,6 +33,17 @@ function terrace(id:string,name:string,tall=false,port=false):Blueprint{
  for(let x=0;x<5;x++)for(const z of [2,3])add(port?'street.road':'street.paving',x,0,z,z===2?2:0);
  add('service.light',4,0,3,0);
  for(const x of [0,1,3,4])add(port?'rail.guard':'street.pipes',x,0,3,0);
+ // Furnish the existing rooms and courts with ordinary player pieces. The
+ // doorway column and the central promenade remain clear for both couriers.
+ for(const offset of [0,3]){
+  if(tall&&offset===3)add('furniture.shelf',4,0,0,1);
+  else{add(port?'storage.crates':'furniture.table',offset+1,0,0);if(!port)add('furniture.chair',offset+1,0,0,2);}
+  add('light.wall',offset,0,0,2);
+ }
+ const frontage=parts.find(p=>p.part==='wall.window'&&p.x===1&&p.z===1&&p.level===0)!;
+ frontage.part='wall.solid';add(port?'sign.mail':tall?'sign.blank':'sign.cup',1,0,2,2);
+ if(port){add('storage.barrel',4,0,2);add('storage.crates',1,0,2,2);}
+ else{add('garden.bed',1,0,2);add('furniture.bench',4,0,2);}
  return {id:id as BlueprintId,name,parts,groups:[]};
 }
 export const PUBLIC_BLUEPRINTS=[
@@ -41,7 +52,7 @@ export const PUBLIC_BLUEPRINTS=[
  terrace('6f803480-9eae-4439-8ff2-33c0b0f4b4b3','Village · port pair',false,true),
 ];
 // SHA-256 from the unmodified player blueprint codec; checked in tests.
-export const PUBLIC_HASHES=["f019642ec2329a610185b689bf9c34edb64a8779cc85f879476e3c0aa5d21f3a","4d035d191b5f46f8b8a94a5c0bf20e53f674820c60a58f87f28d87066c821c40","0a9944f4685927d4625129f38eba780271c52a81e6ce79cd717d5f1d1c7338d8"];
+export const PUBLIC_HASHES=["7351f39ff6fc7c9917866503061221a09f58723f5343ba224b8c41c72d6eb39a","61a77fce6922183b7cba44a88da13847c8cfa8e33b540dbd6a8817d8f74e3cf2","25de9f9bc61a392bacf4e993d8d92617cf4e3485e7a125de27e10921fddce0dd"];
 export const PUBLIC_CONTENTS:BlueprintContents=Object.fromEntries(PUBLIC_BLUEPRINTS.map((b,i)=>[PUBLIC_HASHES[i],b.parts]));
 export const HUB_OBJECTS:PlacedObject[]=[];
 export const HUB_LOTS:{object:PlacedObject;blueprint:Blueprint;district:string}[]=[];
@@ -56,11 +67,11 @@ const spacing=(a:Vec3,b:Vec3)=>new Vector3(...a).angleTo(new Vector3(...b))*HUB_
 // paving is the blueprint's street.paving/street.road and quick-build path.
 export const PUBLIC_WALKS:Vec3[][]=[[SPAWN,HUB_DOCK],[SPAWN,NPCS.mica.position,HUB_DOCK],[SPAWN,NPCS.sol.position,HUB_DOCK]];
 function routeDistance(point:Vec3){let best=Infinity;for(const road of PUBLIC_WALKS)for(let k=1;k<road.length;k++)for(let i=0;i<=40;i++){const at=new Vector3(...road[k-1]).lerp(new Vector3(...road[k]),i/40).normalize().toArray() as Vec3;best=Math.min(best,spacing(point,at));}return best;}
-function prop(kind:BuildKind,point:Vec3,rotation=0){if(placementProblem(kind,point,HUB_OBJECTS,undefined,undefined,HUB_RADIUS)||spacing(point,HUB_SHIP)<3.8)return false;HUB_OBJECTS.push({id:'public-'+kind+'-'+HUB_OBJECTS.length,kind,position:point,rotation:(rotation%(Math.PI*2)+Math.PI*2)%(Math.PI*2),version:1});return true;}
+function prop(kind:BuildKind,point:Vec3,rotation=0){if(placementProblem(kind,point,HUB_OBJECTS,undefined,undefined,HUB_RADIUS)||spacing(point,HUB_SHIP)<3.8)return false;HUB_OBJECTS.push({id:'public-'+kind+'-'+HUB_OBJECTS.length,kind,assetVersion:2,position:point,rotation:(rotation%(Math.PI*2)+Math.PI*2)%(Math.PI*2),version:1});return true;}
 for(const road of PUBLIC_WALKS){let made=0;for(let k=1;k<road.length;k++){const d=spacing(road[k-1],road[k]),steps=Math.ceil(d/.7);for(let i=0;i<=steps&&made<8;i++)if(prop('path',new Vector3(...road[k-1]).lerp(new Vector3(...road[k]),i/steps).normalize().toArray() as Vec3))made++;}}
 const clusters=[[3,-6],[-3,-4],[4,6],[-4,6],[15,1],[-16,2],[17,11],[-18,12],[8,22],[-9,24],[20,-10],[-20,-14],[0,28],[0,-24]];
 for(let i=0;i<10;i++)for(const [cx,cz]of clusters){if(HUB_OBJECTS.filter(o=>o.kind==='tree').length>=20)break;const a=i*2.39996,r=.8+Math.sqrt(i)*1.2,point=villagePoint(cx+Math.cos(a)*r,cz+Math.sin(a)*r);if(routeDistance(point)>1.2)prop('tree',point,i*Math.PI/12);}
 for(const [kind,limit]of [['bench',4],['flowers',8]] as const)for(let i=0;i<180&&HUB_OBJECTS.filter(o=>o.kind===kind).length<limit;i++){const a=i*2.39996,r=4+Math.sqrt(i)*.75,point=villagePoint(Math.cos(a)*r,Math.sin(a)*r);if(routeDistance(point)>.85)prop(kind,point,Math.round(a/(Math.PI/12))*Math.PI/12);}
 // The boarding marker is also a normal quick-build prop, at catalogue size.
 for(const x of [-.95,.95])prop('lamp',localPoint(HUB_DOCK,0,x,0));
-export const HUB_COUNTS={buildings:16,walkInRooms:16,structures:HUB_LOTS.length,objects:HUB_OBJECTS.length,...Object.fromEntries(['tree','path','bench','flowers','lamp'].map(kind=>[kind,HUB_OBJECTS.filter(o=>o.kind===kind).length])),blueprintLamps:8};
+export const HUB_COUNTS={buildings:16,walkInRooms:16,structures:HUB_LOTS.length,objects:HUB_OBJECTS.length,...Object.fromEntries(['tree','path','bench','flowers','lamp'].map(kind=>[kind,HUB_OBJECTS.filter(o=>o.kind===kind).length])),blueprintLamps:24};

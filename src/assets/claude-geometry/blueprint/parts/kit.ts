@@ -203,6 +203,30 @@ export interface Kit {
 }
 
 /**
+ * The kit slot a village prop's material key (src/props/village.ts) is drawn
+ * in, so a part can draw a prop's own model: the same village material in the
+ * village look where the key has a slot, the slot's industrial material in the
+ * industrial look. Keys with no slot fold into the nearest: bark and soil into
+ * timber (#8a6a4f and #6f5240 against #7d5b43), the pot's terracotta into
+ * tile, yellow blooms into cream plaster (#efe3c6), which keeps their outline.
+ */
+const PROP_SLOTS: Record<string, KitMaterial> = {
+  'village:timber': 'post', 'village:iron': 'steel', 'village:plaster': 'skin', 'village:boards': 'tread', 'village:stone': 'concrete',
+  'village:paint': 'leaf', 'village:tile': 'corrugated', 'village:leaf': 'membrane', 'village:bloom-coral': 'hazard',
+  'village:cobble': 'pavers', 'village:lane': 'asphalt', 'village:line': 'marking', glass: 'glass', glow: 'lamp',
+  'village:bark': 'post', 'village:soil': 'post', 'village:pot': 'corrugated', 'village:bloom-yellow': 'skin',
+};
+
+/** A village prop's material resolver (props/village.ts PropMaterials) that asks this kit by slot. */
+export function kitPropMaterials(k: Kit): (key: string) => T.Material {
+  return key => {
+    const slot = PROP_SLOTS[key];
+    if (!slot) throw new Error(`No kit slot for the prop material ${key}.`);
+    return k.m(slot);
+  };
+}
+
+/**
  * Chamfers below this size are drawn as hard edges, per tier. At medium the
  * 3–4.5 mm chamfers on thin plates, edge angles, clips, sills and tread plates
  * go: each costs 44 triangles against a plain box's 12, and the plate's own

@@ -74,7 +74,8 @@ export function historyStore(db:DatabaseSync){
    for(const r of db.prepare('SELECT document FROM history_events WHERE planet_id=? AND seq>? AND seq<=? ORDER BY seq').all(p.id,s.seq,seq)){const e=decodeEvent(r.document);if(!e.ok)throw Error('Unreadable history event.');s=applyEvent(s,e.value);}
    const document=encodeSnapshot(s);const hashes=[...new Set(Object.values(s.objects).flatMap(o=>o.spec.kind==='structure'?[o.spec.blueprintHash]:[]))];
    const atEnvironment=seq===0?db.prepare('SELECT environment FROM history_snapshots WHERE planet_id=? AND seq=0').get(p.id)?.environment:db.prepare('SELECT environment FROM history_events WHERE planet_id=? AND seq=?').get(p.id,seq)?.environment;
-   return bounded({document,hash:hash(document),environment:atEnvironment as string|null,baselineAt:String(h.baseline_at),head:Number(h.seq),blueprints:Object.fromEntries(hashes.map(h=>[h,blueprints.parts(h)]))});
+   const assetVersions=Object.fromEntries(db.prepare('SELECT object_id,asset_version FROM object_assets WHERE planet_id=?').all(p.id).filter(r=>s.objects[String(r.object_id)]).map(r=>[r.object_id,2 as const]));
+   return bounded({document,assetVersions,hash:hash(document),environment:atEnvironment as string|null,baselineAt:String(h.baseline_at),head:Number(h.seq),blueprints:Object.fromEntries(hashes.map(h=>[h,blueprints.parts(h)]))});
   },
  };
 }

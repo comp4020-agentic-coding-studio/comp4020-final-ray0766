@@ -8,7 +8,7 @@ it('resets every ground lighting input across garden → harbour → garden with
  const scene=new T.Scene(),fill=new T.AmbientLight(),sun=new T.DirectionalLight(),texture=new T.Texture();scene.environment=texture;sun.position.set(3,11,7);sun.shadow.bias=-.0003;
  configureGroundLighting('little-47',scene,fill,sun);
  const garden={fog:scene.fog!.toJSON(),fill:fill.color.getHexString(),sun:sun.color.getHexString(),projection:sun.shadow.camera.projectionMatrix.toArray()};
- configureGroundLighting('hub',scene,fill,sun);expect(scene.fog).toBeInstanceOf(T.FogExp2);expect([fill.intensity,sun.intensity,scene.environmentIntensity,sun.shadow.camera.far]).toEqual([.85,2.8,.22,180]);
+ configureGroundLighting('hub',scene,fill,sun);expect(scene.fog).toBeInstanceOf(T.FogExp2);expect([fill.intensity,sun.intensity,scene.environmentIntensity,sun.shadow.camera.far]).toEqual([.85,2.8,.22,75]);
  configureGroundLighting('little-68',scene,fill,sun);expect({fog:scene.fog!.toJSON(),fill:fill.color.getHexString(),sun:sun.color.getHexString(),projection:sun.shadow.camera.projectionMatrix.toArray()}).toEqual(garden);
  expect([fill.intensity,sun.intensity,scene.environmentIntensity,sun.shadow.camera.far]).toEqual([1.05,2.8,.22,65]);expect(scene.environment).toBe(texture);expect(sun.position.toArray()).toEqual([3,11,7]);expect(sun.shadow.bias).toBe(-.0003);texture.dispose();
 });

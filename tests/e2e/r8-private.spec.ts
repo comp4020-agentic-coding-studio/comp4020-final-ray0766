@@ -1,0 +1,52 @@
+import {test,expect} from '@playwright/test';
+import type {Page} from '@playwright/test';
+import {mkdirSync,writeFileSync} from 'node:fs';
+import {randomUUID} from 'node:crypto';
+import {Vector3} from 'three';
+import {readUniverse,menuAction,openMenu,visit,closeVisit} from './flight-helper.ts';
+import {readFeet,frame,walk} from './physics-helper.ts';
+import {structureFit,structureSize} from '../../src/shared/blueprints.ts';
+import {placementProblem} from '../../src/shared/planets.ts';
+import type {PlacedObject} from '../../src/shared/planets.ts';
+import type {Vec3} from '../../src/shared/world.ts';
+import {fieldOf} from '../../src/shared/terrain.ts';
+import {GroundWorld} from '../../src/shared/physics/world.ts';
+const dir='docs/evidence/r8-private';
+async function settleAt(p:Page,target:Vec3){for(let i=0;i<90;i++){const f=await readFeet(p),up=new Vector3(...f.position),to=new Vector3(...target),d=up.angleTo(to)*f.radius;if(d<.018)return;const direction=to.projectOnPlane(up).normalize(),turn=Math.atan2(up.dot(new Vector3().crossVectors(f.north,direction)),f.north.dot(direction));if(Math.abs(turn)>.025){const a=Math.max(-.6,Math.min(.6,turn));await p.mouse.move(850,450);await p.mouse.down();await p.mouse.move(850-a/.004,450,{steps:2});await p.mouse.up();}if(Math.abs(turn)<.35){await p.keyboard.down('w');await p.waitForTimeout(Math.min(32,Math.max(8,d*42)));await p.keyboard.up('w');}await p.waitForTimeout(180);}throw Error('Precision path stalled');}
+test('private ramp, versioned quick objects, lights and real visiting',async({browser})=>{
+ test.setTimeout(420000);if(!String(test.info().project.use.baseURL).endsWith(':8116'))throw Error('Use isolated 8116');mkdirSync(dir,{recursive:true});
+ const c=await browser.newContext({locale:'en-US',viewport:{width:1440,height:900},storageState:'.data/r8-owner.json'}),p=await c.newPage(),errors:string[]=[],checks:string[]=[],measurements:Record<string,unknown>={};
+ const report=(status:string,error?:unknown)=>writeFileSync(`${dir}/journey.json`,JSON.stringify({status,browser:browser.version(),checks,measurements,errors,error:error?String(error):undefined},null,2)+'\n');
+ const check=(s:string)=>{checks.push(s);console.log(s);report('running');};p.on('pageerror',e=>errors.push(e.message));
+ try{
+  await p.goto('/?measure=1');await expect(p.locator('#world canvas')).toHaveAttribute('data-grounded','true');let u=await readUniverse(p);expect(u.currentPlanet.mine).toBe(true);
+  const library=await(await p.request.get('/api/blueprints')).json(),entry=library.find((e:{blueprint:{name:string}})=>e.blueprint.name==='Pad-side stall');expect(entry).toBeTruthy();const parts=entry.blueprint.parts,size=structureSize(parts),feet=await readFeet(p);
+  let placed=u.currentPlanet.objects.find(o=>o.blueprintHash===entry.hash);
+  if(!placed){
+   const sites:PlacedObject[]=[];
+   for(let i=0;i<512;i++){const y=1-2*(i+.5)/512,r=Math.sqrt(1-y*y),a=i*2.399963;for(let j=0;j<8;j++){const o:PlacedObject={id:randomUUID(),kind:'structure',version:1,position:[r*Math.cos(a),y,r*Math.sin(a)],rotation:j*Math.PI/4,blueprintHash:entry.hash,...size};if(placementProblem('structure',o.position,u.currentPlanet.objects,undefined,size.radius,u.currentPlanet.radius)||structureFit(parts,o.position,o.rotation,fieldOf(u.currentPlanet.environment,u.currentPlanet.radius)).problem)continue;sites.push(o);}}
+   sites.sort((a,b)=>new Vector3(...a.position).angleTo(new Vector3(...feet.position))-new Vector3(...b.position).angleTo(new Vector3(...feet.position)));
+   for(const o of sites){const f=frame(o,parts,u.currentPlanet.radius,u.currentPlanet.environment),w=new GroundWorld({...u.currentPlanet,objects:[...u.currentPlanet.objects,o],blueprints:{...u.currentPlanet.blueprints,[entry.hash]:parts}});if(!w.support(f.at(1.5,.30),99).tag.includes('ramp'))continue;
+    let pose={...w.pose(feet.position),radius:feet.radius},valid=true;
+    for(const target of [f.at(1.5,2.8),f.at(1.5,-.3)]){for(let k=0;k<500;k++){const a=new Vector3(...pose.position),b=new Vector3(...target),d=a.angleTo(b)*pose.radius;if(d<.04)break;pose=w.move(pose,a.lerp(b,Math.min(1,.04/d)).normalize().toArray() as Vec3,1/60);}if(new Vector3(...pose.position).angleTo(new Vector3(...target))*pose.radius>.08){valid=false;break;}}
+    if(valid){placed=o;break;}
+   }
+   expect(placed,'Legal terrain site with a reachable, exposed ramp').toBeTruthy();const response=await p.request.post('/api/objects/create',{data:{planetId:u.currentPlanet.id,objectId:placed!.id,kind:'structure',blueprintHash:entry.hash,position:placed!.position,rotation:placed!.rotation}});expect(response.ok(),await response.text()).toBe(true);u=await response.json();placed=u.currentPlanet.objects.find(o=>o.id===placed!.id);await p.reload();await p.waitForTimeout(900);
+  }
+  const f=frame(placed!,parts,u.currentPlanet.radius,u.currentPlanet.environment),w=new GroundWorld(u.currentPlanet);
+  if(f.local(await readFeet(p)).z<1.8)await walk(p,()=>f.at(1.5,-.5));await walk(p,()=>f.at(1.5,2.8));await walk(p,()=>f.at(1.5,.30));await settleAt(p,f.at(1.5,.30));const rampFeet=await readFeet(p),support=w.support(rampFeet.position,rampFeet.radius+.03);expect(support.tag).toContain('ramp');measurements.ramp={feet:rampFeet,support,local:f.local(rampFeet).toArray()};
+  await p.screenshot({path:`${dir}/ramp.png`});await p.reload();await p.waitForTimeout(900);expect((await readFeet(p)).radius).toBeCloseTo(rampFeet.radius,2);await p.keyboard.down('Shift');await walk(p,()=>f.at(1.5,-.3));await p.keyboard.up('Shift');await p.keyboard.press('Space');await p.waitForTimeout(1200);expect((await readFeet(p)).grounded).toBe(true);await walk(p,()=>f.at(1.5,-.5));await walk(p,()=>f.at(.03,-.5));await settleAt(p,f.at(.03,-.5));const beamBase=(await readFeet(p)).radius;let beamPeak=beamBase;await p.keyboard.down('Space');for(let i=0;i<8;i++){await p.waitForTimeout(45);beamPeak=Math.max(beamPeak,(await readFeet(p)).radius);}await p.keyboard.up('Space');await p.waitForTimeout(800);expect((await readFeet(p)).grounded).toBe(true);expect(beamPeak-beamBase).toBeLessThan(.27);expect(beamPeak-beamBase).toBeGreaterThan(.02);const camera=await p.locator('#world canvas').evaluate(e=>({...((e as HTMLElement).dataset)})),head=new Vector3(...JSON.parse(camera.cameraHead!)),eye=new Vector3(...JSON.parse(camera.cameraPosition!));expect(w.cameraDistance(head,eye)).toBeGreaterThanOrEqual(head.distanceTo(eye)-.12);measurements.beam={jumpRise:beamPeak-beamBase,feet:await readFeet(p),cameraDistance:head.distanceTo(eye)};await p.screenshot({path:`${dir}/beam-clearance.png`});await walk(p,()=>f.at(1.5,-.5));await walk(p,()=>f.at(1.5,2.8));check('Actual terrain fit, real ramp ascent/descent, sprint, jump, ramp refresh and central-beam head/camera clearance');
+  const captureLights=()=>p.locator('#world canvas').evaluate(async e=>{const values:{pool:{slots:{points:number;spots:number};lit:number;assigned:string[]};levels:number[]}[]=[];for(let i=0;i<24;i++){values.push({pool:JSON.parse((e as HTMLElement).dataset.practical!),levels:JSON.parse((e as HTMLElement).dataset.lightLevels!)});await new Promise(r=>setTimeout(r,50));}return values;});
+  const lightStates=await captureLights();await menuAction(p,'view-mode');lightStates.push(...await captureLights());await menuAction(p,'view-mode');lightStates.push(...await captureLights());measurements.lightStates=lightStates;
+  for(const state of lightStates){expect(state.pool.slots).toMatchObject({points:2,spots:2});expect(state.pool.lit).toBeLessThanOrEqual(4);}expect(lightStates.some(s=>s.levels.some(n=>n>0&&n<.99))).toBe(true);expect(new Set(lightStates.map(s=>JSON.stringify(s.pool.assigned))).size).toBeGreaterThan(1);check('Fixed two-point/two-spot pool, real camera selection changes and intermediate fade intensities');
+  await menuAction(p,'build-mode');
+  for(const kind of ['tree','flowers','bench']){u=await readUniverse(p);if(u.currentPlanet.objects.some(o=>o.kind===kind&&o.assetVersion===2))continue;
+   await p.getByRole('button',{name:`Add ${kind}`,exact:true}).click();let ready=false;
+   for(const y of [590,680,480,770]){for(const x of [650,1000,490,1180,810]){await p.mouse.click(x,y);if(await p.locator('#save-object').isEnabled()){ready=true;break;}}if(ready)break;}
+   expect(ready,'Visible valid quick-prop placement').toBe(true);await p.locator('#save-object').click();await expect.poll(async()=>(await readUniverse(p)).currentPlanet.objects.filter(o=>o.kind===kind&&o.assetVersion===2).length).toBe(1);
+  }
+  await p.getByRole('button',{name:'Done building'}).click();await p.reload();await p.waitForTimeout(900);u=await readUniverse(p);for(const kind of ['tree','flowers','bench'])expect(u.currentPlanet.objects.find(o=>o.kind===kind)?.assetVersion).toBe(2);await p.screenshot({path:`${dir}/new-quick-props.png`});check('Tree, flowers and bench created through builder UI, server-assigned assetVersion 2 survives refresh');
+  const guestContext=await browser.newContext({locale:'en-US',viewport:{width:1440,height:900}}),guest=await guestContext.newPage();guest.on('pageerror',e=>errors.push(e.message));try{await guest.goto('/?measure=1');await guest.locator('#begin').click();await openMenu(guest);const skip=guest.getByRole('button',{name:'Skip tips',exact:true});if(await skip.isVisible())await skip.click();await guest.locator('#resume').click();await visit(guest,u.currentPlanet.id);const seen=await readUniverse(guest);expect(seen.currentPlanet.objects).toEqual(u.currentPlanet.objects);expect(seen.currentPlanet.blueprints).toEqual(u.currentPlanet.blueprints);await openMenu(guest);await expect(guest.locator('#build-mode')).not.toBeVisible();const denied=await guest.request.post('/api/objects/create',{data:{planetId:u.currentPlanet.id,objectId:randomUUID(),kind:'tree',position:[1,0,0],rotation:0}});expect(denied.status()).toBe(403);await guest.locator('#resume').click();await guest.screenshot({path:`${dir}/visitor.png`});await guest.setViewportSize({width:390,height:844});await guest.locator('.minimal-bar .language-select').selectOption('zh');await guest.screenshot({path:`${dir}/visitor-390-zh.png`});check('Independent visitor flies in, receives identical content/version metadata, and server rejects editing');}finally{await closeVisit(guestContext);}
+  expect(errors).toEqual([]);report('passed');
+ }catch(e){await p.screenshot({path:`${dir}/failure.png`}).catch(()=>{});report('failed',e);throw e;}finally{await closeVisit(c);}
+});

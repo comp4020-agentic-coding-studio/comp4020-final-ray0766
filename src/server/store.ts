@@ -19,7 +19,7 @@ export function openStore(path: string) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-  if (schema > 12) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  if (schema > 13) { db.close(); throw new Error('Database schema is newer than this application.'); }
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
@@ -28,7 +28,7 @@ export function openStore(path: string) {
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
     );`);
   let migrationBackup: string | null = null;
-  if (schema < 12) {
+  if (schema < 13) {
     if (schema > 0 && path !== ':memory:') {
       migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
       // VACUUM INTO includes committed WAL data and produces a consistent restore point.
@@ -139,7 +139,13 @@ export function openStore(path: string) {
           SELECT player_id,planet_id,position,radius,vertical_speed,grounded,sequence,scene_revision,clock_credit,request_hash,physics_version FROM ground_states;
           DROP TABLE ground_states;ALTER TABLE ground_states_v12 RENAME TO ground_states;`);
       }
-      db.exec('PRAGMA user_version=12; COMMIT;');
+      if(schema<13)db.exec(`CREATE TABLE IF NOT EXISTS object_assets (
+        object_id TEXT PRIMARY KEY, planet_id TEXT NOT NULL REFERENCES planets(id),
+        asset_version INTEGER NOT NULL CHECK(asset_version=2));
+        CREATE INDEX IF NOT EXISTS object_assets_planet ON object_assets(planet_id);
+        CREATE TRIGGER IF NOT EXISTS object_assets_no_update BEFORE UPDATE ON object_assets BEGIN SELECT RAISE(ABORT,'Asset versions are immutable'); END;
+        CREATE TRIGGER IF NOT EXISTS object_assets_no_delete BEFORE DELETE ON object_assets BEGIN SELECT RAISE(ABORT,'Asset versions are immutable'); END;`);
+      db.exec('PRAGMA user_version=13; COMMIT;');
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
   const history = historyStore(db);

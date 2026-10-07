@@ -1,3 +1,4 @@
+import { QUICK_PARTS } from '../shared/quick-parts.ts';
 import { radiusForSlot, safeRadius } from '../shared/world-size.ts';
 import { decodeEnvironment,encodeEnvironment } from '../assets/claude-geometry/terrain/env.ts';
 import { checkTerrainChange,describeConflicts } from '../assets/claude-geometry/terrain/policy.ts';
@@ -17,7 +18,7 @@ import { INITIAL_PLANETS } from '../shared/regions.ts';
 import { MAX_PLANETS, planetCenter, spaceDistance } from '../shared/flight.ts';
 
 interface PlanetRow { id: string; name: string; kind: 'hub' | 'garden'; owner_id: string | null; revision: number; objectCount: number;slot:number;radius:number;environment:string|null }
-interface ObjectRow { id: string; kind: PlacedObject['kind']; position: string; rotation: number; version: number; blueprint_hash: string | null; radius: number | null; height: number | null }
+interface ObjectRow { id: string; kind: PlacedObject['kind']; position: string; rotation: number; version: number; blueprint_hash: string | null; radius: number | null; height: number | null; asset_version: 2 | null }
 export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), history = historyStore(db)) {
   const transaction = <T>(fn: () => T) => { db.exec('BEGIN IMMEDIATE'); try { const result = fn(); db.exec('COMMIT'); return result; } catch (error) { if (db.isTransaction) db.exec('ROLLBACK'); throw error; } };
   function replenish() {
@@ -41,13 +42,13 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
   const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: p.revision, objectCount: p.objectCount,slot:p.slot,radius:p.radius,center:planetCenter(p.slot),environment:p.environment??null });
   const objects = (planetId: string): PlacedObject[] => {
     const sizes=new Map<string,ReturnType<typeof structureSize>>();
-    return (db.prepare('SELECT id,kind,position,rotation,version,blueprint_hash,radius,height FROM planet_objects WHERE planet_id=? ORDER BY rowid').all(planetId) as unknown as ObjectRow[]).map(r=>{
+    return (db.prepare('SELECT id,kind,position,rotation,version,blueprint_hash,radius,height,(SELECT asset_version FROM object_assets a WHERE a.object_id=planet_objects.id) AS asset_version FROM planet_objects WHERE planet_id=? ORDER BY rowid').all(planetId) as unknown as ObjectRow[]).map(r=>{
       if(r.blueprint_hash&&!sizes.has(r.blueprint_hash))sizes.set(r.blueprint_hash,structureSize(blueprints.parts(r.blueprint_hash)));
       const size=r.blueprint_hash?sizes.get(r.blueprint_hash):undefined;
       // Old structures stay exactly where they were saved. Effective extents
       // include the new eave when validating future neighbours or edits; their
       // saved rows and historical snapshots are not rewritten on read.
-      return {id:r.id,kind:r.kind,rotation:r.rotation,version:r.version,position:JSON.parse(r.position),...(size?{blueprintHash:r.blueprint_hash!,radius:Math.max(r.radius!,size.radius),height:Math.max(r.height!,size.height)}:{})};
+      return {id:r.id,kind:r.kind,rotation:r.rotation,version:r.version,position:JSON.parse(r.position),...(r.asset_version===2?{assetVersion:2 as const}:{}),...(size?{blueprintHash:r.blueprint_hash!,radius:Math.max(r.radius!,size.radius),height:Math.max(r.height!,size.height)}:{})};
     });
   };
   const owns = (id: string, planetId: unknown) => { const p = planet(planetId); if (p.kind === 'hub' || p.owner_id !== id) throw new RequestError(403, 'Only this planet’s owner can build here.'); return p; };
@@ -56,11 +57,12 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
   const placement = (kind: PlacedObject['kind'], position: unknown, rotation: unknown, planetId: string, ignoreId?: string, blueprintHash?: string) => {
     if (typeof rotation !== 'number' || !Number.isFinite(rotation) || rotation < 0 || rotation >= Math.PI * 2) throw new RequestError(400, 'Rotation must be between 0 and one full turn.');
     const parts = kind === 'structure' ? blueprints.parts(blueprintHash) : null;
-    const problem = placementProblem(kind, position, objects(planetId), ignoreId, parts ? structureSize(parts).radius : undefined, planet(planetId).radius);
+    const old=objects(planetId).find(o=>o.id===ignoreId),assetVersion=old?(old.assetVersion??1):2;
+    const problem = placementProblem(kind, position, objects(planetId), ignoreId, parts ? structureSize(parts).radius : undefined, planet(planetId).radius,assetVersion);
     if (problem) throw new RequestError(400, problem);
     const point = normalize(position as Vec3);
     const field=fieldOf(planet(planetId).environment,planet(planetId).radius);
-    if(planet(planetId).environment){const obj:PlacedObject={id:ignoreId??'preview',kind,position:point,rotation,version:1,...(parts?{blueprintHash,...structureSize(parts)}:{})};const fit=objectSeat(field,obj,parts?{[blueprintHash!]:parts}:{});if(fit.problem)throw new RequestError(409,fit.message??'This terrain cannot support the object.');}
+    if(planet(planetId).environment){const obj:PlacedObject={id:ignoreId??'preview',kind,position:point,rotation,version:1,...(assetVersion===2?{assetVersion:2 as const}:{}),...(parts?{blueprintHash,...structureSize(parts)}:{})};const fit=objectSeat(field,obj,parts?{[blueprintHash!]:parts}:{});if(fit.problem)throw new RequestError(409,fit.message??'This terrain cannot support the object.');}
     if (parts) { const fit = structureFit(parts, point, rotation,field); if (fit.problem) throw new RequestError(400, fit.message ?? 'This ground is too uneven.'); }
     return { position: point, rotation };
   };
@@ -123,6 +125,7 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
         if (blueprintHash && placed.filter(o => o.kind === 'structure').length >= MAX_STRUCTURES) throw new RequestError(409, `This planet has room for ${MAX_STRUCTURES} custom structures.`);
         const size = blueprintHash ? structureSize(blueprints.parts(blueprintHash)) : null;
         db.prepare('INSERT INTO planet_objects (id,planet_id,kind,position,rotation,blueprint_hash,radius,height) VALUES (?,?,?,?,?,?,?,?)').run(oid, p.id, body.kind, JSON.stringify(position.position), position.rotation, blueprintHash ?? null, size?.radius ?? null, size?.height ?? null); bump(p.id);
+        if(QUICK_PARTS[body.kind])db.prepare('INSERT INTO object_assets (object_id,planet_id,asset_version) VALUES (?,?,2)').run(oid,p.id);
         history.append(p.id,null,objects(p.id).find(o=>o.id===oid)!);
       });
     },

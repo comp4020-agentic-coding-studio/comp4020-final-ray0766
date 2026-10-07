@@ -1,5 +1,17 @@
 # Asset provenance
 
+## R8 local workshop additions
+
+The user-authorised Claude resource workspace supplies the 24 additional workshop
+parts and three examples at commit `c499deeb19e1d8ac20a6997f1904d49a2a5f5341`.
+33 changed/dependency files are copied byte-for-byte from its `src/` tree;
+`src/assets/claude-geometry/PROVENANCE.json` records individual hashes and prior
+source pins. The source workspace is not modified. New quick trees, flower pots
+and benches directly reuse the same unscaled blueprint geometry/materials.
+Old saved instances retain the earlier procedural models. These are original
+project resources; no Messenger assets were extracted. See the factual
+[integration record](docs/integration/r8-workshop.md).
+
 ## NASA SVS CGI Moon Kit — orbital planet surfaces
 
 Credit: **NASA's Scientific Visualization Studio**. Visualization: Ernie Wright

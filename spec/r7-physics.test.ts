@@ -97,7 +97,7 @@ it('backs up schema 9 and lazily recovers the old standing height; rejects old p
     s.db.exec('ALTER TABLE ground_states DROP COLUMN physics_version;PRAGMA user_version=9');
     const old=s.db.prepare('SELECT * FROM ground_states').get()!,players=s.db.prepare('SELECT * FROM players').all(),objects=s.db.prepare('SELECT * FROM planet_objects').all();
     s.close();s=openStore(path);
-    expect(s.db.prepare('PRAGMA user_version').get()!.user_version).toBe(12);
+    expect(s.db.prepare('PRAGMA user_version').get()!.user_version).toBe(13);
     const backup=new DatabaseSync(s.migrationBackup!);try{
       expect(backup.prepare('PRAGMA user_version').get()!.user_version).toBe(9);
       expect(backup.prepare('PRAGMA integrity_check').get()!.integrity_check).toBe('ok');

@@ -163,3 +163,113 @@ export function partsLineup(): Blueprint {
   s.add('wall.solid', 0, 0, 0, 2).add('wall.door', 1, 0, 0, 2).add('wall.window', 2, 0, 0, 2).add('wall.louvre', 3, 0, 0, 2).add('wall.corrugated', 4, 0, 0, 2);
   return { id: '0b6f3e1d-2a4c-4d8e-8f10-5c7a9e1b3d26' as BlueprintId, name: 'Parts lineup', parts: s.parts, groups: [] };
 }
+
+/**
+ * Lived-in cottage (round 8, docs/WORKSHOP.md): an L-shaped house of eight
+ * cells round a small courtyard, built only from catalogue parts a player
+ * has. Its roof closes with a hip at the outer corner, a valley at the inner
+ * one and verge boards on the four gable ends; inside, a dining corner, a
+ * sideboard, a shelf, crates and pots, wall lanterns inside and by the front
+ * door; outside, entrance steps down to the ground, a flower bed, a bench and
+ * a tree in the courtyard.
+ */
+export function homeCottage(): Blueprint {
+  const s = new Sketch();
+  const house: [number, number][] = [[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1], [0, 2], [1, 2]];
+  for (const [x, z] of house) s.add('floor.deck', x, 0, z);
+  // Walls round the L; the front door opens north onto the steps, the back door east into the courtyard.
+  s.add('wall.window', 0, 0, 0, 3).add('wall.solid', 0, 0, 1, 3).add('wall.window', 0, 0, 2, 3);
+  s.add('wall.solid', 0, 0, 0, 2).add('wall.window', 1, 0, 0, 2).add('wall.solid', 2, 0, 0, 2);
+  s.add('wall.window', 2, 0, 0, 1).add('wall.solid', 2, 0, 1, 1);
+  s.add('wall.solid', 0, 0, 2, 0).add('wall.door.open', 1, 0, 2, 0);
+  s.add('wall.door', 2, 0, 1, 0).add('wall.window', 1, 0, 2, 1);
+  // Posts on the six corners of the L, the inner one included.
+  s.add('structure.column', 0, 0, 0, 2).add('structure.column', 2, 0, 0, 1).add('structure.column', 2, 0, 1, 0);
+  s.add('structure.column', 1, 0, 1, 0).add('structure.column', 1, 0, 2, 0).add('structure.column', 0, 0, 2, 3);
+  // Roof: a hip on the outer corner, a valley on the inner one, runs between, verges on the gable ends.
+  s.add('roof.slope.hip', 0, 1, 0, 2).add('roof.slope', 1, 1, 0, 2).add('roof.slope', 2, 1, 0, 2);
+  s.add('roof.slope', 0, 1, 1, 3).add('roof.slope.valley', 1, 1, 1, 0).add('roof.slope', 2, 1, 1, 0);
+  s.add('roof.slope', 0, 1, 2, 3).add('roof.slope', 1, 1, 2, 1);
+  s.add('roof.verge.left', 2, 1, 0, 2).add('roof.verge.right', 2, 1, 1, 0).add('roof.verge.right', 0, 1, 2, 3).add('roof.verge.left', 1, 1, 2, 1);
+  // Inside: shelf and crates on the south wall, a sideboard under the south window, a dining corner by the west wall.
+  s.add('furniture.shelf', 0, 0, 0, 2).add('furniture.sideboard', 1, 0, 0, 2).add('storage.crates', 2, 0, 0, 2);
+  s.add('furniture.table', 0, 0, 1).add('furniture.chair', 0, 0, 1, 0).add('furniture.chair', 0, 0, 1, 2).add('light.wall', 0, 0, 1, 3);
+  s.add('light.wall', 2, 0, 1, 1).add('garden.pot', 0, 0, 2, 3).add('garden.pot', 1, 0, 2, 1);
+  // Outside: steps from the front door down to the ground, a lantern beside it.
+  s.add('step.entry', 1, 0, 3, 0).add('light.wall', 0, 0, 3, 2);
+  // Courtyard: paving, a flower bed against the east wall, a tree, a bench.
+  for (const [x, z] of [[2, 2], [3, 0], [3, 1], [3, 2]] as [number, number][]) s.add('street.paving', x, 0, z);
+  s.add('garden.bed', 3, 0, 1).add('garden.tree', 3, 0, 2).add('furniture.bench', 3, 0, 0, 1);
+  // A plain hanging sign on the east wall over the bed, for the house's name once signs carry text.
+  s.add('sign.blank', 3, 0, 1, 3);
+  return { id: '5e2a9c71-4d3b-4f08-a6e2-91c7d0b4f318' as BlueprintId, name: 'Lived-in cottage', parts: s.parts, groups: [] };
+}
+
+/**
+ * Corner lane and courtyard (round 8, docs/WORKSHOP.md): a two-lane lane
+ * turning a corner round a small kerbed courtyard. The centre line turns on
+ * the lane corner piece, the outer cell of the bend has no marking, and a
+ * kerb corner closes the two kerb runs where they meet. In the courtyard a
+ * café pavilion on posts and beams under a gable roof with verge boards, a
+ * table with two chairs, a bench facing the lane, a flower bed and a pot.
+ */
+export function cornerLane(): Blueprint {
+  const s = new Sketch();
+  // East arm: two rows, centre line on the z = 3 line.
+  for (const x of [2, 3]) s.add('street.road', x, 0, 2, 0).add('street.road', x, 0, 3, 2);
+  // South arm: two columns, centre line on the x = 1 line.
+  for (const z of [0, 1]) s.add('street.road', 0, 0, z, 1).add('street.road', 1, 0, z, 3);
+  // The bend: the line turns in (1, 2), the outer cell (0, 3) is plain.
+  s.add('street.road.corner', 1, 0, 2, 3).add('street.road', 1, 0, 3, 2).add('street.road', 0, 0, 2, 1).add('street.road.plain', 0, 0, 3, 0);
+  // Courtyard paving, kerbed along both lane arms, the kerbs turning round its corner.
+  for (const x of [2, 3]) for (const z of [0, 1]) s.add('street.paving', x, 0, z);
+  s.add('street.kerb.corner', 2, 0, 1, 3).add('street.kerb', 3, 0, 1, 0).add('street.kerb', 2, 0, 0, 3);
+  // Pavilion over (3, 0)–(3, 1): six posts, six beams, a gable roof with verges on both ends.
+  s.add('structure.column', 3, 0, 0, 2).add('structure.column', 3, 0, 0, 1).add('structure.column', 3, 0, 1, 2);
+  s.add('structure.column', 3, 0, 1, 1).add('structure.column', 3, 0, 1, 3).add('structure.column', 3, 0, 1, 0);
+  s.add('structure.beam', 3, 0, 0, 2).add('structure.beam', 3, 0, 0, 3).add('structure.beam', 3, 0, 0, 1);
+  s.add('structure.beam', 3, 0, 1, 3).add('structure.beam', 3, 0, 1, 1).add('structure.beam', 3, 0, 1, 0);
+  s.add('roof.slope', 3, 1, 0, 2).add('roof.slope', 3, 1, 1, 0);
+  s.add('roof.verge.left', 3, 1, 0, 2).add('roof.verge.right', 3, 1, 0, 2).add('roof.verge.left', 3, 1, 1, 0).add('roof.verge.right', 3, 1, 1, 0);
+  // Under it a table with two chairs and a bench facing the lane; a flower bed and a pot beside.
+  s.add('furniture.table', 3, 0, 0).add('furniture.chair', 3, 0, 0, 1).add('furniture.chair', 3, 0, 0, 3);
+  s.add('furniture.bench', 3, 0, 1, 0);
+  s.add('garden.bed', 2, 0, 0).add('garden.pot', 2, 0, 1, 1);
+  return { id: '8c41f2d6-7a9e-4b35-b0d8-2e6f9a1c5b74' as BlueprintId, name: 'Corner lane and courtyard', parts: s.parts, groups: [] };
+}
+
+/**
+ * Pad-side stall (round 8, docs/WORKSHOP.md): a market stall beside a
+ * landing pad, with a boardwalk in front and a ramp for carts down from the
+ * pad to the ground. The stall's back and west walls carry hanging signs and
+ * wall lanterns; sideboards make its counter; a pyramid roof of four hips
+ * stands on its walls and on posts and beams along the open front. Crates
+ * and barrels wait on the boardwalk; a lantern post lights the way.
+ */
+export function padStall(): Blueprint {
+  const s = new Sketch();
+  // Stall floor, walls on the back (south), west and the back half of the east side.
+  for (const x of [0, 1]) for (const z of [0, 1]) s.add('floor.deck', x, 0, z);
+  s.add('wall.solid', 0, 0, 0, 2).add('wall.solid', 1, 0, 0, 2).add('wall.solid', 0, 0, 0, 3).add('wall.solid', 0, 0, 1, 3).add('wall.solid', 1, 0, 0, 1);
+  // Posts and beams along the open front and the front half of the east side.
+  s.add('structure.column', 0, 0, 0, 2).add('structure.column', 1, 0, 0, 1).add('structure.column', 0, 0, 1, 3);
+  s.add('structure.column', 0, 0, 1, 0).add('structure.column', 1, 0, 1, 0).add('structure.column', 1, 0, 1, 1);
+  s.add('structure.beam', 0, 0, 1, 0).add('structure.beam', 1, 0, 1, 0).add('structure.beam', 1, 0, 1, 1);
+  // Pyramid roof: a hip on every cell.
+  s.add('roof.slope.hip', 0, 1, 0, 2).add('roof.slope.hip', 1, 1, 0, 1).add('roof.slope.hip', 1, 1, 1, 0).add('roof.slope.hip', 0, 1, 1, 3);
+  // Inside: a counter along the front, a shelf and crates on the back wall, lanterns and the post sign.
+  s.add('furniture.sideboard', 0, 0, 1, 0).add('furniture.sideboard', 1, 0, 1, 0);
+  s.add('furniture.shelf', 0, 0, 0, 2).add('storage.crates', 1, 0, 0, 2);
+  s.add('light.wall', 0, 0, 0, 3).add('light.wall', 0, 0, 1, 3).add('sign.mail', 1, 0, 0, 2);
+  // Landing pad east of the stall, its cup sign on the stall's east wall.
+  s.add('pad.quarter', 3, 0, 1, 0).add('pad.quarter', 2, 0, 1, 3).add('pad.quarter', 3, 0, 0, 1).add('pad.quarter', 2, 0, 0, 2);
+  s.add('sign.cup', 2, 0, 0, 3);
+  // Boardwalk in front, a railing along the ramp, cargo and a bench; a lantern post at its end.
+  for (const x of [0, 1, 2]) for (const z of [2, 3]) s.add('floor.grate', x, 0, z);
+  s.add('rail.guard', 2, 0, 2, 1).add('rail.guard', 2, 0, 3, 1);
+  s.add('storage.barrel', 0, 0, 2, 3).add('storage.crates', 0, 0, 3, 3).add('storage.barrel', 2, 0, 2, 1);
+  s.add('furniture.bench', 1, 0, 3, 0).add('service.light', 2, 0, 3, 0);
+  // Ramp down from the pad to the ground for carts.
+  s.add('ramp.entry', 3, 0, 2, 0);
+  return { id: 'f1b7d3a9-2c6e-4085-9d4a-6b8e0c2f7a13' as BlueprintId, name: 'Pad-side stall', parts: s.parts, groups: [] };
+}

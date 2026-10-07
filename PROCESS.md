@@ -310,3 +310,32 @@ previously reproduced on the unchanged bilingual base; it is not counted as pass
 See [source mapping, screenshots and measured counters](docs/integration/village-density.md)
 and the [full workshop inventory](docs/integration/workshop-module-audit.md). No new
 Claude work, student reflection, push or public deployment was performed.
+
+## R8 workshop: authorised local integration (7 October 2026)
+
+Read Claude's committed c499dee snapshot against the actual host 5a73b228
+baseline and copied 33 changed/dependency files byte-for-byte. The host now exposes
+45 parts, three editable examples and their Chinese labels. New quick tree, pot
+and bench placements directly share the unscaled blueprint parts, materials and
+collision boxes. Schema13 stores immutable per-object asset versions so older
+instances and historical replay retain their previous geometry and dimensions.
+The real database's migration copy preserved every original row and column.
+
+Extended rotated footprints and collision proxies for entrances, corner roofs,
+verges, beams and low fixtures. The entrance uses one pitched support plane.
+Physics5 preserves compatible airborne saves and rejects obsolete motion batches.
+The last browser beam replay exposed radial descent into a counter side freezing
+the character; a bounded fall-distance slide and an actual-stall regression repair
+that case. No source-demo display lift is used for real placements.
+
+Player workflow was tested before enriching the existing eight public blueprint
+plots and 64-object scene with furniture, gardens, wall lamps, signs and cargo.
+Chrome exercised real workshop assembly/save/reload, translated phone views,
+public rooms/tasks/flight/touch, private ramp movement, normal quick-prop creation,
+visitor read-only access and the existing light-pool fades. Measurements and
+screenshots are retained in the R8 evidence folders. The final full unit run has
+148 passes and the same three historical migration/movement fixture failures
+previously reproduced on an unchanged baseline. Two obsolete catalogue/lighting
+assertions were updated without weakening production behavior. Typecheck, lint,
+build and evidence checks passed. See [the R8 record](docs/integration/r8-workshop.md).
+No student reflection, independent source-workspace edits or public deployment.

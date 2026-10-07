@@ -1,3 +1,4 @@
+import { QUICK_PARTS } from '../quick-parts.ts';
 import {HUB_SHIP} from '../harbour-layout.ts';
 import {HUB_OBJECTS,PUBLIC_CONTENTS,PUBLIC_FIELD} from '../public-village.ts';
 import { fieldOf,gradedField,objectSeat } from '../terrain.ts';
@@ -20,9 +21,9 @@ export const SPRINT_FLAG=1, JUMP_FLAG=2;
 export const FIXED_STEP=1/60, MAX_PATH_STEPS=28;
 // Bump whenever static collision semantics change. Durable ground rows and
 // movement batches use this same value; a scene revision alone is not enough.
-export const PHYSICS_VERSION=4;
+export const PHYSICS_VERSION=5;
 // Shared radial-ascent fix and public layout are released together.
-export const HUB_PHYSICS_VERSION=4;
+export const HUB_PHYSICS_VERSION=5;
 export const physicsVersionFor=(planetId:string)=>planetId==='hub'?HUB_PHYSICS_VERSION:PHYSICS_VERSION;
 const SKIN=.002, SUBSTEP=.035, ground=legacyHeightField();
 export interface GroundPose { position:Vec3; radius:number; verticalSpeed:number; grounded:boolean; jumpHeld?:boolean }
@@ -51,7 +52,12 @@ export class GroundWorld {
     const blueprints=planet.id==='hub'?{...PUBLIC_CONTENTS,...planet.blueprints}:planet.blueprints;
     for(const object of objects){
       if(object.kind==='structure')this.structure(object,blueprints?.[object.blueprintHash!]??[]);
-      else if(objectHeight(object)>.6){
+      else if(object.assetVersion===2&&QUICK_PARTS[object.kind]){
+        const contract=QUICK_PARTS[object.kind]!,base=(this.generated?objectSeat(this.field,object,planet.blueprints).baseRadius:this.radius(object.position))+.015;
+        const body:Body={objectId:object.id,dir:vec(object.position),broad:objectRadius(object)+1,colliders:[]};
+        for(const shape of PART_COLLIDERS[contract.part]())this.add(body,object.position,object.rotation,base,{...shape,center:shape.center.map((n,i)=>n+contract.offset[i]) as Vec3});
+        this.bodies.push(body);
+      }else if(objectHeight(object)>.6){
         const radius=objectRadius(object),h=objectHeight(object),base=(this.generated?objectSeat(this.field,object,planet.blueprints).baseRadius:this.radius(object.position))+.015;
         const body:Body={objectId:object.id,dir:vec(object.position),broad:radius+1,colliders:[],round:{radius,height:h,base}};
         this.add(body,object.position,object.rotation,base,{tag:'legacy solid prop',center:[0,h/2,0],half:[radius,h/2,radius]});this.bodies.push(body);
@@ -181,7 +187,19 @@ export class GroundWorld {
         remaining.addScaledVector(normal,hit.depth+SKIN).clampLength(0,budget);
       }
       if(!accepted&&!pose.grounded){
-        const radial=this.radial(pose,pose.position,tick);if(!this.hit(radial.position,radial.radius))pose={...radial,jumpHeld};
+        let radial=this.radial(pose,pose.position,tick),hit=this.hit(radial.position,radial.radius);
+        // Radial gravity tilts towards an adjacent cabinet/wall as feet fall.
+        // Slide that small penetration out along its side, bounded by the fall
+        // distance; rejecting the entire tick would freeze vertical velocity.
+        const budget=Math.max(0,pose.radius-radial.radius);let spent=0;
+        for(let slide=0;hit&&budget>0&&slide<4;slide++){
+          const up=vec(radial.position),away=hit.normal.clone().projectOnPlane(up);
+          if(away.lengthSq()<.01)break;
+          const shift=Math.min(hit.depth+SKIN,budget-spent);if(shift<=0)break;spent+=shift;
+          const position=up.addScaledVector(away.normalize(),shift/radial.radius).normalize().toArray() as Vec3;
+          radial=this.radial(pose,position,tick);hit=this.hit(radial.position,radial.radius);
+        }
+        if(!hit)pose={...radial,jumpHeld};
       }
     }
     return pose;

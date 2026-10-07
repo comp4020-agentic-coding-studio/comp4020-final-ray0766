@@ -24,9 +24,10 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
     const r=player(id),old=row(id),w=world(r.planet_id);
     if(old&&old.planet_id===r.planet_id&&old.scene_revision===w.revision&&old.physics_version===physicsVersionFor(r.planet_id)&&old.position===r.position)return old;
     const start=old&&old.planet_id===r.planet_id&&old.position===r.position?pose(old):w.pose(JSON.parse(r.position));
-    // A private v3 -> v4 upgrade changes ascent clipping, not geometry. Keep
-    // its valid saved pose (including a jump in progress) byte-for-byte.
-    const preserve=old&&r.planet_id!=='hub'&&old.physics_version===3&&old.planet_id===r.planet_id&&old.scene_revision===w.revision&&old.position===r.position&&!w.blocked(start);
+    // Keep valid v3/v4 poses across the R8 upgrade, including airborne saves.
+    // Public furnishings may invalidate a spot; removed supports must fall.
+    const support=w.support(start.position,start.radius+.26);
+    const preserve=old&&[3,4].includes(old.physics_version)&&old.planet_id===r.planet_id&&old.scene_revision===w.revision&&old.position===r.position&&!w.blocked(start)&&(!start.grounded||Math.abs(support.radius-start.radius)<.025);
     const safe=preserve?start:w.recover(start),changed=distance(safe.position,JSON.parse(r.position))>.00001;
     db.exec('BEGIN IMMEDIATE');try{
       write(id,safe,(old?.sequence??-1)+1,w.revision,.1,null,r.planet_id);

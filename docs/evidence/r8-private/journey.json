@@ -1,0 +1,1777 @@
+{
+  "status": "passed",
+  "browser": "154.0.8037.98",
+  "checks": [
+    "Actual terrain fit, real ramp ascent/descent, sprint, jump, ramp refresh and central-beam head/camera clearance",
+    "Fixed two-point/two-spot pool, real camera selection changes and intermediate fade intensities",
+    "Tree, flowers and bench created through builder UI, server-assigned assetVersion 2 survives refresh",
+    "Independent visitor flies in, receives identical content/version metadata, and server rejects editing"
+  ],
+  "measurements": {
+    "ramp": {
+      "feet": {
+        "position": [
+          0.3196947381088385,
+          0.8294964942694263,
+          0.4579637981546718
+        ],
+        "radius": 12.091584183577579,
+        "north": {
+          "x": -0.5845343013566295,
+          "y": 0.5530525655780288,
+          "z": -0.5936771094164549
+        },
+        "grounded": true
+      },
+      "support": {
+        "radius": 12.091584183577579,
+        "objectId": "2872c1e3-a8a3-4891-bb22-b64725215b5b",
+        "tag": "ramp.entry"
+      },
+      "local": [
+        1.488791663917385,
+        -0.08305308044255783,
+        0.3100753305501765
+      ]
+    },
+    "beam": {
+      "jumpRise": 0.1850977742953539,
+      "feet": {
+        "position": [
+          0.18894424465174767,
+          0.8439262721417786,
+          0.5020841758130415
+        ],
+        "radius": 12.091375058249609,
+        "north": {
+          "x": -0.9739584481830612,
+          "y": 0.22630255186717393,
+          "z": -0.013859878471633025
+        },
+        "grounded": true
+      },
+      "cameraDistance": 7.536777793811387
+    },
+    "lightStates": [
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0"
+          ],
+          "fittingsInReach": 1,
+          "clustersInReach": 1,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          0.8890000000000025,
+          0.8890000000000025
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0"
+          ],
+          "fittingsInReach": 1,
+          "clustersInReach": 1,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          0.8890000000000025,
+          0.8890000000000025
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0"
+          ],
+          "fittingsInReach": 1,
+          "clustersInReach": 1,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          0.5000000000000001,
+          0.5000000000000001
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0"
+          ],
+          "fittingsInReach": 1,
+          "clustersInReach": 1,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          0.5000000000000001,
+          0.5000000000000001
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0"
+          ],
+          "fittingsInReach": 1,
+          "clustersInReach": 1,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          0.5000000000000001,
+          0.5000000000000001
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0.8889999999999905,
+          0,
+          0.11133333333332618,
+          0.11133333333332618
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0.8889999999999905,
+          0,
+          0.11133333333332618,
+          0.11133333333332618
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 1,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0.4996666666666595,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 1,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0.4996666666666595,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 1,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0.11099999999999771,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 1,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0.11099999999999771,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 0,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 0,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 0,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 0,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 0,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 0,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 0,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 0,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 0,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 0,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 0,
+          "litShadows": 0,
+          "assigned": [],
+          "fittingsInReach": 0,
+          "clustersInReach": 0,
+          "enabled": true
+        },
+        "levels": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 1,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0"
+          ],
+          "fittingsInReach": 1,
+          "clustersInReach": 1,
+          "enabled": true
+        },
+        "levels": [
+          0.05566666666666909,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 1,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0"
+          ],
+          "fittingsInReach": 1,
+          "clustersInReach": 1,
+          "enabled": true
+        },
+        "levels": [
+          0.05566666666666909,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 15,
+          "clustersInReach": 8,
+          "enabled": true
+        },
+        "levels": [
+          0.44433333333333097,
+          0,
+          0.11133333333332607,
+          0.22233333333332364
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 15,
+          "clustersInReach": 8,
+          "enabled": true
+        },
+        "levels": [
+          0.44433333333333097,
+          0,
+          0.11133333333332607,
+          0.22233333333332364
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          0.8330000000000048,
+          0,
+          0.5,
+          0.6109999999999977
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          0.8330000000000048,
+          0,
+          0.5,
+          0.6109999999999977
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          0.8890000000000023,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          0.8890000000000023,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          0.8890000000000023,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "pool": {
+          "slots": {
+            "spots": 2,
+            "points": 2,
+            "shadows": 0
+          },
+          "lit": 3,
+          "litShadows": 0,
+          "assigned": [
+            "street:4.6,11.7,9.0",
+            "door:0.7,11.7,7.6",
+            "door:1.4,11.2,8.1"
+          ],
+          "fittingsInReach": 20,
+          "clustersInReach": 13,
+          "enabled": true
+        },
+        "levels": [
+          1,
+          0,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "errors": []
+}

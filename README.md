@@ -20,6 +20,8 @@ Space jumping with shared collision, server validation and saved airborne state.
 language selector, browser-local preference and in-place translation without losing drafts.
 [Player-built public village](docs/integration/village-density.md) adds sixteen rooms in eight
 legal blueprint plots, with the same catalogue, dimensions and collisions used by players.
+[R8 workshop](docs/integration/r8-workshop.md) adds 24 parts (45 total), three editable
+examples, matching new quick props and furnished public rooms, with old saves preserved.
 The published Crit 8 release remains `09233d9`; these changes are not deployed.
 
 > Prepared with AI assistance from the student's recorded design decisions and
@@ -41,6 +43,11 @@ props, within the existing limits. Its three reproducible documents are
 and [Port pair](/examples/village/port.json). These are standard blueprint JSON;
 the current workshop does not yet expose an import button. The part grid, saved
 library, placement and collision rules are the same as player construction.
+
+The workshop's **Example → Load example** controls open a lived-in cottage, corner
+lane or pad-side stall as an editable draft. Save it to your library, then place it
+on your own planet. New trees, flowers and benches share the blueprint kit's exact
+dimensions; previously saved quick props retain their old appearance and size.
 
 ## What good means here
 

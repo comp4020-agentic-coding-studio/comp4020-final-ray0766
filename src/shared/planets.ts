@@ -1,3 +1,4 @@
+import { QUICK_PARTS } from './quick-parts.ts';
 import { distance, normalize, SPAWN, validPosition } from './world.ts';
 import type { PlayerState, Vec3 } from './world.ts';
 import type { BlueprintContents } from './blueprints.ts';
@@ -13,18 +14,18 @@ export const CATALOGUE = {
 export type BuildKind = keyof typeof CATALOGUE;
 export type ObjectKind = BuildKind | 'structure';
 export const MAX_OBJECTS = 64;
-export interface PlacedObject { id: string; kind: ObjectKind; position: Vec3; rotation: number; version: number; blueprintHash?: string; radius?: number; height?: number }
+export interface PlacedObject { id: string; kind: ObjectKind; position: Vec3; rotation: number; version: number; blueprintHash?: string; radius?: number; height?: number; assetVersion?: 2 }
 export const objectName = (o: Pick<PlacedObject, 'kind'>) => o.kind === 'structure' ? 'Custom structure' : CATALOGUE[o.kind].name;
-export const objectRadius = (o: Pick<PlacedObject, 'kind' | 'radius'>) => o.kind === 'structure' ? o.radius ?? 0 : CATALOGUE[o.kind].radius;
-export const objectHeight = (o: Pick<PlacedObject, 'kind' | 'height'>) => o.kind === 'structure' ? o.height ?? 0 : CATALOGUE[o.kind].height;
+export const objectRadius = (o: Pick<PlacedObject, 'kind' | 'radius' | 'assetVersion'>) => o.kind === 'structure' ? o.radius ?? 0 : o.assetVersion===2?(QUICK_PARTS[o.kind]?.radius??CATALOGUE[o.kind].radius):CATALOGUE[o.kind].radius;
+export const objectHeight = (o: Pick<PlacedObject, 'kind' | 'height' | 'assetVersion'>) => o.kind === 'structure' ? o.height ?? 0 : o.assetVersion===2?(QUICK_PARTS[o.kind]?.height??CATALOGUE[o.kind].height):CATALOGUE[o.kind].height;
 export interface PlanetSummary { id: string; name: string; kind: 'hub' | 'garden'; claimed: boolean; mine: boolean; revision: number; objectCount: number; center:Vec3; slot:number; radius?:number; environment?:string|null }
 export interface PlanetView extends PlanetSummary { objects: PlacedObject[]; blueprints?: BlueprintContents }
 export interface Universe { player: PlayerState; planets: PlanetSummary[]; ownedPlanetId: string | null; currentPlanet: PlanetView }
 export function isBuildKind(value: unknown): value is BuildKind { return typeof value === 'string' && Object.hasOwn(CATALOGUE, value); }
-export function placementProblem(kind: ObjectKind, position: unknown, objects: PlacedObject[], ignoreId?: string, radius?: number, worldRadius=10) {
+export function placementProblem(kind: ObjectKind, position: unknown, objects: PlacedObject[], ignoreId?: string, radius?: number, worldRadius=10, assetVersion:1|2=2) {
   if (!validPosition(position)) return 'Choose a point on the planet.';
   const point=normalize(position);
-  const size = objectRadius({kind, radius});
+  const size = objectRadius({kind, radius,assetVersion:assetVersion===2?2:undefined});
   if (distance(point, SPAWN, worldRadius) < size + 1.0) return 'Leave a little space around the landing spot.';
   for (const item of objects) {
     if (item.id === ignoreId || (item.kind === 'path' && kind === 'path')) continue;

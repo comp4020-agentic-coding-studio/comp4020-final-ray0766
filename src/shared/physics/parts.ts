@@ -1,3 +1,5 @@
+import { PART_INFO } from '../../assets/claude-geometry/blueprint/parts/info.ts';
+import { PART_IDS } from '../../assets/claude-geometry/blueprint/parts/catalogue.ts';
 import type { PartId } from '../../assets/claude-geometry/blueprint/parts/catalogue.ts';
 import type { Vec3 } from '../world.ts';
 
@@ -39,7 +41,36 @@ function slopeRoof():PartBox[]{
   shapes.push(box('pitched roof ridge',[0,.755,-.46],[1,.06,.08]));
   return shapes;
 }
+// R8 source suggestions are translated once into host collision contracts.
+// The manifest lists two alternative ramp supports; only the pitched one ships.
+function suggested(id:PartId):PartBox[]{
+ const shapes=PART_INFO[id].colliders??[];
+ return shapes.filter((s,i)=>id!=='ramp.entry'||i===0||!s.support).map(s=>({...box(id,s.center,s.size,s.support),pitch:s.pitch}));
+}
+function cornerRoof(hip:boolean):PartBox[]{
+ const shapes:PartBox[]=[],start=-.5,end=hip?.79:.5,n=8,step=(end-start)/n;
+ for(let x=0;x<n;x++)for(let z=0;z<n;z++){
+  const x0=start+x*step,z0=start+z*step;
+  // Conservative tile/ridge envelope at each strip's highest corner. The
+  // volume closes the roof and clips cameras but never grants foot support.
+  const top=Math.min(.8,.7*(.5-(hip?Math.max(x0,z0):Math.min(x0,z0)))+.10),bottom=-.16;
+  shapes.push(box('corner roof', [x0+step/2,(top+bottom)/2,z0+step/2],[step,top-bottom,step]));
+ }
+ return shapes;
+}
+function verge(side:number):PartBox[]{
+ return Array.from({length:8},(_,i)=>{const z=-.5+i*1.31/8,top=Math.min(.84,.7*(.5-z)+.14),bottom=-.2;
+  return box('roof verge',[side*.54,(top+bottom)/2,z+1.31/16],[.08,top-bottom,1.31/8]);});
+}
+const added=Object.fromEntries(PART_IDS.slice(21).map(id=>[id,()=>suggested(id)])) as Record<PartId,()=>PartBox[]>;
+added['roof.slope.hip']=()=>cornerRoof(true);added['roof.slope.valley']=()=>cornerRoof(false);
+added['roof.verge.left']=()=>verge(-1);added['roof.verge.right']=()=>verge(1);
+// The brackets are lower than the central 1.84 m beam. Match their small
+// side volumes; lamps/signs also block jumping heads and camera booms.
+added['structure.beam']=()=>[...suggested('structure.beam'),...[-1,1].map(side=>box('beam bracket',[side*.325,1.815,0],[.15,.39,.15]))];
+for(const id of ['light.wall','sign.blank','sign.mail','sign.cup'] as const)added[id]=()=>[box(id,id==='light.wall'?[0,1.832,-.225]:[0,1.8375,-.295],id==='light.wall'?[.24,.424,.27]:[.12,.405,.41])];
 export const PART_COLLIDERS:Record<PartId,()=>PartBox[]>={
+ ...added,
   'floor.deck':slab,'floor.grate':slab,'roof.deck':slab,
   'wall.solid':wall,'wall.window':wall,'wall.louvre':wall,'wall.corrugated':wall,
   'wall.door':()=>door(false),'wall.door.open':()=>door(true),

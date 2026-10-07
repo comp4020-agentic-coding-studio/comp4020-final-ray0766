@@ -23,9 +23,11 @@ export function floorDeck(k: Kit) {
 export const VILLAGE_SLOPE_RISE = 0.7;
 /**
  * Overhang along the slope past the cell edge. The tiles end 0.28 m beyond the
- * edge (0.17 m beyond the wall face below), between y = −0.16 and 0, where
- * nothing the slope's rules let stand beyond its gutter side reaches: walls
- * below end at −0.16, parts on the level start at 0.
+ * edge (0.175–0.178 m beyond the wall face below), never below y = −0.16, the
+ * top of that wall; they stay above y = 0 for the first 0.09–0.11 m beyond the
+ * edge. The slope's rules keep the neighbouring deck slot clear there, but not
+ * that cell's side edges; docs/VILLAGE.md has the exact profile and what can
+ * meet it.
  */
 export const VILLAGE_EAVE = 0.27;
 const TILE = 0.04, LAP = 0.03, STEP = 0.03;

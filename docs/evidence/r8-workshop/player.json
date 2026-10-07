@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "browser": "154.0.8037.98",
+  "checks": [
+    "All 24 new tools exposed in the actual player workshop",
+    "Corner lane reconstructed piece by piece through real UI, then server-saved",
+    "Four server blueprints survive refresh",
+    "390px visible samples, translated controls, no horizontal overflow and in-place language switch",
+    "New sample accepted at a legal terrain fit and persists as immutable placed content"
+  ],
+  "errors": []
+}

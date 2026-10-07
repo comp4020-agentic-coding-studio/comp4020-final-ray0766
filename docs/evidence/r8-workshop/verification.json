@@ -1,0 +1,41 @@
+{
+  "base": "29bc9f68d55c5bf2a1005753895cf96a5f6bf0bf",
+  "source": "c499deeb19e1d8ac20a6997f1904d49a2a5f5341",
+  "vendorBaseline": "5a73b228f13b8b20460ea6f9403167fdfedc08be",
+  "fullVitest": {
+    "passed": 148,
+    "failed": 3,
+    "total": 151,
+    "filesPassed": 31,
+    "filesFailed": 2
+  },
+  "knownFailures": [
+    "blueprints: artificial v4 database retains modern compact-planet columns and triggers revision migration",
+    "ships: artificial v6 database retains modern compact-planet columns and triggers revision migration",
+    "ships: obsolete large checkpoint moves exceed validated ground travel"
+  ],
+  "knownFailureBaseline": "docs/evidence/bilingual/baseline-comparison.json",
+  "passedChecks": [
+    "typecheck",
+    "eslint",
+    "production build",
+    "check-evidence",
+    "git diff --check",
+    "106 vendor file provenance hashes"
+  ],
+  "browser": "Chrome 154.0.8037.98 on Mac; 390px uses viewport/touch emulation",
+  "repairedProductionBug": "Radial descent beside the pad-stall sideboard froze a beam-clipped jump; tangent correction is bounded by fall distance. Actual saved pose reproduced and regression added.",
+  "driverCorrections": [
+    "Select coordinate options by value rather than duplicate numeric labels",
+    "Wait for asynchronous saved library refresh",
+    "Probe exposed ramp beyond adjacent floor support; precision key pulses avoid boundary overshoot",
+    "Respect both existing light kinds: two point and two spot slots",
+    "Leave saved beam position through the open pad instead of crossing the rail"
+  ],
+  "notClaimed": [
+    "IAB validation",
+    "physical phone GPU performance",
+    "resolution of the previous 845/722-call private capacity result",
+    "public deployment"
+  ]
+}
