@@ -4,6 +4,11 @@ import type { BuiltPart, Placement } from '../../style/geometry.ts';
 import type { LodTier } from '../../style/lod.ts';
 import type { StyleLibrary, SurfaceRecipe } from '../../style/materials.ts';
 import { GLOW, PALETTE, SCALE } from '../../style/tokens.ts';
+import { createInkMaterials } from '../../style/ink.ts';
+import type { InkMaterials } from '../../style/ink.ts';
+import { lookParams } from '../../style/look.ts';
+import { VILLAGE_GROUND, VILLAGE_LAMP, villageMaterial } from '../../style/village.ts';
+import type { Look } from '../../style/look.ts';
 
 // Shared vocabulary for the building kit.
 //
@@ -58,7 +63,37 @@ export interface MaterialSource {
   get(name: KitMaterial): T.Material;
   /** Materials this source created and the model must free (the lamp glow). */
   owned(): T.Material[];
+  /** The look the materials are in; the village look also selects the village models (parts/village). */
+  look?: Look;
+  /** Ink outline materials when the look draws them. */
+  ink?(): InkMaterials | null;
 }
+
+/**
+ * The village look's material for each kit slot. Slot names keep their
+ * contract (parts still ask for 'skin', 'leaf' and so on); the village models
+ * use them for plaster, painted doors and so on, and close look-alikes share
+ * one material so a building stays within its draw calls with its ink lines:
+ * 14 materials at most, plus the ink shell and lines, and a single part within
+ * BUDGET.part's ten. Inside and outside plaster are one material. Two slots
+ * carry planting in this look: 'membrane' is foliage, 'hazard' is blossom.
+ */
+const VILLAGE_SLOTS: Record<KitMaterial, string> = {
+  post: 'village:timber', steel: 'village:iron', bright: 'village:iron', skin: 'village:plaster', skinInner: 'village:plaster',
+  tread: 'village:boards', concrete: 'village:stone', hazard: 'village:bloom-coral', leaf: 'village:paint', glass: 'glass',
+  glassSmoked: 'glass', lamp: 'lamp', corrugated: 'village:tile', membrane: 'village:leaf', pavers: 'village:cobble',
+  asphalt: 'village:lane', marking: 'village:line',
+};
+/** At low LOD the village look folds further, to 8 materials and the ink lines: inside the 10 calls of BUDGET.building.low. */
+const VILLAGE_LOW: Record<string, string> = {
+  'village:iron': 'village:timber', 'village:boards': 'village:timber', 'village:line': 'village:plaster',
+  'village:cobble': 'village:stone', 'village:lane': 'village:stone', 'village:bloom-coral': 'village:paint',
+};
+/** The village material a kit slot resolves to at a tier ('glass' and 'lamp' are the library's glass and the owned glow). */
+export const villageKey = (name: KitMaterial, lod: LodTier): string => {
+  const key = VILLAGE_SLOTS[name];
+  return lod === 'low' ? VILLAGE_LOW[key] ?? key : key;
+};
 
 /**
  * Looks this module registers with StyleLibrary.custom.
@@ -86,7 +121,17 @@ export const KIT_LOOKS = {
 
 export function libraryMaterials(lib: StyleLibrary): MaterialSource {
   let lamp: T.MeshStandardMaterial | null = null;
+  const village = lib.look === 'village';
   const resolve = (name: KitMaterial): T.Material => {
+    if (village) {
+      const key = villageKey(name, lib.lod);
+      if (key === 'glass') return lib.glass('clear');
+      if (key === 'lamp') {
+        if (!lamp) { lamp = lib.createGlow(VILLAGE_LAMP, GLOW.lit); lamp.name = 'blueprint:lamp'; }
+        return lamp;
+      }
+      return villageMaterial(lib, key);
+    }
     switch (kitMaterialFor(name, lib.lod)) {
       case 'post': return lib.preset('framePainted');
       case 'steel': return lib.preset('frame');
@@ -109,25 +154,38 @@ export function libraryMaterials(lib: StyleLibrary): MaterialSource {
         return lamp;
     }
   };
-  return { get: resolve, owned: () => (lamp ? [lamp] : []) };
+  return { get: resolve, owned: () => (lamp ? [lamp] : []), look: lib.look, ink: () => lib.ink() };
 }
 
 /**
  * Plain stand-in materials, one per kit material, for counting triangles and
  * draw calls in Node or before textures exist. Geometry is identical to a
- * library build; only the materials differ.
+ * library build; only the materials differ. In the village look they fold the
+ * way the village materials do and bring stand-in ink, so a count includes
+ * the outline.
  */
-export function countingMaterials(lod: LodTier): MaterialSource & { dispose(): void } {
-  const made = new Map<KitMaterial, T.Material>();
+export function countingMaterials(lod: LodTier, look: Look = 'industrial'): MaterialSource & { dispose(): void } {
+  const made = new Map<string, T.Material>();
+  const village = look === 'village';
+  let ink: InkMaterials | null = null;
   return {
     get(name) {
-      const key = kitMaterialFor(name, lod);
+      const key = village ? villageKey(name, lod) : kitMaterialFor(name, lod);
       let m = made.get(key);
-      if (!m) { m = new T.MeshBasicMaterial({ name: `count:${key}` }); made.set(key, m); }
+      if (!m) {
+        // Glass is transparent in the library, which keeps it out of the ink outline.
+        m = new T.MeshBasicMaterial({ name: `count:${key}`, transparent: key === 'glass' || key === 'glassSmoked' });
+        if (village && VILLAGE_GROUND.has(key)) m.userData.inkShell = false;
+        made.set(key, m);
+      }
       return m;
     },
     owned: () => [],
-    dispose() { made.forEach(m => m.dispose()); made.clear(); },
+    ...(village ? { look, ink: () => (ink ??= createInkMaterials('#000000', 1, 1)) } : {}),
+    dispose() {
+      made.forEach(m => m.dispose()); made.clear();
+      if (ink) { ink.shell.dispose(); ink.lines.dispose(); ink = null; }
+    },
   };
 }
 
@@ -158,6 +216,8 @@ export const KIT_MIN_CHAMFER: Record<LodTier, number> = { high: 0, medium: 0.005
 export function makeKit(b: PartBuilder, source: MaterialSource): Kit {
   const s = b.settings;
   b.minChamfer = Math.max(b.minChamfer, KIT_MIN_CHAMFER[b.lod]);
+  const outline = source.look ? lookParams(source.look)?.outline : undefined, ink = outline ? source.ink?.() : null;
+  if (outline && ink) b.ink = { materials: ink, crease: outline.crease };
   return { b, m: name => source.get(name), lod: b.lod, hardware: s.hardware, fine: b.lod === 'high', low: b.lod === 'low' };
 }
 
@@ -170,6 +230,8 @@ export function makeKit(b: PartBuilder, source: MaterialSource): Kit {
 export function liningCastsNoShadow(group: T.Object3D, source: MaterialSource, lod: LodTier) {
   if (kitMaterialFor('skinInner', lod) !== 'skinInner') return;   // at low it shares a material with door leaves
   const lining = source.get('skinInner');
+  // Where the lining shares the exterior's material (the village look's plaster), it is the exterior too.
+  if (lining === source.get('skin') || lining === source.get('leaf')) return;
   group.traverse(o => { if ((o as T.Mesh).isMesh && (o as T.Mesh).material === lining) o.castShadow = false; });
 }
 

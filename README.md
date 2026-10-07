@@ -10,6 +10,8 @@ workshop described in [the workshop guide](docs/integration/workshop-v1.md),
 records the bounded desktop/phone replay, deferred editors and measured first-screen resources.
 [LOD R4 integration evidence](docs/evidence/lod-r4/verification.md) records the three-file
 geometry update, measured main-world frame counts and its sub-millimetre window-hood difference.
+[R7 village integration](docs/integration/r7-village.md) adds the shared cream, timber
+and terracotta presentation, village ship parts and compatible ground collision.
 The published Crit 8 release remains `09233d9`; these changes are not deployed.
 
 > Prepared with AI assistance from the student's recorded design decisions and

@@ -5,6 +5,8 @@ import type { LodTier } from './lod.ts';
 import { SCALE } from './tokens.ts';
 import type { Vec3 } from '../core/vec.ts';
 import type { Emitter, EmitterKind } from './practical.ts';
+import { addInk, surfaceOf } from './ink.ts';
+import type { InkMaterials } from './ink.ts';
 
 // Geometry helpers shared by the building and ship kits.
 //
@@ -139,6 +141,19 @@ export class PartBuilder {
    * the building kit raises it at medium LOD (blueprint/parts/kit.ts).
    */
   minChamfer = 0;
+  /**
+   * Ink outlines added by build() (src/style/ink.ts): the village look sets
+   * them, with the crease angle in degrees. The shell is skipped at low LOD,
+   * where it would double a small budget; the crease lines stay.
+   */
+  ink: { materials: InkMaterials; crease: number } | null = null;
+  /**
+   * Pieces added while this is set get crease lines but no ink shell: models
+   * drawn in a look that has no model of its own for them (the industrial
+   * fallback in the village look) keep exactly their own triangle count.
+   */
+  shellOff = false;
+  private unshelled = new Set<T.BufferGeometry>();
   constructor(lod: LodTier) { this.lod = lod; }
 
   get settings() { return LOD[this.lod]; }
@@ -166,6 +181,7 @@ export class PartBuilder {
       }
     }
     metreUVs(g, options.uvMetres);
+    if (this.shellOff) this.unshelled.add(g);
     const list = this.buckets.get(material) ?? [];
     list.push(g);
     this.buckets.set(material, list);
@@ -223,6 +239,14 @@ export class PartBuilder {
     group.name = name;
     let triangles = 0;
     const shadows = this.settings.shadows;
+    // The ink shell's sources, picked before the pieces are merged (low LOD draws no shell).
+    const shellFrom: T.BufferGeometry[] = [];
+    for (const [material, geometries] of this.buckets) {
+      if (this.ink && this.lod !== 'low' && !material.transparent && material.userData.inkShell !== false) {
+        for (const g of geometries) if (!this.unshelled.has(g)) shellFrom.push(surfaceOf(g));
+      }
+    }
+    this.unshelled.clear();
     for (const [material, geometries] of this.buckets) {
       const merged = geometries.length === 1 ? geometries[0] : mergeGeometries(geometries, false);
       if (geometries.length > 1) geometries.forEach(g => g.dispose());
@@ -236,6 +260,7 @@ export class PartBuilder {
       triangles += merged.getAttribute('position').count / 3;
     }
     this.buckets.clear();
+    if (this.ink) triangles += addInk(group, this.ink.materials, this.ink.crease, { shell: this.lod !== 'low', shellFrom }).triangles;
     const emitters = this.emitters;
     this.emitters = [];
     if (emitters.length) group.userData.emitters = emitters;

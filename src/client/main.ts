@@ -5,7 +5,7 @@ import { defaultShip } from '../shared/ships.ts';
 import { configureRenderer, configureGroundLighting, groundPresentation, createWorldPracticalLights } from './presentation.ts';
 import { worldMaterials } from './shared-assets.ts';
 import { textureFormat } from './resource-policy.ts';
-import { GroundWorld, groundPose, FIXED_STEP, MAX_PATH_STEPS } from '../shared/physics/world.ts';
+import { GroundWorld, groundPose, FIXED_STEP, MAX_PATH_STEPS, PHYSICS_VERSION } from '../shared/physics/world.ts';
 import type { GroundPose, MotionStep } from '../shared/physics/world.ts';
 import './presentation.css';
 import './style.css';
@@ -43,6 +43,8 @@ let flight: SpaceFlight | undefined;
 let activePlanet = 'hub';let activeEnvironment:string|null=null,terrainRevision=-1;
 let groundWorld:GroundWorld|null=null,standing:GroundPose|null=null,physicsClock=0;
 let motionPending:MotionStep[]=[];
+let motionEpoch=0,physicsMismatch=false;
+function clearGroundMotion(){motionPending=[];physicsClock=0;motionEpoch++;}
 const lastSaved = new T.Vector3();
 let near: NpcId | null = null;let nearDock=false,guideDock=false;
 let queue: Promise<unknown> = Promise.resolve();
@@ -74,6 +76,10 @@ function serial<T>(run: () => Promise<T>): Promise<T> {
   const result = queue.then(run, run); queue = result.catch(() => {}); return result;
 }
 function accept(next: PlayerState) {
+  if(next.flight.mode==='ground'&&next.planetId!=='hub'&&next.ground?.physicsVersion!==PHYSICS_VERSION){
+    physicsMismatch=true;online=false;clearGroundMotion();clearInput();presence.clear();
+    status('Update ready · reload this page',true);notice('The walking model was updated. Reload this page to continue safely.',30000);return false;
+  }
   if(!canAcceptPlayer(state,next))return false;
   const reconnecting = !online;
   const previousGround=state?.ground;
@@ -87,19 +93,20 @@ function accept(next: PlayerState) {
     $('npc-mica').hidden=true;$('npc-sol').hidden=true;$('conversation').hidden=true;document.body.classList.remove('delivery-open');
   }
   if((reconnecting||justLanded) && walker){cameraPitch=0;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;}
-  const newGeometry=state.ground?.sceneRevision!==previousGround?.sceneRevision;
+  const newGeometry=state.ground?.sceneRevision!==previousGround?.sceneRevision||state.ground?.physicsVersion!==previousGround?.physicsVersion;
   if(state.ground&&(!standing||reconnecting||justLanded||newGeometry||previousPlanet!==state.planetId)){
-    standing={position:[...state.position],...state.ground};motionPending=[];physicsClock=0;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);started=false;
+    standing={position:[...state.position],...state.ground};clearGroundMotion();walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;
   }
-  if(state.planetId==='hub'){standing=null;groundWorld=null;motionPending=[];physicsClock=0;}
+  if(state.planetId==='hub'){standing=null;groundWorld=null;clearGroundMotion();}
   if(previousPlanet!==state.planetId||previousMode!==state.flight.mode)presence.clear();
   const design=(state.ship??defaultShip()).design;world.parked.setDesign(design);flight?.setDesign(design);renderer.domElement.dataset.shipDesign=world.parked.document;
   flight?.receive(state.flight,reconnecting);
   if(previousMode==='ground'&&state.flight.mode==='space'&&activePlanet==='hub'&&!reduced&&flight){departure={time:0,base:world.parked.root.position.clone(),start:camera.position.clone(),rotation:camera.quaternion.clone()};flight.presentation=true;document.body.classList.add('departing');notice('Departure clearance granted · Sunseed Harbour',4200);}
-  online = navigator.onLine; status(online?'Progress saved':'Offline · retrying',!online); renderTask();
+  physicsMismatch=false;online = navigator.onLine; status(online?'Progress saved':'Offline · retrying',!online); renderTask();
   return true;
 }
 function failed(error: unknown) {
+  clearGroundMotion();
   presence.clear();
   online = false; status('Offline · retrying', true);
   notice(error instanceof Error ? error.message : 'Could not save. Reconnecting…');
@@ -130,6 +137,13 @@ renderer.setClearColor('#9cc8c4', 0);
 configureRenderer(renderer, 'world');
 $('world').append(renderer.domElement);
 renderer.domElement.setAttribute('aria-label', 'Little Worlds planet. Use WASD or arrow keys to walk; board your ship to fly between worlds.');
+// Optional local measurements: CPU submission time, not GPU frame time.
+// Keep diagnostics off the normal visit and never use them as game inputs.
+if(new URLSearchParams(location.search).has('measure')){
+  const draw=renderer.render.bind(renderer);let frames=0,total=0;
+  renderer.render=(target,view)=>{const begin=performance.now();draw(target,view);total+=performance.now()-begin;
+    if(++frames===30){renderer.domElement.dataset.renderCpuMs=(total/frames).toFixed(3);frames=0;total=0;}};
+}
 worldMaterials().attachRenderer(renderer,textureFormat());
 const scene = new T.Scene();
 const practical=createWorldPracticalLights();scene.add(practical.group);
@@ -225,10 +239,17 @@ async function savePosition(force=false):Promise<void> {
   if(privateWorld&&!motionPending.length)return;
   if(!privateWorld&&!force&&walker.up.distanceTo(lastSaved)<.001)return;
   const steps=privateWorld?motionPending.splice(0,MAX_PATH_STEPS):[],p=steps.length?steps.at(-1)!.slice(0,3) as Vec3:walker.up.toArray() as Vec3,planetId=state.planetId;
-  const motion=steps.length?{sequence:(state.ground?.sequence??0)+1,steps}:undefined;
+  const epoch=motionEpoch,motion=steps.length?{sequence:(state.ground?.sequence??0)+1,physicsVersion:PHYSICS_VERSION,steps}:undefined;
   saving=(async()=>{
-    try{const next=await serial(()=>request('move',{position:p,planetId,...(motion?{motion}:{})}));lastSaved.fromArray(next.position);accept(next);}
-    catch(error){motionPending=[];if(error instanceof ApiError&&error.status===409){walker=new SurfaceWalker(state.position);standing=state.ground?{position:[...state.position],...state.ground}:null;lastSaved.copy(walker.up);clearInput();}failed(error);}
+    try{
+      // A refresh/recovery can happen while this save waits in the mutation
+      // queue or in flight. Neither an old send nor its response may rebase the
+      // new collision world back to the old standing height.
+      const next=await serial(async()=>epoch===motionEpoch?request('move',{position:p,planetId,...(motion?{motion}:{})}):null);
+      if(!next||epoch!==motionEpoch)return;
+      if(accept(next))lastSaved.fromArray(next.position);
+    }
+    catch(error){if(epoch!==motionEpoch)return;if(error instanceof ApiError&&error.status===409){walker=new SurfaceWalker(state.position);standing=state.ground?{position:[...state.position],...state.ground}:null;lastSaved.copy(walker.up);clearInput();}failed(error);}
   })().finally(()=>{saving=null;});
   await saving;
   if(force&&motionPending.length&&online)await savePosition(true);
@@ -259,14 +280,14 @@ setInterval(async()=>{
   finally{presenceBusy=false;}
 },PRESENCE_INTERVAL);
 setInterval(async()=>{
-  if(online || busy) return;
+  if(online || busy || physicsMismatch) return;
   try {
     const next=await serial(()=>request('state'));if(!accept(next))return;
     walker=new SurfaceWalker(next.position);lastSaved.copy(walker.up);clearInput();ensureColony();notice('Back at your last saved spot. Welcome home.');
   }catch{status('Offline · retrying',true);}
 },2500);
 window.addEventListener('online',()=>notice('Reconnecting to your worlds…'));
-window.addEventListener('offline',()=>{presence.clear();online=false;clearInput();flight?.clear();status('Offline · retrying',true);});
+window.addEventListener('offline',()=>{presence.clear();online=false;clearGroundMotion();clearInput();flight?.clear();status('Offline · retrying',true);});
 
 let previous=performance.now(),elapsed=0,uiTick=0,started=false;
 function animate(now:number) {
@@ -358,6 +379,7 @@ function animate(now:number) {
   world.animate(elapsed,reduced,camera.position,renderUp);
   world.npcs.forEach(n=>{n.avatar.animate(elapsed,0,reduced);if(near===n.id){const local=n.anchor.worldToLocal(player.root.position.clone());const yaw=Math.atan2(local.x,local.z);const diff=Math.atan2(Math.sin(yaw-n.avatar.root.rotation.y),Math.cos(yaw-n.avatar.root.rotation.y));n.avatar.root.rotation.y+=diff*(1-Math.exp(-4*dt));}n.beacon.position.y=2.0+(reduced?0:Math.sin(elapsed*2)*.06);n.beacon.visible=state.quest!=='delivered'&&n.id===(state.quest==='available'?'mica':'sol');});
   presence.frame(now,dt,walker.up,reduced);
+  colony?.updateShadows(feet);
   practical.update(scene,camera,dt);renderer.render(scene,camera);
   uiTick+=dt;
   if(uiTick>.1) {

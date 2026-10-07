@@ -104,3 +104,13 @@ prototype. They do not claim to be the student's finished academic harness.
   preserve null legacy environments and the public harbour, apply RESTRICT to all
   existing buildings, and share ground semantics across rendering, physics and server
   validation. No broad historical terrain migration, source-art changes or deployment.
+
+- R7 local integration is explicitly authorised after the R4 baseline. Reuse only
+  the committed Claude snapshot `5a73b228f13b8b20460ea6f9403167fdfedc08be`;
+  32 new/changed files are recorded individually in PROVENANCE.json. Keep the
+  earlier immutable resource URL pin and industrial library default. Host adapters
+  select village; public harbour, courier, local props and HUD share that language.
+  Schema 10 adds a physics version and lazy safe recovery without rewriting old
+  buildings, blueprint hashes, ships or history. Preserve the existing capacities,
+  terrain semantics and interaction flows. Back up SQLite before updating local
+  preview 8098. Published Crit 8, Crit 7 and Claude's independent source stay untouched.

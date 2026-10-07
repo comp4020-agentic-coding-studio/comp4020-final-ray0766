@@ -1,14 +1,14 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
-import { GroundWorld, MAX_PATH_STEPS } from '../shared/physics/world.ts';
+import { GroundWorld, MAX_PATH_STEPS, PHYSICS_VERSION } from '../shared/physics/world.ts';
 import type { GroundPose, GroundState, GroundMotion, MotionStep } from '../shared/physics/world.ts';
 import { distance, normalize, RADIUS, SPEED, validPosition } from '../shared/world.ts';
 import type { Vec3 } from '../shared/world.ts';
 import type { planetStore } from './planets.ts';
 import { RequestError } from './errors.ts';
 interface PlayerRow {position:string;planet_id:string;moved_at:number}
-interface GroundRow {planet_id:string;position:string;radius:number;vertical_speed:number;grounded:number;sequence:number;scene_revision:number;clock_credit:number;request_hash:string|null}
-const view=(r:GroundRow):GroundState=>({radius:r.radius,verticalSpeed:r.vertical_speed,grounded:!!r.grounded,sequence:r.sequence,sceneRevision:r.scene_revision});
+interface GroundRow {planet_id:string;position:string;radius:number;vertical_speed:number;grounded:number;sequence:number;scene_revision:number;physics_version:number;clock_credit:number;request_hash:string|null}
+const view=(r:GroundRow):GroundState=>({radius:r.radius,verticalSpeed:r.vertical_speed,grounded:!!r.grounded,sequence:r.sequence,sceneRevision:r.scene_revision,physicsVersion:r.physics_version});
 const pose=(r:GroundRow):GroundPose=>({position:JSON.parse(r.position),...view(r)});
 export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>){
   const cache=new Map<string,GroundWorld>();
@@ -16,18 +16,21 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
   function row(id:string){return db.prepare('SELECT * FROM ground_states WHERE player_id=?').get(id) as unknown as GroundRow|undefined;}
   const player=(id:string)=>db.prepare('SELECT position,planet_id,moved_at FROM players WHERE id=?').get(id) as unknown as PlayerRow;
   function write(id:string,p:GroundPose,sequence:number,revision:number,credit:number,hash:string|null,planetId:string){
-    db.prepare(`INSERT INTO ground_states (player_id,planet_id,position,radius,vertical_speed,grounded,sequence,scene_revision,clock_credit,request_hash) VALUES (?,?,?,?,?,?,?,?,?,?)
-      ON CONFLICT(player_id) DO UPDATE SET planet_id=excluded.planet_id,position=excluded.position,radius=excluded.radius,vertical_speed=excluded.vertical_speed,grounded=excluded.grounded,sequence=excluded.sequence,scene_revision=excluded.scene_revision,clock_credit=excluded.clock_credit,request_hash=excluded.request_hash`)
-      .run(id,planetId,JSON.stringify(p.position),p.radius,p.verticalSpeed,Number(p.grounded),sequence,revision,credit,hash);
+    db.prepare(`INSERT INTO ground_states (player_id,planet_id,position,radius,vertical_speed,grounded,sequence,scene_revision,physics_version,clock_credit,request_hash) VALUES (?,?,?,?,?,?,?,?,?,?,?)
+      ON CONFLICT(player_id) DO UPDATE SET planet_id=excluded.planet_id,position=excluded.position,radius=excluded.radius,vertical_speed=excluded.vertical_speed,grounded=excluded.grounded,sequence=excluded.sequence,scene_revision=excluded.scene_revision,physics_version=excluded.physics_version,clock_credit=excluded.clock_credit,request_hash=excluded.request_hash`)
+      .run(id,planetId,JSON.stringify(p.position),p.radius,p.verticalSpeed,Number(p.grounded),sequence,revision,PHYSICS_VERSION,credit,hash);
   }
   function ensure(id:string):GroundRow{
     const r=player(id),old=row(id),w=world(r.planet_id);
-    if(old&&old.planet_id===r.planet_id&&old.scene_revision===w.revision&&old.position===r.position)return old;
+    if(old&&old.planet_id===r.planet_id&&old.scene_revision===w.revision&&old.physics_version===PHYSICS_VERSION&&old.position===r.position)return old;
     const start=old&&old.planet_id===r.planet_id&&old.position===r.position?pose(old):w.pose(JSON.parse(r.position));
     const safe=w.recover(start),changed=distance(safe.position,JSON.parse(r.position))>.00001;
     db.exec('BEGIN IMMEDIATE');try{
       write(id,safe,(old?.sequence??-1)+1,w.revision,.1,null,r.planet_id);
-      if(changed)db.prepare('UPDATE players SET position=?,revision=revision+1 WHERE id=?').run(JSON.stringify(safe.position),id);
+      // A physics upgrade also fences older player responses when only the
+      // standing height changed. Ordinary scene edits retain their sequence /
+      // scene-revision fence and do not invent a new player mutation.
+      if(changed||(old&&old.physics_version!==PHYSICS_VERSION))db.prepare('UPDATE players SET position=?,revision=revision+1 WHERE id=?').run(JSON.stringify(safe.position),id);
       db.exec('COMMIT');
     }catch(error){db.exec('ROLLBACK');throw error;}
     return row(id)!;
@@ -39,8 +42,9 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
     move(id:string,target:Vec3,now:number,motion?:unknown){
       const old=ensure(id),r=player(id),w=world(r.planet_id);let steps:MotionStep[],sequence=old.sequence+1,hash:string|null=null;
       if(motion!==undefined){
-        if(!motion||typeof motion!=='object'||Array.isArray(motion)||Object.keys(motion).some(k=>!['sequence','steps'].includes(k)))throw new RequestError(400,'Invalid ground motion.');
+        if(!motion||typeof motion!=='object'||Array.isArray(motion)||Object.keys(motion).some(k=>!['sequence','physicsVersion','steps'].includes(k)))throw new RequestError(400,'Invalid ground motion.');
         const m=motion as GroundMotion;
+        if(m.physicsVersion!==PHYSICS_VERSION)throw new RequestError(409,'The walking model was updated. Reload this page before moving.');
         if(!Number.isSafeInteger(m.sequence)||!Array.isArray(m.steps)||!m.steps.length||m.steps.length>MAX_PATH_STEPS)throw new RequestError(400,'Send a bounded movement path and sequence.');
         for(const s of m.steps)if(!Array.isArray(s)||s.length!==4||!validPosition(s.slice(0,3))||typeof s[3]!=='number'||!Number.isFinite(s[3])||s[3]<=0||s[3]>.050001)throw new RequestError(400,'Invalid movement sample.');
         hash=createHash('sha256').update(JSON.stringify({target,motion})).digest('hex');

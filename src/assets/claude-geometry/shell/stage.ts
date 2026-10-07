@@ -11,6 +11,8 @@ import { StyleLibrary } from '../style/materials.ts';
 import { createEnvironment, createLightRig, loadHdriEnvironment } from '../style/lighting.ts';
 import type { LightRig, Mood } from '../style/lighting.ts';
 import { PracticalLights } from '../style/practical.ts';
+import { lookParams } from '../style/look.ts';
+import type { Look } from '../style/look.ts';
 import { TEXTURE_FORMAT } from '../style/scans.ts';
 import type { TextureFormat } from '../style/scans.ts';
 import { UI } from '../style/tokens.ts';
@@ -43,6 +45,13 @@ export interface StageOptions {
   textures?: TextureFormat;
   /** Texture-set sizes to load (default the LOD); planet-scale pages pass 'medium' at high (StyleLibraryOptions.scanDetail). */
   scanDetail?: LodTier;
+  /**
+   * How the scene is surfaced and lit (src/style/look.ts); default 'industrial'.
+   * 'warm' keeps every light, the practical pool and LOD, and changes their
+   * parameters: tone mapping, sky, key, fill, fog colour and shadow softness;
+   * it lights with its own sky instead of the HDR photograph.
+   */
+  look?: Look;
 }
 
 /**
@@ -65,11 +74,16 @@ export class Stage {
   readonly controls: OrbitControls;
   readonly library: StyleLibrary;
   readonly lod: LodTier;
+  readonly look: Look;
+  /** Backdrop brightness of the mood's environment; pages that swap environments restore it. */
+  moodBackgroundIntensity = 0.35;
   readonly lights: LightRig;
   /** Pooled lights for the fittings parts record; its light count never changes. */
   readonly practical: PracticalLights;
   private environment: T.Texture;
   private composer: EffectComposer | null = null;
+  /** Draw through the post chain (bloom, AO) where the LOD has one; false renders straight, for measuring what the chain costs. */
+  postProcessing = true;
   private bloom: UnrealBloomPass | null = null;
   private ao: GTAOPass | null = null;
   private callbacks = new Set<(dt: number, t: number) => void>();
@@ -97,19 +111,23 @@ export class Stage {
   constructor(options: StageOptions) {
     this.container = options.container;
     this.lod = options.lod;
+    this.look = options.look ?? 'industrial';
+    // Every stylised look (warm, village) sets these; the industrial look keeps the literals below.
+    const P = lookParams(this.look), warm = P !== null;
     const settings = LOD[options.lod];
     this.renderer = new T.WebGLRenderer({ antialias: !settings.bloom, powerPreference: 'high-performance', preserveDrawingBuffer: false });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, settings.pixelRatioCap));
     this.renderer.outputColorSpace = T.SRGBColorSpace;
-    this.renderer.toneMapping = T.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
+    // Neutral keeps the warm look's dusty colours where ACES would desaturate and darken them.
+    this.renderer.toneMapping = warm ? T.NeutralToneMapping : T.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = P ? P.exposure : 1.0;
     this.renderer.shadowMap.enabled = settings.shadows;
     this.renderer.shadowMap.type = T.PCFShadowMap;
     this.renderer.domElement.classList.add('stage-canvas');
     this.container.append(this.renderer.domElement);
 
     const scanDetail = options.scanDetail ?? options.lod;
-    this.library = new StyleLibrary(options.lod, { scans: options.scans, scanDetail });
+    this.library = new StyleLibrary(options.lod, { scans: options.scans, scanDetail, look: this.look });
     this.library.setAnisotropy(this.renderer.capabilities.getMaxAnisotropy());
     // The delivery follows the sizes loaded: KTX2 pays for itself only with 1024 px maps.
     this.library.attachRenderer(this.renderer, options.textures ?? TEXTURE_FORMAT[scanDetail]);
@@ -117,21 +135,25 @@ export class Stage {
     this.scene.background = new T.Color(options.background ?? UI.bg);
     if (options.fog !== null) {
       const fog = options.fog ?? { color: options.background ?? UI.bg, density: 0.018 };
-      this.scene.fog = new T.FogExp2(fog.color, fog.density);
+      // The warm look keeps a lighter version of the page's haze, in its own sky colour, never near-black.
+      this.scene.fog = P && options.mood !== 'orbit' ? new T.FogExp2(P.fog, fog.density * P.fogDensity) : new T.FogExp2(fog.color, fog.density);
     }
-    this.environment = createEnvironment(this.renderer, options.mood);
+    this.environment = createEnvironment(this.renderer, options.mood, this.look);
     this.scene.environment = this.environment;
     if (options.backdrop !== false) {
       // A dim, blurred view of the same environment instead of a black void.
       this.scene.background = this.environment;
-      this.scene.backgroundBlurriness = 0.55;
-      this.scene.backgroundIntensity = options.mood === 'hangar' ? 0.35 : 0.6;
+      const warmSky = warm && options.mood !== 'orbit';
+      this.scene.backgroundBlurriness = warmSky && P ? P.backgroundBlurriness : 0.55;
+      this.moodBackgroundIntensity = warmSky && P ? P.backgroundIntensity : options.mood === 'hangar' ? 0.35 : 0.6;
+      this.scene.backgroundIntensity = this.moodBackgroundIntensity;
     }
-    this.lights = createLightRig(options.mood, settings.shadows, options.shadowExtent ?? 8);
+    this.lights = createLightRig(options.mood, settings.shadows, options.shadowExtent ?? 8, this.look);
     this.scene.add(this.lights.group);
-    this.practical = new PracticalLights(options.lod, { enabled: options.practicalLights ?? true });
+    this.practical = new PracticalLights(options.lod, { enabled: options.practicalLights ?? true, scale: P ? P.practical : 1 });
     this.scene.add(this.practical.group);
-    if (options.environment === 'hdri') {
+    // The warm look lights with its own sky; the HDR photographs belong to the industrial look.
+    if (options.environment === 'hdri' && !(warm && options.mood !== 'orbit')) {
       const mood = options.mood, backdrop = options.backdrop !== false;
       this.environmentReady = loadHdriEnvironment(this.renderer, mood).then(texture => {
         if (!texture) return;
@@ -165,17 +187,18 @@ export class Stage {
       const target = new T.WebGLRenderTarget(1, 1, { type: T.HalfFloatType, samples: 4 });
       this.composer = new EffectComposer(this.renderer, target);
       this.composer.addPass(new RenderPass(this.scene, this.camera));
-      if (options.ambientOcclusion ?? options.environment === 'hdri') {
+      // A look may turn the pass off (ao 0: the village look).
+      if ((options.ambientOcclusion ?? options.environment === 'hdri') && !(P && P.ao === 0)) {
         // Contact shadows in corners, under sills and between parts: what image-based
         // light alone cannot give. Radius in metres; high LOD only (it shares the bloom composer).
         this.ao = new GTAOPass(this.scene, this.camera, 1, 1);
         this.ao.updateGtaoMaterial({ radius: 0.45, distanceExponent: 1.4, thickness: 0.6, scale: 1.0, samples: 12 });
         this.ao.updatePdMaterial({ radius: 6, samples: 12 });
-        this.ao.blendIntensity = 0.85;
+        this.ao.blendIntensity = P ? P.ao : 0.85;
         this.composer.addPass(this.ao);
       }
       // High threshold: only genuinely emissive elements bloom.
-      this.bloom = new UnrealBloomPass(size, 0.42, 0.55, 0.92);
+      this.bloom = P ? new UnrealBloomPass(size, P.bloom.strength, P.bloom.radius, P.bloom.threshold) : new UnrealBloomPass(size, 0.42, 0.55, 0.92);
       this.composer.addPass(this.bloom);
       this.composer.addPass(new OutputPass());
     }
@@ -220,7 +243,7 @@ export class Stage {
     this.practical.update(this.scene, this.camera, dt);
     this.renderer.info.reset();
     this.renderer.info.autoReset = false;
-    if (this.composer) this.composer.render(dt); else this.renderer.render(this.scene, this.camera);
+    if (this.composer && this.postProcessing) this.composer.render(dt); else this.renderer.render(this.scene, this.camera);
     this.lastInfo = { triangles: this.renderer.info.render.triangles, calls: this.renderer.info.render.calls };
     this.cpu.push(performance.now() - begin); if (this.cpu.length > 90) this.cpu.shift();
   }

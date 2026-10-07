@@ -6,7 +6,7 @@ import type { LodTier } from '../style/lod.ts';
 import type { StyleLibrary } from '../style/materials.ts';
 import { groundCells, partTransform, pivotOf } from './model.ts';
 import type { PartPlacement } from './model.ts';
-import { PARTS } from './parts/catalogue.ts';
+import { emitPart } from './parts/catalogue.ts';
 import { libraryMaterials, liningCastsNoShadow, makeKit, SLAB } from './parts/kit.ts';
 
 // The placed form of a blueprint: every part emitted into one PartBuilder, so
@@ -47,7 +47,7 @@ export function buildBlueprintModel(parts: readonly PartPlacement[] | { parts: r
   const ordered = [...list].sort((a, c) => a.n - c.n);
   for (const p of ordered) {
     const t = partTransform(p, pivot);
-    b.within({ position: t.position, rotation: [0, t.yaw, 0] }, () => PARTS[p.part].emit(kit));
+    b.within({ position: t.position, rotation: [0, t.yaw, 0] }, () => emitPart(p.part, lib.look, kit));
   }
   if (options.foundationDepth !== undefined) {
     const depth = Math.max(0, options.foundationDepth) + PLINTH_EMBED;
@@ -58,6 +58,8 @@ export function buildBlueprintModel(parts: readonly PartPlacement[] | { parts: r
   const built = b.build('blueprint');
   const group = built.group;
   liningCastsNoShadow(group, source, lod);
+  // Village look: lantern glass is the light itself and casts no shadow (it would shade its own lamp).
+  if (lib.look === 'village') { const lamp = source.get('lamp'); group.traverse(o => { if ((o as T.Mesh).material === lamp) o.castShadow = false; }); }
   if (options.sockets !== false) {
     for (const p of ordered) {
       const t = partTransform(p, pivot);

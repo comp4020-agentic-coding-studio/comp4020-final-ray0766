@@ -4,7 +4,7 @@ import { encodeBlueprint } from '../assets/claude-geometry/blueprint/codec.ts';
 import { industrialCabin } from '../assets/claude-geometry/blueprint/samples.ts';
 import { partTransform } from '../assets/claude-geometry/blueprint/model.ts';
 import type { Blueprint, PartPlacement, Rot } from '../assets/claude-geometry/blueprint/model.ts';
-import { PART_IDS, PARTS } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import { PART_IDS, partLabel } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
 import type { PartId } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
 import { STOREY } from '../assets/claude-geometry/blueprint/parts/kit.ts';
 import { WorkshopView } from '../assets/claude-geometry/blueprint/view/workshop-view.ts';
@@ -12,6 +12,7 @@ import { PartTemplates } from '../assets/claude-geometry/blueprint/view/template
 import type { Stage } from '../assets/claude-geometry/shell/stage.ts';
 import type { LibraryEntry } from '../shared/blueprints.ts';
 import './workshop.css';
+import { PRESENTATION } from './presentation.ts';
 import { createPresentationStage } from './presentation-stage.ts';
 
 export interface WorkshopBridge {
@@ -51,7 +52,7 @@ export class Workshop {
       <footer class="ws-footer"><div class="ws-feedback"><span id="ws-status" role="status" aria-live="polite">Ready.</span><small id="ws-save-state" role="status" aria-live="polite"></small></div><span id="ws-count"></span></footer>`;
     document.body.append(this.dialog);
     const tool=this.get<HTMLSelectElement>('tool');
-    for(const id of PART_IDS) tool.add(new Option(PARTS[id].label,id));
+    for(const id of PART_IDS) tool.add(new Option(partLabel(id,PRESENTATION.materials.look),id));
     for(const id of ['x','z']) for(let n=0;n<5;n++)this.get<HTMLSelectElement>(id).add(new Option(String(n+1),String(n)));
     this.on('close',()=>this.close());
     this.dialog.addEventListener('cancel',e=>{e.preventDefault();this.close();});
@@ -140,7 +141,7 @@ export class Workshop {
     const draft=this.busy?null:this.hover?this.draftAt(this.hover.x,this.hover.y):this.cellDraft();
     const problem=draft?this.editor.placeProblem(draft):null;
     this.view?.setGhost(draft,!problem);
-    const text=this.busy?'Preview paused while the library is updating.':part==='select'?'Drag to orbit · pinch or scroll to zoom · tap to select':!draft?'Point inside the build grid, or choose a column and row.':problem?`Cannot place: ${problem.message}`:`Ready to add ${PARTS[draft.part].label} · L${draft.level+1}, column ${draft.x+1}, row ${draft.z+1}. ${this.hover?'Tap to add.':'Use Add at cell.'}`;
+    const text=this.busy?'Preview paused while the library is updating.':part==='select'?'Drag to orbit · pinch or scroll to zoom · tap to select':!draft?'Point inside the build grid, or choose a column and row.':problem?`Cannot place: ${problem.message}`:`Ready to add ${partLabel(draft.part,PRESENTATION.materials.look)} · L${draft.level+1}, column ${draft.x+1}, row ${draft.z+1}. ${this.hover?'Tap to add.':'Use Add at cell.'}`;
     if(hint.textContent!==text)hint.textContent=text;
   }
   private addAtCell(){this.hover=null;const draft=this.cellDraft();if(!draft){this.status('Choose a part tool first.');return;}
@@ -184,7 +185,7 @@ export class Workshop {
     this.get('count').textContent=`${this.editor.parts.length} / 120 parts · ${this.unsaved?'Unsaved':'Saved'}`;
     this.get('parts-title').textContent=`Parts & groups (${this.editor.selection.size} selected)`;
     const list=this.get<HTMLSelectElement>('parts');const scroll=list.scrollTop;
-    list.replaceChildren(...this.editor.parts.map(p=>{const o=new Option(`#${p.n} ${PARTS[p.part].label} · L${p.level+1}`,String(p.n));o.selected=this.editor.selection.has(p.n);return o;}));list.scrollTop=scroll;
+    list.replaceChildren(...this.editor.parts.map(p=>{const o=new Option(`#${p.n} ${partLabel(p.part,PRESENTATION.materials.look)} · L${p.level+1}`,String(p.n));o.selected=this.editor.selection.has(p.n);return o;}));list.scrollTop=scroll;
     this.updatePreview();
     this.get('groups').textContent=this.editor.groups.map(g=>`${g.name} (${g.members.length})`).join(' · ');
   }

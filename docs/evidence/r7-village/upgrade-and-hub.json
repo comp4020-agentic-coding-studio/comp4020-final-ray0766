@@ -1,0 +1,89 @@
+{
+  "status": "passed",
+  "browser": "154.0.8037.98",
+  "fixtures": "New anonymous visit created using old 54ade UI in a temporary v9 copy; same in-memory cookie returns after SQLite backup and schema10 migration. No real 8098 data changed. Phone viewport is desktop emulation.",
+  "checks": [
+    "same saved coat, quest, position, custom ship",
+    "v9 migration made its own consistent backup",
+    "desktop and 390px ship preview, no page errors"
+  ],
+  "samples": [
+    {
+      "label": "54ade hub desktop",
+      "viewport": [
+        1440,
+        900
+      ],
+      "buffer": [
+        1440,
+        900
+      ],
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "calls": 293,
+      "triangles": 309608,
+      "medianFrameIntervalMs": 16.699999999999818,
+      "p95FrameIntervalMs": 16.700000000000273,
+      "renderCpuMs": null,
+      "position": "[0,0.9654290825583874,0.2606658522907646]",
+      "camera": "[0.45,802.2251320611349,14.914757432663261]"
+    },
+    {
+      "label": "54ade hub phone viewport",
+      "viewport": [
+        390,
+        844
+      ],
+      "buffer": [
+        390,
+        844
+      ],
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "calls": 221,
+      "triangles": 263156,
+      "medianFrameIntervalMs": 16.699999999999818,
+      "p95FrameIntervalMs": 16.800000000000182,
+      "renderCpuMs": null,
+      "position": "[0,0.9654290825583874,0.2606658522907646]",
+      "camera": "[0.45,802.6034560474944,16.61971224542275]"
+    },
+    {
+      "label": "R7 hub desktop",
+      "viewport": [
+        1440,
+        900
+      ],
+      "buffer": [
+        1440,
+        900
+      ],
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "calls": 278,
+      "triangles": 261672,
+      "medianFrameIntervalMs": 16.699999999999818,
+      "p95FrameIntervalMs": 16.799999999999727,
+      "renderCpuMs": 0.6523999999999986,
+      "position": "[0,0.9654290825583874,0.2606658522907646]",
+      "camera": "[0.45,802.2251320611349,14.914757432663261]"
+    },
+    {
+      "label": "R7 hub phone viewport",
+      "viewport": [
+        390,
+        844
+      ],
+      "buffer": [
+        390,
+        844
+      ],
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "calls": 203,
+      "triangles": 223748,
+      "medianFrameIntervalMs": 16.699999999999818,
+      "p95FrameIntervalMs": 16.799999999999272,
+      "renderCpuMs": 0.7723333333333335,
+      "position": "[0,0.9654290825583874,0.2606658522907646]",
+      "camera": "[0.45,802.6034560481136,16.619712248212757]"
+    }
+  ],
+  "pageErrors": []
+}

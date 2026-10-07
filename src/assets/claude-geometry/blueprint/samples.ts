@@ -127,6 +127,35 @@ export function streetAndPad(): Blueprint {
   return { id: 'd41c7a9e-2b58-4f06-9a3d-6e1b8c0f5a27' as BlueprintId, name: 'Street and pad', parts: s.parts, groups: [] };
 }
 
+/**
+ * Cottage on a 5×5 plot for the village sample (docs/VILLAGE.md): a 2×2
+ * house with its door held open onto a two-row footway, windows on every
+ * side, corner posts and a gable roof of four slope panels back to back; a
+ * fenced plank terrace beside it behind a hedge; a lantern post at the
+ * corner and a kerb along the front edge, where a street blueprint's lane
+ * (streetAndPad) continues. Every part is one players have, so it obeys
+ * the same rules as their buildings in either look.
+ */
+export function villageCottage(): Blueprint {
+  const s = new Sketch();
+  for (let x = 1; x <= 4; x++) for (let z = 1; z <= 2; z++) s.add('floor.deck', x, 0, z);
+  s.add('wall.door.open', 1, 0, 2, 0).add('wall.window', 2, 0, 2, 0);
+  s.add('wall.solid', 1, 0, 1, 2).add('wall.window', 2, 0, 1, 2);
+  s.add('wall.window', 1, 0, 1, 3).add('wall.solid', 1, 0, 2, 3);
+  s.add('wall.solid', 2, 0, 1, 1).add('wall.window', 2, 0, 2, 1);
+  s.add('structure.column', 1, 0, 1, 2).add('structure.column', 2, 0, 1, 1).add('structure.column', 1, 0, 2, 3).add('structure.column', 2, 0, 2, 0);
+  // Gable roof: the back row drains to −Z, the front row to the street.
+  s.add('roof.slope', 1, 1, 1, 2).add('roof.slope', 2, 1, 1, 2).add('roof.slope', 1, 1, 2, 0).add('roof.slope', 2, 1, 2, 0);
+  // Terrace: fenced at the side and back, a hedge along half its front.
+  s.add('rail.guard', 4, 0, 1, 1).add('rail.guard', 4, 0, 2, 1).add('rail.guard', 3, 0, 1, 2).add('rail.guard', 4, 0, 1, 2);
+  s.add('street.pipes', 4, 0, 3, 2);
+  // Footway in front, kerbed along the plot's front edge, with a lantern post at the corner.
+  for (let x = 0; x <= 4; x++) s.add('street.paving', x, 0, 3).add('street.paving', x, 0, 4);
+  for (let x = 0; x <= 4; x++) s.add('street.kerb', x, 0, 4, 0);
+  s.add('service.light', 0, 0, 4, 0);
+  return { id: 'a7d3e5c1-6b2f-4e80-9c14-3f5a8d2b7e60' as BlueprintId, name: 'Village cottage', parts: s.parts, groups: [] };
+}
+
 /** One of every part, spread out on a single storey for side-by-side inspection. */
 export function partsLineup(): Blueprint {
   const s = new Sketch();

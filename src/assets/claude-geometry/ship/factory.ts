@@ -5,20 +5,23 @@ import type { Vec3 } from '../core/vec.ts';
 import { measure, PartBuilder } from '../style/geometry.ts';
 import type { LodTier } from '../style/lod.ts';
 import type { StyleLibrary } from '../style/materials.ts';
+import { lookGlow, lookPaint, lookParams } from '../style/look.ts';
+import type { Look } from '../style/look.ts';
 import { GLOW, PALETTE } from '../style/tokens.ts';
 import type { PaintName, ShipDesign } from './design.ts';
 import { latheZ } from './geom.ts';
 import { Ctx } from './kit.ts';
 import type { ExhaustPoint, NavPoint, Role } from './kit.ts';
 import { ATLAS, hullMarkings, markingGeometry, paintAtlas, seedOf } from './markings.ts';
-import type { AtlasSpec } from './markings.ts';
+import type { AtlasSpec, AtlasStyle, MarkingKind } from './markings.ts';
 import { COCKPIT_BUILDERS } from './parts/cockpits.ts';
 import { DORSAL_BUILDERS } from './parts/dorsals.ts';
 import { ENGINE_BUILDERS } from './parts/engines.ts';
 import { HULL_BUILDERS } from './parts/hulls.ts';
 import { TAIL_BUILDERS } from './parts/tails.ts';
 import { WING_BUILDERS } from './parts/wings.ts';
-import { assemblyPlan, HULLS } from './spec.ts';
+import { VILLAGE_SHIP_BUILDERS, villageInfo } from './parts/village/index.ts';
+import { assemblyPlan, CATALOGUE, HULLS } from './spec.ts';
 import type { Category } from './spec.ts';
 
 // createShipModel(design, library, lod) assembles a ship from its design:
@@ -66,6 +69,17 @@ const BUILDERS: Record<Category, Record<string, Builder>> = {
   hull: HULL_BUILDERS, cockpit: COCKPIT_BUILDERS, wings: WING_BUILDERS, engines: ENGINE_BUILDERS, tail: TAIL_BUILDERS, dorsal: DORSAL_BUILDERS,
 };
 
+/** A part's tile name and line as a look shows them: the village look names its own models (parts/village). */
+export function shipPartInfo(category: Category, id: string, look: Look = 'industrial'): { id: string; name: string; spec: string } {
+  const base = CATALOGUE[category][id as keyof (typeof CATALOGUE)[typeof category]] as { id: string; name: string; spec: string };
+  return look === 'village' ? { ...base, ...villageInfo()[id] } : base;
+}
+
+/** The builder for a part in a look: the village look's own model where it has one (parts/village.ts), else the industrial one. */
+export function shipBuilder(category: Category, part: string, look: Look = 'industrial'): Builder | undefined {
+  return (look === 'village' ? VILLAGE_SHIP_BUILDERS[category]?.[part] : undefined) ?? BUILDERS[category][part];
+}
+
 /** Navigation light colours from the shared palette: port red, starboard cyan, strobe sodium. */
 export const NAV_COLORS = { port: PALETTE.signalRed, starboard: PALETTE.cyan, strobe: PALETTE.sodium } as const;
 /** Liner emissive at rest: a sixth of the pilot step, a residual heat that is visible only up close. */
@@ -109,25 +123,31 @@ export function bareMetals(lib: StyleLibrary) {
 
 interface Leases { materials: Record<Role, T.Material>; release(): void; liner: T.MeshStandardMaterial }
 
+/** The colour a palette paint is applied at on a hull in a look: the warm look's own tone, else hullTone. */
+export function paintTone(paint: PaintName, look: Look = 'industrial'): string {
+  return lookPaint(look, paint) ?? hullTone(paint);
+}
+
 function leaseMaterials(lib: StyleLibrary, design: ShipDesign, lod: LodTier): Leases {
-  const primary = lib.leasePaint(hullTone(design.paint.primary), 'hull', 'paint');
-  const secondary = lib.leasePaint(hullTone(design.paint.secondary), 'hull', 'paint');
-  const trim = lib.leasePaint(hullTone(design.paint.trim), 'plain', 'paint');
-  const liner = lib.createGlow(PALETTE[design.glow], linerIntensity(0));
+  const primary = lib.leasePaint(paintTone(design.paint.primary, lib.look), 'hull', 'paint');
+  const secondary = lib.leasePaint(paintTone(design.paint.secondary, lib.look), 'hull', 'paint');
+  const trim = lib.leasePaint(paintTone(design.paint.trim, lib.look), 'plain', 'paint');
+  const liner = lib.createGlow(lookGlow(lib.look, design.glow, PALETTE[design.glow]), linerIntensity(0));
   liner.name = 'ship:liner';
   const { steel: metal, alloy, heat } = bareMetals(lib);
-  const low = lod === 'low';
+  // At low LOD several roles share a material to stay inside 10 draw calls; the
+  // village look always folds them, leaving room for its two ink draw calls.
+  const fold = lod === 'low' || lib.look === 'village';
   const materials: Record<Role, T.Material> = {
     primary: primary.material,
     secondary: secondary.material,
     trim: trim.material,
     metal,
-    // At low LOD several roles share a material to stay inside 10 draw calls.
-    bright: low ? metal : alloy,
+    bright: fold ? metal : alloy,
     dark: lib.preset('framePainted'),
     glass: lib.glass('canopy'),
-    hazard: low ? trim.material : lib.hazard(),
-    heat: low ? metal : heat,
+    hazard: fold ? trim.material : lib.hazard(),
+    heat: fold ? metal : heat,
     liner,
   };
   return { materials, liner, release() { primary.release(); secondary.release(); trim.release(); } };
@@ -196,8 +216,9 @@ function plumeGeometry(segments: number): T.BufferGeometry {
  * The markings layer: grime, soot, placards and (when the design has one) the
  * registration, as flat quads on the hull with UVs into one painted atlas.
  */
-function markingsMesh(design: ShipDesign, painter: DecalPainter, ink: string): T.Mesh {
-  const g = markingGeometry(hullMarkings(design.parts.hull, design.registration !== undefined));
+function markingsMesh(design: ShipDesign, painter: DecalPainter, ink: string, only?: readonly MarkingKind[]): T.Mesh {
+  const all = hullMarkings(design.parts.hull, design.registration !== undefined);
+  const g = markingGeometry(only ? all.filter(m => only.includes(m.kind)) : all);
   const material = new T.MeshStandardMaterial({
     map: painter({ registration: design.registration, ink, seed: seedOf(design.id) }),
     // Dirt and stencil paint are matte, so grime also breaks up the paint's sheen.
@@ -212,19 +233,21 @@ function markingsMesh(design: ShipDesign, painter: DecalPainter, ink: string): T
 }
 
 /** Ink that reads against the hull side's paint: light on dark paint, dark on light. */
-export function decalInk(design: ShipDesign): string {
-  const c = new T.Color(hullTone(design.paint[HULLS[design.parts.hull].decal.paint]));
+export function decalInk(design: ShipDesign, look: Look = 'industrial'): string {
+  const c = new T.Color(paintTone(design.paint[HULLS[design.parts.hull].decal.paint], look));
   const lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
+  const P = lookParams(look);
+  if (P) return lum > 0.18 ? P.ink.dark : P.ink.light;
   return lum > 0.18 ? '#1c1f23' : '#d8d4c8';
 }
 
 /** Default markings painter for browsers (a canvas); returns null where there is no DOM (Node tests). */
-export function defaultDecalPainter(): DecalPainter | null {
+export function defaultDecalPainter(style: AtlasStyle = 'worn'): DecalPainter | null {
   if (typeof document === 'undefined') return null;
   return spec => {
     const canvas = document.createElement('canvas');
     canvas.width = ATLAS.width; canvas.height = ATLAS.height;
-    paintAtlas(canvas.getContext('2d')!, spec);
+    paintAtlas(canvas.getContext('2d')!, spec, style);
     const texture = new T.CanvasTexture(canvas);
     texture.colorSpace = T.SRGBColorSpace;
     texture.anisotropy = 4;
@@ -239,10 +262,14 @@ export function createShipModel(design: ShipDesign, lib: StyleLibrary, lod: LodT
   const plan = assemblyPlan(design.parts);
   const leases = leaseMaterials(lib, design, lod);
   const builder = new PartBuilder(lod);
+  const outline = lookParams(lib.look)?.outline, ink = outline ? lib.ink() : null;
+  if (outline && ink) builder.ink = { materials: ink, crease: outline.crease };
   const ctx = new Ctx(builder, leases.materials);
   try {
     for (const step of plan) {
-      const build = BUILDERS[step.category][step.part];
+      const build = shipBuilder(step.category, step.part, lib.look);
+      // A part the look has no model for keeps its industrial triangles: crease lines, no ink shell.
+      builder.shellOff = builder.ink !== null && !VILLAGE_SHIP_BUILDERS[step.category]?.[step.part];
       if (!build) throw new Error(`No builder for ${step.category} ${step.part}.`);
       if (!step.socket) build(ctx);
       else ctx.within({ position: step.socket.position, rotation: step.socket.rotation, scale: step.socket.mirror ? [-1, 1, 1] : [1, 1, 1] }, () => build(ctx));
@@ -282,7 +309,7 @@ export function createShipModel(design: ShipDesign, lib: StyleLibrary, lod: LodT
   });
 
   const plumeMaterial = new T.MeshBasicMaterial({
-    color: PALETTE[design.glow], vertexColors: true, transparent: true, opacity: 0,
+    color: lookGlow(lib.look, design.glow, PALETTE[design.glow]), vertexColors: true, transparent: true, opacity: 0,
     blending: T.AdditiveBlending, depthWrite: false,
   });
   plumeMaterial.name = 'ship:plume';
@@ -312,8 +339,11 @@ export function createShipModel(design: ShipDesign, lib: StyleLibrary, lod: LodT
   }
 
   // No markings at low LOD (distance view); the layer is one draw call at the others.
-  const painter = options.decal === undefined ? defaultDecalPainter() : options.decal;
-  const markings = painter && lod !== 'low' ? markingsMesh(design, painter, decalInk(design)) : null;
+  // The warm look keeps placards and the registration but paints no grime, soot or chips;
+  // the village look carries the registration alone.
+  const painter = options.decal === undefined ? defaultDecalPainter(lib.look === 'industrial' ? 'worn' : 'clean') : options.decal;
+  const only = lib.look === 'village' ? ['registration'] as const : undefined;
+  const markings = painter && lod !== 'low' ? markingsMesh(design, painter, decalInk(design, lib.look), only) : null;
   if (markings) root.add(markings);
 
   let thrust = 0, navOn = true;

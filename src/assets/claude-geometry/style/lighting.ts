@@ -1,6 +1,9 @@
 import * as T from 'three';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { PALETTE } from './tokens.ts';
+import { lookParams } from './look.ts';
+import type { LookParams } from './look.ts';
+import type { Look } from './look.ts';
 import { assetUrl, HDRI_FILES } from './scans.ts';
 
 // Lighting moods. Metal only reads as metal when it has something to reflect,
@@ -30,14 +33,32 @@ export function domeColour(mood: 'dusk' | 'orbit', y: number): T.Color {
   return y >= 0 ? horizon.clone().lerp(zenith, Math.pow(y, 0.55)) : horizon.clone().lerp(ground, Math.min(1, -y * 4));
 }
 
-function environmentScene(mood: Mood): T.Scene {
+/** The warm look's sky at elevation sine `y`: teal zenith, pale khaki horizon, sand below (linear). */
+function warmSky(P: LookParams, y: number): T.Color {
+  const zenith = hdr(P.sky.zenith, 1), horizon = hdr(P.sky.horizon, 1), ground = hdr(P.sky.ground, 0.9);
+  return y >= 0 ? horizon.clone().lerp(zenith, Math.pow(y, 0.7)) : horizon.clone().lerp(ground, Math.min(1, -y * 3));
+}
+
+function environmentScene(mood: Mood, look: Look = 'industrial'): T.Scene {
   const scene = new T.Scene();
   const basic = (color: T.Color, side: T.Side = T.FrontSide) => new T.MeshBasicMaterial({ color, side });
   const plane = (w: number, h: number, color: T.Color, position: [number, number, number], rotation: [number, number, number]) => {
     const m = new T.Mesh(new T.PlaneGeometry(w, h), basic(color, T.DoubleSide));
     m.position.set(...position); m.rotation.set(...rotation); scene.add(m);
   };
-  if (mood === 'hangar') {
+  const P = lookParams(look);
+  if (P && mood !== 'orbit') {
+    // An open sky instead of a room: soft colour from above and the horizon, and a
+    // faint sun where the key light is, so reflections agree with the shadows.
+    const dome = new T.SphereGeometry(20, 32, 16);
+    const colors: number[] = [];
+    const p = dome.getAttribute('position');
+    for (let i = 0; i < p.count; i++) { const c = warmSky(P, p.getY(i) / 20); colors.push(c.r, c.g, c.b); }
+    dome.setAttribute('color', new T.Float32BufferAttribute(colors, 3));
+    scene.add(new T.Mesh(dome, new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide })));
+    const sun = new T.Mesh(new T.CircleGeometry(2.4, 24), basic(hdr(P.light.key, P.sky.sun)));
+    sun.position.copy(new T.Vector3(...P.light.keyPosition).setLength(18)); sun.lookAt(0, 0, 0); scene.add(sun);
+  } else if (mood === 'hangar') {
     scene.add(new T.Mesh(new T.BoxGeometry(24, 12, 24), basic(hdr('#14171b', 1), T.BackSide)));
     plane(10, 6, hdr('#fff1de', 5.5), [0, 5.9, 0], [Math.PI / 2, 0, 0]);          // overhead softbox
     plane(0.6, 7, hdr(PALETTE.cyan, 0.8), [-11.8, 1.5, -3], [0, Math.PI / 2, 0]);  // cool strip
@@ -64,9 +85,9 @@ function environmentScene(mood: Mood): T.Scene {
 }
 
 /** Build a prefiltered environment map; the caller owns and disposes the returned texture. */
-export function createEnvironment(renderer: T.WebGLRenderer, mood: Mood): T.Texture {
+export function createEnvironment(renderer: T.WebGLRenderer, mood: Mood, look: Look = 'industrial'): T.Texture {
   const pmrem = new T.PMREMGenerator(renderer);
-  const scene = environmentScene(mood);
+  const scene = environmentScene(mood, look);
   const target = pmrem.fromScene(scene, 0.035);
   scene.traverse(o => { const m = o as T.Mesh; if (m.isMesh) { m.geometry.dispose(); (m.material as T.Material).dispose(); } });
   pmrem.dispose();
@@ -205,23 +226,28 @@ export function capRadiance(texture: T.DataTexture, peak: number) {
 export interface LightRig { group: T.Group; key: T.DirectionalLight; fill: T.HemisphereLight; dispose(): void }
 
 /** Key, rim and fill lights for a mood. Shadow map size follows `shadows`. */
-export function createLightRig(mood: Mood, shadows: boolean, extent = 8): LightRig {
+export function createLightRig(mood: Mood, shadows: boolean, extent = 8, look: Look = 'industrial'): LightRig {
   const group = new T.Group();
   group.name = `lights:${mood}`;
-  const key = new T.DirectionalLight(mood === 'orbit' ? '#fff3e2' : '#ffdcb6', mood === 'orbit' ? 3.4 : 2.6);
-  key.position.set(6, 9, 7);
+  const P = lookParams(look), warm = P !== null && mood !== 'orbit', W = (P ?? lookParams('warm')!).light;
+  const key = new T.DirectionalLight(warm ? W.key : mood === 'orbit' ? '#fff3e2' : '#ffdcb6', warm ? W.keyIntensity : mood === 'orbit' ? 3.4 : 2.6);
+  if (warm) key.position.set(...W.keyPosition); else key.position.set(6, 9, 7);
   key.castShadow = shadows;
   if (shadows) {
     key.shadow.mapSize.set(2048, 2048);
     const c = key.shadow.camera;
     c.left = -extent; c.right = extent; c.top = extent; c.bottom = -extent; c.near = 0.5; c.far = 60;
     key.shadow.bias = -0.0004; key.shadow.normalBias = 0.025;
+    // Soft-edged and lifted: shade reads as cool fill, not as a black cut-out.
+    if (warm) { key.shadow.radius = W.shadowRadius; key.shadow.intensity = W.shadowIntensity; }
   }
   // In orbit there is one sun: a rim light there would add a second specular glint on water and glass.
-  const rim = new T.DirectionalLight('#a9c4e2', mood === 'hangar' ? 0.6 : mood === 'dusk' ? 0.5 : 0);
+  const rim = new T.DirectionalLight(warm ? W.rim : '#a9c4e2', warm ? W.rimIntensity : mood === 'hangar' ? 0.6 : mood === 'dusk' ? 0.5 : 0);
   rim.visible = mood !== 'orbit';
   rim.position.set(-7, 4, -8);
-  const fill = new T.HemisphereLight(mood === 'dusk' ? '#5a6878' : '#3c4652', '#17130f', mood === 'orbit' ? 0.12 : 0.35);
+  const fill = warm
+    ? new T.HemisphereLight(W.sky, W.ground, W.fillIntensity)
+    : new T.HemisphereLight(mood === 'dusk' ? '#5a6878' : '#3c4652', '#17130f', mood === 'orbit' ? 0.12 : 0.35);
   group.add(key, key.target, rim, fill);
   return {
     group, key, fill,

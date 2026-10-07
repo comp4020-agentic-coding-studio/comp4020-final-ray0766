@@ -11,7 +11,7 @@ import type { Universe } from '../src/shared/planets.ts';
 import type { Vec3 } from '../src/shared/world.ts';
 import { normalize,SPAWN } from '../src/shared/world.ts';
 import { PRESENCE_TTL } from '../src/shared/presence.ts';
-import { GroundWorld,FIXED_STEP } from '../src/shared/physics/world.ts';
+import { GroundWorld,PHYSICS_VERSION,FIXED_STEP } from '../src/shared/physics/world.ts';
 import type { MotionStep } from '../src/shared/physics/world.ts';
 import { industrialCabin } from '../src/assets/claude-geometry/blueprint/samples.ts';
 import { encodeBlueprint } from '../src/assets/claude-geometry/blueprint/codec.ts';
@@ -63,7 +63,7 @@ it('retains recovered visitor ground state at equal player revision after the ow
   s.db.prepare('UPDATE players SET position=?,moved_at=0 WHERE id=?').run(JSON.stringify(at(1.8)),'visitor');
   let saved=s.state('visitor'),pose={position:saved.position,...saved.ground!},time=0,batch:MotionStep[]=[];
   const world=new GroundWorld(s.universe('visitor').currentPlanet);
-  const flush=()=>{saved=s.move('visitor',batch.at(-1)!.slice(0,3) as Vec3,time,planet,{sequence:saved.ground!.sequence+1,steps:batch});batch=[];};
+  const flush=()=>{saved=s.move('visitor',batch.at(-1)!.slice(0,3) as Vec3,time,planet,{physicsVersion:PHYSICS_VERSION,sequence:saved.ground!.sequence+1,steps:batch});batch=[];};
   for(let i=0;i<240;i++){
     const target=at(-1.05,pose.radius-base),a=new Vector3(...pose.position),b=new Vector3(...target),d=a.angleTo(b)*pose.radius;
     pose={...pose,...world.move(pose,a.lerp(b,Math.min(1,2.5*FIXED_STEP/Math.max(.00001,d))).normalize().toArray() as Vec3,FIXED_STEP)};

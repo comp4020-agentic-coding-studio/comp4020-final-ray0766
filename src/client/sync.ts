@@ -1,7 +1,7 @@
 import type { PlayerState } from '../shared/world.ts';
 import type { Universe } from '../shared/planets.ts';
 
-/** Ground recovery can advance without changing the player revision. */
+/** Ground sequence, scene and physics version all fence stale responses. */
 export function canAcceptPlayer(current:PlayerState|undefined,next:PlayerState):boolean {
   if(!current)return true;
   if(next.revision<current.revision||next.flight.journey<current.flight.journey)return false;
@@ -10,7 +10,7 @@ export function canAcceptPlayer(current:PlayerState|undefined,next:PlayerState):
   if(next.flight.sequence<current.flight.sequence)return false;
   if(current.ground){
     if(!next.ground)return false;
-    if(next.ground.sceneRevision<current.ground.sceneRevision||next.ground.sequence<current.ground.sequence)return false;
+    if(next.ground.physicsVersion<current.ground.physicsVersion||next.ground.sceneRevision<current.ground.sceneRevision||next.ground.sequence<current.ground.sequence)return false;
   }
   return true;
 }

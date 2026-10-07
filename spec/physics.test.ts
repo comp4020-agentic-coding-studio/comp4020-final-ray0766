@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import type { MotionStep } from '../src/shared/physics/world.ts';
 import { expect,it } from 'vitest';
 import { Vector3,Quaternion } from 'three';
-import { GroundWorld,groundPose,FIXED_STEP,terrainRadius } from '../src/shared/physics/world.ts';
+import { GroundWorld,PHYSICS_VERSION,groundPose,FIXED_STEP,terrainRadius } from '../src/shared/physics/world.ts';
 import type { GroundPose } from '../src/shared/physics/world.ts';
 import { industrialCabin } from '../src/assets/claude-geometry/blueprint/samples.ts';
 import { anchorQuaternion,localToDir } from '../src/assets/claude-geometry/core/anchor.ts';
@@ -71,13 +71,13 @@ it('server replays bounded paths, persists upper-floor height, fences retries, t
     const anchor=normalize([.55,1,.4]),objectId=randomUUID();s.createObject('owner',{planetId:p.id,objectId,kind:'structure',blueprintHash:entry.hash,position:anchor,rotation:0});
     const f=fixture(bp.parts),start=f.at(0,1.8);s.db.prepare('UPDATE players SET position=?,moved_at=0 WHERE id=?').run(JSON.stringify(start),'owner');let state=s.state('owner'),time=0;
     let batch:MotionStep[]=[];let previous:Parameters<typeof s.move>|undefined;
-    function flush(){if(!batch.length)return;const target=batch.at(-1)!.slice(0,3) as Vec3;const motion={sequence:state.ground!.sequence+1,steps:batch};previous=['owner',target,time,p.id,motion];state=s.move(...previous);batch=[];}
+    function flush(){if(!batch.length)return;const target=batch.at(-1)!.slice(0,3) as Vec3;const motion={physicsVersion:PHYSICS_VERSION,sequence:state.ground!.sequence+1,steps:batch};previous=['owner',target,time,p.id,motion];state=s.move(...previous);batch=[];}
     const top=f.walk(groundPose(start),0,-1.05,4,pose=>{time+=FIXED_STEP*1000;batch.push([...pose.position.map(n=>Number(n.toFixed(7))),FIXED_STEP] as MotionStep);if(batch.length===20)flush();});flush();
     expect(state.ground!.radius).toBeCloseTo(top.radius,4);expect(state.ground!.grounded).toBe(true);expect(s.move(...previous!)).toEqual(state);
-    const seq=state.ground!.sequence;expect(()=>s.move('owner',state.position,time,p.id,{sequence:seq,steps:[[...state.position,FIXED_STEP]]})).toThrow('newer');
-    expect(()=>s.move('owner',state.position,time,p.id,{sequence:seq+1,radius:18,steps:[[...state.position,FIXED_STEP]]})).toThrow('Invalid');
-    expect(()=>s.move('owner',state.position,time,p.id,{sequence:seq+1,steps:Array.from({length:28},()=>[...state.position,.05])})).toThrow('server time');
-    expect(()=>s.move('owner',normalize([1,0,0]),time+1000,p.id,{sequence:seq+1,steps:[[1,0,0,.05]]})).toThrow('speed');
+    const seq=state.ground!.sequence;expect(()=>s.move('owner',state.position,time,p.id,{physicsVersion:PHYSICS_VERSION,sequence:seq,steps:[[...state.position,FIXED_STEP]]})).toThrow('newer');
+    expect(()=>s.move('owner',state.position,time,p.id,{physicsVersion:PHYSICS_VERSION,sequence:seq+1,radius:18,steps:[[...state.position,FIXED_STEP]]})).toThrow('Invalid');
+    expect(()=>s.move('owner',state.position,time,p.id,{physicsVersion:PHYSICS_VERSION,sequence:seq+1,steps:Array.from({length:28},()=>[...state.position,.05])})).toThrow('server time');
+    expect(()=>s.move('owner',normalize([1,0,0]),time+1000,p.id,{physicsVersion:PHYSICS_VERSION,sequence:seq+1,steps:[[1,0,0,.05]]})).toThrow('speed');
     s.close();s=openStore(path);expect(s.state('owner')).toEqual(state);
     s.visit('visitor',p.id);const presence=presenceStore(s.state);const face=(id:string)=>new Vector3(0,0,-1).projectOnPlane(new Vector3(...s.state(id).position)).normalize().toArray();presence.heartbeat('owner',{planetId:p.id,facing:face('owner')},time);const seen=presence.heartbeat('visitor',{planetId:p.id,facing:face('visitor')},time);expect(seen.visitors[0].radius).toBe(state.ground!.radius);expect(seen.visitors[0].id).not.toBe('owner');
     expect(()=>s.removeObject('visitor',{planetId:p.id,objectId,expectedVersion:1})).toThrow('Only');

@@ -15,11 +15,14 @@ import type { PartBox } from './parts.ts';
 
 export const BODY_RADIUS=.18, BODY_HEIGHT=1.60, STEP_HEIGHT=.26, GRAVITY=12, MAX_FALL_SPEED=10;
 export const FIXED_STEP=1/60, MAX_PATH_STEPS=28;
+// Bump whenever static collision semantics change. Durable ground rows and
+// movement batches use this same value; a scene revision alone is not enough.
+export const PHYSICS_VERSION=1;
 const SKIN=.002, SUBSTEP=.035, ground=legacyHeightField();
 export interface GroundPose { position:Vec3; radius:number; verticalSpeed:number; grounded:boolean }
-export interface GroundState extends Omit<GroundPose,'position'> { sequence:number; sceneRevision:number }
+export interface GroundState extends Omit<GroundPose,'position'> { sequence:number; sceneRevision:number; physicsVersion:number }
 export type MotionStep=[number,number,number,number];
-export interface GroundMotion { sequence:number; steps:MotionStep[] }
+export interface GroundMotion { sequence:number; physicsVersion:number; steps:MotionStep[] }
 interface Collider { center:Vector3; half:Vector3; q:Quaternion; inverse:Quaternion; support:boolean; tag:string; objectId:string }
 interface Body { objectId:string; dir:Vector3; broad:number; colliders:Collider[]; round?:{radius:number;height:number;base:number} }
 const vec=(v:Vec3)=>new Vector3(...v);
@@ -49,7 +52,7 @@ export class GroundWorld {
   private add(body:Body,dir:Vec3,yaw:number,base:number,shape:PartBox){
     const anchor=new Quaternion().fromArray(anchorQuaternion({dir,yaw}));
     const center=vec(shape.center).applyQuaternion(anchor).addScaledVector(vec(dir),base);
-    const q=anchor.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0,1,0),shape.yaw??0));
+    const q=anchor.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0,1,0),shape.yaw??0)).multiply(new Quaternion().setFromAxisAngle(new Vector3(1,0,0),shape.pitch??0));
     body.colliders.push({center,half:vec(shape.half),q,inverse:q.clone().invert(),support:!!shape.support,tag:shape.tag,objectId:body.objectId});
   }
   private structure(o:PlacedObject,parts:PartPlacement[]){

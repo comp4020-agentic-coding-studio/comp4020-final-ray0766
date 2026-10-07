@@ -142,13 +142,16 @@ export class PracticalLights {
   readonly lod: LodTier;
   private slots: Slot[] = [];
   private enabled: boolean;
+  /** Multiplier on every fitting's candela; the warm look's brighter sky needs less from each lamp. */
+  private readonly scale: number;
   private since = Infinity;
   private lastEye = new T.Vector3(Infinity, Infinity, Infinity);
   private last = { fittings: 0, clusters: 0 };
 
-  constructor(lod: LodTier, options: { enabled?: boolean } = {}) {
+  constructor(lod: LodTier, options: { enabled?: boolean; scale?: number } = {}) {
     this.lod = lod;
     this.enabled = options.enabled ?? true;
+    this.scale = options.scale ?? 1;
     this.group.name = 'practical-lights';
     const budget = PRACTICAL_BUDGET[lod];
     for (let i = 0; i < budget.spots; i++) {
@@ -246,7 +249,7 @@ export class PracticalLights {
     light.color.set(c.color);
     light.distance = spec.distance;
     light.decay = 2;
-    light.userData.fullIntensity = spec.intensity * Math.min(c.count, spec.maxMerged);
+    light.userData.fullIntensity = spec.intensity * Math.min(c.count, spec.maxMerged) * this.scale;
     light.position.copy(c.position).addScaledVector(c.direction, spec.offset);
     if (light instanceof T.SpotLight) {
       light.angle = spec.angle ?? 1;

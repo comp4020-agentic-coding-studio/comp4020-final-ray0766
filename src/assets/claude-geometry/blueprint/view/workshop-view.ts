@@ -155,6 +155,8 @@ export class WorkshopView {
     if (entry.faded === faded) return;
     entry.faded = faded;
     entry.model.object.traverse(o => {
+      // A faded level shows no ink (village look): its lines would read through the tint.
+      if (o.name === 'ink-shell' || o.name === 'ink-lines') { o.visible = !faded; return; }
       const mesh = o as T.Mesh;
       if (!mesh.isMesh) return;
       if (faded) { mesh.userData.base ??= mesh.material; mesh.material = this.faded; mesh.castShadow = false; }
@@ -196,6 +198,8 @@ export class WorkshopView {
     if (!this.ghost) {
       const object = this.templates.instance(draft.part);
       const mats = this.ghostMat[ok ? 'ok' : 'bad'];
+      // The look's ink is not part of a ghost: it has its own outline below.
+      object.traverse(o => { if (o.name === 'ink-shell' || o.name === 'ink-lines') o.visible = false; });
       object.traverse(o => { const m = o as T.Mesh; if (m.isMesh) { m.material = mats.fill; m.castShadow = false; m.receiveShadow = false; m.renderOrder = 5; } });
       const line = new T.LineSegments(this.templates.get(draft.part).outline, mats.line);
       line.renderOrder = 11;

@@ -1,0 +1,44 @@
+{
+  "error": "TypeError: Cannot read properties of undefined (reading 'character')",
+  "pageErrors": [],
+  "samples": [
+    {
+      "label": "54ade hub desktop",
+      "viewport": [
+        1440,
+        900
+      ],
+      "buffer": [
+        1440,
+        900
+      ],
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "calls": 293,
+      "triangles": 309608,
+      "medianFrameIntervalMs": 16.699999999999818,
+      "p95FrameIntervalMs": 16.799999999999727,
+      "renderCpuMs": null,
+      "position": "[0,0.9654290825583874,0.2606658522907646]",
+      "camera": "[0.45,802.2251320611349,14.914757432663261]"
+    },
+    {
+      "label": "54ade hub phone viewport",
+      "viewport": [
+        390,
+        844
+      ],
+      "buffer": [
+        390,
+        844
+      ],
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "calls": 221,
+      "triangles": 263156,
+      "medianFrameIntervalMs": 16.699999999999818,
+      "p95FrameIntervalMs": 16.700000000000728,
+      "renderCpuMs": null,
+      "position": "[0,0.9654290825583874,0.2606658522907646]",
+      "camera": "[0.45,802.6034560478232,16.6197122469036]"
+    }
+  ]
+}

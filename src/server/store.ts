@@ -17,7 +17,7 @@ export function openStore(path: string) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-  if (schema > 9) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  if (schema > 10) { db.close(); throw new Error('Database schema is newer than this application.'); }
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
@@ -26,7 +26,7 @@ export function openStore(path: string) {
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
     );`);
   let migrationBackup: string | null = null;
-  if (schema < 9) {
+  if (schema < 10) {
     if (schema > 0 && path !== ':memory:') {
       migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
       // VACUUM INTO includes committed WAL data and produces a consistent restore point.
@@ -98,9 +98,13 @@ export function openStore(path: string) {
           radius REAL NOT NULL CHECK(radius BETWEEN 8 AND 20), vertical_speed REAL NOT NULL CHECK(vertical_speed BETWEEN -10 AND 0),
           grounded INTEGER NOT NULL CHECK(grounded IN (0,1)), sequence INTEGER NOT NULL, scene_revision INTEGER NOT NULL,
           clock_credit REAL NOT NULL CHECK(clock_credit BETWEEN 0 AND 2), request_hash TEXT);
-          INSERT INTO ground_states_v9 SELECT * FROM ground_states;DROP TABLE ground_states;ALTER TABLE ground_states_v9 RENAME TO ground_states;`);
+          INSERT INTO ground_states_v9 SELECT player_id,planet_id,position,radius,vertical_speed,grounded,sequence,scene_revision,clock_credit,request_hash FROM ground_states;DROP TABLE ground_states;ALTER TABLE ground_states_v9 RENAME TO ground_states;`);
       }
-      db.exec('PRAGMA user_version=9; COMMIT;');
+      // Old rows retain all saved values. Their version 0 is recovered lazily
+      // when that player next returns; no building/history migration is needed.
+      if(!db.prepare('PRAGMA table_info(ground_states)').all().some(c=>c.name==='physics_version'))
+        db.exec('ALTER TABLE ground_states ADD COLUMN physics_version INTEGER NOT NULL DEFAULT 0 CHECK(physics_version>=0)');
+      db.exec('PRAGMA user_version=10; COMMIT;');
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
   const history = historyStore(db);

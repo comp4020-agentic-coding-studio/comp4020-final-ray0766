@@ -223,7 +223,8 @@ function hue([r, g, b]: RGB): number {
 export function buildPlanet(env: PlanetEnvironment, _lib: StyleLibrary | null, lod: LodTier, options: BuildOptions = {}): PlanetHandle {
   const started = performance.now();
   const field = options.field ?? createHeightField(env);
-  const kit = options.kit ?? new TerrainKit(lod);
+  // Without a kit of its own, the planet takes the library's look (the village grade and halo with ?look=village).
+  const kit = options.kit ?? new TerrainKit(lod, { look: _lib?.look ?? 'industrial' });
   const ownKit = !options.kit;
   if (kit.lod !== lod) throw new Error(`TerrainKit is for LOD ${kit.lod}, not ${lod}.`);
   const settings = LOD[lod];
@@ -334,7 +335,7 @@ export function buildPlanet(env: PlanetEnvironment, _lib: StyleLibrary | null, l
   atmoGeometry.setAttribute('normal', new T.BufferAttribute(anor, 3));
   atmoGeometry.setIndex(new T.BufferAttribute(shell.indices, 1));
   atmoGeometry.computeBoundingSphere();
-  const atmoMat = atmosphereMaterial(program);
+  const atmoMat = atmosphereMaterial(program, kit.look);
   const atmosphere = new T.Mesh(atmoGeometry, atmoMat);
   atmosphere.name = 'terrain:atmosphere';
   atmosphere.renderOrder = 2;

@@ -3,6 +3,8 @@ import { markShared } from '../core/dispose.ts';
 import { LOD } from '../style/lod.ts';
 import type { LodTier } from '../style/lod.ts';
 import { ENVIRONMENT_SUN_DIRECTION } from '../style/lighting.ts';
+import { lookParams, warmColour } from '../style/look.ts';
+import type { Look } from '../style/look.ts';
 import { makeDataTexture } from '../style/textures.ts';
 import { PLANET_RADIUS } from '../core/anchor.ts';
 import { DETAIL_METRES, DETAIL_NAMES, detailMap, foliageCard } from './textures.ts';
@@ -185,6 +187,34 @@ function patchFragmentDecl(shader: { fragmentShader: string }, decl: string) {
 }
 
 const vec3Of = (c: RGB) => new T.Vector3(c[0], c[1], c[2]);
+
+/**
+ * A stylised look's grade (src/style/look.ts `terrain`), in the shader: on
+ * the colour the terrain has already worked out (vertex albedo, strata, water
+ * depth tint, plant tints), just before lighting. Field data, heights, sea
+ * level and plant placement are untouched; only the surface's colour changes.
+ */
+function lookGrade<M extends T.MeshStandardMaterial>(kit: TerrainKit, m: M): M {
+  const P = lookParams(kit.look);
+  if (!P) return m;
+  const g = P.terrain, f = (v: number) => v.toFixed(4);
+  const grade = /* glsl */ `{
+    float gradeL = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    diffuseColor.rgb = mix(vec3(gradeL), diffuseColor.rgb, ${f(g.saturation)}) * ${f(g.scale)} + ${f(g.lift)};
+    diffuseColor.rgb *= vec3(${g.warm.map(f).join(', ')});
+  }`;
+  const compile = m.onBeforeCompile, key = m.customProgramCacheKey;
+  m.onBeforeCompile = (shader, renderer) => {
+    compile.call(m, shader, renderer);
+    // Detail strengths are static, so this program gets its own scaled copies (never scale the shared ones).
+    for (const [name, u] of Object.entries(shader.uniforms)) {
+      if (/Strength$/.test(name) && !name.startsWith('uAtmo') && typeof u.value === 'number') shader.uniforms[name] = { value: u.value * g.detail };
+    }
+    shader.fragmentShader = shader.fragmentShader.replace('#include <lights_physical_fragment>', `${grade}\n#include <lights_physical_fragment>`);
+  };
+  m.customProgramCacheKey = () => `${key.call(m)}|warm`;
+  return m;
+}
 export const DEFAULT_SUN = new T.Vector3(6, 9, 7).normalize();
 
 /** Ground: vertex albedo + rock strata, slope/wetness channels, triplanar detail, limb haze. */
@@ -268,7 +298,7 @@ export function groundMaterial(kit: TerrainKit, program: StyleProgram): T.MeshSt
   };
   m.customProgramCacheKey = () => 'terrain.ground.v2';
   m.userData.uniforms = uniforms;
-  return m;
+  return lookGrade(kit, m);
 }
 
 /** Liquid water: depth tint and opacity from a per-vertex depth, slow ripples, shore foam. */
@@ -316,7 +346,7 @@ export function waterMaterial(kit: TerrainKit, look: WaterLook, program: StylePr
   };
   m.customProgramCacheKey = () => 'terrain.water.v4';
   m.userData.uniforms = uniforms;
-  return m;
+  return lookGrade(kit, m);
 }
 
 /** Frozen sea: opaque sheet, clear dark ice over depth, snow-dusted pressure seams near shore. */
@@ -370,14 +400,16 @@ export function seaIceMaterial(kit: TerrainKit, look: WaterLook, program: StyleP
   };
   m.customProgramCacheKey = () => 'terrain.sea-ice.v4';
   m.userData.uniforms = uniforms;
-  return m;
+  return lookGrade(kit, m);
 }
 
 /** Atmosphere halo just outside the limb: back faces of a shell, brightest at the ground, fading outwards. */
-export function atmosphereMaterial(program: StyleProgram): T.ShaderMaterial {
+export function atmosphereMaterial(program: StyleProgram, look: Look = 'industrial'): T.ShaderMaterial {
+  // The warm look softens the halo towards its own dusty colours, like everything else.
+  const halo = lookParams(look) ? new T.Color(warmColour(new T.Color().setRGB(...program.atmosphere.color, T.LinearSRGBColorSpace))) : null;
   const m = new T.ShaderMaterial({
     name: 'terrain:atmosphere',
-    uniforms: { uColor: { value: vec3Of(program.atmosphere.color) }, uStrength: { value: program.atmosphere.strength }, uSunDir: { value: DEFAULT_SUN.clone() } },
+    uniforms: { uColor: { value: halo ? new T.Vector3(halo.r, halo.g, halo.b) : vec3Of(program.atmosphere.color) }, uStrength: { value: program.atmosphere.strength }, uSunDir: { value: DEFAULT_SUN.clone() } },
     vertexShader: /* glsl */ `
       varying vec3 vN; varying vec3 vP;
       void main() {
@@ -457,7 +489,7 @@ function floraMaterial(kit: TerrainKit, name: Exclude<FloraMaterialName, 'leafCa
       .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>\n${GLSL_DAYSIDE}\n${GLSL_PLANET_SHADOW}`);
   };
   m.customProgramCacheKey = () => `terrain.flora.${name}.v3`;
-  return m;
+  return lookGrade(kit, m);
 }
 
 /**
@@ -489,11 +521,13 @@ function cardMaterial(kit: TerrainKit, name: 'leafCard' | 'needleCard'): T.MeshS
       .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>\n${GLSL_DAYSIDE}\n${GLSL_PLANET_SHADOW}`);
   };
   m.customProgramCacheKey = () => `terrain.flora.${name}.v2`;
-  return m;
+  return lookGrade(kit, m);
 }
 
 export class TerrainKit {
   readonly lod: LodTier;
+  /** How surfaces are coloured (src/style/look.ts); the warm look grades them in the shader. */
+  readonly look: Look;
   private textures = new Map<DetailName, T.DataTexture>();
   private cards = new Map<CardName, T.DataTexture>();
   /** Sun direction shared by every plant material of this kit (for the night-side glint mask). */
@@ -505,8 +539,9 @@ export class TerrainKit {
   /** Texture edge length; the LOD default unless a test asks for something smaller. */
   readonly textureSize: number;
 
-  constructor(lod: LodTier, options: { textureSize?: number } = {}) {
+  constructor(lod: LodTier, options: { textureSize?: number; look?: Look } = {}) {
     this.lod = lod;
+    this.look = options.look ?? 'industrial';
     this.textureSize = options.textureSize ?? LOD[lod].textureSize;
   }
 

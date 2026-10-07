@@ -8,14 +8,14 @@ it('resets every ground lighting input across garden → harbour → garden with
  const scene=new T.Scene(),fill=new T.AmbientLight(),sun=new T.DirectionalLight(),texture=new T.Texture();scene.environment=texture;sun.position.set(3,11,7);sun.shadow.bias=-.0003;
  configureGroundLighting('little-47',scene,fill,sun);
  const garden={fog:scene.fog!.toJSON(),fill:fill.color.getHexString(),sun:sun.color.getHexString(),projection:sun.shadow.camera.projectionMatrix.toArray()};
- configureGroundLighting('hub',scene,fill,sun);expect(scene.fog).toBeInstanceOf(T.FogExp2);expect([fill.intensity,sun.intensity,scene.environmentIntensity,sun.shadow.camera.far]).toEqual([.48,2.35,.43,180]);
+ configureGroundLighting('hub',scene,fill,sun);expect(scene.fog).toBeInstanceOf(T.FogExp2);expect([fill.intensity,sun.intensity,scene.environmentIntensity,sun.shadow.camera.far]).toEqual([.85,2.8,.22,180]);
  configureGroundLighting('little-68',scene,fill,sun);expect({fog:scene.fog!.toJSON(),fill:fill.color.getHexString(),sun:sun.color.getHexString(),projection:sun.shadow.camera.projectionMatrix.toArray()}).toEqual(garden);
- expect([fill.intensity,sun.intensity,scene.environmentIntensity,sun.shadow.camera.far]).toEqual([1.1,2.5,.5,65]);expect(scene.environment).toBe(texture);expect(sun.position.toArray()).toEqual([3,11,7]);expect(sun.shadow.bias).toBe(-.0003);texture.dispose();
+ expect([fill.intensity,sun.intensity,scene.environmentIntensity,sun.shadow.camera.far]).toEqual([1.05,2.8,.22,65]);expect(scene.environment).toBe(texture);expect(sun.position.toArray()).toEqual([3,11,7]);expect(sun.shadow.bias).toBe(-.0003);texture.dispose();
 });
-it('keeps the world and preview exposure distinct and reuses bounded Stage options including texture diagnostics',()=>{
- const renderer={toneMapping:T.NoToneMapping,toneMappingExposure:9,outputColorSpace:T.LinearSRGBColorSpace};configureRenderer(renderer,'world');expect(renderer).toEqual({toneMapping:T.ACESFilmicToneMapping,toneMappingExposure:1.03,outputColorSpace:T.SRGBColorSpace});configureRenderer(renderer,'preview');expect(renderer.toneMappingExposure).toBe(1);
+it('keeps the village world and preview appearance consistent and reuses bounded Stage options including texture diagnostics',()=>{
+ const renderer={toneMapping:T.NoToneMapping,toneMappingExposure:9,outputColorSpace:T.LinearSRGBColorSpace};configureRenderer(renderer,'world');expect(renderer).toEqual({toneMapping:T.NeutralToneMapping,toneMappingExposure:1,outputColorSpace:T.SRGBColorSpace});configureRenderer(renderer,'preview');expect(renderer.toneMappingExposure).toBe(1);
  vi.stubGlobal('location',{search:''});
- try{for(const kind of ['workshop','shipyard','terrain','history'] as const){const options=previewOptions(kind,{} as HTMLElement);expect(options.lod).toBe('medium');expect(options.environment).toBe('procedural');expect(options.textures).toBe('webp');expect(options.fog).toBeNull();expect(options.backdrop).toBe(false);expect(options.scans).toBe(true);expect(options.fov).toBe(44);expect(options.mood).toBe(kind==='workshop'||kind==='shipyard'?'hangar':'dusk');expect(options.background).toBe(kind==='workshop'?'#151e24':undefined);}
+ try{for(const kind of ['workshop','shipyard','terrain','history'] as const){const options=previewOptions(kind,{} as HTMLElement);expect(options.lod).toBe('medium');expect(options.environment).toBe('procedural');expect(options.textures).toBe('webp');expect(options.fog).toBeNull();expect(options.backdrop).toBe(false);expect(options.scans).toBe(false);expect(options.look).toBe('village');expect(options.fov).toBe(44);expect(options.mood).toBe(kind==='workshop'||kind==='shipyard'?'hangar':'dusk');expect(options.background).toBe('#efe6d2');}
  vi.stubGlobal('location',{search:'?textures=ktx2'});expect(previewOptions('history',{} as HTMLElement).textures).toBe('ktx2');
  }finally{vi.unstubAllGlobals();}
 });

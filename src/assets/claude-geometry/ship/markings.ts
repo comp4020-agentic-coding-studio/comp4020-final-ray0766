@@ -1,5 +1,6 @@
 import * as T from 'three';
 import type { Vec3 } from '../core/vec.ts';
+import { WARM } from '../style/look.ts';
 import { PALETTE } from '../style/tokens.ts';
 import { HULLS } from './spec.ts';
 import type { HullId } from './spec.ts';
@@ -190,8 +191,18 @@ const rgba = (hex: string, a: number) => {
 const GRIME = '#1a150f', SOOT = '#0c0b0a', CHIP = '#6b6f73';
 const FONT = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
 
+/**
+ * 'worn': grime, soot, chipped paint and worn lettering (the industrial look).
+ * 'clean': the same placards and registration on clean paint, in the warm
+ * look's colours; the dirt cells stay empty.
+ */
+export type AtlasStyle = 'worn' | 'clean';
+
 /** Paint the atlas into a 2D context. Separate from the texture so it can be inspected on its own. */
-export function paintAtlas(g: CanvasRenderingContext2D, spec: AtlasSpec): void {
+export function paintAtlas(g: CanvasRenderingContext2D, spec: AtlasSpec, style: AtlasStyle = 'worn'): void {
+  const clean = style === 'clean';
+  // Placard colours: amber on graphite, or the warm look's ochre on pine teal with cream lettering.
+  const signal = clean ? WARM.paints.amber! : PALETTE.amber, darkInk = clean ? WARM.ink.dark : PALETTE.graphite, lightInk = clean ? WARM.ink.light : PALETTE.bone;
   let s = spec.seed >>> 0 || 1;
   const rnd = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
   g.clearRect(0, 0, ATLAS.width, ATLAS.height);
@@ -220,7 +231,7 @@ export function paintAtlas(g: CanvasRenderingContext2D, spec: AtlasSpec): void {
 
   // Side and slope facets: dirt collects towards the lower edge, runs down from
   // the upper edge and from seams, and the paint is chipped along both edges.
-  cell('grime', (w, h) => {
+  if (!clean) cell('grime', (w, h) => {
     const low = g.createLinearGradient(0, h, 0, h * 0.4);
     low.addColorStop(0, rgba(GRIME, 0.38)); low.addColorStop(1, rgba(GRIME, 0));
     g.fillStyle = low; g.fillRect(0, 0, w, h);
@@ -238,7 +249,7 @@ export function paintAtlas(g: CanvasRenderingContext2D, spec: AtlasSpec): void {
   });
 
   // Deck: boot scuffs, patchy dirt and worn chips where people walk and kneel.
-  cell('grime-deck', (w, h) => {
+  if (!clean) cell('grime-deck', (w, h) => {
     blotches(w, h, 380, 4, 34, 0.02, 0.07, GRIME);
     g.lineCap = 'round';
     for (let i = 0; i < 140; i++) {
@@ -250,7 +261,7 @@ export function paintAtlas(g: CanvasRenderingContext2D, spec: AtlasSpec): void {
   });
 
   // Reaction-thruster soot: a dark core with four plumes along the nozzle axes.
-  cell('soot', (w, h) => {
+  if (!clean) cell('soot', (w, h) => {
     const cx = w / 2, cy = h / 2;
     const core = g.createRadialGradient(cx, cy, 0, cx, cy, w * 0.48);
     core.addColorStop(0, rgba(SOOT, 0.62)); core.addColorStop(0.35, rgba(SOOT, 0.3)); core.addColorStop(1, rgba(SOOT, 0));
@@ -274,24 +285,24 @@ export function paintAtlas(g: CanvasRenderingContext2D, spec: AtlasSpec): void {
   };
   // Amber rescue placard with a pointer towards the canopy release.
   cell('rescue', (w, h) => {
-    plate(w, h, rgba(PALETTE.amber, 0.92), rgba(PALETTE.graphite, 0.9));
-    text('RESCUE', w * 0.42, h / 2 + 2, 34, PALETTE.graphite, w * 0.62);
-    g.fillStyle = PALETTE.graphite; g.beginPath(); g.moveTo(w - 50, h / 2 - 14); g.lineTo(w - 22, h / 2); g.lineTo(w - 50, h / 2 + 14); g.closePath(); g.fill();
+    plate(w, h, rgba(signal, 0.92), rgba(darkInk, 0.9));
+    text('RESCUE', w * 0.42, h / 2 + 2, 34, darkInk, w * 0.62);
+    g.fillStyle = darkInk; g.beginPath(); g.moveTo(w - 50, h / 2 - 14); g.lineTo(w - 22, h / 2); g.lineTo(w - 50, h / 2 + 14); g.closePath(); g.fill();
   });
   cell('no-step', (w, h) => {
-    plate(w, h, rgba(PALETTE.graphite, 0.86), rgba(PALETTE.bone, 0.7));
-    text('NO STEP', w / 2, h / 2 + 2, 34, PALETTE.bone, w - 40);
+    plate(w, h, rgba(darkInk, 0.86), rgba(lightInk, 0.7));
+    text('NO STEP', w / 2, h / 2 + 2, 34, lightInk, w - 40);
   });
   cell('panel', (w, h) => {
-    plate(w, h, rgba(PALETTE.graphite, 0.86), rgba(PALETTE.bone, 0.55));
-    text('B-07', w / 2, h / 2 + 2, 30, PALETTE.bone, w - 24);
+    plate(w, h, rgba(darkInk, 0.86), rgba(lightInk, 0.55));
+    text('B-07', w / 2, h / 2 + 2, 30, lightInk, w - 24);
   });
   cell('warning', (w, h) => {
-    g.fillStyle = PALETTE.graphite;
+    g.fillStyle = darkInk;
     g.beginPath(); g.moveTo(w / 2, 4); g.lineTo(w - 4, h - 6); g.lineTo(4, h - 6); g.closePath(); g.fill();
-    g.fillStyle = PALETTE.amber;
+    g.fillStyle = signal;
     g.beginPath(); g.moveTo(w / 2, 13); g.lineTo(w - 12, h - 11); g.lineTo(12, h - 11); g.closePath(); g.fill();
-    text('!', w / 2, h * 0.62, 30, PALETTE.graphite, w);
+    text('!', w / 2, h * 0.62, 30, darkInk, w);
   });
 
   // Registration in the hull's ink, letter-spaced, with worn flecks knocked out.
@@ -303,9 +314,11 @@ export function paintAtlas(g: CanvasRenderingContext2D, spec: AtlasSpec): void {
       g.textAlign = 'center'; g.textBaseline = 'middle';
       (g as CanvasRenderingContext2D & { letterSpacing?: string }).letterSpacing = '6px';
       g.fillText(reg, w / 2, h / 2 + 4, w - 24);
-      g.globalCompositeOperation = 'destination-out';
-      for (let i = 0; i < 260; i++) { g.beginPath(); g.arc(rnd() * w, rnd() * h, 0.6 + rnd() * 1.8, 0, Math.PI * 2); g.fill(); }
-      g.globalCompositeOperation = 'source-over';
+      if (!clean) {
+        g.globalCompositeOperation = 'destination-out';
+        for (let i = 0; i < 260; i++) { g.beginPath(); g.arc(rnd() * w, rnd() * h, 0.6 + rnd() * 1.8, 0, Math.PI * 2); g.fill(); }
+        g.globalCompositeOperation = 'source-over';
+      }
     });
   }
 }

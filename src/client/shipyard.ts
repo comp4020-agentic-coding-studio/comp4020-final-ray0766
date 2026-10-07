@@ -4,6 +4,7 @@ import { createShipModel } from '../assets/claude-geometry/ship/factory.ts';
 import type { ShipHandle } from '../assets/claude-geometry/ship/factory.ts';
 import { cloneDesign, decodeShipDesign, encodeShipDesign, fromStarter, normalizeRegistration, PAINT_ZONES, STARTERS } from '../assets/claude-geometry/ship/design.ts';
 import type { ShipDesign } from '../assets/claude-geometry/ship/design.ts';
+import { VILLAGE_SHIP_NAMES } from '../assets/claude-geometry/ship/parts/village/index.ts';
 import { CATEGORIES, PART_IDS } from '../assets/claude-geometry/ship/spec.ts';
 import { PAINT_CHOICES, GLOW_CHOICES } from '../assets/claude-geometry/style/tokens.ts';
 import { defaultShip } from '../shared/ships.ts';
@@ -23,7 +24,7 @@ export class Shipyard {
     this.dialog.id='shipyard';this.dialog.setAttribute('aria-labelledby','shipyard-title');
     this.dialog.innerHTML=`<header><div><small>PERSONAL / SHIP WORKSHOP</small><h2 id="shipyard-title">Your ship</h2></div><button id="sy-close">Done ×</button></header><div class="sy-body"><section><div id="sy-stage"></div><p>Drag to orbit · pinch or scroll to zoom</p><button id="sy-frame">Frame ship</button></section><aside><fieldset id="sy-fields"><label>Start from<select id="sy-starter"><option value="">Current design</option></select></label><label>Name<input id="sy-name" maxlength="40" autocomplete="off"></label><label>Registration<input id="sy-registration" maxlength="10" autocomplete="off"></label><div id="sy-parts"></div><div id="sy-paint"></div><label>Engine glow<select id="sy-glow"></select></label></fieldset><p class="sy-note">One current ship, saved to this browser’s private visit. The same design is used on the surface and in flight.</p><button id="sy-reload">Reload saved design</button></aside></div><footer><span id="sy-status" role="status" aria-live="polite"></span><button id="sy-save">Save & use ship</button></footer>`;
     document.body.append(this.dialog);
-    const label=(id:string,title:string,values:readonly string[],container:string)=>{const l=document.createElement('label');l.textContent=title;const select=document.createElement('select');select.id='sy-'+id;for(const v of values)select.add(new Option(v.replaceAll('-',' '),v));l.append(select);this.get(container).append(l);};
+    const label=(id:string,title:string,values:readonly string[],container:string)=>{const l=document.createElement('label');l.textContent=title;const select=document.createElement('select');select.id='sy-'+id;for(const v of values)select.add(new Option(VILLAGE_SHIP_NAMES[v]??v.replaceAll('-',' '),v));l.append(select);this.get(container).append(l);};
     for(const category of CATEGORIES)label(category,category,PART_IDS[category],'parts');
     for(const zone of PAINT_ZONES)label(zone,zone+' paint',PAINT_CHOICES,'paint');
     for(const glow of GLOW_CHOICES)this.get<HTMLSelectElement>('glow').add(new Option(glow,glow));

@@ -188,3 +188,44 @@ inspection also led to hiding the local avatar when the camera is too close indo
 [the physics contract](docs/integration/physics-v1.md) record exact checks and remaining
 limits. These are engineering checks, not student reflection or a user study.
 No push, deployment or submission was performed; further physics features are deferred.
+
+## R7 village — bounded local integration
+
+The user authorised integration of Claude's committed village presentation into
+the existing local Final, including compatible ships, harbour, courier and UI. A
+separate `integrate/r7-village-20261007` worktree started at `54ade588`; a consistent
+SQLite backup and a copy/hash of the existing untracked release test protected the
+active checkout. The integration reads the approved source commit `5a73b22`, not
+Claude's newer working tree. Its 32 new/changed source files remain byte-identical;
+the host separately owns presentation adapters, previews and collision changes.
+
+Schema 10 versions ground physics, recovers old standing states lazily and rejects
+old movement batches. Saved buildings, blueprints, ships and history retain their
+identities. Roof overhang collision/spacing, blueprint lamps and hedges match the
+new geometry while stairs, flat support and player step height keep their original
+semantics. Public and private art share the village palette and procedural shapes.
+
+The first focused run passed 59 checks, followed by 20 course and persistence checks.
+A real Chrome old/new replay preserved a saved ship and player state across a copied
+database migration. A separate desktop, two-identity and phone-touch journey passed
+actual walking, flight, door/stair navigation, blueprint edits, saved placement,
+visitor denial and recovery after support removal. Capacity was tested at the
+existing 8 structures and 64 total objects, without reducing those limits.
+
+The first capacity measurement exposed 741 phone-viewport and 864 desktop draws,
+so it is preserved as evidence rather than described as meeting a 250-draw target.
+The main harbour comparison improved from 293 to 278 desktop calls and 221 to 203
+phone-viewport calls. These are Mac measurements, not physical-phone results.
+[The R7 integration record](docs/integration/r7-village.md) records methodology,
+failures, screenshots, source provenance, migration and remaining visual/performance
+limits. No student reflection was written; no push, deployment or submission occurred.
+
+The final bounded shadow policy reduced capacity baselines to 722 phone-viewport
+and 845 desktop calls; it still exceeds a 250-call target. Four new shadow tests
+passed, bringing distinct targeted checks to 83. An intermediate browser replay
+completed all gameplay but recorded one unclassified 409; a diagnostic replay
+captured the stale ground-sequence error during the support-removal portion. Both
+failed zero-rejection assertions are retained. The final diagnostic-aware replay
+passed without any rejected moves, and separately verified persisted landing after
+support removal. It does not retroactively classify the earlier unlogged response.
+Application code was then frozen for the local preview update.

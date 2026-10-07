@@ -38,7 +38,17 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     return p;
   };
   const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: p.revision, objectCount: p.objectCount,slot:p.slot,center:planetCenter(p.slot),environment:p.environment??null });
-  const objects = (planetId: string): PlacedObject[] => (db.prepare('SELECT id,kind,position,rotation,version,blueprint_hash,radius,height FROM planet_objects WHERE planet_id=? ORDER BY rowid').all(planetId) as unknown as ObjectRow[]).map(r => ({ id:r.id,kind:r.kind,rotation:r.rotation,version:r.version,position:JSON.parse(r.position),...(r.blueprint_hash ? {blueprintHash:r.blueprint_hash,radius:r.radius!,height:r.height!} : {}) }));
+  const objects = (planetId: string): PlacedObject[] => {
+    const sizes=new Map<string,ReturnType<typeof structureSize>>();
+    return (db.prepare('SELECT id,kind,position,rotation,version,blueprint_hash,radius,height FROM planet_objects WHERE planet_id=? ORDER BY rowid').all(planetId) as unknown as ObjectRow[]).map(r=>{
+      if(r.blueprint_hash&&!sizes.has(r.blueprint_hash))sizes.set(r.blueprint_hash,structureSize(blueprints.parts(r.blueprint_hash)));
+      const size=r.blueprint_hash?sizes.get(r.blueprint_hash):undefined;
+      // Old structures stay exactly where they were saved. Effective extents
+      // include the new eave when validating future neighbours or edits; their
+      // saved rows and historical snapshots are not rewritten on read.
+      return {id:r.id,kind:r.kind,rotation:r.rotation,version:r.version,position:JSON.parse(r.position),...(size?{blueprintHash:r.blueprint_hash!,radius:Math.max(r.radius!,size.radius),height:Math.max(r.height!,size.height)}:{})};
+    });
+  };
   const owns = (id: string, planetId: unknown) => { const p = planet(planetId); if (p.kind === 'hub' || p.owner_id !== id) throw new RequestError(403, 'Only this planet’s owner can build here.'); return p; };
   const objectId = (value: unknown) => { if (typeof value !== 'string' || !UUID_PATTERN.test(value)) throw new RequestError(400, 'Invalid object identifier.'); return value; };
   const strict = (body: Record<string, unknown>, keys: string[]) => { if (Object.keys(body).some(k => !keys.includes(k))) throw new RequestError(400, 'Unexpected building field.'); };

@@ -12,7 +12,7 @@ import {chooseSites,padFootprint} from '../src/assets/claude-geometry/terrain/pa
 import {buildPlanet} from '../src/assets/claude-geometry/terrain/planet.ts';
 import {blueprintGroundFootprint} from '../src/assets/claude-geometry/blueprint/model.ts';
 import {fieldOf,objectSeat,foundations,gradedField} from '../src/shared/terrain.ts';
-import {GroundWorld,FIXED_STEP} from '../src/shared/physics/world.ts';
+import {GroundWorld,PHYSICS_VERSION,FIXED_STEP} from '../src/shared/physics/world.ts';
 import {SPAWN} from '../src/shared/world.ts';
 import type {Vec3} from '../src/shared/world.ts';
 import {placementProblem} from '../src/shared/planets.ts';
@@ -46,7 +46,7 @@ it('restricts terrain flooding/steep buildings, underwater visitors and aircraft
 it('shares generated ground with bounded server movement, persists it, and uses enlarged flight clearance with a dry landing',()=>{
  const dir=mkdtempSync(join(tmpdir(),'terrain-state-')),path=join(dir,'world.sqlite');const initial=setup(path),planet=initial.planet;let s=initial.s;try{
  apply(s,planet);let state=s.state('owner'),w=new GroundWorld(s.universe('owner').currentPlanet),pose=w.pose(SPAWN),now=Date.now()+100;
- for(let batch=0;batch<6;batch++){const steps:[number,number,number,number][]=[];for(let i=0;i<20;i++){const target=new Vector3(...pose.position).addScaledVector(new Vector3(1,0,0).projectOnPlane(new Vector3(...pose.position)).normalize(),1.5*FIXED_STEP/pose.radius).normalize().toArray() as Vec3;pose=w.move(pose,target,FIXED_STEP);steps.push([...pose.position,FIXED_STEP]);now+=FIXED_STEP*1000;}state=s.move('owner',pose.position,now,planet,{sequence:state.ground!.sequence+1,steps});expect(state.ground!.radius).toBeCloseTo(pose.radius,6);}
+ for(let batch=0;batch<6;batch++){const steps:[number,number,number,number][]=[];for(let i=0;i<20;i++){const target=new Vector3(...pose.position).addScaledVector(new Vector3(1,0,0).projectOnPlane(new Vector3(...pose.position)).normalize(),1.5*FIXED_STEP/pose.radius).normalize().toArray() as Vec3;pose=w.move(pose,target,FIXED_STEP);steps.push([...pose.position,FIXED_STEP]);now+=FIXED_STEP*1000;}state=s.move('owner',pose.position,now,planet,{physicsVersion:PHYSICS_VERSION,sequence:state.ground!.sequence+1,steps});expect(state.ground!.radius).toBeCloseTo(pose.radius,6);}
  expect(new Vector3(...state.position).distanceTo(new Vector3(...SPAWN))).toBeGreaterThan(.1);s.close();s=openStore(path);expect(s.state('owner')).toEqual(state);expect(s.universe('owner').currentPlanet.environment).toBe(env);
  const bodies=[{id:planet,center:[0,0,0] as Vec3,environment:env}],start={...groundFlight(),mode:'space' as const,position:[0,0,45] as Vec3,speed:36};let flight:ReturnType<typeof groundFlight>=start;for(let i=0;i<180;i++)flight=flightStep(flight,{thrust:true,brake:false,turn:0,pitch:0},FIXED_STEP,bodies);expect(flight.speed).toBe(0);expect(new Vector3(...flight.position).length()).toBeGreaterThanOrEqual(SAFE_RADIUS+1.75-.001);expect(firstCollision([0,0,30],[0,0,13],bodies,12.65)).not.toBe(null);
  const center=s.universe('owner').currentPlanet.center;s.db.prepare('UPDATE players SET flight=? WHERE id=?').run(JSON.stringify({...start,journey:4,speed:0,position:center.map((v,i)=>v+(i===0?18:0))}),'owner');s.land('owner',{planetId:planet,journey:4},now);expect(s.state('owner').position).toEqual(SPAWN);w=new GroundWorld(s.universe('owner').currentPlanet);expect(s.state('owner').ground!.radius).toBeCloseTo(w.pose(SPAWN).radius,6);

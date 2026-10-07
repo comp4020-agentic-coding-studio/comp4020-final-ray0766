@@ -1,22 +1,68 @@
-/* Host UI colour inputs. Preserve the current cascade and all existing layouts.
-   Panel-specific colours remain in their own CSS until an approved sample maps them. */
+/* Host UI palette. The ground uses village paper; orbit keeps its dark instruments. */
 :root {
-  --ui-ground-paper: #13222c;
-  --ui-ground-ink: #b8c8cd;
+  color-scheme: light;
+  --ui-ground-paper: #f3ecdb;
+  --ui-ground-ink: #2f4a43;
   --ui-space-paper: #121b23;
   --ui-space-ink: #bdcad0;
-  --ui-page-background: #08131d;
-  --ui-delivery-accent: #a85f42;
-  --ui-line: #cad1c2;
-  --ui-dialog-surface: #12232ded;
+  --ui-page-background: #e6dcc5;
+  --ui-delivery-accent: #a3532f;
+  --ui-line: #d8ccb1;
+  --ui-dialog-surface: rgba(245, 238, 221, 0.96);
+  --ui-dialog-border: #bfb08f;
+  --ui-dialog-text: #2f4a43;
+  --ui-preview-surface: #f3ecdb;
+  --ui-preview-bar: #ece2cb;
+  --ui-preview-bar-text: #2f4a43;
+  --ui-preview-focus: #326e68;
+  --ui-panel: #f3ecdbee;
+  --ui-chip: #f3ecdbe6;
+  --ui-muted: #5a6a60;
+  --ui-choice: #ece2cb;
+  --ui-selected: #d8ccb1;
+  --ui-teal: #326e68;
+  --ui-secondary-ink: #fff8e8;
+  --ui-secondary-hover: #285c57;
+  --ui-action: #a3532f;
+  --ui-action-hover: #8c4326;
+  --ui-action-ink: #fff8e8;
+  --ui-danger: #954c32;
+  --ui-backdrop: #2f4a4359;
+  --ui-joystick-ring: #2f4a4366;
+  --ui-joystick-stick: #326e6888;
+  --paper: var(--ui-ground-paper);
+  --ink: var(--ui-ground-ink);
+  --rust: var(--ui-delivery-accent);
+  --line: var(--ui-line);
+}
+
+/* Shared dialogs and status controls follow the current mode. Flight's own
+   canvas and instruments retain the colours declared in flight.css. */
+body.in-space {
+  color-scheme: dark;
+  --paper: var(--ui-space-paper);
+  --ink: var(--ui-space-ink);
+  --ui-dialog-surface: #12232df5;
   --ui-dialog-border: #516f7e;
   --ui-dialog-text: #bbccd2;
   --ui-preview-surface: #152129;
   --ui-preview-bar: #21313a;
   --ui-preview-bar-text: #d4dfe1;
   --ui-preview-focus: #f0bc77;
-  --paper: var(--ui-ground-paper);
-  --ink: var(--ui-ground-ink);
-  --rust: var(--ui-delivery-accent);
-  --line: var(--ui-line);
+  --ui-panel: #122631ed;
+  --ui-chip: #0a1923d9;
+  --ui-muted: #a2b8c2;
+  --ui-choice: #1b313d;
+  --ui-selected: #244452;
+  --ui-line: #466372;
+  --ui-teal: #a3c8ca;
+  --ui-secondary-ink: #13222c;
+  --ui-secondary-hover: #b4d6d4;
+  --ui-action: #315465;
+  --ui-action-hover: #3b6375;
+  --ui-action-ink: #e2edf0;
+  --ui-danger: #efb28e;
+  --ui-backdrop: #040e17a8;
+  --ui-joystick-ring: #5b7d8d77;
+  --ui-joystick-stick: #7293a077;
 }

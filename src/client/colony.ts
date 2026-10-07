@@ -1,3 +1,5 @@
+import { makePlacementPreview } from './placement-preview.ts';
+import { PlacedObjectShadows } from './placed-shadows.ts';
 import * as T from 'three';
 import {fieldOf,objectSeat} from '../shared/terrain.ts';
 import { REGIONS,regionFor } from '../shared/regions.ts';
@@ -17,6 +19,7 @@ import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts
 import { SHARED_ASSET_VERSION, worldMaterials } from './shared-assets.ts';
 import { surfacePoint } from './terrain.ts';
 import type { Obstacle } from './scene.ts';
+import { PRESENTATION } from './presentation.ts';
 const el = <E extends HTMLElement = HTMLElement>(id:string) => document.getElementById(id) as E;
 export interface ColonyBridge {
   canvas: HTMLCanvasElement; camera: T.Camera; scene: T.Scene;
@@ -34,6 +37,7 @@ export class Colony {
   private map = el<HTMLDialogElement>('star-map');
   private layer = new T.Group(); private ghost: T.Group | null = null;
   private objects = new Map<string,T.Group>(); private draft: Draft | null = null;
+  private shadows = new PlacedObjectShadows(PRESENTATION.ground.garden.shadowExtent * .75);
   private placing = false; private selected: string | null = null;
   private painted = ''; private cards = ''; private pointer: {id:number;x:number;y:number} | null = null;
   private workshop: Workshop|null=null;
@@ -93,6 +97,11 @@ export class Colony {
     document.body.classList.toggle('building',this.building);el('builder').hidden=!this.building;this.bridge.pause(this.building);if(this.building)el<HTMLDialogElement>('menu-dialog').close();this.editor();this.hud();return true;
   }
   stopBuilding(){return this.setBuilding(false);}
+  updateShadows(feet:T.Vector3){
+    const stats=this.shadows.update(feet,this.building?this.selected:null);
+    this.bridge.canvas.dataset.placedShadowObjects=String(stats.active);
+    this.bridge.canvas.dataset.placedShadowTotal=String(stats.total);
+  }
   accept(next:Universe){
     if(!canAcceptUniverse(this.universe,next)||!this.bridge.applyPlayer(next.player))return;
     const changed=this.universe?.currentPlanet.id!==next.currentPlanet.id;
@@ -101,8 +110,9 @@ export class Colony {
     if(this.building&&(!next.currentPlanet.mine||next.player.flight.mode==='space'))this.setBuilding(false,true);
     const key=next.currentPlanet.id+':'+next.currentPlanet.revision;
     if(this.painted!==key){
-      this.painted=key;this.bridge.canvas.dataset.placedAssetKit=SHARED_ASSET_VERSION;this.bridge.canvas.dataset.placedAssetKinds=next.currentPlanet.objects.map(o=>o.kind).join(',');for(const child of [...this.layer.children])disposeGeometry(child);this.objects.clear();
+      this.painted=key;this.bridge.canvas.dataset.placedAssetKit=SHARED_ASSET_VERSION;this.bridge.canvas.dataset.placedAssetKinds=next.currentPlanet.objects.map(o=>o.kind).join(',');this.shadows.clear();for(const child of [...this.layer.children])disposeGeometry(child);this.objects.clear();
       for(const obj of next.currentPlanet.objects){const group=this.renderObject(obj);group.userData.objectId=obj.id;this.layer.add(group);this.objects.set(obj.id,group);}
+      this.shadows.replace(this.objects);
       const list=el<HTMLSelectElement>('built-list');list.replaceChildren(new Option('Select a saved object…',''));
       next.currentPlanet.objects.forEach((o,i)=>list.add(new Option(`${objectName(o)} ${i+1}`,o.id)));list.value=this.selected??'';
       this.bridge.obstacles(next.currentPlanet.objects.filter(o=>o.kind!=='structure'&&objectHeight(o)>.6).map(o=>({point:new T.Vector3(...o.position),radius:objectRadius(o),height:objectHeight(o)})));
@@ -158,10 +168,7 @@ export class Colony {
     if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}
     if(!this.draft?.position)return;
     this.ghost=this.renderObject(this.draft as PlacedObject);
-    this.ghost.userData.noPracticalLights=true;
-    const invalid=this.problem(this.draft);
-    this.ghost.traverse(o=>{if(o instanceof T.Mesh){const original=Array.isArray(o.material)?o.material:[o.material];o.userData.ghostOriginal=original;o.material=new T.MeshBasicMaterial({color:invalid?'#c87055':'#c8df9b',transparent:true,opacity:.45,depthWrite:false});o.castShadow=false;}});
-    const ghost=this.ghost, dispose=ghost.userData.disposeOwned;ghost.userData.disposeOwned=()=>{ghost.traverse(o=>{if(o instanceof T.Mesh&&o.userData.ghostOriginal){(o.material as T.Material).dispose();o.material=o.userData.ghostOriginal.length===1?o.userData.ghostOriginal[0]:o.userData.ghostOriginal;delete o.userData.ghostOriginal;}});delete ghost.userData.disposeOwned;if(dispose)dispose();else disposeGeometry(ghost);};
+    makePlacementPreview(this.ghost,!!this.problem(this.draft));
     this.bridge.scene.add(this.ghost);
   }
   private async save(){

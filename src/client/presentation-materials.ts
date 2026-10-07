@@ -1,26 +1,26 @@
 import type { MeshStandardMaterialParameters, MeshPhysicalMaterialParameters } from 'three';
 
-// Main-project material inputs which vendor updates cannot change. Existing colours
-// and finishes are preserved. Texture drawing and material ownership stay with the factories.
+// Main-owned village surfaces. Slot names stay stable for the existing scenery;
+// shapes, texture drawing and resource ownership remain in the factories.
 export const HARBOUR_SURFACES = {
-  concrete: { color: '#5e646b', metalness: .08, roughness: .92 },
-  pale: { color: '#899093', metalness: .3, roughness: .67 },
-  metal: { color: '#46535e', metalness: .75, roughness: .46 },
-  dark: { color: '#1b2935', metalness: .68, roughness: .54 },
-  copper: { color: '#8e6550', metalness: .6, roughness: .57 },
-  road: { color: '#3d454e', metalness: .08, roughness: .94 },
-  edge: { color: '#222f3b', metalness: .5, roughness: .62 },
+  concrete: { color: '#cbbfa6', metalness: 0, roughness: .92 },
+  pale: { color: '#efe3c6', metalness: 0, roughness: .88 },
+  metal: { color: '#46514f', metalness: .05, roughness: .7 },
+  dark: { color: '#7d5b43', metalness: 0, roughness: .88 },
+  copper: { color: '#c26b4b', metalness: 0, roughness: .88 },
+  road: { color: '#8e968e', metalness: 0, roughness: .94 },
+  edge: { color: '#b9ad8c', metalness: 0, roughness: .92 },
 } as const satisfies Record<string, MeshStandardMaterialParameters>;
 export const HARBOUR_ACCENTS = {
-  cyan: { color: '#84bdc9', emissive: '#55a8bf', emissiveIntensity: .85, roughness: .44 },
-  amber: { color: '#d9ad76', emissive: '#dca365', emissiveIntensity: .8, roughness: .54 },
-  glass: { color: '#20394a', metalness: .45, roughness: .19, clearcoat: .8, clearcoatRoughness: .16 },
-  facade: { emissive: '#efdbbf', emissiveIntensity: .8, metalness: .6, roughness: .28, bumpScale: .012 },
+  cyan: { color: '#326e68', emissive: '#a8eadb', emissiveIntensity: .85, roughness: .8 },
+  amber: { color: '#ffd08a', emissive: '#ffd08a', emissiveIntensity: 1.6, roughness: .8 },
+  glass: { color: '#3f5a5e', metalness: 0, roughness: .35, transparent: true, opacity: .88, clearcoat: 0 },
+  facade: { emissive: '#ffd08a', emissiveIntensity: .5, metalness: 0, roughness: .88 },
 } as const satisfies Record<string, MeshPhysicalMaterialParameters>;
-export const HARBOUR_GRAIN = { anisotropy: 4, bumpScale: .0035 } as const;
+export const HARBOUR_GRAIN = { anisotropy: 4, bumpScale: 0 } as const;
 export const COURIER_LOOK = {
-  coats: { clay: '#876247', fern: '#4e6a60', sky: '#4d6675' },
-  neighbours: { mica: '#a17a48', sol: '#52766c' },
-  surface: { metalness: .25, roughness: .65 },
-  visor: { color: '#132c38', metalness: .55, roughness: .14, clearcoat: 1 },
+  coats: { clay: '#c47a55', fern: '#5f8b82', sky: '#6585a3' },
+  neighbours: { mica: '#e0a24f', sol: '#93a571' },
+  surface: { metalness: 0, roughness: .88 },
+  visor: { color: '#3f5a5e', metalness: 0, roughness: .35, clearcoat: 0 },
 } as const;

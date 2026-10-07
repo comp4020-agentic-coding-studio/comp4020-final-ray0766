@@ -7,9 +7,10 @@ import type { LodTier } from '../assets/claude-geometry/style/lod.ts';
 import type { PlacedObject } from '../shared/planets.ts';
 import type { BlueprintContents } from '../shared/blueprints.ts';
 import { fieldOf,foundations } from '../shared/terrain.ts';
+import { PRESENTATION } from './presentation.ts';
 import { objectRadius } from '../shared/planets.ts';
 export function terrainModel(environment:string,objects:readonly PlacedObject[]=[],blueprints:BlueprintContents={},lod:LodTier='medium',alphaCanvas=false){
- const field=fieldOf(environment) as TerrainField,kit=new TerrainKit(lod);
+ const field=fieldOf(environment) as TerrainField,kit=new TerrainKit(lod,{look:PRESENTATION.materials.look});
  const model=buildPlanet(field.env,null,lod,{kit,field,foundations:foundations(field,objects,blueprints),clearings:objects.map(o=>({dir:o.position,radius:objectRadius(o)+.2}))});
  // The main canvas composites over a CSS sky. Preserve its destination alpha
  // while keeping Claude's additive RGB halo; otherwise a black opaque shell appears.

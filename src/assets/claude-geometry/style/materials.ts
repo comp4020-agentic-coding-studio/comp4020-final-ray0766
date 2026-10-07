@@ -5,6 +5,11 @@ import type { LodTier } from './lod.ts';
 import { finishMap, makeDataTexture, patternTextures } from './textures.ts';
 import type { FinishName, PatternName, PatternTextures } from './textures.ts';
 import { GLOW, PALETTE } from './tokens.ts';
+import { applyCel } from './cel.ts';
+import { createInkMaterials } from './ink.ts';
+import type { InkMaterials } from './ink.ts';
+import { lookParams, warmColour } from './look.ts';
+import type { Look, LookParams } from './look.ts';
 import { assetUrl, SCAN_TEXTURE_SIZE, SCANS, scanPath, scanRepeat, TRANSCODER_PATH } from './scans.ts';
 import type { ScanId, ScanMap, TextureFormat } from './scans.ts';
 
@@ -70,6 +75,12 @@ export interface StyleLibraryOptions {
    * at high LOD: 1024 px maps would cost download and memory for no visible detail.
    */
   scanDetail?: LodTier;
+  /**
+   * How materials are surfaced (src/style/look.ts); default 'industrial'. The
+   * warm look keeps every material and name but makes them matte and clean,
+   * with its own colours, and loads no texture sets.
+   */
+  look?: Look;
 }
 
 /** One loaded texture-set map: what crossed the network, what it cost, what the GPU holds. */
@@ -126,9 +137,15 @@ export class StyleLibrary {
   private paints = new Map<string, { material: T.MeshStandardMaterial; refs: number }>();
   private specials = new Map<string, T.Material>();
   private hazardTexture: T.DataTexture | null = null;
+  /** 1×1 roughness/metalness maps of the warm look, per finish. */
+  private flats = new Map<FinishName, T.DataTexture>();
   private anisotropy = 1;
   private disposed = false;
   readonly scans: boolean;
+  readonly look: Look;
+  /** The look's parameters; null for the industrial look. */
+  private readonly P: LookParams | null;
+  private inkSet: InkMaterials | null = null;
   /** Tier whose SCAN_TEXTURE_SIZE row the texture sets are loaded at. */
   readonly scanDetail: LodTier;
   private scanTextures = new Map<string, Promise<T.Texture>>();
@@ -144,7 +161,10 @@ export class StyleLibrary {
 
   constructor(lod: LodTier = 'high', options: StyleLibraryOptions = {}) {
     this.lod = lod;
-    this.scans = !!options.scans && typeof document !== 'undefined';
+    this.look = options.look ?? 'industrial';
+    this.P = lookParams(this.look);
+    // Stylised looks draw clean matte surfaces: no scanned wear to load.
+    this.scans = !!options.scans && typeof document !== 'undefined' && this.P === null;
     this.scanDetail = options.scanDetail ?? lod;
   }
 
@@ -304,7 +324,38 @@ export class StyleLibrary {
     return f;
   }
 
-  private build(recipe: SurfaceRecipe): T.MeshStandardMaterial {
+  /**
+   * The warm look's roughness/metalness map for a finish: one texel, so the
+   * surface is evenly matte. A map rather than plain numbers, so code that
+   * copies a material's maps (timeline:ground) keeps the same response.
+   */
+  private flat(name: FinishName): T.DataTexture {
+    let f = this.flats.get(name);
+    if (!f) {
+      const [rough, metal] = this.P!.finish[name];
+      f = markShared(makeDataTexture(new Uint8Array([255, Math.round(rough * 255), Math.round(metal * 255), 255]), 1, false));
+      this.flats.set(name, f);
+    }
+    return f;
+  }
+
+  /**
+   * `name` is the preset name or custom key, used by the warm look to pick the
+   * material's colour; `keepColour` leaves an explicit colour (a leased paint) as given.
+   */
+  private build(recipe: SurfaceRecipe, name = '', keepColour = false): T.MeshStandardMaterial {
+    const P = this.P;
+    if (P) {
+      const relief = (recipe.relief ?? 1) * P.relief, flat = this.flat(recipe.finish);
+      const material = new T.MeshStandardMaterial({
+        color: keepColour ? recipe.color : P.materials[name] ?? warmColour(recipe.color),
+        ...(relief > 0 ? { normalMap: this.pattern(recipe.pattern).normal, normalScale: new T.Vector2(relief, relief) } : {}),
+        roughnessMap: flat, metalnessMap: flat,
+        roughness: 1, metalness: 1,
+        envMapIntensity: Math.min(1, recipe.envIntensity ?? 1) * P.envIntensity,
+      });
+      return this.stylise(material);
+    }
     const p = this.pattern(recipe.pattern), orm = this.finish(recipe.finish);
     const relief = recipe.relief ?? 1;
     const material = new T.MeshStandardMaterial({
@@ -321,6 +372,28 @@ export class StyleLibrary {
   }
 
   /**
+   * The village look's finishing touches on any opaque material it makes:
+   * stepped direct light, and a small depth offset so ink lines drawn on the
+   * model's edges win the depth test against its faces.
+   */
+  private stylise<M extends T.MeshStandardMaterial>(material: M): M {
+    const P = this.P;
+    if (!P?.cel) return material;
+    applyCel(material, P.cel);
+    material.polygonOffset = true; material.polygonOffsetFactor = 1; material.polygonOffsetUnits = 1;
+    return material;
+  }
+
+  /** The look's shared ink outline materials (village), or null when the look draws none. */
+  ink(): InkMaterials | null {
+    const o = this.P?.outline;
+    if (!o) return null;
+    this.alive();
+    this.inkSet ??= createInkMaterials(o.color, o.width, o.lineOpacity);
+    return this.inkSet;
+  }
+
+  /**
    * A module-defined look that is not in PRESETS, cached under a namespaced key
    * (e.g. "ship:canopy-frame"). Shared and permanent like a preset, so modules
    * can extend the vocabulary without editing this file.
@@ -329,7 +402,7 @@ export class StyleLibrary {
     this.alive();
     const id = `custom:${key}`;
     let m = this.presets.get(id);
-    if (!m) { m = markShared(this.build(recipe)); m.name = id; this.presets.set(id, m); }
+    if (!m) { m = markShared(this.build(recipe, key)); m.name = id; this.presets.set(id, m); }
     return m;
   }
 
@@ -337,7 +410,7 @@ export class StyleLibrary {
   preset(name: PresetName): T.MeshStandardMaterial {
     this.alive();
     let m = this.presets.get(name);
-    if (!m) { m = markShared(this.build(PRESETS[name])); m.name = name; this.presets.set(name, m); }
+    if (!m) { m = markShared(this.build(PRESETS[name], name)); m.name = name; this.presets.set(name, m); }
     return m;
   }
 
@@ -349,7 +422,7 @@ export class StyleLibrary {
     const key = `${finish}|${pattern}|${new T.Color(color).getHexString()}` + (relief !== 1 || env !== 1 ? `|r${relief}|e${env}` : '');
     let entry = this.paints.get(key);
     if (!entry) {
-      entry = { material: markShared(this.build({ finish, pattern, color, relief, envIntensity: env })), refs: 0 };
+      entry = { material: markShared(this.build({ finish, pattern, color, relief, envIntensity: env }, '', true)), refs: 0 };
       entry.material.name = `paint:${key}`;
       this.paints.set(key, entry);
     }
@@ -372,6 +445,16 @@ export class StyleLibrary {
    * as a surface with the hangar in it rather than as an empty frame.
    */
   glass(tint: 'clear' | 'smoked' | 'canopy' = 'clear'): T.MeshPhysicalMaterial {
+    const P = this.P;
+    if (P) {
+      // Tinted glass with a soft sheen: it reads as glass by colour, not by mirrored highlights.
+      const g = P.glass[tint];
+      return this.special(`glass:${tint}`, () => new T.MeshPhysicalMaterial({
+        color: g.color, metalness: 0, roughness: g.roughness, specularIntensity: 0.4,
+        transparent: true, opacity: g.opacity, envMapIntensity: P.glass.envIntensity,
+        ior: 1.5, depthWrite: false,
+      })) as T.MeshPhysicalMaterial;
+    }
     if (tint === 'canopy') {
       return this.special('glass:canopy', () => new T.MeshPhysicalMaterial({
         // Same softened highlight as the window glass, so the hangar key
@@ -402,14 +485,16 @@ export class StyleLibrary {
       const data = new Uint8Array(size * size * 4);
       // Stored as sRGB bytes, so take the hex channels directly.
       const bytes = (hex: string) => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
-      const amber = bytes(PALETTE.amber), dark = bytes(PALETTE.graphite);
+      const P = this.P, warm = P !== null;
+      const amber = bytes(P ? P.hazard[0] : PALETTE.amber), dark = bytes(P ? P.hazard[1] : PALETTE.graphite);
       for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
         const c = Math.floor(((x + y) / size) * 8) % 2 === 0 ? amber : dark;
         const i = (y * size + x) * 4;
         data[i] = c[0]; data[i + 1] = c[1]; data[i + 2] = c[2]; data[i + 3] = 255;
       }
       this.hazardTexture = markShared(makeDataTexture(data, size, true));
-      return new T.MeshStandardMaterial({ map: this.hazardTexture, normalMap: this.pattern('plain').normal, roughnessMap: this.finish('paint'), metalnessMap: this.finish('paint'), roughness: 1, metalness: 1 });
+      const orm = warm ? this.flat('paint') : this.finish('paint');
+      return this.stylise(new T.MeshStandardMaterial({ map: this.hazardTexture, normalMap: this.pattern('plain').normal, roughnessMap: orm, metalnessMap: orm, roughness: 1, metalness: 1, ...(P ? { envMapIntensity: P.envIntensity } : {}) }));
     }) as T.MeshStandardMaterial;
   }
 
@@ -418,7 +503,7 @@ export class StyleLibrary {
    * model. Dark base colour so unlit it reads as a lens, not a painted stripe.
    */
   createGlow(color: string = PALETTE.sodium, intensity: number = GLOW.lit): T.MeshStandardMaterial {
-    return new T.MeshStandardMaterial({ color: '#15171a', emissive: color, emissiveIntensity: intensity, roughness: 0.35, metalness: 0 });
+    return this.stylise(new T.MeshStandardMaterial({ color: this.P ? this.P.glowBase : '#15171a', emissive: color, emissiveIntensity: intensity, roughness: 0.35, metalness: 0 }));
   }
 
   private special(key: string, make: () => T.Material): T.Material {
@@ -432,7 +517,7 @@ export class StyleLibrary {
 
   /** Live counts for leak checks and the demo HUD. */
   stats() {
-    return { presets: this.presets.size, paints: this.paints.size, specials: this.specials.size, textures: this.patterns.size * 2 + this.finishes.size + (this.hazardTexture ? 1 : 0) + this.scanLoaded.length };
+    return { presets: this.presets.size, paints: this.paints.size, specials: this.specials.size, textures: this.patterns.size * 2 + this.finishes.size + this.flats.size + (this.hazardTexture ? 1 : 0) + this.scanLoaded.length };
   }
 
   dispose() {
@@ -443,11 +528,13 @@ export class StyleLibrary {
     for (const m of this.specials.values()) m.dispose();
     for (const p of this.patterns.values()) { p.normal.dispose(); p.albedo.dispose(); }
     for (const f of this.finishes.values()) f.dispose();
+    for (const f of this.flats.values()) f.dispose();
     this.hazardTexture?.dispose();
+    this.inkSet?.shell.dispose(); this.inkSet?.lines.dispose(); this.inkSet = null;
     for (const t of this.scanLoaded) this.free(t);
     this.scanLoaded = [];
     this.ktx2Loader?.dispose();
     this.ktx2Loader = null;
-    this.presets.clear(); this.paints.clear(); this.specials.clear(); this.patterns.clear(); this.finishes.clear();
+    this.presets.clear(); this.paints.clear(); this.specials.clear(); this.patterns.clear(); this.finishes.clear(); this.flats.clear();
   }
 }

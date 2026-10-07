@@ -3,12 +3,14 @@ import type { BuiltPart } from '../../style/geometry.ts';
 import { LOD_TIERS } from '../../style/lod.ts';
 import type { LodTier } from '../../style/lod.ts';
 import type { StyleLibrary } from '../../style/materials.ts';
+import type { Look } from '../../style/look.ts';
 import { floorDeck, grateDeck, roofDeck, slopeRoof } from './decks.ts';
 import { buildEmit, countingMaterials, makeKit } from './kit.ts';
-import type { Emit } from './kit.ts';
+import type { Emit, Kit } from './kit.ts';
 import { cornerColumn, guardRail, parapet, plantUnit, stair } from './structure.ts';
 import { corrugatedWall, doorOpenWall, doorWall, louvreWall, solidWall, windowWall } from './walls.ts';
 import { padQuarter, serviceLight, streetKerb, streetPaving, streetPipes, streetRoad } from './street.ts';
+import { VILLAGE_BLURBS, VILLAGE_EMITS, VILLAGE_NAMES } from './village/index.ts';
 
 // The parts a blueprint is made of. Each entry says how it mounts on the grid
 // (cell, edge or vertex) and what structural role it plays; the occupancy and
@@ -76,9 +78,33 @@ export const PARTS: Record<PartId, PartDef> = {
   'pad.quarter': { id: 'pad.quarter', label: 'Pad quarter', blurb: 'Quarter of a 2×2 pad', category: 'Street', mount: 'cell', role: 'deck', floor: true, emit: padQuarter },
 };
 
-/** Build one part with library materials (its own builder, merged per material). */
+/**
+ * The model a part is drawn with in a look: the village look has its own
+ * models (./village) and falls back to the industrial one where it has none.
+ * Rules, budgets and costs (partCost) always use the industrial model.
+ */
+export function partEmit(id: PartId, look: Look = 'industrial'): Emit {
+  return (look === 'village' ? VILLAGE_EMITS[id] : undefined) ?? PARTS[id].emit;
+}
+
+/**
+ * Emit a part in a look into a kit. A part the look has no model for is drawn
+ * by its industrial model without the ink shell (PartBuilder.shellOff), so it
+ * costs exactly its industrial triangles there too.
+ */
+export function emitPart(id: PartId, look: Look, k: Kit) {
+  const own = look === 'village' && VILLAGE_EMITS[id] !== undefined;
+  k.b.shellOff = look !== 'industrial' && !own;
+  try { partEmit(id, look)(k); } finally { k.b.shellOff = false; }
+}
+
+/** A part's name and palette line as a look shows them (rule messages keep the catalogue's names). */
+export const partLabel = (id: PartId, look: Look = 'industrial') => (look === 'village' ? VILLAGE_NAMES[id] : PARTS[id].label);
+export const partBlurb = (id: PartId, look: Look = 'industrial') => (look === 'village' ? VILLAGE_BLURBS[id] : PARTS[id].blurb);
+
+/** Build one part with library materials (its own builder, merged per material), in the library's look. */
 export function buildPart(id: PartId, lib: StyleLibrary, b = new PartBuilder(lib.lod)): BuiltPart {
-  return buildEmit(PARTS[id].emit, id, lib, b);
+  return buildEmit(k => emitPart(id, lib.look, k), id, lib, b);
 }
 
 const counted = new Map<string, { triangles: number; drawCalls: number }>();
@@ -102,3 +128,18 @@ export function partCost(id: PartId, lod: LodTier): { triangles: number; drawCal
 }
 
 export const allPartCosts = () => PART_IDS.flatMap(id => LOD_TIERS.map(lod => ({ id, lod, ...partCost(id, lod) })));
+
+/**
+ * Triangles and draw calls of a part's model in a look, ink outline included,
+ * counted like partCost. The village models are held to their industrial
+ * part's cost (tests/unit/blueprint/village.test.ts), so the budget rules,
+ * which count with partCost, hold for village buildings too.
+ */
+export function lookPartCost(id: PartId, lod: LodTier, look: Look): { triangles: number; drawCalls: number } {
+  const source = countingMaterials(lod, look), b = new PartBuilder(lod);
+  emitPart(id, look, makeKit(b, source));
+  const built = b.build(id);
+  built.group.traverse(o => (o as { geometry?: { dispose(): void } }).geometry?.dispose());
+  source.dispose();
+  return { triangles: built.triangles, drawCalls: built.drawCalls };
+}

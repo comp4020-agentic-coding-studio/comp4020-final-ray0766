@@ -1,7 +1,7 @@
 import {expect,it} from 'vitest';
 import {Vector3,Quaternion} from 'three';
 import {randomUUID} from 'node:crypto';
-import {GroundWorld,FIXED_STEP} from '../src/shared/physics/world.ts';
+import {GroundWorld,PHYSICS_VERSION,FIXED_STEP} from '../src/shared/physics/world.ts';
 import type {GroundPose,MotionStep} from '../src/shared/physics/world.ts';
 import {normalize} from '../src/shared/world.ts';
 import type {Vec3} from '../src/shared/world.ts';
@@ -44,7 +44,7 @@ it.each(['door','stairs'] as const)('replays the low-speed %s path on the server
   const entry=store.saveBlueprint('owner',{document:JSON.parse(encodeBlueprint(f.blueprint)),expectedVersion:0});store.createObject('owner',{planetId:planet.id,objectId:randomUUID(),kind:'structure',blueprintHash:entry.hash,position:f.object.position,rotation:f.object.rotation});
   // Test-only in-memory setup. Production browser evidence uses real keys/touch.
   store.db.prepare('UPDATE players SET position=?,moved_at=0 WHERE id=?').run(JSON.stringify(f.pose.position),'owner');let state=store.state('owner'),pose:GroundPose={position:state.position,...state.ground!},time=0,batch:MotionStep[]=[];
-  const flush=()=>{if(!batch.length)return;state=store.move('owner',batch.at(-1)!.slice(0,3) as Vec3,time,planet.id,{sequence:state.ground!.sequence+1,steps:batch});expect(state.ground!.radius).toBeCloseTo(pose.radius,4);expect(new Vector3(...state.position).distanceTo(new Vector3(...pose.position))).toBeLessThan(.00001);batch=[];};
+  const flush=()=>{if(!batch.length)return;state=store.move('owner',batch.at(-1)!.slice(0,3) as Vec3,time,planet.id,{physicsVersion:PHYSICS_VERSION,sequence:state.ground!.sequence+1,steps:batch});expect(state.ground!.radius).toBeCloseTo(pose.radius,4);expect(new Vector3(...state.position).distanceTo(new Vector3(...pose.position))).toBeLessThan(.00001);batch=[];};
   for(let i=0;i<240;i++){pose=f.world.move(pose,f.next(pose,.016),FIXED_STEP);time+=FIXED_STEP*1000;batch.push([...pose.position.map(v=>Number(v.toFixed(7))),FIXED_STEP] as MotionStep);if(batch.length===20)flush();}flush();
   if(kind==='door')expect(f.local(pose).z).toBeGreaterThan(1.5);else expect(f.local(pose).y).toBeCloseTo(2.2,1);expect(state.ground!.grounded).toBe(true);
  }finally{store.close();}

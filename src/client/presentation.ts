@@ -2,17 +2,18 @@ import * as T from 'three';
 import type { StageOptions } from '../assets/claude-geometry/shell/stage.ts';
 import { StyleLibrary } from '../assets/claude-geometry/style/materials.ts';
 import { PracticalLights } from '../assets/claude-geometry/style/practical.ts';
+import { VILLAGE } from '../assets/claude-geometry/style/look.ts';
 import { textureFormat } from './resource-policy.ts';
 
-// Host-side presentation only. These are the existing defaults, not a new art direction.
+// The host opts into R7; the immutable library keeps its industrial default.
 // Do not import the Stage implementation here: its postprocessing stays lazy.
 export const PRESENTATION = {
-  renderer: { toneMapping: T.ACESFilmicToneMapping, outputColorSpace: T.SRGBColorSpace, worldExposure: 1.03, previewExposure: 1 },
-  materials: { lod: 'medium', scans: true },
+  renderer: { toneMapping: T.NeutralToneMapping, outputColorSpace: T.SRGBColorSpace, worldExposure: 1, previewExposure: 1 },
+  materials: { lod: 'medium', scans: false, look: 'village' },
   practical: { lod: 'medium', enabled: true },
   ground: {
-    hub: { fill: '#839bad', fillIntensity: .48, sun: '#e8bd99', sunIntensity: 2.35, environmentIntensity: .43, shadowExtent: 45, shadowFar: 180, fog: { color: '#665b60', density: .0033 } },
-    garden: { fill: '#839aaf', fillIntensity: 1.1, sun: '#efd4b0', sunIntensity: 2.5, environmentIntensity: .5, shadowExtent: 16, shadowFar: 65, fog: { color: '#0f202b', near: 28, far: 65 } },
+    hub: { fill: VILLAGE.light.sky, fillIntensity: .85, sun: VILLAGE.light.key, sunIntensity: VILLAGE.light.keyIntensity, environmentIntensity: .22, shadowExtent: 45, shadowFar: 180, fog: { color: VILLAGE.fog, density: .0033 } },
+    garden: { fill: VILLAGE.light.sky, fillIntensity: VILLAGE.light.fillIntensity, sun: VILLAGE.light.key, sunIntensity: VILLAGE.light.keyIntensity, environmentIntensity: .22, shadowExtent: 16, shadowFar: 65, fog: { color: VILLAGE.fog, near: 28, far: 65 } },
   },
   space: {
     background: '#040810', fog: { color: '#080e18', density: .00013 },
@@ -28,11 +29,10 @@ export type PreviewKind = 'workshop' | 'shipyard' | 'terrain' | 'history';
 // Medium LOD has no bloom/GTAO. Do not enable high LOD just to change the look.
 export function previewOptions(kind: PreviewKind, container: HTMLElement): StageOptions {
   return {
-    container, lod: PRESENTATION.materials.lod, scans: PRESENTATION.materials.scans,
+    container, lod: PRESENTATION.materials.lod, scans: PRESENTATION.materials.scans, look: PRESENTATION.materials.look,
     textures: textureFormat(), mood: kind === 'workshop' || kind === 'shipyard' ? 'hangar' : 'dusk',
     environment: 'procedural', practicalLights: PRESENTATION.practical.enabled,
-    backdrop: false, fog: null, fov: 44,
-    ...(kind === 'workshop' ? { ambientOcclusion: false, background: '#151e24' } : {}),
+    backdrop: false, fog: null, fov: 44, ambientOcclusion: false, background: VILLAGE.thumbnail,
   };
 }
 
@@ -41,8 +41,8 @@ export function configureRenderer(renderer: Pick<T.WebGLRenderer, 'toneMapping' 
   renderer.outputColorSpace = PRESENTATION.renderer.outputColorSpace;
   renderer.toneMappingExposure = view === 'world' ? PRESENTATION.renderer.worldExposure : PRESENTATION.renderer.previewExposure;
 }
-export const createWorldStyleLibrary = () => new StyleLibrary(PRESENTATION.materials.lod, { scans: PRESENTATION.materials.scans && typeof document !== 'undefined' });
-export const createWorldPracticalLights = () => new PracticalLights(PRESENTATION.practical.lod, { enabled: PRESENTATION.practical.enabled });
+export const createWorldStyleLibrary = () => new StyleLibrary(PRESENTATION.materials.lod, { scans: PRESENTATION.materials.scans, look: PRESENTATION.materials.look });
+export const createWorldPracticalLights = () => new PracticalLights(PRESENTATION.practical.lod, { enabled: PRESENTATION.practical.enabled, scale: VILLAGE.practical });
 export const groundPresentation = (planetId: string) => PRESENTATION.ground[planetId === 'hub' ? 'hub' : 'garden'];
 
 export function configureGroundLighting(planetId: string, scene: T.Scene, fill: T.AmbientLight, sun: T.DirectionalLight) {
@@ -52,5 +52,6 @@ export function configureGroundLighting(planetId: string, scene: T.Scene, fill: 
   sun.color.set(look.sun); sun.intensity = look.sunIntensity;
   Object.assign(sun.shadow.camera, { left: -look.shadowExtent, right: look.shadowExtent, top: look.shadowExtent, bottom: -look.shadowExtent, far: look.shadowFar });
   sun.shadow.camera.updateProjectionMatrix();
+  sun.shadow.radius = VILLAGE.light.shadowRadius; sun.shadow.intensity = VILLAGE.light.shadowIntensity;
   scene.environmentIntensity = look.environmentIntensity;
 }
