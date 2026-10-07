@@ -18,6 +18,7 @@ import { industrialCabin } from '../src/assets/claude-geometry/blueprint/samples
 import { encodeBlueprint } from '../src/assets/claude-geometry/blueprint/codec.ts';
 import { localToDir } from '../src/assets/claude-geometry/core/anchor.ts';
 import { structureFit } from '../src/shared/blueprints.ts';
+import { defaultHomeInterior } from '../src/shared/home.ts';
 
 const stores:ReturnType<typeof openStore>[]=[];
 afterEach(()=>{for(const s of stores)s.close();stores.length=0;vi.restoreAllMocks();});
@@ -91,6 +92,15 @@ it('rejects old visits and stale ground sequences while allowing a new journey t
   expect(canAcceptPlayer(oldSequence,returned.player)).toBe(false);
   const newJourney=structuredClone(returned.player);newJourney.revision++;newJourney.flight.journey++;newJourney.ground!.sequence=0;
   expect(canAcceptPlayer(oldSequence,newJourney)).toBe(true);
+});
+it('rejects an older room or door poll even at the same player revision',()=>{
+  const {s}=fixture(),current=s.state('owner');
+  current.home={planetId:current.planetId,buildingId:'home',interiorId:'room',door:{position:SPAWN,yaw:0},interior:{...defaultHomeInterior(),version:4,doorVersion:3,doorOpen:false},canEdit:true,buildingVersion:1,variant:'base',canUndo:false};
+  const oldRoom=structuredClone(current);oldRoom.home!.interior.version=3;
+  const oldDoor=structuredClone(current);oldDoor.home!.interior.doorVersion=2;oldDoor.home!.interior.doorOpen=true;
+  expect(canAcceptPlayer(current,oldRoom)).toBe(false);expect(canAcceptPlayer(current,oldDoor)).toBe(false);
+  const fresh=structuredClone(current);fresh.home!.interior.doorVersion=4;fresh.home!.interior.doorOpen=true;
+  expect(canAcceptPlayer(current,fresh)).toBe(true);
 });
 it('keeps successful reconnect state when an earlier universe poll fails later',async()=>{
   const {s,planet}=fixture(),before=s.universe('visitor');let fail!:(e:Error)=>void;

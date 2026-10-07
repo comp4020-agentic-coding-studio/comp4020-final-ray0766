@@ -21,6 +21,7 @@ import { SHARED_ASSET_VERSION, worldMaterials } from './shared-assets.ts';
 import { surfacePoint } from './terrain.ts';
 import type { Obstacle } from './scene.ts';
 import { PRESENTATION } from './presentation.ts';
+import { buildStructureFinish } from './structure-finish.ts';
 const el = <E extends HTMLElement = HTMLElement>(id:string) => document.getElementById(id) as E;
 export interface ColonyBridge {
   canvas: HTMLCanvasElement; camera: T.Camera; scene: T.Scene;
@@ -61,6 +62,8 @@ export class Colony {
     el('finish-building').onclick=()=>this.setBuilding(false);
     el('rotate-object').onclick=()=>{if(this.draft){this.draft.rotation=(this.draft.rotation+Math.PI/4)%(Math.PI*2);this.preview();this.editor();}};
     el('move-object').onclick=()=>{this.placing=true;this.editor();};
+    const editStructure=document.createElement('button');editStructure.id='edit-structure';setText(editStructure,'Edit parts');
+    el('move-object').after(editStructure);editStructure.onclick=()=>{if(this.selected)void this.openStructureWorkshop(this.selected);};
     el('cancel-object').onclick=()=>{if(!this.discardPlacement())return;this.clearDraft();this.editor();};
     el('save-object').onclick=()=>void this.save();
     el('remove-object').onclick=()=>void this.remove();
@@ -100,20 +103,25 @@ export class Colony {
   }
   stopBuilding(){return this.setBuilding(false);}
   async openHomeWorkshop(){
-    const u=this.universe,home=u?.player.home;
-    if(!u||!home?.canEdit||u.player.location?.kind==='interior'||!this.syncing||!this.setBuilding(false))return;
-    const object=u.currentPlanet.objects.find(o=>o.id===home.buildingId);
+    const home=this.universe?.player.home;if(home?.canEdit)await this.openStructureWorkshop(home.buildingId);
+  }
+  private async openStructureWorkshop(objectId:string){
+    const u=this.universe;
+    if(!u?.currentPlanet.mine||u.player.location?.kind==='interior'||u.player.flight.mode!=='ground'||!this.syncing||this.busy)return;
+    const object=u.currentPlanet.objects.find(o=>o.id===objectId);
     if(!object?.blueprintHash)return;
+    if(!this.setBuilding(false))return;
+    const home=object.id===u.player.home?.buildingId;
     try{
       await this.bridge.flush();el<HTMLDialogElement>('menu-dialog').close();
       const [panel,entries]=await Promise.all([this.loadWorkshop(),this.bridge.libraryRead()]);
       const existing=entries.find(entry=>entry.hash===object.blueprintHash);
-      const blueprint:Blueprint=existing?structuredClone(existing.blueprint):{id:crypto.randomUUID() as Blueprint['id'],name:'My home',parts:structuredClone(this.parts(object.blueprintHash)),groups:[]};
+      const blueprint:Blueprint=existing?structuredClone(existing.blueprint):{id:crypto.randomUUID() as Blueprint['id'],name:home?'My home':'My structure',parts:structuredClone(this.parts(object.blueprintHash)),groups:[]};
       await panel.open(blueprint,async entry=>{
         const next=await this.bridge.write('objects/replace',{planetId:u.currentPlanet.id,objectId:object.id,expectedVersion:object.version,blueprintHash:entry.hash});
-        this.accept(next);this.bridge.notice('Home updated. Your room and furniture are safe.');
-      });
-    }catch(error){this.bridge.notice(error instanceof Error?error.message:'Could not open your home in the workshop.');}
+        this.accept(next);this.bridge.notice(home?'Home updated. Your room and furniture are safe.':'Structure updated in place.');
+      },home?'Apply to my home':'Apply to this structure');
+    }catch(error){this.bridge.notice(error instanceof Error?error.message:'Could not open this structure in the workshop.');}
   }
   updateShadows(feet:T.Vector3){
     const stats=this.shadows.update(feet,this.building?this.selected:null);
@@ -166,9 +174,10 @@ export class Colony {
     if(obj.kind!=='structure'){const group=builtObject(obj.kind,obj.assetVersion??1);this.locate(group,obj.position,obj.rotation);if(this.universe?.currentPlanet.environment)group.position.set(...obj.position).multiplyScalar(objectSeat(fieldOf(this.universe.currentPlanet.environment,this.universe.currentPlanet.radius),obj,this.universe.currentPlanet.blueprints).baseRadius+.015);return group;}
     const parts=this.parts(obj.blueprintHash!), fit=structureFit(parts,obj.position,obj.rotation,fieldOf(this.universe?.currentPlanet.environment,this.universe?.currentPlanet.radius));
     const model=buildBlueprintModel(parts,worldMaterials(),'medium',{foundationDepth:fit.foundationDepth});
+    const finish=buildStructureFinish(parts,worldMaterials());model.object.add(finish.object);
     const transform=placedTransform({dir:obj.position,yaw:obj.rotation},fit);
     model.object.position.fromArray(transform.position);model.object.quaternion.fromArray(transform.quaternion);
-    model.object.userData.disposeOwned=()=>model.dispose();
+    model.object.userData.disposeOwned=()=>{finish.dispose();model.dispose();};
     return model.object;
   }
   private locate(group:T.Object3D,position:Vec3,rotation:number){const n=new T.Vector3(...position);group.position.copy(surfacePoint(n,.015));group.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),n);group.rotateY(rotation);}
@@ -205,7 +214,8 @@ export class Colony {
     el<HTMLButtonElement>('save-object').disabled=this.busy||!this.syncing||!d?.position||!!problem;
     setText(el('save-object'), this.busy?'Saving…':d?.version?'Save changes':'Place object');
     el<HTMLButtonElement>('move-object').hidden=!d?.version;el<HTMLButtonElement>('remove-object').hidden=!d?.version;
-    for(const id of ['rotate-object','move-object','remove-object','cancel-object'])el<HTMLButtonElement>(id).disabled=this.busy||!this.syncing;
+    el<HTMLButtonElement>('edit-structure').hidden=!d?.version||d.kind!=='structure';
+    for(const id of ['rotate-object','move-object','edit-structure','remove-object','cancel-object'])el<HTMLButtonElement>(id).disabled=this.busy||!this.syncing;
     document.querySelectorAll<HTMLButtonElement>('.catalogue-item').forEach(b=>{b.disabled=this.busy||!this.syncing;b.setAttribute('aria-pressed',String(b.dataset.kind===d?.kind));});
   }
   private hud(){

@@ -1,5 +1,6 @@
 import { HOME_DOOR_PART } from '../shared/home-layout.ts';
 import { HOME_ENVIRONMENT } from '../shared/home-layout.ts';
+import {SAMPLE_PUBLIC_ENVIRONMENT,SAMPLE_PUBLIC_VERSION} from '../shared/sample-public-village.ts';
 import { QUICK_PARTS } from '../shared/quick-parts.ts';
 import { radiusForSlot, safeRadius } from '../shared/world-size.ts';
 import { decodeEnvironment,encodeEnvironment } from '../assets/claude-geometry/terrain/env.ts';
@@ -39,9 +40,9 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     if (typeof id !== 'string' || id.length > 80) throw new RequestError(400, 'Choose a planet.');
     const p = db.prepare('SELECT *, (SELECT count(*) FROM planet_objects o WHERE o.planet_id=planets.id) AS objectCount FROM planets WHERE id=?').get(id) as unknown as PlanetRow;
     if (!p) throw new RequestError(404, 'That planet could not be found.');
-    return {...p,radius:p.sample_radius??p.radius};
+    return {...p,radius:p.sample_radius??p.radius,revision:sampleRadius&&p.kind==='hub'?1000+SAMPLE_PUBLIC_VERSION:p.revision,environment:sampleRadius&&p.kind==='hub'?SAMPLE_PUBLIC_ENVIRONMENT:p.environment};
   };
-  const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: p.revision, objectCount: p.objectCount,slot:p.slot,radius:p.sample_radius??p.radius,center:planetCenter(p.slot),environment:p.environment??null });
+  const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: sampleRadius&&p.kind==='hub'?1000+SAMPLE_PUBLIC_VERSION:p.revision, objectCount: p.objectCount,slot:p.slot,radius:p.sample_radius??p.radius,center:planetCenter(p.slot),environment:sampleRadius&&p.kind==='hub'?SAMPLE_PUBLIC_ENVIRONMENT:p.environment??null });
   const objects = (planetId: string): PlacedObject[] => {
     const sizes=new Map<string,ReturnType<typeof structureSize>>();
     return (db.prepare('SELECT id,kind,position,rotation,version,blueprint_hash,radius,height,(SELECT asset_version FROM object_assets a WHERE a.object_id=planet_objects.id) AS asset_version FROM planet_objects WHERE planet_id=? ORDER BY rowid').all(planetId) as unknown as ObjectRow[]).map(r=>{

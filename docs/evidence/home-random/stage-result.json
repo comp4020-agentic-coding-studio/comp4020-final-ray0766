@@ -1,0 +1,83 @@
+{
+  "stage": "Expanded rooms, persistent seeded neighbourhoods and public-kit composition",
+  "recordedAt": "2026-10-07T18:42:20.112699+00:00",
+  "preview": {
+    "url": "http://127.0.0.1:8128/",
+    "pid": 20424,
+    "build": "assets/index-HXyKhxDA.js",
+    "database": ".data/home-random.sqlite",
+    "cookie": "little_home_sample_p8128"
+  },
+  "preservedReview": {
+    "url": "http://127.0.0.1:8126/",
+    "pid": 14409,
+    "head": "8eddba81f206dca97486119869a009944901ee13",
+    "worktreeClean": true,
+    "backup": ".data/backups/8126-review-20261007T174443Z.sqlite"
+  },
+  "delivered": [
+    "Independent room expanded from 20 to 60.2 square metres, preserving character/furniture dimensions and existing furniture coordinates and IDs.",
+    "Explicit visible door opening/closing persists independently from furnishing versions; closed portal rejects entering/exiting, with no automatic doorway teleport.",
+    "Bounded deterministic initial layout is generated once, saves actual objects and metadata, and never rerolls edited worlds.",
+    "Existing ordinary structures can be edited in the same workshop and replaced in place while preserving private names/groups and the unique home interior.",
+    "Sample public and private planets use radius 21.6; public post, orchard and harbour buildings use normal player blueprints.",
+    "Conservative deterministic edge/eave finish derives from existing structural parts and adds no support or collision."
+  ],
+  "validation": {
+    "fullSuite": {
+      "passed": 239,
+      "failed": 0,
+      "report": "full-spec-result.json",
+      "note": "Run before the final paving projection/material and public resource teardown refinements."
+    },
+    "subsequentTargeted": {
+      "publicVillageAndPaving": 8,
+      "publicResourceOwnership": 2,
+      "allPassed": true
+    },
+    "browser": {
+      "roomCases": 2,
+      "randomCases": 3,
+      "publicInteractionCases": 2,
+      "allPassed": true,
+      "engine": "Installed Google Chrome 154.0.8037.98 via Playwright",
+      "physicalPhone": false,
+      "note": "Final material-only paving fix additionally inspected in desktop and 390px screenshots; public fixture starts on hub and does not validate interplanetary flight."
+    },
+    "static": [
+      "TypeScript noEmit",
+      "ESLint",
+      "Vite production build",
+      "git diff --check",
+      "scripts/check-evidence.ts"
+    ],
+    "compatibility": {
+      "report": "compatibility-result.json",
+      "unchangedTables": 19,
+      "preservedHomes": 16,
+      "preservedFurniture": 64,
+      "sourceBackupUnchanged": true
+    },
+    "services": "service-result.json",
+    "finalPublicVisuals": "public-visual-result.json"
+  },
+  "fixedDefects": [
+    "Slow initial state could overlap the reconnect timer and create two cookie identities; bootstrap and reconnect now share one in-flight request, with a 4.1-second browser regression.",
+    "Read-only door fitting is cached with structure/terrain invalidation.",
+    "Paving is sampled across both width and length against displayed ground, and its owned material disables the kit face depth offset that caused distant fragments.",
+    "Public building model handles now release owned lamp materials and geometry exactly once."
+  ],
+  "remainingAuthorizedWork": [
+    "Exterior closed-door leaf must also block authoritative and client walking, with safe closing around occupants.",
+    "Decorative curved routes currently share a generator across public/private samples but are not constructible using the player workshop road rules. Replace with shared player road construction, persistence and budgets.",
+    "390px planet overview is over-fogged because the pulled-back camera exceeds the walking-view fog range."
+  ],
+  "limits": [
+    "Current workshop retains 5x5m grids, three storeys and 90-degree part rotation; no arbitrary cross-building connection engine.",
+    "Anonymous browser-cookie identity; no OAuth or cross-device identity.",
+    "Starter neighbourhoods remain radial with broad empty expansion land.",
+    "No physical-phone GPU/frame-rate claim.",
+    "No original project, 8126 database, Messenger assets or immutable vendor assets modified; no push or deployment."
+  ],
+  "regressionService": "Temporary 8129 service was stopped after tests; 8126 and 8128 remain detached and healthy."
+}

@@ -1,0 +1,71 @@
+{
+  "status": "passed",
+  "browser": "Installed Google Chrome via Playwright channel chrome (headless), mobile viewport emulation",
+  "browserVersion": "154.0.8037.98",
+  "viewport": "390×844",
+  "realPhone": false,
+  "entry": "Dedicated isolated public-entry fixture; no flight claim",
+  "errors": [],
+  "entryRender": {
+    "drawCalls": 71,
+    "triangles": 109968,
+    "quality": "compact",
+    "groundRadius": 21.6,
+    "feetRadius": 21.817575108690555,
+    "cameraPosition": [
+      0,
+      24.029119662451198,
+      13.117039029993945
+    ],
+    "cameraHeading": [
+      0,
+      0.26066585229076455,
+      -0.9654290825583873
+    ],
+    "groundPosition": [
+      0,
+      0.9654290825583874,
+      0.2606658522907646
+    ],
+    "counts": {
+      "structures": 3,
+      "objects": 21,
+      "destinations": [
+        "post",
+        "orchard",
+        "harbour"
+      ]
+    }
+  },
+  "overviewRender": {
+    "drawCalls": 141,
+    "triangles": 121516,
+    "quality": "compact",
+    "groundRadius": 21.6,
+    "feetRadius": 21.817575108690555,
+    "cameraPosition": [
+      0,
+      102.21902061019236,
+      56.61692281358767
+    ],
+    "cameraHeading": [
+      0,
+      0.26066585229076455,
+      -0.9654290825583873
+    ],
+    "groundPosition": [
+      0,
+      0.9654290825583874,
+      0.2606658522907646
+    ],
+    "counts": {
+      "structures": 3,
+      "objects": 21,
+      "destinations": [
+        "post",
+        "orchard",
+        "harbour"
+      ]
+    }
+  }
+}

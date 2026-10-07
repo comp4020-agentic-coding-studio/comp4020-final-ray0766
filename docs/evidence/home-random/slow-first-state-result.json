@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "browser": "Installed Google Chrome",
+  "firstRequestHoldMs": 4100,
+  "pageErrors": [],
+  "requestsBeforeRelease": 1,
+  "requestsAfterReady": 1,
+  "planetId": "p-7898a7db-4511-4586-b9a0-72c427f760b3",
+  "builderObjectCount": 23,
+  "checks": [
+    "First state request remains the only request beyond the automatic reconnect interval",
+    "Real saved builder options exactly match the API object UUIDs",
+    "One owner planet and one persistent seed/manifest",
+    "No injected response and no API writes"
+  ]
+}

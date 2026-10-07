@@ -1,0 +1,163 @@
+{
+  "candidate": {
+    "object": {
+      "id": "e4b35f79-ef02-444c-a944-fbb217239746",
+      "kind": "structure",
+      "rotation": 4.71238898038469,
+      "version": 1,
+      "position": [
+        0.39816717631609333,
+        0.8724753681858726,
+        0.28328365927704885
+      ],
+      "blueprintHash": "acbe5d36207566bb42e99dc0850bfce807fffabcb44b0e20d2739aa36dc0e456",
+      "radius": 2.0703902067655315,
+      "height": 5.6
+    },
+    "part": {
+      "n": 17,
+      "part": "garden.pot",
+      "level": 0,
+      "x": 2,
+      "z": 1,
+      "rot": 0
+    },
+    "parts": [
+      {
+        "level": 0,
+        "n": 1,
+        "part": "floor.grate",
+        "rot": 0,
+        "x": 1,
+        "z": 1
+      },
+      {
+        "level": 0,
+        "n": 2,
+        "part": "floor.grate",
+        "rot": 0,
+        "x": 1,
+        "z": 2
+      },
+      {
+        "level": 0,
+        "n": 3,
+        "part": "floor.grate",
+        "rot": 0,
+        "x": 2,
+        "z": 1
+      },
+      {
+        "level": 0,
+        "n": 4,
+        "part": "floor.grate",
+        "rot": 0,
+        "x": 2,
+        "z": 2
+      },
+      {
+        "level": 0,
+        "n": 5,
+        "part": "structure.column",
+        "rot": 2,
+        "x": 1,
+        "z": 1
+      },
+      {
+        "level": 0,
+        "n": 6,
+        "part": "structure.column",
+        "rot": 1,
+        "x": 2,
+        "z": 1
+      },
+      {
+        "level": 0,
+        "n": 7,
+        "part": "structure.column",
+        "rot": 3,
+        "x": 1,
+        "z": 2
+      },
+      {
+        "level": 0,
+        "n": 8,
+        "part": "structure.column",
+        "rot": 0,
+        "x": 2,
+        "z": 2
+      },
+      {
+        "level": 1,
+        "n": 9,
+        "part": "roof.slope",
+        "rot": 2,
+        "x": 1,
+        "z": 1
+      },
+      {
+        "level": 1,
+        "n": 10,
+        "part": "roof.slope",
+        "rot": 0,
+        "x": 1,
+        "z": 2
+      },
+      {
+        "level": 1,
+        "n": 11,
+        "part": "roof.slope",
+        "rot": 2,
+        "x": 2,
+        "z": 1
+      },
+      {
+        "level": 1,
+        "n": 12,
+        "part": "roof.slope",
+        "rot": 0,
+        "x": 2,
+        "z": 2
+      },
+      {
+        "level": 0,
+        "n": 13,
+        "part": "rail.guard",
+        "rot": 2,
+        "x": 1,
+        "z": 1
+      },
+      {
+        "level": 0,
+        "n": 14,
+        "part": "rail.guard",
+        "rot": 2,
+        "x": 2,
+        "z": 1
+      },
+      {
+        "level": 0,
+        "n": 15,
+        "part": "furniture.bench",
+        "rot": 0,
+        "x": 1,
+        "z": 1
+      },
+      {
+        "level": 0,
+        "n": 16,
+        "part": "step.entry",
+        "rot": 0,
+        "x": 2,
+        "z": 3
+      }
+    ]
+  },
+  "status": "Add Flower pot #17 at cell 2,1, level 0.",
+  "hint": "Cannot place: Overlaps Flower pot #17.",
+  "tool": "garden.pot",
+  "x": "2",
+  "z": "1",
+  "rot": "0",
+  "level": "0"
+}

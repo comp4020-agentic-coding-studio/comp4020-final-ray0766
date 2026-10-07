@@ -1,0 +1,8 @@
+{
+  "status": "failed",
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "baseURL": "http://127.0.0.1:8128",
+  "viewport": "1440×1000",
+  "checks": [],
+  "pageErrors": []
+}

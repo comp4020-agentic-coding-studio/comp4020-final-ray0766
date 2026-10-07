@@ -33,6 +33,8 @@ import { distance, INTERACT_DISTANCE, NPCS, RADIUS } from '../shared/world.ts';
 import type { Character, NpcId, PlayerState, Vec3 } from '../shared/world.ts';
 import { HomeInterior } from './home-interior.ts';
 import { HomeControls } from './home-controls.ts';
+import { createHomeDoor, placeHomeDoor } from './home-door.ts';
+import { createStateLoader } from './state-loader.ts';
 
 initI18n();
 
@@ -77,7 +79,9 @@ async function request<T = PlayerState>(path: string, body?: unknown): Promise<T
     method: body === undefined ? 'GET' : 'POST',
     headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
-    signal: AbortSignal.timeout(5000),
+    // A first visit performs the bounded layout/route validation before it can
+    // acknowledge the new home. Ordinary reads and saved edits keep 5 seconds.
+    signal: AbortSignal.timeout(path==='state'&&!state?20000:5000),
   });
   const result = await response.json();
   if (!response.ok) throw new ApiError(response.status, result.error ?? 'Please try again.');
@@ -87,6 +91,7 @@ async function request<T = PlayerState>(path: string, body?: unknown): Promise<T
 function serial<T>(run: () => Promise<T>): Promise<T> {
   const result = queue.then(run, run); queue = result.catch(() => {}); return result;
 }
+const stateLoader=createStateLoader(()=>request('state'));
 function accept(next: PlayerState) {
   if(next.location?.kind!=='interior'&&next.flight.mode==='ground'&&next.ground?.physicsVersion!==physicsVersionFor(next.planetId)){
     physicsMismatch=true;online=false;clearGroundMotion();clearInput();presence.clear();
@@ -117,6 +122,7 @@ function accept(next: PlayerState) {
   if(previousMode==='ground'&&state.flight.mode==='space'&&activePlanet==='hub'&&!reduced&&flight){departure={time:0,base:world.parked.root.position.clone(),start:camera.position.clone(),rotation:camera.quaternion.clone()};flight.presentation=true;document.body.classList.add('departing');notice('Departure clearance granted · Sunseed Harbour',4200);}
   physicsMismatch=false;online = navigator.onLine; status(online?'Progress saved':'Offline · retrying',!online); renderTask();
   homeInterior?.receive(state);homeInterior?.setOnline(online);homeControls?.receivePlayer(state);
+  placeHomeDoor(exteriorHomeDoor,state.flight.mode==='ground'?state.home:null);
   return true;
 }
 function failed(error: unknown) {
@@ -161,6 +167,7 @@ if(new URLSearchParams(location.search).has('measure')){
 }
 worldMaterials().attachRenderer(renderer,textureFormat());
 const scene = new T.Scene();
+const exteriorHomeDoor=createHomeDoor();scene.add(exteriorHomeDoor.root);exteriorHomeDoor.root.visible=false;
 const practical=createWorldPracticalLights();scene.add(practical.group);
 const sky = new T.Group();scene.add(sky);
 const stars:number[]=[];for(let i=0;i<260;i++){const p=new T.Vector3(Math.sin(i*21.2),Math.cos(i*14.3),Math.sin(i*9.2)).normalize().multiplyScalar(65);stars.push(...p.toArray());}
@@ -173,7 +180,7 @@ scene.add(sun);scene.add(sun.target);
 let worldRoot = new T.Scene();scene.add(worldRoot);
 let world = createWorld(worldRoot);
 function configureGround(){
- sky.visible=activePlanet!=='hub';configureGroundLighting(activePlanet,scene,fill,sun);
+ sky.visible=activePlanet!=='hub';configureGroundLighting(activePlanet,scene,fill,sun,activeRadius);
 }
 configureGround();
 const player = courier('clay');scene.add(player.root);
@@ -229,7 +236,8 @@ $('close-conversation').onclick=()=>{ $('conversation').hidden=true; conversatio
 $('wardrobe').onclick=()=>{menu.close();clearInput();courierDialog.showModal();};
 $('help').onclick=()=>{menu.close();clearInput();helpDialog.showModal();};
 document.querySelectorAll<HTMLButtonElement>('dialog .close, .close-help').forEach(b=>b.onclick=()=>b.closest('dialog')?.close());
-$('begin').onclick=()=>{courierDialog.close();notice(state.home?'Walk to your home’s door, then choose Enter home.':'Follow the short path to SUNSEED · PORT.',6500);};
+const welcomeKey=(player:PlayerState)=>`little-worlds:welcomed:${player.home?.interiorId??'harbour'}`;
+$('begin').onclick=()=>{try{localStorage.setItem(welcomeKey(state),'1');}catch{/* A blocked preference store must not prevent starting. */}courierDialog.close();notice(state.home?'Walk to your home’s door, then choose Enter home.':'Follow the short path to SUNSEED · PORT.',6500);};
 const menu=$<HTMLDialogElement>('menu-dialog');
 $('open-menu').onclick=()=>{if(homeInterior?.active||homeTransition)return;clearInput();flight?.clear();menu.showModal();void savePosition(true);};
 $('close-menu').onclick=$('resume').onclick=()=>menu.close();
@@ -297,9 +305,9 @@ setInterval(async()=>{
   finally{presenceBusy=false;}
 },PRESENCE_INTERVAL);
 setInterval(async()=>{
-  if(online || busy || physicsMismatch) return;
+  if(online || busy || physicsMismatch || stateLoader.pending) return;
   try {
-    const next=await serial(()=>request('state'));if(!accept(next))return;
+    const next=await serial(()=>stateLoader.read());if(!accept(next))return;
     walker=new SurfaceWalker(next.position);lastSaved.copy(walker.up);clearInput();ensureColony();notice('Back at your last saved spot. Welcome home.');
   }catch{status('Offline · retrying',true);}
 },2500);
@@ -310,6 +318,7 @@ let previous=performance.now(),elapsed=0,uiTick=0,started=false;
 function animate(now:number) {
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.05);previous=now;elapsed+=dt;
+  exteriorHomeDoor.frame(dt,reduced);
   if(homeInterior?.active){homeInterior.frame(dt,elapsed);return;}
   if(!walker || (document.body.classList.contains('workshop-open')||document.body.classList.contains('shipyard-open')||document.body.classList.contains('history-open')||document.body.classList.contains('terrain-workshop-open'))) return;
   if(flight?.active&&departure){
@@ -356,6 +365,12 @@ function animate(now:number) {
   const renderUp=surfaceNormal(walker.up);
   const hub=activePlanet==='hub',phone=innerWidth<600;
   const pose=cameraPose(walker,phone,overview,groundRadius());
+  if(hub&&activeRadius>20&&!overview){
+    // The public route has longer sightlines than a private doorway. Keep the
+    // next destination visible over the curve without changing model scale.
+    pose.position.copy(walker.up).multiplyScalar(activeRadius+4.8).addScaledVector(walker.north,phone?-6.4:-6);
+    pose.target.copy(walker.up).multiplyScalar(activeRadius+1.05).addScaledVector(walker.north,2);
+  }
   pose.position.addScaledVector(walker.up,world.height(walker.up));
   pose.target.addScaledVector(walker.up,world.height(walker.up));
   if(standing&&!overview){const lift=standing.radius-groundRadius()-world.height(walker.up);pose.position.addScaledVector(walker.up,lift);pose.target.addScaledVector(walker.up,lift);}
@@ -447,7 +462,7 @@ function animate(now:number) {
 function ensureColony() {
   if(colony)return;
   homeInterior=new HomeInterior({renderer,
-    move:body=>serial(()=>request('home/move',body)),save:body=>serial(()=>request<Universe>('home/save',body)),exit:body=>serial(()=>request<Universe>('home/exit',body)),
+    move:body=>serial(()=>request('home/move',body)),save:body=>serial(()=>request<Universe>('home/save',body)),exit:body=>serial(()=>request<Universe>('home/exit',body)),door:body=>serial(()=>request<Universe>('home/door',body)),
     applyPlayer:next=>{accept(next);},applyUniverse:next=>colony?.accept(next),recover:()=>request<Universe>('universe'),
   });homeInterior.receive(state);homeInterior.setOnline(online);
   homeControls=new HomeControls({enter:async()=>{
@@ -460,11 +475,11 @@ function ensureColony() {
     }finally{homeTransition=false;document.body.classList.remove('home-transition');}
   },command:(route,body)=>serial(()=>request<Universe>(route,body)),apply:next=>colony?.accept(next),workshop:async()=>{await colony?.openHomeWorkshop();},notice});
   flight=new SpaceFlight({canvas:renderer.domElement,renderer,online:()=>online,player:()=>state,checkpoint:body=>serial(()=>request('flight/checkpoint',body)),command:(route,body)=>serial(()=>request<Universe>(route,body)),apply:accept,applyUniverse:u=>colony?.accept(u),flushGround:async()=>{await savePosition(true);await queue;},clearGround:()=>{clearInput();colony?.stopBuilding();},canBoard:()=>!homeTransition&&state.location?.kind!=='interior'&&!!walker&&!!standing?.grounded&&!colony?.building&&distance(walker.up.toArray() as Vec3,portPoint(activePlanet),groundRadius())<BOARD_RADIUS-.12,failed,notice});
-  flight.setDesign((state.ship??defaultShip()).design);flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=groundPresentation(activePlanet).environmentIntensity;
+  flight.setDesign((state.ship??defaultShip()).design);flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=groundPresentation(activePlanet,activeRadius).environmentIntensity;
   colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,
     applyPlayer:accept,
     universe:u=>{homeControls?.receive(u);flight?.universe(u);const p=u.currentPlanet;if(p.environment&&terrainRevision!==p.revision){
-      world.dispose();world.parked.dispose();disposeGeometry(worldRoot);worldRoot=new T.Scene();scene.add(worldRoot);world=createWorld(worldRoot,false,p.environment,p.objects,p.blueprints,p.radius,p.homeManifest?.routes??[]);world.parked.setDesign((state.ship??defaultShip()).design);configureGround();terrainRevision=p.revision;renderer.domElement.dataset.terrainId=groundField().id;started=false;
+      world.dispose();world.parked.dispose();disposeGeometry(worldRoot);worldRoot=new T.Scene();scene.add(worldRoot);world=createWorld(worldRoot,p.kind==='hub',p.environment,p.objects,p.blueprints,p.radius,p.homeManifest?.routes??[]);world.parked.setDesign((state.ship??defaultShip()).design);configureGround();terrainRevision=p.revision;renderer.domElement.dataset.terrainId=groundField().id;started=false;
     }if(!groundWorld||groundWorld.planetId!==u.currentPlanet.id||groundWorld.revision!==u.currentPlanet.revision)groundWorld=new GroundWorld(u.currentPlanet);},bearing:id=>flight?.mark(id),
     obstacles:blocks=>{if(activePlanet!=='hub')world.blocks.splice(0,world.blocks.length,...blocks);},
     pause:building=>{clearInput();overview=building;setAttribute($('view-mode'), 'aria-label', overview?'Walking view':'View planet');setHTML($('view-mode'), overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>');},
@@ -476,8 +491,9 @@ function ensureColony() {
 }
 requestAnimationFrame(animate);
 try {
-  const initial=await request('state');state=initial;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);accept(initial);
+  const initial=await stateLoader.read();state=initial;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);accept(initial);
   ensureColony();
   if(initial.home)setText(courierDialog.querySelector('p')!, 'Your home is ready. Choose a suit, enter through its door, then make the room and garden yours.');
-  if(initial.revision===0)courierDialog.showModal();else notice('A familiar little planet. Welcome back.');
+  let welcomed=false;try{welcomed=localStorage.getItem(welcomeKey(initial))==='1';}catch{/* Storage can be unavailable in private browsing. */}
+  if(initial.revision===0&&!welcomed)courierDialog.showModal();else notice('A familiar little planet. Welcome back.');
 } catch(error){failed(error);}

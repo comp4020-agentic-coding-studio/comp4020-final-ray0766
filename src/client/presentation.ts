@@ -4,6 +4,7 @@ import { StyleLibrary } from '../assets/claude-geometry/style/materials.ts';
 import { PracticalLights } from '../assets/claude-geometry/style/practical.ts';
 import { VILLAGE } from '../assets/claude-geometry/style/look.ts';
 import { textureFormat } from './resource-policy.ts';
+import {HOME_SAMPLE_RADIUS} from '../shared/home.ts';
 
 // The host opts into R7; the immutable library keeps its industrial default.
 // Do not import the Stage implementation here: its postprocessing stays lazy.
@@ -14,6 +15,7 @@ export const PRESENTATION = {
   ground: {
     hub: { fill: VILLAGE.light.sky, fillIntensity: .85, sun: VILLAGE.light.key, sunIntensity: VILLAGE.light.keyIntensity, environmentIntensity: .22, shadowExtent: 18, shadowFar: 75, fog: { color: VILLAGE.fog, density: .0033 } },
     garden: { fill: VILLAGE.light.sky, fillIntensity: VILLAGE.light.fillIntensity, sun: VILLAGE.light.key, sunIntensity: VILLAGE.light.keyIntensity, environmentIntensity: .22, shadowExtent: 16, shadowFar: 65, fog: { color: VILLAGE.fog, near: 28, far: 65 } },
+    sample: { fill: VILLAGE.light.sky, fillIntensity: 1.05, sun: VILLAGE.light.key, sunIntensity: 2.8, environmentIntensity: .22, shadowExtent: 20, shadowFar: 80, fog: { color: VILLAGE.fog, near: 30, far: 78 } },
   },
   space: {
     background: '#040810', fog: { color: '#080e18', density: .00013 },
@@ -43,10 +45,10 @@ export function configureRenderer(renderer: Pick<T.WebGLRenderer, 'toneMapping' 
 }
 export const createWorldStyleLibrary = () => new StyleLibrary(PRESENTATION.materials.lod, { scans: PRESENTATION.materials.scans, look: PRESENTATION.materials.look });
 export const createWorldPracticalLights = () => new PracticalLights(PRESENTATION.practical.lod, { enabled: PRESENTATION.practical.enabled, scale: VILLAGE.practical });
-export const groundPresentation = (planetId: string) => PRESENTATION.ground[planetId === 'hub' ? 'hub' : 'garden'];
+export const groundPresentation = (planetId: string,radius=0) => Math.abs(radius-HOME_SAMPLE_RADIUS)<1e-6?PRESENTATION.ground.sample:PRESENTATION.ground[planetId === 'hub' ? 'hub' : 'garden'];
 
-export function configureGroundLighting(planetId: string, scene: T.Scene, fill: T.AmbientLight, sun: T.DirectionalLight) {
-  const look = groundPresentation(planetId);
+export function configureGroundLighting(planetId: string, scene: T.Scene, fill: T.AmbientLight, sun: T.DirectionalLight,radius=0) {
+  const look = groundPresentation(planetId,radius);
   scene.fog = 'density' in look.fog ? new T.FogExp2(look.fog.color, look.fog.density) : new T.Fog(look.fog.color, look.fog.near, look.fog.far);
   fill.color.set(look.fill); fill.intensity = look.fillIntensity;
   sun.color.set(look.sun); sun.intensity = look.sunIntensity;

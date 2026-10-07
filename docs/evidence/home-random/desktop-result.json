@@ -1,0 +1,59 @@
+{
+  "status": "passed",
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "baseURL": "http://127.0.0.1:8128",
+  "viewport": "1440×1000",
+  "checks": [
+    "Two independent cookie contexts each own one distinct same-scale planet with a different saved seed and layout",
+    "Reload preserves each concrete generated manifest, object identity and initial placement without drawing again",
+    "Build → selected saved non-home structure → Edit parts → ordinary garden pot → Apply updates that same object and survives reload",
+    "Home building/interior IDs, furniture, initial generation manifest and private blueprint name/groups remain intact"
+  ],
+  "pageErrors": [],
+  "owners": [
+    {
+      "planetId": "p-cd249ad4-e0b8-4ad2-938d-8154683b8560",
+      "seed": 3770204114,
+      "objects": 25,
+      "structures": 4,
+      "homeId": "126a7e28-7147-4370-82d8-2ceb80a7c7cf",
+      "interiorId": "06f1a9b0-e10b-4d34-8a40-49c74cbaf694"
+    },
+    {
+      "planetId": "p-27df6eee-bea6-4084-aa19-798086f8c6e2",
+      "seed": 4173429620,
+      "objects": 32,
+      "structures": 4,
+      "homeId": "0415c68f-2eb6-4c22-8303-04ba7355dd84",
+      "interiorId": "ff953469-25e4-4db1-a336-fb4fa7f48c8f"
+    }
+  ],
+  "edit": {
+    "objectId": "e4b35f79-ef02-444c-a944-fbb217239746",
+    "beforeParts": 16,
+    "afterParts": 17,
+    "beforeVersion": 1,
+    "afterVersion": 2,
+    "preservedPrivateName": "Meadow · open lookout",
+    "part": {
+      "n": 17,
+      "part": "garden.pot",
+      "level": 0,
+      "x": 2,
+      "z": 1,
+      "rot": 0
+    }
+  },
+  "render": {
+    "drawCalls": 80,
+    "triangles": 98778,
+    "quality": "full",
+    "width": 1440,
+    "height": 1000
+  },
+  "uiWriteRoutes": [
+    "/api/presence",
+    "/api/blueprints/save",
+    "/api/objects/replace"
+  ]
+}

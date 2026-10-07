@@ -10,6 +10,11 @@ export function canAcceptPlayer(current:PlayerState|undefined,next:PlayerState):
     if(next.location?.kind!=='interior'||next.location.interiorId!==current.location.interiorId||next.location.sequence<current.location.sequence)return false;
   }
   if(next.revision<current.revision||next.flight.journey<current.flight.journey)return false;
+  // Room edits and shared door actions have independent optimistic versions.
+  // Polls started before either action must not restore the previous contents.
+  if(current.home&&next.home&&current.home.interiorId===next.home.interiorId){
+    if(next.home.interior.version<current.home.interior.version||(next.home.interior.doorVersion??0)<(current.home.interior.doorVersion??0))return false;
+  }
   const sameVisit=next.planetId===current.planetId&&next.flight.mode===current.flight.mode&&next.flight.journey===current.flight.journey;
   if(!sameVisit)return next.revision>current.revision;
   if(next.flight.sequence<current.flight.sequence)return false;

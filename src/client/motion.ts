@@ -38,6 +38,12 @@ export class SurfaceWalker {
   }
 }
 export function cameraPose(walker: SurfaceWalker, portrait: boolean, overview = false,radius=RADIUS) {
+  if (overview && radius > 20) return {
+    // Keep the current neighbourhood on the visible face of a larger sphere.
+    // The old oblique orbit pushed it against the upper silhouette.
+    position: walker.up.clone().multiplyScalar(.97).addScaledVector(walker.north,-.24).normalize().multiplyScalar(radius*(portrait?5.4:2.9)),
+    target: new Vector3(),
+  };
   if (overview) return {
     position: walker.up.clone().multiplyScalar(.83).addScaledVector(walker.north,.56).normalize().multiplyScalar(radius*(portrait?5.4:2.9)),
     target: new Vector3(),

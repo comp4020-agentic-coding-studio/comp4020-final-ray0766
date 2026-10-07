@@ -17,9 +17,11 @@ const sample=()=>{const s=openStore(':memory:',{homeSample:true});stores.push(s)
 const enter=(s:ReturnType<typeof openStore>,id='owner')=>{const p=s.state(id);return s.enterHome(id,{planetId:p.planetId,buildingId:p.home!.buildingId,visitEpoch:p.location!.visitEpoch});};
 afterEach(()=>{for(const s of stores.splice(0)){try{s.close();}catch{ /* already closed to test reopening */ }}for(const d of dirs.splice(0))rmSync(d,{recursive:true,force:true});});
 
-it('starts an isolated sample at its sole home and never regenerates its fixed manifest',()=>{
+it('starts an isolated sample at its sole home and never regenerates its persisted manifest',()=>{
   const s=sample(),u=s.universe('owner');expect(u.player.worldRadius).toBe(21.6);expect(u.planets.every(p=>p.radius===21.6)).toBe(true);
-  expect(u.currentPlanet.objects.filter(o=>o.kind==='structure')).toHaveLength(3);
+  const structures=u.currentPlanet.objects.filter(o=>o.kind==='structure');
+  expect(structures.length).toBeGreaterThanOrEqual(2);expect(structures.length).toBeLessThanOrEqual(4);
+  expect(u.currentPlanet.homeManifest).toMatchObject({generator:'home-neighbourhood',version:2});
   expect(u.player.home).toMatchObject({canEdit:true,buildingVersion:1,variant:'base',interior:{room:HOME_ROOM}});
   const before=s.db.prepare('SELECT document,hash FROM home_manifests').all();s.claim('owner',u.ownedPlanetId);expect(s.db.prepare('SELECT document,hash FROM home_manifests').all()).toEqual(before);
   expect(()=>s.claim('owner',u.planets.find(p=>p.kind==='garden'&&!p.mine)!.id)).toThrow('already');
@@ -70,7 +72,7 @@ it('keeps visitors read-only, validates furniture clearances and scopes presence
   expect(()=>s.saveHome('visitor',save)).toThrow('Only');s.saveHome('owner',save);expect(s.state('owner').home!.interior.material).toBe('sage');
   expect(()=>s.saveHome('owner',save)).toThrow('another tab');
   expect(()=>s.saveHome('owner',{...save,expectedVersion:2,items:[{id:'block',kind:'table',position:[0,0,1],yaw:0}]})).toThrow('door');
-  expect(()=>s.saveHome('owner',{...save,expectedVersion:2,items:[{id:'block',kind:'shelf',position:[3,0,0],yaw:0}]})).toThrow('inside');
+  expect(()=>s.saveHome('owner',{...save,expectedVersion:2,items:[{id:'block',kind:'shelf',position:[HOME_ROOM.width/2+1,0,0],yaw:0}]})).toThrow('inside');
   const beat=(p:typeof inside)=>({planetId:p.planetId,facing:[0,0,-1],scope:'home:'+h.buildingId,visitEpoch:p.location!.visitEpoch});
   presence.heartbeat('owner',beat(inside));const snapshot=presence.heartbeat('visitor',beat(visitor));expect(snapshot.scope).toBe('home:'+h.buildingId);expect(snapshot.visitors).toHaveLength(1);expect(snapshot.visitors[0].position).toEqual(inside.location!.kind==='interior'?inside.location!.position:[]);
   s.exitHome('visitor',{buildingId:h.buildingId,visitEpoch:visitor.location!.visitEpoch});expect(presence.heartbeat('owner',beat(inside)).visitors).toHaveLength(0);
@@ -88,7 +90,7 @@ it('replaces and undoes exterior content under one building id, replays hashes, 
   const object=s.universe('owner').currentPlanet.objects.find(o=>o.id===h.buildingId)!;s.updateObject('owner',{planetId:old.planetId,objectId:h.buildingId,position:object.position,rotation:.1,expectedVersion:3});
   const latest=s.state('visitor'),newDoor=latest.home!.door.position;expect(newDoor).not.toEqual(h.door.position);
   s.exitHome('visitor',{buildingId:h.buildingId,visitEpoch:latest.location!.visitEpoch});expect(s.state('visitor').position).toEqual(newDoor);expect(s.state('owner').home!.interior).toEqual(h.interior);
-});
+},10000); // Two fully validated generated worlds plus remodel/history replays.
 
 it('reuses preset content without overwriting user library names, groups or edited documents',()=>{
   const s=sample(),buildingId=s.state('owner').home!.buildingId;

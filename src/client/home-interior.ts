@@ -7,17 +7,19 @@ import { libraryMaterials, makeKit } from '../assets/claude-geometry/blueprint/p
 import { emitPart } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
 import type { PartId } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
 import { VILLAGE } from '../assets/claude-geometry/style/look.ts';
-import { HOME_EXIT, HOME_ROOM, homeItemBounds, homePathAllowed, homePositionAllowed } from '../shared/home.ts';
-import type { HomeDescriptor, HomeInterior as InteriorData, HomeItem } from '../shared/home.ts';
+import { HOME_ROOM, HOME_BODY_RADIUS, homeExit, homeNearDoor, homeItemBounds, homePathAllowed, homePositionAllowed } from '../shared/home.ts';
+import type { HomeDescriptor, HomeInterior as InteriorData, HomeItem, HomeRoom } from '../shared/home.ts';
 import type { PlayerState, Vec3 } from '../shared/world.ts';
 import type { Universe } from '../shared/planets.ts';
 import type { PresenceSnapshot } from '../shared/presence.ts';
+import { createHomeDoor } from './home-door.ts';
 import './home-interior.css';
 
 export interface HomeInteriorOptions {
   renderer: T.WebGLRenderer;
   move(body: { buildingId: string; visitEpoch: number; sequence: number; position: Vec3; yaw: number }): Promise<PlayerState>;
   save(body: { buildingId: string; expectedVersion: number; material: InteriorData['material']; items: HomeItem[] }): Promise<Universe>;
+  door(body: { buildingId: string; visitEpoch: number; expectedDoorVersion: number; open: boolean }): Promise<Universe>;
   exit(body: { buildingId: string; visitEpoch: number }): Promise<Universe>;
   applyPlayer(player: PlayerState): void;
   applyUniverse(universe: Universe): void;
@@ -48,21 +50,23 @@ const copy = (interior: InteriorData): InteriorData => structuredClone(interior)
 const distance = (a: Vec3, b: Vec3) => Math.hypot(a[0] - b[0], a[2] - b[2]);
 
 /** Preview refusal before save; the server remains the authority. */
-export function homeFurnitureFits(items: readonly HomeItem[], position: Vec3) {
-  if (!homePositionAllowed(position, items)) return false;
+export function homeFurnitureFits(items: readonly HomeItem[], position: Vec3, room: HomeRoom = HOME_ROOM) {
+  if (!homePositionAllowed(position, items, HOME_BODY_RADIUS, room)) return false;
   return items.every((item, i) => {
     const a = homeItemBounds(item);
-    if (a.minX < -HOME_ROOM.width / 2 + .08 || a.maxX > HOME_ROOM.width / 2 - .08 || a.minZ < -HOME_ROOM.depth / 2 + .08 || a.maxZ > HOME_ROOM.depth / 2 - .08) return false;
+    if (a.minX < -room.width / 2 + .08 || a.maxX > room.width / 2 - .08 || a.minZ < -room.depth / 2 + .08 || a.maxZ > room.depth / 2 - .08) return false;
     if (a.minX < .65 && a.maxX > -.65 && a.maxZ > .5) return false;
     return items.slice(0, i).every(other => { const b = homeItemBounds(other); return !(a.minX < b.maxX + .04 && a.maxX > b.minX - .04 && a.minZ < b.maxZ + .04 && a.maxZ > b.minZ - .04); });
   });
 }
 const translation: Record<string, [string, string]> = {
   title: ['A room of your own', '我的小屋'], guest: ['Visiting this home', '正在做客'],
-  leave: ['Go outside', '出门'], door: ['Walk to the doorway to leave', '走到门口即可出门'],
+  leave: ['Go outside · E', '出门 · E'], door: ['Open the door, then choose Go outside', '走到门口开门，再选择出门'],
+  openDoor: ['Open door', '开门'], closeDoor: ['Close door', '关门'], opened: ['Door open', '门已打开'], closed: ['Door closed · open it to leave', '门已关好 · 开门后可出门'],
+  overview: ['Whole room', '全屋总览'], closeView: ['Follow me', '跟随近景'],
   arrange: ['Arrange room', '布置房间'], save: ['Save changes', '保存布置'], cancel: ['Cancel', '取消'],
-  move: ['MOVE', '移动'], hint: ['WASD / arrows · walk to the doorway to leave', 'WASD / 方向键移动 · 走到门口出门'],
-  phoneHint: ['Use the thumbstick · exit at the doorway', '拖动摇杆走动 · 从门口出门'],
+  move: ['MOVE', '移动'], hint: ['WASD / arrows · open the door, then E to leave', 'WASD / 方向键移动 · 门口开门后按 E 出门'],
+  phoneHint: ['Use the thumbstick · open the door to go outside', '拖动摇杆走动 · 门口开门后选择出门'],
   saved: ['Room saved', '房间已保存'], saving: ['Saving…', '正在保存…'], entering: ['Welcome home', '欢迎回家'],
   offline: ['Connection lost. Your saved room is safe.', '连接中断，已保存的房间仍然安全。'],
   retry: ['Reconnect', '重新连接'], pending: ['Opening the door…', '正在开门…'],
@@ -82,6 +86,9 @@ export class HomeInterior {
   private readonly ui = document.createElement('section');
   private readonly library = createWorldStyleLibrary();
   private room = new T.Group();
+  private readonly doorView = createHomeDoor();
+  private overview = false;
+  private cameraOffset = new T.Vector3();
   private furniture = new T.Group();
   private avatar = courier('clay');
   private selection = new T.Mesh(new T.RingGeometry(.45, .49, 4, 1, Math.PI / 4), new T.MeshBasicMaterial({ color: '#dcad5c', transparent: true, opacity: .85, depthWrite: false, side: T.DoubleSide }));
@@ -103,9 +110,6 @@ export class HomeInterior {
   private draftVersion = 0;
   private selected = '';
   private lastSend = 0;
-  private elapsed = 0;
-  private entryAt = 0;
-  private exitArmed = false;
   private lastViewport = '';
   private locale = '';
   private statusKey = 'entering';
@@ -119,24 +123,26 @@ export class HomeInterior {
 
   constructor(private readonly options: HomeInteriorOptions) {
     this.scene.background = new T.Color('#98b6ad');
-    this.scene.add(this.room, this.furniture, this.avatar.root, this.selection);
+    this.scene.add(this.room, this.furniture, this.avatar.root, this.selection, this.doorView.root);
     this.selection.rotation.x = -Math.PI / 2; this.selection.visible = false;
     const fill = new T.HemisphereLight('#e2efe5', '#a99a79', 1.4);
     const sun = new T.DirectionalLight(VILLAGE.light.key, 2.4);
     sun.position.set(-4, 8, 5); sun.castShadow = true;
     sun.shadow.mapSize.set(1024, 1024); sun.shadow.normalBias = .025; sun.shadow.bias = -.00015;
-    Object.assign(sun.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: .1, far: 25 });
+    Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: .1, far: 35 });
     sun.shadow.camera.updateProjectionMatrix(); this.scene.add(fill, sun, sun.target);
     this.library.attachRenderer(options.renderer);
     this.ui.className = 'home-interior-ui'; this.ui.hidden = true;
     this.ui.dataset.i18nVerbatim = ''; this.ui.setAttribute('aria-label', 'Home interior');
-    this.ui.innerHTML = `<header class="home-room-header"><div><span class="home-room-eyebrow">HOME / 小屋</span><h2 data-home-text="title"></h2><p id="home-room-status" role="status" aria-live="polite"></p></div><button id="home-exit" data-home-text="leave"></button></header>
-      <div class="home-room-tools"><button id="home-arrange" data-home-text="arrange"></button><button id="home-retry" data-home-text="retry" hidden></button><p id="home-room-hint"></p></div>
+    this.ui.innerHTML = `<header class="home-room-header"><div><span class="home-room-eyebrow">HOME / 小屋</span><h2 data-home-text="title"></h2><p id="home-room-status" role="status" aria-live="polite"></p></div><nav class="home-door-actions"><button id="home-toggle-door"></button><button id="home-exit" data-home-text="leave"></button></nav></header>
+      <div class="home-room-tools"><button id="home-camera-view" data-home-text="overview"></button><button id="home-arrange" data-home-text="arrange"></button><button id="home-retry" data-home-text="retry" hidden></button><p id="home-room-hint"></p></div>
       <section id="home-room-editor" class="home-room-editor" hidden aria-label="Arrange room"><div class="home-material-row"><span data-home-text="material"></span><button id="home-material-warm" data-material="warm" data-home-text="warm"></button><button id="home-material-sage" data-material="sage" data-home-text="sage"></button><button id="home-material-blue" data-material="blue" data-home-text="blue"></button></div><label><span data-home-text="furniture"></span> <select id="home-item-select"></select></label><div class="home-item-moves"><button id="home-item-left">←</button><button id="home-item-forward">↑</button><button id="home-item-back">↓</button><button id="home-item-right">→</button><button id="home-item-rotate" data-home-text="rotate"></button></div><div class="home-save-row"><button id="home-cancel" data-home-text="cancel"></button><button id="home-save" data-home-text="save"></button></div></section>
       <div id="home-joystick" class="home-joystick" role="group" aria-label="Move around the room"><span id="home-stick"></span><small data-home-text="move"></small></div>`;
     document.body.append(this.ui);
     const on = (id: string, fn: () => void) => this.get(id).addEventListener('click', fn, { signal: this.abort.signal });
     on('home-exit', () => { if (this.nearExit()) void this.leave(); });
+    on('home-toggle-door', () => void this.toggleDoor());
+    on('home-camera-view', () => { this.overview = !this.overview; this.lastViewport = ''; this.updateControls(); });
     on('home-arrange', () => this.beginEditing());
     on('home-cancel', () => this.cancelEditing());
     on('home-save', () => void this.saveDraft());
@@ -193,12 +199,13 @@ export class HomeInterior {
     if (previous && location && location.visitEpoch < previous.visitEpoch) return;
     if (previous?.kind === 'interior' && location?.kind === 'interior' && previous.visitEpoch === location.visitEpoch && location.sequence < previous.sequence) return;
     if (!player.home || location?.kind !== 'interior') { if (this.active) this.close(); return; }
+    if (this.home?.interiorId === player.home.interiorId && (player.home.interior.version < this.home.interior.version || player.home.interior.doorVersion < this.home.interior.doorVersion)) return;
     const visit = `${location.interiorId}:${location.visitEpoch}`;
     const arriving = visit !== this.currentVisit;
     this.acknowledged = player; this.home = player.home;
     if (arriving) {
       this.currentVisit = visit; this.position = [...location.position]; this.yaw = location.yaw;
-      this.entryAt = this.elapsed; this.exitArmed = false; this.editing = false; this.dirty = false; this.clearInput();
+      this.editing = false; this.dirty = false; this.clearInput();
       this.draft = copy(player.home.interior); this.draftVersion = this.draft.version; this.selected = this.draft.items[0]?.id ?? '';
       this._active = true; this.ui.hidden = false; document.body.classList.add('home-interior-active');
       this.avatar.setColor(player.character); this.online = true; this.setStatus(player.home.canEdit ? 'entering' : 'readonly');
@@ -208,8 +215,9 @@ export class HomeInterior {
       this.sourceKey = sourceKey;
       if (!this.editing || this.pendingAction) { this.draft = copy(player.home.interior); this.draftVersion = this.draft.version; }
       this.buildRoom(); this.buildFurniture(); this.applyTheme((this.draft ?? player.home.interior).material);
-      if (!homePositionAllowed(this.position, player.home.interior.items)) this.position = [...location.position];
+      if (!homePositionAllowed(this.position, player.home.interior.items, HOME_BODY_RADIUS, player.home.interior.room)) this.position = [...location.position];
     }
+    this.doorView.setOpen(player.home.interior.doorOpen, arriving);
     this.avatar.setColor(player.character); this.populateItems(); this.updateControls();
   }
 
@@ -238,13 +246,16 @@ export class HomeInterior {
     const interior = this.draft ?? this.home!.interior, { width, depth, height } = interior.room;
     const b = new PartBuilder('medium'), source = libraryMaterials(this.library), kit = makeKit(b, source);
     const part = (id: PartId, x: number, z: number, yaw = 0) => b.within({ position: [x, 0, z], rotation: [0, yaw, 0] }, () => emitPart(id, 'village', kit));
-    for (let x = -.5 * width + .5; x < width / 2; x++) for (let z = -.5 * depth + .5; z < depth / 2; z++) part('floor.deck', x, z);
+    b.box(kit.m('post'), [width, .16, depth], { position: [0, -.08, 0] }, 0);
+    for (let x = -width / 2; x < width / 2 - .001; x += 1) { const span = Math.min(1, width / 2 - x); b.box(kit.m('tread'), [span - .025, .035, depth - .04], { position: [x + span / 2, .005, 0] }, 0); }
     // Back and left walls remain at full height. Front/right walls are a visual
     // cutaway; the shared planar collision boundary remains authoritative.
-    for (let x = -.5 * width + .5; x < width / 2; x++) {
+    for (let x = -Math.floor(width) / 2 + .5; x < Math.floor(width) / 2; x++) {
       part(Math.abs(x) < 1.1 ? 'wall.window' : 'wall.solid', x, -depth / 2, Math.PI);
       if (height > 2.04) b.box(kit.m('skinInner'), [1, height - 2.04, .18], { position: [x, (height + 2.04) / 2, -depth / 2] }, 0);
     }
+    const edge = (width - Math.floor(width)) / 2;
+    if (edge > .001) for (const sign of [-1, 1]) b.box(kit.m('skinInner'), [edge, height, .18], { position: [sign * (width / 2 - edge / 2), height / 2, -depth / 2] }, 0);
     for (let z = -.5 * depth + .5; z < depth / 2; z++) {
       part(z < 0 ? 'wall.window' : 'wall.solid', -width / 2, z, -Math.PI / 2);
       if (height > 2.04) b.box(kit.m('skinInner'), [.18, height - 2.04, 1], { position: [-width / 2, (height + 2.04) / 2, z] }, 0);
@@ -257,10 +268,12 @@ export class HomeInterior {
     for (const x of [-width / 2, width / 2]) b.box(kit.m('post'), [.14, .22, .14], { position: [x, .04, depth / 2] }, 0);
     const built = b.build('home-room-kit'); this.room.add(built.group);
     this.surfaceResourceDisposers.push(() => source.owned().forEach(material => material.dispose()));
+    const exit = homeExit(interior.room);
+    this.doorView.root.position.set(0, 0, depth / 2);
     const mat = new T.MeshBasicMaterial({ color: '#e6c578', transparent: true, opacity: .7, depthWrite: false });
-    const doorway = new T.Mesh(new T.PlaneGeometry(1.05, .35), mat); doorway.rotation.x = -Math.PI / 2; doorway.position.set(0, .015, HOME_EXIT[2]); this.room.add(doorway);
+    const doorway = new T.Mesh(new T.PlaneGeometry(1.05, .35), mat); doorway.rotation.x = -Math.PI / 2; doorway.position.set(0, .015, exit[2]); this.room.add(doorway);
     const arrow = new T.Shape(); arrow.moveTo(-.15, -.08); arrow.lineTo(.15, -.08); arrow.lineTo(0, .14); arrow.closePath();
-    const marker = new T.Mesh(new T.ShapeGeometry(arrow), new T.MeshBasicMaterial({ color: '#4c6758', side: T.DoubleSide })); marker.rotation.x = Math.PI / 2; marker.position.set(0, .024, HOME_EXIT[2]); this.room.add(marker);
+    const marker = new T.Mesh(new T.ShapeGeometry(arrow), new T.MeshBasicMaterial({ color: '#4c6758', side: T.DoubleSide })); marker.rotation.x = Math.PI / 2; marker.position.set(0, .024, exit[2]); this.room.add(marker);
     this.lastViewport = '';
   }
 
@@ -303,13 +316,19 @@ export class HomeInterior {
     if (!this.canChange() || !this.draft) return;
     const candidate = copy(this.draft), item = candidate.items.find(i => i.id === this.selected); if (!item) return;
     item.position[0] += x; item.position[2] += z; item.yaw = (item.yaw + yaw) % (Math.PI * 2);
-    if (!homeFurnitureFits(candidate.items, this.position)) { this.setStatus('blocked'); return; }
+    if (!homeFurnitureFits(candidate.items, this.position, candidate.room)) { this.setStatus('blocked'); return; }
     this.draft = candidate; this.dirty = true; this.buildFurniture(); this.applyTheme(candidate.material); this.setStatus('edited'); this.updateControls();
   }
-  private nearExit() { return this.active && Math.abs(this.position[0] - HOME_EXIT[0]) < .7 && this.position[2] > HOME_EXIT[2] - .85; }
+  private nearExit() { return this.active && !!this.home && homeNearDoor(this.position, this.home.interior.room); }
   private updateControls() {
     const enabled = this.online && !this.pendingAction;
-    this.get<HTMLButtonElement>('home-exit').disabled = !enabled || !this.nearExit() || this.editing;
+    this.get<HTMLButtonElement>('home-exit').disabled = !enabled || !this.nearExit() || this.editing || !this.home?.interior.doorOpen;
+    const doorButton = this.get<HTMLButtonElement>('home-toggle-door');
+    doorButton.disabled = !enabled || !this.nearExit() || this.editing;
+    doorButton.textContent = this.text(this.home?.interior.doorOpen ? 'closeDoor' : 'openDoor');
+    doorButton.setAttribute('aria-pressed', String(this.home?.interior.doorOpen ?? false));
+    this.get('home-camera-view').textContent = this.text(this.overview ? 'closeView' : 'overview');
+    this.get('home-camera-view').hidden = false;
     this.get('home-exit').title = this.text('door');
     this.get('home-arrange').hidden = !this.home?.canEdit || this.editing;
     this.get<HTMLButtonElement>('home-arrange').disabled = !enabled;
@@ -328,7 +347,6 @@ export class HomeInterior {
 
   frame(delta: number, nowSeconds: number) {
     if (!this.active || !this.home) return;
-    this.elapsed = nowSeconds;
     if (document.documentElement.lang !== this.locale) this.localize();
     const dt = Math.min(.05, Math.max(0, delta));
     this.moving = 0;
@@ -340,7 +358,7 @@ export class HomeInterior {
       const direction = right.multiplyScalar(input.x).addScaledVector(forward, -input.y);
       const before: Vec3 = [...this.position], room = this.home.interior;
       const acknowledged = this.acknowledged?.location;
-      const canMove = (candidate: Vec3) => homePositionAllowed(candidate, room.items) && (acknowledged?.kind !== 'interior' || homePathAllowed(acknowledged.position, candidate, room.items));
+      const canMove = (candidate: Vec3) => homePositionAllowed(candidate, room.items, HOME_BODY_RADIUS, room.room) && (acknowledged?.kind !== 'interior' || homePathAllowed(acknowledged.position, candidate, room.items, room.room));
       const steps = Math.max(1, Math.ceil(direction.length() * 2.5 * dt / .04));
       for (let i = 0; i < steps; i++) {
         const next: Vec3 = [this.position[0] + direction.x * 2.5 * dt / steps, 0, this.position[2] + direction.z * 2.5 * dt / steps];
@@ -352,18 +370,25 @@ export class HomeInterior {
       }
       this.moving = distance(before, this.position) / Math.max(dt, .001);
       if (this.moving > .01) this.yaw = (Math.atan2(this.position[0] - before[0], this.position[2] - before[2]) + Math.PI * 2) % (Math.PI * 2);
-      if (input.lengthSq() < .01 || !this.nearExit()) this.exitArmed = true;
-      if (this.exitArmed && nowSeconds - this.entryAt > .65 && Math.abs(this.position[0]) < .55 && this.position[2] > HOME_EXIT[2] - .16 && input.lengthSq() > .05) void this.leave();
       if (nowSeconds - this.lastSend > .14) { this.lastSend = nowSeconds; void this.flush(); }
     }
     this.avatar.root.position.fromArray(this.position); this.avatar.root.rotation.y = this.yaw;
     this.avatar.animate(nowSeconds, this.moving, matchMedia('(prefers-reduced-motion: reduce)').matches);
     for (const guest of this.guests.values()) guest.animate(nowSeconds, 0, true);
     const viewport = `${innerWidth}:${innerHeight}:${this.home.interior.room.width}:${this.home.interior.room.depth}`;
-    if (viewport !== this.lastViewport) { const r = this.home.interior.room; fitHomeCamera(this.camera, r.width, r.depth, r.height, innerWidth / innerHeight, innerWidth < 700); this.lastViewport = viewport; }
+    if (viewport !== this.lastViewport) { const r = this.home.interior.room; fitHomeCamera(this.camera, r.width, r.depth, r.height, innerWidth / innerHeight, innerWidth < 700); this.cameraOffset.set(0, 0, 0); this.lastViewport = viewport; }
+    this.camera.position.sub(this.cameraOffset); this.cameraOffset.set(0, 0, 0);
+    if (!this.overview) {
+      const compact=innerWidth < 700 || innerHeight < 500,follow=compact?.72:.35;
+      this.camera.zoom = compact?1.65:1.18; this.cameraOffset.set(this.position[0] * follow, 0, this.position[2] * follow);
+      this.camera.position.add(this.cameraOffset);
+    } else this.camera.zoom = 1;
+    this.camera.updateMatrixWorld(true); this.camera.updateProjectionMatrix();
+    this.doorView.frame(dt, matchMedia('(prefers-reduced-motion: reduce)').matches);
     this.options.renderer.render(this.scene, this.camera);
     const canvas = this.options.renderer.domElement;
     canvas.dataset.homeInterior = this.home.interiorId; canvas.dataset.homePosition = JSON.stringify(this.position); canvas.dataset.homeVersion = String(this.home.interior.version);
+    canvas.dataset.homeDoorOpen = String(this.home.interior.doorOpen); canvas.dataset.homeArea = String(this.home.interior.room.width * this.home.interior.room.depth);
     canvas.dataset.homePending = String(this.pendingAction || !!this.pendingMove); canvas.dataset.homeDrawCalls = String(this.options.renderer.info.render.calls);
     this.updateControls();
   }
@@ -391,9 +416,20 @@ export class HomeInterior {
     } catch (error) { this.get('home-room-status').textContent = error instanceof Error ? error.message : this.text('offline'); }
     finally { this.pendingAction = false; this.updateControls(); }
   }
+  private async toggleDoor() {
+    const location = this.acknowledged?.location;
+    if (!this.online || this.pendingAction || this.editing || !this.home || !this.nearExit() || location?.kind !== 'interior') return;
+    this.pendingAction = true; this.clearInput(); this.updateControls();
+    try {
+      await this.flush(); await this.flush(); if (!this.online) return;
+      const next = await this.options.door({ buildingId: this.home.buildingId, visitEpoch: location.visitEpoch, expectedDoorVersion: this.home.interior.doorVersion, open: !this.home.interior.doorOpen });
+      this.receive(next.player); this.options.applyUniverse(next); this.setStatus(next.player.home?.interior.doorOpen ? 'opened' : 'closed');
+    } catch (error) { this.get('home-room-status').textContent = error instanceof Error ? error.message : this.text('offline'); }
+    finally { this.pendingAction = false; this.updateControls(); }
+  }
   private async leave() {
     const location = this.acknowledged?.location;
-    if (!this.online || this.pendingAction || this.editing || !this.home || location?.kind !== 'interior') return;
+    if (!this.online || this.pendingAction || this.editing || !this.home || !this.home.interior.doorOpen || !this.nearExit() || location?.kind !== 'interior') return;
     this.pendingAction = true; this.clearInput(); this.setStatus('pending'); this.updateControls();
     try {
       await this.flush(); await this.flush(); if (!this.online) return;
@@ -413,10 +449,10 @@ export class HomeInterior {
     this._active = false; this.ui.hidden = true; this.currentVisit = ''; this.sourceKey = ''; this.clearInput(); this.editing = false; this.dirty = false;
     document.body.classList.remove('home-interior-active');
     for (const guest of this.guests.values()) disposeGeometry(guest.root); this.guests.clear();
-    for (const key of ['homeInterior', 'homePosition', 'homeVersion', 'homePending', 'homeDrawCalls']) delete this.options.renderer.domElement.dataset[key];
+    for (const key of ['homeInterior', 'homePosition', 'homeVersion', 'homePending', 'homeDrawCalls', 'homeDoorOpen', 'homeArea']) delete this.options.renderer.domElement.dataset[key];
   }
   dispose() {
     this.close(); this.abort.abort(); this.ui.remove(); this.surfaceResourceDisposers.forEach(dispose => dispose());
-    disposeGeometry(this.room); disposeGeometry(this.furniture); disposeGeometry(this.avatar.root); disposeGeometry(this.selection); this.library.dispose();
+    disposeGeometry(this.room); disposeGeometry(this.furniture); disposeGeometry(this.avatar.root); disposeGeometry(this.selection); this.doorView.dispose(); this.library.dispose();
   }
 }

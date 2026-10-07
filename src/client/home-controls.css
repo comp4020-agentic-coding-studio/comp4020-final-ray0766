@@ -7,3 +7,4 @@ body.home-interior-active #open-menu,body.home-interior-active #open-map,body.ho
 
 body.home-interior-active .minimal-bar,body.home-interior-active footer{display:none!important}
 body.home-transition #open-menu,body.home-transition #open-map,body.home-transition #home-controls{pointer-events:none}
+.home-entry-actions{display:flex;gap:6px}.home-entry-actions #home-enter{flex:1;margin-bottom:0!important}.home-entry-actions #home-door-toggle{flex:0 0 auto}#home-door-hint{margin:5px 0 8px!important;color:#70573b;opacity:1!important}

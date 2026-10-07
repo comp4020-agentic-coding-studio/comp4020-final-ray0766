@@ -15,6 +15,7 @@ import type { LibraryEntry } from '../shared/blueprints.ts';
 import './workshop.css';
 import { PRESENTATION } from './presentation.ts';
 import { createPresentationStage } from './presentation-stage.ts';
+import { SAMPLE_PUBLIC_BLUEPRINTS } from '../shared/sample-public-village.ts';
 
 export interface WorkshopBridge {
   read: () => Promise<LibraryEntry[]>;
@@ -56,6 +57,7 @@ export class Workshop {
     document.body.append(this.dialog);
     const tool=this.get<HTMLSelectElement>('tool');
     for(const id of PART_IDS) tool.add(localizedOption(partLabel(id,PRESENTATION.materials.look), id));
+    for(const [i,name]of ['Village post cottage','Village orchard court','Village harbour shelter'].entries())this.get<HTMLSelectElement>('example').add(localizedOption(name,`sample-${i}`));
     for(const id of ['x','z']) for(let n=0;n<5;n++)this.get<HTMLSelectElement>(id).add(localizedOption(String(n+1), String(n)));
     this.on('close',()=>this.close());
     this.dialog.addEventListener('cancel',e=>{e.preventDefault();this.close();});
@@ -63,7 +65,7 @@ export class Workshop {
     this.on('apply',()=>void this.applyPlaced());
     this.on('new',()=>{if(!this.discard())return;this.hover=null;this.saved=null;this.editor.reset();this.editor.rename('Untitled structure');this.changed();this.frame();});
     this.on('cabin',()=>{if(this.discard())this.starter();});
-    this.on('example-load',()=>{if(!this.discard())return;const key=this.get<HTMLSelectElement>('example').value;const bp=(key==='home'?homeCottage:key==='lane'?cornerLane:padStall)();bp.id=crypto.randomUUID() as Blueprint['id'];this.hover=null;this.saved=null;this.editor.load(bp);this.changed();this.frame();this.status('Example loaded · save your own copy.');});
+    this.on('example-load',()=>{if(!this.discard())return;const key=this.get<HTMLSelectElement>('example').value;const sample=key.startsWith('sample-')?SAMPLE_PUBLIC_BLUEPRINTS[Number(key.slice(7))]:undefined;const bp=sample?structuredClone(sample):(key==='home'?homeCottage:key==='lane'?cornerLane:padStall)();bp.id=crypto.randomUUID() as Blueprint['id'];this.hover=null;this.saved=null;this.editor.load(bp);this.changed();this.frame();this.status('Example loaded · save your own copy.');});
     this.on('copy',()=>{const bp=this.editor.toBlueprint();bp.id=crypto.randomUUID() as Blueprint['id'];this.saved=null;this.editor.load(bp);this.changed();void this.save();});
     this.on('load',()=>{if(!this.discard())return;const e=this.entries.find(e=>e.blueprint.id===this.get<HTMLSelectElement>('library').value);if(e)this.load(e);});
     this.get<HTMLInputElement>('name').oninput=()=>this.editor.rename(this.get<HTMLInputElement>('name').value);
@@ -88,9 +90,10 @@ export class Workshop {
   private discard(){return !this.unsaved||window.confirm(translate('Discard the unsaved blueprint changes?'));}
   private status(text:string){setText(this.get('status'), text);}
   private result(result:{message:string}){this.status(result.message);}
-  async open(initial?: Blueprint, applyToPlaced?: (entry: LibraryEntry) => Promise<void>){
+  async open(initial?: Blueprint, applyToPlaced?: (entry: LibraryEntry) => Promise<void>, applyLabel='Apply to my home'){
     if(this.opened||!this.bridge.allowed())return;
     this.applyToPlaced=applyToPlaced??null;
+    setText(this.get('apply'),applyLabel);
     this.get('apply').hidden=!this.applyToPlaced;this.get('place').hidden=!!this.applyToPlaced;
     this.dialog.showModal();document.body.classList.add('workshop-open');
     this.busy=true;this.changed();this.status('Opening your saved library…');
@@ -112,7 +115,7 @@ export class Workshop {
       this.stage.start();this.entries=await this.bridge.read();this.libraryOptions();
       if(initial){const existing=this.entries.find(entry=>entry.blueprint.id===initial.id);this.saved=existing??null;this.editor.load(initial);this.changed();}
       else if(this.entries.length)this.load(this.entries[0]);else this.starter();
-      this.status(initial?'Edit your home. Applying keeps its room and furniture.':this.entries.length?'Library loaded from the server.':'Start with this cabin, or create a new blueprint.');
+      this.status(initial?'Edit the parts. Apply to update the same placed structure.':this.entries.length?'Library loaded from the server.':'Start with this cabin, or create a new blueprint.');
     }catch(error){this.status(error instanceof Error?error.message:'Workshop unavailable. Close and retry.');}
     finally{this.busy=false;this.changed();this.frame();}
   }
@@ -145,7 +148,7 @@ export class Workshop {
     if(this.unsaved||!this.saved)return;
     this.busy=true;this.changed();
     try{await this.applyToPlaced(this.saved);this.busy=false;this.close(true);}
-    catch(error){this.status(error instanceof Error?error.message:'Could not update your home. Your draft is safe.');}
+    catch(error){this.status(error instanceof Error?error.message:'Could not update this structure. Your draft is safe.');}
     finally{this.busy=false;this.changed();}
   }
   private draftAt(x:number,y:number){const part=this.get<HTMLSelectElement>('tool').value;if(part==='select')return null;const point=this.view?.pointToGrid(x,y);return point?this.view!.slotAt(part as PartId,point.gx,point.gz,Number(this.get<HTMLSelectElement>('rot').value) as Rot,false):null;}

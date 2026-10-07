@@ -8,10 +8,13 @@ import { presenceStore } from './presence.ts';
 import { openStore, RequestError } from './store.ts';
 
 const homeSample=process.env.HOME_SAMPLE==='1';
+const samplePort=Number(process.env.HOME_SAMPLE_PORT??8126);
+if(homeSample&&(!Number.isInteger(samplePort)||samplePort<1024||samplePort>65535))throw new Error('HOME_SAMPLE_PORT must be an integer from 1024 to 65535.');
 if(homeSample&&!process.env.DATABASE_PATH)throw new Error('HOME_SAMPLE requires a dedicated DATABASE_PATH.');
 const store = openStore(process.env.DATABASE_PATH ?? '.data/little-post.sqlite',{homeSample});
 if(homeSample&&!store.homeSample){store.close();throw new Error('HOME_SAMPLE refuses an existing non-sample database. Use a fresh isolated path.');}
-const cookieName=homeSample?'little_home_sample':'little_post';
+// Local previews may coexist on one host. Cookies otherwise ignore the port.
+const cookieName=homeSample?(samplePort===8126?'little_home_sample':`little_home_sample_p${samplePort}`):'little_post';
 if (store.migrationBackup) console.log(`Before migration, saved a consistent backup: ${store.migrationBackup}`);
 const presence=presenceStore(store.state);
 const root = resolve('dist');
@@ -74,6 +77,7 @@ const server = createServer(async (req, res) => {
       else if(url.pathname==='/api/home/move')send(200,store.moveHome(id,body));
       else if(url.pathname==='/api/home/exit'){const result=store.exitHome(id,body);presence.leave(id);send(200,result);}
       else if(url.pathname==='/api/home/save')send(200,store.saveHome(id,body));
+      else if(url.pathname==='/api/home/door')send(200,store.setHomeDoor(id,body));
       else if(url.pathname==='/api/home/remodel')send(200,store.remodelHome(id,body));
       else if(url.pathname==='/api/home/undo')send(200,store.undoHome(id,body));
       else if(url.pathname==='/api/objects/replace')send(200,store.replaceObject(id,body));
@@ -126,7 +130,7 @@ const server = createServer(async (req, res) => {
     else { console.error(error instanceof Error ? error.message : 'Request failed'); send(500, { error: 'The world is unavailable. Please retry.' }); }
   }
 });
-const port=homeSample?8126:Number(process.env.PORT??8080),host=homeSample?'127.0.0.1':process.env.HOST??'0.0.0.0';
+const port=homeSample?samplePort:Number(process.env.PORT??8080),host=homeSample?'127.0.0.1':process.env.HOST??'0.0.0.0';
 server.listen(port,host,()=>console.log(`Little Worlds is ready on http://${host}:${port}`));
 const stop = () => { server.close(() => { store.close(); process.exit(0); }); server.closeIdleConnections(); };
 process.on('SIGTERM', stop); process.on('SIGINT', stop);

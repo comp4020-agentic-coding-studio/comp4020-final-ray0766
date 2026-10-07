@@ -233,7 +233,7 @@ export function openStore(path: string, options: { homeSample?: boolean } = {}) 
       if (action === 'deliver' && r.quest === 'delivered') return state(id);
       if (action === 'deliver' && r.quest !== 'carrying') throw new RequestError(409, 'Collect the parcel from Mica first.');
       const npc = action === 'pickup' ? NPCS.mica : NPCS.sol;
-      if (distance(JSON.parse(r.position), npc.position, HUB_RADIUS) > INTERACT_DISTANCE) throw new RequestError(409, `Walk closer to ${npc.name} first.`);
+      if (distance(JSON.parse(r.position), npc.position, planets.planet(r.planet_id).radius) > INTERACT_DISTANCE) throw new RequestError(409, `Walk closer to ${npc.name} first.`);
       db.prepare('UPDATE players SET quest=?,deliveries=?,revision=revision+1 WHERE id=?')
         .run(action === 'pickup' ? 'carrying' : 'delivered', action === 'pickup' ? 0 : 1, id);
       return state(id);
@@ -259,6 +259,7 @@ export function openStore(path: string, options: { homeSample?: boolean } = {}) 
     enterHome(id:string,body:Record<string,unknown>,now=Date.now()){row(id);homes.enter(id,body,now);return universe(id);},
     moveHome(id:string,body:Record<string,unknown>,now=Date.now()){row(id);homes.move(id,body,now);return state(id);},
     exitHome(id:string,body:Record<string,unknown>,now=Date.now()){row(id);homes.exit(id,body,now);return universe(id);},
+    setHomeDoor(id:string,body:Record<string,unknown>){row(id);homes.setDoor(id,body);return universe(id);},
     saveHome(id:string,body:Record<string,unknown>){row(id);homes.save(id,body);return universe(id);},
     replaceObject(id:string,body:Record<string,unknown>){row(id);homes.requireOutside(id);planets.replace(id,body);return universe(id);},
     undoObject(id:string,body:Record<string,unknown>){row(id);homes.requireOutside(id);planets.undo(id,body);return universe(id);},

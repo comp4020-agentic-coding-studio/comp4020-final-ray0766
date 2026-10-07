@@ -1,6 +1,7 @@
 import { QUICK_PARTS } from '../quick-parts.ts';
 import {HUB_SHIP} from '../harbour-layout.ts';
 import {HUB_OBJECTS,PUBLIC_CONTENTS,publicField} from '../public-village.ts';
+import {isSamplePublicRadius,samplePublicVillage} from '../sample-public-village.ts';
 import { fieldOf,gradedField,objectSeat } from '../terrain.ts';
 import type { HeightField } from '../../assets/claude-geometry/core/ground.ts';
 import { Vector3, Quaternion } from 'three';
@@ -45,11 +46,14 @@ export class GroundWorld {
   radius(p:Vec3){return RADIUS+this.ground.heightAt(p);}
   pose(p:Vec3){return groundPose(p,this.ground);}
   constructor(planet:Pick<PlanetView,'id'|'revision'|'objects'|'blueprints'|'environment'|'radius'>){
-    this.baseRadius=planet.radius??RADIUS;this.field=planet.id==='hub'?publicField(planet.radius):fieldOf(planet.environment,this.baseRadius);this.generated=!!planet.environment;this.ground=this.generated?gradedField(this.field,planet.objects,planet.blueprints):this.field;
+    this.baseRadius=planet.radius??RADIUS;
+    const sample=planet.id==='hub'&&isSamplePublicRadius(this.baseRadius)?samplePublicVillage(this.baseRadius):null;
+    const objects=planet.id==='hub'?[...(sample?.objects??HUB_OBJECTS),...planet.objects]:planet.objects;
+    const blueprints=planet.id==='hub'?{...(sample?.blueprints??PUBLIC_CONTENTS),...planet.blueprints}:planet.blueprints;
+    this.field=planet.id==='hub'&&!sample?publicField(planet.radius):fieldOf(sample?.environment??planet.environment,this.baseRadius);
+    this.generated=!!(sample?.environment??planet.environment);this.ground=this.generated?gradedField(this.field,objects,blueprints):this.field;
     this.revision=planet.revision;this.planetId=planet.id;
     if(planet.id==='hub')this.harbour();
-    const objects=planet.id==='hub'?[...HUB_OBJECTS,...planet.objects]:planet.objects;
-    const blueprints=planet.id==='hub'?{...PUBLIC_CONTENTS,...planet.blueprints}:planet.blueprints;
     for(const object of objects){
       if(object.kind==='structure')this.structure(object,blueprints?.[object.blueprintHash!]??[]);
       else if(object.assetVersion===2&&QUICK_PARTS[object.kind]){
@@ -67,7 +71,7 @@ export class GroundWorld {
   private harbour(){
     // Craft is a travel-system object. All village construction below goes
     // through the exact same object/structure path as a player's colony.
-    this.bodies.push({objectId:'hub-ship',dir:vec(HUB_SHIP),broad:3.2,colliders:[],round:{radius:2.1,height:2.5,base:this.baseRadius}});
+    this.bodies.push({objectId:'hub-ship',dir:vec(HUB_SHIP),broad:3.2,colliders:[],round:{radius:2.1,height:2.5,base:this.radius(HUB_SHIP)}});
   }
   private add(body:Body,dir:Vec3,yaw:number,base:number,shape:PartBox){
     const anchor=new Quaternion().fromArray(anchorQuaternion({dir,yaw}));

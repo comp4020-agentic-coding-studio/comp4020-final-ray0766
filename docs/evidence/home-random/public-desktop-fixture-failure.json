@@ -1,0 +1,9 @@
+{
+  "status": "failed",
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "viewport": "1440×1000",
+  "entry": "Dedicated test identity created only in .data/home-random.sqlite; store.visit(id, hub) prepares the entry fixture. This does not verify interplanetary flight.",
+  "errors": [],
+  "failedResponses": [],
+  "checks": []
+}

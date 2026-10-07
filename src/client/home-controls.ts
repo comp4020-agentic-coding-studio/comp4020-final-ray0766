@@ -24,7 +24,7 @@ export class HomeControls {
     this.root.id = 'home-controls';
     this.root.hidden = true;
     setHTML(this.root, `<div class="home-caption"><span id="home-caption">My home</span><span id="home-distance"></span></div>
-      <button id="home-enter" class="primary" hidden>Enter home · E</button>
+      <div class="home-entry-actions"><button id="home-door-toggle" hidden>Close door</button><button id="home-enter" class="primary" hidden>Enter home · E</button></div><p id="home-door-hint" hidden>Open the door before entering.</p>
       <details id="home-remodel"><summary>Make it yours</summary><div class="home-remodel-actions">
       <button id="home-terrace" data-home-variant="terrace">Add a terrace</button>
       <button id="home-roof" data-home-variant="roof">Change the roof</button>
@@ -33,6 +33,7 @@ export class HomeControls {
       <button id="home-undo">Undo last remodel</button><button id="home-workshop">Edit with building parts</button>
       </div><p>One home, one room. Your furniture stays with your home.</p></details>`);
     document.body.append(this.root);
+    this.get<HTMLButtonElement>('door-toggle').onclick = () => void this.toggleDoor();
     this.get<HTMLButtonElement>('enter').onclick = () => void this.enter();
     for (const button of this.root.querySelectorAll<HTMLButtonElement>('[data-home-variant]')) {
       button.onclick = () => void this.remodel(button.dataset.homeVariant!);
@@ -56,17 +57,32 @@ export class HomeControls {
     const d = home ? distance(position, home.door.position, radius) : Infinity;
     this.near = d <= 1.6;
     this.get('enter').hidden = !this.near || !enabled;
-    this.get<HTMLButtonElement>('enter').disabled = this.pending;
+    this.get<HTMLButtonElement>('enter').disabled = this.pending || !home?.interior.doorOpen;
+    const door = this.get<HTMLButtonElement>('door-toggle');
+    door.hidden = !this.near || !enabled; door.disabled = this.pending;
+    setText(door, home?.interior.doorOpen ? 'Close door' : 'Open door');
+    door.setAttribute('aria-pressed', String(home?.interior.doorOpen ?? false));
+    this.get('door-hint').hidden = !this.near || !!home?.interior.doorOpen;
     setText(this.get('distance'), Number.isFinite(d) ? `${Math.round(d)} m` : '');
     for (const button of this.root.querySelectorAll<HTMLButtonElement>('[data-home-variant],#home-workshop')) button.disabled = this.pending || !enabled;
     this.get<HTMLButtonElement>('undo').disabled = this.pending || !enabled || !home?.canUndo;
   }
-  get canEnter() { return this.near && this.enabled && !this.pending && !!this.player?.home && this.player.location?.kind !== 'interior'; }
+  get canEnter() { return this.near && this.enabled && !this.pending && !!this.player?.home?.interior.doorOpen && this.player.location?.kind !== 'interior'; }
   async enter() {
     if (!this.canEnter) return;
     this.pending = true;
     try { await this.bridge.enter(); }
     catch (error) { this.bridge.notice(error instanceof Error ? error.message : 'Could not enter your home.'); }
+    finally { this.pending = false; }
+  }
+  private async toggleDoor() {
+    const home = this.player?.home, location = this.player?.location;
+    if (!home || !location || !this.near || !this.enabled || this.pending) return;
+    this.pending = true;
+    try {
+      const next = await this.bridge.command('home/door', { buildingId: home.buildingId, visitEpoch: location.visitEpoch, expectedDoorVersion: home.interior.doorVersion, open: !home.interior.doorOpen });
+      this.bridge.apply(next);
+    } catch (error) { this.bridge.notice(error instanceof Error ? error.message : 'Could not change the door.'); }
     finally { this.pending = false; }
   }
   private async remodel(variant?: string) {

@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "viewport": "390×844",
+  "realPhone": false,
+  "browser": "Installed Google Chrome with mobile viewport and native Playwright touch input",
+  "pageErrors": [],
+  "seed": 862509156,
+  "edit": {
+    "objectId": "09edb60d-d0ae-4dba-9dcf-05a3a293316b",
+    "beforeParts": 16,
+    "afterParts": 17,
+    "beforeVersion": 1,
+    "afterVersion": 2,
+    "preservedPrivateName": "Meadow · open lookout",
+    "part": {
+      "n": 17,
+      "part": "garden.pot",
+      "level": 0,
+      "x": 2,
+      "z": 1,
+      "rot": 0
+    }
+  },
+  "render": {
+    "drawCalls": 71,
+    "triangles": 97760,
+    "quality": "compact",
+    "width": 390,
+    "height": 844
+  },
+  "checks": [
+    "Touch begin, Build, Edit parts, Add and Apply controls",
+    "Ordinary saved non-home structure changes in place",
+    "Reload preserves its parts and the unique home/interior",
+    "No horizontal page overflow"
+  ]
+}

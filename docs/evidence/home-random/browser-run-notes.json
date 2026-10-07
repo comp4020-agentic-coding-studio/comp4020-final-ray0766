@@ -1,0 +1,66 @@
+{
+  "diagnosticCorrections": [
+    {
+      "issue": "Sandboxed Chrome aborted before app startup",
+      "resolution": "Authorized require_escalated browser run succeeded; no application code changed."
+    },
+    {
+      "issue": "Test expected optional currentPlanet.home, but server descriptor is under player.home",
+      "resolution": "Assert unique concrete structure matching player.home.buildingId and manifest.homeBuildingId."
+    },
+    {
+      "issue": "Parallel test workers used the same trace output directory",
+      "resolution": "Random browser suite uses test-results/random; room suite uses its own output."
+    },
+    {
+      "issue": "selectOption string matched displayed 1-based column/row labels instead of intended 0-based values",
+      "resolution": "Use explicit {value:...} when choosing cells; maintain the original strict part-count assertion."
+    }
+  ],
+  "observedUX": [
+    "Resolved in final build: welcome preference is retained and the post-edit reload screenshot shows the world directly.",
+    "Resolved in final build: overview now centres the current settlement. All four kit structures and their landing routes are visible in desktop-owner-1-overview.png.",
+    "The phone entrance view shows the full character and reachable door; controls and joystick fit within 390 pixels without horizontal overflow.",
+    "The workshop shows the newly added pot in context at desktop and phone sizes; the screenshot uses Select mode so no duplicate-placement ghost obscures the result.",
+    "The neighbourhood layout remains visibly radial and the wider planet has substantial open land. This is a bounded editable starting layout, not a finished organic village or a physical-phone performance result."
+  ],
+  "earlierPassingRun": {
+    "tests": 2,
+    "passed": 2,
+    "durationSeconds": 32.6,
+    "browser": "Installed Google Chrome, Playwright channel chrome",
+    "scope": "127.0.0.1:8128 only",
+    "physicalPhone": false
+  },
+  "initializationRaceFailure": {
+    "build": "index-fTzns6vo",
+    "tests": 2,
+    "passed": 0,
+    "status": "historical failure; resolved and verified in latestCompletedRun",
+    "failureEvidence": [
+      "Desktop /api/state requests aborted near 5 seconds before the welcome/ready UI.",
+      "390px API snapshot object UUID was absent from the rendered builder options."
+    ],
+    "cause": "Initial request(state) ran outside the mutation queue while the 2500ms reconnect interval could concurrently request state without a cookie. A slow initial generation could create two identities; a late cookie response could disagree with the accepted client player.",
+    "resolution": "Bootstrap and reconnect share createStateLoader in-flight state; reconnect skips pending initialization. Initial-state timeout is 20 seconds while ordinary saves keep their original limit. Read-only door fitting is cached and invalidated by structure/terrain state."
+  },
+  "latestCompletedRun": {
+    "build": "assets/index-DRXJBihQ.js",
+    "tests": 3,
+    "passed": 3,
+    "durationSeconds": 37.4,
+    "browser": "Installed Google Chrome via Playwright channel chrome",
+    "scope": "127.0.0.1:8128 only",
+    "execution": "serial, separate test-results/random",
+    "physicalPhone": false,
+    "desktopViewport": "1440x1000",
+    "touchViewport": "390x844",
+    "pageErrors": [],
+    "slowFirstState": {
+      "holdMs": 4100,
+      "requestsBeforeRelease": 1,
+      "requestsAfterReady": 1,
+      "builderApiObjectIdsMatch": true
+    }
+  }
+}

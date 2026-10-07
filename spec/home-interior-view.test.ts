@@ -7,12 +7,15 @@ describe('home room presentation', () => {
   it.each([[1440, 900], [390, 844], [844, 390]])('keeps the whole room and unscaled head height inside a %i × %i view', (width, height) => {
     const camera = new OrthographicCamera(-1, 1, 1, -1, .05, 100);
     fitHomeCamera(camera, HOME_ROOM.width, HOME_ROOM.depth, HOME_ROOM.height, width / height, width < 700);
-    for (const x of [-2.5, 2.5]) for (const z of [-2, 2]) for (const y of [0, HOME_ROOM.height]) {
+    for (const x of [-HOME_ROOM.width / 2, HOME_ROOM.width / 2]) for (const z of [-HOME_ROOM.depth / 2, HOME_ROOM.depth / 2]) for (const y of [0, HOME_ROOM.height]) {
       const point = new Vector3(x, y, z).project(camera);
       expect(Math.abs(point.x)).toBeLessThan(.95);
       expect(Math.abs(point.y)).toBeLessThan(.95);
       expect(Math.abs(point.z)).toBeLessThan(1);
     }
+    // The optional overview fits every corner; the normal narrow-screen view
+    // follows the player at 1.65x instead of shrinking the metre-sized avatar.
+    if (width < 700 || height < 500) { camera.zoom = 1.65; camera.updateProjectionMatrix(); }
     const feet = new Vector3(...HOME_ENTRY).project(camera), head = new Vector3(HOME_ENTRY[0], 1.62, HOME_ENTRY[2]).project(camera);
     // Screen readability, not a device-independent NDC fraction: portrait
     // fitting leaves more vertical space but still needs a legible avatar.

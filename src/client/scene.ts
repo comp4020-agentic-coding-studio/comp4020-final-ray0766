@@ -12,10 +12,14 @@ import { surfaceHeight,surfacePoint,setGroundWorld,useTerrain } from './terrain.
 import { makeShip } from './ship-model.ts';
 import { createHarbour } from './harbour.ts';
 import { harbourMaterials } from './harbour-materials.ts';
+import {isSamplePublicRadius,samplePublicVillage} from '../shared/sample-public-village.ts';
 export { courier } from './character.ts';
 export interface Obstacle {point:T.Vector3;radius:number;height:number}
 export function createWorld(scene:T.Scene,populated=true,environment:string|null=null,objects:PlacedObject[]=[],blueprints:BlueprintContents={},radius=populated?HUB_RADIUS:RADIUS,surfaceRoutes:readonly HomeSurfaceRoute[]=[]){
-  setGroundWorld(populated,environment,radius);if(populated)return createHarbour(scene);useTerrain({environment,objects,blueprints,radius});
+  const publicVillage=populated&&isSamplePublicRadius(radius)?samplePublicVillage(radius):null;
+  setGroundWorld(populated,publicVillage?.environment??environment,radius);
+  if(populated){if(publicVillage)useTerrain(publicVillage);return createHarbour(scene,publicVillage);}
+  useTerrain({environment,objects,blueprints,radius});
   const terrain=environment?terrainModel(environment,objects,blueprints,'medium',true,radius,surfaceRoutes):null;let globe:T.Mesh;
   if(terrain){globe=terrain.ground;scene.add(terrain.object);}else{
   const geo=new T.IcosahedronGeometry(RADIUS,5),a=geo.attributes.position,colors:number[]=[];

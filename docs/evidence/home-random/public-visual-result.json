@@ -1,0 +1,67 @@
+{
+  "browser": "Installed Google Chrome via Playwright channel chrome (headless)",
+  "browserVersion": "154.0.8037.98",
+  "build": "index-HXyKhxDA.js",
+  "records": [
+    {
+      "viewport": "1440×1000",
+      "realPhone": false,
+      "script": "/assets/index-HXyKhxDA.js",
+      "errors": [],
+      "failures": [],
+      "stats": {
+        "drawCalls": 140,
+        "triangles": 121504,
+        "cameraPosition": [
+          0,
+          54.992652462824076,
+          30.431644242665033
+        ],
+        "groundPosition": [
+          0,
+          0.9654290825583872,
+          0.26066585229076455
+        ]
+      }
+    },
+    {
+      "viewport": "390×844",
+      "realPhone": false,
+      "script": "/assets/index-HXyKhxDA.js",
+      "errors": [],
+      "failures": [],
+      "stats": {
+        "drawCalls": 141,
+        "triangles": 121516,
+        "cameraPosition": [
+          0,
+          102.21902796784293,
+          56.6169269069161
+        ],
+        "groundPosition": [
+          0,
+          0.9654290825583874,
+          0.2606658522907646
+        ]
+      }
+    }
+  ],
+  "visualReview": {
+    "inspected": [
+      "public-desktop-final-entry.png",
+      "public-desktop-final-overview.png",
+      "public-phone-final-entry.png",
+      "public-phone-final-overview.png"
+    ],
+    "desktopRoad": "The final desktop overview shows continuous cream-coloured routes to all three destinations. The fragmented dark gaps seen before removing the inherited ink depth bias are resolved in this capture.",
+    "walkingEntry": "The revised public walking camera shows the central route clearly on desktop and at 390px; the desktop post cottage is visible on the right. The 390px view still shows little destination architecture at the initial landing position.",
+    "phoneOverview": "The 390px whole-planet view is washed out into a near-solid fog-coloured disk. Its camera is about 117m from the centre, beyond the sample ground fog far distance of 78m. This remains a visual limitation; it is not a page error.",
+    "composition": "The whole-planet camera frames the three destinations near the upper edge rather than centring the village."
+  },
+  "limits": [
+    "The curved decorative road generator is shared by public and private sample terrain, but is not the workshop street.paving construction algorithm.",
+    "Entry is a dedicated local test fixture; this capture does not verify interplanetary flight.",
+    "Mobile viewport emulation does not establish real phone performance.",
+    "The 390px whole-planet overview is washed out by the ground fog range; walking view remains visible."
+  ]
+}

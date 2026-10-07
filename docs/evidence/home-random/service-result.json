@@ -1,0 +1,99 @@
+{
+  "8126": {
+    "health": {
+      "status": 200,
+      "body": {
+        "ok": true
+      }
+    },
+    "index": 200,
+    "assets": [
+      {
+        "path": "/assets/index-DSeCXCfz.js",
+        "status": 200,
+        "bytes": 128211
+      },
+      {
+        "path": "/assets/three.core-BEi-KHTG.js",
+        "status": 200,
+        "bytes": 251280
+      },
+      {
+        "path": "/assets/lighting-CjrcQydx.js",
+        "status": 200,
+        "bytes": 470749
+      },
+      {
+        "path": "/assets/model3d-CSSvYAJU.js",
+        "status": 200,
+        "bytes": 106559
+      },
+      {
+        "path": "/assets/terrain-model-C80fOKAS.js",
+        "status": 200,
+        "bytes": 112191
+      },
+      {
+        "path": "/assets/factory-B_uRTJqn.js",
+        "status": 200,
+        "bytes": 78060
+      },
+      {
+        "path": "/assets/index-I-_R4yj4.css",
+        "status": 200,
+        "bytes": 55406
+      }
+    ]
+  },
+  "8128": {
+    "health": {
+      "status": 200,
+      "body": {
+        "ok": true
+      }
+    },
+    "index": 200,
+    "assets": [
+      {
+        "path": "/assets/index-HXyKhxDA.js",
+        "status": 200,
+        "bytes": 138112
+      },
+      {
+        "path": "/assets/three.core-BEi-KHTG.js",
+        "status": 200,
+        "bytes": 251280
+      },
+      {
+        "path": "/assets/lighting-nwnCq9zW.js",
+        "status": 200,
+        "bytes": 472654
+      },
+      {
+        "path": "/assets/model3d-BQtEd2aK.js",
+        "status": 200,
+        "bytes": 162362
+      },
+      {
+        "path": "/assets/sample-public-village-0EeLVpXx.js",
+        "status": 200,
+        "bytes": 4990
+      },
+      {
+        "path": "/assets/factory-cjkjiHox.js",
+        "status": 200,
+        "bytes": 78066
+      },
+      {
+        "path": "/assets/terrain-model-_DGg0BL3.js",
+        "status": 200,
+        "bytes": 57639
+      },
+      {
+        "path": "/assets/index-DJOSWb9A.css",
+        "status": 200,
+        "bytes": 56122
+      }
+    ]
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "status": "passed",
+  "browser": "Installed Google Chrome via Playwright channel chrome (headless)",
+  "browserVersion": "154.0.8037.98",
+  "viewport": "1440×1000",
+  "entry": "Dedicated test identity created only in .data/home-random.sqlite; store.visit(id, hub) prepares the entry fixture. This does not verify interplanetary flight.",
+  "errors": [],
+  "failedResponses": [],
+  "checks": [
+    "Real keyboard movement follows the saved public landing-to-post route; UI pickup is acknowledged by the server",
+    "Keyboard route reaches the orchard; UI delivery persists quest=delivered",
+    "Keyboard route reaches the harbour; the normal boarding button appears beside its saved marker"
+  ],
+  "entryRender": {
+    "drawCalls": 141,
+    "triangles": 121516,
+    "quality": "full",
+    "groundRadius": 21.6,
+    "feetRadius": 21.817575108690555,
+    "cameraPosition": [
+      0,
+      24.133386003367505,
+      12.73086739697059
+    ],
+    "cameraHeading": [
+      0,
+      0.26066585229076455,
+      -0.9654290825583873
+    ],
+    "groundPosition": [
+      0,
+      0.9654290825583874,
+      0.2606658522907646
+    ],
+    "counts": {
+      "structures": 3,
+      "objects": 21,
+      "destinations": [
+        "post",
+        "orchard",
+        "harbour"
+      ]
+    }
+  },
+  "overviewRender": {
+    "drawCalls": 141,
+    "triangles": 121516,
+    "quality": "full",
+    "groundRadius": 21.6,
+    "feetRadius": 21.817575108690555,
+    "cameraPosition": [
+      0,
+      54.992650978939324,
+      30.431643391513475
+    ],
+    "cameraHeading": [
+      0,
+      0.2606658522907646,
+      -0.9654290825583873
+    ],
+    "groundPosition": [
+      0,
+      0.9654290825583872,
+      0.26066585229076455
+    ],
+    "counts": {
+      "structures": 3,
+      "objects": 21,
+      "destinations": [
+        "post",
+        "orchard",
+        "harbour"
+      ]
+    }
+  },
+  "finalRender": {
+    "drawCalls": 78,
+    "triangles": 142636,
+    "quality": "full",
+    "groundRadius": 21.6,
+    "feetRadius": 21.64498467974034,
+    "cameraPosition": [
+      -0.3285154544532596,
+      24.918030074702774,
+      -10.692333309666454
+    ],
+    "cameraHeading": [
+      0.019709049946694427,
+      -0.5878939934069224,
+      -0.8086978458400023
+    ],
+    "groundPosition": [
+      -0.008190240388399689,
+      0.808732883772957,
+      -0.5881190718440077
+    ],
+    "counts": {
+      "structures": 3,
+      "objects": 21,
+      "destinations": [
+        "post",
+        "orchard",
+        "harbour"
+      ]
+    }
+  },
+  "finalQuest": "delivered"
+}
