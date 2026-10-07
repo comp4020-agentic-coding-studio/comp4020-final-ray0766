@@ -6,8 +6,8 @@ import { structureFit, structureSize } from '../src/shared/blueprints.ts';
 import type { BlueprintContents } from '../src/shared/blueprints.ts';
 import { MAX_OBJECTS, placementProblem } from '../src/shared/planets.ts';
 import type { PlacedObject } from '../src/shared/planets.ts';
-import { fieldOf, gradedField, objectSeat } from '../src/shared/terrain.ts';
-import { ROUTE_SURFACE_OFFSET, surfaceRouteGeometry } from '../src/client/sample-landscape.ts';
+import { fieldOf, objectSeat } from '../src/shared/terrain.ts';
+import { planRoutePaths } from '../src/shared/path-layout.ts';
 import type { Vec3 } from '../src/shared/world.ts';
 import { terrainModel } from '../src/client/terrain-model.ts';
 import { BUDGET } from '../src/assets/claude-geometry/style/lod.ts';
@@ -100,40 +100,44 @@ it('seats the fixed 41-object sample dry on one shared field with room for the s
   }
 });
 
-it('derives bounded, outward-facing decorative route geometry from shared data and physical graded ground', () => {
+it('retains historical navigation endpoints while planning only ordinary bounded Path objects', () => {
   const { manifest, objects, blueprints } = scene();
-  const field = gradedField(fieldOf(HOME_ENVIRONMENT, radius), objects, blueprints);
-  const geometry = surfaceRouteGeometry(manifest.routes, field);
-  try {
-    expect(manifest.routes.map(route => route.id)).toEqual(['home', 'lookout', 'orchard']);
-    for (const route of manifest.routes) expect(new Vector3(...route.points[0]).distanceTo(new Vector3(...SPAWN))).toBeLessThan(1e-10);
-    const sites = [manifest.home, ...manifest.infrastructure];
-    const ends = manifest.routes.map((route, i) => siteFrame(sites[i]).local({ position: route.points.at(-1)!, radius: siteFrame(sites[i]).base }));
-    // Home and lookout routes finish at their outward entry steps. The
-    // orchard route finishes just inside its east edge, away from planting.
-    for (let i = 0; i < 2; i++) {
-      const part = sites[i].blueprint.parts.find(part => part.part === 'step.entry')!;
-      const step = partTransform(part, pivotOf(sites[i].blueprint.parts)).position;
-      expect(Math.abs(ends[i].x - step[0])).toBeLessThan(.45);
-      expect(ends[i].z - step[2]).toBeGreaterThan(0);
-      expect(ends[i].z - step[2]).toBeLessThan(.7);
-    }
-    expect(ends[2].x).toBeGreaterThan(1.2);
-    expect(ends[2].x).toBeLessThan(1.5);
-    expect(Math.abs(ends[2].z)).toBeLessThan(.5);
-    const positions = geometry.getAttribute('position'), indices = geometry.index!;
-    expect(indices.count / 3).toBeLessThan(200);
-    for (let i = 0; i < positions.count; i++) {
-      const p = new Vector3().fromBufferAttribute(positions, i), radial = p.length();
-      const d = p.normalize().toArray() as Vec3;
-      expect(radial - (10 + field.heightAt(d))).toBeCloseTo(ROUTE_SURFACE_OFFSET, 4);
-    }
-    for (let i = 0; i < indices.count; i += 3) {
-      const [a, b, c] = [0, 1, 2].map(offset => new Vector3().fromBufferAttribute(positions, indices.getX(i + offset)));
-      const normal = b.clone().sub(a).cross(c.clone().sub(a));
-      expect(normal.dot(a)).toBeGreaterThan(0);
-    }
-  } finally { geometry.dispose(); }
+  expect(manifest.routes.map(route => route.id)).toEqual(['home', 'lookout', 'orchard']);
+  for (const route of manifest.routes) expect(new Vector3(...route.points[0]).distanceTo(new Vector3(...SPAWN))).toBeLessThan(1e-10);
+  const sites = [manifest.home, ...manifest.infrastructure];
+  const ends = manifest.routes.map((route, i) => siteFrame(sites[i]).local({ position: route.points.at(-1)!, radius: siteFrame(sites[i]).base }));
+  // Preserve historical destination bearings independently of how an owner
+  // chooses to pave them. No special route mesh exists in the renderer.
+  for (let i = 0; i < 2; i++) {
+    const part = sites[i].blueprint.parts.find(part => part.part === 'step.entry')!;
+    const step = partTransform(part, pivotOf(sites[i].blueprint.parts)).position;
+    expect(Math.abs(ends[i].x - step[0])).toBeLessThan(.45);
+    expect(ends[i].z - step[2]).toBeGreaterThan(0);
+    expect(ends[i].z - step[2]).toBeLessThan(.7);
+  }
+  expect(ends[2].x).toBeGreaterThan(1.2);
+  expect(ends[2].x).toBeLessThan(1.5);
+  expect(Math.abs(ends[2].z)).toBeLessThan(.5);
+  const before = JSON.stringify({manifest, objects, blueprints});
+  const options = {routes:manifest.routes, radius, environment:HOME_ENVIRONMENT, objects, blueprints};
+  const plan = planRoutePaths(options), field = fieldOf(HOME_ENVIRONMENT, radius);
+  // This historical fixture already contains its ordinary Path tiles: a
+  // preview must not duplicate them. A bare fixture still gets legal tiles.
+  expect(plan.added).toBe(0);
+  expect(plan.coverage.some(route=>route.covered>0)).toBe(true);
+  const bareObjects = objects.filter(object=>object.kind!=='path');
+  const additions = planRoutePaths({...options,objects:bareObjects});
+  expect(additions.added).toBeGreaterThan(0);
+  expect(bareObjects.length + additions.added).toBeLessThanOrEqual(MAX_OBJECTS);
+  for (const object of additions.objects) {
+    expect(object.kind).toBe('path');
+    expect(object.radius).toBeUndefined();expect(object.height).toBeUndefined();
+    expect(placementProblem(object.kind, object.position, bareObjects, undefined, undefined, radius)).toBeNull();
+    expect(objectSeat(field, object, blueprints).problem).toBeNull();
+  }
+  // A legacy visual width cannot grant larger tiles or wider clearings.
+  expect(planRoutePaths({...options,routes:manifest.routes.map(route=>({...route,width:100}))})).toEqual(plan);
+  expect(JSON.stringify({manifest, objects, blueprints})).toBe(before);
 });
 
 it('walks from the real door approach over the court to natural ground and back up the entry steps at radius 21.6', () => {
@@ -185,17 +189,30 @@ it('approaches the house from sloped natural ground but cannot walk through its 
   expect(supports).toEqual(new Set(['terrain', 'floor']));
 });
 
-it('retains seeded vegetation at the enlarged radius within the existing terrain budget and disposes added route geometry', () => {
+it('retains seeded vegetation within the terrain budget, ignores historical road widths and disposes terrain once', () => {
   const { manifest, objects, blueprints } = scene();
   const model = terrainModel(HOME_ENVIRONMENT, objects, blueprints, 'medium', true, radius, manifest.routes);
-  const route = model.object.getObjectByName('sample:surface-routes') as import('three').Mesh;
-  let routeDisposals = 0;
-  route.geometry.addEventListener('dispose', () => routeDisposals++);
+  const withoutRoutes = terrainModel(HOME_ENVIRONMENT, objects, blueprints, 'medium', true, radius);
+  const instances = (root:import('three').Object3D) => {
+    const matrices:number[][]=[];
+    root.getObjectByName('flora')!.traverse(object=>{
+      if ('isInstancedMesh' in object && object.isInstancedMesh) matrices.push(Array.from((object as import('three').InstancedMesh).instanceMatrix.array));
+    });
+    return matrices;
+  };
+  let groundDisposals = 0;
+  model.ground.geometry.addEventListener('dispose', () => groundDisposals++);
   try {
+    expect(model.object.getObjectByName('sample:surface-routes')).toBeUndefined();
     expect(Object.values(model.stats.vegetation).reduce((sum, count) => sum + (count ?? 0), 0)).toBeGreaterThan(10);
     expect(model.stats.triangles).toBeLessThanOrEqual(BUDGET.terrain.medium.triangles);
     expect(model.stats.drawCalls).toBeLessThanOrEqual(BUDGET.terrain.medium.drawCalls);
-    expect(route.userData).toMatchObject({ decorativeTerrain: true, collision: false, support: false });
-  } finally { model.dispose(); model.dispose(); }
-  expect(routeDisposals).toBe(1);
+    expect(model.stats.vegetation).toEqual(withoutRoutes.stats.vegetation);
+    expect(instances(model.object).length).toBeGreaterThan(0);
+    expect(instances(model.object)).toEqual(instances(withoutRoutes.object));
+    expect(model.stats.triangles).toBe(withoutRoutes.stats.triangles);
+    expect(model.stats.drawCalls).toBe(withoutRoutes.stats.drawCalls);
+    expect(model.ground.geometry.getAttribute('position').array).toEqual(withoutRoutes.ground.geometry.getAttribute('position').array);
+  } finally { model.dispose(); model.dispose(); withoutRoutes.dispose(); }
+  expect(groundDisposals).toBe(1);
 });

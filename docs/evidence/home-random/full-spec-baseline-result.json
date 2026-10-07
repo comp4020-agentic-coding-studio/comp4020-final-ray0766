@@ -1,0 +1,180 @@
+{
+  "recordedAt": "2026-10-07T19:49:15.317578+00:00",
+  "purpose": "Original-assertion baseline for the three files implicated in the reported five failures of the phase-2 full suite. This is a targeted baseline, not a stage full-suite rerun.",
+  "baselineCommit": "8efaefcaa1cd9fe9ce4893c55a2b9468ce474a1d",
+  "comparisonCommit": "6f6dd38",
+  "method": {
+    "snapshot": "/tmp/full-spec-baseline-8efaefc-o61ldo0a/snapshot",
+    "source": "git archive of committed 8efaefc, extracted to a fresh /tmp directory",
+    "dependencies": "symlink to the existing project node_modules; no installation",
+    "config": "/tmp/full-spec-baseline-8efaefc-o61ldo0a/snapshot/baseline-vitest.config.mjs",
+    "configContents": "export default { test: { include: [\"spec/home-layout.test.ts\", \"spec/public-village.test.ts\", \"spec/store.test.ts\"], globalSetup: [] } };",
+    "globalSetup": "Omitted deliberately: these three spec files contain no HTTP tests and use only in-memory or temporary SQLite databases.",
+    "command": [
+      "/Users/ray/.local/share/mise/installs/node/24.19.0/bin/node",
+      "/Users/ray/Documents/Codex/2026-10-08/task-2/little-worlds-random-sample/node_modules/vitest/vitest.mjs",
+      "run",
+      "spec/home-layout.test.ts",
+      "spec/public-village.test.ts",
+      "spec/store.test.ts",
+      "--config",
+      "/tmp/full-spec-baseline-8efaefc-o61ldo0a/snapshot/baseline-vitest.config.mjs",
+      "--maxWorkers=1",
+      "--reporter=json",
+      "--outputFile=/tmp/full-spec-baseline-8efaefc-o61ldo0a/vitest-result.json"
+    ],
+    "environment": {
+      "TMPDIR": "/tmp/full-spec-baseline-8efaefc-o61ldo0a/fixture-tmp",
+      "HOME_SAMPLE": "0",
+      "DATABASE_PATH": "/tmp/full-spec-baseline-8efaefc-o61ldo0a/unused-http-server.sqlite",
+      "APP_URL": "unset"
+    },
+    "httpRequests": false,
+    "existingDatabaseAccess": false,
+    "sourceRepositoryTestsOrImplementationModified": false,
+    "originalTestsAndAssertionsUnmodified": true
+  },
+  "exitCode": 1,
+  "totals": {
+    "files": 3,
+    "tests": 14,
+    "passed": 13,
+    "failed": 1,
+    "pending": 0
+  },
+  "originalFileVerification": [
+    {
+      "file": "spec/home-layout.test.ts",
+      "sha256": "1ff0c1ef8cd4f531cb5c58edb59e7bc257004ef1dc5519602e20a347f8d8baf7",
+      "matchesBaselineCommit": true,
+      "identicalToPhase2Commit6f6dd38": true
+    },
+    {
+      "file": "spec/public-village.test.ts",
+      "sha256": "8f4d92fb71175e44700f647d7a4792f6c0d6c6015eebdda820d07fdbf757c67e",
+      "matchesBaselineCommit": true,
+      "identicalToPhase2Commit6f6dd38": true
+    },
+    {
+      "file": "spec/store.test.ts",
+      "sha256": "7afc0abe3c9104620610e1050333bbca23b37831642fa7b1fbf319ea02f2d0f6",
+      "matchesBaselineCommit": true,
+      "identicalToPhase2Commit6f6dd38": true
+    }
+  ],
+  "results": [
+    {
+      "file": "spec/home-layout.test.ts",
+      "status": "failed",
+      "tests": [
+        {
+          "name": "makes four distinct supported kit homes without moving or duplicating the durable entrance",
+          "status": "passed"
+        },
+        {
+          "name": "seats the fixed 41-object sample dry on one shared field with room for the same remodels",
+          "status": "passed"
+        },
+        {
+          "name": "derives bounded, outward-facing decorative route geometry from shared data and physical graded ground",
+          "status": "failed",
+          "failure": "AssertionError: expected 800 to be less than 200"
+        },
+        {
+          "name": "walks from the real door approach over the court to natural ground and back up the entry steps at radius 21.6",
+          "status": "passed"
+        },
+        {
+          "name": "approaches the house from sloped natural ground but cannot walk through its front wall",
+          "status": "passed"
+        },
+        {
+          "name": "retains seeded vegetation at the enlarged radius within the existing terrain budget and disposes added route geometry",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "spec/public-village.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "uses legal player blueprints, authentic content hashes, ordinary placement and unchanged capacity limits",
+          "status": "passed"
+        },
+        {
+          "name": "walks all delivery/boarding bearings through the central alley with shared colliders",
+          "status": "passed"
+        },
+        {
+          "name": "enters all sixteen rooms through real open-door parts and keeps ceiling jumps safe",
+          "status": "passed"
+        },
+        {
+          "name": "fences old public batches while leaving existing private ground rows and content unchanged",
+          "status": "passed"
+        },
+        {
+          "name": "upgrades a valid private v3 airborne save without changing position, height, velocity or jump latch",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "spec/store.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "requires pickup and proximity, and replays both transitions without duplicate delivery",
+          "status": "passed"
+        },
+        {
+          "name": "validates character, nonfinite or off-sphere coordinates, and impossible travel",
+          "status": "passed"
+        },
+        {
+          "name": "stores identity-specific coat and delivery across an actual database close/reopen",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "inheritedFailureAt8efaefc": [
+      {
+        "file": "spec/home-layout.test.ts",
+        "test": "derives bounded, outward-facing decorative route geometry from shared data and physical graded ground",
+        "failure": "AssertionError: expected 800 to be less than 200"
+      }
+    ],
+    "fourFailuresNotPresentAt8efaefc": [
+      {
+        "file": "spec/home-layout.test.ts",
+        "test": "retains seeded vegetation at the enlarged radius within the existing terrain budget and disposes added route geometry",
+        "baselineStatus": "passed",
+        "phase2Status": "failed (parent-reported 6f6dd38 full run)"
+      },
+      {
+        "file": "spec/public-village.test.ts",
+        "test": "upgrades a valid private v3 airborne save without changing position, height, velocity or jump latch",
+        "baselineStatus": "passed",
+        "phase2Status": "failed (parent-reported 6f6dd38 full run)"
+      },
+      {
+        "file": "spec/store.test.ts",
+        "test": "requires pickup and proximity, and replays both transitions without duplicate delivery",
+        "baselineStatus": "passed",
+        "phase2Status": "failed (parent-reported 6f6dd38 full run)"
+      },
+      {
+        "file": "spec/store.test.ts",
+        "test": "stores identity-specific coat and delivery across an actual database close/reopen",
+        "baselineStatus": "passed",
+        "phase2Status": "failed (parent-reported 6f6dd38 full run)"
+      }
+    ],
+    "interpretation": "The obsolete curved-road triangle budget was already failing at stage 8efaefc. The removed decorative route object and the three physics-version expectations first became failing between the compared stages. This establishes chronology; it does not itself classify obsolete test assertions as production implementation defects."
+  },
+  "rawReport": "/tmp/full-spec-baseline-8efaefc-o61ldo0a/vitest-result.json",
+  "rawOutput": "/tmp/full-spec-baseline-8efaefc-o61ldo0a/vitest-output.log"
+}

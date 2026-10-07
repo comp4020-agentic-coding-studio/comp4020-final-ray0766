@@ -89,7 +89,16 @@
       "scripts/check-evidence.ts"
     ],
     "compatibility": "door-v6-compatibility-result.json",
-    "services": "phase2-service-result.json"
+    "services": "phase2-service-result.json",
+    "finalFullSuite": {
+      "files": 48,
+      "passed": 259,
+      "failed": 0,
+      "pending": 0,
+      "report": "final-full-spec-result.json",
+      "followup": "full-spec-followup-result.json",
+      "note": "Run after the follow-up code/test corrections; earlier 110 checks remain explicitly targeted."
+    }
   },
   "observedExperience": [
     "Real keyboard motion stopped at door-local z=0.364 m when closed and reached z=-1.647 m when open; no automatic room entry.",

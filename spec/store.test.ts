@@ -1,5 +1,5 @@
 import {Vector3} from 'three';
-import {GroundWorld,FIXED_STEP,PHYSICS_VERSION} from '../src/shared/physics/world.ts';
+import {GroundWorld,FIXED_STEP,HUB_PHYSICS_VERSION} from '../src/shared/physics/world.ts';
 import { expect, it } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -13,7 +13,7 @@ const travel = (store:ReturnType<typeof openStore>,id:string,destination:Vec3,st
  // same bounded, collision-resolved motion samples as the current client.
  for(const target of [SPAWN,destination]){let reached=false;for(let i=0;i<1500;i++){
   const a=new Vector3(...pose.position),b=new Vector3(...target),d=a.angleTo(b)*14;if(d<.03){reached=true;break;}
-  const next=world.move(pose,a.lerp(b,Math.min(1,.045/d)).normalize().toArray() as Vec3,FIXED_STEP);state=store.move(id,next.position,time+=FIXED_STEP*1000,'hub',{sequence:state.ground!.sequence+1,physicsVersion:PHYSICS_VERSION,steps:[[...next.position,FIXED_STEP,0]]});pose={position:state.position,...state.ground!};
+  const next=world.move(pose,a.lerp(b,Math.min(1,.045/d)).normalize().toArray() as Vec3,FIXED_STEP);state=store.move(id,next.position,time+=FIXED_STEP*1000,'hub',{sequence:state.ground!.sequence+1,physicsVersion:HUB_PHYSICS_VERSION,steps:[[...next.position,FIXED_STEP,0]]});pose={position:state.position,...state.ground!};
  }expect(reached).toBe(true);}
 };
 it('requires pickup and proximity, and replays both transitions without duplicate delivery',()=>{

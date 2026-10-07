@@ -6,7 +6,7 @@ import {layoutErrors} from '../src/assets/claude-geometry/blueprint/model.ts';
 import {blueprintHash,decodeBlueprint} from '../src/assets/claude-geometry/blueprint/codec.ts';
 import {structureFit,MAX_STRUCTURES} from '../src/shared/blueprints.ts';
 import {MAX_OBJECTS,placementProblem} from '../src/shared/planets.ts';
-import {GroundWorld,FIXED_STEP,JUMP_FLAG,HUB_PHYSICS_VERSION} from '../src/shared/physics/world.ts';
+import {GroundWorld,FIXED_STEP,JUMP_FLAG,HUB_PHYSICS_VERSION,PHYSICS_VERSION} from '../src/shared/physics/world.ts';
 import type {GroundPose} from '../src/shared/physics/world.ts';
 import {localToDir,anchorQuaternion} from '../src/assets/claude-geometry/core/anchor.ts';
 import type {Vec3} from '../src/shared/world.ts';
@@ -32,5 +32,5 @@ it('fences old public batches while leaving existing private ground rows and con
 });
 
 it('upgrades a valid private v3 airborne save without changing position, height, velocity or jump latch',()=>{
- const s=openStore(':memory:');try{s.create('p',0);s.visit('p',s.universe('p').planets.find(p=>p.kind==='garden')!.id);s.state('p');s.db.exec("UPDATE ground_states SET physics_version=3,radius=radius+0.5,vertical_speed=2,grounded=0,jump_held=1 WHERE player_id='p'");const before=s.db.prepare("SELECT * FROM ground_states WHERE player_id='p'").get()!;s.state('p');const after=s.db.prepare("SELECT * FROM ground_states WHERE player_id='p'").get()!;for(const k of ['position','radius','vertical_speed','grounded','jump_held','scene_revision','planet_id'])expect(after[k]).toEqual(before[k]);expect(after.physics_version).toBe(HUB_PHYSICS_VERSION);}finally{s.close();}
+ const s=openStore(':memory:');try{s.create('p',0);s.visit('p',s.universe('p').planets.find(p=>p.kind==='garden')!.id);s.state('p');s.db.exec("UPDATE ground_states SET physics_version=3,radius=radius+0.5,vertical_speed=2,grounded=0,jump_held=1 WHERE player_id='p'");const before=s.db.prepare("SELECT * FROM ground_states WHERE player_id='p'").get()!;s.state('p');const after=s.db.prepare("SELECT * FROM ground_states WHERE player_id='p'").get()!;for(const k of ['position','radius','vertical_speed','grounded','jump_held','scene_revision','planet_id'])expect(after[k]).toEqual(before[k]);expect(after.physics_version).toBe(PHYSICS_VERSION);expect(after.sequence).toBe(Number(before.sequence)+1);}finally{s.close();}
 });

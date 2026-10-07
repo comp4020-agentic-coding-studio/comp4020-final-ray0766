@@ -1,0 +1,64 @@
+{
+  "recordedAt": "2026-10-07T19:54:18.528914+00:00",
+  "startingCommit": "6f6dd38a9fbd89004e93dca17dedd499d0d8e803",
+  "fullRun": {
+    "files": 48,
+    "tests": 259,
+    "passed": 259,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "durationSeconds": 129.92,
+    "report": "final-full-spec-result.json",
+    "scope": "All spec/**/*.test.ts under the unchanged standard vitest.config.ts; no test file or case excluded."
+  },
+  "isolation": {
+    "appURL": "http://127.0.0.1:8129",
+    "HOME_SAMPLE": "0",
+    "database": "/var/folders/fb/fcyrnm0d20g6lgwtxfxnpzn80000gn/T/little-worlds-fullspec-retest-dkecce1k/http.sqlite",
+    "TMPDIR": "/var/folders/fb/fcyrnm0d20g6lgwtxfxnpzn80000gn/T/little-worlds-fullspec-retest-dkecce1k",
+    "testServerPid": 25891,
+    "testServerStopped": true,
+    "preview8128RequestedByTests": false,
+    "preview8128Restarted": false,
+    "existingUserDatabaseAccess": false
+  },
+  "firstRun": {
+    "tests": 259,
+    "passed": 254,
+    "failed": 5,
+    "report": "full-spec-first-run-result.json"
+  },
+  "baseline": {
+    "commit": "8efaefc",
+    "scope": "Three implicated files, unchanged assertions, isolated git archive; no HTTP globalSetup because these files have no HTTP tests.",
+    "tests": 14,
+    "passed": 13,
+    "failed": 1,
+    "report": "full-spec-baseline-result.json"
+  },
+  "corrections": [
+    "Removed unused curved paving geometry/material/clearing APIs. Phase2 already rendered ordinary Path only; the old geometry triangle-budget failure also reproduced in the stage baseline.",
+    "Replaced obsolete curved-mesh expectations with preserved navigation endpoints, ordinary Path placement/seating and unchanged 64-object budget, no duplication of already saved paths, immutable input and no route-width privileges.",
+    "Terrain test retains original vegetation/triangle/draw-call budgets, requires no special road mesh, compares vegetation instance matrices and terrain vertices with versus without route metadata, and checks exactly-once terrain disposal.",
+    "Private airborne upgrade expects private PHYSICS_VERSION=6 and additionally requires sequence advancement; existing saved-position/height/velocity/jump invariants remain exact.",
+    "Hub delivery movement fixtures send HUB_PHYSICS_VERSION=5; delivery proximity, idempotence and actual SQLite close/reopen assertions remain unchanged."
+  ],
+  "intermediateValidation": "The first corrected targeted run exposed an incorrect new test-fixture assumption: the legacy fixture already held all ordinary paths. Corrected to require zero duplicate additions, plus a separate bare fixture requiring legal positive additions. The final targeted run passed 14/14 before the full run.",
+  "static": {
+    "typecheck": "passed",
+    "changedFileLint": "passed",
+    "gitDiffCheck": "passed",
+    "productionBuild": "passed in separate temporary outDir",
+    "servedDistModified": false,
+    "identicalServedFiles": 21,
+    "differentServedFiles": 0
+  },
+  "testedFileSha256": {
+    "src/client/sample-landscape.ts": "b3ca586d4f595c004ee0b69784e9f70e8d50c6019a2234366e6f54f72f104b9b",
+    "spec/home-layout.test.ts": "936ebff7f7c31f1f90ddd0145d038fc1b168768afcb6f15145b474159f14e448",
+    "spec/public-village.test.ts": "02185788f4a77c922a95bf5b5bf7d8b3e767333b280973b17557020cf762018e",
+    "spec/store.test.ts": "39a8235984bb9af216ca8c4790ff6684966248a2e28fdf8e45239c20f05b4dfe"
+  },
+  "longTermFeatureDevelopment": false
+}
