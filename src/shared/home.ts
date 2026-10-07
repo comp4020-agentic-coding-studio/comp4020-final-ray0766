@@ -1,10 +1,11 @@
+import { homeIndoorDoorAllows } from './home-door.ts';
 import type { Vec3 } from './world.ts';
 
 export const HOME_SAMPLE_RADIUS = 21.6;
 export interface HomeRoom { width: number; depth: number; height: number }
-/** 60.2 m²: three times the original floor area; people and furniture keep their metre scale. */
+/** 60.2 m²: approximately three times the original floor area; people and furniture keep their metre scale. */
 export const HOME_ROOM: Readonly<HomeRoom> = { width: 8.6, depth: 7, height: 2.6 };
-export const homeEntry = (room: HomeRoom = HOME_ROOM): Vec3 => [0, 0, room.depth / 2 - .9];
+export const homeEntry = (room: HomeRoom = HOME_ROOM): Vec3 => [0, 0, room.depth / 2 - 1.05];
 export const homeExit = (room: HomeRoom = HOME_ROOM): Vec3 => [0, 0, room.depth / 2 - .2];
 export const HOME_ENTRY = homeEntry();
 export const HOME_EXIT = homeExit();
@@ -46,13 +47,14 @@ export function homeItemBounds(item: HomeItem) {
   return { minX: item.position[0] - (w*c+d*s)/2, maxX: item.position[0] + (w*c+d*s)/2,
     minZ: item.position[2] - (w*s+d*c)/2, maxZ: item.position[2] + (w*s+d*c)/2 };
 }
-export function homePositionAllowed(position: Vec3, items: readonly HomeItem[], padding = HOME_BODY_RADIUS, room: HomeRoom = HOME_ROOM): boolean {
+export function homePositionAllowed(position: Vec3, items: readonly HomeItem[], padding = HOME_BODY_RADIUS, room: HomeRoom = HOME_ROOM, doorOpen = true): boolean {
   if (!position.every(Number.isFinite) || Math.abs(position[1]) > .001 || Math.abs(position[0]) > room.width/2-padding || Math.abs(position[2]) > room.depth/2-padding) return false;
+  if (!homeIndoorDoorAllows(position, room, doorOpen)) return false;
   return items.every(item => { const b=homeItemBounds(item); return position[0] < b.minX-padding || position[0] > b.maxX+padding || position[2] < b.minZ-padding || position[2] > b.maxZ+padding; });
 }
-export function homePathAllowed(from: Vec3, to: Vec3, items: readonly HomeItem[], room: HomeRoom = HOME_ROOM): boolean {
+export function homePathAllowed(from: Vec3, to: Vec3, items: readonly HomeItem[], room: HomeRoom = HOME_ROOM, doorOpen = true): boolean {
   const steps=Math.max(1,Math.ceil(Math.hypot(to[0]-from[0],to[2]-from[2])/.06));
-  for(let n=0;n<=steps;n++) if(!homePositionAllowed(from.map((v,i)=>v+(to[i]-v)*n/steps) as Vec3,items,HOME_BODY_RADIUS,room)) return false;
+  for(let n=0;n<=steps;n++) if(!homePositionAllowed(from.map((v,i)=>v+(to[i]-v)*n/steps) as Vec3,items,HOME_BODY_RADIUS,room,doorOpen)) return false;
   return true;
 }
 export function defaultHomeInterior(): HomeInterior {

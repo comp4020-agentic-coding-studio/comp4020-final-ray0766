@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { Group,Vector3 } from 'three';
 import { openStore } from '../src/server/store.ts';
 import { presenceStore } from '../src/server/presence.ts';
-import { canAcceptPlayer,canAcceptUniverse } from '../src/client/sync.ts';
+import { canAcceptPlayer,canAcceptUniverse,isDoorOnlyRevision } from '../src/client/sync.ts';
 import { PlacedObjectShadows } from '../src/client/placed-shadows.ts';
 import { Colony } from '../src/client/colony.ts';
 import type { ColonyBridge } from '../src/client/colony.ts';
@@ -34,7 +34,7 @@ function colonyFixture(current:Universe,read:()=>Promise<Universe>=async()=>curr
   // Exercise the real acceptance/polling methods without the editor's event setup.
   const colony:Colony=Object.assign(Object.create(Colony.prototype) as Colony,{universe:current,building:false,syncing:true,busy:false,
     bridge:{applyPlayer,universe:paint,obstacles,canvas:document.querySelector('canvas'),read} as Partial<ColonyBridge>,
-    layer:new Group(),objects:new Map(),shadows:new PlacedObjectShadows(),painted:'',selected:null,pollBusy:false,
+    layer:new Group(),pathPreview:new Group(),objects:new Map(),shadows:new PlacedObjectShadows(),painted:'',selected:null,pollBusy:false,
     hud:vi.fn(),editor:vi.fn(),starMap:vi.fn(),renderObject:vi.fn(()=>new Group())});
   return {colony,applyPlayer,paint,obstacles};
 }
@@ -101,6 +101,16 @@ it('rejects an older room or door poll even at the same player revision',()=>{
   expect(canAcceptPlayer(current,oldRoom)).toBe(false);expect(canAcceptPlayer(current,oldDoor)).toBe(false);
   const fresh=structuredClone(current);fresh.home!.interior.doorVersion=4;fresh.home!.interior.doorOpen=true;
   expect(canAcceptPlayer(current,fresh)).toBe(true);
+});
+it('preserves held input only for an isolated door scene change, not a remodel or missed scene edits',()=>{
+  const {s}=fixture(),before=s.state('owner');
+  before.home={planetId:before.planetId,buildingId:'home',interiorId:'room',door:{position:SPAWN,yaw:0},interior:defaultHomeInterior(),canEdit:true,buildingVersion:1,variant:'base',canUndo:false};
+  const after=structuredClone(before);after.home!.interior.doorVersion++;after.home!.interior.doorOpen=false;after.ground!.sceneRevision++;
+  expect(isDoorOnlyRevision(before,after)).toBe(true);
+  const remodel=structuredClone(after);remodel.home!.buildingVersion++;
+  expect(isDoorOnlyRevision(before,remodel)).toBe(false);
+  const missed=structuredClone(after);missed.ground!.sceneRevision++;
+  expect(isDoorOnlyRevision(before,missed)).toBe(false);
 });
 it('keeps successful reconnect state when an earlier universe poll fails later',async()=>{
   const {s,planet}=fixture(),before=s.universe('visitor');let fail!:(e:Error)=>void;

@@ -18,6 +18,7 @@ import { blueprintStore } from './blueprints.ts';
 import { planetStore } from './planets.ts';
 import { RequestError } from './errors.ts';
 import { navigationStore } from './navigation.ts';
+import { homePathStore } from './home-paths.ts';
 export { RequestError } from './errors.ts';
 
 interface Row { character: Character; quest: Quest; position: string; deliveries: number; revision: number; moved_at: number; planet_id: string }
@@ -171,6 +172,7 @@ export function openStore(path: string, options: { homeSample?: boolean } = {}) 
   const navigation=navigationStore(db,planets);
   const ground=groundStore(db,planets);
   const homes=homeStore(db,planets,blueprints,history,homeSample);
+  const homePaths=homePathStore(db,planets,homes,homeSample);
   const row = (id: string): Row => {
     const result = db.prepare('SELECT * FROM players WHERE id=?').get(id) as unknown as Row | undefined;
     if (!result) throw new RequestError(401, 'Your session has expired. Reload to start a new visit.');
@@ -186,6 +188,8 @@ export function openStore(path: string, options: { homeSample?: boolean } = {}) 
   const universe = (id: string) => { const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) }; };
   return {
     db, state, universe, migrationBackup, homeSample,
+    previewHomePaths(id:string,body:Record<string,unknown>){row(id);return homePaths.preview(id,body);},
+    applyHomePaths(id:string,body:Record<string,unknown>){row(id);homePaths.apply(id,body);return universe(id);},
     historyPage(id:string,planet:unknown,after?:unknown,limit?:unknown){row(id);return history.page(id,planet,after,limit);},
     historySnapshot(id:string,planet:unknown,sequence?:unknown){row(id);return {...history.snapshot(id,planet,sequence),radius:planets.planet(planet).radius};},
     saveShip(id: string, body: Record<string, unknown>) { row(id); ships.save(id, body); return state(id); },

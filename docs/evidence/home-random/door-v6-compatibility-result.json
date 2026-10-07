@@ -1,0 +1,406 @@
+{
+  "status": "passed",
+  "checkedAt": "2026-10-07T19:14:40.259Z",
+  "scope": "Existing isolated backup copied once; original backup and 8126 source were not opened writable or modified.",
+  "source": ".data/backups/8126-review-20261007T174443Z.sqlite",
+  "copy": ".data/compatibility-door-v6.sqlite",
+  "sourceSha256Before": "6d6cdb79d3dc5206727419fc23b897d3cc60fa7d55144e8ea16af194ff09c6c3",
+  "sourceSha256After": "6d6cdb79d3dc5206727419fc23b897d3cc60fa7d55144e8ea16af194ff09c6c3",
+  "sourceUnchanged": true,
+  "physicsUpgradeExplanation": "Private exterior ground reads upgrade walking physics from version 5 to 6, advance the movement sequence, reset clock credit/request retry metadata as needed and increment the associated player revision to fence stale responses. Valid feet position, radius, vertical speed, grounded state and jump latch are preserved. Interior visitors retain their inactive ground rows until returning outdoors. No schema or durable building/room/manifest/library migration is performed.",
+  "originalTableCount": 19,
+  "originalTables": {
+    "blueprint_contents": {
+      "rows": 7,
+      "sha256": "13765938ab3330b695b00a458ebd03fc553d024f800bbcab9e4dda7189496fe5"
+    },
+    "blueprint_library": {
+      "rows": 24,
+      "sha256": "3c37aa49a3f802e3bea67176e3f072c7bfc02a4385da4552669a8eeb8ea874ae"
+    },
+    "ground_states": {
+      "rows": 16,
+      "sha256": "a9279a16fe5b6826bfa1f65de6f0e12022de2411d01625408f418e2277bf9df6"
+    },
+    "history_events": {
+      "rows": 671,
+      "sha256": "53b1bdad39c27bd1777617f38471f80fbf92b950a47712ee50e45aca2f11fbad"
+    },
+    "history_heads": {
+      "rows": 32,
+      "sha256": "53d37eac84b8206a1a9e5e125f6f6574bfc8eb54781372f62626ab9aea91b4f8"
+    },
+    "history_snapshots": {
+      "rows": 64,
+      "sha256": "6e738091c50910acf41b852d8a2a9abe57d088b4ee2232190d8533f41cb20155"
+    },
+    "home_interiors": {
+      "rows": 16,
+      "sha256": "ee28a866cb3dc238689b3db7375be4786b39c9b0a7eb3578aca24836cec120cd"
+    },
+    "home_locations": {
+      "rows": 16,
+      "sha256": "1bd40fe95fa0c4efe6dd16d38db0fd624a0881f5c0fd6effbf8b2105bc98b178"
+    },
+    "home_manifests": {
+      "rows": 16,
+      "sha256": "1e7866615a4aad596c65a10d7fb5c33f0bb6c073efc5e996660ba25165100eef"
+    },
+    "home_sample_config": {
+      "rows": 1,
+      "sha256": "39b9a0f5d13c5811665e95c80a11b641bed5c9987c692653ecf30803a9758fb8"
+    },
+    "object_assets": {
+      "rows": 608,
+      "sha256": "e0e5ca1fa79b0c6829693e589e38187cf36f43f59e45f779b52e9fc6261b676e"
+    },
+    "object_replacements": {
+      "rows": 13,
+      "sha256": "ff9228c47d806342e823caa6d4ed40fab92b0b7c35c5c342da2ccb3b2f45c5d5"
+    },
+    "object_tombstones": {
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "planet_objects": {
+      "rows": 656,
+      "sha256": "157a8168009cef9c825b0d7fcec90de72f5c27d9d729895bfcca307a4fe8ea2e"
+    },
+    "planets": {
+      "rows": 33,
+      "sha256": "1ae15288db45538c8ab6431a1d072be44655eef98691e310b39b0ac8ffbdf088"
+    },
+    "player_ships": {
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "players": {
+      "rows": 16,
+      "sha256": "75fab2d08102d38a69351e69afa9565239b631cab53da7c759570f03d2155473"
+    },
+    "sqlite_sequence": {
+      "rows": 1,
+      "sha256": "2c1b1af85a492a39c25a9f8d1e3bda0b5b1eb9edb1d1abe656a5c33f8b0c7386"
+    },
+    "visits": {
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "durable": {
+    "homeIdentitySha256": "4b758a39267f41f96a7942aa1f5bd6243a5b6ce76d2e88f96d787f0e7e5844d1",
+    "furnitureSha256": "2d1ffc0adbe6b1c896f6517f5f6c2043ce00849a84b8678262815a236f5756cf",
+    "furnitureCount": 64,
+    "blueprintLabelsGroupsHashesSha256": "8966f75a8615758c7a77c135adca5a15c5793850ff4f1066d1693dca84a4159e",
+    "manifestCount": 16,
+    "manifestVersions": [
+      1
+    ],
+    "manifestGenerators": [
+      "home-sample"
+    ]
+  },
+  "checks": [
+    {
+      "pass": "open-read-close",
+      "readIdentities": 16,
+      "roomDescriptorsVerified": 16,
+      "roomsVerified": 16,
+      "projectedRoom": {
+        "width": 8.6,
+        "depth": 7,
+        "height": 2.6,
+        "area": 60.2
+      },
+      "furnitureCoordinatesIdsAndVersionsUnchanged": true,
+      "physicalEdgesAndExpandedWalkingRangeVerified": true,
+      "changedTables": [
+        "ground_states",
+        "players"
+      ],
+      "cumulativeChanges": {
+        "ground_states": {
+          "beforeCount": 16,
+          "afterCount": 16,
+          "addedRows": 0,
+          "removedRows": 0,
+          "updatedRows": 5,
+          "changedFieldCounts": {
+            "sequence": 5,
+            "physics_version": 5,
+            "clock_credit": 1,
+            "request_hash": 1
+          }
+        },
+        "players": {
+          "beforeCount": 16,
+          "afterCount": 16,
+          "addedRows": 0,
+          "removedRows": 0,
+          "updatedRows": 5,
+          "changedFieldCounts": {
+            "revision": 5
+          }
+        }
+      },
+      "changesThisPass": {
+        "ground_states": {
+          "beforeCount": 16,
+          "afterCount": 16,
+          "addedRows": 0,
+          "removedRows": 0,
+          "updatedRows": 5,
+          "changedFieldCounts": {
+            "sequence": 5,
+            "physics_version": 5,
+            "clock_credit": 1,
+            "request_hash": 1
+          }
+        },
+        "players": {
+          "beforeCount": 16,
+          "afterCount": 16,
+          "addedRows": 0,
+          "removedRows": 0,
+          "updatedRows": 5,
+          "changedFieldCounts": {
+            "revision": 5
+          }
+        }
+      },
+      "groundVersionCounts": [
+        {
+          "version": 5,
+          "count": 11
+        },
+        {
+          "version": 6,
+          "count": 5
+        }
+      ],
+      "tableDataSha256": "d551a67701b68e7454dacc6b9fcf63db55034d93ac8cdb117fab4eee064ed5c5",
+      "tablesAfter": {
+        "blueprint_contents": {
+          "rows": 7,
+          "sha256": "13765938ab3330b695b00a458ebd03fc553d024f800bbcab9e4dda7189496fe5"
+        },
+        "blueprint_library": {
+          "rows": 24,
+          "sha256": "3c37aa49a3f802e3bea67176e3f072c7bfc02a4385da4552669a8eeb8ea874ae"
+        },
+        "ground_states": {
+          "rows": 16,
+          "sha256": "bc72bee4f3f051e35f22be90063ceb79f5ad033863c44724285b411f7d377ef8"
+        },
+        "history_events": {
+          "rows": 671,
+          "sha256": "53b1bdad39c27bd1777617f38471f80fbf92b950a47712ee50e45aca2f11fbad"
+        },
+        "history_heads": {
+          "rows": 32,
+          "sha256": "53d37eac84b8206a1a9e5e125f6f6574bfc8eb54781372f62626ab9aea91b4f8"
+        },
+        "history_snapshots": {
+          "rows": 64,
+          "sha256": "6e738091c50910acf41b852d8a2a9abe57d088b4ee2232190d8533f41cb20155"
+        },
+        "home_interiors": {
+          "rows": 16,
+          "sha256": "ee28a866cb3dc238689b3db7375be4786b39c9b0a7eb3578aca24836cec120cd"
+        },
+        "home_locations": {
+          "rows": 16,
+          "sha256": "1bd40fe95fa0c4efe6dd16d38db0fd624a0881f5c0fd6effbf8b2105bc98b178"
+        },
+        "home_manifests": {
+          "rows": 16,
+          "sha256": "1e7866615a4aad596c65a10d7fb5c33f0bb6c073efc5e996660ba25165100eef"
+        },
+        "home_sample_config": {
+          "rows": 1,
+          "sha256": "39b9a0f5d13c5811665e95c80a11b641bed5c9987c692653ecf30803a9758fb8"
+        },
+        "object_assets": {
+          "rows": 608,
+          "sha256": "e0e5ca1fa79b0c6829693e589e38187cf36f43f59e45f779b52e9fc6261b676e"
+        },
+        "object_replacements": {
+          "rows": 13,
+          "sha256": "ff9228c47d806342e823caa6d4ed40fab92b0b7c35c5c342da2ccb3b2f45c5d5"
+        },
+        "object_tombstones": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "planet_objects": {
+          "rows": 656,
+          "sha256": "157a8168009cef9c825b0d7fcec90de72f5c27d9d729895bfcca307a4fe8ea2e"
+        },
+        "planets": {
+          "rows": 33,
+          "sha256": "1ae15288db45538c8ab6431a1d072be44655eef98691e310b39b0ac8ffbdf088"
+        },
+        "player_ships": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "players": {
+          "rows": 16,
+          "sha256": "82c0f9cf88627adcdff9198487dca4a0c5963ffc511bd68962a38140656e8744"
+        },
+        "sqlite_sequence": {
+          "rows": 1,
+          "sha256": "2c1b1af85a492a39c25a9f8d1e3bda0b5b1eb9edb1d1abe656a5c33f8b0c7386"
+        },
+        "visits": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      },
+      "schemaSha256": "15feec3c32aafadfa1712f88e605068b52a012a0f4dc776f8cc1b72b09914391",
+      "migrationBackup": null
+    },
+    {
+      "pass": "reopen-read-close",
+      "readIdentities": 16,
+      "roomDescriptorsVerified": 16,
+      "roomsVerified": 16,
+      "projectedRoom": {
+        "width": 8.6,
+        "depth": 7,
+        "height": 2.6,
+        "area": 60.2
+      },
+      "furnitureCoordinatesIdsAndVersionsUnchanged": true,
+      "physicalEdgesAndExpandedWalkingRangeVerified": true,
+      "changedTables": [
+        "ground_states",
+        "players"
+      ],
+      "cumulativeChanges": {
+        "ground_states": {
+          "beforeCount": 16,
+          "afterCount": 16,
+          "addedRows": 0,
+          "removedRows": 0,
+          "updatedRows": 5,
+          "changedFieldCounts": {
+            "sequence": 5,
+            "physics_version": 5,
+            "clock_credit": 1,
+            "request_hash": 1
+          }
+        },
+        "players": {
+          "beforeCount": 16,
+          "afterCount": 16,
+          "addedRows": 0,
+          "removedRows": 0,
+          "updatedRows": 5,
+          "changedFieldCounts": {
+            "revision": 5
+          }
+        }
+      },
+      "changesThisPass": {},
+      "groundVersionCounts": [
+        {
+          "version": 5,
+          "count": 11
+        },
+        {
+          "version": 6,
+          "count": 5
+        }
+      ],
+      "tableDataSha256": "d551a67701b68e7454dacc6b9fcf63db55034d93ac8cdb117fab4eee064ed5c5",
+      "tablesAfter": {
+        "blueprint_contents": {
+          "rows": 7,
+          "sha256": "13765938ab3330b695b00a458ebd03fc553d024f800bbcab9e4dda7189496fe5"
+        },
+        "blueprint_library": {
+          "rows": 24,
+          "sha256": "3c37aa49a3f802e3bea67176e3f072c7bfc02a4385da4552669a8eeb8ea874ae"
+        },
+        "ground_states": {
+          "rows": 16,
+          "sha256": "bc72bee4f3f051e35f22be90063ceb79f5ad033863c44724285b411f7d377ef8"
+        },
+        "history_events": {
+          "rows": 671,
+          "sha256": "53b1bdad39c27bd1777617f38471f80fbf92b950a47712ee50e45aca2f11fbad"
+        },
+        "history_heads": {
+          "rows": 32,
+          "sha256": "53d37eac84b8206a1a9e5e125f6f6574bfc8eb54781372f62626ab9aea91b4f8"
+        },
+        "history_snapshots": {
+          "rows": 64,
+          "sha256": "6e738091c50910acf41b852d8a2a9abe57d088b4ee2232190d8533f41cb20155"
+        },
+        "home_interiors": {
+          "rows": 16,
+          "sha256": "ee28a866cb3dc238689b3db7375be4786b39c9b0a7eb3578aca24836cec120cd"
+        },
+        "home_locations": {
+          "rows": 16,
+          "sha256": "1bd40fe95fa0c4efe6dd16d38db0fd624a0881f5c0fd6effbf8b2105bc98b178"
+        },
+        "home_manifests": {
+          "rows": 16,
+          "sha256": "1e7866615a4aad596c65a10d7fb5c33f0bb6c073efc5e996660ba25165100eef"
+        },
+        "home_sample_config": {
+          "rows": 1,
+          "sha256": "39b9a0f5d13c5811665e95c80a11b641bed5c9987c692653ecf30803a9758fb8"
+        },
+        "object_assets": {
+          "rows": 608,
+          "sha256": "e0e5ca1fa79b0c6829693e589e38187cf36f43f59e45f779b52e9fc6261b676e"
+        },
+        "object_replacements": {
+          "rows": 13,
+          "sha256": "ff9228c47d806342e823caa6d4ed40fab92b0b7c35c5c342da2ccb3b2f45c5d5"
+        },
+        "object_tombstones": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "planet_objects": {
+          "rows": 656,
+          "sha256": "157a8168009cef9c825b0d7fcec90de72f5c27d9d729895bfcca307a4fe8ea2e"
+        },
+        "planets": {
+          "rows": 33,
+          "sha256": "1ae15288db45538c8ab6431a1d072be44655eef98691e310b39b0ac8ffbdf088"
+        },
+        "player_ships": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "players": {
+          "rows": 16,
+          "sha256": "82c0f9cf88627adcdff9198487dca4a0c5963ffc511bd68962a38140656e8744"
+        },
+        "sqlite_sequence": {
+          "rows": 1,
+          "sha256": "2c1b1af85a492a39c25a9f8d1e3bda0b5b1eb9edb1d1abe656a5c33f8b0c7386"
+        },
+        "visits": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      },
+      "schemaSha256": "15feec3c32aafadfa1712f88e605068b52a012a0f4dc776f8cc1b72b09914391",
+      "migrationBackup": null
+    }
+  ],
+  "privacy": "Identity values, names, labels and group text are omitted; only counts and hashes are reported.",
+  "lazyUpgradeCounts": {
+    "exteriorGroundSavesUpgradedTo6": 5,
+    "inactiveInteriorGroundSavesRetainedAt5": 11,
+    "unchangedTables": 17,
+    "secondOpenAdditionalMutations": 0
+  }
+}

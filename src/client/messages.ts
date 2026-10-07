@@ -1,6 +1,19 @@
 // Host-owned UI translations. English source strings are the stable fallback.
 // Saved names, IDs, resource snapshots and server payloads are not translated.
 export const messages: Record<string, string> = {
+  'Someone is in the doorway. Step back before moving the door.':'有人在门扇经过的位置，请退开后再开关门。',
+  'Someone is in the doorway. Move the home after they step clear.':'有人在新门口的位置，请等对方离开后再移动房屋。',
+  'The door changed in another tab.':'门已在另一个页面中改变，请重试。',
+  'Preview path tiles':'预览小路石板',
+  'Add previewed tiles':'添加预览石板',
+  'Cancel preview':'取消预览',
+  'These ordinary path tiles use your building budget. Grass gaps keep space for your own building.':'这些普通石板计入建造数量。保留的草地间隔方便你继续建造。',
+  'Path tiles added. Move or remove each tile in Build.':'石板已添加。可以在「建造」中逐块移动或移除。',
+  'Could not preview paths.':'暂时无法预览小路。',
+  'Could not add paths.':'暂时无法添加小路。',
+  'Your planet changed. Preview the paths again.':'星球已发生变化，请重新预览小路。',
+  'No more path tiles fit. Your existing objects are unchanged.':'没有可放置石板的位置，现有物件保持不变。',
+
   "Your home is ready. Choose a suit, enter through its door, then make the room and garden yours.": "家已经准备好了。选一套衣服，从家门进入，布置房间，再改造小屋和庭院。",
   "Walk to your home’s door, then choose Enter home.": "走到家门前，选择“进入家中”。",
   "My home": "我的家",
@@ -832,6 +845,7 @@ export const messages: Record<string, string> = {
 
 // Third tuple item lists system-term slots. Other slots, including user names, stay verbatim.
 export const patterns: readonly (readonly [string, string, (readonly number[])?])[] = [
+  ['{0} path tiles · {1} / {2} objects after adding','{0} 块石板 · 添加后物件 {1} / {2}'],
   ["{0} needs a floor or roof deck under its cell.", "{0}所在格下方需要地板或屋顶平台。", [0]],
   ["{0} hangs on a plain wall ({1}) on its edge.", "{0}需挂在格边的平整墙面（{1}）上。", [0, 1]],
   ["{0} needs a corner post at each end.", "{0}的两端都需要角柱。", [0]],

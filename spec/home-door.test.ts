@@ -62,11 +62,11 @@ it('lets a visitor open the same door while furniture stays owner-only', () => {
   expect(JSON.parse(String(serialized))).toMatchObject({doorOpen:true,doorVersion:2});
 });
 
-it('keeps door animation separate from room collision and supports reduced motion', () => {
+it('applies the same immediate door pose for ordinary and reduced motion', () => {
   const view=createHomeDoor(),position=[...HOME_ENTRY] as [number,number,number],room=defaultHomeInterior();
   view.setOpen(false,true);expect(view.root.userData.open).toBe(false);
   const closedAngle=view.root.children[0].rotation.y;
-  view.setOpen(true);view.frame(.03);expect(view.root.children[0].rotation.y).toBeLessThan(closedAngle);
+  view.setOpen(true);view.frame(.03);expect(view.root.children[0].rotation.y).toBeGreaterThan(closedAngle);
   view.setOpen(false);view.frame(.01,true);expect(view.root.children[0].rotation.y).toBe(0);
   expect(homePositionAllowed(position,room.items)).toBe(true);expect(position).toEqual(HOME_ENTRY);
   expect(normalizeHomeInterior(room)).toEqual(room);view.dispose();

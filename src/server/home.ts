@@ -1,3 +1,6 @@
+import { occupiedExteriorDoor } from './home-door-safety.ts';
+import { homeDoorSweepContains, homeIndoorDoorOrigin } from '../shared/home-door.ts';
+import { GroundWorld } from '../shared/physics/world.ts';
 import { createHash, randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
 import { defaultHomeInterior, HOME_BODY_RADIUS, homeEntry, homeNearDoor, normalizeHomeInterior, HOME_ITEM_KINDS, HOME_MATERIALS, HOME_MAX_ITEMS, HOME_MOVE_SPEED, homeItemBounds, homePathAllowed, homePositionAllowed } from '../shared/home.ts';
@@ -69,7 +72,7 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
   function door(h:HomeRow) {
     const p=planets.planet(h.planet_id),o=planets.view('',h.planet_id).objects.find(o=>o.id===h.building_id);
     if(!o?.blueprintHash)throw new RequestError(409,'Your home exterior is unavailable; its contents are preserved.');
-    const key=JSON.stringify([p.revision,p.radius,p.environment,o.version,o.blueprintHash,o.position,o.rotation]);
+    const key=JSON.stringify([p.radius,p.environment,o.version,o.blueprintHash,o.position,o.rotation]);
     const cached=doorFrames.get(h.building_id);if(cached?.key===key)return structuredClone(cached.value);
     const parts=blueprints.parts(o.blueprintHash),part=parts.find(p=>p.n===HOME_DOOR_PART&&p.part==='wall.door.open');
     if(!part)throw new RequestError(409,'The home entrance is unavailable; its contents are preserved.');
@@ -79,6 +82,16 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
     const value:HomeDescriptor['door']={position:localToDir(anchor,fit.baseRadius,point),yaw:(o.rotation+t.yaw)%(Math.PI*2),frame:{position:localToPlanet(anchor,fit.baseRadius,t.position),quaternion:quatMultiply(anchorQuaternion(anchor),quatFromAxisAngle([0,1,0],t.yaw))}};
     if(doorFrames.size>=64&&!doorFrames.has(h.building_id))doorFrames.delete(doorFrames.keys().next().value!);
     doorFrames.set(h.building_id,{key,value});return structuredClone(value);
+  }
+  /** Read every saved body, including disconnected visitors. Never recover or
+   * relocate a person to make room for a door; reject the whole action instead. */
+  function doorSweepOccupied(h:HomeRow,room:HomeInterior):boolean {
+    const origin=homeIndoorDoorOrigin(room.room);
+    for(const row of db.prepare('SELECT document FROM home_locations').all()){
+      const at=JSON.parse(String(row.document)) as HomeLocation;
+      if(at.kind==='interior'&&at.buildingId===h.building_id&&homeDoorSweepContains(at.position.map((n,i)=>n-origin[i]) as Vec3))return true;
+    }
+    return occupiedExteriorDoor(db,h.planet_id,door(h).frame!,()=>new GroundWorld(planets.view('',h.planet_id)));
   }
   function descriptor(id:string,planetId=String(player(id).planet_id)):HomeDescriptor|null {
     const h=home(planetId);if(!h)return null;const p=planets.planet(planetId),o=planets.view(id,planetId).objects.find(o=>o.id===h.building_id)!;
@@ -150,7 +163,7 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
       if(body.sequence===loc.sequence&&saved.request_hash===hash)return;
       if(body.sequence!==loc.sequence+1)throw new RequestError(409,'A newer home position exists.');
       const elapsed=Math.min(1.5,Math.max(0,now-Number(saved.moved_at))/1000),d=Math.hypot(...body.position.map((n,i)=>n-loc.position[i]));
-      if(d>HOME_MOVE_SPEED*elapsed+.25||!homePathAllowed(loc.position,body.position,interior(h).items,interior(h).room))throw new RequestError(409,'A wall or furniture blocks this home movement.');
+      if(d>HOME_MOVE_SPEED*elapsed+.25||!homePathAllowed(loc.position,body.position,interior(h).items,interior(h).room,interior(h).doorOpen))throw new RequestError(409,'A wall or furniture blocks this home movement.');
       transaction(()=>{writeLocation(id,{...loc,position:body.position as Vec3,yaw:body.yaw as number,sequence:Number(body.sequence)},now,hash);db.prepare('UPDATE players SET revision=revision+1 WHERE id=?').run(id);});
     },
     exit(id:string,body:Record<string,unknown>,now=Date.now()){
@@ -160,7 +173,7 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
       const point=door(h).position;
       transaction(()=>{db.prepare('UPDATE players SET position=?,moved_at=?,revision=revision+1 WHERE id=?').run(JSON.stringify(point),now,id);db.prepare('DELETE FROM ground_states WHERE player_id=?').run(id);writeLocation(id,{kind:'exterior',planetId:h.planet_id,visitEpoch:loc.visitEpoch+1},now);});
     },
-    setDoor(id:string,body:Record<string,unknown>){
+    setDoor(id:string,body:Record<string,unknown>){return transaction(()=>{
       strict(body,['buildingId','visitEpoch','expectedDoorVersion','open']);
       if(!enabled)throw new RequestError(404,'Home sample is unavailable.');
       if(typeof body.open!=='boolean'||!Number.isSafeInteger(body.expectedDoorVersion))throw new RequestError(400,'Choose whether to open or close the door.');
@@ -171,15 +184,15 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
       }else if(p.planet_id!==h.planet_id||JSON.parse(String(p.flight??'{"mode":"ground"}')).mode!=='ground'||distance(JSON.parse(String(p.position)),door(h).position,planets.planet(h.planet_id).radius)>1.7)throw new RequestError(409,'Walk to this home door first.');
       if(body.expectedDoorVersion!==old.doorVersion)throw new RequestError(409,'The door changed in another tab.');
       if(body.open===old.doorOpen)return;
-      // Door authority is separate from furnishing edits. No location, movement
-      // sequence or visit epoch changes, and no moving collision can eject users.
-      transaction(()=>{db.prepare('UPDATE home_interiors SET document=? WHERE planet_id=?').run(JSON.stringify({...old,doorOpen:body.open,doorVersion:old.doorVersion+1}),h.planet_id);changed(h.planet_id);});
-    },
+      if(doorSweepOccupied(h,old))throw new RequestError(409,'Someone is in the doorway. Step back before moving the door.');
+      db.prepare('UPDATE home_interiors SET document=? WHERE planet_id=?').run(JSON.stringify({...old,doorOpen:body.open,doorVersion:old.doorVersion+1}),h.planet_id);
+      db.prepare('UPDATE planets SET revision=revision+1 WHERE id=?').run(h.planet_id);changed(h.planet_id);
+    });},
     save(id:string,body:Record<string,unknown>){
       strict(body,['buildingId','expectedVersion','material','items']);const h=byBuilding(body.buildingId);if(planets.planet(h.planet_id).owner_id!==id)throw new RequestError(403,'Only the home owner can edit the room.');
       const loc=location(id);if(loc.kind!=='interior'||loc.buildingId!==h.building_id)throw new RequestError(409,'Enter your home before arranging it.');
       const old=interior(h);if(body.expectedVersion!==old.version)throw new RequestError(409,'This room changed in another tab.');const next=validateInterior(body,old.room);
-      for(const r of db.prepare('SELECT document FROM home_locations').all()){const at=JSON.parse(String(r.document)) as HomeLocation;if(at.kind==='interior'&&at.buildingId===h.building_id&&!homePositionAllowed(at.position,next.items,HOME_BODY_RADIUS,old.room))throw new RequestError(409,'A visitor is standing there. Leave their space clear.');}
+      for(const r of db.prepare('SELECT document FROM home_locations').all()){const at=JSON.parse(String(r.document)) as HomeLocation;if(at.kind==='interior'&&at.buildingId===h.building_id&&!homePositionAllowed(at.position,next.items,HOME_BODY_RADIUS,old.room,old.doorOpen))throw new RequestError(409,'A visitor is standing there. Leave their space clear.');}
       transaction(()=>{db.prepare('UPDATE home_interiors SET document=? WHERE planet_id=?').run(JSON.stringify({...old,...next,version:old.version+1}),h.planet_id);changed(h.planet_id);});
     },
     remodelBlueprint(variant:unknown):Blueprint {if(!['base','terrace','roof','extended'].includes(String(variant)))throw new RequestError(400,'Choose a home variation.');return homeVariant(variant==='base'?'starter':variant==='extended'?'extension':variant as 'terrace'|'roof');},

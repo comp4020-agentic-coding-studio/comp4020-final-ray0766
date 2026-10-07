@@ -1,6 +1,16 @@
 import type { PlayerState } from '../shared/world.ts';
 import type { Universe } from '../shared/planets.ts';
 
+/** One door revision can refresh collision without dropping a held walk/jump. */
+export function isDoorOnlyRevision(current:PlayerState|undefined,next:PlayerState):boolean {
+  return !!current?.home && !!next.home && !!current.ground && !!next.ground &&
+    current.planetId===next.planetId && current.environment===next.environment && current.worldRadius===next.worldRadius &&
+    current.flight.mode==='ground' && next.flight.mode==='ground' && current.location?.visitEpoch===next.location?.visitEpoch &&
+    current.home.interiorId===next.home.interiorId && current.home.buildingVersion===next.home.buildingVersion &&
+    next.home.interior.doorVersion===current.home.interior.doorVersion+1 &&
+    next.ground.sceneRevision===current.ground.sceneRevision+1 && next.ground.physicsVersion===current.ground.physicsVersion;
+}
+
 /** Ground sequence, scene and physics version all fence stale responses. */
 export function canAcceptPlayer(current:PlayerState|undefined,next:PlayerState):boolean {
   if(!current)return true;

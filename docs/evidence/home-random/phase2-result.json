@@ -1,0 +1,107 @@
+{
+  "stage": "Physical door and ordinary editable paths complete",
+  "recordedAt": "2026-10-07T19:36:26.455316+00:00",
+  "baseCommit": "8efaefc",
+  "preview": {
+    "url": "http://127.0.0.1:8128/",
+    "pid": 24488,
+    "build": "assets/index-zsyc2KVa.js",
+    "database": ".data/home-random.sqlite",
+    "backup": ".data/backups/8128-stage-8efaefc-20261007.sqlite"
+  },
+  "preserved": {
+    "reviewUrl": "http://127.0.0.1:8126/",
+    "reviewPid": 14409,
+    "reviewHead": "8eddba81f206dca97486119869a009944901ee13",
+    "reviewWorktreeClean": true,
+    "mainHead": "d06a54a7ab7ba849b5e90db1984a27a4b053ae0d",
+    "mainExistingUntrackedFile": "tests/e2e/crit8-update-live.spec.ts",
+    "developmentOriginalClean": true,
+    "noPushOrPublicDeployment": true
+  },
+  "delivered": [
+    "One shared metre-scale door leaf drives exterior renderer, interior renderer and authoritative physics. Closed blocks walking; open permits walking. Open/close takes effect after acknowledgement without an asynchronous swing that disagrees with collision.",
+    "Opening, closing and moving/remodelling a home reject an occupied sweep or destination doorway, including saved visitors without a live presence heartbeat. People are never pushed or teleported by the action.",
+    "Door-only revisions fence old movement batches while preserving valid standing/airborne position, velocity and held movement/camera orientation. Door changes do not rebuild terrain or static building resources.",
+    "Generator v3 saves ordinary unscaled Path objects within the same placement, terrain seating, save/history and collision contracts as player-built Path. New layouts cap at 40 objects and four buildings, leaving 24 objects/four buildings available.",
+    "Public sample v2 uses ordinary Path and player kit blueprints, capped at 64 total objects. Runtime no longer draws route-specific continuous paving or clears flora from navigation metadata.",
+    "Existing v1/v2 manifests are kept as immutable creation receipts. Owners can preview normal paths with exact counts, cancel without writes, then explicitly apply an atomic batch. Old objects, furniture, names, groups and manifest bytes remain intact.",
+    "Overview fog adapts to camera pullback, fixing the washed-out 390px public planet while preserving walking fog."
+  ],
+  "validation": {
+    "generator": {
+      "passed": 35,
+      "file": "spec/home-generation.test.ts"
+    },
+    "publicOrdinaryPaths": {
+      "passed": 7,
+      "file": "spec/sample-public-village.test.ts"
+    },
+    "pathConversion": {
+      "passed": 6,
+      "report": "home-paths-tests.json"
+    },
+    "doorPhysicsPersistence": {
+      "passed": 7,
+      "file": "spec/home-door-physics-persistence.test.ts"
+    },
+    "clientVisualAndSync": {
+      "passed": 9,
+      "files": [
+        "spec/world-visual-state.test.ts",
+        "spec/multiplayer-sync.test.ts"
+      ]
+    },
+    "affectedRegressions": {
+      "passed": 46,
+      "failed": 0,
+      "report": "phase2-regression-result.json"
+    },
+    "browser": {
+      "passed": 9,
+      "failed": 0,
+      "engine": "Installed Google Chrome 154.0.8037.98 via Playwright channel chrome",
+      "cases": {
+        "solidDoor": 1,
+        "roomDesktopAndTouch": 2,
+        "legacyPathUI": 1,
+        "publicDesktopAndTouch": 2,
+        "randomAndSlowStart": 3
+      },
+      "reports": [
+        "solid-door-browser-result.json",
+        "room-desktop-result.json",
+        "room-phone-result.json",
+        "path-browser-result.json",
+        "public-desktop-result.json",
+        "public-phone-result.json",
+        "slow-first-state-result.json"
+      ],
+      "additionalRandomReports": [
+        "slow-first-state-result.json"
+      ]
+    },
+    "static": [
+      "TypeScript noEmit",
+      "ESLint on changed code and tests",
+      "Vite production build",
+      "git diff --check",
+      "scripts/check-evidence.ts"
+    ],
+    "compatibility": "door-v6-compatibility-result.json",
+    "services": "phase2-service-result.json"
+  },
+  "observedExperience": [
+    "Real keyboard motion stopped at door-local z=0.364 m when closed and reached z=-1.647 m when open; no automatic room entry.",
+    "Existing v2 fixture previewed 23 tiles: 28 to 51 objects. Cancel preserved objects; confirm saved; ordinary Build UI rotated/saved/removed one newly added tile.",
+    "Stone-like ordinary tiles and intentional grass gaps are visible in the post and overview screenshots. This is the existing player Path presentation, not a widened special road mesh.",
+    "The public desktop walk reached post pickup, orchard delivery and harbour boarding. Mobile overview shows the whole planet clearly."
+  ],
+  "limits": [
+    "Mobile screenshots use a 390x844 Chrome touch viewport on Mac, not a physical phone; no phone frame-rate, battery or memory guarantee.",
+    "Public browser fixtures start on the hub through the isolated test store; they do not verify interplanetary flight.",
+    "Old saved route metadata remains, but only actual normal Path objects are rendered. Owners choose whether to add previewed paths.",
+    "No Messenger source, models, sounds or textures copied. No offline render or AI image generation added in this implementation."
+  ],
+  "remainingAuthorizedWork": []
+}

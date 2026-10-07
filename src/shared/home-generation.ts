@@ -12,19 +12,20 @@ import type { BuildKind, PlacedObject } from './planets.ts';
 import { FIXED_STEP, GroundWorld } from './physics/world.ts';
 import type { GroundPose } from './physics/world.ts';
 import { fieldOf, objectSeat } from './terrain.ts';
+import { planRoutePaths } from './path-layout.ts';
 import { distance, SPAWN } from './world.ts';
 import type { Vec3 } from './world.ts';
 
 /** Includes the home and all props; these are deliberately below player caps. */
-export const HOME_GENERATION_BUDGET = Object.freeze({ maxObjects: 40, maxStructures: 4, reservedObjects: 24, reservedStructures: 4 });
-export const HOME_GENERATOR_VERSION = 2;
+export const HOME_GENERATION_BUDGET = Object.freeze({ maxObjects: 40, maxStructures: 4, reservedObjects: 24, reservedStructures: 4, minSceneryObjects: 8 });
+export const HOME_GENERATOR_VERSION = 3;
 export const HOME_GENERATION_VERSION = HOME_GENERATOR_VERSION;
 export const HOME_GENERATION_ATTEMPTS = 8;
 export type HomeGenerationFallback = 'invalid-environment' | 'unsafe-environment' | 'bounded-layout-fallback';
 export interface GeneratedHomeManifest extends HomeManifest {
   environment: string;
   generator: 'home-neighbourhood';
-  version: 2;
+  version: 3;
   seed: number;
   catalogueVersion: 'home-kit-v1';
   fallback: boolean;
@@ -169,11 +170,23 @@ function plan(radius: number, seed: number, environment: string, attempt: number
   // Optional infrastructure is optional in quantity, but at least one legal
   // secondary destination is required before accepting a generated layout.
   if (!manifest.infrastructure.length) return null;
+  // Roads spend the ordinary object budget before scenery. They are the same
+  // selectable/removable path objects that an owner places, with no display
+  // ribbon and no exemption for the landing or a structure's keep-out circle.
+  // Route points remain navigation data and may cross those intentional gaps.
+  const roads = planRoutePaths({ routes: manifest.routes, radius, environment, objects: scene.objects, blueprints: scene.blueprints,
+    maxObjects: HOME_GENERATION_BUDGET.maxObjects - HOME_GENERATION_BUDGET.minSceneryObjects, idPrefix: 'generated-road' });
+  if (roads.budgetLimited || roads.coverage.some(route => route.added + route.covered < 2)) return null;
+  for (const path of roads.objects) {
+    manifest.objects.push({ kind: 'path', position: path.position, rotation: path.rotation });
+    scene.objects.push({ ...path, id: `generated-prop-${manifest.objects.length - 1}` });
+  }
   const clearings = homeRouteClearings(manifest.routes, radius);
-  const desiredProps = 12 + Math.floor(rng() * 17);
+  const desiredScenery = Math.min(8 + Math.floor(rng() * 9), HOME_GENERATION_BUDGET.maxObjects - scene.objects.length);
+  const desiredProps = manifest.objects.length + desiredScenery;
   const kinds: readonly BuildKind[] = ['tree', 'tree', 'flowers', 'flowers', 'bench', 'lamp'];
-  // 112 bounded candidates include the foreground and rear planting belt;
-  // no path tile is inserted across a court or into the landing clearance.
+  // 112 bounded scenery candidates include the foreground and rear planting
+  // belt; no decorative prop is put into the reserved navigable corridor.
   for (let index = 0; index < 112 && manifest.objects.length < desiredProps; index++) {
     const angle = rng() * Math.PI * 2, reach = 3.4 + rng() * 11.8;
     const kind = kinds[Math.floor(rng() * kinds.length)], position = at(Math.cos(angle) * reach, Math.sin(angle) * reach);

@@ -1,3 +1,4 @@
+import {HOME_GENERATOR_VERSION} from '../src/shared/home-generation.ts';
 import { afterEach, expect, it } from 'vitest';
 import { mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -21,7 +22,7 @@ it('starts an isolated sample at its sole home and never regenerates its persist
   const s=sample(),u=s.universe('owner');expect(u.player.worldRadius).toBe(21.6);expect(u.planets.every(p=>p.radius===21.6)).toBe(true);
   const structures=u.currentPlanet.objects.filter(o=>o.kind==='structure');
   expect(structures.length).toBeGreaterThanOrEqual(2);expect(structures.length).toBeLessThanOrEqual(4);
-  expect(u.currentPlanet.homeManifest).toMatchObject({generator:'home-neighbourhood',version:2});
+  expect(u.currentPlanet.homeManifest).toMatchObject({generator:'home-neighbourhood',version:HOME_GENERATOR_VERSION});
   expect(u.player.home).toMatchObject({canEdit:true,buildingVersion:1,variant:'base',interior:{room:HOME_ROOM}});
   const before=s.db.prepare('SELECT document,hash FROM home_manifests').all();s.claim('owner',u.ownedPlanetId);expect(s.db.prepare('SELECT document,hash FROM home_manifests').all()).toEqual(before);
   expect(()=>s.claim('owner',u.planets.find(p=>p.kind==='garden'&&!p.mine)!.id)).toThrow('already');

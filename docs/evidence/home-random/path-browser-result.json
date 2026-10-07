@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "browser": "154.0.8037.98",
+  "previewText": "23 path tiles · 51 / 64 objects after adding",
+  "added": 23,
+  "beforeObjects": 28,
+  "afterObjects": 51,
+  "checks": [
+    "Existing dedicated v2 test owner; original objects and manifest preserved",
+    "Preview and cancel do not write objects",
+    "Confirm creates normal Paths within 64-object budget",
+    "Reload preserves paths",
+    "Normal Build UI selects, rotates, saves and removes a new Path"
+  ],
+  "pageErrors": []
+}

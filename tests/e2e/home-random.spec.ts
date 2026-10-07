@@ -1,3 +1,4 @@
+import {HOME_GENERATOR_VERSION} from '../../src/shared/home-generation.ts';
 import { test, expect } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -23,7 +24,7 @@ async function begin(page: Page, touch = false) {
   await page.goto('/?measure=1');
   await expect(page.locator('#begin')).toBeVisible({ timeout: 25000 });
   if (touch) await page.locator('#begin').tap(); else await page.locator('#begin').click();
-  await expect.poll(async () => (await read(page)).currentPlanet.homeManifest?.version).toBe(2);
+  await expect.poll(async () => (await read(page)).currentPlanet.homeManifest?.version).toBe(HOME_GENERATOR_VERSION);
   await expect.poll(async () => Number(await page.locator('#world canvas').getAttribute('data-triangles'))).toBeGreaterThan(1000);
   await expect(page.locator('#home-controls')).toBeVisible();
 }
@@ -46,8 +47,9 @@ function assertInitial(universe: Universe) {
   expect(universe.planets.filter(p => p.mine)).toHaveLength(1);
   expect(planet.radius).toBe(21.6);
   expect(universe.player.worldRadius).toBe(21.6);
-  expect(manifest).toMatchObject({ generator: 'home-neighbourhood', version: 2, radius: 21.6, catalogueVersion: 'home-kit-v1' });
+  expect(manifest).toMatchObject({ generator: 'home-neighbourhood', version: HOME_GENERATOR_VERSION, radius: 21.6, catalogueVersion: 'home-kit-v1' });
   expect(manifest.objects).toEqual(planet.objects);
+  expect(planet.objects.some(o=>o.kind==='path')).toBe(true);
   expect(planet.objects.length).toBeLessThanOrEqual(40);
   expect(planet.objects.filter(o => o.kind === 'structure').length).toBeLessThanOrEqual(4);
   expect(planet.objects.filter(object => object.id === universe.player.home!.buildingId && object.kind === 'structure')).toHaveLength(1);

@@ -7,8 +7,8 @@
   "entry": "Dedicated isolated public-entry fixture; no flight claim",
   "errors": [],
   "entryRender": {
-    "drawCalls": 71,
-    "triangles": 109968,
+    "drawCalls": 75,
+    "triangles": 126884,
     "quality": "compact",
     "groundRadius": 21.6,
     "feetRadius": 21.817575108690555,
@@ -29,7 +29,7 @@
     ],
     "counts": {
       "structures": 3,
-      "objects": 21,
+      "objects": 64,
       "destinations": [
         "post",
         "orchard",
@@ -38,29 +38,29 @@
     }
   },
   "overviewRender": {
-    "drawCalls": 141,
-    "triangles": 121516,
+    "drawCalls": 140,
+    "triangles": 138176,
     "quality": "compact",
     "groundRadius": 21.6,
     "feetRadius": 21.817575108690555,
     "cameraPosition": [
       0,
-      102.21902061019236,
-      56.61692281358767
+      102.21902186547545,
+      56.61692351194728
     ],
     "cameraHeading": [
       0,
-      0.26066585229076455,
+      0.2606658522907646,
       -0.9654290825583873
     ],
     "groundPosition": [
       0,
-      0.9654290825583874,
-      0.2606658522907646
+      0.9654290825583872,
+      0.26066585229076455
     ],
     "counts": {
       "structures": 3,
-      "objects": 21,
+      "objects": 64,
       "destinations": [
         "post",
         "orchard",

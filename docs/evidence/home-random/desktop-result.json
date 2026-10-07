@@ -12,24 +12,24 @@
   "pageErrors": [],
   "owners": [
     {
-      "planetId": "p-cd249ad4-e0b8-4ad2-938d-8154683b8560",
-      "seed": 3770204114,
-      "objects": 25,
+      "planetId": "p-76c8c5dc-0d47-4e56-a445-1a7079a2d97c",
+      "seed": 3048787832,
+      "objects": 37,
       "structures": 4,
-      "homeId": "126a7e28-7147-4370-82d8-2ceb80a7c7cf",
-      "interiorId": "06f1a9b0-e10b-4d34-8a40-49c74cbaf694"
+      "homeId": "27c44109-d8dd-4387-a06d-c05d2f9067e2",
+      "interiorId": "e8008835-dbc1-4292-95f1-5cf10f87ad1a"
     },
     {
-      "planetId": "p-27df6eee-bea6-4084-aa19-798086f8c6e2",
-      "seed": 4173429620,
-      "objects": 32,
-      "structures": 4,
-      "homeId": "0415c68f-2eb6-4c22-8303-04ba7355dd84",
-      "interiorId": "ff953469-25e4-4db1-a336-fb4fa7f48c8f"
+      "planetId": "p-df97838e-6364-4f1e-9649-dbfd95fb8cf7",
+      "seed": 52116832,
+      "objects": 27,
+      "structures": 3,
+      "homeId": "056f2626-2a53-4422-9f24-0169e77e1db1",
+      "interiorId": "b718f835-6c09-40e1-8d0f-90e7b9e4f872"
     }
   ],
   "edit": {
-    "objectId": "e4b35f79-ef02-444c-a944-fbb217239746",
+    "objectId": "f20d68ca-f0cc-4889-bba2-881f1b4bda68",
     "beforeParts": 16,
     "afterParts": 17,
     "beforeVersion": 1,
@@ -45,8 +45,8 @@
     }
   },
   "render": {
-    "drawCalls": 80,
-    "triangles": 98778,
+    "drawCalls": 79,
+    "triangles": 97632,
     "quality": "full",
     "width": 1440,
     "height": 1000

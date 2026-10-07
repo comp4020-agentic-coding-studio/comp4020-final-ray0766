@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "browser": "154.0.8037.98",
+  "viewport": "1440x1000",
+  "blockedDoorLocalFeet": [
+    0.00008886218525985179,
+    0.002140145911650048,
+    0.364144253091092
+  ],
+  "openDoorLocalFeet": [
+    0.00042486276402689744,
+    0.0022467258641826133,
+    -1.6470985893162522
+  ],
+  "checks": [
+    "Real keyboard walking stops outside the closed leaf",
+    "Stepping back permits opening; the same route crosses the open doorway",
+    "Opening does not automatically enter the independent room",
+    "Door state, player position and interior identity survive reload"
+  ],
+  "pageErrors": []
+}

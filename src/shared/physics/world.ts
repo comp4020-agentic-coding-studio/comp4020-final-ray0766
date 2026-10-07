@@ -14,6 +14,8 @@ import { objectHeight, objectRadius } from '../planets.ts';
 import type { PlanetView, PlacedObject } from '../planets.ts';
 import { RADIUS, SPAWN } from '../world.ts';
 import type { Vec3 } from '../world.ts';
+import { homeDoorLeaf } from '../home-door.ts';
+import type { HomeDoorState } from '../home-door.ts';
 import { PART_COLLIDERS } from './parts.ts';
 import type { PartBox } from './parts.ts';
 
@@ -22,7 +24,7 @@ export const SPRINT_FLAG=1, JUMP_FLAG=2;
 export const FIXED_STEP=1/60, MAX_PATH_STEPS=28;
 // Bump whenever static collision semantics change. Durable ground rows and
 // movement batches use this same value; a scene revision alone is not enough.
-export const PHYSICS_VERSION=5;
+export const PHYSICS_VERSION=6;
 // Shared radial-ascent fix and public layout are released together.
 export const HUB_PHYSICS_VERSION=5;
 export const physicsVersionFor=(planetId:string)=>planetId==='hub'?HUB_PHYSICS_VERSION:PHYSICS_VERSION;
@@ -45,7 +47,7 @@ export class GroundWorld {
   readonly field:HeightField;readonly ground:HeightField;readonly generated:boolean;readonly baseRadius:number;
   radius(p:Vec3){return RADIUS+this.ground.heightAt(p);}
   pose(p:Vec3){return groundPose(p,this.ground);}
-  constructor(planet:Pick<PlanetView,'id'|'revision'|'objects'|'blueprints'|'environment'|'radius'>){
+  constructor(planet:Pick<PlanetView,'id'|'revision'|'objects'|'blueprints'|'environment'|'radius'|'homeDoor'>){
     this.baseRadius=planet.radius??RADIUS;
     const sample=planet.id==='hub'&&isSamplePublicRadius(this.baseRadius)?samplePublicVillage(this.baseRadius):null;
     const objects=planet.id==='hub'?[...(sample?.objects??HUB_OBJECTS),...planet.objects]:planet.objects;
@@ -55,7 +57,7 @@ export class GroundWorld {
     this.revision=planet.revision;this.planetId=planet.id;
     if(planet.id==='hub')this.harbour();
     for(const object of objects){
-      if(object.kind==='structure')this.structure(object,blueprints?.[object.blueprintHash!]??[]);
+      if(object.kind==='structure')this.structure(object,blueprints?.[object.blueprintHash!]??[],planet.homeDoor);
       else if(object.assetVersion===2&&QUICK_PARTS[object.kind]){
         const contract=QUICK_PARTS[object.kind]!,base=(this.generated?objectSeat(this.field,object,planet.blueprints).baseRadius:this.radius(object.position))+.015;
         const body:Body={objectId:object.id,dir:vec(object.position),broad:objectRadius(object)+1,colliders:[]};
@@ -79,12 +81,15 @@ export class GroundWorld {
     const q=anchor.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0,1,0),shape.yaw??0)).multiply(new Quaternion().setFromAxisAngle(new Vector3(1,0,0),shape.pitch??0));
     body.colliders.push({center,half:vec(shape.half),q,inverse:q.clone().invert(),support:!!shape.support,tag:shape.tag,objectId:body.objectId});
   }
-  private structure(o:PlacedObject,parts:PartPlacement[]){
+  private structure(o:PlacedObject,parts:PartPlacement[],homeDoor?:HomeDoorState){
     if(!parts.length)return;const fit=structureFit(parts,o.position,o.rotation,this.field),pivot=pivotOf(parts);
     const body:Body={objectId:o.id,dir:vec(o.position),broad:objectRadius(o)+1,colliders:[]};
     for(const part of parts){
       const t=partTransform(part,pivot),turn=new Quaternion().setFromAxisAngle(new Vector3(0,1,0),t.yaw);
-      for(const shape of PART_COLLIDERS[part.part]()){
+      const dynamic=homeDoor?.buildingId===o.id&&homeDoor.partNumber===part.n&&part.part==='wall.door.open';
+      const shapes=PART_COLLIDERS[part.part]();
+      const colliders=dynamic?[...shapes.filter(shape=>shape.tag!=='open leaf'&&shape.tag!=='closed leaf'),homeDoorLeaf(homeDoor.open)]:shapes;
+      for(const shape of colliders){
         const center=vec(shape.center).applyQuaternion(turn).add(vec(t.position));
         this.add(body,o.position,o.rotation,fit.baseRadius,{...shape,center:center.toArray() as Vec3,yaw:t.yaw+(shape.yaw??0)});
       }

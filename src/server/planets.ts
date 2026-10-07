@@ -1,3 +1,9 @@
+import { occupiedExteriorDoor } from './home-door-safety.ts';
+import { GroundWorld } from '../shared/physics/world.ts';
+import { localToPlanet, anchorQuaternion } from '../assets/claude-geometry/core/anchor.ts';
+import { quatMultiply, quatFromAxisAngle } from '../assets/claude-geometry/core/vec.ts';
+import { partTransform, pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
+import { normalizeHomeInterior } from '../shared/home.ts';
 import { HOME_DOOR_PART } from '../shared/home-layout.ts';
 import { HOME_ENVIRONMENT } from '../shared/home-layout.ts';
 import {SAMPLE_PUBLIC_ENVIRONMENT,SAMPLE_PUBLIC_VERSION} from '../shared/sample-public-village.ts';
@@ -69,6 +75,17 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     if (parts) { const fit = structureFit(parts, point, rotation,field); if (fit.problem) throw new RequestError(400, fit.message ?? 'This ground is too uneven.'); }
     return { position: point, rotation };
   };
+  const clearHomeDoorPlacement=(planetId:string,o:PlacedObject,hash:string)=>{
+    if(!db.prepare('SELECT 1 FROM home_interiors WHERE building_id=?').get(o.id))return;
+    const p=planet(planetId),parts=blueprints.parts(hash),part=parts.find(part=>part.n===HOME_DOOR_PART&&part.part==='wall.door.open');
+    if(!part)return;
+    const t=partTransform(part,pivotOf(parts)),anchor={dir:o.position,yaw:o.rotation},fit=structureFit(parts,o.position,o.rotation,fieldOf(p.environment,p.radius));
+    const frame={position:localToPlanet(anchor,fit.baseRadius,t.position),quaternion:quatMultiply(anchorQuaternion(anchor),quatFromAxisAngle([0,1,0],t.yaw))};
+    if(occupiedExteriorDoor(db,planetId,frame,()=>{
+      const placed=objects(planetId),contents=Object.fromEntries(placed.flatMap(item=>item.blueprintHash?[[item.blueprintHash,blueprints.parts(item.blueprintHash)]]:[]));
+      return new GroundWorld({...summary(p,''),objects:placed,blueprints:contents});
+    }))throw new RequestError(409,'Someone is in the doorway. Move the home after they step clear.');
+  };
   const bump = (p: string) => db.prepare('UPDATE planets SET revision=revision+1 WHERE id=?').run(p);
   const same = (old: PlacedObject, p: Vec3, rotation: number) => Math.abs(old.rotation - rotation) < 1e-8 && old.position.every((v, i) => Math.abs(v - p[i]) < 1e-8);
   const replaceInner=(id:string,body:Record<string,unknown>,variant='custom',undo=false)=>{
@@ -81,6 +98,7 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     if(h&&!parts.some(p=>p.n===HOME_DOOR_PART&&p.part==='wall.door.open'))throw new RequestError(409,'Keep the home entrance so its saved interior remains accessible.');
     if(body.blueprintHash===old.blueprintHash)return;
     placement(old.kind,old.position,old.rotation,p.id,oid,String(body.blueprintHash));const size=structureSize(parts);
+    if(h)clearHomeDoorPlacement(p.id,old,String(body.blueprintHash));
     if(!undo)db.prepare('INSERT INTO object_replacements(planet_id,object_id,before_hash,after_hash,before_variant,after_variant,object_version) VALUES(?,?,?,?,?,?,?)').run(p.id,oid,old.blueprintHash!,String(body.blueprintHash),String(h?.variant??'custom'),variant,old.version+1);
     db.prepare('UPDATE planet_objects SET blueprint_hash=?,radius=?,height=?,version=version+1 WHERE id=?').run(body.blueprintHash as string,size.radius,size.height,oid);
     if(h)db.prepare('UPDATE home_interiors SET variant=? WHERE building_id=?').run(variant,oid);
@@ -95,7 +113,8 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
       const placed = objects(planetId);
       const hashes = [...new Set(placed.flatMap(o => o.blueprintHash ? [o.blueprintHash] : []))];
       const manifest=db.prepare('SELECT document FROM home_manifests WHERE planet_id=?').get(planetId);
-      return { ...summary(planet(planetId), id), objects: placed, ...(manifest?{homeManifest:JSON.parse(String(manifest.document))}:{}), ...(hashes.length ? {blueprints: Object.fromEntries(hashes.map(h => [h, blueprints.parts(h)]))} : {}) };
+      const home=db.prepare('SELECT building_id,document FROM home_interiors WHERE planet_id=?').get(planetId),room=home?normalizeHomeInterior(JSON.parse(String(home.document))):null;
+      return { ...summary(planet(planetId), id), objects: placed, ...(home&&room?{homeDoor:{buildingId:String(home.building_id),partNumber:HOME_DOOR_PART,open:room.doorOpen,version:room.doorVersion}}:{}), ...(manifest?{homeManifest:JSON.parse(String(manifest.document))}:{}), ...(hashes.length ? {blueprints: Object.fromEntries(hashes.map(h => [h, blueprints.parts(h)]))} : {}) };
     },
     owned(id: string) { return (db.prepare('SELECT id FROM planets WHERE owner_id=?').get(id)?.id as string) ?? null; },
     claim(id: string, planetId: unknown) {
@@ -159,6 +178,7 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
         const position = placement(old.kind, body.position, body.rotation, p.id, oid, old.blueprintHash);
         if (same(old, position.position, position.rotation)) return;
         if (old.version !== body.expectedVersion) throw new RequestError(409, 'This object changed in another tab. Select it again.');
+        if(old.blueprintHash)clearHomeDoorPlacement(p.id,{...old,...position},old.blueprintHash);
         db.prepare('UPDATE planet_objects SET position=?,rotation=?,version=version+1 WHERE planet_id=? AND id=?').run(JSON.stringify(position.position), position.rotation, p.id, oid); bump(p.id);
         history.append(p.id,old,objects(p.id).find(o=>o.id===oid)!);
       });

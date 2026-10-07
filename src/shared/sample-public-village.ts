@@ -13,9 +13,10 @@ import type {Vec3} from './world.ts';
 import {HUB_DOCK} from './ports.ts';
 import {HUB_SHIP,facePoint} from './harbour-layout.ts';
 import {fieldOf,objectSeat} from './terrain.ts';
+import {planRoutePaths} from './path-layout.ts';
 
 /** Sample-only public composition. Metre-sized kit parts, never scaled meshes. */
-export const SAMPLE_PUBLIC_VERSION=1;
+export const SAMPLE_PUBLIC_VERSION=2;
 export const SAMPLE_PUBLIC_ENVIRONMENT=HOME_ENVIRONMENT;
 export const SAMPLE_PUBLIC_BLUEPRINTS:Blueprint[]=[
  {...starterHome(),id:'3dbf341d-a2e9-41c8-bf64-39ea9eb1c001',name:'Village · post cottage'},
@@ -68,6 +69,9 @@ export function samplePublicVillage(radius=HOME_SAMPLE_RADIUS):SamplePublicVilla
  for(const [x,z]of [[-2.5,-2],[2.5,-2],[-3.5,-8],[3.5,-8],[-8,-14],[8,-15]])add('flowers',local(SPAWN,x,z));
  for(const [x,z]of [[-2.1,-4],[2.1,-4]])add('bench',local(SPAWN,x,z),Math.PI);
  for(const x of [-1.4,1.4])add('lamp',local(HUB_DOCK,x,1.3));
+ // Ordinary quick-build tiles retain their real dimensions, seating, clearings
+ // and object cost. Preserve the existing courts/props before allocating roads.
+ objects.push(...planRoutePaths({routes,radius,environment:SAMPLE_PUBLIC_ENVIRONMENT,objects,blueprints,spacing:.95,idPrefix:'sample-public-path'}).objects);
  const village:SamplePublicVillage={version:SAMPLE_PUBLIC_VERSION,radius,environment:SAMPLE_PUBLIC_ENVIRONMENT,objects,blueprints,routes,
   destinations:sites.map(([id,,position],i)=>({id,position,buildingId:objects[i].id}))};
  cache.set(radius,village);return village;

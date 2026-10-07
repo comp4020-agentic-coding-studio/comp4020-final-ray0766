@@ -4,9 +4,9 @@
   "realPhone": false,
   "browser": "Installed Google Chrome with mobile viewport and native Playwright touch input",
   "pageErrors": [],
-  "seed": 862509156,
+  "seed": 2786745679,
   "edit": {
-    "objectId": "09edb60d-d0ae-4dba-9dcf-05a3a293316b",
+    "objectId": "52738c05-6040-4006-bed9-888ff3e67670",
     "beforeParts": 16,
     "afterParts": 17,
     "beforeVersion": 1,
@@ -23,7 +23,7 @@
   },
   "render": {
     "drawCalls": 71,
-    "triangles": 97760,
+    "triangles": 96214,
     "quality": "compact",
     "width": 390,
     "height": 844

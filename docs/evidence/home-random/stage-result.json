@@ -67,11 +67,6 @@
     "Paving is sampled across both width and length against displayed ground, and its owned material disables the kit face depth offset that caused distant fragments.",
     "Public building model handles now release owned lamp materials and geometry exactly once."
   ],
-  "remainingAuthorizedWork": [
-    "Exterior closed-door leaf must also block authoritative and client walking, with safe closing around occupants.",
-    "Decorative curved routes currently share a generator across public/private samples but are not constructible using the player workshop road rules. Replace with shared player road construction, persistence and budgets.",
-    "390px planet overview is over-fogged because the pulled-back camera exceeds the walking-view fog range."
-  ],
   "limits": [
     "Current workshop retains 5x5m grids, three storeys and 90-degree part rotation; no arbitrary cross-building connection engine.",
     "Anonymous browser-cookie identity; no OAuth or cross-device identity.",
@@ -79,5 +74,11 @@
     "No physical-phone GPU/frame-rate claim.",
     "No original project, 8126 database, Messenger assets or immutable vendor assets modified; no push or deployment."
   ],
-  "regressionService": "Temporary 8129 service was stopped after tests; 8126 and 8128 remain detached and healthy."
+  "regressionService": "Temporary 8129 service was stopped after tests; 8126 and 8128 remain detached and healthy.",
+  "remainingAtStage": [
+    "Exterior closed-door leaf must also block authoritative and client walking, with safe closing around occupants.",
+    "Decorative curved routes currently share a generator across public/private samples but are not constructible using the player workshop road rules. Replace with shared player road construction, persistence and budgets.",
+    "390px planet overview is over-fogged because the pulled-back camera exceeds the walking-view fog range."
+  ],
+  "completionReport": "phase2-result.json"
 }

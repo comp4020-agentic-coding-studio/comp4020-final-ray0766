@@ -12,6 +12,7 @@ import type { HomeDescriptor, HomeInterior as InteriorData, HomeItem, HomeRoom }
 import type { PlayerState, Vec3 } from '../shared/world.ts';
 import type { Universe } from '../shared/planets.ts';
 import type { PresenceSnapshot } from '../shared/presence.ts';
+import { homeIndoorDoorOrigin } from '../shared/home-door.ts';
 import { createHomeDoor } from './home-door.ts';
 import './home-interior.css';
 
@@ -50,8 +51,8 @@ const copy = (interior: InteriorData): InteriorData => structuredClone(interior)
 const distance = (a: Vec3, b: Vec3) => Math.hypot(a[0] - b[0], a[2] - b[2]);
 
 /** Preview refusal before save; the server remains the authority. */
-export function homeFurnitureFits(items: readonly HomeItem[], position: Vec3, room: HomeRoom = HOME_ROOM) {
-  if (!homePositionAllowed(position, items, HOME_BODY_RADIUS, room)) return false;
+export function homeFurnitureFits(items: readonly HomeItem[], position: Vec3, room: HomeRoom = HOME_ROOM, doorOpen = true) {
+  if (!homePositionAllowed(position, items, HOME_BODY_RADIUS, room, doorOpen)) return false;
   return items.every((item, i) => {
     const a = homeItemBounds(item);
     if (a.minX < -room.width / 2 + .08 || a.maxX > room.width / 2 - .08 || a.minZ < -room.depth / 2 + .08 || a.maxZ > room.depth / 2 - .08) return false;
@@ -215,7 +216,7 @@ export class HomeInterior {
       this.sourceKey = sourceKey;
       if (!this.editing || this.pendingAction) { this.draft = copy(player.home.interior); this.draftVersion = this.draft.version; }
       this.buildRoom(); this.buildFurniture(); this.applyTheme((this.draft ?? player.home.interior).material);
-      if (!homePositionAllowed(this.position, player.home.interior.items, HOME_BODY_RADIUS, player.home.interior.room)) this.position = [...location.position];
+      if (!homePositionAllowed(this.position, player.home.interior.items, HOME_BODY_RADIUS, player.home.interior.room, player.home.interior.doorOpen)) this.position = [...location.position];
     }
     this.doorView.setOpen(player.home.interior.doorOpen, arriving);
     this.avatar.setColor(player.character); this.populateItems(); this.updateControls();
@@ -269,7 +270,7 @@ export class HomeInterior {
     const built = b.build('home-room-kit'); this.room.add(built.group);
     this.surfaceResourceDisposers.push(() => source.owned().forEach(material => material.dispose()));
     const exit = homeExit(interior.room);
-    this.doorView.root.position.set(0, 0, depth / 2);
+    this.doorView.root.position.fromArray(homeIndoorDoorOrigin(interior.room));
     const mat = new T.MeshBasicMaterial({ color: '#e6c578', transparent: true, opacity: .7, depthWrite: false });
     const doorway = new T.Mesh(new T.PlaneGeometry(1.05, .35), mat); doorway.rotation.x = -Math.PI / 2; doorway.position.set(0, .015, exit[2]); this.room.add(doorway);
     const arrow = new T.Shape(); arrow.moveTo(-.15, -.08); arrow.lineTo(.15, -.08); arrow.lineTo(0, .14); arrow.closePath();
@@ -316,7 +317,7 @@ export class HomeInterior {
     if (!this.canChange() || !this.draft) return;
     const candidate = copy(this.draft), item = candidate.items.find(i => i.id === this.selected); if (!item) return;
     item.position[0] += x; item.position[2] += z; item.yaw = (item.yaw + yaw) % (Math.PI * 2);
-    if (!homeFurnitureFits(candidate.items, this.position, candidate.room)) { this.setStatus('blocked'); return; }
+    if (!homeFurnitureFits(candidate.items, this.position, candidate.room, this.home!.interior.doorOpen)) { this.setStatus('blocked'); return; }
     this.draft = candidate; this.dirty = true; this.buildFurniture(); this.applyTheme(candidate.material); this.setStatus('edited'); this.updateControls();
   }
   private nearExit() { return this.active && !!this.home && homeNearDoor(this.position, this.home.interior.room); }
@@ -358,7 +359,7 @@ export class HomeInterior {
       const direction = right.multiplyScalar(input.x).addScaledVector(forward, -input.y);
       const before: Vec3 = [...this.position], room = this.home.interior;
       const acknowledged = this.acknowledged?.location;
-      const canMove = (candidate: Vec3) => homePositionAllowed(candidate, room.items, HOME_BODY_RADIUS, room.room) && (acknowledged?.kind !== 'interior' || homePathAllowed(acknowledged.position, candidate, room.items, room.room));
+      const canMove = (candidate: Vec3) => homePositionAllowed(candidate, room.items, HOME_BODY_RADIUS, room.room, room.doorOpen) && (acknowledged?.kind !== 'interior' || homePathAllowed(acknowledged.position, candidate, room.items, room.room, room.doorOpen));
       const steps = Math.max(1, Math.ceil(direction.length() * 2.5 * dt / .04));
       for (let i = 0; i < steps; i++) {
         const next: Vec3 = [this.position[0] + direction.x * 2.5 * dt / steps, 0, this.position[2] + direction.z * 2.5 * dt / steps];

@@ -46,8 +46,41 @@ describe('versioned, constrained home neighbourhoods', () => {
     // generator does not consume their room by moving neighbouring objects in.
     for (const variant of HOME_VARIANTS) expect(structureFit(homeVariant(variant).parts, manifest.home.position, manifest.home.rotation, field).problem).toBeNull();
     const clearings = homeRouteClearings(manifest.routes, radius);
-    for (const object of objects.filter(o => o.kind !== 'structure')) for (const clearing of clearings)
+    for (const object of objects.filter(o => o.kind !== 'structure' && o.kind !== 'path')) for (const clearing of clearings)
       expect(distance(object.position, clearing.dir, radius)).toBeGreaterThanOrEqual(clearing.radius + objectRadius(object) + .15 - 1e-8);
+  });
+
+  it('uses normal persisted path objects first, including their landing and building restrictions', () => {
+    for (const manifest of fixtures.values()) {
+      expect(manifest.version).toBe(3);
+      const { objects } = homeManifestScene(manifest);
+      const paths = objects.filter(object => object.kind === 'path');
+      const scenery = objects.filter(object => object.kind !== 'path' && object.kind !== 'structure');
+      expect(paths.length).toBeGreaterThanOrEqual(manifest.routes.length * 2);
+      expect(scenery.length).toBeGreaterThanOrEqual(HOME_GENERATION_BUDGET.minSceneryObjects);
+      // These are complete ordinary object specs, not a render-only route mesh
+      // or enlarged/invisible collision substitutes.
+      for (const path of paths) {
+        expect(path.assetVersion).toBe(2);
+        expect(path.blueprintHash).toBeUndefined();
+        expect(path.radius).toBeUndefined();
+        expect(path.height).toBeUndefined();
+        expect(distance(path.position, SPAWN, radius)).toBeGreaterThanOrEqual(objectRadius(path) + 1 - 1e-8);
+        expect(placementProblem('path', path.position, objects, path.id, undefined, radius, 2)).toBeNull();
+        // The same owner operation can retain or rotate this individual tile.
+        expect(objectSeat(fieldOf(manifest.environment, radius), { ...path, rotation: (path.rotation + Math.PI / 2) % (2 * Math.PI) }).problem).toBeNull();
+      }
+      expect(manifest.objects.slice(0, paths.length).every(object => object.kind === 'path')).toBe(true);
+      expect(manifest.objects.slice(paths.length).every(object => object.kind !== 'path')).toBe(true);
+      for (const route of manifest.routes) {
+        const routeSamples = homeRouteClearings([route], radius);
+        const tiles = paths.filter(path => routeSamples.some(sample => distance(path.position, sample.dir, radius) < .2));
+        expect(tiles.length, route.id).toBeGreaterThanOrEqual(2);
+      }
+      const first = paths[0];
+      expect(placementProblem('path', SPAWN, objects, first.id, undefined, radius, 2)).not.toBeNull();
+      expect(placementProblem('path', manifest.home.position, objects, first.id, undefined, radius, 2)).not.toBeNull();
+    }
   });
 
   it('recreates exactly the same result for the same seed, including edge uint32 seeds', () => {

@@ -1,0 +1,82 @@
+{
+  "checkedAt": "2026-10-07T19:34:22.998039+00:00",
+  "readOnlyChecks": true,
+  "services": [
+    {
+      "port": 8126,
+      "pid": 14409,
+      "health": 200,
+      "index": 200,
+      "assets": [
+        {
+          "path": "/assets/index-DSeCXCfz.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/three.core-BEi-KHTG.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/lighting-CjrcQydx.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/model3d-CSSvYAJU.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/terrain-model-C80fOKAS.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/factory-B_uRTJqn.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/index-I-_R4yj4.css",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "port": 8128,
+      "pid": 24488,
+      "health": 200,
+      "index": 200,
+      "assets": [
+        {
+          "path": "/assets/index-zsyc2KVa.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/three.core-BEi-KHTG.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/lighting-DpHWnMdE.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/model3d-BLrzxP1q.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/sample-public-village-DImx8eoC.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/factory-DEahHGRb.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/terrain-model-DOWmglcM.js",
+          "status": 200
+        },
+        {
+          "path": "/assets/index-DJOSWb9A.css",
+          "status": 200
+        }
+      ]
+    }
+  ]
+}

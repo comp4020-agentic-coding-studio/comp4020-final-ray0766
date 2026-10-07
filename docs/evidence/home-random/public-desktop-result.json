@@ -12,46 +12,15 @@
     "Keyboard route reaches the harbour; the normal boarding button appears beside its saved marker"
   ],
   "entryRender": {
-    "drawCalls": 141,
-    "triangles": 121516,
+    "drawCalls": 140,
+    "triangles": 138176,
     "quality": "full",
     "groundRadius": 21.6,
     "feetRadius": 21.817575108690555,
     "cameraPosition": [
       0,
-      24.133386003367505,
+      24.1333860033675,
       12.73086739697059
-    ],
-    "cameraHeading": [
-      0,
-      0.26066585229076455,
-      -0.9654290825583873
-    ],
-    "groundPosition": [
-      0,
-      0.9654290825583874,
-      0.2606658522907646
-    ],
-    "counts": {
-      "structures": 3,
-      "objects": 21,
-      "destinations": [
-        "post",
-        "orchard",
-        "harbour"
-      ]
-    }
-  },
-  "overviewRender": {
-    "drawCalls": 141,
-    "triangles": 121516,
-    "quality": "full",
-    "groundRadius": 21.6,
-    "feetRadius": 21.817575108690555,
-    "cameraPosition": [
-      0,
-      54.992650978939324,
-      30.431643391513475
     ],
     "cameraHeading": [
       0,
@@ -65,7 +34,38 @@
     ],
     "counts": {
       "structures": 3,
-      "objects": 21,
+      "objects": 64,
+      "destinations": [
+        "post",
+        "orchard",
+        "harbour"
+      ]
+    }
+  },
+  "overviewRender": {
+    "drawCalls": 140,
+    "triangles": 138176,
+    "quality": "full",
+    "groundRadius": 21.6,
+    "feetRadius": 21.817575108690555,
+    "cameraPosition": [
+      0,
+      54.99265119382883,
+      30.431643514773413
+    ],
+    "cameraHeading": [
+      0,
+      0.26066585229076455,
+      -0.9654290825583873
+    ],
+    "groundPosition": [
+      0,
+      0.9654290825583874,
+      0.2606658522907646
+    ],
+    "counts": {
+      "structures": 3,
+      "objects": 64,
       "destinations": [
         "post",
         "orchard",
@@ -75,28 +75,28 @@
   },
   "finalRender": {
     "drawCalls": 78,
-    "triangles": 142636,
+    "triangles": 162296,
     "quality": "full",
     "groundRadius": 21.6,
-    "feetRadius": 21.64498467974034,
+    "feetRadius": 21.64743739317201,
     "cameraPosition": [
-      -0.3285154544532596,
-      24.918030074702774,
-      -10.692333309666454
+      -0.2821215208366072,
+      24.83944141033742,
+      -10.880674333210864
     ],
     "cameraHeading": [
-      0.019709049946694427,
-      -0.5878939934069224,
-      -0.8086978458400023
+      0.02620132659317463,
+      -0.59423646883972,
+      -0.8038634893970854
     ],
     "groundPosition": [
-      -0.008190240388399689,
-      0.808732883772957,
-      -0.5881190718440077
+      -0.005096304713857852,
+      0.8040497087161337,
+      -0.5945402371511658
     ],
     "counts": {
       "structures": 3,
-      "objects": 21,
+      "objects": 64,
       "destinations": [
         "post",
         "orchard",

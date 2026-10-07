@@ -78,6 +78,8 @@ const server = createServer(async (req, res) => {
       else if(url.pathname==='/api/home/exit'){const result=store.exitHome(id,body);presence.leave(id);send(200,result);}
       else if(url.pathname==='/api/home/save')send(200,store.saveHome(id,body));
       else if(url.pathname==='/api/home/door')send(200,store.setHomeDoor(id,body));
+      else if(url.pathname==='/api/home/paths/preview')send(200,store.previewHomePaths(id,body));
+      else if(url.pathname==='/api/home/paths/apply')send(200,store.applyHomePaths(id,body));
       else if(url.pathname==='/api/home/remodel')send(200,store.remodelHome(id,body));
       else if(url.pathname==='/api/home/undo')send(200,store.undoHome(id,body));
       else if(url.pathname==='/api/objects/replace')send(200,store.replaceObject(id,body));

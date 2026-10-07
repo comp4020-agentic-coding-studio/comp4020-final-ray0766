@@ -47,6 +47,15 @@ export const createWorldStyleLibrary = () => new StyleLibrary(PRESENTATION.mater
 export const createWorldPracticalLights = () => new PracticalLights(PRESENTATION.practical.lod, { enabled: PRESENTATION.practical.enabled, scale: VILLAGE.practical });
 export const groundPresentation = (planetId: string,radius=0) => Math.abs(radius-HOME_SAMPLE_RADIUS)<1e-6?PRESENTATION.ground.sample:PRESENTATION.ground[planetId === 'hub' ? 'hub' : 'garden'];
 
+/** Keep walking fog depth when the overview camera pulls back to fit a phone. */
+export function updateGroundFog(scene: T.Scene, planetId: string, radius: number, cameraRadius: number, overview: boolean) {
+  const preset = groundPresentation(planetId, radius).fog;
+  if (!(scene.fog instanceof T.Fog) || !('near' in preset)) return;
+  const pullback = overview ? Math.max(0, cameraRadius - radius - 8) : 0;
+  scene.fog.near = preset.near + pullback;
+  scene.fog.far = preset.far + pullback;
+}
+
 export function configureGroundLighting(planetId: string, scene: T.Scene, fill: T.AmbientLight, sun: T.DirectionalLight,radius=0) {
   const look = groundPresentation(planetId,radius);
   scene.fog = 'density' in look.fog ? new T.FogExp2(look.fog.color, look.fog.density) : new T.Fog(look.fog.color, look.fog.near, look.fog.far);
