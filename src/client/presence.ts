@@ -1,3 +1,4 @@
+import { setText } from './i18n.ts';
 import {SPRINT_SPEED} from '../shared/world.ts';
 import * as T from 'three';
 import { courier,PALETTES } from './character.ts';
@@ -20,7 +21,7 @@ export class GroundPresence {
     for(const r of this.people.values())disposeGeometry(r.root);this.people.clear();
     for(const key of ['visitors','nearbyVisitors','visibleVisitors','detailedVisitors'])this.canvas.dataset[key]='0';
     delete this.canvas.dataset.presencePlanet;delete this.canvas.dataset.visitorRadii;
-    document.getElementById('presence-summary')!.textContent='No other visitors nearby.';
+    setText(document.getElementById('presence-summary')!, 'No other visitors nearby.');
   }
   receive(snapshot:PresenceSnapshot,now=performance.now(),ticket=this.ticket(snapshot.planetId)){
     if(ticket.epoch!==this.epoch||ticket.request<=this.accepted||ticket.planetId!==snapshot.planetId)return false;
@@ -41,7 +42,7 @@ export class GroundPresence {
       }
       const target=new T.Vector3(...visitor.position);r.speed=Math.min(SPRINT_SPEED,r.position.angleTo(target)*groundRadius()/Math.max(.1,(now-r.at)/1000));r.from.copy(r.position);r.fromRadius=r.radius;r.visitor=visitor;r.at=now;r.body.color.set(PALETTES[visitor.character]);r.avatar?.setColor(visitor.character);
     }
-    this.canvas.dataset.visitors=String(this.people.size);this.canvas.dataset.nearbyVisitors=String(snapshot.nearbyCount);this.canvas.dataset.presencePlanet=snapshot.planetId;document.getElementById('presence-summary')!.textContent=snapshot.nearbyCount?`${snapshot.nearbyCount} other visitor${snapshot.nearbyCount===1?'':'s'} on this world · teal foot rings`:'No other visitors nearby.';
+    this.canvas.dataset.visitors=String(this.people.size);this.canvas.dataset.nearbyVisitors=String(snapshot.nearbyCount);this.canvas.dataset.presencePlanet=snapshot.planetId;setText(document.getElementById('presence-summary')!, snapshot.nearbyCount?`${snapshot.nearbyCount} other visitor${snapshot.nearbyCount===1?'':'s'} on this world · teal foot rings`:'No other visitors nearby.');
     return true;
   }
   frame(now:number,dt:number,self:T.Vector3,reduced:boolean){

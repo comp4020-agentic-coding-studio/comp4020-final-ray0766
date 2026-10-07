@@ -1,3 +1,4 @@
+import { localizedOption, setAttribute, setHTML, setText, translate } from './i18n.ts';
 import * as T from 'three';
 import { BlueprintEditor } from '../assets/claude-geometry/blueprint/editor.ts';
 import { encodeBlueprint } from '../assets/claude-geometry/blueprint/codec.ts';
@@ -38,7 +39,7 @@ export class Workshop {
   private unload = (e: BeforeUnloadEvent) => { if (this.opened && this.unsaved) e.preventDefault(); };
   constructor(private bridge: WorkshopBridge) {
     this.dialog.id = 'workshop'; this.dialog.setAttribute('aria-labelledby', 'workshop-title');
-    this.dialog.innerHTML = `
+    setHTML(this.dialog, `
       <header class="ws-head"><div><small>MY PLANET / ASSEMBLY BAY</small><h2 id="workshop-title">Workshop</h2></div><button id="ws-close" aria-label="Close workshop">Done ×</button></header>
       <div class="ws-bar"><label>Name <input id="ws-name" maxlength="60" autocomplete="off" value=""></label><div class="ws-actions"><button id="ws-save" aria-describedby="ws-save-state">Save blueprint</button><button id="ws-place" aria-describedby="ws-save-state">Place on planet ↗</button></div></div>
       <div class="ws-body"><section class="ws-view" aria-label="Blueprint preview"><div class="ws-camera"><label>Level <select id="ws-level"><option value="0">L1 · ground</option><option value="1">L2 · upper</option><option value="2">L3 · top</option></select></label><button id="ws-frame">Frame model</button><button id="ws-inside">Look inside</button></div><div id="ws-stage"></div><p id="ws-hint" class="ws-hint" role="status" aria-live="polite">Drag to orbit · pinch or scroll to zoom · tap to add or select</p></section>
@@ -47,13 +48,13 @@ export class Workshop {
       <div class="ws-row"><label>Column <select id="ws-x"></select></label><label>Row <select id="ws-z"></select></label><label>Turn <select id="ws-rot"><option value="0">0°</option><option value="1">90°</option><option value="2">180°</option><option value="3">270°</option></select></label></div>
       <button id="ws-add">Add at cell</button><small>Walls snap to the chosen cell edge. Upper parts need support.</small>
       <div class="ws-row"><button id="ws-undo">Undo</button><button id="ws-redo">Redo</button><button id="ws-remove">Remove</button><button id="ws-rotate">Rotate</button></div>
-      <details><summary id="ws-parts-title">Parts & groups</summary><label>Parts (multiple selection)<select id="ws-parts" multiple size="5"></select></label><div class="ws-row"><button id="ws-all">Select all</button><button id="ws-clear">Deselect</button><button id="ws-up">Level up</button><button id="ws-down">Level down</button></div><div class="ws-row"><button id="ws-left">←</button><button id="ws-forward">↑</button><button id="ws-back">↓</button><button id="ws-right">→</button></div><label>Group name <input id="ws-group-name" maxlength="40" placeholder="e.g. Cabin shell"></label><div class="ws-row"><button id="ws-group">Group selection</button><button id="ws-ungroup">Ungroup</button></div><p id="ws-groups"></p></details>
-      <details open><summary>My saved blueprints</summary><select id="ws-library" aria-label="Saved blueprints"></select><button id="ws-load">Open saved blueprint</button><p class="ws-private">Names and groups stay in your private library. Visitors see placed geometry.</p></details></fieldset></aside></div>
-      <footer class="ws-footer"><div class="ws-feedback"><span id="ws-status" role="status" aria-live="polite">Ready.</span><small id="ws-save-state" role="status" aria-live="polite"></small></div><span id="ws-count"></span></footer>`;
+      <details><summary id="ws-parts-title">Parts & groups</summary><label>Parts (multiple selection)<select id="ws-parts" multiple size="5"></select></label><div class="ws-row"><button id="ws-all">Select all</button><button id="ws-clear">Deselect</button><button id="ws-up">Level up</button><button id="ws-down">Level down</button></div><div class="ws-row"><button id="ws-left">←</button><button id="ws-forward">↑</button><button id="ws-back">↓</button><button id="ws-right">→</button></div><label>Group name <input id="ws-group-name" maxlength="40" placeholder="e.g. Cabin shell"></label><div class="ws-row"><button id="ws-group">Group selection</button><button id="ws-ungroup">Ungroup</button></div><p id="ws-groups" data-i18n-verbatim></p></details>
+      <details open><summary>My saved blueprints</summary><select id="ws-library" data-i18n-verbatim aria-label="Saved blueprints"></select><button id="ws-load">Open saved blueprint</button><p class="ws-private">Names and groups stay in your private library. Visitors see placed geometry.</p></details></fieldset></aside></div>
+      <footer class="ws-footer"><div class="ws-feedback"><span id="ws-status" role="status" aria-live="polite">Ready.</span><small id="ws-save-state" role="status" aria-live="polite"></small></div><span id="ws-count"></span></footer>`);
     document.body.append(this.dialog);
     const tool=this.get<HTMLSelectElement>('tool');
-    for(const id of PART_IDS) tool.add(new Option(partLabel(id,PRESENTATION.materials.look),id));
-    for(const id of ['x','z']) for(let n=0;n<5;n++)this.get<HTMLSelectElement>(id).add(new Option(String(n+1),String(n)));
+    for(const id of PART_IDS) tool.add(localizedOption(partLabel(id,PRESENTATION.materials.look), id));
+    for(const id of ['x','z']) for(let n=0;n<5;n++)this.get<HTMLSelectElement>(id).add(localizedOption(String(n+1), String(n)));
     this.on('close',()=>this.close());
     this.dialog.addEventListener('cancel',e=>{e.preventDefault();this.close();});
     this.on('save',()=>void this.save());this.on('place',()=>this.place());
@@ -80,8 +81,8 @@ export class Workshop {
   private get<E extends HTMLElement=HTMLElement>(id:string){return this.dialog.querySelector(`#ws-${id}`) as E;}
   private on(id:string,fn:()=>void){this.get(id).onclick=()=>{if(!this.busy)fn();};}
   private get unsaved(){return this.editor.dirty||(!this.saved&&this.editor.parts.length>0);}
-  private discard(){return !this.unsaved||window.confirm('Discard the unsaved blueprint changes?');}
-  private status(text:string){this.get('status').textContent=text;}
+  private discard(){return !this.unsaved||window.confirm(translate('Discard the unsaved blueprint changes?'));}
+  private status(text:string){setText(this.get('status'), text);}
   private result(result:{message:string}){this.status(result.message);}
   async open(){
     if(this.opened||!this.bridge.allowed())return;
@@ -90,7 +91,7 @@ export class Workshop {
     try{
       this.stage=createPresentationStage('workshop',this.get('stage'));
       this.templates=new PartTemplates(this.stage.library);this.view=new WorkshopView(this.stage,this.editor,this.templates);
-      const canvas=this.stage.renderer.domElement;canvas.setAttribute('aria-label','Workshop 3D preview');
+      const canvas=this.stage.renderer.domElement;setAttribute(canvas, 'aria-label', 'Workshop 3D preview');
       const pressed=new Set<number>();let pinched=false;
       canvas.addEventListener('pointerdown',e=>{pressed.add(e.pointerId);if(pressed.size>1){pinched=true;this.pointer=null;}else{pinched=false;this.pointer={x:e.clientX,y:e.clientY};}});
       canvas.addEventListener('pointercancel',e=>{pressed.delete(e.pointerId);this.pointer=null;});
@@ -119,7 +120,7 @@ export class Workshop {
   }
   private starter(){this.hover=null;const bp=industrialCabin();bp.id=crypto.randomUUID() as Blueprint['id'];this.saved=null;this.editor.load(bp);this.level=0;this.get<HTMLSelectElement>('level').value='0';this.view?.setLevel(0);this.changed();this.frame();}
   private load(entry:LibraryEntry){this.hover=null;this.saved=entry;this.editor.load(entry.blueprint);this.level=0;this.get<HTMLSelectElement>('level').value='0';this.view?.setLevel(0);this.changed();this.frame();this.status('Saved blueprint opened.');}
-  private libraryOptions(){const select=this.get<HTMLSelectElement>('library');select.replaceChildren(...this.entries.map(e=>new Option(e.blueprint.name,e.blueprint.id)));if(this.saved)select.value=this.saved.blueprint.id;}
+  private libraryOptions(){const select=this.get<HTMLSelectElement>('library');select.replaceChildren(...this.entries.map(e=>localizedOption(e.blueprint.name, e.blueprint.id, false, false, true)));if(this.saved)select.value=this.saved.blueprint.id;}
   private async save(){
     const problem=this.editor.saveProblem();if(problem){this.status(problem);return;}
     this.busy=true;this.changed();this.status('Saving blueprint…');
@@ -142,7 +143,7 @@ export class Workshop {
     const problem=draft?this.editor.placeProblem(draft):null;
     this.view?.setGhost(draft,!problem);
     const text=this.busy?'Preview paused while the library is updating.':part==='select'?'Drag to orbit · pinch or scroll to zoom · tap to select':!draft?'Point inside the build grid, or choose a column and row.':problem?`Cannot place: ${problem.message}`:`Ready to add ${partLabel(draft.part,PRESENTATION.materials.look)} · L${draft.level+1}, column ${draft.x+1}, row ${draft.z+1}. ${this.hover?'Tap to add.':'Use Add at cell.'}`;
-    if(hint.textContent!==text)hint.textContent=text;
+    if(hint.textContent!==text)setText(hint, text);
   }
   private addAtCell(){this.hover=null;const draft=this.cellDraft();if(!draft){this.status('Choose a part tool first.');return;}
     this.result(this.editor.add(draft));this.updatePreview();}
@@ -178,15 +179,15 @@ export class Workshop {
     const saveProblem=this.editor.saveProblem();
     this.get<HTMLButtonElement>('save').disabled=this.busy||!!saveProblem;
     const saveState=this.get('save-state'),saveText=this.busy?'':saveProblem??(this.unsaved?'Save your changes before placing on the planet.':'');
-    if(saveState.textContent!==saveText)saveState.textContent=saveText;
+    if(saveState.textContent!==saveText)setText(saveState, saveText);
     this.get<HTMLButtonElement>('place').disabled=this.busy||this.unsaved||!this.saved;
     this.get<HTMLButtonElement>('undo').disabled=!this.editor.canUndo;this.get<HTMLButtonElement>('redo').disabled=!this.editor.canRedo;
     this.get<HTMLButtonElement>('load').disabled=!this.entries.length;
-    this.get('count').textContent=`${this.editor.parts.length} / 120 parts · ${this.unsaved?'Unsaved':'Saved'}`;
-    this.get('parts-title').textContent=`Parts & groups (${this.editor.selection.size} selected)`;
+    setText(this.get('count'), `${this.editor.parts.length} / 120 parts · ${this.unsaved?'Unsaved':'Saved'}`);
+    setText(this.get('parts-title'), `Parts & groups (${this.editor.selection.size} selected)`);
     const list=this.get<HTMLSelectElement>('parts');const scroll=list.scrollTop;
-    list.replaceChildren(...this.editor.parts.map(p=>{const o=new Option(`#${p.n} ${partLabel(p.part,PRESENTATION.materials.look)} · L${p.level+1}`,String(p.n));o.selected=this.editor.selection.has(p.n);return o;}));list.scrollTop=scroll;
+    list.replaceChildren(...this.editor.parts.map(p=>{const o=localizedOption(`#${p.n} ${partLabel(p.part,PRESENTATION.materials.look)} · L${p.level+1}`, String(p.n));o.selected=this.editor.selection.has(p.n);return o;}));list.scrollTop=scroll;
     this.updatePreview();
-    this.get('groups').textContent=this.editor.groups.map(g=>`${g.name} (${g.members.length})`).join(' · ');
+    setText(this.get('groups'), this.editor.groups.map(g=>`${g.name} (${g.members.length})`).join(' · '));
   }
 }

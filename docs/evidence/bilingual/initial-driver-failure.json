@@ -1,0 +1,15 @@
+{
+  "status": "failed",
+  "browser": "154.0.8037.98",
+  "checks": [
+    "Chinese browser default, persistent explicit preference, accessible labels and no character/pose reset",
+    "Ship draft, part IDs and preview survive switches without a save; player name Cottage remains verbatim after explicit save",
+    "Translated server error, unsaved character rollback and reconnect preserve preference and saved identity",
+    "Actual Shift/Space motion and pickup→delivery NPC text work in Chinese; open conversation changes language in place",
+    "Translated atlas, bearings, flight HUD, boarding and landing retain continuous real-control travel"
+  ],
+  "errors": [],
+  "rejectedMoves": [],
+  "error": "TimeoutError: locator.fill: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#ws-group-name')\u001b[22m\n\u001b[2m    - locator resolved to <input maxlength=\"40\" id=\"ws-group-name\" placeholder=\"例如：小屋外壳\"/>\u001b[22m\n\u001b[2m    - fill(\"Cottage\")\u001b[22m\n\u001b[2m  - attempting fill action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    29 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying fill action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+  "fixtures": "Isolated 8114 SQLite, fresh anonymous browser identity. Actual Chrome UI controls and movement. 390×844 is desktop touch emulation, not physical-phone performance. IAB remains unverified."
+}

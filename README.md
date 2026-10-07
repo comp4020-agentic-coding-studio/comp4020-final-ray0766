@@ -16,10 +16,20 @@ and terracotta presentation, village ship parts and compatible ground collision.
 persisted 10–12 m new planets and protected old layouts.
 [Sprint and jump](docs/integration/sprint-jump.md) adds hold-Shift running and
 Space jumping with shared collision, server validation and saved airborne state.
+[Chinese / English interface](docs/integration/bilingual.md) adds an always-available
+language selector, browser-local preference and in-place translation without losing drafts.
 The published Crit 8 release remains `09233d9`; these changes are not deployed.
 
 > Prepared with AI assistance from the student's recorded design decisions and
 > the implementation evidence.
+
+## Chinese / English
+
+Choose **中文** or **English** at the top of the world or inside any open dialog.
+The first visit follows the browser language (`zh` → Chinese; otherwise English).
+An explicit choice stays in local storage; no account or database change is needed.
+Changing language keeps the current world, flight, editor draft and saved progress.
+Player-authored names and technical IDs remain unchanged.
 
 ## What good means here
 

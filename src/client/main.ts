@@ -1,3 +1,5 @@
+import { initI18n, setAttribute, setHTML, setText } from './i18n.ts';
+import './i18n.css';
 import {SPRINT_SPEED,SPEED} from '../shared/world.ts';
 import {SPRINT_FLAG,JUMP_FLAG} from '../shared/physics/world.ts';
 import * as T from 'three';
@@ -30,6 +32,8 @@ import { createWorld, courier } from './scene.ts';
 import { distance, INTERACT_DISTANCE, NPCS, RADIUS } from '../shared/world.ts';
 import type { Character, NpcId, PlayerState, Vec3 } from '../shared/world.ts';
 
+initI18n();
+
 const $ = <E extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as E;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const keys = new Set<string>();let jumpQueued=false;
@@ -53,14 +57,14 @@ let queue: Promise<unknown> = Promise.resolve();
 const courierDialog = $<HTMLDialogElement>('courier-dialog');
 const helpDialog = $<HTMLDialogElement>('help-dialog');
 const action = $<HTMLButtonElement>('interact');
-function status(message: string, error = false) { $('save-status').textContent = message; $('save-status').classList.toggle('error', error); }
+function status(message: string, error = false) { setText($('save-status'), message); $('save-status').classList.toggle('error', error); }
 function speak(id: NpcId, message: string) {
-  $('speaker').textContent = `${NPCS[id].name} · ${NPCS[id].place}`;
-  $('dialogue-text').textContent = message; $('conversation').hidden = false;
+  setText($('speaker'), `${NPCS[id].name} · ${NPCS[id].place}`);
+  setText($('dialogue-text'), message); $('conversation').hidden = false;
   conversationUntil = performance.now() + 7000;
   world.npcs.find(n => n.id === id)?.avatar.greet(elapsed);
 }
-function notice(message: string, duration = 5000) { $('notice').textContent = message; $('notice').hidden = false; noticeUntil = performance.now() + duration; }
+function notice(message: string, duration = 5000) { setText($('notice'), message); $('notice').hidden = false; noticeUntil = performance.now() + duration; }
 class ApiError extends Error { status: number; constructor(status: number, message: string) { super(message); this.status = status; } }
 async function request<T = PlayerState>(path: string, body?: unknown): Promise<T> {
   const response = await fetch('/api/' + path, {
@@ -116,10 +120,10 @@ function renderTask() {
   const carrying = state.quest === 'carrying', done = state.quest === 'delivered';
   player.parcel.visible = carrying && activePlanet === 'hub';
   world.flowers.visible = done;
-  if (done) { $('distance').textContent = 'Saved for your next visit'; $('compass').textContent = '✓'; $('compass').style.transform = ''; if (near) action.innerHTML = `Talk to ${NPCS[near].name} <kbd>E</kbd>`; }
-  $('mission-title').textContent = done ? 'Something good is growing.' : carrying ? 'A little care, on its way.' : 'A seed of an idea';
-  $('mission-detail').textContent = done ? 'One small kindness, delivered. Take the long way home.' : carrying ? 'Bring the sunseeds to Sol at the glasshouse.' : 'Find Mica at the post office.';
-  $('destination-name').textContent = done ? 'Delivery complete · thank you' : carrying ? 'Sol · Glasshouse' : 'Mica · Post office';
+  if (done) { setText($('distance'), 'Saved for your next visit'); setText($('compass'), '✓'); $('compass').style.transform = ''; if (near) setHTML(action, `Talk to ${NPCS[near].name} <kbd>E</kbd>`); }
+  setText($('mission-title'), done ? 'Something good is growing.' : carrying ? 'A little care, on its way.' : 'A seed of an idea');
+  setText($('mission-detail'), done ? 'One small kindness, delivered. Take the long way home.' : carrying ? 'Bring the sunseeds to Sol at the glasshouse.' : 'Find Mica at the post office.');
+  setText($('destination-name'), done ? 'Delivery complete · thank you' : carrying ? 'Sol · Glasshouse' : 'Mica · Post office');
   $('step-pickup').className = state.quest === 'available' ? 'current' : 'done';
   $('step-deliver').className = carrying ? 'current' : done ? 'done' : '';
   $('step-done').className = done ? 'current' : '';
@@ -129,7 +133,7 @@ function renderTask() {
 let renderer: T.WebGLRenderer;
 try { renderer = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' }); }
 catch {
-  $('world').innerHTML = '<div class="fallback">This browser could not start WebGL. Try an up-to-date browser with hardware acceleration. <a href="/readme/">Read about Little Post</a></div>';
+  setHTML($('world'), '<div class="fallback">This browser could not start WebGL. Try an up-to-date browser with hardware acceleration. <a href="/readme/">Read about Little Post</a></div>');
   throw new Error('WebGL unavailable');
 }
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
@@ -137,7 +141,7 @@ renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
 renderer.setClearColor('#9cc8c4', 0);
 configureRenderer(renderer, 'world');
 $('world').append(renderer.domElement);
-renderer.domElement.setAttribute('aria-label', 'Little Worlds planet. Use WASD or arrows to walk, hold Shift to run, Space to jump; board your ship to fly between worlds.');
+setAttribute(renderer.domElement, 'aria-label', 'Little Worlds planet. Use WASD or arrows to walk, hold Shift to run, Space to jump; board your ship to fly between worlds.');
 // Optional local measurements: CPU submission time, not GPU frame time.
 // Keep diagnostics off the normal visit and never use them as game inputs.
 if(new URLSearchParams(location.search).has('measure')){
@@ -209,7 +213,7 @@ function drag(e:PointerEvent) {
 joystick.addEventListener('pointerdown',e=>{joyPointer=e.pointerId;joystick.setPointerCapture(e.pointerId);target=null;drag(e);});
 joystick.addEventListener('pointermove',e=>{if(joyPointer===e.pointerId)drag(e);});
 for(const name of ['pointerup','pointercancel','lostpointercapture']) joystick.addEventListener(name,()=>{joyPointer=null;joy.set(0,0);$('stick').style.transform='';});
-$('view-mode').onclick=()=>{menu.close();overview=!overview; $('view-mode').setAttribute('aria-label',overview?'Walking view':'View planet'); $('view-mode').innerHTML=overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>'; };
+$('view-mode').onclick=()=>{menu.close();overview=!overview; setAttribute($('view-mode'), 'aria-label', overview?'Walking view':'View planet'); setHTML($('view-mode'), overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>'); };
 $('close-conversation').onclick=()=>{ $('conversation').hidden=true; conversationUntil=0; };
 $('wardrobe').onclick=()=>{menu.close();clearInput();courierDialog.showModal();};
 $('help').onclick=()=>{menu.close();clearInput();helpDialog.showModal();};
@@ -387,8 +391,8 @@ function animate(now:number) {
     renderer.domElement.dataset.triangles=String(renderer.info.render.triangles);
     uiTick=0;near=null;
     const dockPoint=new T.Vector3(...portPoint(activePlanet)),displayDockDistance=surfaceNormal(walker.up).angleTo(surfaceNormal(dockPoint))*groundRadius(),dockDistance=walker.up.angleTo(dockPoint)*groundRadius();nearDock=!!standing?.grounded&&dockDistance<BOARD_RADIUS-.12;
-    $('boarding-prompt').hidden=!nearDock||paused;$('dock-context').textContent=activePlanet==='hub'?'STARPORT / BOARDING GATE':'PARKED SHIP / RETURN BEACON';
-    $('dock-guide').hidden=!guideDock||nearDock||paused;const toward=dockPoint.projectOnPlane(walker.up).normalize();$('dock-arrow').style.transform=`rotate(${Math.atan2(toward.dot(walker.right()),toward.dot(walker.north))*180/Math.PI}deg)`;$('dock-guide-text').textContent=`Parked ship · ${Math.round(displayDockDistance)} m`;
+    $('boarding-prompt').hidden=!nearDock||paused;setText($('dock-context'), activePlanet==='hub'?'STARPORT / BOARDING GATE':'PARKED SHIP / RETURN BEACON');
+    $('dock-guide').hidden=!guideDock||nearDock||paused;const toward=dockPoint.projectOnPlane(walker.up).normalize();$('dock-arrow').style.transform=`rotate(${Math.atan2(toward.dot(walker.right()),toward.dot(walker.north))*180/Math.PI}deg)`;setText($('dock-guide-text'), `Parked ship · ${Math.round(displayDockDistance)} m`);
     renderer.domElement.dataset.portDistance=String(dockDistance);renderer.domElement.dataset.groundPosition=JSON.stringify(walker.up.toArray());
 
     for(const n of world.npcs){
@@ -406,14 +410,14 @@ function animate(now:number) {
       label.style.top=`${Math.max(innerWidth<600?222:100,Math.min(innerHeight-210,(-p.y*.5+.5)*innerHeight))}px`;
     }
     action.hidden=!near||paused||nearDock;
-    if(near){action.innerHTML=(state.quest==='available'&&near==='mica'?'Collect the parcel':state.quest==='carrying'&&near==='sol'?'Deliver to Sol':`Talk to ${NPCS[near].name}`)+' <kbd>E</kbd>';$('nearby').textContent=near==='mica'?'A little sunshine, ready to go.':'Something’s waiting to grow.';}
-    else $('nearby').textContent='';
+    if(near){setHTML(action, (state.quest==='available'&&near==='mica'?'Collect the parcel':state.quest==='carrying'&&near==='sol'?'Deliver to Sol':`Talk to ${NPCS[near].name}`)+' <kbd>E</kbd>');setText($('nearby'), near==='mica'?'A little sunshine, ready to go.':'Something’s waiting to grow.');}
+    else setText($('nearby'), '');
     if(state.quest!=='delivered') {
       const destination=new T.Vector3(...NPCS[state.quest==='available'?'mica':'sol'].position);
-      $('distance').textContent=near===(state.quest==='available'?'mica':'sol')?'You’re here · say hello':`${Math.round(surfaceNormal(walker.up).angleTo(surfaceNormal(destination))*groundRadius())} m away`;
+      setText($('distance'), near===(state.quest==='available'?'mica':'sol')?'You’re here · say hello':`${Math.round(surfaceNormal(walker.up).angleTo(surfaceNormal(destination))*groundRadius())} m away`);
       const tangent=destination.projectOnPlane(walker.up).normalize();
       $('compass').style.transform=`rotate(${Math.atan2(tangent.dot(walker.right()),tangent.dot(walker.north))*180/Math.PI}deg)`;
-    }else{$('distance').textContent='Saved for your next visit';$('compass').textContent='✓';$('compass').style.transform='';}
+    }else{setText($('distance'), 'Saved for your next visit');setText($('compass'), '✓');$('compass').style.transform='';}
     if(now>noticeUntil)$('notice').hidden=true;
     if(now>conversationUntil)$('conversation').hidden=true;
   }
@@ -428,12 +432,12 @@ function ensureColony() {
       world.dispose();world.parked.dispose();disposeGeometry(worldRoot);worldRoot=new T.Scene();scene.add(worldRoot);world=createWorld(worldRoot,false,p.environment,p.objects,p.blueprints,p.radius);world.parked.setDesign((state.ship??defaultShip()).design);configureGround();terrainRevision=p.revision;renderer.domElement.dataset.terrainId=groundField().id;started=false;
     }if(!groundWorld||groundWorld.planetId!==u.currentPlanet.id||groundWorld.revision!==u.currentPlanet.revision)groundWorld=new GroundWorld(u.currentPlanet);},bearing:id=>flight?.mark(id),
     obstacles:blocks=>{if(activePlanet!=='hub')world.blocks.splice(0,world.blocks.length,...blocks);},
-    pause:building=>{clearInput();overview=building;$('view-mode').setAttribute('aria-label',overview?'Walking view':'View planet');$('view-mode').innerHTML=overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>';},
+    pause:building=>{clearInput();overview=building;setAttribute($('view-mode'), 'aria-label', overview?'Walking view':'View planet');setHTML($('view-mode'), overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>');},
     libraryRead:()=>request<import('../shared/blueprints.ts').LibraryEntry[]>('blueprints'),librarySave:body=>serial(()=>request<import('../shared/blueprints.ts').LibraryEntry>('blueprints/save',body)),
     read:()=>request<Universe>('universe'),write:(route,body)=>serial(()=>request<Universe>(route,body)),flush:async()=>{await savePosition(true);await queue;},notice,
   });
   mountOnboarding({read:()=>colony?.universe?{universe:colony.universe,mode:state.flight.mode,building:colony.building,nearDock,online:online&&colony.syncing}:null});
-  $('delivery-toggle').onclick=()=>{menu.close();document.body.classList.toggle('delivery-open');$('delivery-toggle').textContent=document.body.classList.contains('delivery-open')?'Hide delivery':'Try a delivery';};
+  $('delivery-toggle').onclick=()=>{menu.close();document.body.classList.toggle('delivery-open');setText($('delivery-toggle'), document.body.classList.contains('delivery-open')?'Hide delivery':'Try a delivery');};
 }
 requestAnimationFrame(animate);
 try {

@@ -1,0 +1,19 @@
+.minimal-bar { gap: 10px; }
+.minimal-bar #location-chip { min-width: 0; flex: 1; margin-right: auto; max-width: max-content; }
+.minimal-bar #open-menu { order: 2; }
+.language-picker { display: flex; align-items: center; gap: 7px; flex: 0 0 auto; pointer-events: auto; font: 11px/1.4 system-ui, sans-serif; color: var(--ink); }
+.language-picker select { min-height: 38px; min-width: 90px; padding: 7px 9px; border: 1px solid var(--ui-dialog-border); border-radius: 8px; background: var(--ui-chip); color: var(--ink); font: 12px/1.4 system-ui, sans-serif; }
+.language-picker select:focus-visible { outline: 3px solid var(--ui-teal); outline-offset: 2px; }
+.minimal-bar .language-picker > span { display: none; }
+.dialog-language { margin: 0 35px 16px 0; }
+dialog > header { gap: 10px; flex-wrap: wrap; }
+dialog > header .language-picker { margin-left: auto; }
+html[lang='zh-CN'] .eyebrow, html[lang='zh-CN'] .ws-head small { letter-spacing: .5px; }
+html[lang='zh-CN'] button, html[lang='zh-CN'] p { line-height: 1.5; }
+@media(max-width:700px) {
+  .minimal-bar { gap: 7px; }
+  .minimal-bar #location-chip { max-width: calc(100% - 142px); }
+  .language-picker select { min-height: 40px; }
+  dialog > header .language-picker > span { display: none; }
+  dialog > header h2 { overflow-wrap: anywhere; }
+}

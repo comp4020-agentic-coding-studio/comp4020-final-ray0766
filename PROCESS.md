@@ -264,3 +264,20 @@ travel, sprinting jump, ceiling/roof/stair collision, another visitor's height,
 airborne refresh and phone touch. A final short visual check followed removal of
 the floating contact blob. See the [movement record](docs/integration/sprint-jump.md).
 Only local delivery is authorised; no deployment or student reflection was added.
+
+## Chinese / English: authorised local interface pass (7 October 2026)
+
+Added a language selector in the world header and each dialog, browser-language
+fallback, and an explicit localStorage preference. Host-owned source-text bindings
+translate existing nodes and accessible labels without reconstructing an editor
+or changing saves. Names, IDs and immutable source assets stay unchanged.
+
+Typecheck, lint, build and 45 focused checks passed. Chrome exercised both
+languages through real delivery and flight, draft editing, an injected server
+error/reconnect, refresh and a phone viewport. The first driver missed a collapsed
+parts section; its retained failure led to an explicit expansion step. Broader
+serial regression comparison found the same three older fixture failures in the
+unchanged base commit; these are documented instead of counted as passes. See the
+[bilingual record](docs/integration/bilingual.md) and its evidence. IAB is still
+unverified; its earlier empty new tab and unavailable control/Accessibility tools
+are separate from the Chrome results. No student reflection or deployment added.

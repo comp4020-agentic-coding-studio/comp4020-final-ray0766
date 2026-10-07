@@ -1,0 +1,35 @@
+{
+  "passed": 45,
+  "failed": 0,
+  "files": [
+    {
+      "path": "api.test.ts",
+      "status": "passed"
+    },
+    {
+      "path": "build-ux.test.ts",
+      "status": "passed"
+    },
+    {
+      "path": "i18n.test.ts",
+      "status": "passed"
+    },
+    {
+      "path": "invariants.test.ts",
+      "status": "passed"
+    },
+    {
+      "path": "onboarding.test.ts",
+      "status": "passed"
+    },
+    {
+      "path": "save-recovery.test.ts",
+      "status": "passed"
+    },
+    {
+      "path": "sprint-jump.test.ts",
+      "status": "passed"
+    }
+  ],
+  "environment": "Mac Node 24, serial workers, isolated 8114 HTTP service"
+}

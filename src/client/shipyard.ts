@@ -1,3 +1,4 @@
+import { localizedOption, setAttribute, setHTML, setText, translate } from './i18n.ts';
 import * as T from 'three';
 import type { Stage } from '../assets/claude-geometry/shell/stage.ts';
 import { createShipModel } from '../assets/claude-geometry/ship/factory.ts';
@@ -22,13 +23,13 @@ export class Shipyard {
   private dirty=false;
   constructor(private bridge:Bridge){
     this.dialog.id='shipyard';this.dialog.setAttribute('aria-labelledby','shipyard-title');
-    this.dialog.innerHTML=`<header><div><small>PERSONAL / SHIP WORKSHOP</small><h2 id="shipyard-title">Your ship</h2></div><button id="sy-close">Done ×</button></header><div class="sy-body"><section><div id="sy-stage"></div><p>Drag to orbit · pinch or scroll to zoom</p><button id="sy-frame">Frame ship</button></section><aside><fieldset id="sy-fields"><label>Start from<select id="sy-starter"><option value="">Current design</option></select></label><label>Name<input id="sy-name" maxlength="40" autocomplete="off"></label><label>Registration<input id="sy-registration" maxlength="10" autocomplete="off"></label><div id="sy-parts"></div><div id="sy-paint"></div><label>Engine glow<select id="sy-glow"></select></label></fieldset><p class="sy-note">One current ship, saved to this browser’s private visit. The same design is used on the surface and in flight.</p><button id="sy-reload">Reload saved design</button></aside></div><footer><span id="sy-status" role="status" aria-live="polite"></span><button id="sy-save">Save & use ship</button></footer>`;
+    setHTML(this.dialog, `<header><div><small>PERSONAL / SHIP WORKSHOP</small><h2 id="shipyard-title">Your ship</h2></div><button id="sy-close">Done ×</button></header><div class="sy-body"><section><div id="sy-stage"></div><p>Drag to orbit · pinch or scroll to zoom</p><button id="sy-frame">Frame ship</button></section><aside><fieldset id="sy-fields"><label>Start from<select id="sy-starter"><option value="">Current design</option></select></label><label>Name<input id="sy-name" maxlength="40" autocomplete="off"></label><label>Registration<input id="sy-registration" maxlength="10" autocomplete="off"></label><div id="sy-parts"></div><div id="sy-paint"></div><label>Engine glow<select id="sy-glow"></select></label></fieldset><p class="sy-note">One current ship, saved to this browser’s private visit. The same design is used on the surface and in flight.</p><button id="sy-reload">Reload saved design</button></aside></div><footer><span id="sy-status" role="status" aria-live="polite"></span><button id="sy-save">Save & use ship</button></footer>`);
     document.body.append(this.dialog);
-    const label=(id:string,title:string,values:readonly string[],container:string)=>{const l=document.createElement('label');l.textContent=title;const select=document.createElement('select');select.id='sy-'+id;for(const v of values)select.add(new Option(VILLAGE_SHIP_NAMES[v]??v.replaceAll('-',' '),v));l.append(select);this.get(container).append(l);};
+    const label=(id:string,title:string,values:readonly string[],container:string)=>{const l=document.createElement('label');setText(l, title);const select=document.createElement('select');select.id='sy-'+id;for(const v of values)select.add(localizedOption(VILLAGE_SHIP_NAMES[v]??v.replaceAll('-',' '), v));l.append(select);this.get(container).append(l);};
     for(const category of CATEGORIES)label(category,category,PART_IDS[category],'parts');
     for(const zone of PAINT_ZONES)label(zone,zone+' paint',PAINT_CHOICES,'paint');
-    for(const glow of GLOW_CHOICES)this.get<HTMLSelectElement>('glow').add(new Option(glow,glow));
-    STARTERS.forEach((s,i)=>this.get<HTMLSelectElement>('starter').add(new Option(s.name,String(i))));
+    for(const glow of GLOW_CHOICES)this.get<HTMLSelectElement>('glow').add(localizedOption(glow, glow));
+    STARTERS.forEach((s,i)=>this.get<HTMLSelectElement>('starter').add(localizedOption(s.name, String(i))));
     this.get('fields').addEventListener('input',()=>{this.dirty=true;this.status('Unsaved changes.');});
     this.get('fields').addEventListener('change',()=>{this.dirty=true;if(this.readDraft())this.render();});
     this.get<HTMLSelectElement>('starter').onchange=()=>{const value=this.get<HTMLSelectElement>('starter').value;if(value==='')return;this.draft=fromStarter(Number(value));this.fill();this.dirty=true;this.render();this.status('Starter selected · save to use it.');};
@@ -38,9 +39,9 @@ export class Shipyard {
     window.addEventListener('beforeunload',e=>{if(this.dialog.open&&this.dirty)e.preventDefault();});
   }
   private get<E extends HTMLElement=HTMLElement>(id:string){return this.dialog.querySelector('#sy-'+id) as E;}
-  private status(message:string){this.get('status').textContent=message;}
+  private status(message:string){setText(this.get('status'), message);}
   private lock(value:boolean){this.busy=value;this.get<HTMLFieldSetElement>('fields').disabled=value;for(const id of ['save','reload','close'])this.get<HTMLButtonElement>(id).disabled=value;}
-  private discard(){return !this.dirty||window.confirm('Discard the unsaved ship changes?');}
+  private discard(){return !this.dirty||window.confirm(translate('Discard the unsaved ship changes?'));}
   private fill(){
     for(const [key,value] of Object.entries({...this.draft.parts,...this.draft.paint,name:this.draft.name,registration:this.draft.registration??'',glow:this.draft.glow}))this.get<HTMLInputElement|HTMLSelectElement>(key).value=value;
     this.get<HTMLSelectElement>('starter').value='';
@@ -72,7 +73,7 @@ export class Shipyard {
     if(this.dialog.open||!this.bridge.allowed())return;
     this.dialog.showModal();document.body.classList.add('shipyard-open');
     try{this.stage=createPresentationStage('shipyard',this.get('stage'));
-      this.stage.renderer.domElement.setAttribute('aria-label','Ship 3D preview');this.stage.start();await this.load();
+      setAttribute(this.stage.renderer.domElement, 'aria-label', 'Ship 3D preview');this.stage.start();await this.load();
     }catch(e){this.status(e instanceof Error?e.message:'Could not open ship preview.');}
   }
   private async save(){

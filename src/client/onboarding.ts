@@ -1,3 +1,4 @@
+import { setAttribute, setText } from './i18n.ts';
 import type { Universe } from '../shared/planets.ts';
 import './onboarding.css';
 
@@ -80,13 +81,13 @@ export function mountOnboarding({ read }: { read: () => OnboardingContext | null
 
   const card = document.createElement('aside');
   card.id = 'first-visit-tip'; card.className = 'onboarding-tip'; card.hidden = true;
-  card.setAttribute('aria-label', 'First-visit tip');
+  setAttribute(card, 'aria-label', 'First-visit tip');
   const title = document.createElement('strong'), copy = document.createElement('p');
   title.className = 'onboarding-title'; copy.className = 'onboarding-copy';
   const actions = document.createElement('div'); actions.className = 'onboarding-actions';
   const action = document.createElement('button'), skip = document.createElement('button');
-  action.type = skip.type = 'button'; skip.textContent = 'Skip tips';
-  skip.title = 'Show them again in Pause → How to play';
+  action.type = skip.type = 'button'; setText(skip, 'Skip tips');
+  setAttribute(skip, 'title', 'Show them again in Pause → How to play');
   actions.append(action, skip); card.append(title, copy, actions);
   let target: string | undefined;
   action.onclick = () => {
@@ -104,7 +105,7 @@ export function mountOnboarding({ read }: { read: () => OnboardingContext | null
   };
   const reopen = document.createElement('button');
   reopen.type = 'button'; reopen.id = 'show-first-visit-tips'; reopen.className = 'onboarding-reopen';
-  reopen.textContent = 'Show first-visit tips';
+  setText(reopen, 'Show first-visit tips');
   get('help-dialog')?.querySelector('.close-help')?.before(reopen);
   reopen.onclick = () => {
     remember('active');
@@ -140,10 +141,10 @@ export function mountOnboarding({ read }: { read: () => OnboardingContext | null
     // Append in the builder: Save / Cancel / Done retain their place and hit targets.
     if (card.parentElement !== host) host.insertBefore(card, before);
     card.dataset.placement = placement; card.dataset.step = tip.id;
-    title.textContent = tip.title; copy.textContent = placement === 'menu' ? tip.text.replaceAll('Pause → ', '') : tip.text;
+    setText(title, tip.title); setText(copy, placement === 'menu' ? tip.text.replaceAll('Pause → ', '') : tip.text);
     target = tip.action?.target;
     action.hidden = !tip.action || placement === 'menu' || placement === 'atlas' || placement === 'builder';
-    action.textContent = tip.action?.label ?? '';
+    setText(action, tip.action?.label ?? '');
     card.hidden = false;
   }
 

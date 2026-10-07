@@ -1,0 +1,17 @@
+{
+  "baseline": "9c76e15968cd88e3dbcd51f68a70f7b7640f3039",
+  "baselinePassed": 10,
+  "baselineFailed": 3,
+  "currentPassed": 10,
+  "currentFailed": 3,
+  "identicalFailures": [
+    "backs up v4, preserves every old column and reopens blueprints and placements from disk",
+    "keeps private ships isolated, retries idempotent, stale tabs rejected and in-flight changes fenced",
+    "backs up schema 6 without changing existing rows and keeps saved designs across reopen"
+  ],
+  "explanation": [
+    "Two old migration fixtures change a current database user_version to 4/6 without reverting compact planet data; compact migration increments untouched planet revisions.",
+    "The old ship fixture sends legacy large ground moves, now rejected by shared validated movement."
+  ],
+  "implementationChanged": false
+}

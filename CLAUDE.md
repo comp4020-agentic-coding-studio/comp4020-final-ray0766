@@ -126,3 +126,8 @@ prototype. They do not claim to be the student's finished academic harness.
   batches, schema 12 and physics version 3. Preserve the jump-press latch and
   airborne saves; never accept client height/velocity. Shared public anchors
   belong in harbour-layout.ts. Keep ordinary walking at 3 m/s and sprint at 4.8 m/s.
+
+- The user authorised Chinese/English UI switching. Keep translations in the host
+  adapter; do not edit the immutable art snapshot or translate user-authored names
+  and technical IDs. Language changes update text in place, preserving drafts,
+  selection, inputs and current gameplay. Persist only a local language preference.
