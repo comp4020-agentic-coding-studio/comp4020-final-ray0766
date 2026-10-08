@@ -1,0 +1,4597 @@
+{
+  "status": "passed",
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "browserVersion": "154.0.8037.98",
+  "baseURL": "http://127.0.0.1:8130",
+  "host": {
+    "platform": "darwin",
+    "osRelease": "27.0.0",
+    "cpu": "Apple M3",
+    "cpuLogicalCount": 8,
+    "memoryGiB": 16,
+    "realPhone": false
+  },
+  "fixture": "New isolated anonymous browser identity. Every movement, edit, quest action and flight transition uses actual UI/keyboard/touch controls. APIs below only read acknowledged state.",
+  "checks": [
+    "Real closed-door blocking, explicit entry/exit, saved room rearrangement, room movement and same interior after reload",
+    "Ordinary structure edited in place with private name/groups retained",
+    "Ordinary Path rotated, newly placed and removed through Build",
+    "Real takeoff, radius-aware piloting, public landing, actual delivery, return flight and room re-entry",
+    "Edits and quest survive the complete journey and refresh"
+  ],
+  "samples": [
+    {
+      "label": "ground-close-idle",
+      "durationMs": 4009.5,
+      "frames": {
+        "samples": 240,
+        "p50": 16.699999999999818,
+        "p95": 16.800000000000182,
+        "p99": 16.800000000000182,
+        "max": 16.800000000000182,
+        "mean": 16.665833333333335
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 241,
+        "p50": 265,
+        "p95": 265,
+        "p99": 265,
+        "max": 265,
+        "mean": 265
+      },
+      "triangles": {
+        "samples": 241,
+        "p50": 229626,
+        "p95": 229626,
+        "p99": 229626,
+        "max": 229626,
+        "mean": 229626
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 241,
+        "p50": 0.943,
+        "p95": 7.217,
+        "p99": 7.217,
+        "max": 7.217,
+        "mean": 1.6647344398340236
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 241
+      },
+      "actionMs": 18,
+      "paddingAfterActionMs": 3982,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "ground-overview",
+      "durationMs": 4010.5,
+      "frames": {
+        "samples": 239,
+        "p50": 16.69999999999891,
+        "p95": 16.700000000000728,
+        "p99": 16.80000000000109,
+        "max": 16.80000000000109,
+        "mean": 16.666108786610874
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 240,
+        "p50": 361,
+        "p95": 361,
+        "p99": 361,
+        "max": 361,
+        "mean": 350.05
+      },
+      "triangles": {
+        "samples": 240,
+        "p50": 253104,
+        "p95": 253104,
+        "p99": 253104,
+        "max": 253104,
+        "mean": 250432.39166666666
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 240,
+        "p50": 1.13,
+        "p95": 1.637,
+        "p99": 1.637,
+        "max": 1.637,
+        "mean": 1.1125875000000016
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 240
+      },
+      "actionMs": 2042,
+      "paddingAfterActionMs": 1958,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "closed-door-collision-and-open",
+      "durationMs": 4011.599999964237,
+      "frames": {
+        "samples": 235,
+        "p50": 16.700000000000728,
+        "p95": 16.799999999999272,
+        "p99": 16.80000000000291,
+        "max": 66.79999999999927,
+        "mean": 17.020425531914906
+      },
+      "longFrames": {
+        "over33_3ms": 2,
+        "over50ms": 1,
+        "over100ms": 0
+      },
+      "longTasks": {
+        "samples": 2,
+        "p50": 73,
+        "p95": 73,
+        "p99": 73,
+        "max": 73,
+        "mean": 73
+      },
+      "drawCalls": {
+        "samples": 236,
+        "p50": 265,
+        "p95": 269,
+        "p99": 269,
+        "max": 269,
+        "mean": 265.6313559322034
+      },
+      "triangles": {
+        "samples": 236,
+        "p50": 229626,
+        "p95": 230154,
+        "p99": 230154,
+        "max": 230154,
+        "mean": 229438.11864406778
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 236,
+        "p50": 0.763,
+        "p95": 0.82,
+        "p99": 0.82,
+        "max": 0.82,
+        "mean": 0.7604830508474583
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 236
+      },
+      "actionMs": 3337,
+      "paddingAfterActionMs": 663,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "enter-room-and-close-door",
+      "durationMs": 4008.100000023842,
+      "frames": {
+        "samples": 235,
+        "p50": 16.69999999999709,
+        "p95": 16.799999999999272,
+        "p99": 16.80000000000291,
+        "max": 50,
+        "mean": 16.949787234042557
+      },
+      "longFrames": {
+        "over33_3ms": 2,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": {
+        "samples": 1,
+        "p50": 74,
+        "p95": 74,
+        "p99": 74,
+        "max": 74,
+        "mean": 74
+      },
+      "drawCalls": {
+        "samples": 236,
+        "p50": 189,
+        "p95": 189,
+        "p99": 269,
+        "max": 269,
+        "mean": 191.3728813559322
+      },
+      "triangles": {
+        "samples": 7,
+        "p50": 230154,
+        "p95": 230154,
+        "p99": 230154,
+        "max": 230154,
+        "mean": 230154
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 236,
+        "p50": 0.783,
+        "p95": 2.187,
+        "p99": 2.187,
+        "max": 2.187,
+        "mean": 0.9364322033898322
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 7,
+        "interior": 229
+      },
+      "actionMs": 637,
+      "paddingAfterActionMs": 3363,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "room-walk-and-return",
+      "durationMs": 4009.199999988079,
+      "frames": {
+        "samples": 239,
+        "p50": 16.700000000000728,
+        "p95": 16.700000000000728,
+        "p99": 16.799999999999272,
+        "max": 16.80000000000291,
+        "mean": 16.665690376569046
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 240,
+        "p50": 193,
+        "p95": 198,
+        "p99": 199,
+        "max": 199,
+        "mean": 192.16666666666666
+      },
+      "triangles": null,
+      "renderCpuSubmissionMs": {
+        "samples": 240,
+        "p50": 0.653,
+        "p95": 0.71,
+        "p99": 0.773,
+        "max": 0.773,
+        "mean": 0.6588333333333348
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "interior": 240
+      },
+      "actionMs": 2689,
+      "paddingAfterActionMs": 1311,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "room-arrange-and-save",
+      "durationMs": 4007.7000000476837,
+      "frames": {
+        "samples": 239,
+        "p50": 16.700000000000728,
+        "p95": 16.799999999999272,
+        "p99": 16.799999999999272,
+        "max": 16.80000000000291,
+        "mean": 16.66610878661088
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 240,
+        "p50": 188,
+        "p95": 190,
+        "p99": 190,
+        "max": 190,
+        "mean": 188.18333333333334
+      },
+      "triangles": null,
+      "renderCpuSubmissionMs": {
+        "samples": 240,
+        "p50": 0.773,
+        "p95": 0.907,
+        "p99": 0.907,
+        "max": 0.907,
+        "mean": 0.7665166666666648
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "interior": 240
+      },
+      "actionMs": 523,
+      "paddingAfterActionMs": 3477,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "open-door-exit-and-reenter",
+      "durationMs": 4010.899999976158,
+      "frames": {
+        "samples": 234,
+        "p50": 16.699999999999818,
+        "p95": 16.799999999999955,
+        "p99": 16.800000000000182,
+        "max": 83.30000000000018,
+        "mean": 17.094017094017072
+      },
+      "longFrames": {
+        "over33_3ms": 2,
+        "over50ms": 1,
+        "over100ms": 0
+      },
+      "longTasks": {
+        "samples": 2,
+        "p50": 73,
+        "p95": 89,
+        "p99": 89,
+        "max": 89,
+        "mean": 81
+      },
+      "drawCalls": {
+        "samples": 232,
+        "p50": 189,
+        "p95": 189,
+        "p99": 270,
+        "max": 270,
+        "mean": 191.54741379310346
+      },
+      "triangles": {
+        "samples": 8,
+        "p50": 234266,
+        "p95": 234266,
+        "p99": 234266,
+        "max": 234266,
+        "mean": 234266
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 235,
+        "p50": 0.803,
+        "p95": 4.023,
+        "p99": 4.023,
+        "max": 4.023,
+        "mean": 1.3646340425531929
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "interior": 224,
+        "ground": 11
+      },
+      "actionMs": 1257,
+      "paddingAfterActionMs": 2743,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "ordinary-building-workshop-edit",
+      "durationMs": 4015.2000000476837,
+      "frames": {
+        "samples": 195,
+        "p50": 16.699999999999818,
+        "p95": 16.799999999999272,
+        "p99": 166.69999999999982,
+        "max": 466.60000000000036,
+        "mean": 20.511794871794876
+      },
+      "longFrames": {
+        "over33_3ms": 4,
+        "over50ms": 3,
+        "over100ms": 3
+      },
+      "longTasks": {
+        "samples": 3,
+        "p50": 172,
+        "p95": 427,
+        "p99": 427,
+        "max": 427,
+        "mean": 239.66666666666666
+      },
+      "drawCalls": {
+        "samples": 149,
+        "p50": 270,
+        "p95": 270,
+        "p99": 372,
+        "max": 372,
+        "mean": 272.7718120805369
+      },
+      "triangles": {
+        "samples": 148,
+        "p50": 235406,
+        "p95": 235406,
+        "p99": 264718,
+        "max": 264718,
+        "mean": 236502.24324324325
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 149,
+        "p50": 1.043,
+        "p95": 3.21,
+        "p99": 3.21,
+        "max": 3.21,
+        "mean": 1.4422013422818811
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "interior": 1,
+        "ground": 148,
+        "workshop": 47
+      },
+      "actionMs": 2369,
+      "paddingAfterActionMs": 1631,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "ordinary-path-rotate-place-remove",
+      "durationMs": 4013.300000011921,
+      "frames": {
+        "samples": 161,
+        "p50": 16.69999999999891,
+        "p95": 16.799999999999272,
+        "p99": 450,
+        "max": 450,
+        "mean": 24.84347826086956
+      },
+      "longFrames": {
+        "over33_3ms": 3,
+        "over50ms": 3,
+        "over100ms": 3
+      },
+      "longTasks": {
+        "samples": 6,
+        "p50": 63,
+        "p95": 417,
+        "p99": 417,
+        "max": 417,
+        "mean": 235
+      },
+      "drawCalls": {
+        "samples": 162,
+        "p50": 361,
+        "p95": 364,
+        "p99": 364,
+        "max": 364,
+        "mean": 315.2345679012346
+      },
+      "triangles": {
+        "samples": 162,
+        "p50": 254244,
+        "p95": 255540,
+        "p99": 255540,
+        "max": 255540,
+        "mean": 244474.22222222222
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 162,
+        "p50": 3.15,
+        "p95": 3.33,
+        "p99": 3.33,
+        "max": 3.33,
+        "mean": 2.383086419753082
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 162
+      },
+      "actionMs": 3079,
+      "paddingAfterActionMs": 921,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "walk-board-fly-land-public",
+      "durationMs": 28820.700000047684,
+      "frames": {
+        "samples": 1631,
+        "p50": 16.69999999999709,
+        "p95": 16.799999999995634,
+        "p99": 16.80000000000291,
+        "max": 1249.800000000003,
+        "mean": 17.657204169221338
+      },
+      "longFrames": {
+        "over33_3ms": 5,
+        "over50ms": 3,
+        "over100ms": 2
+      },
+      "longTasks": {
+        "samples": 4,
+        "p50": 76,
+        "p95": 1223,
+        "p99": 1223,
+        "max": 1223,
+        "mean": 412.25
+      },
+      "drawCalls": {
+        "samples": 1632,
+        "p50": 22,
+        "p95": 299,
+        "p99": 311,
+        "max": 313,
+        "mean": 71.4203431372549
+      },
+      "triangles": {
+        "samples": 1632,
+        "p50": 25040,
+        "p95": 242906,
+        "p99": 246678,
+        "max": 331134,
+        "mean": 65413.35906862745
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 1632,
+        "p50": 0.463,
+        "p95": 1.557,
+        "p99": 4.527,
+        "max": 4.527,
+        "mean": 0.697264093137256
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 309,
+        "flight": 1323
+      },
+      "actionMs": 28808,
+      "paddingAfterActionMs": 0,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "public-walk-pickup-deliver",
+      "durationMs": 39680.19999998808,
+      "frames": {
+        "samples": 2380,
+        "p50": 16.69999999999709,
+        "p95": 16.79999999998836,
+        "p99": 16.80000000000291,
+        "max": 16.80000000000291,
+        "mean": 16.666008403361346
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 2381,
+        "p50": 184,
+        "p95": 217,
+        "p99": 219,
+        "max": 219,
+        "mean": 184.29147417051658
+      },
+      "triangles": {
+        "samples": 2381,
+        "p50": 311932,
+        "p95": 321014,
+        "p99": 331230,
+        "max": 335404,
+        "mean": 312896.84922301554
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 2381,
+        "p50": 0.743,
+        "p95": 0.837,
+        "p99": 0.883,
+        "max": 2.393,
+        "mean": 0.7610407391852123
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 2381
+      },
+      "actionMs": 39676,
+      "paddingAfterActionMs": 0,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "board-fly-land-home",
+      "durationMs": 50501.89999997616,
+      "frames": {
+        "samples": 2984,
+        "p50": 16.699999999982538,
+        "p95": 16.79999999998836,
+        "p99": 16.800000000017462,
+        "max": 600,
+        "mean": 16.91729222520107
+      },
+      "longFrames": {
+        "over33_3ms": 3,
+        "over50ms": 3,
+        "over100ms": 1
+      },
+      "longTasks": {
+        "samples": 4,
+        "p50": 74,
+        "p95": 556,
+        "p99": 556,
+        "max": 556,
+        "mean": 190.25
+      },
+      "drawCalls": {
+        "samples": 2985,
+        "p50": 20,
+        "p95": 193,
+        "p99": 193,
+        "max": 311,
+        "mean": 32.436180904522615
+      },
+      "triangles": {
+        "samples": 2985,
+        "p50": 22584,
+        "p95": 335308,
+        "p99": 335308,
+        "max": 335308,
+        "mean": 45092.99765494138
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 2985,
+        "p50": 0.417,
+        "p95": 0.913,
+        "p99": 1.52,
+        "max": 1.52,
+        "mean": 0.479673366834171
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 20,
+        "flight": 2965
+      },
+      "actionMs": 50497,
+      "paddingAfterActionMs": 0,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "walk-home-and-enter-after-flight",
+      "durationMs": 5394.199999988079,
+      "frames": {
+        "samples": 323,
+        "p50": 16.699999999982538,
+        "p95": 16.79999999998836,
+        "p99": 16.800000000017462,
+        "max": 16.800000000017462,
+        "mean": 16.665944272445838
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 324,
+        "p50": 276,
+        "p95": 311,
+        "p99": 311,
+        "max": 311,
+        "mean": 282.5401234567901
+      },
+      "triangles": {
+        "samples": 322,
+        "p50": 235944,
+        "p95": 246678,
+        "p99": 246678,
+        "max": 246678,
+        "mean": 237890.46583850932
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 324,
+        "p50": 0.997,
+        "p95": 2.537,
+        "p99": 2.537,
+        "max": 2.537,
+        "mean": 1.142574074074071
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 322,
+        "interior": 2
+      },
+      "actionMs": 5390,
+      "paddingAfterActionMs": 0,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    }
+  ],
+  "pageErrors": [],
+  "apiResponses": [
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/door",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/door",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/enter",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/door",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/save",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/door",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/exit",
+      "status": 200
+    },
+    {
+      "route": "/api/home/enter",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/exit",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/blueprints/save",
+      "status": 200
+    },
+    {
+      "route": "/api/objects/replace",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/objects/update",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/objects/create",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/objects/delete",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/takeoff",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/land",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/interact",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/interact",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/takeoff",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/checkpoint",
+      "status": 200
+    },
+    {
+      "route": "/api/flight/land",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/enter",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    }
+  ],
+  "renderer": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "dpr": 1
+    },
+    "drawingBuffer": {
+      "width": 390,
+      "height": 844
+    },
+    "touchPoints": 1,
+    "visibility": "visible",
+    "webglVendor": "Google Inc. (Apple)",
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+  },
+  "initial": {
+    "radius": 21.6,
+    "objects": 40,
+    "structures": 4,
+    "manifestVersion": 5
+  },
+  "closedDoor": {
+    "closedLeafBlockedActualMovement": true,
+    "doorLocalZ": 0.3594249648681827
+  },
+  "structureEdit": {
+    "partCountBefore": 79,
+    "partCountAfter": 80,
+    "sameObject": true,
+    "sameNameAndGroups": true
+  },
+  "pathEdit": {
+    "existingRotatedWithOrdinaryUI": true,
+    "newPathPlacedAndRemovedWithOrdinaryUI": true,
+    "preservedOtherObjectIds": true
+  },
+  "outbound": {
+    "targetRadius": 21.6,
+    "landingBand": 31.6,
+    "clearance": 26.35,
+    "distanceAtLanding": 30.748493034468265,
+    "speedAtLanding": 0,
+    "detours": 0,
+    "controls": "CDP actual two-finger steering and thrust/brake touches",
+    "teleport": false
+  },
+  "returnTrip": {
+    "targetRadius": 21.6,
+    "landingBand": 31.6,
+    "clearance": 26.35,
+    "distanceAtLanding": 31.451282583419268,
+    "speedAtLanding": 0,
+    "detours": 1,
+    "controls": "CDP actual two-finger steering and thrust/brake touches",
+    "teleport": false
+  },
+  "rendererAtEnd": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "dpr": 1
+    },
+    "drawingBuffer": {
+      "width": 390,
+      "height": 844
+    },
+    "touchPoints": 1,
+    "visibility": "visible",
+    "webglVendor": "Google Inc. (Apple)",
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+  },
+  "final": {
+    "sameHome": true,
+    "sameSavedObjects": true,
+    "samePrivateBlueprintMetadata": true,
+    "delivered": true
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "createdAt": "2026-10-08T08:47:20.474403+00:00",
+  "status": "ready-for-authorized-local-cutover",
+  "productCommit": "ff89fce6f0d9ca5d9ed71c7f53644b2a4b5cbd9c",
+  "tests": {
+    "uniqueTestsPassed": 316,
+    "files": 59,
+    "reports": [
+      "final-spec-result.json",
+      "final-geometry-recheck.json",
+      "final-worker-recheck.json"
+    ],
+    "qualification": "The final bulk run had one 5-second geometry timeout and two worker startup timeouts. The exact affected suites passed in targeted rechecks; original failures remain in the bulk report. No geometry assertions were weakened."
+  },
+  "checks": [
+    "TypeScript noEmit passed",
+    "ESLint passed",
+    "git diff --check passed",
+    "existing evidence references passed",
+    "production build passed"
+  ],
+  "journeys": {
+    "desktop": {
+      "report": "docs/evidence/integration/quality/final-complete-journey/desktop-journey-result.json",
+      "status": "passed",
+      "final": {
+        "sameHome": true,
+        "sameSavedObjects": true,
+        "samePrivateBlueprintMetadata": true,
+        "delivered": true
+      },
+      "browser": "154.0.8037.98",
+      "host": {
+        "platform": "darwin",
+        "osRelease": "27.0.0",
+        "cpu": "Apple M3",
+        "cpuLogicalCount": 8,
+        "memoryGiB": 16,
+        "realPhone": false
+      },
+      "outbound": {
+        "targetRadius": 21.6,
+        "landingBand": 31.6,
+        "clearance": 26.35,
+        "distanceAtLanding": 31.12119041465083,
+        "speedAtLanding": 0,
+        "detours": 0,
+        "controls": "keyboard yaw/pitch/thrust/brake",
+        "teleport": false
+      },
+      "return": {
+        "targetRadius": 21.6,
+        "landingBand": 31.6,
+        "clearance": 26.35,
+        "distanceAtLanding": 30.93232306351436,
+        "speedAtLanding": 0,
+        "detours": 1,
+        "controls": "keyboard yaw/pitch/thrust/brake",
+        "teleport": false
+      }
+    },
+    "390-touch-emulation": {
+      "report": "docs/evidence/integration/quality/final-touch-complete/touch-390-journey-result.json",
+      "status": "passed",
+      "final": {
+        "sameHome": true,
+        "sameSavedObjects": true,
+        "samePrivateBlueprintMetadata": true,
+        "delivered": true
+      },
+      "browser": "154.0.8037.98",
+      "host": {
+        "platform": "darwin",
+        "osRelease": "27.0.0",
+        "cpu": "Apple M3",
+        "cpuLogicalCount": 8,
+        "memoryGiB": 16,
+        "realPhone": false
+      },
+      "outbound": {
+        "targetRadius": 21.6,
+        "landingBand": 31.6,
+        "clearance": 26.35,
+        "distanceAtLanding": 30.748493034468265,
+        "speedAtLanding": 0,
+        "detours": 0,
+        "controls": "CDP actual two-finger steering and thrust/brake touches",
+        "teleport": false
+      },
+      "return": {
+        "targetRadius": 21.6,
+        "landingBand": 31.6,
+        "clearance": 26.35,
+        "distanceAtLanding": 31.451282583419268,
+        "speedAtLanding": 0,
+        "detours": 1,
+        "controls": "CDP actual two-finger steering and thrust/brake touches",
+        "teleport": false
+      }
+    }
+  },
+  "visual": {
+    "private": "district-v5-final/result.json",
+    "public": "public-v4-final/result.json",
+    "independentReview": "Bounded first district is reviewable. Default doorway framing and excessive overview shadows resolved; public entry has no hard visual obstruction. Not Messenger art parity."
+  },
+  "buildFingerprint": "c9b5eead490c8997b919143af80eee2a47ef75d97e58e961658cc7a216b209f9",
+  "migrationPreflight": "final-migration.json",
+  "limitations": [
+    "Physical-phone and sustained thermal performance not tested.",
+    "Modular 5x5 grid and 90-degree part rotations remain. This is not unrestricted log construction.",
+    "Existing private objects and creation receipts are preserved; old worlds are not silently regenerated.",
+    "Seeded neighbourhood variety is currently limited to the checked district family."
+  ]
+}

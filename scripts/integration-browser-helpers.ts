@@ -160,17 +160,17 @@ export async function flyTo(page:Page,target:PlanetSummary,touch=false){
  const set=async(key:string,on:boolean)=>{if(on&&!held.has(key)){await page.keyboard.down(key);held.add(key);}else if(!on&&held.has(key)){await page.keyboard.up(key);held.delete(key);}};
  let stalled=0,detours=0,arrived=false;
  try{while(Date.now()<until){
-  const d=await page.locator('#flight-hud').evaluate(el=>({...el.dataset})),position=JSON.parse(d.position!) as Vec3,speed=Number(d.speed);
+  const d=await page.locator('#flight-hud').evaluate(el=>({...el.dataset})),position=JSON.parse(d.position!) as Vec3,speed=Number(d.speed),targetDistance=Number(d.distance);
+  // A detour is only a means of reaching the target. Once the real landing
+  // control allows a stopped arrival, do not keep chasing an obsolete waypoint.
+  if(targetDistance<=landingRadius(target)&&speed<.8&&await page.locator('#land-ship').isEnabled()){arrived=true;break;}
   const marked=bearing(position,target.center),aim=bearing(position,waypoints[0]??target.center);
   // HUD errors and position are sampled together. Reconstruct actual attitude;
   // waypoints steer with the same keys/touches and never write a flight pose.
   const yaw=wrapAngle(aim.yaw-marked.yaw+Number(d.yawError));
   const pitch=Math.max(-1.25,Math.min(1.25,aim.pitch))-marked.pitch+Number(d.pitchError);
-  const gap=waypoints.length?spaceDistance(position,waypoints[0]):Number(d.distance),stop=waypoints.length?3:stopAt;
-  if(gap<=stop+.8&&speed<.8){
-   if(waypoints.length){waypoints.shift();stalled=0;continue;}
-   if(gap>safeRadius(target)){arrived=true;break;}
-  }
+  const gap=waypoints.length?spaceDistance(position,waypoints[0]):targetDistance,stop=waypoints.length?3:stopAt;
+  if(waypoints.length&&gap<=stop+.8&&speed<.8){waypoints.shift();stalled=0;continue;}
   const turning=Math.abs(yaw)>.22||Math.abs(pitch)>.22;
   const braking=turning&&speed>1.5||gap<stop+speed*speed/(2*FLIGHT_BRAKE)+speed*.40;
   stalled=!waypoints.length&&gap>landingRadius(target)&&speed<.1&&!turning?stalled+1:0;
@@ -198,7 +198,7 @@ export async function flyTo(page:Page,target:PlanetSummary,touch=false){
   else{await set('a',yaw<-.10);await set('d',yaw>.10);await set('ArrowUp',pitch>.10);await set('ArrowDown',pitch<-.10);await set('s',braking);await set('w',!braking&&!turning&&gap>stop);await page.waitForTimeout(65);}
  }}finally{for(const key of held)await page.keyboard.up(key);await cdp?.detach();}
  const last=await page.locator('#flight-hud').evaluate(el=>({...el.dataset}));
- if(!arrived)throw Error('Real-control flight timed out before the conservative arrival condition: '+JSON.stringify({distance:last.distance,speed:last.speed,yaw:last.yawError,pitch:last.pitchError,detours}));
+ if(!arrived)throw Error('Real-control flight timed out before the conservative arrival condition: '+JSON.stringify({distance:last.distance,speed:last.speed,yaw:last.yawError,pitch:last.pitchError,detours,clearance:safeRadius(target),remainingWaypoints:waypoints.length}));
  expect(Number(last.distance)).toBeLessThanOrEqual(landingRadius(target));expect(Number(last.speed)).toBeLessThan(6);
  await expect(page.locator('#land-ship')).toBeEnabled();await activate(page,'#land-ship',touch);await expect(page.locator('#flight-title')).toContainText(target.name);await activate(page,'#confirm-flight',touch);
  await expect(page.locator('#flight-hud')).not.toBeVisible({timeout:15000});await expect.poll(async()=>(await universe(page)).currentPlanet.id).toBe(target.id);
