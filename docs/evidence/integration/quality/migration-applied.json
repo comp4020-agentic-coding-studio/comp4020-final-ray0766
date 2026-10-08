@@ -1,0 +1,337 @@
+{
+  "status": "applied-to-isolated-copy",
+  "sourceSha256Before": "6576a743f37cad1a644ee79bd736b3c03c9e101f9965bb0b4671c82cf928f7af",
+  "sourceSha256After": "6576a743f37cad1a644ee79bd736b3c03c9e101f9965bb0b4671c82cf928f7af",
+  "sourceUnchanged": true,
+  "restoreMatchesAllOriginalTables": true,
+  "preview": {
+    "version": 1,
+    "radius": 21.6,
+    "alreadyApplied": false,
+    "canApply": true,
+    "planets": 87,
+    "objects": 37,
+    "spaceFlights": 2,
+    "savedGroundPoses": 6,
+    "structurePoses": 0,
+    "terrainPoses": 6,
+    "unsavedGroundPoses": 198,
+    "risks": [],
+    "sourceDigest": "424192080067d2c3b946743ae58beb880b5dc9454ff09988bd14c3d32d226c05"
+  },
+  "comparison": {
+    "blueprint_contents": {
+      "beforeCount": 4,
+      "afterCount": 4,
+      "changedRows": 0,
+      "changedColumns": [],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "8c55c69cf06e03a3ee3893e8576aa41b6f712f8343ee7dbe62b4b906b39c6d17",
+      "protectedColumnsSha256After": "8c55c69cf06e03a3ee3893e8576aa41b6f712f8343ee7dbe62b4b906b39c6d17",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "blueprint_library": {
+      "beforeCount": 23,
+      "afterCount": 23,
+      "changedRows": 0,
+      "changedColumns": [],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "765b605eaa524e729e9360ad334a2e319714ce4691e1a6677d13ad14503bbd2c",
+      "protectedColumnsSha256After": "765b605eaa524e729e9360ad334a2e319714ce4691e1a6677d13ad14503bbd2c",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "ground_states": {
+      "beforeCount": 6,
+      "afterCount": 6,
+      "changedRows": 6,
+      "changedColumns": [
+        "clock_credit",
+        "physics_version",
+        "radius",
+        "request_hash",
+        "scene_revision",
+        "sequence"
+      ],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "2a4fdf69568881c80868fc1c673d5dfef1aed89b0b4df0a9dcb127446b045095",
+      "protectedColumnsSha256After": "2a4fdf69568881c80868fc1c673d5dfef1aed89b0b4df0a9dcb127446b045095",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "history_events": {
+      "beforeCount": 17,
+      "afterCount": 17,
+      "changedRows": 0,
+      "changedColumns": [],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "f17b39dedcc0fa6d0a9db1b31a7c13d5e6dd4d12255832607098780e60485898",
+      "protectedColumnsSha256After": "f17b39dedcc0fa6d0a9db1b31a7c13d5e6dd4d12255832607098780e60485898",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "history_heads": {
+      "beforeCount": 86,
+      "afterCount": 86,
+      "changedRows": 0,
+      "changedColumns": [],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "b2b2abed122dadaa3ded951d24afb4c34c488f2b1c0f35992fcb3d12e83b4fee",
+      "protectedColumnsSha256After": "b2b2abed122dadaa3ded951d24afb4c34c488f2b1c0f35992fcb3d12e83b4fee",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "history_snapshots": {
+      "beforeCount": 86,
+      "afterCount": 86,
+      "changedRows": 0,
+      "changedColumns": [],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "a8cc952883d1c11832bc1299c2e88630380a91e4d3254a532ab0f8f7683f88d7",
+      "protectedColumnsSha256After": "a8cc952883d1c11832bc1299c2e88630380a91e4d3254a532ab0f8f7683f88d7",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "object_assets": {
+      "beforeCount": 1,
+      "afterCount": 1,
+      "changedRows": 0,
+      "changedColumns": [],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "140fb259cfef9880479a086335e87ae41af9072e43be70396e8298d9f8100fe3",
+      "protectedColumnsSha256After": "140fb259cfef9880479a086335e87ae41af9072e43be70396e8298d9f8100fe3",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "object_tombstones": {
+      "beforeCount": 10,
+      "afterCount": 10,
+      "changedRows": 0,
+      "changedColumns": [],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "cae02959aa15b958241cdb1a15de56c9e9a18e88412b76762d90d9848d3bcfcd",
+      "protectedColumnsSha256After": "cae02959aa15b958241cdb1a15de56c9e9a18e88412b76762d90d9848d3bcfcd",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "planet_objects": {
+      "beforeCount": 37,
+      "afterCount": 37,
+      "changedRows": 0,
+      "changedColumns": [],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "eaffaec65b3c4ff00388174ca4f8500f0bdab1ded033db44c27c5e52c6203f15",
+      "protectedColumnsSha256After": "eaffaec65b3c4ff00388174ca4f8500f0bdab1ded033db44c27c5e52c6203f15",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "planets": {
+      "beforeCount": 87,
+      "afterCount": 87,
+      "changedRows": 87,
+      "changedColumns": [
+        "revision"
+      ],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "4f012c16523f447abe57d6e96a22807c5b66fdbde8b34c6e8640e002f591efa8",
+      "protectedColumnsSha256After": "4f012c16523f447abe57d6e96a22807c5b66fdbde8b34c6e8640e002f591efa8",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "player_ships": {
+      "beforeCount": 14,
+      "afterCount": 14,
+      "changedRows": 0,
+      "changedColumns": [],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "1d9ad2307110d0fc9ea5278ad1d8096ae078bea6e8cb9448bc7f94c4aaf4a617",
+      "protectedColumnsSha256After": "1d9ad2307110d0fc9ea5278ad1d8096ae078bea6e8cb9448bc7f94c4aaf4a617",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "players": {
+      "beforeCount": 206,
+      "afterCount": 206,
+      "changedRows": 206,
+      "changedColumns": [
+        "revision"
+      ],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "1c85aa6be0d4c70628ad427243ddbfb5b6244b99bc1622eb2fbee85f501ba7eb",
+      "protectedColumnsSha256After": "1c85aa6be0d4c70628ad427243ddbfb5b6244b99bc1622eb2fbee85f501ba7eb",
+      "protectedEqual": true,
+      "allowedChanges": true
+    },
+    "visits": {
+      "beforeCount": 60,
+      "afterCount": 60,
+      "changedRows": 0,
+      "changedColumns": [],
+      "metadataInitialization": false,
+      "protectedColumnsSha256Before": "3b850940e5c49c15c00425a1c50cd9237599f707cd6255f4746238c003a4f294",
+      "protectedColumnsSha256After": "3b850940e5c49c15c00425a1c50cd9237599f707cd6255f4746238c003a4f294",
+      "protectedEqual": true,
+      "allowedChanges": true
+    }
+  },
+  "newTables": [
+    "home_interiors",
+    "home_locations",
+    "home_manifests",
+    "home_sample_config",
+    "integration_config",
+    "integration_migrations",
+    "object_replacements",
+    "planet_radius_epochs"
+  ],
+  "reopenEqual": true,
+  "savedPoseReadsStable": true,
+  "originalTables": {
+    "blueprint_contents": {
+      "count": 4,
+      "sha256": "8c55c69cf06e03a3ee3893e8576aa41b6f712f8343ee7dbe62b4b906b39c6d17"
+    },
+    "blueprint_library": {
+      "count": 23,
+      "sha256": "765b605eaa524e729e9360ad334a2e319714ce4691e1a6677d13ad14503bbd2c"
+    },
+    "ground_states": {
+      "count": 6,
+      "sha256": "87bc9c5eae6c40aed078b6e8b12afd8d1e9bf709444f40b2d4e37bb90e79c837"
+    },
+    "history_events": {
+      "count": 17,
+      "sha256": "f17b39dedcc0fa6d0a9db1b31a7c13d5e6dd4d12255832607098780e60485898"
+    },
+    "history_heads": {
+      "count": 86,
+      "sha256": "b2b2abed122dadaa3ded951d24afb4c34c488f2b1c0f35992fcb3d12e83b4fee"
+    },
+    "history_snapshots": {
+      "count": 86,
+      "sha256": "a8cc952883d1c11832bc1299c2e88630380a91e4d3254a532ab0f8f7683f88d7"
+    },
+    "object_assets": {
+      "count": 1,
+      "sha256": "140fb259cfef9880479a086335e87ae41af9072e43be70396e8298d9f8100fe3"
+    },
+    "object_tombstones": {
+      "count": 10,
+      "sha256": "cae02959aa15b958241cdb1a15de56c9e9a18e88412b76762d90d9848d3bcfcd"
+    },
+    "planet_objects": {
+      "count": 37,
+      "sha256": "eaffaec65b3c4ff00388174ca4f8500f0bdab1ded033db44c27c5e52c6203f15"
+    },
+    "planets": {
+      "count": 87,
+      "sha256": "78ed4205a9a4d08c1ee7bea2fcd5d534e51b52c2614312dd7e6af725c34e5ff1"
+    },
+    "player_ships": {
+      "count": 14,
+      "sha256": "1d9ad2307110d0fc9ea5278ad1d8096ae078bea6e8cb9448bc7f94c4aaf4a617"
+    },
+    "players": {
+      "count": 206,
+      "sha256": "d27e9e1a3661cf34d6934e2ffe702d34c8740821190704ae2f66a35fb370a4cf"
+    },
+    "visits": {
+      "count": 60,
+      "sha256": "3b850940e5c49c15c00425a1c50cd9237599f707cd6255f4746238c003a4f294"
+    }
+  },
+  "afterTables": {
+    "blueprint_contents": {
+      "count": 4,
+      "sha256": "8c55c69cf06e03a3ee3893e8576aa41b6f712f8343ee7dbe62b4b906b39c6d17"
+    },
+    "blueprint_library": {
+      "count": 23,
+      "sha256": "765b605eaa524e729e9360ad334a2e319714ce4691e1a6677d13ad14503bbd2c"
+    },
+    "ground_states": {
+      "count": 6,
+      "sha256": "56a85797b9f1e9a05745f8ed55f483d82bbede0547cb098546e2d8c8b03a91ec"
+    },
+    "history_events": {
+      "count": 17,
+      "sha256": "f17b39dedcc0fa6d0a9db1b31a7c13d5e6dd4d12255832607098780e60485898"
+    },
+    "history_heads": {
+      "count": 86,
+      "sha256": "b2b2abed122dadaa3ded951d24afb4c34c488f2b1c0f35992fcb3d12e83b4fee"
+    },
+    "history_snapshots": {
+      "count": 86,
+      "sha256": "a8cc952883d1c11832bc1299c2e88630380a91e4d3254a532ab0f8f7683f88d7"
+    },
+    "home_interiors": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "home_locations": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "home_manifests": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "home_sample_config": {
+      "count": 1,
+      "sha256": "d079e278667b7e1f6824591a2bd72a1903fdc9a39738a4017cf48f021d614128"
+    },
+    "integration_config": {
+      "count": 1,
+      "sha256": "330aabcadc1622b31e2b5ac2b231a0309f86303553529e11ee519aa683624c28"
+    },
+    "integration_migrations": {
+      "count": 1,
+      "sha256": "e2276e900a4598d227cb5eddedbbd3e20313a84dccd5706be44304bb46927270"
+    },
+    "object_assets": {
+      "count": 1,
+      "sha256": "140fb259cfef9880479a086335e87ae41af9072e43be70396e8298d9f8100fe3"
+    },
+    "object_replacements": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "object_tombstones": {
+      "count": 10,
+      "sha256": "cae02959aa15b958241cdb1a15de56c9e9a18e88412b76762d90d9848d3bcfcd"
+    },
+    "planet_objects": {
+      "count": 37,
+      "sha256": "eaffaec65b3c4ff00388174ca4f8500f0bdab1ded033db44c27c5e52c6203f15"
+    },
+    "planet_radius_epochs": {
+      "count": 174,
+      "sha256": "3ee93fcae0d802d9e835f448a21c2c768904f4488cbe61c82b06400d289dc0ee"
+    },
+    "planets": {
+      "count": 87,
+      "sha256": "fb23664ca0dab496e192f54c7911f45ad2ed9679bae6f665af49c9f0ffbd1f80"
+    },
+    "player_ships": {
+      "count": 14,
+      "sha256": "1d9ad2307110d0fc9ea5278ad1d8096ae078bea6e8cb9448bc7f94c4aaf4a617"
+    },
+    "players": {
+      "count": 206,
+      "sha256": "bd3185735da99a7bb71aa79fefb96ccdfaf25eb8bbe320406f781ca6cd5a951e"
+    },
+    "visits": {
+      "count": 60,
+      "sha256": "3b850940e5c49c15c00425a1c50cd9237599f707cd6255f4746238c003a4f294"
+    }
+  },
+  "notes": [
+    "The source is read-only; destination was created exclusively.",
+    "Only planet revisions, player revision fences and explicitly rebased ground poses may change in original tables.",
+    "Original object rows, blueprint labels/groups/content, ships, quests, ownership, visits and immutable history are retained.",
+    "Radius epochs describe old snapshot geometry without fabricating or rewriting history events.",
+    "Restore requires the old application and untouched source backup; do not merge old and new writable databases."
+  ]
+}

@@ -19,20 +19,27 @@ import { planetStore } from './planets.ts';
 import { RequestError } from './errors.ts';
 import { navigationStore } from './navigation.ts';
 import { homePathStore } from './home-paths.ts';
+import { homeSetupStore } from './home-setup.ts';
+import { INTEGRATED_RADIUS, migrateIntegrationSchema } from './integration-migration.ts';
 export { RequestError } from './errors.ts';
 
 interface Row { character: Character; quest: Quest; position: string; deliveries: number; revision: number; moved_at: number; planet_id: string }
-export function openStore(path: string, options: { homeSample?: boolean } = {}) {
+export function openStore(path: string, options: { homeSample?: boolean; integratedWorld?: boolean } = {}) {
   // Probe with SQLite's read-only flag before mkdir, WAL pragmas or any migration.
   if(options.homeSample&&path!==':memory:'&&existsSync(path)){
     const probe=new DatabaseSync(path,{readOnly:true});let permitted:boolean;
     try{const table=probe.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='home_sample_config'").get();permitted=!!table&&Number(probe.prepare('SELECT enabled FROM home_sample_config WHERE id=1').get()?.enabled)===1;}finally{probe.close();}
     if(!permitted)throw new Error('HOME_SAMPLE refuses an existing non-sample database before migration. Use a new isolated path.');
   }
+  if(options.integratedWorld&&path!==':memory:'&&existsSync(path)){
+    const probe=new DatabaseSync(path,{readOnly:true});let ready:boolean;
+    try{const table=probe.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='integration_config'").get();ready=!!table&&Number(probe.prepare('SELECT version FROM integration_config WHERE id=1').get()?.version)>=1;}finally{probe.close();}
+    if(!ready)throw new Error('Existing main database requires an explicit backed-up integration migration before startup.');
+  }
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-  if (schema > 14) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  if (schema > 15) { db.close(); throw new Error('Database schema is newer than this application.'); }
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
@@ -41,7 +48,7 @@ export function openStore(path: string, options: { homeSample?: boolean } = {}) 
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
     );`);
   let migrationBackup: string | null = null;
-  if (schema < 14) {
+  if (schema < 15) {
     if (schema > 0 && path !== ':memory:') {
       migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
       // VACUUM INTO includes committed WAL data and produces a consistent restore point.
@@ -161,18 +168,26 @@ export function openStore(path: string, options: { homeSample?: boolean } = {}) 
       migrateHomes(db);
       db.prepare('INSERT OR IGNORE INTO home_sample_config(id,enabled) VALUES(1,?)').run(Number(schema===0&&!!options.homeSample));
       if(schema===0&&options.homeSample) db.prepare('UPDATE planets SET sample_radius=?').run(HOME_SAMPLE_RADIUS);
-      db.exec('PRAGMA user_version=14; COMMIT;');
+      migrateIntegrationSchema(db);
+      if(schema===0&&options.integratedWorld){
+        db.prepare('INSERT INTO integration_config(id,version,radius) VALUES(1,1,?)').run(INTEGRATED_RADIUS);
+        db.prepare('UPDATE planets SET world_radius=?').run(INTEGRATED_RADIUS);
+      }
+      db.exec('PRAGMA user_version=15; COMMIT;');
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
   const history = historyStore(db);
   const ships = shipStore(db);
   const blueprints = blueprintStore(db);
   const homeSample=!!options.homeSample&&Number(db.prepare('SELECT enabled FROM home_sample_config WHERE id=1').get()?.enabled)===1;
-  const planets = planetStore(db, blueprints, history, homeSample ? HOME_SAMPLE_RADIUS : undefined);
+  const integratedWorld=Number(db.prepare('SELECT version FROM integration_config WHERE id=1').get()?.version??0)>=1;
+  const homeEnabled=homeSample||integratedWorld;
+  const planets = planetStore(db, blueprints, history, homeSample ? HOME_SAMPLE_RADIUS : undefined,integratedWorld?INTEGRATED_RADIUS:undefined);
   const navigation=navigationStore(db,planets);
   const ground=groundStore(db,planets);
-  const homes=homeStore(db,planets,blueprints,history,homeSample);
-  const homePaths=homePathStore(db,planets,homes,homeSample);
+  const homes=homeStore(db,planets,blueprints,history,homeEnabled);
+  const homePaths=homePathStore(db,planets,homes,homeEnabled);
+  const homeSetup=homeSetupStore(db,planets,blueprints,homes,homeEnabled);
   const row = (id: string): Row => {
     const result = db.prepare('SELECT * FROM players WHERE id=?').get(id) as unknown as Row | undefined;
     if (!result) throw new RequestError(401, 'Your session has expired. Reload to start a new visit.');
@@ -180,18 +195,20 @@ export function openStore(path: string, options: { homeSample?: boolean } = {}) 
   };
   const state = (id: string): PlayerState => {
     row(id);const flight=navigation.flight(id);
-    const location=homeSample?homes.location(id):undefined;
+    const location=homeEnabled?homes.location(id):undefined;
     const standing=flight.mode==='ground'&&location?.kind!=='interior'?ground.read(id):undefined;
     const r = row(id);
-    return { ...(homeSample?{location,home:homes.descriptor(id)}:{}), worldRadius:planets.planet(r.planet_id).radius, environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
+    return { ...(homeEnabled?{location,home:homes.descriptor(id)}:{}), worldRadius:planets.planet(r.planet_id).radius, environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
   };
   const universe = (id: string) => { const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) }; };
   return {
-    db, state, universe, migrationBackup, homeSample,
+    db, state, universe, migrationBackup, homeSample, integratedWorld,
+    previewHomeSetup(id:string,body:Record<string,unknown>){row(id);return homeSetup.preview(id,body);},
+    confirmHomeSetup(id:string,body:Record<string,unknown>){row(id);homeSetup.confirm(id,body);return universe(id);},
     previewHomePaths(id:string,body:Record<string,unknown>){row(id);return homePaths.preview(id,body);},
     applyHomePaths(id:string,body:Record<string,unknown>){row(id);homePaths.apply(id,body);return universe(id);},
     historyPage(id:string,planet:unknown,after?:unknown,limit?:unknown){row(id);return history.page(id,planet,after,limit);},
-    historySnapshot(id:string,planet:unknown,sequence?:unknown){row(id);return {...history.snapshot(id,planet,sequence),radius:planets.planet(planet).radius};},
+    historySnapshot(id:string,planet:unknown,sequence?:unknown){row(id);const snap=history.snapshot(id,planet,sequence),seq=JSON.parse(snap.document).seq;const epoch=db.prepare('SELECT radius FROM planet_radius_epochs WHERE planet_id=? AND from_sequence<=? ORDER BY from_sequence DESC LIMIT 1').get(String(planet),seq);return {...snap,radius:epoch?Number(epoch.radius):planets.planet(planet).radius};},
     saveShip(id: string, body: Record<string, unknown>) { row(id); ships.save(id, body); return state(id); },
     library(id: string) { row(id); return blueprints.list(id); },
     saveBlueprint(id: string, body: Record<string, unknown>) { row(id); return blueprints.save(id, body); },
@@ -200,18 +217,17 @@ export function openStore(path: string, options: { homeSample?: boolean } = {}) 
     land(id:string,body:Record<string,unknown>,now=Date.now()){homes.exterior(id,body.visitEpoch);const clean={...body};delete clean.visitEpoch;navigation.land(id,clean,now);homes.movedExterior(id);return universe(id);},
     has: (id: string) => Boolean(db.prepare('SELECT id FROM players WHERE id=?').get(id)),
     create(id: string, now = Date.now()) {
-      if(homeSample)db.exec('BEGIN IMMEDIATE');
+      if(homeEnabled)db.exec('BEGIN IMMEDIATE');
       try{
         db.prepare('INSERT INTO players (id,position,moved_at) VALUES (?,?,?)').run(id, JSON.stringify(SPAWN), now);
-        if(homeSample){
-          const available=planets.list(id).find(p=>p.kind==='garden'&&!p.claimed);
-          if(!available)throw new RequestError(409,'No sample planet is available.');
+        if(homeEnabled){
+          const available={id:planets.freshHomePlanet()};
           planets.claim(id,available.id);homes.initialise(available.id);const door=homes.door(available.id);
           if(!door)throw new RequestError(409,'The sample home could not be prepared.');
           db.prepare('UPDATE players SET planet_id=?,position=? WHERE id=?').run(available.id,JSON.stringify(door.position),id);
           homes.movedExterior(id);db.exec('COMMIT');
         }
-      }catch(error){if(homeSample&&db.isTransaction)db.exec('ROLLBACK');throw error;}
+      }catch(error){if(homeEnabled&&db.isTransaction)db.exec('ROLLBACK');throw error;}
       return state(id);
     },
     character(id: string, value: unknown) {
@@ -243,7 +259,7 @@ export function openStore(path: string, options: { homeSample?: boolean } = {}) 
       return state(id);
     },
     visit(id: string, planetId: unknown) {
-      if(homeSample&&homes.location(id).kind==='interior')throw new RequestError(409,'Leave home before travelling.');
+      if(homeEnabled&&homes.location(id).kind==='interior')throw new RequestError(409,'Leave home before travelling.');
       const r = row(id), p = planets.planet(planetId);
       if (r.planet_id === p.id) return universe(id);
       db.exec('BEGIN IMMEDIATE');
@@ -276,7 +292,10 @@ export function openStore(path: string, options: { homeSample?: boolean } = {}) 
         const h=homes.descriptor(id);
         if(!h||h.buildingId!==body.buildingId||!h.canEdit)throw new RequestError(403,'Only the home owner can remodel.');
         if(h.buildingVersion!==body.expectedVersion)throw new RequestError(409,'This home changed in another tab. Select it again.');
-        const bp=homes.remodelBlueprint(body.variant),content=canonicalJson(hashInput(bp.parts)),hash=createHash('sha256').update(content).digest('hex');
+        const bp=homes.remodelBlueprint(body.variant,h.planetId);
+        const bound=Number(db.prepare('SELECT door_part FROM home_interiors WHERE building_id=?').get(h.buildingId)!.door_part);
+        if(bound!==1){const collision=bp.parts.find(part=>part.n===bound);if(collision)collision.n=Math.max(...bp.parts.map(part=>part.n),bound)+1;bp.parts.find(part=>part.n===1)!.n=bound;}
+        const content=canonicalJson(hashInput(bp.parts)),hash=createHash('sha256').update(content).digest('hex');
         const library=blueprints.list(id);
         // A preset's id, name and groups are not placement identity. Never save
         // over a library document: its owner may have renamed or regrouped it.

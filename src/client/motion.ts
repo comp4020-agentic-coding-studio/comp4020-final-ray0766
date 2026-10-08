@@ -50,8 +50,10 @@ export function cameraPose(walker: SurfaceWalker, portrait: boolean, overview = 
   };
   const lookAhead = walker.velocity.clone().multiplyScalar(.13);
   if (radius > 20) return {
-    position: walker.up.clone().multiplyScalar(radius + 2.8).addScaledVector(walker.north, portrait ? -5.2 : -4.8),
-    target: walker.up.clone().multiplyScalar(radius + 1.05).addScaledVector(walker.north, .65).add(lookAhead),
+    // Frame a person within their street: enough foreground to read a step,
+    // and enough distance to see a neighbouring facade beyond the doorway.
+    position: walker.up.clone().multiplyScalar(radius + (portrait ? 3.8 : 3.6)).addScaledVector(walker.north, portrait ? -8 : -7.2),
+    target: walker.up.clone().multiplyScalar(radius + 1.15).addScaledVector(walker.north, 1.1).add(lookAhead),
   };
   return {
     position: walker.up.clone().multiplyScalar(radius + (portrait ? 6.4 : 4.6)).addScaledVector(walker.north, portrait ? -9.0 : -6.8),

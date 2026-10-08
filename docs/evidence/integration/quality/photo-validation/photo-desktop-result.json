@@ -1,0 +1,158 @@
+{
+  "status": "passed",
+  "baseURL": "http://127.0.0.1:8130",
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "browserVersion": "154.0.8037.98",
+  "host": {
+    "platform": "darwin",
+    "osRelease": "27.0.0",
+    "cpu": "Apple M3",
+    "cpuLogicalCount": 8,
+    "memoryGiB": 16,
+    "realPhone": false
+  },
+  "photos": [
+    {
+      "path": "docs/evidence/integration/quality/photo-validation/photo-desktop-exterior-2048.png",
+      "width": 2048,
+      "height": 1422,
+      "bytes": 1397423,
+      "sha256": "25ffdfba1451edbf0fa77df2aa4d253d712209e5629ad4bcb6076c53c99fc7ea",
+      "elapsedMs": 437,
+      "pixels": {
+        "decodedWidth": 2048,
+        "decodedHeight": 1422,
+        "quantizedColors": 268,
+        "opaqueFraction": 0.993896484375,
+        "luminanceRange": 193.33333333333334
+      },
+      "supersampling": 2,
+      "source": "local geometry"
+    },
+    {
+      "path": "docs/evidence/integration/quality/photo-validation/photo-desktop-exterior-3840.png",
+      "width": 3840,
+      "height": 2667,
+      "bytes": 3687121,
+      "sha256": "749829e460cfceb5bd0435b0403471d64e61cf6075024d5de2b177af4d9e69f8",
+      "elapsedMs": 425,
+      "pixels": {
+        "decodedWidth": 3840,
+        "decodedHeight": 2667,
+        "quantizedColors": 263,
+        "opaqueFraction": 0.9951171875,
+        "luminanceRange": 184.66666666666669
+      },
+      "supersampling": 1,
+      "source": "local geometry"
+    },
+    {
+      "path": "docs/evidence/integration/quality/photo-validation/photo-desktop-interior-2048.png",
+      "width": 2048,
+      "height": 1422,
+      "bytes": 677478,
+      "sha256": "ca7cfe0d0775e5f69f9a5666c4e3141419246f4b16df400a9e7657dab161b63f",
+      "elapsedMs": 338,
+      "pixels": {
+        "decodedWidth": 2048,
+        "decodedHeight": 1422,
+        "quantizedColors": 199,
+        "opaqueFraction": 1,
+        "luminanceRange": 155.33333333333331
+      },
+      "supersampling": 2,
+      "source": "local geometry"
+    },
+    {
+      "path": "docs/evidence/integration/quality/photo-validation/photo-desktop-interior-3840.png",
+      "width": 3840,
+      "height": 2667,
+      "bytes": 1777369,
+      "sha256": "eb9bb148cc7be9badbda70832f5e10da166a7c93ac3d6133df1738bd57314ee2",
+      "elapsedMs": 301,
+      "pixels": {
+        "decodedWidth": 3840,
+        "decodedHeight": 2667,
+        "quantizedColors": 199,
+        "opaqueFraction": 1,
+        "luminanceRange": 164.66666666666666
+      },
+      "supersampling": 1,
+      "source": "local geometry"
+    }
+  ],
+  "checks": [
+    "exterior: orbit changes view, both camera presets work, 2K/4K PNG decodes, geometry/furniture/labels/pose unchanged while paused",
+    "exterior: close restores real keyboard walking controls",
+    "interior: orbit changes view, both camera presets work, 2K/4K PNG decodes, geometry/furniture/labels/pose unchanged while paused",
+    "interior: close restores real keyboard walking controls"
+  ],
+  "pageErrors": [],
+  "externalRequests": [],
+  "fixture": "Fresh isolated browser identity. Photo actions use actual controls and local downloads; state APIs are read-only. No physical-phone performance claim.",
+  "renderer": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "viewport": {
+      "width": 1440,
+      "height": 1000,
+      "dpr": 1
+    },
+    "drawingBuffer": {
+      "width": 1440,
+      "height": 1000
+    },
+    "touchPoints": 0,
+    "visibility": "visible",
+    "webglVendor": "Google Inc. (Apple)",
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+  },
+  "writeRoutes": [
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/move",
+    "/api/home/enter",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/home/move",
+    "/api/home/move",
+    "/api/presence",
+    "/api/home/move",
+    "/api/presence",
+    "/api/home/move",
+    "/api/presence",
+    "/api/home/move",
+    "/api/presence"
+  ],
+  "contentDigestBefore": "9ccd7059c9ca00002c78edae9f87f5e9e054f4939fd2cac77f057cf0608b6e9a",
+  "contentDigestAfter": "9ccd7059c9ca00002c78edae9f87f5e9e054f4939fd2cac77f057cf0608b6e9a"
+}

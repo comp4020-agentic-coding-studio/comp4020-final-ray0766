@@ -32,3 +32,15 @@
 .home-room-header .home-door-actions{display:flex;flex-direction:column;gap:8px;pointer-events:auto}
 .home-door-actions button{white-space:nowrap}
 @media(max-height:500px){.home-room-header{top:10px;left:12px;right:12px}.home-room-header>div{padding:8px 12px}.home-room-header h2{font-size:17px}.home-room-eyebrow{display:none}.home-room-header .home-door-actions{flex-direction:row}.home-room-tools{bottom:12px}.home-room-editor{bottom:60px;max-height:calc(100dvh - 135px);overflow:auto}}
+
+/* Indoor controls use the same paper, ink and action hierarchy as outdoors. */
+.home-interior-ui{color:var(--ui-ground-ink)}
+.home-interior-ui button,.home-interior-ui select{color:var(--ui-ground-ink);background:var(--ui-ground-paper);border-color:var(--ui-dialog-border)}
+.home-interior-ui button:focus-visible,.home-interior-ui select:focus-visible{outline-color:var(--ui-preview-focus)}
+.home-interior-ui button[aria-pressed=true],#home-save{background:var(--ui-teal);color:var(--ui-secondary-ink);border-color:var(--ui-teal)}
+.home-room-header>div,.home-room-editor{background:var(--ui-dialog-surface);border-color:var(--ui-dialog-border);color:var(--ui-dialog-text)}
+#home-room-hint{background:var(--ui-chip);color:var(--ui-ground-ink)}
+#home-exit{background:var(--ui-ground-paper);color:var(--ui-ground-ink)}
+#home-photo{border-color:var(--ui-teal)}
+.home-joystick{background:var(--ui-chip);border-color:var(--ui-joystick-ring)}
+.home-joystick>span{background:var(--ui-joystick-stick);border-color:var(--ui-joystick-ring)}

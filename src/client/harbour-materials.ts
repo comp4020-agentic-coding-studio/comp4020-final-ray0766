@@ -2,6 +2,7 @@ import * as T from 'three';
 import { HARBOUR_SURFACES, HARBOUR_ACCENTS, HARBOUR_GRAIN } from './presentation-materials.ts';
 import { applyCel } from '../assets/claude-geometry/style/cel.ts';
 import { VILLAGE } from '../assets/claude-geometry/style/look.ts';
+import {applyArtMaterial} from './art-profile.ts';
 
 // Shared original Sunseed material profile. One bounded palette lives for the app lifetime.
 function makePalette(){
@@ -20,7 +21,7 @@ function makePalette(){
   const lightMap=texture(512,c=>{c.fillStyle='#000000';c.fillRect(0,0,512,512);for(let row=0;row<12;row++)for(let col=0;col<8;col++)if(windows[row*8+col]){const x=col*64+21,y=row*42+7;c.fillStyle='#ffffff';c.fillRect(x,y,22,23);c.fillStyle='#000000';c.fillRect(x+10,y,2,23);c.fillRect(x,y+11,22,2);}});
   const facade=applyCel(new T.MeshStandardMaterial({...HARBOUR_ACCENTS.facade,map:facadeMap,emissiveMap:lightMap}),VILLAGE.cel!);facade.userData.ownedResource=true;
   const palette={concrete,pale,metal,dark,copper,road,edge,cyan,amber,glass,facade};
-  for(const [name,m] of Object.entries(palette)){m.name='sunseed:'+name;m.userData.sharedResource=true;}
+  for(const [name,m] of Object.entries(palette)){m.name='sunseed:'+name;m.userData.sharedResource=true;applyArtMaterial(m);}
   return palette;
 }
 let shared:ReturnType<typeof makePalette>|null=null;

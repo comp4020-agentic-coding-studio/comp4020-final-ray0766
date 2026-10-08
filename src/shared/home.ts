@@ -58,10 +58,19 @@ export function homePathAllowed(from: Vec3, to: Vec3, items: readonly HomeItem[]
   return true;
 }
 export function defaultHomeInterior(): HomeInterior {
+  // A new home starts with two deliberate furniture groups. Existing room
+  // documents never pass through this initializer and retain every saved item.
   return {version:1,room:{...HOME_ROOM},doorOpen:true,doorVersion:0,material:'warm',items:[
-    {id:'table',kind:'table',position:[-.9,0,-.45],yaw:0},
-    {id:'chair',kind:'chair',position:[-.9,0,.35],yaw:Math.PI},
-    {id:'shelf',kind:'shelf',position:[1.65,0,-1.55],yaw:0},
-    {id:'plant',kind:'plant',position:[-1.9,0,-1.4],yaw:0},
+    {id:'table',kind:'table',position:[-2.2,0,-.2],yaw:0},
+    {id:'chair',kind:'chair',position:[-2.2,0,.7],yaw:0},
+    {id:'shelf',kind:'shelf',position:[-3.15,0,-3.12],yaw:Math.PI},
+    {id:'plant',kind:'plant',position:[-3.55,0,2.3],yaw:0},
+    {id:'chair-table-back',kind:'chair',position:[-2.2,0,-1.1],yaw:Math.PI},
+    {id:'chair-table-side',kind:'chair',position:[-1.25,0,-.2],yaw:Math.PI/2},
+    {id:'shelf-back',kind:'shelf',position:[-2.05,0,-3.12],yaw:Math.PI},
+    {id:'shelf-reading',kind:'shelf',position:[2.65,0,-3.12],yaw:Math.PI},
+    {id:'table-reading',kind:'table',position:[2.5,0,-2.15],yaw:0},
+    {id:'chair-reading',kind:'chair',position:[1.6,0,-2.05],yaw:Math.PI*1.5},
+    {id:'plant-window',kind:'plant',position:[3.6,0,-2.85],yaw:0},
   ]};
 }

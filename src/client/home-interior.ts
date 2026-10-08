@@ -1,12 +1,12 @@
 import * as T from 'three';
 import { courier } from './character.ts';
 import { disposeGeometry } from './build-art.ts';
-import { createWorldStyleLibrary } from './presentation.ts';
+import { createWorldStyleLibrary,configureHomeLighting } from './presentation.ts';
+import {ART_PALETTE,HOME_ART_THEMES} from './art-profile.ts';
 import { PartBuilder } from '../assets/claude-geometry/style/geometry.ts';
 import { libraryMaterials, makeKit } from '../assets/claude-geometry/blueprint/parts/kit.ts';
 import { emitPart } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
 import type { PartId } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
-import { VILLAGE } from '../assets/claude-geometry/style/look.ts';
 import { HOME_ROOM, HOME_BODY_RADIUS, homeExit, homeNearDoor, homeItemBounds, homePathAllowed, homePositionAllowed } from '../shared/home.ts';
 import type { HomeDescriptor, HomeInterior as InteriorData, HomeItem, HomeRoom } from '../shared/home.ts';
 import type { PlayerState, Vec3 } from '../shared/world.ts';
@@ -14,6 +14,7 @@ import type { Universe } from '../shared/planets.ts';
 import type { PresenceSnapshot } from '../shared/presence.ts';
 import { homeIndoorDoorOrigin } from '../shared/home-door.ts';
 import { createHomeDoor } from './home-door.ts';
+import { createHomeRoomArt, applyHomeRoomTheme } from './home-room-art.ts';
 import './home-interior.css';
 
 export interface HomeInteriorOptions {
@@ -46,7 +47,7 @@ export function fitHomeCamera(camera: T.OrthographicCamera, width: number, depth
 }
 
 const PART: Record<HomeItem['kind'], PartId> = { table: 'furniture.table', chair: 'furniture.chair', shelf: 'furniture.shelf', plant: 'garden.pot' };
-const THEMES = { warm: ['#efe3c6', '#5f8b82'], sage: ['#cdd9bc', '#597f6f'], blue: ['#d3e2e6', '#668da1'] } as const;
+const THEMES = HOME_ART_THEMES;
 const copy = (interior: InteriorData): InteriorData => structuredClone(interior);
 const distance = (a: Vec3, b: Vec3) => Math.hypot(a[0] - b[0], a[2] - b[2]);
 
@@ -65,6 +66,7 @@ const translation: Record<string, [string, string]> = {
   leave: ['Go outside · E', '出门 · E'], door: ['Open the door, then choose Go outside', '走到门口开门，再选择出门'],
   openDoor: ['Open door', '开门'], closeDoor: ['Close door', '关门'], opened: ['Door open', '门已打开'], closed: ['Door closed · open it to leave', '门已关好 · 开门后可出门'],
   overview: ['Whole room', '全屋总览'], closeView: ['Follow me', '跟随近景'],
+  photo: ['Photo mode', '照片模式'],
   arrange: ['Arrange room', '布置房间'], save: ['Save changes', '保存布置'], cancel: ['Cancel', '取消'],
   move: ['MOVE', '移动'], hint: ['WASD / arrows · open the door, then E to leave', 'WASD / 方向键移动 · 门口开门后按 E 出门'],
   phoneHint: ['Use the thumbstick · open the door to go outside', '拖动摇杆走动 · 门口开门后选择出门'],
@@ -89,6 +91,9 @@ export class HomeInterior {
   private room = new T.Group();
   private readonly doorView = createHomeDoor();
   private overview = false;
+  private photoMode = false;
+  private readonly fill = new T.HemisphereLight();
+  private readonly sun = new T.DirectionalLight();
   private cameraOffset = new T.Vector3();
   private furniture = new T.Group();
   private avatar = courier('clay');
@@ -116,27 +121,21 @@ export class HomeInterior {
   private statusKey = 'entering';
   private sourceKey = '';
   private currentVisit = '';
-  private surfaceResourceDisposers: (() => void)[] = [];
   private abort = new AbortController();
   private _active = false;
   get active() { return this._active; }
   get facing(): Vec3 { return [Math.sin(this.yaw), 0, Math.cos(this.yaw)]; }
 
   constructor(private readonly options: HomeInteriorOptions) {
-    this.scene.background = new T.Color('#98b6ad');
     this.scene.add(this.room, this.furniture, this.avatar.root, this.selection, this.doorView.root);
     this.selection.rotation.x = -Math.PI / 2; this.selection.visible = false;
-    const fill = new T.HemisphereLight('#e2efe5', '#a99a79', 1.4);
-    const sun = new T.DirectionalLight(VILLAGE.light.key, 2.4);
-    sun.position.set(-4, 8, 5); sun.castShadow = true;
-    sun.shadow.mapSize.set(1024, 1024); sun.shadow.normalBias = .025; sun.shadow.bias = -.00015;
-    Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: .1, far: 35 });
-    sun.shadow.camera.updateProjectionMatrix(); this.scene.add(fill, sun, sun.target);
+    configureHomeLighting(this.scene,this.fill,this.sun,HOME_ROOM.width,HOME_ROOM.depth,HOME_ROOM.height);
+    this.scene.add(this.fill,this.sun,this.sun.target);
     this.library.attachRenderer(options.renderer);
     this.ui.className = 'home-interior-ui'; this.ui.hidden = true;
     this.ui.dataset.i18nVerbatim = ''; this.ui.setAttribute('aria-label', 'Home interior');
     this.ui.innerHTML = `<header class="home-room-header"><div><span class="home-room-eyebrow">HOME / 小屋</span><h2 data-home-text="title"></h2><p id="home-room-status" role="status" aria-live="polite"></p></div><nav class="home-door-actions"><button id="home-toggle-door"></button><button id="home-exit" data-home-text="leave"></button></nav></header>
-      <div class="home-room-tools"><button id="home-camera-view" data-home-text="overview"></button><button id="home-arrange" data-home-text="arrange"></button><button id="home-retry" data-home-text="retry" hidden></button><p id="home-room-hint"></p></div>
+      <div class="home-room-tools"><button id="home-camera-view" data-home-text="overview"></button><button id="home-photo" data-home-text="photo"></button><button id="home-arrange" data-home-text="arrange"></button><button id="home-retry" data-home-text="retry" hidden></button><p id="home-room-hint"></p></div>
       <section id="home-room-editor" class="home-room-editor" hidden aria-label="Arrange room"><div class="home-material-row"><span data-home-text="material"></span><button id="home-material-warm" data-material="warm" data-home-text="warm"></button><button id="home-material-sage" data-material="sage" data-home-text="sage"></button><button id="home-material-blue" data-material="blue" data-home-text="blue"></button></div><label><span data-home-text="furniture"></span> <select id="home-item-select"></select></label><div class="home-item-moves"><button id="home-item-left">←</button><button id="home-item-forward">↑</button><button id="home-item-back">↓</button><button id="home-item-right">→</button><button id="home-item-rotate" data-home-text="rotate"></button></div><div class="home-save-row"><button id="home-cancel" data-home-text="cancel"></button><button id="home-save" data-home-text="save"></button></div></section>
       <div id="home-joystick" class="home-joystick" role="group" aria-label="Move around the room"><span id="home-stick"></span><small data-home-text="move"></small></div>`;
     document.body.append(this.ui);
@@ -144,6 +143,7 @@ export class HomeInterior {
     on('home-exit', () => { if (this.nearExit()) void this.leave(); });
     on('home-toggle-door', () => void this.toggleDoor());
     on('home-camera-view', () => { this.overview = !this.overview; this.lastViewport = ''; this.updateControls(); });
+    on('home-photo',()=>{if(!this.pendingAction)window.dispatchEvent(new Event('open-photo-mode'));});
     on('home-arrange', () => this.beginEditing());
     on('home-cancel', () => this.cancelEditing());
     on('home-save', () => void this.saveDraft());
@@ -159,7 +159,7 @@ export class HomeInterior {
     window.addEventListener('keydown', this.keyDown, { capture: true, signal: this.abort.signal });
     window.addEventListener('keyup', this.keyUp, { capture: true, signal: this.abort.signal });
     window.addEventListener('blur', () => this.clearInput(), { signal: this.abort.signal });
-    document.addEventListener('visibilitychange', () => { if (document.hidden) { this.clearInput(); void this.flush(); } }, { signal: this.abort.signal });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) { this.clearInput(); if(!this.photoMode)void this.flush(); } }, { signal: this.abort.signal });
     const joystick = this.get('home-joystick');
     const drag = (e: PointerEvent) => { const rect = joystick.getBoundingClientRect(); this.stick.set((e.clientX - rect.left - rect.width / 2) / 34, (e.clientY - rect.top - rect.height / 2) / 34).clampLength(0, 1); this.get('home-stick').style.transform = `translate(${this.stick.x * 25}px,${this.stick.y * 25}px)`; };
     joystick.addEventListener('pointerdown', e => { if (this.editing || !this.online || this.pendingAction) return; e.preventDefault(); this.stickPointer = e.pointerId; joystick.setPointerCapture(e.pointerId); drag(e); }, { signal: this.abort.signal });
@@ -179,7 +179,7 @@ export class HomeInterior {
   private setStatus(key: string) { this.statusKey = key; this.get('home-room-status').textContent = this.text(key); }
   private clearInput() { this.keys.clear(); this.stick.set(0, 0); this.moving = 0; this.get('home-stick').style.transform = ''; }
   private keyDown = (event: KeyboardEvent) => {
-    if (!this.active || event.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (!this.active || this.photoMode || event.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;
     if ((event.target as Element)?.closest('input,select,textarea,[contenteditable]')) return;
     const key = event.key.toLowerCase();
     if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'e', 'escape', ' '].includes(key)) {
@@ -242,39 +242,16 @@ export class HomeInterior {
   }
 
   private buildRoom() {
-    this.surfaceResourceDisposers.forEach(dispose => dispose()); this.surfaceResourceDisposers = [];
     disposeGeometry(this.room); this.room = new T.Group(); this.scene.add(this.room);
     const interior = this.draft ?? this.home!.interior, { width, depth, height } = interior.room;
-    const b = new PartBuilder('medium'), source = libraryMaterials(this.library), kit = makeKit(b, source);
-    const part = (id: PartId, x: number, z: number, yaw = 0) => b.within({ position: [x, 0, z], rotation: [0, yaw, 0] }, () => emitPart(id, 'village', kit));
-    b.box(kit.m('post'), [width, .16, depth], { position: [0, -.08, 0] }, 0);
-    for (let x = -width / 2; x < width / 2 - .001; x += 1) { const span = Math.min(1, width / 2 - x); b.box(kit.m('tread'), [span - .025, .035, depth - .04], { position: [x + span / 2, .005, 0] }, 0); }
-    // Back and left walls remain at full height. Front/right walls are a visual
-    // cutaway; the shared planar collision boundary remains authoritative.
-    for (let x = -Math.floor(width) / 2 + .5; x < Math.floor(width) / 2; x++) {
-      part(Math.abs(x) < 1.1 ? 'wall.window' : 'wall.solid', x, -depth / 2, Math.PI);
-      if (height > 2.04) b.box(kit.m('skinInner'), [1, height - 2.04, .18], { position: [x, (height + 2.04) / 2, -depth / 2] }, 0);
-    }
-    const edge = (width - Math.floor(width)) / 2;
-    if (edge > .001) for (const sign of [-1, 1]) b.box(kit.m('skinInner'), [edge, height, .18], { position: [sign * (width / 2 - edge / 2), height / 2, -depth / 2] }, 0);
-    for (let z = -.5 * depth + .5; z < depth / 2; z++) {
-      part(z < 0 ? 'wall.window' : 'wall.solid', -width / 2, z, -Math.PI / 2);
-      if (height > 2.04) b.box(kit.m('skinInner'), [.18, height - 2.04, 1], { position: [-width / 2, (height + 2.04) / 2, z] }, 0);
-    }
-    b.box(kit.m('post'), [width + .14, .12, .2], { position: [0, height, -depth / 2] }, 0);
-    b.box(kit.m('post'), [.2, .12, depth + .14], { position: [-width / 2, height, 0] }, 0);
-    // Low visible edge describes the cutaway and preserves a clear exit opening.
-    b.box(kit.m('post'), [.1, .14, depth], { position: [width / 2, .02, 0] }, 0);
-    for (const side of [-1, 1]) b.box(kit.m('post'), [(width - 1.2) / 2, .14, .1], { position: [side * (width / 4 + .3), .02, depth / 2] }, 0);
-    for (const x of [-width / 2, width / 2]) b.box(kit.m('post'), [.14, .22, .14], { position: [x, .04, depth / 2] }, 0);
-    const built = b.build('home-room-kit'); this.room.add(built.group);
-    this.surfaceResourceDisposers.push(() => source.owned().forEach(material => material.dispose()));
+    configureHomeLighting(this.scene,this.fill,this.sun,width,depth,height);
+    this.room.add(createHomeRoomArt(interior.room, this.library).group);
     const exit = homeExit(interior.room);
     this.doorView.root.position.fromArray(homeIndoorDoorOrigin(interior.room));
-    const mat = new T.MeshBasicMaterial({ color: '#e6c578', transparent: true, opacity: .7, depthWrite: false });
+    const mat = new T.MeshBasicMaterial({ color: ART_PALETTE.gold, transparent: true, opacity: .7, depthWrite: false });
     const doorway = new T.Mesh(new T.PlaneGeometry(1.05, .35), mat); doorway.rotation.x = -Math.PI / 2; doorway.position.set(0, .015, exit[2]); this.room.add(doorway);
     const arrow = new T.Shape(); arrow.moveTo(-.15, -.08); arrow.lineTo(.15, -.08); arrow.lineTo(0, .14); arrow.closePath();
-    const marker = new T.Mesh(new T.ShapeGeometry(arrow), new T.MeshBasicMaterial({ color: '#4c6758', side: T.DoubleSide })); marker.rotation.x = Math.PI / 2; marker.position.set(0, .024, exit[2]); this.room.add(marker);
+    const marker = new T.Mesh(new T.ShapeGeometry(arrow), new T.MeshBasicMaterial({ color: ART_PALETTE.ink, side: T.DoubleSide })); marker.rotation.x = Math.PI / 2; marker.position.set(0, .024, exit[2]); this.room.add(marker);
     this.lastViewport = '';
   }
 
@@ -294,6 +271,7 @@ export class HomeInterior {
 
   private applyTheme(material: InteriorData['material']) {
     const [plaster, paint] = THEMES[material];
+    applyHomeRoomTheme(this.room, material);
     for (const root of [this.room, this.furniture]) root.traverse(o => {
       if (!(o instanceof T.Mesh)) return;
       for (const m of Array.isArray(o.material) ? o.material : [o.material]) if (m instanceof T.MeshStandardMaterial) {
@@ -347,7 +325,7 @@ export class HomeInterior {
   }
 
   frame(delta: number, nowSeconds: number) {
-    if (!this.active || !this.home) return;
+    if (!this.active || !this.home || this.photoMode) return;
     if (document.documentElement.lang !== this.locale) this.localize();
     const dt = Math.min(.05, Math.max(0, delta));
     this.moving = 0;
@@ -447,13 +425,27 @@ export class HomeInterior {
     finally { this.pendingAction = false; this.updateControls(); }
   }
   private close() {
+    this.photoMode=false;
     this._active = false; this.ui.hidden = true; this.currentVisit = ''; this.sourceKey = ''; this.clearInput(); this.editing = false; this.dirty = false;
     document.body.classList.remove('home-interior-active');
     for (const guest of this.guests.values()) disposeGeometry(guest.root); this.guests.clear();
     for (const key of ['homeInterior', 'homePosition', 'homeVersion', 'homePending', 'homeDrawCalls', 'homeDoorOpen', 'homeArea']) delete this.options.renderer.domElement.dataset[key];
   }
   dispose() {
-    this.close(); this.abort.abort(); this.ui.remove(); this.surfaceResourceDisposers.forEach(dispose => dispose());
-    disposeGeometry(this.room); disposeGeometry(this.furniture); disposeGeometry(this.avatar.root); disposeGeometry(this.selection); this.doorView.dispose(); this.library.dispose();
+    this.close(); this.abort.abort(); this.ui.remove();
+    disposeGeometry(this.room); disposeGeometry(this.furniture); disposeGeometry(this.avatar.root); disposeGeometry(this.selection); this.doorView.dispose(); this.library.dispose();this.sun.shadow.dispose();
+  }
+
+  /** The host flushes acknowledged movement before entering photo mode. */
+  setPhotoMode(active:boolean){this.photoMode=active;this.clearInput();}
+
+  /** A separate camera: export/orbit may change it without changing gameplay. */
+  getPhotoView(width:number,height:number,mode:'follow'|'overview'='overview'){
+    const camera=this.camera.clone(),room=this.home?.interior.room??HOME_ROOM,aspect=Math.max(1,width)/Math.max(1,height);
+    const target=new T.Vector3(0,room.height*.31,0);
+    if(mode==='overview'){camera.zoom=1;fitHomeCamera(camera,room.width,room.depth,room.height,aspect,false);}
+    else{const span=camera.top-camera.bottom;camera.left=-span*aspect/2;camera.right=span*aspect/2;target.add(this.cameraOffset);}
+    camera.updateProjectionMatrix();camera.updateMatrixWorld(true);this.scene.updateMatrixWorld(true);
+    return {scene:this.scene,camera,target};
   }
 }

@@ -1,0 +1,37 @@
+{
+  "phase": "district-v4-second",
+  "browser": "Installed Google Chrome via Playwright",
+  "browserVersion": "154.0.8037.98",
+  "results": [
+    {
+      "viewport": "1440",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "pose": {
+        "feet": "[0.13420509874355183,0.989062103475294,-0.061197605674245134]",
+        "camera": "[-3.44494107877719,26.106582904269143,0.4208135631454002]",
+        "heading": "[0.9506600254910303,-0.14593357392849515,-0.27376798193698604]"
+      },
+      "generatedVersion": 4,
+      "objects": 40,
+      "structures": 4
+    }
+  ],
+  "errors": [],
+  "badResponses": [],
+  "physicalPhone": false
+}

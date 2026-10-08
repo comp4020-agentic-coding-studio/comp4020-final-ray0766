@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { OrthographicCamera, Vector3 } from 'three';
 import { fitHomeCamera, homeFurnitureFits } from '../src/client/home-interior.ts';
-import { defaultHomeInterior, HOME_ENTRY, HOME_ROOM } from '../src/shared/home.ts';
+import { defaultHomeInterior, HOME_ENTRY, HOME_ROOM, HOME_MAX_ITEMS, homePathAllowed, homePositionAllowed } from '../src/shared/home.ts';
+import type { Vec3 } from '../src/shared/world.ts';
 
 describe('home room presentation', () => {
   it.each([[1440, 900], [390, 844], [844, 390]])('keeps the whole room and unscaled head height inside a %i × %i view', (width, height) => {
@@ -24,11 +25,33 @@ describe('home room presentation', () => {
 
   it('allows moving a table into open space but refuses doorway, overlaps and a standing player', () => {
     const items = defaultHomeInterior().items;
+    const table = items.find(item => item.id === 'table')!, chair = items.find(item => item.id === 'chair')!;
     expect(homeFurnitureFits(items, HOME_ENTRY)).toBe(true);
     const move = (x: number, z: number) => items.map(item => item.id === 'table' ? { ...item, position: [x, 0, z] as [number, number, number] } : item);
-    expect(homeFurnitureFits(move(-.9, -.85), HOME_ENTRY)).toBe(true);
+    expect(homeFurnitureFits(move(table.position[0] - .25, table.position[2]), HOME_ENTRY)).toBe(true);
     expect(homeFurnitureFits(move(0, 1.2), HOME_ENTRY)).toBe(false);
-    expect(homeFurnitureFits(move(-.9, .35), HOME_ENTRY)).toBe(false);
-    expect(homeFurnitureFits(items, [-.9, 0, -.45])).toBe(false);
+    expect(homeFurnitureFits(move(chair.position[0], chair.position[2]), HOME_ENTRY)).toBe(false);
+    expect(homeFurnitureFits(items, table.position)).toBe(false);
+  });
+
+  it('leaves connected walking space between the entrance, table group, reading corner and wall storage', () => {
+    const room = defaultHomeInterior(), before = JSON.stringify(room);
+    expect(room.items.length).toBeLessThanOrEqual(HOME_MAX_ITEMS);
+    expect(new Set(room.items.map(item => item.id)).size).toBe(room.items.length);
+    expect(homeFurnitureFits(room.items, HOME_ENTRY, room.room, false)).toBe(true);
+    // Actual body-clear routes, not just separated item centres. The central
+    // aisle reaches both sides and each furniture group without crossing one.
+    const routes: Vec3[][] = [
+      [HOME_ENTRY, [0, 0, 1.55], [-2.2, 0, 1.55]],
+      [HOME_ENTRY, [0, 0, -2.25], [-2.6, 0, -2.25]],
+      [HOME_ENTRY, [0, 0, .7], [2.5, 0, .7], [2.5, 0, -1.3]],
+      [HOME_ENTRY, [0, 0, .7], [3.1, 0, .7], [3.1, 0, -2.7]],
+    ];
+    for (const route of routes) for (let i = 1; i < route.length; i++) {
+      expect(homePathAllowed(route[i - 1], route[i], room.items, room.room, false)).toBe(true);
+    }
+    for (const item of room.items) expect(homePositionAllowed(item.position, room.items)).toBe(false);
+    expect(JSON.stringify(room)).toBe(before);
+    expect(defaultHomeInterior()).toEqual(room);
   });
 });

@@ -1,0 +1,516 @@
+{
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "version": "154.0.8037.98",
+  "host": {
+    "cpu": "Apple M3",
+    "os": "27.0.0",
+    "memoryGiB": 16,
+    "realPhone": false
+  },
+  "cases": [
+    {
+      "name": "before-1440",
+      "port": 8131,
+      "touch": false,
+      "status": "failed",
+      "errors": [],
+      "consoleErrors": [],
+      "shots": [
+        "art-before-1440-close.png",
+        "art-before-1440-overview.png",
+        "art-before-1440-failure.png",
+        "art-before-1440-workshop.png"
+      ],
+      "samples": [],
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "build": "/assets/index-_rNRyYob.js",
+      "close": {
+        "calls": 129,
+        "triangles": 147448,
+        "renderCpuMs": 0.737,
+        "quality": "full",
+        "homeCalls": null
+      },
+      "overview": {
+        "calls": 129,
+        "triangles": 147448,
+        "renderCpuMs": 0.84,
+        "quality": "full",
+        "homeCalls": null
+      },
+      "failure": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('#edit-structure')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" locator('#edit-structure') with timeout 5000ms\n  - waiting for locator('#edit-structure')\n",
+      "baselineWorkshopRetest": {
+        "status": "passed",
+        "actualEntry": "Pause menu > Workshop > saved blueprint > Open saved blueprint",
+        "errors": [],
+        "unchangedObjects": true,
+        "reason": "Original build has no #edit-structure button. Initial failure was a harness assumption, retained above."
+      }
+    },
+    {
+      "name": "after-1440",
+      "port": 8130,
+      "touch": false,
+      "status": "passed",
+      "errors": [],
+      "consoleErrors": [],
+      "shots": [
+        "art-after-1440-close.png",
+        "art-after-1440-overview.png",
+        "art-after-1440-workshop.png"
+      ],
+      "samples": [],
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "build": "/assets/index-sjP_er3v.js",
+      "close": {
+        "calls": 72,
+        "triangles": 112740,
+        "renderCpuMs": 0.567,
+        "quality": "full",
+        "homeCalls": null
+      },
+      "overview": {
+        "calls": 80,
+        "triangles": 112994,
+        "renderCpuMs": 0.65,
+        "quality": "full",
+        "homeCalls": null
+      },
+      "sameObjects": true
+    },
+    {
+      "name": "before-390",
+      "port": 8131,
+      "touch": true,
+      "status": "failed",
+      "errors": [],
+      "consoleErrors": [],
+      "shots": [
+        "art-before-390-close.png",
+        "art-before-390-overview.png",
+        "art-before-390-failure.png",
+        "art-before-390-workshop.png"
+      ],
+      "samples": [],
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 390,
+          "height": 844,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 390,
+          "height": 844
+        },
+        "touchPoints": 1,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "build": "/assets/index-_rNRyYob.js",
+      "close": {
+        "calls": 129,
+        "triangles": 147448,
+        "renderCpuMs": 0.573,
+        "quality": "compact",
+        "homeCalls": null
+      },
+      "overview": {
+        "calls": 129,
+        "triangles": 147448,
+        "renderCpuMs": 0.747,
+        "quality": "compact",
+        "homeCalls": null
+      },
+      "failure": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('#edit-structure')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" locator('#edit-structure') with timeout 5000ms\n  - waiting for locator('#edit-structure')\n",
+      "baselineWorkshopRetest": {
+        "status": "passed",
+        "actualEntry": "Pause menu > Workshop > saved blueprint > Open saved blueprint",
+        "errors": [],
+        "unchangedObjects": true,
+        "reason": "Original build has no #edit-structure button. Initial failure was a harness assumption, retained above."
+      }
+    },
+    {
+      "name": "after-390",
+      "port": 8130,
+      "touch": true,
+      "status": "passed",
+      "errors": [],
+      "consoleErrors": [],
+      "shots": [
+        "art-after-390-close.png",
+        "art-after-390-overview.png",
+        "art-after-390-workshop.png"
+      ],
+      "samples": [],
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 390,
+          "height": 844,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 390,
+          "height": 844
+        },
+        "touchPoints": 1,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "build": "/assets/index-sjP_er3v.js",
+      "close": {
+        "calls": 64,
+        "triangles": 111242,
+        "renderCpuMs": 0.483,
+        "quality": "compact",
+        "homeCalls": null
+      },
+      "overview": {
+        "calls": 80,
+        "triangles": 112994,
+        "renderCpuMs": 0.903,
+        "quality": "compact",
+        "homeCalls": null
+      },
+      "sameObjects": true
+    },
+    {
+      "name": "new-1440",
+      "port": 8130,
+      "touch": false,
+      "status": "passed",
+      "errors": [],
+      "consoleErrors": [],
+      "shots": [
+        "art-new-1440-close.png",
+        "art-new-1440-overview.png",
+        "art-new-1440-room-follow.png",
+        "art-new-1440-room-overview.png",
+        "art-new-1440-room-photo.png"
+      ],
+      "samples": [
+        {
+          "label": "walk-real-home-route",
+          "durationMs": 4003.899999976158,
+          "frames": {
+            "samples": 239,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.66569037656904
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 240,
+            "p50": 74,
+            "p95": 77,
+            "p99": 77,
+            "max": 77,
+            "mean": 74.29166666666667
+          },
+          "triangles": {
+            "samples": 240,
+            "p50": 96788,
+            "p95": 97624,
+            "p99": 97624,
+            "max": 97624,
+            "mean": 96866.16666666667
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 240,
+            "p50": 0.833,
+            "p95": 0.883,
+            "p99": 0.883,
+            "max": 0.883,
+            "mean": 0.821691666666669
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 240
+          },
+          "actionMs": 1828,
+          "paddingAfterActionMs": 2172,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+        }
+      ],
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "build": "/assets/index-sjP_er3v.js",
+      "close": {
+        "calls": 74,
+        "triangles": 96788,
+        "renderCpuMs": 0.83,
+        "quality": "full",
+        "homeCalls": null
+      },
+      "overview": {
+        "calls": 159,
+        "triangles": 112650,
+        "renderCpuMs": 1.113,
+        "quality": "full",
+        "homeCalls": null
+      },
+      "room": {
+        "calls": 74,
+        "triangles": 96788,
+        "renderCpuMs": 1.03,
+        "quality": "full",
+        "homeCalls": 136,
+        "homePending": "false"
+      },
+      "export": {
+        "width": 2048,
+        "height": 1422,
+        "bytes": 520595,
+        "supersampling": 2,
+        "source": "local geometry"
+      },
+      "photoRestored": true
+    },
+    {
+      "name": "new-390",
+      "port": 8130,
+      "touch": true,
+      "status": "passed",
+      "errors": [],
+      "consoleErrors": [],
+      "shots": [
+        "art-new-390-close.png",
+        "art-new-390-overview.png",
+        "art-new-390-room-follow.png",
+        "art-new-390-room-overview.png",
+        "art-new-390-room-photo.png"
+      ],
+      "samples": [
+        {
+          "label": "walk-real-home-route",
+          "durationMs": 4004.2999999523163,
+          "frames": {
+            "samples": 239,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.800000000000182,
+            "max": 16.80000000000109,
+            "mean": 16.665690376569035
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 240,
+            "p50": 76,
+            "p95": 79,
+            "p99": 79,
+            "max": 79,
+            "mean": 76.84583333333333
+          },
+          "triangles": {
+            "samples": 240,
+            "p50": 97208,
+            "p95": 98144,
+            "p99": 98144,
+            "max": 98144,
+            "mean": 97457.9
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 240,
+            "p50": 0.64,
+            "p95": 0.707,
+            "p99": 0.707,
+            "max": 0.707,
+            "mean": 0.6425000000000008
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 240
+          },
+          "actionMs": 2002,
+          "paddingAfterActionMs": 1998,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+        }
+      ],
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 390,
+          "height": 844,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 390,
+          "height": 844
+        },
+        "touchPoints": 1,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "build": "/assets/index-sjP_er3v.js",
+      "close": {
+        "calls": 76,
+        "triangles": 97208,
+        "renderCpuMs": 0.573,
+        "quality": "compact",
+        "homeCalls": null
+      },
+      "overview": {
+        "calls": 194,
+        "triangles": 119442,
+        "renderCpuMs": 1.303,
+        "quality": "compact",
+        "homeCalls": null
+      },
+      "room": {
+        "calls": 76,
+        "triangles": 97208,
+        "renderCpuMs": 0.723,
+        "quality": "compact",
+        "homeCalls": 136,
+        "homePending": "false"
+      },
+      "export": {
+        "width": 946,
+        "height": 2048,
+        "bytes": 225273,
+        "supersampling": 2,
+        "source": "local geometry"
+      },
+      "photoRestored": true
+    }
+  ],
+  "scope": {
+    "ports": [
+      8130,
+      8131
+    ],
+    "databases": "Dedicated browser-validation copies only; no original service/database touched.",
+    "integratedBuild": "/assets/index-sjP_er3v.js",
+    "baselineBuild": "/assets/index-_rNRyYob.js",
+    "viewports": [
+      "1440x1000",
+      "390x844 touch emulation"
+    ],
+    "newIdentities": 2,
+    "browserClosed": true
+  },
+  "outcome": "Integrated old-layout comparison and new-home room/photo journeys passed at both viewports. Original workshop comparison passed after using its actual menu entry; original harness failures remain recorded.",
+  "visualReview": [
+    {
+      "finding": "The same legacy saved structure and planet objects remain unchanged before/after UI inspection; the comparison fixture contains a single floor blueprint and two lamps, so it is not evidence of complex-building editing.",
+      "evidence": [
+        "art-before-1440-workshop.png",
+        "art-after-1440-workshop.png",
+        "art-before-390-workshop.png",
+        "art-after-390-workshop.png"
+      ]
+    },
+    {
+      "finding": "New exterior and independent room share cream plaster, warm boards, muted green furniture/door, low specular response and restrained dark outlines. Door opening remains readable beside the unchanged character.",
+      "evidence": [
+        "art-new-1440-close.png",
+        "art-new-1440-room-overview.png",
+        "art-new-390-room-follow.png"
+      ]
+    },
+    {
+      "finding": "Ground close camera is closer than the original baseline: character is more legible, while the nearby parked ship can leave the frame. This is composition change, not unchanged-camera material A/B evidence.",
+      "evidence": [
+        "art-before-1440-close.png",
+        "art-after-1440-close.png",
+        "art-after-390-close.png"
+      ]
+    },
+    {
+      "finding": "World overview preserves the terrain biome colour and rock patches. Generated normal path pieces are visible with intended grass gaps; no route-surface fragments were observed in these captured views. This does not prove all route angles or seeds.",
+      "evidence": [
+        "art-new-1440-overview.png",
+        "art-new-390-overview.png"
+      ]
+    },
+    {
+      "finding": "390px room follow intentionally crops lateral room edges. Whole-room and photo framing show the complete room; interactive controls remain visible.",
+      "evidence": [
+        "art-new-390-room-follow.png",
+        "art-new-390-room-overview.png",
+        "art-new-390-room-photo.png"
+      ]
+    },
+    {
+      "finding": "2K local-geometry PNG exports have clean scene-only output, full room framing, and no UI. Portrait output uses large top/bottom space to fit the full width; zoom/orbit remain user controls. Both photo closes returned to the room UI.",
+      "evidence": [
+        "art-new-1440-room-export-2k.png",
+        "art-new-390-room-export-2k.png"
+      ]
+    },
+    {
+      "finding": "All observed pages and shader compilation paths had zero pageerror and console.error events. No art code repair or rebuild was needed after this visual review.",
+      "evidence": [
+        "art-visual-result.json"
+      ]
+    }
+  ],
+  "limitations": [
+    "Chrome 154.0.8037.98 on Apple M3/16GiB, ANGLE Metal; 390px is desktop touch emulation, not a physical phone.",
+    "Static counters and short rAF samples are diagnostic only. Other validation overlapped part of the time; no sustained/mobile/GPU performance conclusion is drawn.",
+    "This art pass did not exercise flight to the public hub or the full quest; the separate journey validation owns that scope.",
+    "Visual finishing is cosmetic and deterministic. It never invents structural roof/support members, closes openings, changes collision or modifies saved blueprint documents.",
+    "The first baseline attempt assumed the newer edit-structure button. A second temporary script lookup also used the wrong nested blueprint ID. Neither was a product error; corrected menu/library runs passed at both viewports."
+  ]
+}

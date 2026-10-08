@@ -26,19 +26,23 @@ import { RequestError } from './errors.ts';
 import { INITIAL_PLANETS } from '../shared/regions.ts';
 import { MAX_PLANETS, planetCenter, spaceDistance } from '../shared/flight.ts';
 
-interface PlanetRow { id: string; name: string; kind: 'hub' | 'garden'; owner_id: string | null; revision: number; objectCount: number;slot:number;radius:number;environment:string|null;sample_radius:number|null }
+interface PlanetRow { id: string; name: string; kind: 'hub' | 'garden'; owner_id: string | null; revision: number; objectCount: number;slot:number;radius:number;environment:string|null;sample_radius:number|null;world_radius:number|null }
 interface ObjectRow { id: string; kind: PlacedObject['kind']; position: string; rotation: number; version: number; blueprint_hash: string | null; radius: number | null; height: number | null; asset_version: 2 | null }
-export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), history = historyStore(db), sampleRadius?:number) {
+export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), history = historyStore(db), sampleRadius?:number,worldRadius?:number) {
   const transaction = <T>(fn: () => T) => { if(db.isTransaction)return fn();db.exec('BEGIN IMMEDIATE'); try { const result = fn(); db.exec('COMMIT'); return result; } catch (error) { if (db.isTransaction) db.exec('ROLLBACK'); throw error; } };
+  function addBlankPlanet() {
+    if(Number(db.prepare('SELECT count(*) AS n FROM planets').get()!.n)>=MAX_PLANETS)throw new RequestError(409,'All home planets are currently occupied.');
+    const number=Number(db.prepare("SELECT count(*) AS n FROM planets WHERE kind='garden'").get()!.n)+1;
+    const slot=Number(db.prepare('SELECT COALESCE(max(slot),-1)+1 AS slot FROM planets').get()!.slot),id='p-'+randomUUID();
+    db.prepare("INSERT INTO planets(id,name,kind,slot,radius,sample_radius,environment,world_radius) VALUES(?,?,'garden',?,?,?,?,?)").run(id,`Little world ${String(number).padStart(2,'0')}`,slot,radiusForSlot(slot),sampleRadius??null,(sampleRadius||worldRadius)?HOME_ENVIRONMENT:null,worldRadius??null);
+    history.baseline(id);return id;
+  }
   function replenish() {
     let blank = Number(db.prepare("SELECT count(*) AS n FROM planets WHERE kind='garden' AND owner_id IS NULL").get()!.n);
     let total=Number(db.prepare('SELECT count(*) AS n FROM planets').get()!.n);
     while((blank<6||total<INITIAL_PLANETS)&&total<MAX_PLANETS){
       blank++;total++;
-      const number = Number(db.prepare("SELECT count(*) AS n FROM planets WHERE kind='garden'").get()!.n) + 1;
-      const slot=Number(db.prepare('SELECT COALESCE(max(slot),-1)+1 AS slot FROM planets').get()!.slot);
-      const id='p-'+randomUUID();
-      db.prepare("INSERT INTO planets (id,name,kind,slot,radius,sample_radius,environment) VALUES (?,?,'garden',?,?,?,?)").run(id, `Little world ${String(number).padStart(2, '0')}`,slot,radiusForSlot(slot),sampleRadius??null,sampleRadius?HOME_ENVIRONMENT:null);history.baseline(id);
+      addBlankPlanet();
     }
   }
   transaction(replenish);
@@ -46,9 +50,9 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     if (typeof id !== 'string' || id.length > 80) throw new RequestError(400, 'Choose a planet.');
     const p = db.prepare('SELECT *, (SELECT count(*) FROM planet_objects o WHERE o.planet_id=planets.id) AS objectCount FROM planets WHERE id=?').get(id) as unknown as PlanetRow;
     if (!p) throw new RequestError(404, 'That planet could not be found.');
-    return {...p,radius:p.sample_radius??p.radius,revision:sampleRadius&&p.kind==='hub'?1000+SAMPLE_PUBLIC_VERSION:p.revision,environment:sampleRadius&&p.kind==='hub'?SAMPLE_PUBLIC_ENVIRONMENT:p.environment};
+    return {...p,radius:p.world_radius??p.sample_radius??p.radius,revision:(sampleRadius||worldRadius)&&p.kind==='hub'?1000+SAMPLE_PUBLIC_VERSION:p.revision,environment:(sampleRadius||worldRadius)&&p.kind==='hub'?SAMPLE_PUBLIC_ENVIRONMENT:p.environment};
   };
-  const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: sampleRadius&&p.kind==='hub'?1000+SAMPLE_PUBLIC_VERSION:p.revision, objectCount: p.objectCount,slot:p.slot,radius:p.sample_radius??p.radius,center:planetCenter(p.slot),environment:sampleRadius&&p.kind==='hub'?SAMPLE_PUBLIC_ENVIRONMENT:p.environment??null });
+  const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: (sampleRadius||worldRadius)&&p.kind==='hub'?1000+SAMPLE_PUBLIC_VERSION:p.revision, objectCount: p.objectCount,slot:p.slot,radius:p.world_radius??p.sample_radius??p.radius,center:planetCenter(p.slot),environment:(sampleRadius||worldRadius)&&p.kind==='hub'?SAMPLE_PUBLIC_ENVIRONMENT:p.environment??null });
   const objects = (planetId: string): PlacedObject[] => {
     const sizes=new Map<string,ReturnType<typeof structureSize>>();
     return (db.prepare('SELECT id,kind,position,rotation,version,blueprint_hash,radius,height,(SELECT asset_version FROM object_assets a WHERE a.object_id=planet_objects.id) AS asset_version FROM planet_objects WHERE planet_id=? ORDER BY rowid').all(planetId) as unknown as ObjectRow[]).map(r=>{
@@ -66,18 +70,19 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
   const placement = (kind: PlacedObject['kind'], position: unknown, rotation: unknown, planetId: string, ignoreId?: string, blueprintHash?: string) => {
     if (typeof rotation !== 'number' || !Number.isFinite(rotation) || rotation < 0 || rotation >= Math.PI * 2) throw new RequestError(400, 'Rotation must be between 0 and one full turn.');
     const parts = kind === 'structure' ? blueprints.parts(blueprintHash) : null;
-    const old=objects(planetId).find(o=>o.id===ignoreId),assetVersion=old?(old.assetVersion??1):2;
-    const problem = placementProblem(kind, position, objects(planetId), ignoreId, parts ? structureSize(parts).radius : undefined, planet(planetId).radius,assetVersion);
+    const placed=objects(planetId),old=placed.find(o=>o.id===ignoreId),assetVersion=old?(old.assetVersion??1):2,p=planet(planetId),field=fieldOf(p.environment,p.radius);
+    const contents=Object.fromEntries(placed.flatMap(o=>o.blueprintHash?[[o.blueprintHash,blueprints.parts(o.blueprintHash)]]:[]));
+    if(parts&&blueprintHash)contents[blueprintHash]=parts;
+    const problem = placementProblem(kind, position, placed, ignoreId, parts ? structureSize(parts).radius : undefined, p.radius,assetVersion,{rotation,blueprintHash,blueprints:contents,field,terrainSeating:!!p.environment});
     if (problem) throw new RequestError(400, problem);
     const point = normalize(position as Vec3);
-    const field=fieldOf(planet(planetId).environment,planet(planetId).radius);
     if(planet(planetId).environment){const obj:PlacedObject={id:ignoreId??'preview',kind,position:point,rotation,version:1,...(assetVersion===2?{assetVersion:2 as const}:{}),...(parts?{blueprintHash,...structureSize(parts)}:{})};const fit=objectSeat(field,obj,parts?{[blueprintHash!]:parts}:{});if(fit.problem)throw new RequestError(409,fit.message??'This terrain cannot support the object.');}
     if (parts) { const fit = structureFit(parts, point, rotation,field); if (fit.problem) throw new RequestError(400, fit.message ?? 'This ground is too uneven.'); }
     return { position: point, rotation };
   };
   const clearHomeDoorPlacement=(planetId:string,o:PlacedObject,hash:string)=>{
-    if(!db.prepare('SELECT 1 FROM home_interiors WHERE building_id=?').get(o.id))return;
-    const p=planet(planetId),parts=blueprints.parts(hash),part=parts.find(part=>part.n===HOME_DOOR_PART&&part.part==='wall.door.open');
+    const home=db.prepare('SELECT door_part FROM home_interiors WHERE building_id=?').get(o.id);if(!home)return;
+    const p=planet(planetId),parts=blueprints.parts(hash),part=parts.find(part=>part.n===Number(home.door_part??HOME_DOOR_PART)&&part.part==='wall.door.open');
     if(!part)return;
     const t=partTransform(part,pivotOf(parts)),anchor={dir:o.position,yaw:o.rotation},fit=structureFit(parts,o.position,o.rotation,fieldOf(p.environment,p.radius));
     const frame={position:localToPlanet(anchor,fit.baseRadius,t.position),quaternion:quatMultiply(anchorQuaternion(anchor),quatFromAxisAngle([0,1,0],t.yaw))};
@@ -94,8 +99,8 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     if(!old||old.kind!=='structure')throw new RequestError(404,'Choose a placed structure.');
     if(!Number.isSafeInteger(body.expectedVersion)||old.version!==body.expectedVersion)throw new RequestError(409,'This object changed in another tab.');
     if(!undo)blueprints.owns(id,body.blueprintHash);
-    const parts=blueprints.parts(body.blueprintHash),h=db.prepare('SELECT variant FROM home_interiors WHERE building_id=?').get(oid);
-    if(h&&!parts.some(p=>p.n===HOME_DOOR_PART&&p.part==='wall.door.open'))throw new RequestError(409,'Keep the home entrance so its saved interior remains accessible.');
+    const parts=blueprints.parts(body.blueprintHash),h=db.prepare('SELECT variant,door_part FROM home_interiors WHERE building_id=?').get(oid);
+    if(h&&!parts.some(p=>p.n===Number(h.door_part??HOME_DOOR_PART)&&p.part==='wall.door.open'))throw new RequestError(409,'Keep the home entrance so its saved interior remains accessible.');
     if(body.blueprintHash===old.blueprintHash)return;
     placement(old.kind,old.position,old.rotation,p.id,oid,String(body.blueprintHash));const size=structureSize(parts);
     if(h)clearHomeDoorPlacement(p.id,old,String(body.blueprintHash));
@@ -105,6 +110,16 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     bump(p.id);history.append(p.id,old,objects(p.id).find(o=>o.id===oid)!);
   };
   return {
+    freshHomePlanet(){return transaction(()=>{
+      const available=db.prepare(`SELECT id FROM planets p WHERE kind='garden' AND owner_id IS NULL
+        AND NOT EXISTS(SELECT 1 FROM planet_objects WHERE planet_id=p.id)
+        AND NOT EXISTS(SELECT 1 FROM object_tombstones WHERE planet_id=p.id)
+        AND COALESCE((SELECT seq FROM history_heads WHERE planet_id=p.id),0)=0
+        AND NOT EXISTS(SELECT 1 FROM players WHERE planet_id=p.id)
+        AND NOT EXISTS(SELECT 1 FROM visits WHERE planet_id=p.id)
+        AND NOT EXISTS(SELECT 1 FROM home_manifests WHERE planet_id=p.id) ORDER BY rowid LIMIT 1`).get();
+      return String(available?.id??addBlankPlanet());
+    });},
     replace(id:string,body:Record<string,unknown>,variant='custom'){return transaction(()=>replaceInner(id,body,variant));},
     undo(id:string,body:Record<string,unknown>){return transaction(()=>{strict(body,['planetId','objectId','expectedVersion']);owns(id,body.planetId);const row=db.prepare('SELECT * FROM object_replacements WHERE planet_id=? AND object_id=? AND undone=0 ORDER BY seq DESC LIMIT 1').get(body.planetId as string,body.objectId as string);if(!row)throw new RequestError(409,'There is no exterior change to undo.');replaceInner(id,{...body,blueprintHash:row.before_hash},String(row.before_variant),true);db.prepare('UPDATE object_replacements SET undone=1 WHERE seq=?').run(row.seq);});},
     planet,
@@ -113,8 +128,8 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
       const placed = objects(planetId);
       const hashes = [...new Set(placed.flatMap(o => o.blueprintHash ? [o.blueprintHash] : []))];
       const manifest=db.prepare('SELECT document FROM home_manifests WHERE planet_id=?').get(planetId);
-      const home=db.prepare('SELECT building_id,document FROM home_interiors WHERE planet_id=?').get(planetId),room=home?normalizeHomeInterior(JSON.parse(String(home.document))):null;
-      return { ...summary(planet(planetId), id), objects: placed, ...(home&&room?{homeDoor:{buildingId:String(home.building_id),partNumber:HOME_DOOR_PART,open:room.doorOpen,version:room.doorVersion}}:{}), ...(manifest?{homeManifest:JSON.parse(String(manifest.document))}:{}), ...(hashes.length ? {blueprints: Object.fromEntries(hashes.map(h => [h, blueprints.parts(h)]))} : {}) };
+      const home=db.prepare('SELECT building_id,document,door_part FROM home_interiors WHERE planet_id=?').get(planetId),room=home?normalizeHomeInterior(JSON.parse(String(home.document))):null;
+      return { ...summary(planet(planetId), id), objects: placed, ...(home&&room?{homeDoor:{buildingId:String(home.building_id),partNumber:Number(home.door_part??HOME_DOOR_PART),open:room.doorOpen,version:room.doorVersion}}:{}), ...(manifest?{homeManifest:JSON.parse(String(manifest.document))}:{}), ...(hashes.length ? {blueprints: Object.fromEntries(hashes.map(h => [h, blueprints.parts(h)]))} : {}) };
     },
     owned(id: string) { return (db.prepare('SELECT id FROM planets WHERE owner_id=?').get(id)?.id as string) ?? null; },
     claim(id: string, planetId: unknown) {

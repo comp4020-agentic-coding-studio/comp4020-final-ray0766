@@ -7,6 +7,7 @@ import { harbourMaterials } from './harbour-materials.ts';
 import type { BuildKind } from '../shared/planets.ts';
 import { applyCel } from '../assets/claude-geometry/style/cel.ts';
 import { VILLAGE } from '../assets/claude-geometry/style/look.ts';
+import {applyArtMaterial} from './art-profile.ts';
 export function legacyBuiltObject(kind: BuildKind) {
   if(kind==='cottage')return habitatCabin();
   if(kind==='lamp')return sharedParts([{part:'service.light',position:[0,0,0]}]);
@@ -20,13 +21,13 @@ export function legacyBuiltObject(kind: BuildKind) {
     for(const x of [-.47,.47])add(new T.BoxGeometry(.065,.35,.065),p.dark,[x,.64,-.25]);
     for(let i=0;i<2;i++)add(new RoundedBoxGeometry(1.13,.105,.05,1,.015),p.dark,[0,.65+i*.13,-.26]);
   }else if(kind==='tree'){
-    const leaf=applyCel(new T.MeshStandardMaterial({color:'#93a571',roughness:.92}),VILLAGE.cel!);leaf.userData.ownedResource=true;
+    const leaf=applyArtMaterial(applyCel(new T.MeshStandardMaterial({color:'#93a571',roughness:.92}),VILLAGE.cel!));leaf.userData.ownedResource=true;
     add(new T.CylinderGeometry(.07,.12,1.2,7),p.dark,[0,.6,0]);
     for(const side of [-1,1]){const branch=add(new T.CylinderGeometry(.035,.055,.6,6),p.dark,[side*.10,.94,0]);branch.rotation.z=-side*.45;}
     for(let i=0;i<3;i++){const a=i*2.4;add(new T.IcosahedronGeometry(.40,1),leaf,[Math.sin(a)*.16,1.2+i*.24,Math.cos(a)*.13]).scale.set(1,.9,.9);}
   }else{
     add(new T.CylinderGeometry(.23,.18,.20,10),p.copper,[0,.10,0]);add(new T.CylinderGeometry(.25,.25,.055,10),p.copper,[0,.21,0]);add(new T.CylinderGeometry(.216,.216,.012,10),p.dark,[0,.24,0]);
-    const leaf=applyCel(new T.MeshStandardMaterial({color:'#789380',roughness:.8}),VILLAGE.cel!);leaf.userData.ownedResource=true;
+    const leaf=applyArtMaterial(applyCel(new T.MeshStandardMaterial({color:'#789380',roughness:.8}),VILLAGE.cel!));leaf.userData.ownedResource=true;
     for(let i=0;i<5;i++){const x=Math.sin(i*2)*.13,z=Math.cos(i*2)*.12;add(new T.CylinderGeometry(.013,.018,.24,5),leaf,[x,.35,z]);for(let petal=0;petal<5;petal++){const a=petal/5*Math.PI*2;add(new T.IcosahedronGeometry(.035,0),i%2?p.pale:p.copper,[x+Math.sin(a)*.035,.48,z+Math.cos(a)*.035]);}add(new T.IcosahedronGeometry(.024,0),p.pale,[x,.50,z]);}
   }
   // Static local props use one mesh per material; instances still retain their

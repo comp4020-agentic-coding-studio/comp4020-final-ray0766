@@ -1,0 +1,210 @@
+{
+  "phase": "district-v4-shadow",
+  "status": "passed",
+  "browser": "Installed Google Chrome via Playwright",
+  "browserVersion": "154.0.8037.98",
+  "results": [
+    {
+      "viewport": "1440",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "pose": {
+        "feet": "[0.14174218616281253,0.9871865409319779,-0.07329315155281045]",
+        "camera": "[-3.2410287898471215,26.154224561716827,0.10646827786638399]",
+        "heading": "[0.9492309954964657,-0.1565507748818259,-0.2728596197180679]"
+      },
+      "generatedVersion": 4,
+      "seed": 3639133366,
+      "objects": 40,
+      "structures": 4
+    },
+    {
+      "viewport": "390",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 390,
+          "height": 844,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 390,
+          "height": 844
+        },
+        "touchPoints": 1,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "pose": {
+        "feet": "[0.14174218616281253,0.9871865409319779,-0.07329315155281045]",
+        "camera": "[-3.9720651490117316,26.47690248980868,0.31009734333027617]",
+        "heading": "[0.9492309954964657,-0.1565507748818259,-0.2728596197180679]"
+      },
+      "generatedVersion": 4,
+      "seed": 3639133366,
+      "objects": 40,
+      "structures": 4
+    }
+  ],
+  "captures": [
+    {
+      "viewport": "1440",
+      "name": "arrival",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 262,
+      "triangles": 235602
+    },
+    {
+      "viewport": "1440",
+      "name": "planet",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 349,
+      "triangles": 259596
+    },
+    {
+      "viewport": "1440",
+      "name": "arrival-street",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 332,
+      "triangles": 257192
+    },
+    {
+      "viewport": "1440",
+      "name": "street-turn",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 279,
+      "triangles": 243150
+    },
+    {
+      "viewport": "1440",
+      "name": "home-street",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 264,
+      "triangles": 232786
+    },
+    {
+      "viewport": "1440",
+      "name": "room-follow",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 205,
+      "triangles": null
+    },
+    {
+      "viewport": "1440",
+      "name": "room-overview",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 205,
+      "triangles": null
+    },
+    {
+      "viewport": "390",
+      "name": "arrival",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 221,
+      "triangles": 218342
+    },
+    {
+      "viewport": "390",
+      "name": "planet",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 349,
+      "triangles": 259596
+    },
+    {
+      "viewport": "390",
+      "name": "arrival-street",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 296,
+      "triangles": 251584
+    },
+    {
+      "viewport": "390",
+      "name": "street-turn",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 252,
+      "triangles": 234116
+    },
+    {
+      "viewport": "390",
+      "name": "home-street",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 224,
+      "triangles": 226650
+    },
+    {
+      "viewport": "390",
+      "name": "room-follow",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 189,
+      "triangles": null
+    },
+    {
+      "viewport": "390",
+      "name": "room-overview",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 205,
+      "triangles": null
+    }
+  ],
+  "counterMeaning": "Renderer counters at each settled screenshot, not frame timing or a sustained mobile performance claim.",
+  "errors": [],
+  "badResponses": [],
+  "physicalPhone": false
+}

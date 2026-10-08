@@ -3,13 +3,16 @@ import { Box3, Mesh } from 'three';
 import type { PartPlacement, Rot } from '../src/assets/claude-geometry/blueprint/model.ts';
 import { rotDir } from '../src/assets/claude-geometry/blueprint/model.ts';
 import { StyleLibrary } from '../src/assets/claude-geometry/style/materials.ts';
-import { libraryMaterials, STOREY } from '../src/assets/claude-geometry/blueprint/parts/kit.ts';
+import { libraryMaterials, STOREY, WALL_H, WALL_T } from '../src/assets/claude-geometry/blueprint/parts/kit.ts';
+import { BASE_COURSE, TOP_BAND } from '../src/assets/claude-geometry/blueprint/parts/village/walls.ts';
 import { buildStructureFinish, planStructureFinish, STRUCTURE_FINISH_MAX_PROJECTION } from '../src/client/structure-finish.ts';
 import { homeVariant } from '../src/shared/home-layout.ts';
 
 const resources: { dispose(): void }[] = [];
 const library = () => { const lib = new StyleLibrary('medium', { look: 'village' }); resources.push(lib); return lib; };
 const floor = (n: number, x: number, z: number, level = 0): PartPlacement => ({ n, part: 'floor.deck', x, z, level, rot: 0 });
+const wall = (n: number, x: number, z: number, rot: Rot = 0, level = 0): PartPlacement => ({ n, part: 'wall.solid', x, z, level, rot });
+const joints = (parts: readonly PartPlacement[]) => planStructureFinish(parts).filter(s => s.kind === 'existing-wall-joint');
 afterEach(() => { for (const resource of resources.splice(0).reverse()) resource.dispose(); });
 
 it('finishes a joined floor as four continuous outside runs, never a grid of inner seams', () => {
@@ -73,6 +76,67 @@ it('adds one continuous facing only on an existing straight eave and skips roof 
   expect(planStructureFinish([parts[0], { ...parts[0], n: 5, part: 'roof.verge.left' }])).toEqual([]);
 });
 
+it.each([0, 1, 2, 3] as Rot[])('covers only the existing exterior solid-wall post seam at quarter turn %i', rot => {
+  const [dx, dz] = rotDir(rot), level = 1;
+  const parts = [floor(1, 2, 2, level), floor(2, 2 + dz, 2 - dx, level),
+    wall(3, 2, 2, rot, level), wall(4, 2 + dz, 2 - dx, rot, level)];
+  const caps = joints(parts);
+  expect(caps).toHaveLength(1);
+  expect(caps[0].to - caps[0].from).toBeCloseTo(.04);
+  const lib = library(), finish = buildStructureFinish(parts, lib); resources.push(finish);
+  const material = libraryMaterials(lib).get('post');
+  const capMesh = finish.object.children.find(child => (child as Mesh).material === material)!;
+  const bounds = new Box3().setFromObject(capMesh);
+  expect(bounds.min.y).toBeCloseTo(level * STOREY + BASE_COURSE);
+  expect(bounds.max.y).toBeCloseTo(level * STOREY + WALL_H - TOP_BAND);
+  const coordinate = dz ? 'z' : 'x', normal = dz || dx;
+  const outerFace = Math.max(normal * bounds.min[coordinate], normal * bounds.max[coordinate]);
+  // The supporting floor edge is at half a metre on the normal axis.
+  const existingPostFace = .5 + WALL_T / 2 + .015;
+  expect(outerFace - existingPostFace).toBeCloseTo(.014);
+  expect(outerFace - existingPostFace).toBeLessThan(STRUCTURE_FINISH_MAX_PROJECTION);
+  expect(finish.drawCalls).toBe(2);
+  const geometry = (capMesh as Mesh).geometry;
+  expect((geometry.index?.count ?? geometry.getAttribute('position').count) / 3).toBe(12);
+});
+
+it('never dresses opening profiles, isolated wall ends, inward walls or courtyard voids', () => {
+  const parts = [floor(1, 1, 1), floor(2, 2, 1), wall(3, 1, 1), wall(4, 2, 1)];
+  for (const part of ['wall.door', 'wall.door.open', 'wall.window', 'wall.louvre', 'wall.corrugated'] as const) {
+    expect(joints([...parts.slice(0, 3), { ...parts[3], part }])).toEqual([]);
+  }
+  expect(joints(parts.slice(0, 3))).toEqual([]);
+  expect(joints([...parts, floor(5, 1, 2), floor(6, 2, 2)])).toEqual([]);
+  const courtyard: PartPlacement[] = [];
+  for (let x = 0; x < 4; x++) for (let z = 0; z < 3; z++) if (z !== 1 || x === 0 || x === 3) courtyard.push(floor(courtyard.length + 1, x, z));
+  courtyard.push(wall(20, 1, 0), wall(21, 2, 0));
+  expect(joints(courtyard)).toEqual([]);
+});
+
+it('leaves corners, explicit posts and trim, entrances, stairs and opposite-facing joins alone', () => {
+  const parts = [floor(1, 1, 1), floor(2, 2, 1), wall(3, 1, 1), wall(4, 2, 1)];
+  const blockers: PartPlacement[] = [
+    wall(5, 1, 1, 1),
+    { n: 5, part: 'structure.column', x: 1, z: 1, level: 0, rot: 0 },
+    { n: 5, part: 'structure.beam', x: 1, z: 1, level: 0, rot: 1 },
+    { n: 5, part: 'street.kerb.corner', x: 1, z: 1, level: 0, rot: 0 },
+    { n: 5, part: 'step.entry', x: 2, z: 2, level: 0, rot: 0 },
+    { n: 5, part: 'stair.straight', x: 2, z: 2, level: 0, rot: 0 },
+  ];
+  for (const blocker of blockers) expect(joints([...parts, blocker])).toEqual([]);
+  expect(joints([...parts.slice(0, 3), wall(4, 2, 2, 2), floor(5, 2, 2)])).toEqual([]);
+});
+
+it('bounds a full straight facade to one 12-triangle cover per join and keeps the two-material budget', () => {
+  const parts = Array.from({ length: 5 }, (_, x) => [floor(x * 2 + 1, x, 1), wall(x * 2 + 2, x, 1)]).flat();
+  const lib = library(), finish = buildStructureFinish(parts, lib); resources.push(finish);
+  expect(joints(parts)).toHaveLength(4);
+  expect(finish.drawCalls).toBe(2);
+  // Three continuous slab runs plus four existing-post covers, each a box.
+  expect(finish.triangles).toBe((3 + 4) * 12);
+  expect(finish.segments).toEqual(planStructureFinish([...parts].reverse()));
+});
+
 it('bounds added reach to two centimetres below the existing walking surface and reuses palette ownership', () => {
   const lib = library(), source = libraryMaterials(lib), material = source.get('concrete');
   const finish = buildStructureFinish([floor(1, 0, 0)], lib); resources.push(finish);
@@ -96,7 +160,7 @@ it('is deterministic under part order and does not mutate the structural documen
   resources.push(first, reordered);
   expect(first.seed).toBe(reordered.seed); expect(first.segments).toEqual(reordered.segments);
   expect(first.drawCalls).toBeLessThanOrEqual(2);
-  expect(first.object.userData).toMatchObject({ decorative: true, collision: false, support: false, finishVersion: 1 });
+  expect(first.object.userData).toMatchObject({ decorative: true, collision: false, support: false, finishVersion: 2 });
   expect(JSON.stringify(parts)).toBe(before);
   const attributes = (handle: typeof first) => handle.object.children.map(child => Array.from((child as Mesh).geometry.getAttribute('position').array));
   expect(attributes(first)).toEqual(attributes(reordered));

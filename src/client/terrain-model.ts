@@ -1,4 +1,4 @@
-import {Mesh,ShaderMaterial,CustomBlending,AddEquation,SrcAlphaFactor,OneFactor,ZeroFactor} from 'three';
+import {Mesh,MeshStandardMaterial,ShaderMaterial,CustomBlending,AddEquation,SrcAlphaFactor,OneFactor,ZeroFactor} from 'three';
 import type {Vec3} from '../shared/world.ts';
 import { buildPlanet } from '../assets/claude-geometry/terrain/planet.ts';
 import { TerrainKit } from '../assets/claude-geometry/terrain/kit.ts';
@@ -14,6 +14,9 @@ import { measure } from '../assets/claude-geometry/style/geometry.ts';
 import { BUDGET } from '../assets/claude-geometry/style/lod.ts';
 import { PRESENTATION } from './presentation.ts';
 import { objectRadius } from '../shared/planets.ts';
+import {applyArtToObject} from './art-profile.ts';
+import {applyTerrainArt} from './terrain-art.ts';
+import {DISTRICT_ENVIRONMENT,SHORT_STREET_ENVIRONMENT} from '../shared/district-layout.ts';
 export function terrainModel(environment:string,objects:readonly PlacedObject[]=[],blueprints:BlueprintContents={},lod:LodTier='medium',alphaCanvas=false,radius=10,_surfaceRoutes:readonly HomeSurfaceRoute[]=[]){
  void _surfaceRoutes;
  const field=fieldOf(environment,radius) as TerrainField,kit=new TerrainKit(lod,{look:PRESENTATION.materials.look});
@@ -37,6 +40,8 @@ export function terrainModel(environment:string,objects:readonly PlacedObject[]=
  // The main canvas composites over a CSS sky. Preserve its destination alpha
  // while keeping Claude's additive RGB halo; otherwise a black opaque shell appears.
  if(alphaCanvas){const halo=model.object.getObjectByName('terrain:atmosphere');if(halo instanceof Mesh&&halo.material instanceof ShaderMaterial){const m=halo.material;m.blending=CustomBlending;m.blendEquation=AddEquation;m.blendSrc=SrcAlphaFactor;m.blendDst=OneFactor;m.blendEquationAlpha=AddEquation;m.blendSrcAlpha=ZeroFactor;m.blendDstAlpha=OneFactor;}}
+ applyArtToObject(model.object);
+ for(const material of Array.isArray(model.ground.material)?model.ground.material:[model.ground.material])if(material instanceof MeshStandardMaterial)applyTerrainArt(material,{districtMeadow:environment===DISTRICT_ENVIRONMENT||environment===SHORT_STREET_ENVIRONMENT});
  let disposed=false;const dispose=()=>{if(disposed)return;disposed=true;model.dispose();kit.dispose();};model.object.userData.disposeOwned=dispose;
  return {object:model.object,ground:model.ground,stats:model.stats,tick:(t:number)=>model.tick(t),setSunDirection:(dir:Vec3)=>model.setSunDirection(dir),dispose};
 }

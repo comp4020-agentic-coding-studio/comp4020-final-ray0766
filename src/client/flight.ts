@@ -10,6 +10,7 @@ import type { PlanetSummary, Universe } from '../shared/planets.ts';
 import type { PlayerState } from '../shared/world.ts';
 import { bodyRadius, landingRadius } from '../shared/world-size.ts';
 import { RADIUS } from '../shared/world.ts';
+import { needsFlightDetour } from './flight-guidance.ts';
 const el=<E extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as E;
 interface Bridge {
   canvas:HTMLCanvasElement; renderer:T.WebGLRenderer; online:()=>boolean; player:()=>PlayerState|undefined;
@@ -142,7 +143,7 @@ export class SpaceFlight {
       const b=bearing(f.position,target.center),yaw=wrapAngle(b.yaw-f.yaw),pitch=b.pitch-f.pitch,d=spaceDistance(f.position,target.center);
       setText(el('course-name'), target.name, true);setText(el('course-distance'), `${regionFor(target.slot).name} · ${Math.round(d)} m · ${target.mine?'Your world':target.claimed?'Neighbour':'Unclaimed'}`);
       setText(el('course-heading'), Math.abs(yaw)<.06&&Math.abs(pitch)<.06?'On course · thrust forward':`${Math.abs(yaw)<.06?'Ahead':yaw>0?'Turn right →':'← Turn left'}${Math.abs(pitch)>.06?pitch>0?' · nose up ↑':' · nose down ↓':''}`);
-      if(closest&&closest.id!==target.id&&distance<15&&d>25&&f.speed<.2)setText(el('course-heading'), 'World ahead · turn away, then fly around it');
+      if(closest&&needsFlightDetour(f.position,f.speed,closest,target))setText(el('course-heading'), 'World ahead · turn away, then fly around it');
       el('flight-hud').dataset.yawError=String(yaw);el('flight-hud').dataset.pitchError=String(pitch);el('flight-hud').dataset.distance=String(d);el('flight-hud').dataset.target=target.id;
       const p=new T.Vector3(...target.center).project(this.camera);el('course-marker').style.left=`${Math.max(7,Math.min(93,(p.x*.5+.5)*100))}%`;el('course-marker').style.top=`${Math.max(26,Math.min(70,(-p.y*.5+.5)*100))}%`;el('course-marker').classList.toggle('behind',p.z>1||Math.abs(yaw)>1.5);
     }

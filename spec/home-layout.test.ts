@@ -15,7 +15,7 @@ import { anchorQuaternion, localToDir } from '../src/assets/claude-geometry/core
 import { BODY_RADIUS, FIXED_STEP, GroundWorld, STEP_HEIGHT } from '../src/shared/physics/world.ts';
 import type { GroundPose } from '../src/shared/physics/world.ts';
 import type { HomeManifestSite } from '../src/shared/home-layout.ts';
-import { SPAWN } from '../src/shared/world.ts';
+import { distance, SPAWN } from '../src/shared/world.ts';
 
 const radius = 21.6;
 function scene() {
@@ -83,7 +83,7 @@ it('seats the fixed 41-object sample dry on one shared field with room for the s
   expect(objects).toHaveLength(41);
   expect(objects.length).toBeLessThan(MAX_OBJECTS);
   for (const object of objects) {
-    expect(placementProblem(object.kind, object.position, objects, object.id, object.radius, radius, 2)).toBeNull();
+    expect(placementProblem(object.kind, object.position, objects, object.id, object.radius, radius, 2,{rotation:object.rotation,blueprintHash:object.blueprintHash,blueprints,field})).toBeNull();
     const fit = objectSeat(field, object, blueprints);
     expect(fit.problem, object.id).toBeNull();
     expect(fit.underwater, object.id).toBe(false);
@@ -121,9 +121,13 @@ it('retains historical navigation endpoints while planning only ordinary bounded
   const before = JSON.stringify({manifest, objects, blueprints});
   const options = {routes:manifest.routes, radius, environment:HOME_ENVIRONMENT, objects, blueprints};
   const plan = planRoutePaths(options), field = fieldOf(HOME_ENVIRONMENT, radius);
-  // This historical fixture already contains its ordinary Path tiles: a
-  // preview must not duplicate them. A bare fixture still gets legal tiles.
-  expect(plan.added).toBe(0);
+  // Historical tiles retain their seats. The precise geometry rule may fill
+  // former circle-exclusion gaps, but cannot duplicate an existing tile.
+  for(const path of plan.objects){
+    expect(objects.filter(object=>object.kind==='path').every(old=>distance(old.position,path.position,radius)>=.48)).toBe(true);
+    expect(placementProblem('path',path.position,[...objects,...plan.objects],path.id,undefined,radius,2,{rotation:path.rotation,blueprints,field})).toBeNull();
+  }
+  expect(objects.length+plan.added).toBeLessThanOrEqual(MAX_OBJECTS);
   expect(plan.coverage.some(route=>route.covered>0)).toBe(true);
   const bareObjects = objects.filter(object=>object.kind!=='path');
   const additions = planRoutePaths({...options,objects:bareObjects});
@@ -132,7 +136,7 @@ it('retains historical navigation endpoints while planning only ordinary bounded
   for (const object of additions.objects) {
     expect(object.kind).toBe('path');
     expect(object.radius).toBeUndefined();expect(object.height).toBeUndefined();
-    expect(placementProblem(object.kind, object.position, bareObjects, undefined, undefined, radius)).toBeNull();
+    expect(placementProblem(object.kind, object.position, bareObjects, undefined, undefined, radius,2,{rotation:object.rotation,blueprints,field})).toBeNull();
     expect(objectSeat(field, object, blueprints).problem).toBeNull();
   }
   // A legacy visual width cannot grant larger tiles or wider clearings.

@@ -1,0 +1,73 @@
+{
+  "status": "initial-read-only-preflight",
+  "planetRowsSha256": "78ed4205a9a4d08c1ee7bea2fcd5d534e51b52c2614312dd7e6af725c34e5ff1",
+  "planets": 87,
+  "objects": 37,
+  "spaceFlights": 2,
+  "flightConflicts": [],
+  "newObjectProblems": [],
+  "oldObjectProblems": [],
+  "groundChecks": [
+    {
+      "planetKind": "garden",
+      "oldPhysics": 0,
+      "grounded": true,
+      "oldBlocked": false,
+      "newRadialBlocked": false,
+      "radialShift": 11.6,
+      "oldSupport": "terrain",
+      "newSupport": "terrain"
+    },
+    {
+      "planetKind": "garden",
+      "oldPhysics": 0,
+      "grounded": true,
+      "oldBlocked": false,
+      "newRadialBlocked": false,
+      "radialShift": 11.6,
+      "oldSupport": "terrain",
+      "newSupport": "terrain"
+    },
+    {
+      "planetKind": "hub",
+      "oldPhysics": 3,
+      "grounded": true,
+      "oldBlocked": false,
+      "newRadialBlocked": false,
+      "radialShift": 7.817575108690555,
+      "oldSupport": "terrain",
+      "newSupport": "terrain"
+    },
+    {
+      "planetKind": "hub",
+      "oldPhysics": 3,
+      "grounded": true,
+      "oldBlocked": false,
+      "newRadialBlocked": false,
+      "radialShift": 7.817575108690555,
+      "oldSupport": "terrain",
+      "newSupport": "terrain"
+    },
+    {
+      "planetKind": "hub",
+      "oldPhysics": 3,
+      "grounded": true,
+      "oldBlocked": false,
+      "newRadialBlocked": false,
+      "radialShift": 7.817575108690555,
+      "oldSupport": "terrain",
+      "newSupport": "terrain"
+    },
+    {
+      "planetKind": "hub",
+      "oldPhysics": 4,
+      "grounded": true,
+      "oldBlocked": false,
+      "newRadialBlocked": false,
+      "radialShift": 7.799837867534144,
+      "oldSupport": "terrain",
+      "newSupport": "terrain"
+    }
+  ],
+  "note": "Initial risk probe only; structural local-coordinate remap and exact player-wide pose checks are in implementation."
+}

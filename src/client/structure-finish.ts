@@ -1,18 +1,19 @@
 import { Group, Mesh } from 'three';
 import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
-import { edgeKey, pivotOf, rotDir, slotsOf } from '../assets/claude-geometry/blueprint/model.ts';
+import { edgeKey, pivotOf, rotDir, slotsOf, vertexKey } from '../assets/claude-geometry/blueprint/model.ts';
 import { PARTS } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
-import { libraryMaterials, SLAB, STOREY } from '../assets/claude-geometry/blueprint/parts/kit.ts';
+import { libraryMaterials, SLAB, STOREY, WALL_H, WALL_T } from '../assets/claude-geometry/blueprint/parts/kit.ts';
+import { BASE_COURSE, TOP_BAND } from '../assets/claude-geometry/blueprint/parts/village/walls.ts';
 import { disposeObject3D } from '../assets/claude-geometry/core/dispose.ts';
 import { PartBuilder } from '../assets/claude-geometry/style/geometry.ts';
 import type { StyleLibrary } from '../assets/claude-geometry/style/materials.ts';
 import { worldMaterials } from './shared-assets.ts';
 
-export const STRUCTURE_FINISH_VERSION = 1;
-/** Additional reach beyond an existing slab/frieze face, never a floor surface. */
+export const STRUCTURE_FINISH_VERSION = 2;
+/** Additional reach beyond an existing slab/frieze/post face, never a floor surface. */
 export const STRUCTURE_FINISH_MAX_PROJECTION = .02;
 export interface FinishSegment {
-  kind: 'slab-edge' | 'existing-eave';
+  kind: 'slab-edge' | 'existing-eave' | 'existing-wall-joint';
   axis: 'x' | 'z';
   from: number; to: number; line: number; y: number;
   material: 'concrete' | 'post';
@@ -20,6 +21,50 @@ export interface FinishSegment {
 
 const cell = (x: number, z: number, level: number) => `${x},${z},${level}`;
 const FLOOR_PARTS = new Set(['floor.deck', 'floor.grate', 'roof.deck']);
+
+function edgeVertices(p: PartPlacement): [number, number][] {
+  const [dx, dz] = rotDir(p.rot);
+  return dz ? [[p.x, p.z + (dz > 0 ? 1 : 0)], [p.x + 1, p.z + (dz > 0 ? 1 : 0)]]
+    : [[p.x + (dx > 0 ? 1 : 0), p.z], [p.x + (dx > 0 ? 1 : 0), p.z + 1]];
+}
+
+/** Only cover the join of two existing exterior end posts, not their open ends or corners. */
+function wallJoints(parts: readonly PartPlacement[], pivot: { x: number; z: number }, occupied: ReadonlySet<string>,
+  outside: ReadonlyMap<number, ReadonlySet<string>>, protectedEdges: ReadonlySet<string>, clearanceEdges: ReadonlySet<string>, protectedVertices: ReadonlySet<string>) {
+  const ends = new Map<string, { x: number; z: number; walls: PartPlacement[] }>();
+  for (const p of parts) {
+    // Other wall profiles carry openings, shutters, battens or door casings.
+    if (p.part !== 'wall.solid' || !occupied.has(cell(p.x, p.z, p.level))) continue;
+    const [dx, dz] = rotDir(p.rot);
+    if (!outside.get(p.level)?.has(cell(p.x + dx, p.z + dz, p.level)) || clearanceEdges.has(edgeKey(p.x, p.z, p.rot, p.level))) continue;
+    for (const [x, z] of edgeVertices(p)) {
+      const key = vertexKey(x, z, p.level), end = ends.get(key) ?? { x, z, walls: [] };
+      end.walls.push(p); ends.set(key, end);
+    }
+  }
+  const result: FinishSegment[] = [];
+  for (const [key, { x, z, walls }] of ends) {
+    if (walls.length !== 2 || protectedVertices.has(key)) continue;
+    const [a, b] = walls;
+    if (a.rot !== b.rot) continue;
+    const ownEdges = new Set(walls.map(p => edgeKey(p.x, p.z, p.rot, p.level)));
+    if (ownEdges.size !== 2) continue;
+    // The other two edges at this vertex must be free of corners, guards,
+    // explicit trim, beams, entry/stair approaches and their clearance rules.
+    const incident = [edgeKey(x - 1, z - 1, 0, a.level), edgeKey(x, z - 1, 0, a.level),
+      edgeKey(x - 1, z - 1, 1, a.level), edgeKey(x - 1, z, 1, a.level)];
+    if (incident.some(edge => !ownEdges.has(edge) && protectedEdges.has(edge))) continue;
+    const [dx, dz] = rotDir(a.rot), axis = dz ? 'x' : 'z';
+    const along = axis === 'x' ? x - pivot.x : z - pivot.z;
+    // Village dress() has two 50 mm end posts, 15 mm proud of the plaster.
+    // A 40 mm cover sits on those posts, extending their face by only 14 mm.
+    const line = axis === 'x' ? z - pivot.z + dz * (WALL_T / 2 + .022)
+      : x - pivot.x + dx * (WALL_T / 2 + .022);
+    result.push({ kind: 'existing-wall-joint', axis, from: along - .02, to: along + .02, line,
+      y: a.level * STOREY + (BASE_COURSE + WALL_H - TOP_BAND) / 2, material: 'post' });
+  }
+  return result;
+}
 
 /** A versioned content fingerprint, not random variation. Names/groups stay private. */
 function finishSeed(parts: readonly PartPlacement[]) {
@@ -69,7 +114,7 @@ function mergeSegments(segments: FinishSegment[]) {
  */
 export function planStructureFinish(parts: readonly PartPlacement[], pivot = pivotOf(parts)): FinishSegment[] {
   if (!parts.length) return [];
-  const occupied = new Set<string>(), protectedEdges = new Set<string>();
+  const occupied = new Set<string>(), protectedEdges = new Set<string>(), clearanceEdges = new Set<string>(), protectedVertices = new Set<string>();
   const shapedRoof = new Set<string>();
   for (const p of parts) {
     const def = PARTS[p.part], slots = slotsOf(p);
@@ -77,12 +122,18 @@ export function planStructureFinish(parts: readonly PartPlacement[], pivot = piv
     if (def.role === 'slope' && p.part !== 'roof.slope' || def.trim?.on === 'slope') shapedRoof.add(cell(p.x, p.z, p.level));
     // The slope's own gutter clearance permits its existing frieze facing.
     const clearance = def.role === 'slope' ? [] : slots.keepsClear.map(s => s.key);
+    for (const key of [...clearance, ...slots.edgeRules.map(s => s.key), ...(slots.edgesTouched ?? [])]) {
+      if (key.startsWith('edge ')) clearanceEdges.add(key);
+    }
     for (const key of [...slots.occupies, ...clearance, ...slots.edgeRules.map(s => s.key), ...(slots.edgesTouched ?? [])]) {
       if (key.startsWith('edge ')) protectedEdges.add(key);
+      if (key.startsWith('vertex ')) protectedVertices.add(key);
     }
     if (def.role === 'entry' || def.role === 'stair') for (const [x, z] of slots.cells) {
       for (const level of def.role === 'stair' ? [p.level, p.level + 1] : [p.level])
-        for (let side = 0; side < 4; side++) protectedEdges.add(edgeKey(x, z, side, level));
+        for (let side = 0; side < 4; side++) {
+          const key = edgeKey(x, z, side, level); protectedEdges.add(key); clearanceEdges.add(key);
+        }
     }
   }
   const outside = new Map([...new Set(parts.map(p => p.level))].map(level => [level, exteriorCells(parts, occupied, level)]));
@@ -108,7 +159,7 @@ export function planStructureFinish(parts: readonly PartPlacement[], pivot = piv
       add(p, p.rot, .607, 'existing-eave', p.level * STOREY - SLAB + .045, 'post');
     }
   }
-  return mergeSegments(segments);
+  return mergeSegments([...segments, ...wallJoints(parts, pivot, occupied, outside, protectedEdges, clearanceEdges, protectedVertices)]);
 }
 
 /** Shared palette, at most two merged meshes. Caller attaches it to the existing model. */
@@ -117,7 +168,8 @@ export function buildStructureFinish(parts: readonly PartPlacement[], lib: Style
   const segments = lib.look === 'village' ? planStructureFinish(parts, options.pivot) : [];
   const builder = new PartBuilder(lib.lod), materials = libraryMaterials(lib);
   for (const s of segments) {
-    const length = s.to - s.from, thickness = s.kind === 'slab-edge' ? .02 : .014, height = s.kind === 'slab-edge' ? .06 : .022;
+    const length = s.to - s.from, thickness = s.kind === 'slab-edge' ? .02 : .014;
+    const height = s.kind === 'slab-edge' ? .06 : s.kind === 'existing-wall-joint' ? WALL_H - TOP_BAND - BASE_COURSE : .022;
     const along = (s.from + s.to) / 2;
     builder.box(materials.get(s.material), s.axis === 'x' ? [length, height, thickness] : [thickness, height, length],
       { position: s.axis === 'x' ? [along, s.y, s.line] : [s.line, s.y, along] }, 0);

@@ -1,0 +1,162 @@
+{
+  "status": "passed",
+  "baseURL": "http://127.0.0.1:8130",
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "browserVersion": "154.0.8037.98",
+  "host": {
+    "platform": "darwin",
+    "osRelease": "27.0.0",
+    "cpu": "Apple M3",
+    "cpuLogicalCount": 8,
+    "memoryGiB": 16,
+    "realPhone": false
+  },
+  "photos": [
+    {
+      "path": "docs/evidence/integration/quality/photo-validation/photo-touch-390-exterior-2048.png",
+      "width": 946,
+      "height": 2048,
+      "bytes": 686961,
+      "sha256": "bd16b817b71f04a4101a79e4cfa6547e73f0e79736f91624a6a022525a40c8dc",
+      "elapsedMs": 269,
+      "pixels": {
+        "decodedWidth": 946,
+        "decodedHeight": 2048,
+        "quantizedColors": 204,
+        "opaqueFraction": 0.994873046875,
+        "luminanceRange": 201.66666666666666
+      },
+      "supersampling": 2,
+      "source": "local geometry"
+    },
+    {
+      "path": "docs/evidence/integration/quality/photo-validation/photo-touch-390-exterior-3840.png",
+      "width": 1774,
+      "height": 3840,
+      "bytes": 1812101,
+      "sha256": "4c24298d9aba75f77d3b9a9ed32ebe115c3fc37187ebf4ca4925f9143cca6ed7",
+      "elapsedMs": 300,
+      "pixels": {
+        "decodedWidth": 1774,
+        "decodedHeight": 3840,
+        "quantizedColors": 217,
+        "opaqueFraction": 0.996337890625,
+        "luminanceRange": 204.33333333333334
+      },
+      "supersampling": 1,
+      "source": "local geometry"
+    },
+    {
+      "path": "docs/evidence/integration/quality/photo-validation/photo-touch-390-interior-2048.png",
+      "width": 946,
+      "height": 2048,
+      "bytes": 306819,
+      "sha256": "3d27745cb7263fd0ec50841146c3469b784452ed6a2291b89ee97dfe6db94590",
+      "elapsedMs": 267,
+      "pixels": {
+        "decodedWidth": 946,
+        "decodedHeight": 2048,
+        "quantizedColors": 154,
+        "opaqueFraction": 1,
+        "luminanceRange": 151.66666666666666
+      },
+      "supersampling": 2,
+      "source": "local geometry"
+    },
+    {
+      "path": "docs/evidence/integration/quality/photo-validation/photo-touch-390-interior-3840.png",
+      "width": 1774,
+      "height": 3840,
+      "bytes": 754121,
+      "sha256": "66304a3b34b8a1ffd302eaa9681f6b1567ff032ffb672c8e405b3970aee96c57",
+      "elapsedMs": 251,
+      "pixels": {
+        "decodedWidth": 1774,
+        "decodedHeight": 3840,
+        "quantizedColors": 136,
+        "opaqueFraction": 1,
+        "luminanceRange": 151.33333333333331
+      },
+      "supersampling": 1,
+      "source": "local geometry"
+    }
+  ],
+  "checks": [
+    "exterior: orbit changes view, both camera presets work, 2K/4K PNG decodes, geometry/furniture/labels/pose unchanged while paused",
+    "exterior: close restores real touch walking controls",
+    "interior: orbit changes view, both camera presets work, 2K/4K PNG decodes, geometry/furniture/labels/pose unchanged while paused",
+    "interior: close restores real touch walking controls"
+  ],
+  "pageErrors": [],
+  "externalRequests": [],
+  "fixture": "Fresh isolated browser identity. Photo actions use actual controls and local downloads; state APIs are read-only. No physical-phone performance claim.",
+  "renderer": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "dpr": 1
+    },
+    "drawingBuffer": {
+      "width": 390,
+      "height": 844
+    },
+    "touchPoints": 1,
+    "visibility": "visible",
+    "webglVendor": "Google Inc. (Apple)",
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+  },
+  "writeRoutes": [
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/move",
+    "/api/home/enter",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/home/move",
+    "/api/home/move",
+    "/api/presence",
+    "/api/home/move",
+    "/api/presence",
+    "/api/home/move",
+    "/api/presence",
+    "/api/home/move",
+    "/api/home/move",
+    "/api/presence"
+  ],
+  "contentDigestBefore": "209f704101ec96243a6e7d2556dba1d4855a557f53227ee98cb9302fb6b8f5c6",
+  "contentDigestAfter": "209f704101ec96243a6e7d2556dba1d4855a557f53227ee98cb9302fb6b8f5c6"
+}

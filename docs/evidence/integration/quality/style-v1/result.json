@@ -1,0 +1,65 @@
+{
+  "phase": "style-v1",
+  "browser": "Installed Google Chrome via Playwright",
+  "browserVersion": "154.0.8037.98",
+  "results": [
+    {
+      "viewport": "1440",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "pose": {
+        "feet": "[-0.010439734130282336,0.9996660056063683,-0.02364083725881315]",
+        "camera": "[-0.25670611633806173,24.58112196459295,3.716723860772179]",
+        "heading": "[0.00024687305258078385,-0.023639548218897872,-0.9997205163512963]"
+      },
+      "generatedVersion": 3,
+      "objects": 24,
+      "structures": 2
+    },
+    {
+      "viewport": "390",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 390,
+          "height": 844,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 390,
+          "height": 844
+        },
+        "touchPoints": 1,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "pose": {
+        "feet": "[-0.010439734130282336,0.9996660056063683,-0.02364083725881315]",
+        "camera": "[-0.25658425159907994,24.569452698372007,3.763033216678228]",
+        "heading": "[0.00024687305258078385,-0.023639548218897872,-0.9997205163512963]"
+      },
+      "generatedVersion": 3,
+      "objects": 24,
+      "structures": 2
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  ],
+  "physicalPhone": false
+}

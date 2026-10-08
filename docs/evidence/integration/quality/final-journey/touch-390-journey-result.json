@@ -1,0 +1,1359 @@
+{
+  "status": "failed",
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "browserVersion": "154.0.8037.98",
+  "baseURL": "http://127.0.0.1:8130",
+  "host": {
+    "platform": "darwin",
+    "osRelease": "27.0.0",
+    "cpu": "Apple M3",
+    "cpuLogicalCount": 8,
+    "memoryGiB": 16,
+    "realPhone": false
+  },
+  "fixture": "New isolated anonymous browser identity. Every movement, edit, quest action and flight transition uses actual UI/keyboard/touch controls. APIs below only read acknowledged state.",
+  "checks": [
+    "Real closed-door blocking, explicit entry/exit, saved room rearrangement, room movement and same interior after reload"
+  ],
+  "samples": [
+    {
+      "label": "ground-close-idle",
+      "durationMs": 4015.699999988079,
+      "frames": {
+        "samples": 240,
+        "p50": 16.699999999999818,
+        "p95": 16.800000000000182,
+        "p99": 16.800000000000182,
+        "max": 16.800000000000182,
+        "mean": 16.66583333333333
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 241,
+        "p50": 265,
+        "p95": 265,
+        "p99": 265,
+        "max": 265,
+        "mean": 265
+      },
+      "triangles": {
+        "samples": 241,
+        "p50": 229786,
+        "p95": 229786,
+        "p99": 229786,
+        "max": 229786,
+        "mean": 229786
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 241,
+        "p50": 0.827,
+        "p95": 8.287,
+        "p99": 8.287,
+        "max": 8.287,
+        "mean": 1.7615892116182552
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 241
+      },
+      "actionMs": 16,
+      "paddingAfterActionMs": 3984,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "ground-overview",
+      "durationMs": 4012.699999988079,
+      "frames": {
+        "samples": 240,
+        "p50": 16.69999999999891,
+        "p95": 16.700000000000728,
+        "p99": 16.800000000000182,
+        "max": 16.80000000000109,
+        "mean": 16.66583333333334
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 241,
+        "p50": 361,
+        "p95": 361,
+        "p99": 361,
+        "max": 361,
+        "mean": 350.7551867219917
+      },
+      "triangles": {
+        "samples": 241,
+        "p50": 253264,
+        "p95": 253264,
+        "p99": 253264,
+        "max": 253264,
+        "mean": 250844.03319502075
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 241,
+        "p50": 1.027,
+        "p95": 1.753,
+        "p99": 1.753,
+        "max": 1.753,
+        "mean": 1.100734439834021
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 241
+      },
+      "actionMs": 2053,
+      "paddingAfterActionMs": 1947,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "closed-door-collision-and-open",
+      "durationMs": 4011.600000023842,
+      "frames": {
+        "samples": 233,
+        "p50": 16.69999999999709,
+        "p95": 16.799999999999272,
+        "p99": 33.30000000000291,
+        "max": 66.70000000000073,
+        "mean": 17.16652360515021
+      },
+      "longFrames": {
+        "over33_3ms": 2,
+        "over50ms": 2,
+        "over100ms": 0
+      },
+      "longTasks": {
+        "samples": 2,
+        "p50": 84,
+        "p95": 85,
+        "p99": 85,
+        "max": 85,
+        "mean": 84.5
+      },
+      "drawCalls": {
+        "samples": 234,
+        "p50": 264,
+        "p95": 265,
+        "p99": 265,
+        "max": 265,
+        "mean": 230.10256410256412
+      },
+      "triangles": {
+        "samples": 234,
+        "p50": 228866,
+        "p95": 229514,
+        "p99": 229514,
+        "max": 229514,
+        "mean": 223033.84615384616
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 234,
+        "p50": 0.767,
+        "p95": 0.87,
+        "p99": 0.87,
+        "max": 0.87,
+        "mean": 0.7333333333333322
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 234
+      },
+      "actionMs": 3313,
+      "paddingAfterActionMs": 687,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "enter-room-and-close-door",
+      "durationMs": 4107.399999976158,
+      "frames": {
+        "samples": 241,
+        "p50": 16.69999999999709,
+        "p95": 16.700000000000728,
+        "p99": 16.80000000000291,
+        "max": 66.70000000000073,
+        "mean": 17.012033195020752
+      },
+      "longFrames": {
+        "over33_3ms": 2,
+        "over50ms": 2,
+        "over100ms": 0
+      },
+      "longTasks": {
+        "samples": 1,
+        "p50": 86,
+        "p95": 86,
+        "p99": 86,
+        "max": 86,
+        "mean": 86
+      },
+      "drawCalls": {
+        "samples": 242,
+        "p50": 189,
+        "p95": 189,
+        "p99": 189,
+        "max": 189,
+        "mean": 187.95867768595042
+      },
+      "triangles": {
+        "samples": 9,
+        "p50": 210682,
+        "p95": 210682,
+        "p99": 210682,
+        "max": 210682,
+        "mean": 210682
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 242,
+        "p50": 0.677,
+        "p95": 2.153,
+        "p99": 2.153,
+        "max": 2.153,
+        "mean": 0.8772727272727255
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 9,
+        "interior": 233
+      },
+      "actionMs": 698,
+      "paddingAfterActionMs": 3302,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "room-walk-and-return",
+      "durationMs": 4007.900000035763,
+      "frames": {
+        "samples": 239,
+        "p50": 16.69999999999709,
+        "p95": 16.700000000000728,
+        "p99": 16.80000000000291,
+        "max": 16.80000000000291,
+        "mean": 16.66569037656903
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 240,
+        "p50": 194,
+        "p95": 198,
+        "p99": 199,
+        "max": 199,
+        "mean": 192.30416666666667
+      },
+      "triangles": null,
+      "renderCpuSubmissionMs": {
+        "samples": 240,
+        "p50": 0.663,
+        "p95": 0.687,
+        "p99": 0.687,
+        "max": 0.687,
+        "mean": 0.660104166666669
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "interior": 240
+      },
+      "actionMs": 2827,
+      "paddingAfterActionMs": 1173,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "room-arrange-and-save",
+      "durationMs": 4036.5,
+      "frames": {
+        "samples": 241,
+        "p50": 16.69999999999709,
+        "p95": 16.700000000004366,
+        "p99": 16.799999999999272,
+        "max": 16.80000000000291,
+        "mean": 16.665560165975094
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 242,
+        "p50": 188,
+        "p95": 190,
+        "p99": 190,
+        "max": 190,
+        "mean": 188.1900826446281
+      },
+      "triangles": null,
+      "renderCpuSubmissionMs": {
+        "samples": 242,
+        "p50": 0.677,
+        "p95": 0.977,
+        "p99": 0.977,
+        "max": 0.977,
+        "mean": 0.7406280991735544
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "interior": 242
+      },
+      "actionMs": 545,
+      "paddingAfterActionMs": 3455,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "open-door-exit-and-reenter",
+      "durationMs": 4033.800000011921,
+      "frames": {
+        "samples": 230,
+        "p50": 16.699999999999818,
+        "p95": 16.800000000000182,
+        "p99": 33.29999999999973,
+        "max": 116.70000000000027,
+        "mean": 17.46304347826086
+      },
+      "longFrames": {
+        "over33_3ms": 2,
+        "over50ms": 2,
+        "over100ms": 1
+      },
+      "longTasks": {
+        "samples": 2,
+        "p50": 93,
+        "p95": 131,
+        "p99": 131,
+        "max": 131,
+        "mean": 112
+      },
+      "drawCalls": {
+        "samples": 228,
+        "p50": 189,
+        "p95": 189,
+        "p99": 270,
+        "max": 270,
+        "mean": 191.59649122807016
+      },
+      "triangles": {
+        "samples": 8,
+        "p50": 234426,
+        "p95": 234426,
+        "p99": 234426,
+        "max": 234426,
+        "mean": 234426
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 231,
+        "p50": 0.81,
+        "p95": 5.727,
+        "p99": 5.727,
+        "max": 5.727,
+        "mean": 1.7296666666666642
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "interior": 220,
+        "ground": 11
+      },
+      "actionMs": 1315,
+      "paddingAfterActionMs": 2685,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "ordinary-building-workshop-edit",
+      "durationMs": 4012.7999999523163,
+      "frames": {
+        "samples": 179,
+        "p50": 16.699999999999818,
+        "p95": 16.800000000000182,
+        "p99": 199.89999999999964,
+        "max": 566.7000000000007,
+        "mean": 22.34525139664804
+      },
+      "longFrames": {
+        "over33_3ms": 7,
+        "over50ms": 5,
+        "over100ms": 3
+      },
+      "longTasks": {
+        "samples": 6,
+        "p50": 76,
+        "p95": 524,
+        "p99": 524,
+        "max": 524,
+        "mean": 177.83333333333334
+      },
+      "drawCalls": {
+        "samples": 125,
+        "p50": 270,
+        "p95": 375,
+        "p99": 375,
+        "max": 375,
+        "mean": 274.08
+      },
+      "triangles": {
+        "samples": 124,
+        "p50": 235566,
+        "p95": 266000,
+        "p99": 266000,
+        "max": 266000,
+        "mean": 236957.79032258064
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 125,
+        "p50": 1.093,
+        "p95": 3.843,
+        "p99": 3.843,
+        "max": 3.843,
+        "mean": 1.6701999999999981
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "interior": 1,
+        "ground": 124,
+        "workshop": 55
+      },
+      "actionMs": 2826,
+      "paddingAfterActionMs": 1174,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "ordinary-path-rotate-place-remove",
+      "durationMs": 1339.300000011921,
+      "frames": {
+        "samples": 46,
+        "p50": 16.69999999999891,
+        "p95": 16.80000000000109,
+        "p99": 566.6999999999989,
+        "max": 566.6999999999989,
+        "mean": 28.623913043478236
+      },
+      "longFrames": {
+        "over33_3ms": 1,
+        "over50ms": 1,
+        "over100ms": 1
+      },
+      "longTasks": {
+        "samples": 2,
+        "p50": 81,
+        "p95": 504,
+        "p99": 504,
+        "max": 504,
+        "mean": 292.5
+      },
+      "drawCalls": {
+        "samples": 47,
+        "p50": 359,
+        "p95": 362,
+        "p99": 362,
+        "max": 362,
+        "mean": 310.29787234042556
+      },
+      "triangles": {
+        "samples": 47,
+        "p50": 253714,
+        "p95": 254836,
+        "p99": 254836,
+        "max": 254836,
+        "mean": 243806.25531914894
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 47,
+        "p50": 1.09,
+        "p95": 1.09,
+        "p99": 1.09,
+        "max": 1.09,
+        "mean": 1.0807021276595756
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 47
+      },
+      "actionMs": 764,
+      "paddingAfterActionMs": 3236,
+      "failed": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 2\u001b[39m\n\n\u001b[2m  Array [\u001b[22m\n\u001b[2m    0,\u001b[22m\n\u001b[32m-   0.9921094233217371,\u001b[39m\n\u001b[32m-   0.12537500610652208,\u001b[39m\n\u001b[31m+   0.9921094233217369,\u001b[39m\n\u001b[31m+   0.12537500610652205,\u001b[39m\n\u001b[2m  ]\u001b[22m",
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    }
+  ],
+  "pageErrors": [],
+  "apiResponses": [
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/door",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/door",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/enter",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/door",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/save",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/door",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/exit",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 409
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/enter",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/exit",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/blueprints/save",
+      "status": 200
+    },
+    {
+      "route": "/api/objects/replace",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/objects/update",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    }
+  ],
+  "renderer": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "dpr": 1
+    },
+    "drawingBuffer": {
+      "width": 390,
+      "height": 844
+    },
+    "touchPoints": 1,
+    "visibility": "visible",
+    "webglVendor": "Google Inc. (Apple)",
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+  },
+  "initial": {
+    "radius": 21.6,
+    "objects": 40,
+    "structures": 4,
+    "manifestVersion": 5
+  },
+  "closedDoor": {
+    "closedLeafBlockedActualMovement": true,
+    "doorLocalZ": 0.3592839805132041
+  },
+  "structureEdit": {
+    "partCountBefore": 79,
+    "partCountAfter": 80,
+    "sameObject": true,
+    "sameNameAndGroups": true
+  },
+  "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 2\u001b[39m\n\n\u001b[2m  Array [\u001b[22m\n\u001b[2m    0,\u001b[22m\n\u001b[32m-   0.9921094233217371,\u001b[39m\n\u001b[32m-   0.12537500610652208,\u001b[39m\n\u001b[31m+   0.9921094233217369,\u001b[39m\n\u001b[31m+   0.12537500610652205,\u001b[39m\n\u001b[2m  ]\u001b[22m"
+}

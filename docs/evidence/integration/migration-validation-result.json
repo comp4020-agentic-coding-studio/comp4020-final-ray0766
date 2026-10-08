@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-10-08T05:24:46.768Z",
+  "sourceSha256": "6576a743f37cad1a644ee79bd736b3c03c9e101f9965bb0b4671c82cf928f7af",
+  "sourceMatchesOriginalAudit": true,
+  "sourceTablesMatchOriginalAudit": true,
+  "migratedTablesMatchOriginalAudit": true,
+  "restoreTablesMatchOriginalAudit": true,
+  "tests": {
+    "migration": 7,
+    "homeSetup": 11,
+    "launchGuard": 2,
+    "passed": 20,
+    "typecheck": "passed",
+    "targetedLint": "passed"
+  },
+  "httpSuite": "Not run here; root must run against explicitly isolated legacy-test service. Integrated browser acceptance is separate."
+}

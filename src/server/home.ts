@@ -15,7 +15,8 @@ import { partTransform, pivotOf } from '../assets/claude-geometry/blueprint/mode
 import { encodeBlueprint, hashInput } from '../assets/claude-geometry/blueprint/codec.ts';
 import type { Blueprint } from '../assets/claude-geometry/blueprint/model.ts';
 import { canonicalJson } from '../assets/claude-geometry/core/doc.ts';
-import { HOME_DOOR_PART, homeVariant } from '../shared/home-layout.ts';
+import { HOME_DOOR_PART, HOME_ENVIRONMENT, homeVariant } from '../shared/home-layout.ts';
+import { districtHome } from '../shared/district-layout.ts';
 import { generateHomeManifest, HOME_GENERATION_VERSION } from '../shared/home-generation.ts';
 import type { planetStore } from './planets.ts';
 import type { blueprintStore } from './blueprints.ts';
@@ -52,7 +53,7 @@ export function migrateHomes(db: DatabaseSync) {
 const strict=(body:Record<string,unknown>,keys:string[])=>{if(Object.keys(body).some(k=>!keys.includes(k)))throw new RequestError(400,'Unexpected home field.');};
 const vec=(v:unknown):v is Vec3=>Array.isArray(v)&&v.length===3&&v.every(n=>typeof n==='number'&&Number.isFinite(n));
 const digest=(v:unknown)=>createHash('sha256').update(canonicalJson(v)).digest('hex');
-interface HomeRow { planet_id:string;building_id:string;interior_id:string;document:string;variant:HomeDescriptor['variant'] }
+interface HomeRow { door_part:number;planet_id:string;building_id:string;interior_id:string;document:string;variant:HomeDescriptor['variant'] }
 /** Stable for this planet and generator version; independent of browser identity. */
 export const homeGenerationSeed=(planetId:string)=>createHash('sha256').update(`home-neighbourhood:${HOME_GENERATION_VERSION}:${planetId}`).digest().readUInt32BE(0);
 
@@ -72,12 +73,12 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
   function door(h:HomeRow) {
     const p=planets.planet(h.planet_id),o=planets.view('',h.planet_id).objects.find(o=>o.id===h.building_id);
     if(!o?.blueprintHash)throw new RequestError(409,'Your home exterior is unavailable; its contents are preserved.');
-    const key=JSON.stringify([p.radius,p.environment,o.version,o.blueprintHash,o.position,o.rotation]);
+    const key=JSON.stringify([p.radius,p.environment,o.version,o.blueprintHash,o.position,o.rotation,h.door_part]);
     const cached=doorFrames.get(h.building_id);if(cached?.key===key)return structuredClone(cached.value);
-    const parts=blueprints.parts(o.blueprintHash),part=parts.find(p=>p.n===HOME_DOOR_PART&&p.part==='wall.door.open');
+    const parts=blueprints.parts(o.blueprintHash),part=parts.find(p=>p.n===(h.door_part??HOME_DOOR_PART)&&p.part==='wall.door.open');
     if(!part)throw new RequestError(409,'The home entrance is unavailable; its contents are preserved.');
     const t=partTransform(part,pivotOf(parts)),fit=structureFit(parts,o.position,o.rotation,fieldOf(p.environment,p.radius));
-    const point:Vec3=[t.position[0]+Math.sin(t.yaw)*.9,0,t.position[2]+Math.cos(t.yaw)*.9];
+    const point:Vec3=[t.position[0]+Math.sin(t.yaw)*.9,t.position[1],t.position[2]+Math.cos(t.yaw)*.9];
     const anchor={dir:o.position,yaw:o.rotation};
     const value:HomeDescriptor['door']={position:localToDir(anchor,fit.baseRadius,point),yaw:(o.rotation+t.yaw)%(Math.PI*2),frame:{position:localToPlanet(anchor,fit.baseRadius,t.position),quaternion:quatMultiply(anchorQuaternion(anchor),quatFromAxisAngle([0,1,0],t.yaw))}};
     if(doorFrames.size>=64&&!doorFrames.has(h.building_id))doorFrames.delete(doorFrames.keys().next().value!);
@@ -100,7 +101,7 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
   function content(bp:Blueprint) {const value=canonicalJson(hashInput(bp.parts)),hash=createHash('sha256').update(value).digest('hex');db.prepare('INSERT OR IGNORE INTO blueprint_contents(hash,content) VALUES(?,?)').run(hash,value);return hash;}
   function initialise(planetId:string) {
     if(!enabled||home(planetId))return;
-    const p=planets.planet(planetId);if(p.kind!=='garden'||p.sample_radius===null||!p.owner_id)return;
+    const p=planets.planet(planetId);if(p.kind!=='garden'||(p.sample_radius===null&&p.world_radius===null)||!p.owner_id)return;
     // A manifest is a creation receipt, never an instruction to regenerate.
     // Empty but previously edited worlds also remain untouched.
     if(db.prepare('SELECT 1 FROM home_manifests WHERE planet_id=?').get(planetId)||
@@ -108,7 +109,9 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
       db.prepare('SELECT 1 FROM object_tombstones WHERE planet_id=?').get(planetId)||
       Number(db.prepare('SELECT seq FROM history_heads WHERE planet_id=?').get(planetId)?.seq??0)>0)return;
     transaction(()=>{
-      const manifest=generateHomeManifest(p.radius,homeGenerationSeed(planetId),p.environment);
+      // Only this never-edited, newly created home may adopt the new authored
+      // district ground. A supplied custom terrain remains an input constraint.
+      const manifest=generateHomeManifest(p.radius,homeGenerationSeed(planetId),p.environment===HOME_ENVIRONMENT?undefined:p.environment);
       // Ground, rendering and every creation event read the accepted output
       // environment in the same transaction as its concrete saved objects.
       db.prepare('UPDATE planets SET environment=? WHERE id=?').run(manifest.environment,planetId);
@@ -125,7 +128,11 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
       const building=insertStructure(manifest.home);
       for(const item of manifest.infrastructure??[])insertStructure(item);
       for(const spec of manifest.objects){const id=randomUUID();db.prepare('INSERT INTO planet_objects(id,planet_id,kind,position,rotation) VALUES(?,?,?,?,?)').run(id,planetId,spec.kind,JSON.stringify(spec.position),spec.rotation);db.prepare('INSERT INTO object_assets(object_id,planet_id,asset_version) VALUES(?,?,2)').run(id,planetId);history.append(planetId,null,planets.view('',planetId).objects.find(o=>o.id===id)!);}
-      db.prepare('INSERT INTO home_interiors(planet_id,building_id,interior_id,document) VALUES(?,?,?,?)').run(planetId,building.id,randomUUID(),JSON.stringify(defaultHomeInterior()));
+      // The compact district house is editable kit geometry, not the historical
+      // full-court preset. Describe the actual saved design without relabelling
+      // an existing home or implying a larger remodel has already been applied.
+      const variant=canonicalJson(hashInput(manifest.home.blueprint.parts))===canonicalJson(hashInput(homeVariant('starter').parts))?'base':'custom';
+      db.prepare('INSERT INTO home_interiors(planet_id,building_id,interior_id,document,variant) VALUES(?,?,?,?,?)').run(planetId,building.id,randomUUID(),JSON.stringify(defaultHomeInterior()),variant);
       const document:HomeInfrastructureManifest={generator:manifest.generator,version:manifest.version,seed:manifest.seed,radius:p.radius,environment:manifest.environment,catalogueVersion:manifest.catalogueVersion,fallback:manifest.fallback,...(manifest.fallbackReason?{fallbackReason:manifest.fallbackReason}:{}),routes:manifest.routes,homeBuildingId:building.id,objects:planets.view('',planetId).objects};
       db.prepare('INSERT INTO home_manifests(planet_id,version,document,hash) VALUES(?,?,?,?)').run(planetId,manifest.version,JSON.stringify(document),digest(document));
       db.prepare('UPDATE planets SET revision=revision+1 WHERE id=?').run(planetId);
@@ -195,6 +202,14 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
       for(const r of db.prepare('SELECT document FROM home_locations').all()){const at=JSON.parse(String(r.document)) as HomeLocation;if(at.kind==='interior'&&at.buildingId===h.building_id&&!homePositionAllowed(at.position,next.items,HOME_BODY_RADIUS,old.room,old.doorOpen))throw new RequestError(409,'A visitor is standing there. Leave their space clear.');}
       transaction(()=>{db.prepare('UPDATE home_interiors SET document=? WHERE planet_id=?').run(JSON.stringify({...old,...next,version:old.version+1}),h.planet_id);changed(h.planet_id);});
     },
-    remodelBlueprint(variant:unknown):Blueprint {if(!['base','terrace','roof','extended'].includes(String(variant)))throw new RequestError(400,'Choose a home variation.');return homeVariant(variant==='base'?'starter':variant==='extended'?'extension':variant as 'terrace'|'roof');},
+    remodelBlueprint(variant:unknown,planetId:string):Blueprint {
+      if(!['base','terrace','roof','extended'].includes(String(variant)))throw new RequestError(400,'Choose a home variation.');
+      const kind=variant==='base'?'starter':variant==='extended'?'extension':variant as 'terrace'|'roof';
+      const row=db.prepare('SELECT document FROM home_manifests WHERE planet_id=?').get(planetId);
+      const receipt=row?JSON.parse(String(row.document)) as HomeInfrastructureManifest:null;
+      return receipt?.catalogueVersion==='district-kit-v2'
+        ?districtHome(kind,(receipt.objects.find(object=>object.id===receipt.homeBuildingId)?.rotation??0)>Math.PI)
+        :homeVariant(kind);
+    },
   };
 }

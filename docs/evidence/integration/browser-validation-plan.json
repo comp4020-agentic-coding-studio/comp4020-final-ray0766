@@ -1,0 +1,59 @@
+{
+  "recordedAt": "2026-10-08T05:05:16.926189+00:00",
+  "status": "prepared-not-browser-executed",
+  "baselineCommit": "9bfa9520ceea98310b0aa4b6883d807c163f32ad",
+  "isolatedDestination": "http://127.0.0.1:8130",
+  "protectedServicesAccessed": false,
+  "originalDatabasesAccessed": false,
+  "newFiles": [
+    "scripts/integration-browser-helpers.ts",
+    "tests/e2e/integration-journey.spec.ts",
+    "tests/e2e/integration-legacy.spec.ts"
+  ],
+  "checksPlanned": [
+    "New anonymous identity, home creation/claim through available UI and acknowledged server state",
+    "Actual closed-door collision, explicit entry/exit, room movement, furniture editing, refresh persistence",
+    "Existing non-home structure in-place workshop editing with private metadata preservation",
+    "Normal Path rotation, UI creation and removal within existing object budget",
+    "Actual boarding, keyboard or two-finger touch flight, radius-aware landing, delivery and return home",
+    "Independent old-data fixture render/editor-read/refresh preservation at desktop and 390px"
+  ],
+  "timingMethod": {
+    "scope": "Each real-action interval plus declared settling padding; foreground Chrome requestAnimationFrame timing",
+    "percentiles": [
+      "p50",
+      "p95",
+      "p99"
+    ],
+    "longFramesMs": [
+      33.3333333333,
+      50,
+      100
+    ],
+    "alsoCollect": [
+      "PerformanceObserver longtask entries",
+      "actual renderer counters when available",
+      "hardware/OS/browser/viewport/DPR/WebGL context"
+    ],
+    "limits": [
+      "Not a physical phone",
+      "Not GPU-synchronised timing",
+      "No thermal or sustained performance conclusion",
+      "No frame-rate promise until measured",
+      "No old counters presented as interior triangle counts"
+    ]
+  },
+  "risks": [
+    "Current normal and sample DB modes require a deliberate integration path; toggling HOME_SAMPLE is insufficient",
+    "Existing owned planet radii/terrain/objects/history must retain their saved semantics",
+    "Old flight helper stops at fixed19.4m and cannot reach a21.6m sphere; new helper uses radius+10 landing band",
+    "Hub departure ignores and then clears controls until its presentation ends; new helper explicitly waits",
+    "Future larger or distant layouts may need real-control detours; tests report detours and fail rather than teleport",
+    "Legacy fixture must come from the data owner with explicit isolated-copy provenance and expected state"
+  ],
+  "staticPreparation": {
+    "playwrightCollection": "4 tests in 2 files, --list only; no browser launched",
+    "newFilesLint": "passed",
+    "typecheck": "Full TypeScript noEmit passed after the concurrent art-material fixture correction; final three new files also pass ESLint."
+  }
+}

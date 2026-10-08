@@ -1,13 +1,14 @@
 import type { MeshStandardMaterialParameters, MeshPhysicalMaterialParameters } from 'three';
+import {ART_PALETTE} from './art-profile.ts';
 
 // Main-owned village surfaces. Slot names stay stable for the existing scenery;
 // shapes, texture drawing and resource ownership remain in the factories.
 export const HARBOUR_SURFACES = {
-  concrete: { color: '#cbbfa6', metalness: 0, roughness: .92 },
-  pale: { color: '#efe3c6', metalness: 0, roughness: .88 },
-  metal: { color: '#46514f', metalness: .05, roughness: .7 },
-  dark: { color: '#7d5b43', metalness: 0, roughness: .88 },
-  copper: { color: '#c26b4b', metalness: 0, roughness: .88 },
+  concrete: { color: ART_PALETTE.stone, metalness: 0, roughness: .92 },
+  pale: { color: ART_PALETTE.cream, metalness: 0, roughness: .88 },
+  metal: { color: ART_PALETTE.iron, metalness: .03, roughness: .84 },
+  dark: { color: ART_PALETTE.wood, metalness: 0, roughness: .9 },
+  copper: { color: ART_PALETTE.clay, metalness: 0, roughness: .9 },
   road: { color: '#8e968e', metalness: 0, roughness: .94 },
   edge: { color: '#b9ad8c', metalness: 0, roughness: .92 },
 } as const satisfies Record<string, MeshStandardMaterialParameters>;

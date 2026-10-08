@@ -7,6 +7,7 @@ import { openStore } from '../src/server/store.ts';
 import { homeGenerationSeed } from '../src/server/home.ts';
 import { HOME_ENVIRONMENT, starterManifest } from '../src/shared/home-layout.ts';
 import { HOME_GENERATION_BUDGET, HOME_GENERATION_VERSION } from '../src/shared/home-generation.ts';
+import { SHORT_STREET_ENVIRONMENT } from '../src/shared/district-layout.ts';
 import { defaultHomeInterior, HOME_SAMPLE_RADIUS } from '../src/shared/home.ts';
 import { encodeBlueprint } from '../src/assets/claude-geometry/blueprint/codec.ts';
 import type { Blueprint } from '../src/assets/claude-geometry/blueprint/model.ts';
@@ -27,7 +28,8 @@ it('stores one generated layout per owned planet with concrete IDs, hashes and e
     const id = `owner-${i}`;
     s.create(id);
     const u = s.universe(id), manifest = u.currentPlanet.homeManifest!;
-    expect(manifest).toMatchObject({ generator: 'home-neighbourhood', version: HOME_GENERATION_VERSION, seed: homeGenerationSeed(u.ownedPlanetId!), radius: HOME_SAMPLE_RADIUS, environment: u.currentPlanet.environment, catalogueVersion: 'home-kit-v1' });
+    expect(manifest).toMatchObject({ generator: 'home-neighbourhood', version: HOME_GENERATION_VERSION, seed: homeGenerationSeed(u.ownedPlanetId!), radius: HOME_SAMPLE_RADIUS, environment: u.currentPlanet.environment, catalogueVersion: 'district-kit-v2' });
+    expect(u.player.home!.variant).toBe('custom');
     expect(manifest.objects).toEqual(u.currentPlanet.objects);
     expect(manifest.routes.find(route => route.id === 'home')!.points.length).toBeGreaterThanOrEqual(2);
     expect(manifest.objects.length).toBeLessThanOrEqual(HOME_GENERATION_BUDGET.maxObjects);
@@ -51,7 +53,8 @@ it('reopens edited infrastructure and room contents without rerolling or replaci
   const path = databasePath(), s = sample(path);
   s.create('owner');
   const first = s.universe('owner'), planet = first.ownedPlanetId!, home = first.player.home!, originalReceipt = receipt(s, planet);
-  const infrastructure = first.currentPlanet.objects.find(object => object.kind === 'structure' && object.id !== home.buildingId)!;
+  const infrastructure = first.currentPlanet.objects.find(object => object.kind === 'structure' && object.id !== home.buildingId
+    &&first.currentPlanet.blueprints?.[object.blueprintHash!]?.some(part=>part.part==='furniture.bench'))!;
   const entry = s.library('owner').find(entry => entry.hash === infrastructure.blueprintHash)!;
   const bench = entry.blueprint.parts.find(part => part.part === 'furniture.bench')!;
   const blueprint: Blueprint = { ...entry.blueprint, name: 'My named resting place', groups: [{ name: 'Keep my floor label', members: entry.blueprint.parts.slice(0, 2).map(part => part.n) }], parts: entry.blueprint.parts.filter(part => part.n !== bench.n) };
@@ -90,11 +93,11 @@ it('persists legal fallback terrain atomically with object history and ground st
   s.create('owner');
   const u = s.universe('owner'), manifest = u.currentPlanet.homeManifest!;
   expect(u.ownedPlanetId).toBe(planet);
-  expect(manifest).toMatchObject({ fallback: true, fallbackReason: 'invalid-environment', environment: HOME_ENVIRONMENT });
-  expect(u.player.environment).toBe(HOME_ENVIRONMENT);
+  expect(manifest).toMatchObject({ fallback: true, fallbackReason: 'invalid-environment', environment: SHORT_STREET_ENVIRONMENT });
+  expect(u.player.environment).toBe(SHORT_STREET_ENVIRONMENT);
   expect(u.player.ground!.sceneRevision).toBe(u.currentPlanet.revision);
-  expect(s.db.prepare('SELECT DISTINCT environment FROM history_events WHERE planet_id=?').all(planet)).toEqual([{ environment: HOME_ENVIRONMENT }]);
-  expect(s.historySnapshot('owner', planet).environment).toBe(HOME_ENVIRONMENT);
+  expect(s.db.prepare('SELECT DISTINCT environment FROM history_events WHERE planet_id=?').all(planet)).toEqual([{ environment: SHORT_STREET_ENVIRONMENT }]);
+  expect(s.historySnapshot('owner', planet).environment).toBe(SHORT_STREET_ENVIRONMENT);
   const saved = s.universe('owner'), originalReceipt = receipt(s, planet);
   s.close();
   const again = sample(path);

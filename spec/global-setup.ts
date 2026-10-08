@@ -16,7 +16,8 @@ export default async function setup(project: TestProject): Promise<void> {
 
   for (let attempt = 0; ; attempt++) {
     try {
-      await fetch(baseUrl);
+      const response=await fetch(baseUrl);
+      if(!response.ok)throw new Error(`App returned HTTP ${response.status}`);
       break;
     } catch {
       // not up yet
@@ -29,5 +30,11 @@ export default async function setup(project: TestProject): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
 
+  // An explicit handshake prevents a legacy HTTP suite from creating test
+  // identities in an integrated or existing preview database by mistake.
+  if(process.env.EXPECT_WORLD_PROFILE){
+    const response=await fetch(baseUrl+'/healthz'),health=await response.json() as {ok?:boolean;profile?:string};
+    if(!response.ok||!health.ok||health.profile!==process.env.EXPECT_WORLD_PROFILE)throw new Error(`Expected ${process.env.EXPECT_WORLD_PROFILE} at ${baseUrl}; received ${health.profile??'unknown'}. No HTTP tests were started.`);
+  }
   project.provide("baseUrl", baseUrl);
 }

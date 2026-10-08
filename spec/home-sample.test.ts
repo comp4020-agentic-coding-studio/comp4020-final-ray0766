@@ -10,7 +10,7 @@ import { HOME_EXIT, HOME_ROOM } from '../src/shared/home.ts';
 import { decodeSnapshot } from '../src/shared/timeline-codec.ts';
 import { SPAWN } from '../src/shared/world.ts';
 import { encodeBlueprint } from '../src/assets/claude-geometry/blueprint/codec.ts';
-import { homeVariant } from '../src/shared/home-layout.ts';
+import { homeVariant, samplePoint } from '../src/shared/home-layout.ts';
 
 const stores:ReturnType<typeof openStore>[]=[];
 const dirs:string[]=[];
@@ -23,7 +23,7 @@ it('starts an isolated sample at its sole home and never regenerates its persist
   const structures=u.currentPlanet.objects.filter(o=>o.kind==='structure');
   expect(structures.length).toBeGreaterThanOrEqual(2);expect(structures.length).toBeLessThanOrEqual(4);
   expect(u.currentPlanet.homeManifest).toMatchObject({generator:'home-neighbourhood',version:HOME_GENERATOR_VERSION});
-  expect(u.player.home).toMatchObject({canEdit:true,buildingVersion:1,variant:'base',interior:{room:HOME_ROOM}});
+  expect(u.player.home).toMatchObject({canEdit:true,buildingVersion:1,variant:'custom',interior:{room:HOME_ROOM}});
   const before=s.db.prepare('SELECT document,hash FROM home_manifests').all();s.claim('owner',u.ownedPlanetId);expect(s.db.prepare('SELECT document,hash FROM home_manifests').all()).toEqual(before);
   expect(()=>s.claim('owner',u.planets.find(p=>p.kind==='garden'&&!p.mine)!.id)).toThrow('already');
   expect(s.state('owner').position).toEqual(s.state('owner').home!.door.position);
@@ -47,7 +47,7 @@ it('rejects stale surface and indoor actions; furniture and walls block walking,
   expect(()=>s.takeoff('owner',{planetId:outside.planetId,journey:0,visitEpoch:outside.location!.visitEpoch})).toThrow('Leave');
   expect(()=>s.flight('owner',{visitEpoch:outside.location!.visitEpoch})).toThrow('Leave');
   expect(()=>s.moveHome('owner',{buildingId:id,visitEpoch:at.visitEpoch,sequence:1,position:[0,0,20],yaw:0},Date.now()+1000)).toThrow('blocks');
-  expect(()=>s.moveHome('owner',{buildingId:id,visitEpoch:at.visitEpoch,sequence:1,position:[-.9,0,-.45],yaw:0},Date.now()+1000)).toThrow('blocks');
+  expect(()=>s.moveHome('owner',{buildingId:id,visitEpoch:at.visitEpoch,sequence:1,position:outside.home!.interior.items.find(item=>item.id==='table')!.position,yaw:0},Date.now()+1000)).toThrow('blocks');
   const body={buildingId:id,visitEpoch:at.visitEpoch,sequence:1,position:HOME_EXIT,yaw:0};s.moveHome('owner',body,Date.now()+1000);const accepted=s.state('owner');s.moveHome('owner',body,Date.now()+1001);expect(s.state('owner')).toEqual(accepted);
   s.exitHome('owner',{buildingId:id,visitEpoch:at.visitEpoch});
   expect(()=>s.moveHome('owner',{...body,sequence:2},Date.now()+2000)).toThrow('changed');
@@ -86,9 +86,11 @@ it('replaces and undoes exterior content under one building id, replays hashes, 
   expect(updated.buildingId).toBe(h.buildingId);expect(updated.interior).toEqual(h.interior);expect(updated.interiorId).toBe(h.interiorId);expect(updated.buildingVersion).toBe(2);expect(updated.canUndo).toBe(true);
   const snapshot=s.historySnapshot('owner',old.planetId),decoded=decodeSnapshot(snapshot.document);expect(decoded.ok).toBe(true);if(decoded.ok)expect(decoded.value.objects[h.buildingId].spec).toMatchObject({blueprintHash:changed.currentPlanet.objects.find(o=>o.id===h.buildingId)!.blueprintHash});
   expect(()=>s.removeObject('owner',{planetId:old.planetId,objectId:h.buildingId,expectedVersion:2})).toThrow('belongings');
-  s.undoHome('owner',{buildingId:h.buildingId,expectedVersion:2});expect(s.state('owner').home).toMatchObject({buildingId:h.buildingId,variant:'base',canUndo:false,buildingVersion:3});
+  s.undoHome('owner',{buildingId:h.buildingId,expectedVersion:2});expect(s.state('owner').home).toMatchObject({buildingId:h.buildingId,variant:h.variant,canUndo:false,buildingVersion:3});
   s.create('visitor');s.visit('visitor',old.planetId);s.db.prepare('UPDATE players SET position=? WHERE id=?').run(JSON.stringify(h.door.position),'visitor');enter(s,'visitor');
-  const object=s.universe('owner').currentPlanet.objects.find(o=>o.id===h.buildingId)!;s.updateObject('owner',{planetId:old.planetId,objectId:h.buildingId,position:object.position,rotation:.1,expectedVersion:3});
+  // Relocate onto clear ground: rotating in the compact street now correctly
+  // conflicts with its neighbouring paving and is not a valid movement fixture.
+  s.updateObject('owner',{planetId:old.planetId,objectId:h.buildingId,position:samplePoint(21.6,10,5),rotation:.1,expectedVersion:3});
   const latest=s.state('visitor'),newDoor=latest.home!.door.position;expect(newDoor).not.toEqual(h.door.position);
   s.exitHome('visitor',{buildingId:h.buildingId,visitEpoch:latest.location!.visitEpoch});expect(s.state('visitor').position).toEqual(newDoor);expect(s.state('owner').home!.interior).toEqual(h.interior);
 },10000); // Two fully validated generated worlds plus remodel/history replays.

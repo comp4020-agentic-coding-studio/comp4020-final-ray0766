@@ -1,0 +1,186 @@
+{
+  "status": "passed",
+  "baseURL": "http://127.0.0.1:8130",
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "browserVersion": "154.0.8037.98",
+  "host": {
+    "platform": "darwin",
+    "osRelease": "27.0.0",
+    "cpu": "Apple M3",
+    "cpuLogicalCount": 8,
+    "memoryGiB": 16,
+    "realPhone": false
+  },
+  "provenance": {
+    "sourceCommit": "d06a54a7ab7ba849b5e90db1984a27a4b053ae0d",
+    "synthetic": true,
+    "databaseIsIsolatedCopy": true,
+    "privateLabelsReplacedForEvidence": true
+  },
+  "expectedObjectCount": 3,
+  "expectedBlueprintCount": 1,
+  "samples": [
+    {
+      "label": "legacy-loaded-close-view",
+      "durationMs": 4011,
+      "frames": {
+        "samples": 240,
+        "p50": 16.699999999999818,
+        "p95": 16.700000000000273,
+        "p99": 16.799999999999955,
+        "max": 16.800000000000182,
+        "mean": 16.66583333333331
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 241,
+        "p50": 68,
+        "p95": 68,
+        "p99": 68,
+        "max": 68,
+        "mean": 68
+      },
+      "triangles": {
+        "samples": 241,
+        "p50": 112704,
+        "p95": 112704,
+        "p99": 112704,
+        "max": 112704,
+        "mean": 112704
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 241,
+        "p50": 0.44,
+        "p95": 5.18,
+        "p99": 5.18,
+        "max": 5.18,
+        "mean": 1.06353112033195
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 241
+      },
+      "actionMs": 807,
+      "paddingAfterActionMs": 3193,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    },
+    {
+      "label": "legacy-overview-and-ordinary-editor-open",
+      "durationMs": 4007.600000023842,
+      "frames": {
+        "samples": 237,
+        "p50": 16.699999999999818,
+        "p95": 16.800000000000182,
+        "p99": 16.80000000000109,
+        "max": 50,
+        "mean": 16.80675105485232
+      },
+      "longFrames": {
+        "over33_3ms": 1,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 225,
+        "p50": 68,
+        "p95": 78,
+        "p99": 81,
+        "max": 81,
+        "mean": 71.89333333333333
+      },
+      "triangles": {
+        "samples": 225,
+        "p50": 112704,
+        "p95": 112970,
+        "p99": 113102,
+        "max": 113102,
+        "mean": 112723.6888888889
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 225,
+        "p50": 0.47,
+        "p95": 0.84,
+        "p99": 0.84,
+        "max": 0.84,
+        "mean": 0.5216755555555559
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 225,
+        "workshop": 13
+      },
+      "actionMs": 2089,
+      "paddingAfterActionMs": 1911,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim."
+    }
+  ],
+  "pageErrors": [],
+  "writeRoutes": [
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence"
+  ],
+  "fixtureMeaning": "Authorised isolated legacy fixture only. Identity token and private labels are never written to evidence. UI only opens/closes editor and changes the camera; no content is edited.",
+  "renderer": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "dpr": 1
+    },
+    "drawingBuffer": {
+      "width": 390,
+      "height": 844
+    },
+    "touchPoints": 1,
+    "visibility": "visible",
+    "webglVendor": "Google Inc. (Apple)",
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+  },
+  "preserved": [
+    "coat",
+    "quest and deliveries",
+    "existing planet radius and terrain",
+    "object IDs, transforms and versions",
+    "blueprint content hashes",
+    "private blueprint names/groups"
+  ]
+}

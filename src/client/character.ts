@@ -3,10 +3,11 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { COURIER_LOOK } from './presentation-materials.ts';
 import { applyCel } from '../assets/claude-geometry/style/cel.ts';
 import { VILLAGE } from '../assets/claude-geometry/style/look.ts';
+import {applyArtMaterial} from './art-profile.ts';
 import type { Character } from '../shared/world.ts';
 export const PALETTES=COURIER_LOOK.coats;
 const cache=new Map<string,T.MeshStandardMaterial>();
-const material=(color:string)=>{if(!cache.has(color)){const m=applyCel(new T.MeshStandardMaterial({color,...COURIER_LOOK.surface}),VILLAGE.cel!);m.userData.sharedResource=true;cache.set(color,m);}return cache.get(color)!;};
+const material=(color:string)=>{if(!cache.has(color)){const m=applyArtMaterial(applyCel(new T.MeshStandardMaterial({color,...COURIER_LOOK.surface}),VILLAGE.cel!));m.userData.sharedResource=true;cache.set(color,m);}return cache.get(color)!;};
 export function courier(identity:Character|'mica'|'sol'){
   const root=new T.Group(),rig=new T.Group(),torso=new T.Group(),head=new T.Group();root.add(rig);rig.add(torso);torso.position.y=.93;
   const coat=identity==='mica'?COURIER_LOOK.neighbours.mica:identity==='sol'?COURIER_LOOK.neighbours.sol:PALETTES[identity],colored:T.Mesh[]=[];

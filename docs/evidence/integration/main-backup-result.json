@@ -1,0 +1,208 @@
+{
+  "backupAt": "20261008T045514Z",
+  "sourceCommit": "d06a54a7ab7ba849b5e90db1984a27a4b053ae0d",
+  "backupDirectory": "/Users/ray/Documents/Codex/2026-10-08/task-2/little-worlds-integrated/.data/integration-backups/20261008T045514Z",
+  "schemaVersion": 13,
+  "sourceMode": "read-only SQLite online backup",
+  "integrity": "ok",
+  "restoreProbeAllTableHashesMatch": true,
+  "tables": {
+    "blueprint_contents": {
+      "rows": 4,
+      "columns": [
+        "hash",
+        "content"
+      ],
+      "sha256": "e35ea0db3d3a86db209b3d87c4e5fbbbdc6329db2d3f6960889ceb7a360a0eb0"
+    },
+    "blueprint_library": {
+      "rows": 23,
+      "columns": [
+        "owner_id",
+        "id",
+        "document",
+        "hash",
+        "version"
+      ],
+      "sha256": "2911c59d062001f859aa097bdfc81b5d442142d5c66dfc24c5c742750581c349"
+    },
+    "ground_states": {
+      "rows": 6,
+      "columns": [
+        "player_id",
+        "planet_id",
+        "position",
+        "radius",
+        "vertical_speed",
+        "grounded",
+        "sequence",
+        "scene_revision",
+        "clock_credit",
+        "request_hash",
+        "physics_version",
+        "jump_held"
+      ],
+      "sha256": "d9c1f3880c19dc77e56b1fad7bfc9c404f0689372c26e23f1aabcb0a38e349e1"
+    },
+    "history_events": {
+      "rows": 17,
+      "columns": [
+        "planet_id",
+        "seq",
+        "command_id",
+        "document",
+        "environment"
+      ],
+      "sha256": "b18c968becb7f7bd46fdb829fb95ee37028814a7ec78da4d6c4c437f778327b9"
+    },
+    "history_heads": {
+      "rows": 86,
+      "columns": [
+        "planet_id",
+        "seq",
+        "document",
+        "baseline_at"
+      ],
+      "sha256": "9ba81cba8eda4750df33cb99043ab3610a6d715dc4652f3c786792ec0ad7142f"
+    },
+    "history_snapshots": {
+      "rows": 86,
+      "columns": [
+        "planet_id",
+        "seq",
+        "document",
+        "hash",
+        "environment"
+      ],
+      "sha256": "ecee2c2eb07eab5737e6331483b6c652d0a0771e41b56092f61340f956b15afb"
+    },
+    "object_assets": {
+      "rows": 1,
+      "columns": [
+        "object_id",
+        "planet_id",
+        "asset_version"
+      ],
+      "sha256": "62927de5b7f2de3576914a3da1d65b2a0624edddf1c0c905df1e734d715e0690"
+    },
+    "object_tombstones": {
+      "rows": 10,
+      "columns": [
+        "id",
+        "planet_id"
+      ],
+      "sha256": "eddfe1b8fd9c3020350a416492cb933ac394411caa9972d1ee212374eeb969bc"
+    },
+    "planet_objects": {
+      "rows": 37,
+      "columns": [
+        "id",
+        "planet_id",
+        "kind",
+        "position",
+        "rotation",
+        "version",
+        "blueprint_hash",
+        "radius",
+        "height"
+      ],
+      "sha256": "2769a3452deb349b96db45288fdf952ae2e77d57ea14044573b55e8e698d05af"
+    },
+    "planets": {
+      "rows": 87,
+      "columns": [
+        "id",
+        "name",
+        "kind",
+        "owner_id",
+        "revision",
+        "slot",
+        "environment",
+        "radius"
+      ],
+      "sha256": "eee0ce124defebcf28b2a70d66e48558621f8ca4830162ceb01460088a2a80c8"
+    },
+    "player_ships": {
+      "rows": 14,
+      "columns": [
+        "player_id",
+        "document",
+        "version"
+      ],
+      "sha256": "3036dcc64b9c710bf2b4b179ae1bc1fdf36788937f3ca54005861585ead73260"
+    },
+    "players": {
+      "rows": 206,
+      "columns": [
+        "id",
+        "character",
+        "quest",
+        "position",
+        "deliveries",
+        "revision",
+        "moved_at",
+        "planet_id",
+        "flight",
+        "flight_at"
+      ],
+      "sha256": "fb00508812a106ccef724f94e4ee691765a756699ac605afab57a1a1a40b4331"
+    },
+    "visits": {
+      "rows": 60,
+      "columns": [
+        "player_id",
+        "planet_id",
+        "position"
+      ],
+      "sha256": "5302ffc8a0faa7633aa7e6af518276e2b8c7927b36c4905e40fe3e4c365fab3b"
+    }
+  },
+  "radii": [
+    [
+      "garden",
+      10.0,
+      81
+    ],
+    [
+      "garden",
+      11.0,
+      3
+    ],
+    [
+      "garden",
+      12.0,
+      2
+    ],
+    [
+      "hub",
+      14.0,
+      1
+    ]
+  ],
+  "objectKinds": [
+    [
+      "cottage",
+      12
+    ],
+    [
+      "flowers",
+      6
+    ],
+    [
+      "lamp",
+      2
+    ],
+    [
+      "structure",
+      5
+    ],
+    [
+      "tree",
+      12
+    ]
+  ],
+  "preservedUntracked": {
+    "path": "tests/e2e/crit8-update-live.spec.ts",
+    "sha256": "b3e8bdf427e4fb9569cc7aa7a631860b42848dab0a8a2fdc588d591ef970341c"
+  }
+}

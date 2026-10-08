@@ -47,7 +47,7 @@ function assertInitial(universe: Universe) {
   expect(universe.planets.filter(p => p.mine)).toHaveLength(1);
   expect(planet.radius).toBe(21.6);
   expect(universe.player.worldRadius).toBe(21.6);
-  expect(manifest).toMatchObject({ generator: 'home-neighbourhood', version: HOME_GENERATOR_VERSION, radius: 21.6, catalogueVersion: 'home-kit-v1' });
+  expect(manifest).toMatchObject({ generator: 'home-neighbourhood', version: HOME_GENERATOR_VERSION, radius: 21.6, catalogueVersion: 'district-kit-v2' });
   expect(manifest.objects).toEqual(planet.objects);
   expect(planet.objects.some(o=>o.kind==='path')).toBe(true);
   expect(planet.objects.length).toBeLessThanOrEqual(40);

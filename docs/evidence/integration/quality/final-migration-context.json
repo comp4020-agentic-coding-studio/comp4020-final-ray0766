@@ -1,0 +1,135 @@
+{
+  "status": "fresh-source-public-v4-migration-verified",
+  "sourceCommit": "d06a54a7ab7ba849b5e90db1984a27a4b053ae0d",
+  "sourceSha256": "ee0ccf9c449c11ee179a7fbbf906fd0d1d46968521fcb296070eef0e8441fc60",
+  "sourceMatchesParentBackup": true,
+  "sourceUnchanged": true,
+  "sourceWalBytes": 0,
+  "publicVersion": 4,
+  "publicSceneRevision": 1004,
+  "publicStructures": 6,
+  "publicObjects": 64,
+  "environmentSha256": "d616f9de2c66eb2f980dbe340e485c01115b50d4f7b23cb05eb6f23e39197cee",
+  "sourceFiles": {
+    "src/shared/sample-public-village.ts": "156db8fcdc3eafd77473d570ff2f0f12edd8f6cbed4e0d9e41d0f8632cf316c8",
+    "src/server/planets.ts": "71970f1e55cf963f8471a9713f0c91fdb5dc10a8dea7323eb52c0dfd6b294c3f",
+    "src/server/integration-migration.ts": "e854d95d8b97339255ca8ab7aef4cc2365e87ffb9c92f122049c142664b27b28",
+    "src/shared/physics/world.ts": "04e01f618130785a35647f514c3145ed10f6ceb5741d1d7edef8967620429940",
+    "src/shared/physics/parts.ts": "9d32efedcc8bf10501aea0f3bb3cd7f547872cf5155d52a5a6296464895ace28"
+  },
+  "freshSourceCounts": {
+    "players": 206,
+    "planets": 87,
+    "planet_objects": 37,
+    "ground_states": 7,
+    "blueprint_library": 23,
+    "blueprint_contents": 4,
+    "history_events": 17,
+    "history_heads": 86,
+    "history_snapshots": 86
+  },
+  "riskCount": 0,
+  "preview": {
+    "version": 1,
+    "radius": 21.6,
+    "alreadyApplied": false,
+    "canApply": true,
+    "planets": 87,
+    "objects": 37,
+    "spaceFlights": 1,
+    "savedGroundPoses": 7,
+    "structurePoses": 0,
+    "terrainPoses": 7,
+    "unsavedGroundPoses": 198,
+    "risks": [],
+    "sourceDigest": "d0585fc087f850ff1f56b15c5b1f2c3ec502aa2c0bb9eee787d6225aab55fdc9"
+  },
+  "reopenEqual": true,
+  "savedPoseReadsStable": true,
+  "restoreMatchesAllOriginalTables": true,
+  "integrity": {
+    "quickCheck": [
+      "ok"
+    ],
+    "foreignKeyErrors": 0
+  },
+  "epochs": {
+    "rows": 174,
+    "planetsChecked": 87,
+    "errors": 0,
+    "historicalSnapshotsChecked": 86,
+    "historicalRadiusErrors": 0
+  },
+  "ground": {
+    "rowsBefore": 7,
+    "rowsAfter": 7,
+    "publicGroundRows": 5,
+    "privateGroundRows": 2,
+    "sceneRevisionErrors": 0
+  },
+  "protectedBusinessFieldsAllEqual": true,
+  "oldContentChecks": [
+    {
+      "table": "planet_objects",
+      "beforeCount": 37,
+      "afterCount": 37,
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "blueprint_contents",
+      "beforeCount": 4,
+      "afterCount": 4,
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "blueprint_library",
+      "beforeCount": 23,
+      "afterCount": 23,
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "history_events",
+      "beforeCount": 17,
+      "afterCount": 17,
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "history_heads",
+      "beforeCount": 86,
+      "afterCount": 86,
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "history_snapshots",
+      "beforeCount": 86,
+      "afterCount": 86,
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "player_ships",
+      "beforeCount": 14,
+      "afterCount": 14,
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "visits",
+      "beforeCount": 61,
+      "afterCount": 61,
+      "protectedEqual": true,
+      "changedRows": 0
+    }
+  ],
+  "notes": [
+    "The fresh backup has 7 ground rows, superseding the earlier 6-row inventory. All 7 existed before this migration.",
+    "No source sidecars were deleted or changed by this audit workflow; all application writes were confined to the new isolated migrated copy.",
+    "This verifies public v4 and the recorded code hashes; earlier v3 risk results were not reused.",
+    "No original project database or service was opened, stopped or modified by this task."
+  ]
+}

@@ -63,7 +63,7 @@ export function createHarbour(scene:T.Scene,village:SamplePublicVillage|null=nul
     for(const o of meshes){if(!o.geometry.userData.sharedResource&&!freed.has(o.geometry)){freed.add(o.geometry);o.geometry.dispose();}o.removeFromParent();}
     for(const [material,parts]of batches){const g=mergeGeometries(parts);if(g)mesh(root,g,material,[0,0,0],!material.transparent&&material!==p.amber);parts.forEach(p=>p.dispose());}
   }
-  bake(scenery);scenery.userData.publicCounts=village?{structures:3,objects:objects.length,destinations:village.destinations.map(d=>d.id)}:HUB_COUNTS;scenery.name='public-village';
+  bake(scenery);scenery.userData.publicCounts=village?{structures:objects.filter(o=>o.kind==='structure').length,objects:objects.length,destinations:village.destinations.map(d=>d.id)}:HUB_COUNTS;scenery.name='public-village';
  // Baking frees source geometry but transfers its materials to the batches.
  // Keep model handles to release their private lamps and retained silhouettes;
  // the host's following scene cleanup owns the merged batch geometry.

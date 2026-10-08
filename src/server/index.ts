@@ -6,12 +6,14 @@ import { marked } from 'marked';
 import { BLUEPRINT_BODY_LIMIT } from '../shared/blueprints.ts';
 import { presenceStore } from './presence.ts';
 import { openStore, RequestError } from './store.ts';
+import { integratedStartup } from './launch-options.ts';
 
 const homeSample=process.env.HOME_SAMPLE==='1';
 const samplePort=Number(process.env.HOME_SAMPLE_PORT??8126);
 if(homeSample&&(!Number.isInteger(samplePort)||samplePort<1024||samplePort>65535))throw new Error('HOME_SAMPLE_PORT must be an integer from 1024 to 65535.');
 if(homeSample&&!process.env.DATABASE_PATH)throw new Error('HOME_SAMPLE requires a dedicated DATABASE_PATH.');
-const store = openStore(process.env.DATABASE_PATH ?? '.data/little-post.sqlite',{homeSample});
+const databasePath=process.env.DATABASE_PATH??'.data/little-post.sqlite';
+const store = openStore(databasePath,{homeSample,integratedWorld:integratedStartup(process.env,databasePath,homeSample)});
 if(homeSample&&!store.homeSample){store.close();throw new Error('HOME_SAMPLE refuses an existing non-sample database. Use a fresh isolated path.');}
 // Local previews may coexist on one host. Cookies otherwise ignore the port.
 const cookieName=homeSample?(samplePort===8126?'little_home_sample':`little_home_sample_p${samplePort}`):'little_post';
@@ -29,7 +31,7 @@ const server = createServer(async (req, res) => {
   res.setHeader('Referrer-Policy', 'same-origin');
   try {
     const url = new URL(req.url ?? '/', 'http://localhost');
-    if (url.pathname === '/healthz') { send(200, { ok: true }); return; }
+    if (url.pathname === '/healthz') { send(200, { ok: true, profile:homeSample?'home-sample':store.integratedWorld?'integrated':'legacy-test' }); return; }
     if (url.pathname.startsWith('/api/')) {
       const cookie = new RegExp('(?:^|;\\s*)'+cookieName+'=([a-f0-9]{64})(?:;|$)').exec(req.headers.cookie ?? '')?.[1];
       let id = cookie ? hash(cookie) : '';
@@ -73,6 +75,8 @@ const server = createServer(async (req, res) => {
       try { body = JSON.parse(text); } catch { throw new RequestError(400, 'Invalid JSON.'); }
       if (!body || Array.isArray(body) || typeof body !== 'object') throw new RequestError(400, 'Expected an object.');
       if (url.pathname === '/api/blueprints/save') send(200, store.saveBlueprint(id, body));
+      else if(url.pathname==='/api/home/setup/preview')send(200,store.previewHomeSetup(id,body));
+      else if(url.pathname==='/api/home/setup/confirm')send(200,store.confirmHomeSetup(id,body));
       else if(url.pathname==='/api/home/enter'){const result=store.enterHome(id,body);presence.leave(id);send(200,result);}
       else if(url.pathname==='/api/home/move')send(200,store.moveHome(id,body));
       else if(url.pathname==='/api/home/exit'){const result=store.exitHome(id,body);presence.leave(id);send(200,result);}

@@ -1,0 +1,318 @@
+{
+  "phase": "public-v4-final",
+  "status": "passed",
+  "browser": "Installed Google Chrome via Playwright",
+  "browserVersion": "154.0.8037.98",
+  "results": [
+    {
+      "viewport": "1440",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "publicVersion": 4,
+      "objects": 64,
+      "structures": 6
+    },
+    {
+      "viewport": "390",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 390,
+          "height": 844,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 390,
+          "height": 844
+        },
+        "touchPoints": 1,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "publicVersion": 4,
+      "objects": 64,
+      "structures": 6
+    }
+  ],
+  "captures": [
+    {
+      "viewport": "1440",
+      "name": "public-arrival",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 223,
+      "triangles": 334504
+    },
+    {
+      "viewport": "1440",
+      "name": "public-planet",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 267,
+      "triangles": 347688
+    },
+    {
+      "viewport": "1440",
+      "name": "public-post-0",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 234,
+      "triangles": 341464
+    },
+    {
+      "viewport": "1440",
+      "name": "public-post-1",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 263,
+      "triangles": 347280
+    },
+    {
+      "viewport": "1440",
+      "name": "public-post-2",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 212,
+      "triangles": 324744
+    },
+    {
+      "viewport": "1440",
+      "name": "public-orchard-0",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 234,
+      "triangles": 341464
+    },
+    {
+      "viewport": "1440",
+      "name": "public-orchard-1",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 264,
+      "triangles": 347580
+    },
+    {
+      "viewport": "1440",
+      "name": "public-orchard-2",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 218,
+      "triangles": 326020
+    },
+    {
+      "viewport": "1440",
+      "name": "public-orchard-3",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 197,
+      "triangles": 336948
+    },
+    {
+      "viewport": "1440",
+      "name": "public-orchard-4",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 227,
+      "triangles": 334600
+    },
+    {
+      "viewport": "1440",
+      "name": "public-orchard-5",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 198,
+      "triangles": 326504
+    },
+    {
+      "viewport": "1440",
+      "name": "public-orchard-6",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 194,
+      "triangles": 317968
+    },
+    {
+      "viewport": "1440",
+      "name": "public-orchard-7",
+      "drawingBuffer": [
+        1440,
+        1000
+      ],
+      "drawCalls": 207,
+      "triangles": 304400
+    },
+    {
+      "viewport": "390",
+      "name": "public-arrival",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 193,
+      "triangles": 335308
+    },
+    {
+      "viewport": "390",
+      "name": "public-planet",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 267,
+      "triangles": 347688
+    },
+    {
+      "viewport": "390",
+      "name": "public-post-0",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 198,
+      "triangles": 329364
+    },
+    {
+      "viewport": "390",
+      "name": "public-post-1",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 197,
+      "triangles": 336948
+    },
+    {
+      "viewport": "390",
+      "name": "public-post-2",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 210,
+      "triangles": 324696
+    },
+    {
+      "viewport": "390",
+      "name": "public-orchard-0",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 198,
+      "triangles": 329364
+    },
+    {
+      "viewport": "390",
+      "name": "public-orchard-1",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 197,
+      "triangles": 336948
+    },
+    {
+      "viewport": "390",
+      "name": "public-orchard-2",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 213,
+      "triangles": 325788
+    },
+    {
+      "viewport": "390",
+      "name": "public-orchard-3",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 133,
+      "triangles": 320132
+    },
+    {
+      "viewport": "390",
+      "name": "public-orchard-4",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 195,
+      "triangles": 326696
+    },
+    {
+      "viewport": "390",
+      "name": "public-orchard-5",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 183,
+      "triangles": 311008
+    },
+    {
+      "viewport": "390",
+      "name": "public-orchard-6",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 193,
+      "triangles": 317908
+    },
+    {
+      "viewport": "390",
+      "name": "public-orchard-7",
+      "drawingBuffer": [
+        390,
+        844
+      ],
+      "drawCalls": 206,
+      "triangles": 296768
+    }
+  ],
+  "counterMeaning": "Renderer counters at each settled screenshot, not frame timing or a sustained mobile performance claim.",
+  "errors": [],
+  "badResponses": [],
+  "physicalPhone": false
+}

@@ -24,6 +24,7 @@ import type { Obstacle } from './scene.ts';
 import { PRESENTATION } from './presentation.ts';
 import { buildStructureFinish } from './structure-finish.ts';
 import { worldVisualSignature } from './world-visual-signature.ts';
+import type {HomeSetupAddition} from '../shared/home-setup.ts';
 const el = <E extends HTMLElement = HTMLElement>(id:string) => document.getElementById(id) as E;
 export interface ColonyBridge {
   canvas: HTMLCanvasElement; camera: T.Camera; scene: T.Scene;
@@ -151,6 +152,15 @@ export class Colony {
     }
     this.hud();this.editor();this.starMap();
   }
+  previewHome(addition:HomeSetupAddition|undefined){
+    this.previewPaths([]);if(!addition||!this.universe)return;
+    const parts=addition.blueprint.parts,planet=this.universe.currentPlanet;
+    const fit=structureFit(parts,addition.position,addition.rotation,fieldOf(planet.environment,planet.radius));
+    const model=buildBlueprintModel(parts,worldMaterials(),'medium',{foundationDepth:fit.foundationDepth});
+    const transform=placedTransform({dir:addition.position,yaw:addition.rotation},fit);
+    model.object.position.fromArray(transform.position);model.object.quaternion.fromArray(transform.quaternion);
+    this.pathPreview.add(makePlacementPreview(model.object,!!fit.problem));
+  }
   previewPaths(objects:readonly PlacedObject[]){
     for(const child of [...this.pathPreview.children])disposeGeometry(child);
     for(const object of objects)this.pathPreview.add(makePlacementPreview(this.renderObject(object),false));
@@ -173,7 +183,8 @@ export class Colony {
   }
   private parts(hash:string){return this.universe?.currentPlanet.blueprints?.[hash]??this.localParts[hash]??[];}
   private problem(d:Draft){
-    const spacing=placementProblem(d.kind,d.position,this.universe?.currentPlanet.objects??[],d.id,d.radius,this.universe?.currentPlanet.radius,d.assetVersion??1);
+    const planet=this.universe?.currentPlanet,field=fieldOf(planet?.environment,planet?.radius),blueprints={...planet?.blueprints,...(d.blueprintHash?{[d.blueprintHash]:this.parts(d.blueprintHash)}:{})};
+    const spacing=placementProblem(d.kind,d.position,planet?.objects??[],d.id,d.radius,planet?.radius,d.assetVersion??1,{rotation:d.rotation,blueprintHash:d.blueprintHash,blueprints,field,terrainSeating:!!planet?.environment});
     if(spacing||!d.position)return spacing;
     if(this.universe?.currentPlanet.environment){const fit=objectSeat(fieldOf(this.universe.currentPlanet.environment,this.universe.currentPlanet.radius),d as PlacedObject,{...this.universe.currentPlanet.blueprints,...(d.blueprintHash?{[d.blueprintHash]:this.parts(d.blueprintHash)}:{})});if(fit.problem)return fit.message;}
     if(d.kind!=='structure')return null;

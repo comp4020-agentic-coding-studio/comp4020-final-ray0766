@@ -1,15 +1,18 @@
 import * as T from 'three';
 import type { HomeDescriptor } from '../shared/home.ts';
 import { HOME_DOOR_LEAF } from '../shared/home-door.ts';
+import {applyArtMaterial,ART_PALETTE} from './art-profile.ts';
 
 /** An authoritative open/closed leaf. State changes are instantaneous so the
  * rendered solid and both collision worlds never disagree during a swing. */
 export function createHomeDoor() {
   const root = new T.Group(), pivot = new T.Group(),leaf=HOME_DOOR_LEAF;
   root.name = 'home-physical-door'; pivot.position.fromArray(leaf.hinge); root.add(pivot);
-  const wood = new T.MeshStandardMaterial({ color: '#638a79', roughness: .87 });
-  const trim = new T.MeshStandardMaterial({ color: '#dcc38c', roughness: .8 });
-  const plaster = new T.MeshStandardMaterial({ color: '#efe3c6', roughness: .92 });
+  const wood = applyArtMaterial(new T.MeshStandardMaterial({ color: ART_PALETTE.sage, roughness: .9 }));
+  const trim = applyArtMaterial(new T.MeshStandardMaterial({ color: ART_PALETTE.boards, roughness: .9 }));
+  const plaster = applyArtMaterial(new T.MeshStandardMaterial({ color: ART_PALETTE.cream, roughness: .92 }));
+  for(const material of [wood,trim,plaster])material.userData.ownedResource=true;
+  let disposed=false;
   const box = (parent:T.Group,size: [number, number, number], position: [number, number, number], material: T.Material) => {
     const mesh = new T.Mesh(new T.BoxGeometry(...size), material); mesh.position.set(...position); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
   };
@@ -24,7 +27,7 @@ export function createHomeDoor() {
     root,
     setOpen(open: boolean, _immediate = true) { pivot.rotation.y=open?leaf.openAngle:0;root.userData.open=open;void _immediate; },
     frame(_delta: number, _reducedMotion = false) { void _delta; void _reducedMotion; },
-    dispose() { root.removeFromParent(); root.traverse(object => { if (object instanceof T.Mesh) object.geometry.dispose(); }); wood.dispose(); trim.dispose(); plaster.dispose(); },
+    dispose() { if(disposed)return;disposed=true;root.removeFromParent(); root.traverse(object => { if (object instanceof T.Mesh) object.geometry.dispose(); }); wood.dispose(); trim.dispose(); plaster.dispose(); },
   };
 }
 export type HomeDoorView = ReturnType<typeof createHomeDoor>;

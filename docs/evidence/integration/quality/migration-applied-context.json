@@ -1,0 +1,71 @@
+{
+  "status": "latest-public-v3-apply-and-reopen-verified",
+  "publicVersion": 3,
+  "publicSceneRevision": 1003,
+  "publicStructures": 6,
+  "publicObjects": 64,
+  "sourceFiles": {
+    "src/shared/sample-public-village.ts": "cb52ad66428493493914dbfa85c3e30ba497a4d93170289deebddf71cadb247a",
+    "src/server/planets.ts": "71970f1e55cf963f8471a9713f0c91fdb5dc10a8dea7323eb52c0dfd6b294c3f",
+    "src/server/integration-migration.ts": "e854d95d8b97339255ca8ab7aef4cc2365e87ffb9c92f122049c142664b27b28",
+    "src/shared/physics/world.ts": "04e01f618130785a35647f514c3145ed10f6ceb5741d1d7edef8967620429940",
+    "src/shared/physics/parts.ts": "9d32efedcc8bf10501aea0f3bb3cd7f547872cf5155d52a5a6296464895ace28"
+  },
+  "goldenSha256": "6576a743f37cad1a644ee79bd736b3c03c9e101f9965bb0b4671c82cf928f7af",
+  "goldenUnchanged": true,
+  "goldenWalBytes": 0,
+  "original13TablesMatchGoldenAudit": true,
+  "riskCount": 0,
+  "reopenEqual": true,
+  "savedPoseReadsStable": true,
+  "restoreMatchesAllOriginalTables": true,
+  "epochs": {
+    "rows": 174,
+    "planetsChecked": 87,
+    "errors": 0,
+    "historicalSnapshotsChecked": 86,
+    "historicalRadiusErrors": 0
+  },
+  "ground": {
+    "rowsChecked": 6,
+    "sceneRevisionErrors": 0
+  },
+  "oldContentChecks": [
+    {
+      "table": "planet_objects",
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "blueprint_contents",
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "blueprint_library",
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "history_events",
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "history_heads",
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "history_snapshots",
+      "protectedEqual": true,
+      "changedRows": 0
+    }
+  ],
+  "checks": {
+    "targetedMigrationTestsPassed": 7,
+    "typecheck": "passed",
+    "targetedLint": "passed"
+  },
+  "scope": "Golden read-only; all application writes isolated to the new quality copy. No original project, service, sample database or golden sidecar was changed or deleted."
+}

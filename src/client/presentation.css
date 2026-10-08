@@ -1,19 +1,19 @@
 /* Host UI palette. The ground uses village paper; orbit keeps its dark instruments. */
 :root {
   color-scheme: light;
-  --ui-ground-paper: #f3ecdb;
-  --ui-ground-ink: #2f4a43;
+  --ui-ground-paper: #f4eddb;
+  --ui-ground-ink: #394d47;
   --ui-space-paper: #121b23;
   --ui-space-ink: #bdcad0;
-  --ui-page-background: #e6dcc5;
+  --ui-page-background: #e9e2d0;
   --ui-delivery-accent: #a3532f;
   --ui-line: #d8ccb1;
   --ui-dialog-surface: rgba(245, 238, 221, 0.96);
   --ui-dialog-border: #bfb08f;
-  --ui-dialog-text: #2f4a43;
-  --ui-preview-surface: #f3ecdb;
+  --ui-dialog-text: #394d47;
+  --ui-preview-surface: #f4eddb;
   --ui-preview-bar: #ece2cb;
-  --ui-preview-bar-text: #2f4a43;
+  --ui-preview-bar-text: #394d47;
   --ui-preview-focus: #326e68;
   --ui-panel: #f3ecdbee;
   --ui-chip: #f3ecdbe6;

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "radius": 21.6,
+  "alreadyApplied": false,
+  "canApply": true,
+  "planets": 87,
+  "objects": 37,
+  "spaceFlights": 2,
+  "savedGroundPoses": 6,
+  "structurePoses": 0,
+  "terrainPoses": 6,
+  "unsavedGroundPoses": 198,
+  "risks": [],
+  "sourceDigest": "424192080067d2c3b946743ae58beb880b5dc9454ff09988bd14c3d32d226c05"
+}

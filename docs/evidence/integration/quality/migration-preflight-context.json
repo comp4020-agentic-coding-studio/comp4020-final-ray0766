@@ -1,0 +1,58 @@
+{
+  "status": "new-layout-dry-run-complete-apply-pending",
+  "publicVersion": 3,
+  "publicStructures": 6,
+  "publicObjects": 64,
+  "sourceFiles": {
+    "src/shared/sample-public-village.ts": "cb52ad66428493493914dbfa85c3e30ba497a4d93170289deebddf71cadb247a",
+    "src/server/planets.ts": "71970f1e55cf963f8471a9713f0c91fdb5dc10a8dea7323eb52c0dfd6b294c3f",
+    "src/server/integration-migration.ts": "9c113daccee204c05d94c3f33572c97e1140745533f757d50fc123b8bac2ea43",
+    "src/shared/physics/world.ts": "04e01f618130785a35647f514c3145ed10f6ceb5741d1d7edef8967620429940"
+  },
+  "goldenSha256": "6576a743f37cad1a644ee79bd736b3c03c9e101f9965bb0b4671c82cf928f7af",
+  "goldenSha256MatchesPreviousAudit": true,
+  "goldenWalBytes": 0,
+  "standaloneSourceSha256": "6576a743f37cad1a644ee79bd736b3c03c9e101f9965bb0b4671c82cf928f7af",
+  "originalTablesMatchPreviousGoldenAudit": true,
+  "protectedOriginalTables": 13,
+  "changedOriginalTables": [],
+  "canApply": true,
+  "riskCount": 0,
+  "oldContentChecks": [
+    {
+      "table": "planet_objects",
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "blueprint_contents",
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "blueprint_library",
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "history_events",
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "history_heads",
+      "protectedEqual": true,
+      "changedRows": 0
+    },
+    {
+      "table": "history_snapshots",
+      "protectedEqual": true,
+      "changedRows": 0
+    }
+  ],
+  "radiusEpochs": {
+    "existingRows": 0,
+    "applicationVerified": false
+  },
+  "limitation": "Dry run only. The CLI did not read saved poses after radius application. Runtime hub revision is now 1003; migration pose.sceneRevision still needs the matching projection before full apply/reopen audit."
+}

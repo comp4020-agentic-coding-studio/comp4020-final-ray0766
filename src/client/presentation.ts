@@ -5,6 +5,7 @@ import { PracticalLights } from '../assets/claude-geometry/style/practical.ts';
 import { VILLAGE } from '../assets/claude-geometry/style/look.ts';
 import { textureFormat } from './resource-policy.ts';
 import {HOME_SAMPLE_RADIUS} from '../shared/home.ts';
+import {adaptArtLibrary,ART_LIGHT,ART_PALETTE} from './art-profile.ts';
 
 // The host opts into R7; the immutable library keeps its industrial default.
 // Do not import the Stage implementation here: its postprocessing stays lazy.
@@ -13,9 +14,9 @@ export const PRESENTATION = {
   materials: { lod: 'medium', scans: false, look: 'village' },
   practical: { lod: 'medium', enabled: true },
   ground: {
-    hub: { fill: VILLAGE.light.sky, fillIntensity: .85, sun: VILLAGE.light.key, sunIntensity: VILLAGE.light.keyIntensity, environmentIntensity: .22, shadowExtent: 18, shadowFar: 75, fog: { color: VILLAGE.fog, density: .0033 } },
-    garden: { fill: VILLAGE.light.sky, fillIntensity: VILLAGE.light.fillIntensity, sun: VILLAGE.light.key, sunIntensity: VILLAGE.light.keyIntensity, environmentIntensity: .22, shadowExtent: 16, shadowFar: 65, fog: { color: VILLAGE.fog, near: 28, far: 65 } },
-    sample: { fill: VILLAGE.light.sky, fillIntensity: 1.05, sun: VILLAGE.light.key, sunIntensity: 2.8, environmentIntensity: .22, shadowExtent: 20, shadowFar: 80, fog: { color: VILLAGE.fog, near: 30, far: 78 } },
+    hub: { ...ART_LIGHT, shadowExtent: 18, shadowFar: 75, fog: { color: ART_PALETTE.fog, density: .0033 } },
+    garden: { ...ART_LIGHT, shadowExtent: 16, shadowFar: 65, fog: { color: ART_PALETTE.fog, near: 28, far: 65 } },
+    sample: { ...ART_LIGHT, shadowExtent: 20, shadowFar: 80, fog: { color: ART_PALETTE.fog, near: 30, far: 78 } },
   },
   space: {
     background: '#040810', fog: { color: '#080e18', density: .00013 },
@@ -43,7 +44,7 @@ export function configureRenderer(renderer: Pick<T.WebGLRenderer, 'toneMapping' 
   renderer.outputColorSpace = PRESENTATION.renderer.outputColorSpace;
   renderer.toneMappingExposure = view === 'world' ? PRESENTATION.renderer.worldExposure : PRESENTATION.renderer.previewExposure;
 }
-export const createWorldStyleLibrary = () => new StyleLibrary(PRESENTATION.materials.lod, { scans: PRESENTATION.materials.scans, look: PRESENTATION.materials.look });
+export const createWorldStyleLibrary = () => adaptArtLibrary(new StyleLibrary(PRESENTATION.materials.lod, { scans: PRESENTATION.materials.scans, look: PRESENTATION.materials.look }));
 export const createWorldPracticalLights = () => new PracticalLights(PRESENTATION.practical.lod, { enabled: PRESENTATION.practical.enabled, scale: VILLAGE.practical });
 export const groundPresentation = (planetId: string,radius=0) => Math.abs(radius-HOME_SAMPLE_RADIUS)<1e-6?PRESENTATION.ground.sample:PRESENTATION.ground[planetId === 'hub' ? 'hub' : 'garden'];
 
@@ -63,6 +64,35 @@ export function configureGroundLighting(planetId: string, scene: T.Scene, fill: 
   sun.color.set(look.sun); sun.intensity = look.sunIntensity;
   Object.assign(sun.shadow.camera, { left: -look.shadowExtent, right: look.shadowExtent, top: look.shadowExtent, bottom: -look.shadowExtent, far: look.shadowFar });
   sun.shadow.camera.updateProjectionMatrix();
-  sun.shadow.radius = VILLAGE.light.shadowRadius; sun.shadow.intensity = VILLAGE.light.shadowIntensity;
+  sun.shadow.radius = ART_LIGHT.shadowRadius; sun.shadow.intensity = ART_LIGHT.shadowIntensity;
   scene.environmentIntensity = look.environmentIntensity;
+}
+
+const groundSunOffset=new T.Vector3();
+/** A directional light depends on its direction, not its distance. Keep the
+ * walking target midway through the existing shadow depth range. The old
+ * 65 m rise plus tangent offset put the target 95 m away, beyond the 80 m far
+ * plane, so nearby buildings could not cast a shadow onto the ground. */
+export function fitGroundSunShadowDepth(sun:T.DirectionalLight){
+ groundSunOffset.copy(sun.position).sub(sun.target.position);
+ const distance=groundSunOffset.length();
+ if(distance===0)return;
+ const depth=(sun.shadow.camera.near+sun.shadow.camera.far)/2;
+ sun.position.copy(sun.target.position).addScaledVector(groundSunOffset,depth/distance);
+}
+
+/** Same warm key/cool fill as outdoors, fitted to the actual room dimensions. */
+export function configureHomeLighting(scene:T.Scene,fill:T.HemisphereLight,sun:T.DirectionalLight,width:number,depth:number,height:number){
+ scene.background=new T.Color(ART_LIGHT.roomBackground);
+ fill.color.set(ART_LIGHT.fill);fill.groundColor.set(ART_LIGHT.roomGround);fill.intensity=ART_LIGHT.fillIntensity;
+ sun.color.set(ART_LIGHT.sun);sun.intensity=ART_LIGHT.sunIntensity;sun.castShadow=true;
+ const reach=Math.max(width,depth),extent=reach*.78+1;
+ // Both visible walls receive a light band, while the key is offset from the
+ // overview camera so furniture shadows emerge sideways instead of hiding
+ // almost exactly behind their casters. Height and shadow depth stay fixed.
+ sun.position.set(reach*.88,height+reach*.9,reach*.24);sun.target.position.set(0,0,0);
+ Object.assign(sun.shadow.camera,{left:-extent,right:extent,top:extent,bottom:-extent,near:.1,far:reach*3+height+5});
+ sun.shadow.camera.updateProjectionMatrix();sun.shadow.radius=ART_LIGHT.shadowRadius;sun.shadow.intensity=ART_LIGHT.shadowIntensity;
+ sun.shadow.normalBias=.018;sun.shadow.bias=-.00012;sun.shadow.mapSize.set(1024,1024);
+ scene.environmentIntensity=ART_LIGHT.environmentIntensity;
 }

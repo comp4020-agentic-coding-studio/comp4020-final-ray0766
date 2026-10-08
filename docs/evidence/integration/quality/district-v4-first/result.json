@@ -1,0 +1,64 @@
+{
+  "phase": "district-v4-first",
+  "browser": "Installed Google Chrome via Playwright",
+  "browserVersion": "154.0.8037.98",
+  "results": [
+    {
+      "viewport": "1440",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "pose": {
+        "feet": "[0.14174218616281253,0.9871865409319779,-0.07329315155281045]",
+        "camera": "[3.6684349633241924,25.54941277622296,5.322514184627128]",
+        "heading": "[-0.010416747999550011,-0.07254913800767801,-0.9973104401015046]"
+      },
+      "generatedVersion": 4,
+      "objects": 40,
+      "structures": 4
+    },
+    {
+      "viewport": "390",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 390,
+          "height": 844,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 390,
+          "height": 844
+        },
+        "touchPoints": 1,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "pose": {
+        "feet": "[0.14174218616281253,0.9871865409319779,-0.07329315155281045]",
+        "camera": "[3.7051167989563942,25.804889394815497,6.10570390639777]",
+        "heading": "[-0.010416747999550011,-0.07254913800767801,-0.9973104401015046]"
+      },
+      "generatedVersion": 4,
+      "objects": 40,
+      "structures": 4
+    }
+  ],
+  "errors": [],
+  "badResponses": [],
+  "physicalPhone": false
+}
