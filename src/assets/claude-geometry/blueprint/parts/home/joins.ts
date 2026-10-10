@@ -1,6 +1,7 @@
 import * as T from 'three';
 import { SLAB, small } from '../kit.ts';
 import type { Kit } from '../kit.ts';
+import { block, GUTTER, jointBed, slab, STONE_JOINT, underside } from '../village/street.ts';
 import type { Placement } from '../../../style/geometry.ts';
 
 // Street joins: the lane pieces that turn a straight roadway into corners,
@@ -29,6 +30,28 @@ export function roadCorner(k: Kit) {
   roadPlain(k);
   k.b.box(k.m('marking'), [0.5, 0.003, 0.05], { position: [0, 0.0015, 0.475] }, 0);
   k.b.box(k.m('marking'), [0.05, 0.003, 0.5], { position: [0.475, 0.0015, 0] }, 0);
+}
+
+/**
+ * The lane corner in the village look: the same lane and half dashes, and in
+ * the cell's other corner (−X, −Z), where the gutters of the two lanes beside
+ * it meet round the vertex (village/street.ts streetRoad), the gutter turning
+ * the corner: one square stone lid, jointed to theirs and slit to the lane on
+ * its two inner sides. The lane is one L-shaped slab and the dashes are paint
+ * films; the slab and the lid are open below over the cell's one underside,
+ * with the street's dark bed under the slit and joints, so the piece costs no
+ * more than the shared corner's 36 triangles.
+ */
+export function roadCornerVillage(k: Kit) {
+  const { width, slit } = GUTTER, j = STONE_JOINT / 2, c = -0.5 + width, lid = width - slit - j;
+  const lane: [number, number][] = [[c, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5], [-0.5, c], [c, c]];
+  underside(k, k.m('asphalt'));
+  jointBed(k);
+  slab(k, k.m('asphalt'), lane);
+  block(k, k.m('concrete'), -0.5 + j, -0.5 + j + lid, -0.5 + j, -0.5 + j + lid);
+  for (const [x, z, w, d] of [[0, 0.475, 0.5, 0.05], [0.475, 0, 0.05, 0.5]] as const) {
+    k.b.geometry(k.m('marking'), new T.PlaneGeometry(w, d), { position: [x, 0.003, z], rotation: [-Math.PI / 2, 0, 0] });
+  }
 }
 
 // ------------------------------------------------------------ kerb corner
@@ -144,9 +167,12 @@ export function kerbCorner(k: Kit) {
   });
 }
 
-/** The same in the village look: the stone kerb's eased section round the turn, and its iron drain on each arm. */
+/**
+ * The same in the village look: the stone kerb's eased section swept round
+ * the turn as one edging stone from vertex to vertex, jointed only where the
+ * straight kerbs beside it are (village/street.ts streetKerb), in fewer turn
+ * segments; no drain, as the lane's gutter takes the water.
+ */
 export function kerbCornerVillage(k: Kit) {
-  kerbUnits(k, VILLAGE_KERB);
-  if (k.low) return;
-  for (const arm of ARMS) k.b.within(arm, () => k.b.box(k.m('steel'), [0.26, 0.012, 0.14], { position: [0.18, -0.002, 0.16] }, 0));
+  k.b.geometry(k.m('concrete'), sweep(VILLAGE_KERB, turnPath(-END, -END, k.low ? 3 : k.fine ? 6 : 4)));
 }

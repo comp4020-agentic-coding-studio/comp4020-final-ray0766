@@ -2,34 +2,44 @@ import type { Vec3 } from './world.ts';
 import type { HomeRoom } from './home.ts';
 import type { PartBox } from './physics/parts.ts';
 
-/** The single metre-scale leaf contract used by physics and both renderers. */
-export const HOME_DOOR_LEAF = { width: .8, height: 1.82, thickness: .055, hinge: [-.4, .025, .16] as Vec3, openAngle: Math.PI / 2 } as const;
-export const HOME_DOOR_BODY = { radius: .18, height: 1.6 } as const;
-export interface HomeDoorState { buildingId: string; partNumber: number; open: boolean; version: number }
-export const homeIndoorDoorOrigin = (room: HomeRoom): Vec3 => [0, 0, room.depth / 2 - .2];
-export function homeDoorLeaf(open: boolean): PartBox {
-  const leaf=HOME_DOOR_LEAF, [x,y,z]=leaf.hinge;
-  return { tag:'home door leaf', center:open?[x,y+leaf.height/2,z-leaf.width/2]:[x+leaf.width/2,y+leaf.height/2,z],
-    half:open?[leaf.thickness/2,leaf.height/2,leaf.width/2]:[leaf.width/2,leaf.height/2,leaf.thickness/2] };
+/** Village sliding leaves, metres. Pinned to the source kit's LEAVES and
+ * DOOR_OPENING; geometry contract tests check every source LOD against this. */
+export const HOME_DOOR_SLIDING = { width:.145, thickness:.014, lap:.0075, tracks:[.117,.1295,.142], foot:.02, top:1.9, halfOpening:.4 } as const;
+export const HOME_DOOR_BODY = { radius:.18, height:1.6 } as const;
+export interface HomeDoorState { buildingId:string; partNumber:number; open:boolean; version:number }
+export const homeIndoorDoorOrigin = (room:HomeRoom):Vec3 => [0,0,room.depth/2-.2];
+export function homeDoorPanelX(side:number,index:number,open:boolean):number {
+  const leaf=HOME_DOOR_SLIDING;
+  return side*(open?.5-leaf.width/2:index*(leaf.width-leaf.lap)+leaf.width/2);
 }
-/** Capsule against a leaf at any angle. Extra sweep padding covers the gaps
- * between the 5° samples, so an accepted transition cannot clip a saved body. */
-export function homeDoorLeafContains(position:Vec3,angle:number,padding=0,up:Vec3=[0,1,0]):boolean {
-  const leaf=HOME_DOOR_LEAF,[hx,hy,hz]=leaf.hinge,c=Math.cos(angle),s=Math.sin(angle),r=HOME_DOOR_BODY.radius+padding;
+/** Every visible leaf has its own proxy, leaving the actual 0.71 m opening. */
+export function homeDoorLeaves(open:boolean):PartBox[] {
+  const leaf=HOME_DOOR_SLIDING;
+  return [-1,1].flatMap(side=>leaf.tracks.map((z,index)=>({tag:'sliding leaf',
+    center:[homeDoorPanelX(side,index,open),(leaf.foot+leaf.top)/2,z] as Vec3,
+    half:[leaf.width/2,(leaf.top-leaf.foot)/2,leaf.thickness/2] as Vec3})));
+}
+/** Translation along one rail sweeps exactly an axis-aligned box. There is no
+ * inward swing, no angular sampling gap and no invisible reservation behind it. */
+export function homeDoorSweepBoxes():PartBox[] {
+  const shut=homeDoorLeaves(false),open=homeDoorLeaves(true);
+  return shut.map((box,index)=>({...box,tag:'sliding door travel',
+    center:[(box.center[0]+open[index].center[0])/2,box.center[1],box.center[2]] as Vec3,
+    half:[box.half[0]+Math.abs(open[index].center[0]-box.center[0])/2,box.half[1],box.half[2]] as Vec3}));
+}
+function capsuleMeets(box:PartBox,position:Vec3,up:Vec3,padding=0):boolean {
+  const radius=HOME_DOOR_BODY.radius+padding;
   for(let i=0;i<=8;i++){
     const h=HOME_DOOR_BODY.radius+(HOME_DOOR_BODY.height-2*HOME_DOOR_BODY.radius)*i/8;
-    const x=position[0]+up[0]*h-hx,y=position[1]+up[1]*h-hy,z=position[2]+up[2]*h-hz;
-    const lx=c*x-s*z,lz=s*x+c*z;
-    const dx=Math.max(0,-lx,lx-leaf.width),dz=Math.max(0,Math.abs(lz)-leaf.thickness/2),dy=Math.max(0,-y,y-leaf.height);
-    if(Math.hypot(dx,dy,dz)<r)return true;
+    const d=position.map((v,axis)=>Math.max(0,Math.abs(v+up[axis]*h-box.center[axis])-box.half[axis]));
+    if(Math.hypot(...d)<radius)return true;
   }
   return false;
 }
 export function homeDoorSweepContains(position:Vec3,up:Vec3=[0,1,0]):boolean {
-  for(let i=0;i<=18;i++)if(homeDoorLeafContains(position,HOME_DOOR_LEAF.openAngle*i/18,.025,up))return true;
-  return false;
+  return homeDoorSweepBoxes().some(box=>capsuleMeets(box,position,up,.003));
 }
 export function homeIndoorDoorAllows(position:Vec3,room:HomeRoom,open:boolean):boolean {
-  const origin=homeIndoorDoorOrigin(room);
-  return !homeDoorLeafContains(position.map((n,i)=>n-origin[i]) as Vec3,open?HOME_DOOR_LEAF.openAngle:0);
+  const origin=homeIndoorDoorOrigin(room),local=position.map((n,i)=>n-origin[i]) as Vec3;
+  return !homeDoorLeaves(open).some(box=>capsuleMeets(box,local,[0,1,0]));
 }

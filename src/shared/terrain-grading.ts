@@ -4,14 +4,15 @@ import type { SurfaceAnchor } from '../assets/claude-geometry/core/anchor.ts';
 import { numericNormal } from '../assets/claude-geometry/core/ground.ts';
 import type { HeightField } from '../assets/claude-geometry/core/ground.ts';
 import { padFootprint, padCovers } from '../assets/claude-geometry/terrain/pads.ts';
-import { blueprintGroundFootprint, blueprintCovers } from '../assets/claude-geometry/blueprint/model.ts';
+import { blueprintCovers } from '../assets/claude-geometry/blueprint/model.ts';
+import { structureGroundFootprint } from './blueprint-ground-footprint.ts';
 import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
 import type { Vec3 } from './world.ts';
 
 /** The same footing and radial lowering for rendering, physics and placement.
  * It consumes resolved geometry and never imports planet/catalogue state. */
 export function surfaceFooting(parts:readonly PartPlacement[]|undefined,radius:number){
- if(parts)return {footprint:blueprintGroundFootprint(parts),covers:blueprintCovers(parts)};
+ if(parts)return {footprint:structureGroundFootprint(parts),covers:blueprintCovers(parts)};
  const shape={kind:'circle' as const,radius};
  return {footprint:padFootprint(shape),covers:(x:number,z:number)=>padCovers(shape,x,z)};
 }

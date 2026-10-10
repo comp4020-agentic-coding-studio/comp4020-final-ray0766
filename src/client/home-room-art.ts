@@ -9,9 +9,7 @@ import { HOME_ART_THEMES } from './art-profile.ts';
 export function createHomeRoomArt(room: HomeRoom, library: StyleLibrary) {
   const { width, depth, height } = room;
   const b = new PartBuilder('medium'), source = libraryMaterials(library), kit = makeKit(b, source);
-  // A crease on every board or plaster patch reads as a construction grid.
-  // The furniture keeps the kit's ink; continuous room surfaces use their shape.
-  b.ink = null;
+  // Continuous room surfaces use their shape; the host draws screen-space lines.
   const own = (material: T.MeshStandardMaterial, name: string) => {
     const result = material.clone();
     result.name = name;

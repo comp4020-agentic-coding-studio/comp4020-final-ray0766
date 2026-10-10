@@ -1,0 +1,158 @@
+{
+  "status": "passed",
+  "baseURL": "http://127.0.0.1:8134",
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "browserVersion": "154.0.8037.99",
+  "host": {
+    "platform": "darwin",
+    "osRelease": "27.0.0",
+    "cpu": "Apple M3",
+    "cpuLogicalCount": 8,
+    "memoryGiB": 16,
+    "realPhone": false
+  },
+  "photos": [
+    {
+      "path": "docs/evidence/village-world/photos/photo-desktop-exterior-2048.png",
+      "width": 2048,
+      "height": 1422,
+      "bytes": 1038998,
+      "sha256": "a370e4d138587f937bdcb4c0963c04148ef716323bf1a452ac99661d3d069fea",
+      "elapsedMs": 581,
+      "pixels": {
+        "decodedWidth": 2048,
+        "decodedHeight": 1422,
+        "quantizedColors": 315,
+        "opaqueFraction": 1,
+        "luminanceRange": 164.66666666666666
+      },
+      "supersampling": 2,
+      "source": "local geometry"
+    },
+    {
+      "path": "docs/evidence/village-world/photos/photo-desktop-exterior-3840.png",
+      "width": 3840,
+      "height": 2667,
+      "bytes": 2168752,
+      "sha256": "f377026cc8e05ef676e9eb353194954ca1c3fb74244ae7e1231952a48083e21e",
+      "elapsedMs": 418,
+      "pixels": {
+        "decodedWidth": 3840,
+        "decodedHeight": 2667,
+        "quantizedColors": 292,
+        "opaqueFraction": 1,
+        "luminanceRange": 172.33333333333331
+      },
+      "supersampling": 1,
+      "source": "local geometry"
+    },
+    {
+      "path": "docs/evidence/village-world/photos/photo-desktop-interior-2048.png",
+      "width": 2048,
+      "height": 1422,
+      "bytes": 663279,
+      "sha256": "72aa8c4dae675e4712393a319ab9585a5a6dcbc200bb8e51bd2a637b5b8edcdc",
+      "elapsedMs": 497,
+      "pixels": {
+        "decodedWidth": 2048,
+        "decodedHeight": 1422,
+        "quantizedColors": 204,
+        "opaqueFraction": 1,
+        "luminanceRange": 174.66666666666669
+      },
+      "supersampling": 2,
+      "source": "local geometry"
+    },
+    {
+      "path": "docs/evidence/village-world/photos/photo-desktop-interior-3840.png",
+      "width": 3840,
+      "height": 2667,
+      "bytes": 1378659,
+      "sha256": "076eb59b6895f43993d1915da328aabe258a09adb80ee125f89fb25b23076495",
+      "elapsedMs": 369,
+      "pixels": {
+        "decodedWidth": 3840,
+        "decodedHeight": 2667,
+        "quantizedColors": 205,
+        "opaqueFraction": 1,
+        "luminanceRange": 173.66666666666669
+      },
+      "supersampling": 1,
+      "source": "local geometry"
+    }
+  ],
+  "checks": [
+    "exterior: orbit changes view, both camera presets work, 2K/4K PNG decodes, geometry/furniture/labels/pose unchanged while paused",
+    "exterior: close restores real keyboard walking controls",
+    "interior: orbit changes view, both camera presets work, 2K/4K PNG decodes, geometry/furniture/labels/pose unchanged while paused",
+    "interior: close restores real keyboard walking controls"
+  ],
+  "pageErrors": [],
+  "externalRequests": [],
+  "fixture": "Fresh isolated browser identity. Photo actions use actual controls and local downloads; state APIs are read-only. No physical-phone performance claim.",
+  "renderer": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "viewport": {
+      "width": 1440,
+      "height": 1000,
+      "dpr": 1
+    },
+    "drawingBuffer": {
+      "width": 1440,
+      "height": 1000
+    },
+    "touchPoints": 0,
+    "visibility": "visible",
+    "webglVendor": "Google Inc. (Apple)",
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+  },
+  "writeRoutes": [
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/move",
+    "/api/presence",
+    "/api/move",
+    "/api/home/enter",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/home/move",
+    "/api/presence",
+    "/api/home/move",
+    "/api/presence",
+    "/api/presence",
+    "/api/home/move",
+    "/api/home/move",
+    "/api/presence"
+  ],
+  "contentDigestBefore": "1d751f9ac3fb3fbd4ab8491776c1fd7ac3ed1cac4dcb5d44909db7a819281ead",
+  "contentDigestAfter": "1d751f9ac3fb3fbd4ab8491776c1fd7ac3ed1cac4dcb5d44909db7a819281ead"
+}

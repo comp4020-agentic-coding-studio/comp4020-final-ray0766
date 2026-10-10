@@ -5,12 +5,13 @@ import type { HeightField } from '../assets/claude-geometry/core/ground.ts';
 import { MAX_FOUNDATION_DEPTH } from '../assets/claude-geometry/core/ground.ts';
 import { groundCells, partTransform, pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
 import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
-import { PART_INFO } from '../assets/claude-geometry/blueprint/parts/info.ts';
+import { VILLAGE_PART_BOUNDS } from './physics/village-bounds.ts';
 import { structureFit } from './blueprints.ts';
 import type { BlueprintContents } from './blueprints.ts';
-import { HOME_DOOR_BODY, HOME_DOOR_LEAF } from './home-door.ts';
-import { PART_COLLIDERS, SLOPE_BOUNDS } from './physics/parts.ts';
+import { HOME_DOOR_BODY, homeDoorSweepBoxes } from './home-door.ts';
+import { PART_COLLIDERS } from './physics/parts.ts';
 import type { PartBox } from './physics/parts.ts';
+import { BODY_RADIUS, STEP_HEIGHT, GROUND_SUBSTEP } from './physics/body.ts';
 import type { PlacedObject } from './planets.ts';
 import type { Vec3 } from './world.ts';
 
@@ -21,41 +22,16 @@ export const STRUCTURE_DOOR_APPROACH = { width:.8, depth:.65, height:HOME_DOOR_B
 const UP=new Vector3(0,1,0), RIGHT=new Vector3(1,0,0);
 const vec=(p:Vec3)=>new Vector3(...p);
 interface Shape { box:OBB; bounds:Box3 }
-interface PreparedStructure { field:HeightField; signature:string; solids:Shape[]; sweeps:Shape[]; approaches:Shape[]; problem:string|null }
+interface PreparedStructure { field:HeightField; signature:string; solids:Shape[]; sweeps:Shape[]; approaches:Shape[]; roadDecks:Shape[]; problem:string|null }
 const envelope=(tag:string,min:Vec3,max:Vec3):PartBox=>({tag,center:min.map((n,i)=>(n+max[i])/2) as Vec3,half:min.map((n,i)=>(max[i]-n)/2) as Vec3});
-/** First-generation village details have no PART_INFO envelope. These small
- * appearance-only boxes follow their authored geometry, not walking support. */
-function appearanceDetails(part:PartPlacement['part']):PartBox[] {
-  switch(part){
-    case 'wall.window':return [envelope('window planter',[-.33,.58,.09],[.33,.94,.25])];
-    case 'wall.louvre':return [envelope('window canopy',[-.324,1.51,.09],[.324,1.737,.24])];
-    case 'wall.door':case 'wall.door.open':return [envelope('door lantern',[-.043,1.92,.105],[.043,2.036,.152]),
-      ...(part==='wall.door.open'?[envelope('open door handle',[-.46,1,-.792],[-.33,1.05,-.748])]:[])];
-    case 'roof.deck':return [envelope('ceiling lamp',[-.09,-.275,-.14],[.09,-.16,.04]),...[-.3,.3].map(z=>({tag:'ceiling beam',center:[0,-.19,z] as Vec3,half:[.5,.03,.04] as Vec3}))];
-    case 'street.kerb':return [envelope('drain cover',[.05,-.008,.09],[.31,.004,.23]),envelope('kerb underside',[-.5,-.05,-.075],[.5,0,.075])];
-    case 'service.light':return [envelope('hanging basket',[-.415,2.233,-.265],[-.185,2.435,-.035]),envelope('lamp sign',[-.315,2.67,-.23],[-.285,2.83,.15]),envelope('lamp brace',[-.313,3.118,-.281],[-.287,3.382,.001])];
-    case 'stair.straight':return [-1,1].flatMap(side=>[
-      {tag:'sloping handrail',center:[side*.3175,2.0020879121,-.48] as Vec3,half:[.025,.0225,1.3334915803] as Vec3,pitch:.8796454792},
-      {tag:'stair foot post',center:[side*.3175,.5615,.405] as Vec3,half:[.038,.5615,.038] as Vec3},
-      {tag:'stair foot stringer',center:[side*.3175,.112,.397] as Vec3,half:[.0175,.112,.093] as Vec3},
-      {tag:'stair top stringer',center:[side*.3175,2.1,-1.355] as Vec3,half:[.0175,.1,.025] as Vec3},
-    ]);
-    default:return [];
-  }
-}
+/** Placement includes the actual visible envelope, while movement uses the
+ * separately authored part proxies. Detail can never license two roofs to cut
+ * through each other, and no obsolete open-door handle reserves empty air. */
 function partSolids(part:PartPlacement['part']):PartBox[] {
-  const result=[...PART_COLLIDERS[part](),...appearanceDetails(part)];
-  const bounds=part==='roof.slope'?{min:[-SLOPE_BOUNDS.halfWidth,SLOPE_BOUNDS.bottom,SLOPE_BOUNDS.back] as Vec3,max:[SLOPE_BOUNDS.halfWidth,SLOPE_BOUNDS.top,SLOPE_BOUNDS.front] as Vec3}:PART_INFO[part].envelope?.village;
-  if(bounds)result.push(envelope('appearance envelope',bounds.min,bounds.max));
-  return result;
+  const bounds=VILLAGE_PART_BOUNDS[part];
+  return [...PART_COLLIDERS[part](),envelope('appearance envelope',bounds.min,bounds.max)];
 }
-const doorSweeps:PartBox[]=Array.from({length:19},(_,step)=>{
-  const leaf=HOME_DOOR_LEAF,[x,y,z]=leaf.hinge,angle=leaf.openAngle*step/18;
-  // Nearest sample is at most 2.5 degrees away. Pad by maximum corner travel
-  // to cover every angle continuously, including between the sampled poses.
-  const pad=2*Math.hypot(leaf.width,leaf.thickness/2)*Math.sin(Math.PI/144);
-  return {tag:'door sweep',center:[x+Math.cos(angle)*leaf.width/2,y+leaf.height/2,z-Math.sin(angle)*leaf.width/2],half:[leaf.width/2+pad,leaf.height/2,leaf.thickness/2+pad],yaw:angle};
-});
+const doorSweeps=homeDoorSweepBoxes();
 const doorApproach:PartBox={tag:'door approach',center:[0,.025+STRUCTURE_DOOR_APPROACH.height/2,.16+STRUCTURE_DOOR_APPROACH.depth/2],half:[STRUCTURE_DOOR_APPROACH.width/2,STRUCTURE_DOOR_APPROACH.height/2,STRUCTURE_DOOR_APPROACH.depth/2]};
 const isDoor=(part:PartPlacement['part'])=>part==='wall.door.open'||part==='wall.door';
 const reachCache=new WeakMap<readonly PartPlacement[],{signature:string;radius:number}>();
@@ -98,7 +74,7 @@ export class StructurePlacementCache {
     const prior=this.objects.get(object);
     if(prior?.field===field&&prior.signature===signature)return prior;
     const fit=structureFit(parts,object.position,object.rotation,field);
-    const result:PreparedStructure={field,signature,solids:[],sweeps:[],approaches:[],problem:fit.problem?'This ground cannot support the neighbouring buildings.':null};
+    const result:PreparedStructure={field,signature,solids:[],sweeps:[],approaches:[],roadDecks:[],problem:fit.problem?'This ground cannot support the neighbouring buildings.':null};
     this.objects.set(object,result);
     if(result.problem)return result;
     const anchor=new Quaternion().fromArray(anchorQuaternion({dir:object.position,yaw:object.rotation}));
@@ -113,6 +89,7 @@ export class StructurePlacementCache {
     for(const part of parts){
       const t=partTransform(part,pivot);
       for(const box of partSolids(part.part))result.solids.push(shape(box,t.position,t.yaw));
+      if(isRoadSurface(parts))for(const box of PART_COLLIDERS[part.part]().filter(box=>box.support))result.roadDecks.push(shape(box,t.position,t.yaw,0));
       // R8 publishes village appearance envelopes separately from colliders.
       // Include those envelopes; invisible air below an eave must not license
       // a neighbouring roof/beam to cut through the visible tile or verge.
@@ -129,6 +106,50 @@ export class StructurePlacementCache {
   }
 }
 
+/** Ground-only street blueprints are ordinary owner-editable structures.
+ * Their foundations may meet, but the actual deck planes must form a walkable
+ * join. A wall, stair, furnishing or upper deck never receives this exception. */
+const ROAD_PARTS=new Set(['street.paving','street.road','street.road.plain','street.road.corner','pad.quarter']);
+export const isRoadSurface=(parts:readonly PartPlacement[])=>parts.length>0&&parts.every(p=>p.level===0&&ROAD_PARTS.has(p.part));
+export const ROAD_JOIN_MAX_STEP=STEP_HEIGHT;
+type Point2=[number,number];
+function clipPolygon(input:Point2[],axis:0|1,edge:number,sign:number):Point2[]{
+ const out:Point2[]=[];
+ for(let i=0;i<input.length;i++){
+  const a=input[i],b=input[(i+1)%input.length],da=sign*(a[axis]-edge),db=sign*(b[axis]-edge);
+  if(da<=1e-9)out.push(a);
+  if((da<0&&db>0)||(da>0&&db<0)){const t=da/(da-db);out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]);}
+ }
+ return out;
+}
+function roadJoinProblem(one:PreparedStructure,two:PreparedStructure):string|null {
+ for(const a of one.roadDecks)for(const b of two.roadDecks){
+  // Work in A's deck frame; intersect B's projected top rectangle with A.
+  // Plane-height difference is affine, so checking every clipped vertex
+  // bounds the entire overlap, including bends and square/plaza junctions.
+  const inverse=a.box.rotation.clone().transpose();
+  // Support begins as the bottom capsule reaches an edge, before its centre
+  // reaches the visible overlap. Check that same reach on both deck planes.
+  // A bare 25 cm plane join can otherwise demand a >26 cm capsule step.
+  const reach=BODY_RADIUS+GROUND_SUBSTEP;
+  const corners:Point2[]=[],top=b.box.halfSize.y;
+  for(const [x,z] of [[-1,-1],[1,-1],[1,1],[-1,1]]){
+   const p=new Vector3(x*(b.box.halfSize.x+reach),top,z*(b.box.halfSize.z+reach)).applyMatrix3(b.box.rotation).add(b.box.center).sub(a.box.center).applyMatrix3(inverse);
+   corners.push([p.x,p.z]);
+  }
+  let overlap=corners;
+  for(const axis of [0,1] as const){const h=(axis===0?a.box.halfSize.x:a.box.halfSize.z)+reach;overlap=clipPolygon(clipPolygon(overlap,axis,h,1),axis,-h,-1);}
+  if(!overlap.length)continue;
+  const normal=new Vector3(0,1,0).applyMatrix3(b.box.rotation).applyMatrix3(inverse);
+  if(normal.y<Math.cos(Math.PI/6))return 'Road decks need a shallower join.';
+  const origin=new Vector3(0,top,0).applyMatrix3(b.box.rotation).add(b.box.center).sub(a.box.center).applyMatrix3(inverse);
+  for(const [x,z] of overlap){const y=origin.y-(normal.x*(x-origin.x)+normal.z*(z-origin.z))/normal.y;
+   if(Math.abs(y-a.box.halfSize.y)>ROAD_JOIN_MAX_STEP+1e-6)return 'Keep joined road surfaces within a 26 cm step, including the walking capsule at their edges.';
+  }
+ }
+ return null;
+}
+
 /** Narrow phase after conservative circle overlap. Both surface frames and
  * seats come from the actual sphere/height field; no tangent-plane flattening.
  * Missing content never proves that two structures can fit beside each other. */
@@ -137,6 +158,7 @@ export function structurePlacementProblem(first:PlacedObject,second:PlacedObject
   if(!a?.length||!b?.length)return 'A little too close. Resolve both building blueprints before placing them nearby.';
   const cache=context.cache??new StructurePlacementCache(),one=cache.prepare(context.field,first,a),two=cache.prepare(context.field,second,b);
   if(one.problem||two.problem)return one.problem??two.problem;
+  if(isRoadSurface(a)&&isRoadSurface(b))return roadJoinProblem(one,two);
   if(intersects(one.solids,two.solids))return 'A little too close. Leave space between the buildings’ walls, roofs and foundations.';
   if(intersects(one.sweeps,two.solids)||intersects(two.sweeps,one.solids)||intersects(one.sweeps,two.sweeps))return 'A little too close. Keep the full door opening space clear.';
   if(intersects(one.approaches,two.solids)||intersects(two.approaches,one.solids)||intersects(one.approaches,two.sweeps)||intersects(two.approaches,one.sweeps))return 'A little too close. Leave standing room in front of each doorway.';

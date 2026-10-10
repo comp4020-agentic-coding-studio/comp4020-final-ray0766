@@ -8,8 +8,9 @@ import type { Kit } from '../kit.ts';
 // Two courses of eased stone blocks, bonded at the corners, under a coping
 // with a rounded nose that overhangs them; dark soil ('post', the kit has no
 // soil slot), leaf mounds spilling over the coping, blooms in coral ('hazard')
-// and cream ('marking'). Drawn alike in both looks: a precast planter with
-// rubber planting in the industrial one.
+// and cream ('marking'): the industrial look's precast planter with rubber
+// planting. The village look has its own twin at the end of this file: four
+// big stones laid round the bed in a pinwheel, three round shrubs, a few blooms.
 
 type P2 = [number, number];
 type P3 = [number, number, number];
@@ -106,5 +107,46 @@ export function flowerBed(k: Kit) {
     const [[cx, cy, cz], r, [sx, sy, sz]] = MOUNDS[m];
     const ce = Math.cos(el), p: P3 = [cx + sx * r * ce * Math.cos(az), cy + sy * r * Math.sin(el), cz + sz * r * ce * Math.sin(az)];
     b.geometry(col === 'coral' ? coral : cream, new T.IcosahedronGeometry(0.03, 0), { position: p, scale: [1, 0.8, 1] });
+  }
+}
+
+// ------------------------------------------------------------------ village twin
+
+/**
+ * The village planting bed: four stones round the bed, `half` from its
+ * middle and `thick` deep, each running from its corner to `joint` short of
+ * the next stone's face (a pinwheel, so every corner is one stone and every
+ * joint opens onto the soil); their tops vary a little, as stones do; the soil
+ * stands below them.
+ */
+export const STONE_BED = { half: 0.38, thick: 0.12, joint: 0.012, heights: [0.3, 0.28, 0.31, 0.29], soil: 0.25 } as const;
+/** Round shrubs (azalea-like): centre, radius, scale. */
+const SHRUBS: [P3, number, P3][] = [
+  [[-0.07, 0.32, -0.05], 0.21, [1.1, 0.9, 1.0]],
+  [[0.17, 0.27, 0.16], 0.13, [1.1, 0.85, 1.1]],
+  [[0.17, 0.27, -0.17], 0.12, [1.1, 0.8, 1.15]],
+];
+/** Blooms on the shrubs: [shrub, azimuth, elevation (radians), colour]; the first two are the ones drawn at low. */
+const FLOWERS: [number, number, number, 'coral' | 'cream'][] = [
+  [0, 4.3, 1.15, 'cream'], [1, 1.2, 1.0, 'cream'], [0, 0.6, 1.05, 'coral'], [2, 5.0, 0.95, 'coral'], [0, 2.4, 0.85, 'coral'],
+];
+
+/** Village planting bed in the middle of its cell: 0.76 m square, stones 0.28–0.31 m high, shrubs to 0.51 m. */
+export function flowerBedVillage(k: Kit) {
+  const { b } = k, stone = k.m('concrete');
+  const { half, thick, joint, heights, soil } = STONE_BED;
+  const run = 2 * half - thick - joint;
+  heights.forEach((h, i) => b.within({ rotation: [0, -i * Math.PI / 2, 0] }, () => {
+    b.box(stone, [run, h, thick], { position: [-half + run / 2, h / 2, -half + thick / 2] }, 0);
+  }));
+  // Soil: up to the stones' inner faces, so the joints open onto it (not into them: their bottoms would share y 0).
+  const fill = half - thick;
+  b.box(k.m('post'), [2 * fill, soil, 2 * fill], { position: [0, soil / 2, 0] }, 0);
+  for (const [c, r, s] of SHRUBS) b.geometry(k.m('membrane'), new T.IcosahedronGeometry(r, k.fine ? 1 : 0), { position: c, scale: s });
+  const flowers = k.low ? FLOWERS.slice(0, 2) : k.fine ? FLOWERS : FLOWERS.slice(0, 4);
+  for (const [m, az, el, col] of flowers) {
+    const [[cx, cy, cz], r, [sx, sy, sz]] = SHRUBS[m];
+    const ce = Math.cos(el), p: P3 = [cx + sx * r * ce * Math.cos(az), cy + sy * r * Math.sin(el), cz + sz * r * ce * Math.sin(az)];
+    b.geometry(k.m(col === 'coral' ? 'hazard' : 'marking'), new T.IcosahedronGeometry(0.035, 0), { position: p, scale: [1, 0.8, 1] });
   }
 }

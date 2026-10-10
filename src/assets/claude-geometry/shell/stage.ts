@@ -8,10 +8,13 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { LOD } from '../style/lod.ts';
 import type { LodTier } from '../style/lod.ts';
 import { StyleLibrary } from '../style/materials.ts';
-import { createEnvironment, createLightRig, loadHdriEnvironment } from '../style/lighting.ts';
+import { createEnvironment, createLightRig, loadHdriEnvironment, looksLit } from '../style/lighting.ts';
 import type { LightRig, Mood } from '../style/lighting.ts';
 import { PracticalLights } from '../style/practical.ts';
 import { lookParams } from '../style/look.ts';
+import { HandDrawnLinesPass, PEN_CELL, linesTarget } from '../style/lines.ts';
+import { createCloudSky } from '../style/sky.ts';
+import type { CloudSky } from '../style/sky.ts';
 import type { Look } from '../style/look.ts';
 import { TEXTURE_FORMAT } from '../style/scans.ts';
 import type { TextureFormat } from '../style/scans.ts';
@@ -49,10 +52,33 @@ export interface StageOptions {
    * How the scene is surfaced and lit (src/style/look.ts); default 'industrial'.
    * 'warm' keeps every light, the practical pool and LOD, and changes their
    * parameters: tone mapping, sky, key, fill, fog colour and shadow softness;
-   * it lights with its own sky instead of the HDR photograph.
+   * it lights with its own sky instead of the HDR photograph. 'village' also
+   * draws hand-drawn lines at every LOD tier (a post chain at low and medium
+   * too), a flat cloud sky behind the scene, no tone curve, and no practical
+   * lights by day, in every mood: in the village look orbit is the same
+   * daylight as the others (the warm look keeps the orbit mood's own lights).
    */
   look?: Look;
+  /**
+   * A planet-scale page (the terrain editor, the showcase, the timeline): in a
+   * look with a cloud sky the planet hangs in that sky even with
+   * `backdrop: false`, its bands lie across the view (Stage.skyAcrossView),
+   * and the lines' fade distances follow the camera
+   * (Stage.lineReach = PLANET_LINE_REACH). Looks without a cloud sky ignore it,
+   * so the industrial and warm pages keep their dark background.
+   */
+  planet?: boolean;
 }
+
+/**
+ * Camera distance (metres, from controls.target) up to which a planet page
+ * keeps the look's own line fade; further out the fade distances stretch with
+ * the distance, so a planet seen whole from 45-160 m keeps its silhouettes and
+ * creases as a street does from 20 m. A decorative choice: at 20 m the village
+ * sample's own views and the close planet views (showcase settlement, timeline
+ * colony, blueprint planet view) keep the fixed fade.
+ */
+export const PLANET_LINE_REACH = 20;
 
 /**
  * How much of the HDR photograph's light reaches the scene, per mood. The hangar
@@ -82,9 +108,27 @@ export class Stage {
   readonly practical: PracticalLights;
   private environment: T.Texture;
   private composer: EffectComposer | null = null;
-  /** Draw through the post chain (bloom, AO) where the LOD has one; false renders straight, for measuring what the chain costs. */
+  /** Draw through the post chain (lines, bloom, AO) where there is one; false renders straight, for measuring what the chain costs. */
   postProcessing = true;
   private bloom: UnrealBloomPass | null = null;
+  private lines: HandDrawnLinesPass | null = null;
+  private sky: CloudSky | null = null;
+  /** The look's own line fade distances, stretched from these when lineReach is set, and the stretch now. */
+  private lineFade: { crease: readonly [number, number]; all: readonly [number, number] } | null = null;
+  private fadeScale = 1;
+  /**
+   * Where the lines' fade starts to follow the camera, in metres from
+   * controls.target, or null for the look's fixed fade distances. Set, the
+   * look's crease and line fades are stretched by max(1, distance / lineReach)
+   * every frame (past the look's own crease distance the lines draw only the
+   * corners of things: src/style/lines.ts). Planet pages set it
+   * (StageOptions.planet); a page switching between building and planet scale
+   * (the blueprint demo) sets it per view.
+   */
+  lineReach: number | null = null;
+  /** Whether the crease fade stretches with the line fade (the default), and whether the fades need setting again. */
+  private creaseStretch = true;
+  private fadeStale = false;
   private ao: GTAOPass | null = null;
   private callbacks = new Set<(dt: number, t: number) => void>();
   private raf = 0;
@@ -115,11 +159,17 @@ export class Stage {
     // Every stylised look (warm, village) sets these; the industrial look keeps the literals below.
     const P = lookParams(this.look), warm = P !== null;
     const settings = LOD[options.lod];
-    this.renderer = new T.WebGLRenderer({ antialias: !settings.bloom, powerPreference: 'high-performance', preserveDrawingBuffer: false });
+    // The look's own drawing (lines, cloud sky, no tone curve) goes where its lights go: every mood in
+    // the flat village look (daytime only, orbit included), every mood but orbit in the warm look.
+    const drawn = looksLit(P, options.mood) ? P : null;
+    const edges = drawn?.edges ?? null, flat = drawn?.toneMapping === 'none' ? drawn : null;
+    // With a post chain the canvas's own antialiasing is never used: the chain's target is multisampled.
+    this.renderer = new T.WebGLRenderer({ antialias: !(settings.bloom || edges), powerPreference: 'high-performance', preserveDrawingBuffer: false });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, settings.pixelRatioCap));
     this.renderer.outputColorSpace = T.SRGBColorSpace;
-    // Neutral keeps the warm look's dusty colours where ACES would desaturate and darken them.
-    this.renderer.toneMapping = warm ? T.NeutralToneMapping : T.ACESFilmicToneMapping;
+    // Neutral keeps the warm look's dusty colours where ACES would desaturate and darken them;
+    // the village draws its colours as lit, so lit = colour and shade = half of it.
+    this.renderer.toneMapping = flat ? T.NoToneMapping : warm ? T.NeutralToneMapping : T.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = P ? P.exposure : 1.0;
     this.renderer.shadowMap.enabled = settings.shadows;
     this.renderer.shadowMap.type = T.PCFShadowMap;
@@ -136,24 +186,37 @@ export class Stage {
     if (options.fog !== null) {
       const fog = options.fog ?? { color: options.background ?? UI.bg, density: 0.018 };
       // The warm look keeps a lighter version of the page's haze, in its own sky colour, never near-black.
-      this.scene.fog = P && options.mood !== 'orbit' ? new T.FogExp2(P.fog, fog.density * P.fogDensity) : new T.FogExp2(fog.color, fog.density);
+      this.scene.fog = drawn ? new T.FogExp2(drawn.fog, fog.density * drawn.fogDensity) : new T.FogExp2(fog.color, fog.density);
     }
     this.environment = createEnvironment(this.renderer, options.mood, this.look);
     this.scene.environment = this.environment;
+    // three lights a material from scene.environment at scene.environmentIntensity and ignores the
+    // material's own envMapIntensity (WebGLRenderer setProgram), so a flat look's share is set here:
+    // the village's 0 keeps image light off every surface, glass included.
+    if (flat) { this.moodEnvironmentIntensity = flat.envIntensity; this.scene.environmentIntensity = flat.envIntensity; }
     if (options.backdrop !== false) {
       // A dim, blurred view of the same environment instead of a black void.
       this.scene.background = this.environment;
-      const warmSky = warm && options.mood !== 'orbit';
-      this.scene.backgroundBlurriness = warmSky && P ? P.backgroundBlurriness : 0.55;
-      this.moodBackgroundIntensity = warmSky && P ? P.backgroundIntensity : options.mood === 'hangar' ? 0.35 : 0.6;
+      this.scene.backgroundBlurriness = drawn ? drawn.backgroundBlurriness : 0.55;
+      this.moodBackgroundIntensity = drawn ? drawn.backgroundIntensity : options.mood === 'hangar' ? 0.35 : 0.6;
       this.scene.backgroundIntensity = this.moodBackgroundIntensity;
+    }
+    // The village's flat cloud sky covers the whole backdrop. Planet pages ask for it in place of their
+    // flat background; other pages that turn the backdrop off (the main project's previews) keep theirs.
+    if (drawn?.cloudSky && (options.backdrop !== false || options.planet)) {
+      this.scene.background = null; this.sky = createCloudSky(drawn.cloudSky); this.scene.add(this.sky);
+      // A planet page's camera looks down at the planet: its bands lie across the view, not into their pole.
+      this.sky.acrossView = options.planet === true;
     }
     this.lights = createLightRig(options.mood, settings.shadows, options.shadowExtent ?? 8, this.look);
     this.scene.add(this.lights.group);
     this.practical = new PracticalLights(options.lod, { enabled: options.practicalLights ?? true, scale: P ? P.practical : 1 });
     this.scene.add(this.practical.group);
+    // A look whose lamps light nothing by day (practical 0) hides the pool rather than leaving it
+    // at zero: three gathers only visible lights, so its slots leave every shader and shadow pass.
+    if (P && P.practical === 0) this.practical.group.visible = false;
     // The warm look lights with its own sky; the HDR photographs belong to the industrial look.
-    if (options.environment === 'hdri' && !(warm && options.mood !== 'orbit')) {
+    if (options.environment === 'hdri' && !drawn) {
       const mood = options.mood, backdrop = options.backdrop !== false;
       this.environmentReady = loadHdriEnvironment(this.renderer, mood).then(texture => {
         if (!texture) return;
@@ -182,13 +245,22 @@ export class Stage {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
 
-    if (settings.bloom) {
+    if (settings.bloom || edges) {
       const size = new T.Vector2(1, 1);
-      const target = new T.WebGLRenderTarget(1, 1, { type: T.HalfFloatType, samples: 4 });
+      // The lines read the depth the scene was drawn with, so their target keeps it as a texture.
+      const target = edges ? linesTarget() : new T.WebGLRenderTarget(1, 1, { type: T.HalfFloatType, samples: 4 });
       this.composer = new EffectComposer(this.renderer, target);
       this.composer.addPass(new RenderPass(this.scene, this.camera));
+      // Directly after the scene: the next pass swaps the targets and the depth with them.
+      if (edges) {
+        this.lines = new HandDrawnLinesPass(this.camera, edges, this.renderer.getPixelRatio()); this.composer.addPass(this.lines);
+        // The camera moves: the pen's gaps are fixed in the world (stretched with the fade below).
+        this.lines.lines.setPenCell(PEN_CELL);
+        this.lineFade = { crease: edges.creaseFade, all: edges.fade };
+        if (options.planet) this.lineReach = PLANET_LINE_REACH;
+      }
       // A look may turn the pass off (ao 0: the village look).
-      if ((options.ambientOcclusion ?? options.environment === 'hdri') && !(P && P.ao === 0)) {
+      if (settings.bloom && (options.ambientOcclusion ?? options.environment === 'hdri') && !(P && P.ao === 0)) {
         // Contact shadows in corners, under sills and between parts: what image-based
         // light alone cannot give. Radius in metres; high LOD only (it shares the bloom composer).
         this.ao = new GTAOPass(this.scene, this.camera, 1, 1);
@@ -197,9 +269,11 @@ export class Stage {
         this.ao.blendIntensity = P ? P.ao : 0.85;
         this.composer.addPass(this.ao);
       }
-      // High threshold: only genuinely emissive elements bloom.
-      this.bloom = P ? new UnrealBloomPass(size, P.bloom.strength, P.bloom.radius, P.bloom.threshold) : new UnrealBloomPass(size, 0.42, 0.55, 0.92);
-      this.composer.addPass(this.bloom);
+      // High threshold: only genuinely emissive elements bloom. High LOD only.
+      if (settings.bloom) {
+        this.bloom = P ? new UnrealBloomPass(size, P.bloom.strength, P.bloom.radius, P.bloom.threshold) : new UnrealBloomPass(size, 0.42, 0.55, 0.92);
+        this.composer.addPass(this.bloom);
+      }
       this.composer.addPass(new OutputPass());
     }
     this.observer = new ResizeObserver(() => this.resize());
@@ -214,6 +288,7 @@ export class Stage {
     this.camera.updateProjectionMatrix();
     this.composer?.setSize(w, h);
     this.composer?.setPixelRatio(this.renderer.getPixelRatio());
+    this.lines?.lines.setPixelRatio(this.renderer.getPixelRatio());
   }
 
   onFrame(fn: (dt: number, t: number) => void): () => void {
@@ -240,6 +315,7 @@ export class Stage {
     const begin = performance.now();
     for (const fn of this.callbacks) fn(dt, t);
     this.controls.update();
+    this.fadeLines();
     this.practical.update(this.scene, this.camera, dt);
     this.renderer.info.reset();
     this.renderer.info.autoReset = false;
@@ -295,6 +371,51 @@ export class Stage {
 
   /** Turn the GTAO pass on or off (where it exists): pages switching to a planet-scale view turn it off. */
   setAmbientOcclusion(on: boolean) { if (this.ao) this.ao.enabled = on; }
+
+  /** Turn the look's hand-drawn lines on or off (where the look draws them), to compare or to measure them. */
+  setLines(on: boolean) { if (this.lines) this.lines.enabled = on; }
+
+  /** Whether this stage draws hand-drawn lines now. */
+  get drawsLines(): boolean { return this.lines?.enabled ?? false; }
+
+  /** Draw the lines with the pen's hand (drift, swell, gaps; the default) or whole and steady, to measure what the hand adds. */
+  setPen(on: boolean) { this.lines?.lines.setPen(on); }
+
+  /** How far the lines' fade distances were stretched for the last frame (1: the look's own). */
+  get lineFadeScale(): number { return this.fadeScale; }
+
+  /** Metres per pen-noise cell for the last frame: PEN_CELL stretched as the fade is (0 without lines). */
+  get penCell(): number { return this.lines?.lines.penCell ?? 0; }
+
+  /**
+   * Stretch the crease fade with the line fade where lineReach stretches it (the default), or hold the
+   * creases at the look's own distances: to measure what the stretched creases add.
+   */
+  setCreaseStretch(on: boolean) { this.creaseStretch = on; this.fadeStale = true; }
+
+  /** Stretch the look's line fade by the camera's distance from what it looks at (lineReach), or restore it. */
+  private fadeLines() {
+    if (!this.lines || !this.lineFade) return;
+    const k = this.lineReach ? Math.max(1, this.camera.position.distanceTo(this.controls.target) / this.lineReach) : 1;
+    if (k === this.fadeScale && !this.fadeStale) return;
+    this.fadeScale = k; this.fadeStale = false;
+    // Every crease inside the look's own crease distance; past it, out to the stretched one, only corners.
+    const { crease, all } = this.lineFade, kc = this.creaseStretch ? k : 1;
+    this.lines.lines.setFade(crease, [all[0] * k, all[1] * k], [crease[0] * kc, crease[1] * kc]);
+    this.lines.lines.setPenCell(PEN_CELL * k);
+  }
+
+  /** Whether the look's flat cloud sky is the backdrop: pages that swap environments then leave scene.background empty. */
+  get drawsSky(): boolean { return this.sky !== null; }
+
+  /**
+   * Whether the cloud sky's bands lie across the view (src/style/sky.ts
+   * viewSkyFrame) rather than along the horizon of camera.up. Planet pages
+   * start with it on (StageOptions.planet); a page switching between
+   * building and planet scale sets it per view. False without a cloud sky.
+   */
+  get skyAcrossView(): boolean { return this.sky?.acrossView ?? false; }
+  set skyAcrossView(on: boolean) { if (this.sky) this.sky.acrossView = on; }
 
   /**
    * Render one frame and return the mean luminance (0–255, sRGB bytes) of a
@@ -372,6 +493,8 @@ export class Stage {
     this.composer?.renderTarget2.dispose();
     this.composer?.dispose();
     this.bloom?.dispose();
+    this.lines?.dispose();
+    if (this.sky) { this.sky.removeFromParent(); this.sky.geometry.dispose(); (this.sky.material as T.Material).dispose(); }
     this.ao?.dispose();
     this.library.dispose();
     this.renderer.dispose();

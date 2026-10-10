@@ -5,7 +5,7 @@ import { encodeBlueprint } from '../assets/claude-geometry/blueprint/codec.ts';
 import { industrialCabin, homeCottage, cornerLane, padStall } from '../assets/claude-geometry/blueprint/samples.ts';
 import { partTransform } from '../assets/claude-geometry/blueprint/model.ts';
 import type { Blueprint, PartPlacement, Rot } from '../assets/claude-geometry/blueprint/model.ts';
-import { PART_IDS, partLabel } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import { PART_IDS } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
 import type { PartId } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
 import { STOREY } from '../assets/claude-geometry/blueprint/parts/kit.ts';
 import { WorkshopView } from '../assets/claude-geometry/blueprint/view/workshop-view.ts';
@@ -13,9 +13,10 @@ import { PartTemplates } from '../assets/claude-geometry/blueprint/view/template
 import type { Stage } from '../assets/claude-geometry/shell/stage.ts';
 import type { LibraryEntry } from '../shared/blueprints.ts';
 import './workshop.css';
-import { PRESENTATION } from './presentation.ts';
+import { villagePartDiagnostic, villagePartLabel } from './part-labels.ts';
 import { createPresentationStage } from './presentation-stage.ts';
 import { SAMPLE_PUBLIC_BLUEPRINTS } from '../shared/sample-public-village.ts';
+import {beginSceneLoading,yieldSceneFrame} from './loading-state.ts';
 
 export interface WorkshopBridge {
   read: () => Promise<LibraryEntry[]>;
@@ -35,6 +36,7 @@ export class Workshop {
   private saved: LibraryEntry | null = null;
   private level = 0;
   private busy = false;
+  private loading: {controller:AbortController;task:ReturnType<typeof beginSceneLoading>} | null = null;
   private applyToPlaced: ((entry: LibraryEntry) => Promise<void>) | null = null;
   private pointer: {x:number;y:number} | null = null;
   private hover: {x:number;y:number} | null = null;
@@ -56,16 +58,19 @@ export class Workshop {
       <footer class="ws-footer"><div class="ws-feedback"><span id="ws-status" role="status" aria-live="polite">Ready.</span><small id="ws-save-state" role="status" aria-live="polite"></small></div><span id="ws-count"></span></footer>`);
     document.body.append(this.dialog);
     const tool=this.get<HTMLSelectElement>('tool');
-    for(const id of PART_IDS) tool.add(localizedOption(partLabel(id,PRESENTATION.materials.look), id));
-    for(const [i,name]of ['Village post cottage','Village orchard court','Village harbour shelter'].entries())this.get<HTMLSelectElement>('example').add(localizedOption(name,`sample-${i}`));
+    for(const id of PART_IDS) tool.add(localizedOption(villagePartLabel(id), id));
+    const villagePlans=document.createElement('optgroup');setAttribute(villagePlans,'label','Village plans');
+    for(const [i,blueprint]of SAMPLE_PUBLIC_BLUEPRINTS.entries())villagePlans.append(localizedOption(blueprint.name,`sample-${i}`));
+    this.get<HTMLSelectElement>('example').append(villagePlans);
     for(const id of ['x','z']) for(let n=0;n<5;n++)this.get<HTMLSelectElement>(id).add(localizedOption(String(n+1), String(n)));
     this.on('close',()=>this.close());
     this.dialog.addEventListener('cancel',e=>{e.preventDefault();this.close();});
+    this.dialog.addEventListener('close',()=>{if(!this.opened&&this.loading)this.close(true);});
     this.on('save',()=>void this.save());this.on('place',()=>this.place());
     this.on('apply',()=>void this.applyPlaced());
     this.on('new',()=>{if(!this.discard())return;this.hover=null;this.saved=null;this.editor.reset();this.editor.rename('Untitled structure');this.changed();this.frame();});
     this.on('cabin',()=>{if(this.discard())this.starter();});
-    this.on('example-load',()=>{if(!this.discard())return;const key=this.get<HTMLSelectElement>('example').value;const sample=key.startsWith('sample-')?SAMPLE_PUBLIC_BLUEPRINTS[Number(key.slice(7))]:undefined;const bp=sample?structuredClone(sample):(key==='home'?homeCottage:key==='lane'?cornerLane:padStall)();bp.id=crypto.randomUUID() as Blueprint['id'];this.hover=null;this.saved=null;this.editor.load(bp);this.changed();this.frame();this.status('Example loaded · save your own copy.');});
+    this.on('example-load',()=>{if(!this.discard())return;const key=this.get<HTMLSelectElement>('example').value;const sample=key.startsWith('sample-')?SAMPLE_PUBLIC_BLUEPRINTS[Number(key.slice(7))]:undefined;const bp=sample?structuredClone(sample):(key==='home'?homeCottage:key==='lane'?cornerLane:padStall)();bp.id=crypto.randomUUID() as Blueprint['id'];this.hover=null;this.saved=null;this.editor.load(bp);this.level=0;this.get<HTMLSelectElement>('level').value='0';this.view?.setLevel(0);this.get<HTMLSelectElement>('tool').value='select';this.changed();this.frame();this.status('Example loaded · save your own copy.');});
     this.on('copy',()=>{const bp=this.editor.toBlueprint();bp.id=crypto.randomUUID() as Blueprint['id'];this.saved=null;this.editor.load(bp);this.changed();void this.save();});
     this.on('load',()=>{if(!this.discard())return;const e=this.entries.find(e=>e.blueprint.id===this.get<HTMLSelectElement>('library').value);if(e)this.load(e);});
     this.get<HTMLInputElement>('name').oninput=()=>this.editor.rename(this.get<HTMLInputElement>('name').value);
@@ -84,22 +89,38 @@ export class Workshop {
     window.addEventListener('beforeunload',this.unload);
   }
   get opened(){return this.dialog.open;}
+  get preparing(){return this.loading!==null;}
   private get<E extends HTMLElement=HTMLElement>(id:string){return this.dialog.querySelector(`#ws-${id}`) as E;}
   private on(id:string,fn:()=>void){this.get(id).onclick=()=>{if(!this.busy)fn();};}
   private get unsaved(){return this.editor.dirty||(!this.saved&&this.editor.parts.length>0);}
   private discard(){return !this.unsaved||window.confirm(translate('Discard the unsaved blueprint changes?'));}
   private status(text:string){setText(this.get('status'), text);}
-  private result(result:{message:string}){this.status(result.message);}
+  private result(result:{message:string;problem?:unknown}){this.status(result.problem?villagePartDiagnostic(result.message):result.message);}
   async open(initial?: Blueprint, applyToPlaced?: (entry: LibraryEntry) => Promise<void>, applyLabel='Apply to my home'){
     if(this.opened||!this.bridge.allowed())return;
     this.applyToPlaced=applyToPlaced??null;
     setText(this.get('apply'),applyLabel);
     this.get('apply').hidden=!this.applyToPlaced;this.get('place').hidden=!!this.applyToPlaced;
     this.dialog.showModal();document.body.classList.add('workshop-open');
+    const loading={controller:new AbortController(),task:beginSceneLoading('Opening the workshop…',{onCancel:()=>this.close(true)})};this.loading=loading;
+    const {signal}=loading.controller,current=()=>this.loading===loading&&!signal.aborted&&this.opened;
+    const next=async()=>{await yieldSceneFrame(signal);if(!current())throw new DOMException('Loading cancelled.','AbortError');};
     this.busy=true;this.changed();this.status('Opening your saved library…');
     try{
+      await next();await next();
+      const entries=await this.bridge.read();if(!current())return;
+      this.entries=entries;this.libraryOptions();
+      if(initial){const existing=this.entries.find(entry=>entry.blueprint.id===initial.id);this.saved=existing??null;this.editor.load(initial);this.changed();}
+      else if(this.entries.length)this.load(this.entries[0]);else this.starter();
+      loading.task.update('Preparing the view…');await next();
       this.stage=createPresentationStage('workshop',this.get('stage'));
-      this.templates=new PartTemplates(this.stage.library);this.view=new WorkshopView(this.stage,this.editor,this.templates);
+      this.stage.controls.enabled=false;await next();
+      this.templates=new PartTemplates(this.stage.library);
+      const partTypes=[...new Set(this.editor.parts.map(part=>part.part))];
+      for(const [index,part] of partTypes.entries()){
+        loading.task.update('Bringing buildings into view…',index,partTypes.length);this.templates.get(part);await next();
+      }
+      this.view=new WorkshopView(this.stage,this.editor,this.templates);await next();
       const canvas=this.stage.renderer.domElement;setAttribute(canvas, 'aria-label', 'Workshop 3D preview');
       const pressed=new Set<number>();let pinched=false;
       canvas.addEventListener('pointerdown',e=>{pressed.add(e.pointerId);if(pressed.size>1){pinched=true;this.pointer=null;}else{pinched=false;this.pointer={x:e.clientX,y:e.clientY};}});
@@ -112,16 +133,27 @@ export class Workshop {
         else{this.hover={x:e.clientX,y:e.clientY};const d=this.draftAt(e.clientX,e.clientY);if(d)this.result(this.editor.add(d));this.updatePreview();}
       });
       this.stage.onFrame(()=>{if(this.stage){canvas.dataset.practical=JSON.stringify(this.stage.practical.stats());canvas.dataset.resources=JSON.stringify(this.stage.stats());canvas.dataset.textureFormat=this.stage.library.textureFormat;}});
-      this.stage.start();this.entries=await this.bridge.read();this.libraryOptions();
-      if(initial){const existing=this.entries.find(entry=>entry.blueprint.id===initial.id);this.saved=existing??null;this.editor.load(initial);this.changed();}
-      else if(this.entries.length)this.load(this.entries[0]);else this.starter();
+      this.frame();loading.task.update('Finishing the view…');await next();
+      await this.stage.ready();if(!current())return;
+      await this.stage.renderer.compileAsync(this.stage.scene,this.stage.camera);if(!current())return;
+      await next();this.stage.renderOnce();await next();
+      this.stage.controls.enabled=true;this.stage.start();this.busy=false;this.loading=null;this.changed();loading.task.finish();
       this.status(initial?'Edit the parts. Apply to update the same placed structure.':this.entries.length?'Library loaded from the server.':'Start with this cabin, or create a new blueprint.');
-    }catch(error){this.status(error instanceof Error?error.message:'Workshop unavailable. Close and retry.');}
-    finally{this.busy=false;this.changed();this.frame();}
+    }catch(error){
+      if(current()){
+        this.releaseView();
+        this.status(error instanceof Error?error.message:'Workshop unavailable. Close and retry.');
+        loading.task.fail('Could not finish loading. Your saved world is unchanged.',()=>{if(current()){this.close(true);void this.open(initial,applyToPlaced,applyLabel);}});
+      }else loading.task.finish();
+    }
   }
   close(force=false){
-    if(this.busy||(!force&&!this.discard()))return;
-    this.dialog.close();document.body.classList.remove('workshop-open');
+    if(this.busy&&!this.loading||(!force&&!this.loading&&!this.discard()))return;
+    const loading=this.loading;this.loading=null;loading?.controller.abort();loading?.task.finish();this.busy=false;
+    if(this.opened)this.dialog.close();document.body.classList.remove('workshop-open');
+    this.releaseView();
+  }
+  private releaseView(){
     this.view?.dispose();this.templates?.dispose();this.stage?.dispose();this.stage?.renderer.forceContextLoss();this.view=null;this.templates=null;this.stage=null;
     // The source view subscribes to its editor for the view's lifetime. Retire
     // that editor with the disposed view; reusing it would call a dead library.
@@ -161,7 +193,7 @@ export class Workshop {
     const draft=this.busy?null:this.hover?this.draftAt(this.hover.x,this.hover.y):this.cellDraft();
     const problem=draft?this.editor.placeProblem(draft):null;
     this.view?.setGhost(draft,!problem);
-    const text=this.busy?'Preview paused while the library is updating.':part==='select'?'Drag to orbit · pinch or scroll to zoom · tap to select':!draft?'Point inside the build grid, or choose a column and row.':problem?`Cannot place: ${problem.message}`:`Ready to add ${partLabel(draft.part,PRESENTATION.materials.look)} · L${draft.level+1}, column ${draft.x+1}, row ${draft.z+1}. ${this.hover?'Tap to add.':'Use Add at cell.'}`;
+    const text=this.busy?'Preview paused while the library is updating.':part==='select'?'Drag to orbit · pinch or scroll to zoom · tap to select':!draft?'Point inside the build grid, or choose a column and row.':problem?`Cannot place: ${villagePartDiagnostic(problem.message)}`:`Ready to add ${villagePartLabel(draft.part)} · L${draft.level+1}, column ${draft.x+1}, row ${draft.z+1}. ${this.hover?'Tap to add.':'Use Add at cell.'}`;
     if(hint.textContent!==text)setText(hint, text);
   }
   private addAtCell(){this.hover=null;const draft=this.cellDraft();if(!draft){this.status('Choose a part tool first.');return;}
@@ -206,7 +238,7 @@ export class Workshop {
     setText(this.get('count'), `${this.editor.parts.length} / 120 parts · ${this.unsaved?'Unsaved':'Saved'}`);
     setText(this.get('parts-title'), `Parts & groups (${this.editor.selection.size} selected)`);
     const list=this.get<HTMLSelectElement>('parts');const scroll=list.scrollTop;
-    list.replaceChildren(...this.editor.parts.map(p=>{const o=localizedOption(`#${p.n} ${partLabel(p.part,PRESENTATION.materials.look)} · L${p.level+1}`, String(p.n));o.selected=this.editor.selection.has(p.n);return o;}));list.scrollTop=scroll;
+    list.replaceChildren(...this.editor.parts.map(p=>{const o=localizedOption(`#${p.n} ${villagePartLabel(p.part)} · L${p.level+1}`, String(p.n));o.selected=this.editor.selection.has(p.n);return o;}));list.scrollTop=scroll;
     this.updatePreview();
     setText(this.get('groups'), this.editor.groups.map(g=>`${g.name} (${g.members.length})`).join(' · '));
   }

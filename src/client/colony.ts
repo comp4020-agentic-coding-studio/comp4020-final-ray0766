@@ -6,8 +6,9 @@ import {fieldOf,objectSeat} from '../shared/terrain.ts';
 import { REGIONS,regionFor } from '../shared/regions.ts';
 import { spaceDistance } from '../shared/flight.ts';
 import { CATALOGUE, MAX_OBJECTS, objectName, objectRadius, objectHeight, placementProblem } from '../shared/planets.ts';
-import type { BuildKind, PlacedObject, Universe } from '../shared/planets.ts';
+import type { BuildKind, PlacedObject, PlanetView, Universe } from '../shared/planets.ts';
 import type { PlayerState, Vec3 } from '../shared/world.ts';
+import {RADIUS} from '../shared/world.ts';
 import { builtObject, disposeGeometry } from './build-art.ts';
 import type { Workshop } from './workshop.ts';
 import { canAcceptUniverse } from './sync.ts';
@@ -19,12 +20,12 @@ import { placedTransform } from '../assets/claude-geometry/blueprint/placement.t
 import type { Blueprint, PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
 import { pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
 import { SHARED_ASSET_VERSION, worldMaterials } from './shared-assets.ts';
-import { surfacePoint } from './terrain.ts';
 import type { Obstacle } from './scene.ts';
 import { PRESENTATION } from './presentation.ts';
 import { buildStructureFinish } from './structure-finish.ts';
 import { worldVisualSignature } from './world-visual-signature.ts';
 import type {HomeSetupAddition} from '../shared/home-setup.ts';
+import {beginSceneLoading,yieldSceneFrame} from './loading-state.ts';
 const el = <E extends HTMLElement = HTMLElement>(id:string) => document.getElementById(id) as E;
 export interface ColonyBridge {
   canvas: HTMLCanvasElement; camera: T.Camera; scene: T.Scene;
@@ -34,6 +35,8 @@ export interface ColonyBridge {
   libraryRead: () => Promise<LibraryEntry[]>; librarySave: (body:unknown) => Promise<LibraryEntry>;
   universe:(u:Universe)=>void; bearing:(id:string)=>void;
   flush: () => Promise<void>; notice: (text:string) => void;
+  /** The world host commits prepared models with its terrain and collision. */
+  deferObjects?:boolean;
 }
 type Draft = Omit<PlacedObject,'position'|'version'> & {position:Vec3|null;version?:number};
 export class Colony {
@@ -47,6 +50,7 @@ export class Colony {
   private placing = false; private selected: string | null = null;
   private painted = ''; private cards = ''; private pointer: {id:number;x:number;y:number} | null = null;
   private workshop: Workshop|null=null;
+  private structureWorkshopOpening:symbol|null=null;
   private loadWorkshop: () => Promise<Workshop>;
   private localParts: Record<string,PartPlacement[]> = {};
   private ray = new T.Raycaster(); private pollBusy = false;
@@ -112,21 +116,33 @@ export class Colony {
   }
   private async openStructureWorkshop(objectId:string){
     const u=this.universe;
-    if(!u?.currentPlanet.mine||u.player.location?.kind==='interior'||u.player.flight.mode!=='ground'||!this.syncing||this.busy)return;
+    if(this.structureWorkshopOpening||!u?.currentPlanet.mine||u.player.location?.kind==='interior'||u.player.flight.mode!=='ground'||!this.syncing||this.busy)return;
     const object=u.currentPlanet.objects.find(o=>o.id===objectId);
     if(!object?.blueprintHash)return;
     if(!this.setBuilding(false))return;
     const home=object.id===u.player.home?.buildingId;
+    const token=this.structureWorkshopOpening=Symbol(),controller=new AbortController();
+    const feedback=beginSceneLoading('Opening the workshop…',{onCancel:()=>{controller.abort();feedback.finish();if(this.structureWorkshopOpening===token)this.structureWorkshopOpening=null;}});
+    const valid=()=>{
+      const latest=this.universe,placed=latest?.currentPlanet.objects.find(o=>o.id===objectId);
+      return !controller.signal.aborted&&this.structureWorkshopOpening===token&&this.syncing&&latest?.currentPlanet.id===u.currentPlanet.id&&latest.currentPlanet.mine
+        &&latest.player.flight.mode==='ground'&&latest.player.location?.kind!=='interior'&&latest.player.location?.visitEpoch===u.player.location?.visitEpoch
+        &&placed?.version===object.version&&placed?.blueprintHash===object.blueprintHash;
+    };
     try{
+      await yieldSceneFrame(controller.signal);await yieldSceneFrame(controller.signal);
       await this.bridge.flush();el<HTMLDialogElement>('menu-dialog').close();
+      if(!valid())return;
       const [panel,entries]=await Promise.all([this.loadWorkshop(),this.bridge.libraryRead()]);
+      if(!valid())return;
       const existing=entries.find(entry=>entry.hash===object.blueprintHash);
       const blueprint:Blueprint=existing?structuredClone(existing.blueprint):{id:crypto.randomUUID() as Blueprint['id'],name:home?'My home':'My structure',parts:structuredClone(this.parts(object.blueprintHash)),groups:[]};
-      await panel.open(blueprint,async entry=>{
+      feedback.finish();await panel.open(blueprint,async entry=>{
         const next=await this.bridge.write('objects/replace',{planetId:u.currentPlanet.id,objectId:object.id,expectedVersion:object.version,blueprintHash:entry.hash});
         this.accept(next);this.bridge.notice(home?'Home updated. Your room and furniture are safe.':'Structure updated in place.');
       },home?'Apply to my home':'Apply to this structure');
-    }catch(error){this.bridge.notice(error instanceof Error?error.message:'Could not open this structure in the workshop.');}
+    }catch(error){if(!controller.signal.aborted)this.bridge.notice(error instanceof Error?error.message:'Could not open this structure in the workshop.');}
+    finally{feedback.finish();if(this.structureWorkshopOpening===token)this.structureWorkshopOpening=null;}
   }
   updateShadows(feet:T.Vector3){
     const stats=this.shadows.update(feet,this.building?this.selected:null);
@@ -140,17 +156,37 @@ export class Colony {
     if(changed){this.setBuilding(false,true);this.clearDraft();}
     if(this.building&&(!next.currentPlanet.mine||next.player.flight.mode==='space'||next.player.location?.kind==='interior'))this.setBuilding(false,true);
     const key=worldVisualSignature(next.currentPlanet);
-    if(this.painted!==key){
-      this.previewPaths([]);
-      this.painted=key;this.bridge.canvas.dataset.placedAssetKit=SHARED_ASSET_VERSION;this.bridge.canvas.dataset.placedAssetKinds=next.currentPlanet.objects.map(o=>o.kind).join(',');this.shadows.clear();for(const child of [...this.layer.children])disposeGeometry(child);this.objects.clear();
-      for(const obj of next.currentPlanet.objects){const group=this.renderObject(obj);group.userData.objectId=obj.id;this.layer.add(group);this.objects.set(obj.id,group);}
-      this.shadows.replace(this.objects);
-      const list=el<HTMLSelectElement>('built-list');list.replaceChildren(localizedOption('Select a saved object…', ''));
-      next.currentPlanet.objects.forEach((o,i)=>list.add(localizedOption(`${objectName(o)} ${i+1}`, o.id)));list.value=this.selected??'';
-      this.bridge.obstacles(next.currentPlanet.objects.filter(o=>o.kind!=='structure'&&objectHeight(o)>.6).map(o=>({point:new T.Vector3(...o.position),radius:objectRadius(o),height:objectHeight(o)})));
-      if(this.selected&&!next.currentPlanet.objects.some(o=>o.id===this.selected))this.clearDraft();
+    if(this.painted!==key&&!this.bridge.deferObjects){
+      const objects=new Map<string,T.Group>();
+      for(const obj of next.currentPlanet.objects){const group=this.renderObject(obj);group.userData.objectId=obj.id;objects.set(obj.id,group);}
+      this.commitObjects(next.currentPlanet,objects);
     }
     this.hud();this.editor();this.starMap();
+  }
+  private commitObjects(planet:PlanetView,objects:Map<string,T.Group>){
+    this.previewPaths([]);this.painted=worldVisualSignature(planet);
+    this.bridge.canvas.dataset.placedAssetKit=SHARED_ASSET_VERSION;this.bridge.canvas.dataset.placedAssetKinds=planet.objects.map(o=>o.kind).join(',');
+    this.shadows.clear();for(const child of [...this.layer.children])disposeGeometry(child);this.layer.clear();this.objects=objects;
+    for(const group of objects.values())this.layer.add(group);this.shadows.replace(objects);
+    const list=el<HTMLSelectElement>('built-list');list.replaceChildren(localizedOption('Select a saved object…', ''));
+    planet.objects.forEach((o,i)=>list.add(localizedOption(`${objectName(o)} ${i+1}`,o.id)));list.value=this.selected??'';
+    this.bridge.obstacles(planet.objects.filter(o=>o.kind!=='structure'&&objectHeight(o)>.6).map(o=>({point:new T.Vector3(...o.position),radius:objectRadius(o),height:objectHeight(o)})));
+    if(this.selected&&!planet.objects.some(o=>o.id===this.selected))this.clearDraft();
+  }
+  async prepareObjects(planet:PlanetView,options:{signal:AbortSignal;yieldFrame:()=>Promise<void>;onProgress?:(done:number,total:number)=>void;budgetMs?:number}){
+    const root=new T.Group(),objects=new Map<string,T.Group>();let released=false;
+    const dispose=()=>{if(released)return;released=true;for(const group of objects.values())disposeGeometry(group);root.clear();root.removeFromParent();};
+    const check=()=>{if(options.signal.aborted)throw new DOMException('Loading cancelled.','AbortError');};
+    try{
+      await options.yieldFrame();check();let started=performance.now();
+      options.onProgress?.(0,planet.objects.length);
+      for(const object of planet.objects){
+        check();const group=this.renderObject(object,planet);group.userData.objectId=object.id;root.add(group);objects.set(object.id,group);
+        options.onProgress?.(objects.size,planet.objects.length);
+        if(performance.now()-started>=(options.budgetMs??6)){await options.yieldFrame();started=performance.now();}
+      }
+      check();return {root,dispose,commit:()=>{if(released)return;check();this.commitObjects(planet,objects);released=true;root.removeFromParent();}};
+    }catch(error){dispose();throw error;}
   }
   previewHome(addition:HomeSetupAddition|undefined){
     this.previewPaths([]);if(!addition||!this.universe)return;
@@ -190,10 +226,10 @@ export class Colony {
     if(d.kind!=='structure')return null;
     return structureFit(this.parts(d.blueprintHash!),d.position,d.rotation,fieldOf(this.universe?.currentPlanet.environment,this.universe?.currentPlanet.radius)).message;
   }
-  private renderObject(obj:PlacedObject){
-    if(obj.kind!=='structure'){const group=builtObject(obj.kind,obj.assetVersion??1);this.locate(group,obj.position,obj.rotation);if(this.universe?.currentPlanet.environment)group.position.set(...obj.position).multiplyScalar(objectSeat(fieldOf(this.universe.currentPlanet.environment,this.universe.currentPlanet.radius),obj,this.universe.currentPlanet.blueprints).baseRadius+.015);return group;}
-    const parts=this.parts(obj.blueprintHash!), fit=structureFit(parts,obj.position,obj.rotation,fieldOf(this.universe?.currentPlanet.environment,this.universe?.currentPlanet.radius));
-    const door=this.universe?.currentPlanet.homeDoor;
+  private renderObject(obj:PlacedObject,planet=this.universe!.currentPlanet){
+    if(obj.kind!=='structure'){const group=builtObject(obj.kind,obj.assetVersion??1);this.locate(group,obj.position,obj.rotation,planet);if(planet.environment)group.position.set(...obj.position).multiplyScalar(objectSeat(fieldOf(planet.environment,planet.radius),obj,planet.blueprints).baseRadius+.015);return group;}
+    const parts=planet.blueprints?.[obj.blueprintHash!]??this.localParts[obj.blueprintHash!]??[],fit=structureFit(parts,obj.position,obj.rotation,fieldOf(planet.environment,planet.radius));
+    const door=planet.homeDoor;
     const visibleParts=door?.buildingId===obj.id?parts.filter(part=>part.n!==door.partNumber):parts;
     const model=buildBlueprintModel(visibleParts,worldMaterials(),'medium',{foundationDepth:fit.foundationDepth,pivot:pivotOf(parts)});
     const finish=buildStructureFinish(parts,worldMaterials());model.object.add(finish.object);
@@ -202,7 +238,14 @@ export class Colony {
     model.object.userData.disposeOwned=()=>{finish.dispose();model.dispose();};
     return model.object;
   }
-  private locate(group:T.Object3D,position:Vec3,rotation:number){const n=new T.Vector3(...position);group.position.copy(surfacePoint(n,.015));group.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),n);group.rotateY(rotation);}
+  private locate(group:T.Object3D,position:Vec3,rotation:number,planet=this.universe!.currentPlanet){
+    const n=new T.Vector3(...position),radius=planet.radius??RADIUS;
+    // A surface may still be preparing while accepted objects arrive. Seat
+    // legacy props against this PlanetView, never the previous visible world.
+    // Keep their point-height contract; generated props use objectSeat above.
+    const height=planet.kind==='hub'&&!planet.environment?radius:RADIUS+fieldOf(planet.environment,radius).heightAt(position);
+    group.position.copy(n).multiplyScalar(height+.015);group.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),n);group.rotateY(rotation);
+  }
   private point(x:number,y:number){
     this.ray.setFromCamera(new T.Vector2(x/innerWidth*2-1,-y/innerHeight*2+1),this.bridge.camera);
     if(this.placing&&this.draft){const hit=this.ray.intersectObject(this.bridge.ground())[0];if(hit){this.draft.position=hit.point.normalize().toArray() as Vec3;this.preview();this.editor();}return;}

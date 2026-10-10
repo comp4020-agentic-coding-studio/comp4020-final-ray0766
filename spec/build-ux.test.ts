@@ -13,11 +13,11 @@ import {SPAWN} from '../src/shared/world.ts';
 // Exercise the host's real controls and editor validation without WebGL or a DB.
 const preview=vi.hoisted(()=>({ghost:vi.fn()}));
 vi.mock('../src/client/presentation-stage.ts',()=>({createPresentationStage:()=>({
-  renderer:{domElement:document.createElement('canvas'),forceContextLoss:vi.fn()},
-  library:{},camera:new T.PerspectiveCamera(),resize:vi.fn(),frameBox:vi.fn(),
-  onFrame:vi.fn(),start:vi.fn(),dispose:vi.fn(),
+  renderer:{domElement:document.createElement('canvas'),forceContextLoss:vi.fn(),compileAsync:vi.fn(async()=>{})},
+  library:{},scene:new T.Scene(),camera:new T.PerspectiveCamera(),controls:{enabled:true},resize:vi.fn(),frameBox:vi.fn(),
+  onFrame:vi.fn(),ready:vi.fn(async()=>{}),renderOnce:vi.fn(),start:vi.fn(),dispose:vi.fn(),
 })}));
-vi.mock('../src/assets/claude-geometry/blueprint/view/templates.ts',()=>({PartTemplates:class {dispose(){}}}));
+vi.mock('../src/assets/claude-geometry/blueprint/view/templates.ts',()=>({PartTemplates:class {get(){}dispose(){}}}));
 vi.mock('../src/assets/claude-geometry/blueprint/view/workshop-view.ts',()=>({WorkshopView:class {
   level=0;
   constructor(stage:{renderer:{domElement:HTMLCanvasElement}}){document.getElementById('ws-stage')!.append(stage.renderer.domElement);}
@@ -41,6 +41,7 @@ function pointer(canvas:HTMLCanvasElement,type:string,x=0,id=1,extra:object={}){
 Object.assign(HTMLDialogElement.prototype,{showModal(this:HTMLDialogElement){this.open=true;},close(this:HTMLDialogElement){this.open=false;}});
 let windowListeners:Parameters<typeof window.addEventListener>[];
 let documentListeners:Parameters<typeof document.addEventListener>[];
+const panels:Workshop[]=[];
 beforeEach(()=>{
   vi.useFakeTimers();preview.ghost.mockClear();windowListeners=[];documentListeners=[];
   const windowAdd=window.addEventListener.bind(window),documentAdd=document.addEventListener.bind(document);
@@ -51,6 +52,7 @@ beforeEach(()=>{
   vi.spyOn(window,'confirm').mockReturnValue(false);
 });
 afterEach(()=>{
+  for(const panel of panels.splice(0))panel.close(true);
   windowListeners.forEach(args=>window.removeEventListener(...args));
   documentListeners.forEach(args=>document.removeEventListener(...args));
   document.body.replaceChildren();document.body.className='';vi.restoreAllMocks();vi.useRealTimers();
@@ -58,7 +60,13 @@ afterEach(()=>{
 async function workshop(){
   const saved:LibraryEntry={blueprint:industrialCabin(),hash:'fixture',version:1};
   const save=vi.fn(async()=>saved),place=vi.fn();
-  const panel=new Workshop({read:async()=>[saved],save,place,allowed:()=>true});await panel.open();
+  const panel=new Workshop({read:async()=>[saved],save,place,allowed:()=>true});panels.push(panel);
+  let ready=false;const opening=panel.open().then(()=>{ready=true;});
+  // The real loading lifecycle yields browser frames before enabling controls.
+  // Drive those frames under fake timers instead of waiting on a paused clock.
+  for(let frame=0;frame<100&&!ready;frame++)await vi.advanceTimersByTimeAsync(16);
+  expect(ready,'workshop opening should settle within the frame budget').toBe(true);await opening;
+  expect(panel.preparing).toBe(false);
   return {panel,save,place};
 }
 describe('workshop placement feedback and draft protection',()=>{

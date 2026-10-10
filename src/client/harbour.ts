@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {applyArtMaterial} from './art-profile.ts';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {HUB_SHIP} from '../shared/harbour-layout.ts';
 import {HUB_OBJECTS,PUBLIC_CONTENTS,publicField,HUB_COUNTS} from '../shared/public-village.ts';
@@ -21,13 +22,14 @@ import {placedTransform} from '../assets/claude-geometry/blueprint/placement.ts'
 import type {Obstacle} from './scene.ts';
 import {terrainModel} from './terrain-model.ts';
 import {buildStructureFinish} from './structure-finish.ts';
+import {createPublicTownArt} from './public-town-art.ts';
 
-export function createHarbour(scene:T.Scene,village:SamplePublicVillage|null=null){
+export function createHarbour(scene:T.Scene,village:SamplePublicVillage|null=null,preparedTown?:ReturnType<typeof createPublicTownArt>,preparedTerrain?:ReturnType<typeof terrainModel>){
  const radius=groundRadius(),p=harbourMaterials(),scenery=new T.Group(),blocks:Obstacle[]=[];scene.add(scenery);
  const mesh=(parent:T.Object3D,geometry:T.BufferGeometry,material:T.Material,position:number[]=[0,0,0],shadow=true)=>{const m=new T.Mesh(geometry,material);m.position.fromArray(position);m.castShadow=shadow;m.receiveShadow=true;parent.add(m);return m;};
  function anchor(parent:T.Object3D,point:Vec3,yaw=0){const up=new T.Vector3(...normalize(point)),g=new T.Group();g.position.copy(surfacePoint(up));g.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),up);g.rotateY(yaw);parent.add(g);return g;}
- const ground=new T.MeshStandardMaterial({color:'#95ab7f',roughness:.98,flatShading:true});ground.userData.ownedResource=true;
- const terrain=village?terrainModel(village.environment,village.objects,village.blueprints,'medium',true,radius,village.routes):null;
+ const ground=applyArtMaterial(new T.MeshStandardMaterial({color:'#5ea476',roughness:1,flatShading:true}));ground.userData.ownedResource=true;
+ const terrain=village?(preparedTerrain??terrainModel(village.environment,village.objects,village.blueprints,'medium',true,radius,village.routes)):null;
  const globe=terrain?terrain.ground:mesh(scene,new T.IcosahedronGeometry(radius,6),ground,[0,0,0],false);
  if(terrain){ground.dispose();scene.add(terrain.object);}
  const objects=village?.objects??HUB_OBJECTS,contents=village?.blueprints??PUBLIC_CONTENTS;
@@ -36,7 +38,10 @@ export function createHarbour(scene:T.Scene,village:SamplePublicVillage|null=nul
  // The same model builder, foundation fit, dimensions and anchor as Colony.
  // Cloning quick-build prototypes shares materials before the static merge.
  const prototypes=new Map<BuildKind,T.Group>();
+ const town=village?(preparedTown??createPublicTownArt(village,radius)):null;
+ if(town)scenery.add(town.root);
  for(const o of objects){
+  if(town){if(objectHeight(o)>.6)blocks.push({point:new T.Vector3(...o.position),radius:objectRadius(o),height:objectHeight(o)});continue;}
   if(o.kind==='structure'){
    const parts=contents[o.blueprintHash!],fit=structureFit(parts,o.position,o.rotation,field),model=buildBlueprintModel(parts,worldMaterials(),'medium',{foundationDepth:fit.foundationDepth}),t=placedTransform({dir:o.position,yaw:o.rotation},fit);
    if(village){
@@ -63,9 +68,9 @@ export function createHarbour(scene:T.Scene,village:SamplePublicVillage|null=nul
     for(const o of meshes){if(!o.geometry.userData.sharedResource&&!freed.has(o.geometry)){freed.add(o.geometry);o.geometry.dispose();}o.removeFromParent();}
     for(const [material,parts]of batches){const g=mergeGeometries(parts);if(g)mesh(root,g,material,[0,0,0],!material.transparent&&material!==p.amber);parts.forEach(p=>p.dispose());}
   }
-  bake(scenery);scenery.userData.publicCounts=village?{structures:objects.filter(o=>o.kind==='structure').length,objects:objects.length,destinations:village.destinations.map(d=>d.id)}:HUB_COUNTS;scenery.name='public-village';
+  if(!town)bake(scenery);scenery.userData.publicCounts=village?{structures:objects.filter(o=>o.kind==='structure').length,objects:objects.length,destinations:village.destinations.map(d=>d.id)}:HUB_COUNTS;scenery.name='public-village';
  // Baking frees source geometry but transfers its materials to the batches.
  // Keep model handles to release their private lamps and retained silhouettes;
  // the host's following scene cleanup owns the merged batch geometry.
- return {globe,scenery,blocks,flowers,npcs,dock,parked,setSunDirection(dir:Vec3){terrain?.setSunDirection(dir);},dispose(){finishes.forEach(finish=>finish.dispose());models.forEach(model=>model.dispose());terrain?.dispose();},height:surfaceHeight,animate(t:number,_reduced:boolean,_eye?:T.Vector3,_up?:T.Vector3){terrain?.tick(t);void _reduced;void _eye;void _up;}};
+ return {globe,scenery,blocks,flowers,npcs,dock,parked,setSunDirection(dir:Vec3){terrain?.setSunDirection(dir);},dispose(){town?.dispose();finishes.forEach(finish=>finish.dispose());models.forEach(model=>model.dispose());terrain?.dispose();},height:surfaceHeight,animate(t:number,_reduced:boolean,_eye?:T.Vector3,_up?:T.Vector3,overview=false){terrain?.tick(t);void _reduced;if(town&&_eye){const stats=town.update(_eye,_up?.clone().multiplyScalar(radius),{globalLow:overview});scenery.userData.townStats=stats;}}};
 }

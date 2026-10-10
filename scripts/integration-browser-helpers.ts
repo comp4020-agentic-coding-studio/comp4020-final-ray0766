@@ -15,7 +15,7 @@ export function integrationUrl(){
  const raw=process.env.APP_URL;
  if(!raw)throw Error('Set APP_URL=http://127.0.0.1:8130 for the isolated integration copy.');
  const url=new URL(raw);
- if(!['127.0.0.1','localhost'].includes(url.hostname)||url.port!=='8130'||url.protocol!=='http:')throw Error('Integration browser tests are restricted to local port 8130.');
+ if(!['127.0.0.1','localhost'].includes(url.hostname)||!['8130','8134'].includes(url.port)||url.protocol!=='http:')throw Error('Integration browser tests are restricted to local isolated ports 8130 and 8134.');
  return url.origin;
 }
 export const hostContext=()=>({platform:platform(),osRelease:release(),cpu:cpus()[0]?.model,cpuLogicalCount:cpus().length,memoryGiB:Math.round(totalmem()/2**30),realPhone:false});
@@ -25,9 +25,11 @@ export async function menu(page:Page,selector:string,touch=false){if(!await page
 export async function begin(page:Page,touch=false){
  await page.goto('/?measure=1');
  await expect.poll(async()=>Number(await page.locator('#world canvas').getAttribute('data-triangles')),{timeout:30000}).toBeGreaterThan(1000);
+ await expect(page.locator('#world canvas')).toHaveAttribute('data-terrain-id',/.+/,{timeout:45000});
+ await expect(page.locator('.scene-loading-overlay')).toBeHidden({timeout:45000});
  if(await page.locator('#begin').isVisible())await activate(page,'#begin',touch);
  if(await page.locator('#first-visit-tip').isVisible())await activate(page,'#first-visit-tip button:last-child',touch);
- await expect(page.locator('#scene-sync')).toContainText(/Live|实时/);
+ await expect(page.locator('#scene-sync')).toContainText(/Live|实时|已连接/);
 }
 export async function visibleControl(page:Page,selector:string){
  const control=page.locator(selector);await expect(control).toBeVisible();
@@ -52,10 +54,10 @@ export async function measureAction<T>(page:Page,label:string,samples:Record<str
    if(!data.running)return;
    if(data.previous)data.frames.push(time-data.previous);data.previous=time;data.visible&&=!document.hidden;
    const canvas=document.querySelector<HTMLCanvasElement>('#world canvas');
-   const phase=document.body.classList.contains('home-interior-active')?'interior':document.body.classList.contains('in-space')?'flight':document.querySelector('dialog#workshop[open]')?'workshop':'ground';
+   const phase=document.body.classList.contains('scene-loading')?'loading':document.body.classList.contains('home-interior-active')?'interior':document.body.classList.contains('in-space')?'flight':document.querySelector('dialog#workshop[open]')?'workshop':'ground';
    data.phaseCounts[phase]=(data.phaseCounts[phase]??0)+1;
    // The workshop has its own renderer; the world canvas counters stop there.
-   if(canvas&&phase!=='workshop'){
+   if(canvas&&phase!=='workshop'&&phase!=='loading'){
     const call=Number(phase==='interior'?canvas.dataset.homeDrawCalls:canvas.dataset.drawCalls);if(Number.isFinite(call))data.calls.push(call);
     // Ground triangle counters are stale while the independent interior renders.
     if(phase!=='interior'){const triangles=Number(canvas.dataset.triangles);if(Number.isFinite(triangles))data.triangles.push(triangles);}
@@ -73,7 +75,7 @@ export async function measureAction<T>(page:Page,label:string,samples:Record<str
     const win=window as CaptureWindow,data=win.__integrationFrameCapture!;data.running=false;cancelAnimationFrame(data.raf);data.observer?.disconnect();
     const stats=(values:number[])=>{const sorted=values.filter(Number.isFinite).sort((a,b)=>a-b),at=(q:number)=>sorted[Math.min(sorted.length-1,Math.ceil(sorted.length*q)-1)];return sorted.length?{samples:sorted.length,p50:at(.5),p95:at(.95),p99:at(.99),max:sorted.at(-1),mean:sorted.reduce((a,b)=>a+b,0)/sorted.length}:null;};
     const result={durationMs:performance.now()-data.start,frames:stats(data.frames),longFrames:{over33_3ms:data.frames.filter(x=>x>100/3).length,over50ms:data.frames.filter(x=>x>50).length,over100ms:data.frames.filter(x=>x>100).length},longTasks:stats(data.longTasks),drawCalls:stats(data.calls),triangles:stats(data.triangles),renderCpuSubmissionMs:stats(data.cpu),continuouslyForeground:data.visible,phaseFrameCounts:data.phaseCounts};delete win.__integrationFrameCapture;return result;
-   });samples.push({label,...measured,actionMs,paddingAfterActionMs:Math.max(0,minimumMs-actionMs),failed,timingMeaning:'Foreground Chrome rAF intervals during the named action plus explicit settling time. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and workshop renderer counters are omitted. No physical-phone or sustained thermal claim.'});
+   });samples.push({label,...measured,actionMs,paddingAfterActionMs:Math.max(0,minimumMs-actionMs),failed,timingMeaning:'Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim.'});
   }catch(error){samples.push({label,actionMs,failed:failed??String(error),samplingFailed:String(error)});}
  }
 }
@@ -82,6 +84,11 @@ export async function groundWalk(page:Page,target:Vec3,touch=false,tolerance=.38
  const cdp=touch?await page.context().newCDPSession(page):null,held=new Set<string>();let touching=false;
  const until=Date.now()+timeoutMs;
  try{while(Date.now()<until){
+  if(await page.locator('body').evaluate(node=>node.classList.contains('scene-loading'))){
+   for(const key of held)await page.keyboard.up(key);held.clear();
+   if(cdp&&touching){await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});touching=false;}
+   await page.waitForTimeout(50);continue;
+  }
   const feet=await page.locator('#world canvas').evaluate(el=>({position:JSON.parse(el.dataset.groundPosition!) as Vec3,north:JSON.parse(el.dataset.cameraHeading!) as Vec3,radius:Number(el.dataset.groundRadius)}));
   const gap=distance(feet.position,target,feet.radius);if(gap<tolerance){await page.waitForTimeout(50);return;}
   const up=new Vector3(...feet.position),north=new Vector3(...feet.north),direction=new Vector3(...target).projectOnPlane(up).normalize(),right=new Vector3().crossVectors(north,up).normalize();
@@ -95,6 +102,7 @@ export async function groundWalk(page:Page,target:Vec3,touch=false,tolerance=.38
  throw Error('Real walking could not reach the navigation waypoint.');
 }
 export async function roomWalk(page:Page,targetX:number,touch=false,targetZ?:number){
+ await expect(page.locator('.scene-loading-overlay')).toBeHidden({timeout:45000});
  const u=await universe(page),room=u.player.home?.interior.room;
  expect(room).toBeTruthy();expect(u.player.location?.kind).toBe('interior');
  const readPosition=async()=>JSON.parse(await page.locator('#world canvas').getAttribute('data-home-position')??'[]') as Vec3;
@@ -152,6 +160,7 @@ export async function flyTo(page:Page,target:PlanetSummary,touch=false){
  // Hub departure temporarily rejects keydown and clears controls at its end.
  // Start the driver only afterwards so its held-key bookkeeping stays real.
  await expect(page.locator('body')).not.toHaveClass(/departing/,{timeout:15000});
+ await expect(page.locator('.scene-loading-overlay')).toBeHidden({timeout:45000});
  await menu(page,'#open-map',touch);await page.locator('#region-select').selectOption('all');
  await activate(page,`.planet-option[data-planet-id="${target.id}"] button`,touch);
  await expect(page.locator('#flight-hud')).toHaveAttribute('data-target',target.id);await expect(page.locator('dialog[open]')).toHaveCount(0);
@@ -160,6 +169,10 @@ export async function flyTo(page:Page,target:PlanetSummary,touch=false){
  const set=async(key:string,on:boolean)=>{if(on&&!held.has(key)){await page.keyboard.down(key);held.add(key);}else if(!on&&held.has(key)){await page.keyboard.up(key);held.delete(key);}};
  let stalled=0,detours=0,arrived=false;
  try{while(Date.now()<until){
+  if(await page.locator('body').evaluate(node=>node.classList.contains('scene-loading'))){
+   for(const key of held)await page.keyboard.up(key);held.clear();
+   await page.waitForTimeout(50);continue;
+  }
   const d=await page.locator('#flight-hud').evaluate(el=>({...el.dataset})),position=JSON.parse(d.position!) as Vec3,speed=Number(d.speed),targetDistance=Number(d.distance);
   // A detour is only a means of reaching the target. Once the real landing
   // control allows a stopped arrival, do not keep chasing an obsolete waypoint.
@@ -202,5 +215,6 @@ export async function flyTo(page:Page,target:PlanetSummary,touch=false){
  expect(Number(last.distance)).toBeLessThanOrEqual(landingRadius(target));expect(Number(last.speed)).toBeLessThan(6);
  await expect(page.locator('#land-ship')).toBeEnabled();await activate(page,'#land-ship',touch);await expect(page.locator('#flight-title')).toContainText(target.name);await activate(page,'#confirm-flight',touch);
  await expect(page.locator('#flight-hud')).not.toBeVisible({timeout:15000});await expect.poll(async()=>(await universe(page)).currentPlanet.id).toBe(target.id);
+ await expect(page.locator('.scene-loading-overlay')).toBeHidden({timeout:45000});
  return {targetRadius:target.radius,landingBand:landingRadius(target),clearance:safeRadius(target),distanceAtLanding:Number(last.distance),speedAtLanding:Number(last.speed),detours,controls:touch?'CDP actual two-finger steering and thrust/brake touches':'keyboard yaw/pitch/thrust/brake',teleport:false};
 }

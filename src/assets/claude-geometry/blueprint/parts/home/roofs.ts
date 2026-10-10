@@ -2,13 +2,13 @@ import * as T from 'three';
 import { SLOPE_RISE } from '../decks.ts';
 import { slab, small, SLAB } from '../kit.ts';
 import type { Kit } from '../kit.ts';
-import { VILLAGE_EAVE, VILLAGE_SLOPE_RISE } from '../village/decks.ts';
+import { FRIEZE, RAFTER, RAFTERS, rafterTail, VILLAGE_BANDS, VILLAGE_EAVE, VILLAGE_EAVE_REACH, VILLAGE_RIDGE, VILLAGE_RIDGE_TOP, VILLAGE_SLOPE_RISE, VILLAGE_TILE, villageFoot } from '../village/decks.ts';
 
 // Roof closures for the sloped roof panel (roof.slope): the hip that turns an
 // outer corner and the valley that turns an inner one. They meet the panel's
 // surface edge for edge, so each look has its own: the industrial panel rises
-// 0.36 m over its cell (parts/decks.ts), the village panel 0.70 m
-// (parts/village/decks.ts).
+// 0.36 m over its cell (parts/decks.ts), the village panel 0.5 m and its eave
+// on past the cell (parts/village/decks.ts).
 //
 // Cell parts, origin at the cell centre on the level's walking surface. With
 // u = z + 0.5 and v = x + 0.5 (0..1 across the cell), a panel turned to drain
@@ -42,6 +42,27 @@ function boxSolid(lo: V3, hi: V3, m?: T.Matrix4): Solid {
     return [v.x, v.y, v.z];
   });
   return [[p[0], p[4], p[6], p[2]], [p[1], p[3], p[7], p[5]], [p[0], p[1], p[5], p[4]], [p[2], p[6], p[7], p[3]], [p[0], p[2], p[3], p[1]], [p[4], p[5], p[7], p[6]]];
+}
+
+/** Wind every face of a convex solid outward: its normal (Newell's, as draw() takes it) away from the solid's centre. */
+function outward(s: Solid): Solid {
+  const all = s.flat(), c = all.reduce((m, p) => [m[0] + p[0] / all.length, m[1] + p[1] / all.length, m[2] + p[2] / all.length] as V3, [0, 0, 0] as V3);
+  return s.map(face => {
+    let nx = 0, ny = 0, nz = 0, fx = 0, fy = 0, fz = 0;
+    for (let i = 0; i < face.length; i++) {
+      const a = face[i], b = face[(i + 1) % face.length];
+      nx += (a[1] - b[1]) * (a[2] + b[2]); ny += (a[2] - b[2]) * (a[0] + b[0]); nz += (a[0] - b[0]) * (a[1] + b[1]);
+      fx += a[0] / face.length; fy += a[1] / face.length; fz += a[2] / face.length;
+    }
+    return nx * (fx - c[0]) + ny * (fy - c[1]) + nz * (fz - c[2]) < 0 ? face.slice().reverse() : face;
+  });
+}
+
+/** A convex (z, y) profile run along x from x0 to x1, as the village panel's extrudeZY pieces are. */
+function prismSolid(profile: [number, number][], x0: number, x1: number): Solid {
+  const a = profile.map(([z, y]): V3 => [x0, y, z]), b = profile.map(([z, y]): V3 => [x1, y, z]);
+  const sides = profile.map((_, i): V3[] => { const j = (i + 1) % profile.length; return [a[i], a[j], b[j], b[i]]; });
+  return outward([a, b, ...sides]);
 }
 
 /** Keep the part of a convex solid where n·p ≤ d; `cap` closes the cut (leave it open where a mirrored twin closes it). */
@@ -158,78 +179,62 @@ function gutterWing(R: number, half: number, depth: number, thick: number, insid
 
 // ------------------------------------------------------------ village
 
-// The village panel's tile courses (parts/village/decks.ts courses(), which is
-// not exported): the same constants and layout, so lips land where the panel's do.
-const TILE = 0.04, LAP = 0.03, STEP = 0.03;
-function villageCourses(lod: 'high' | 'medium' | 'low') {
-  const R = VILLAGE_SLOPE_RISE, a = Math.atan2(R, 1), length = Math.hypot(1, R) + VILLAGE_EAVE;
-  const count = lod === 'low' ? 3 : lod === 'high' ? 7 : 4, pitch = length / count, tile = pitch + LAP;
-  const tilt = a - Math.asin(STEP / tile);
-  const along = (s: number): V3 => [0, R - s * Math.sin(a), -0.5 + s * Math.cos(a)];
-  /** Course i's frame: its upper back edge on the line through the lips' feet, pitched `tilt`. */
-  const course = (i: number) => frame(along(i * pitch), tilt);
-  return { R, a, count, pitch, tile, tilt, along, course };
-}
-type Courses = ReturnType<typeof villageCourses>;
-
-/** The panel's half ridge cap: 0.06 high over the 0.08 next to the ridge. */
-const RIDGE_CAP = { h: 0.06, d: 0.08 };
 /** The panel's timber ceiling slab. */
 function villageCeiling(k: Kit) {
   k.b.box(k.m('post'), [1.0, SLAB - 0.03, 1.0], { position: [0, -SLAB / 2 - 0.015, 0] }, 0);
 }
 
+/** The panel's half ridge (block and cap) as boxes over x0..x1 and z0..z1, each its own depth out from the ridge line at z0 (or x0 for an x run). */
+function ridgeBox(k: Kit, x: [number, number], z: [number, number], y: [number, number]) {
+  k.b.box(k.m('corrugated'), [x[1] - x[0], y[1] - y[0], z[1] - z[0]], { position: [(x[0] + x[1]) / 2, (y[0] + y[1]) / 2, (z[0] + z[1]) / 2] }, 0);
+}
+const R_BASE = VILLAGE_SLOPE_RISE, R_BLOCK = VILLAGE_SLOPE_RISE + VILLAGE_RIDGE.block;
+
 /**
- * Hip tiles along the hip line: one per course, each laid on its course where
- * the course is mitred, so like the courses it is pitched a little flatter
- * than the hip and its lower end stands proud of the next. The first starts
- * under the ridge caps' meeting square; the last is cut to the two eaves.
+ * The hip ridge along the hip line: one straight piece over the lips of
+ * the pitch's two bands from the ridges' meeting square, a second on the eave
+ * band from the cell's corner to the eave's, each `h` over what it rests on
+ * and sunk far enough that its edges meet the bands either side.
  */
-function hipTiles(c: Courses, w: number, h: number): Solid[] {
-  const out: Solid[] = [];
-  const st = Math.sin(c.tilt), ct = Math.cos(c.tilt);
-  for (let i = 0; i < c.count; i++) {
-    const [, ay, az] = c.along(i * c.pitch);
-    // Course i's top on the diagonal, at `zl` along the course.
-    const top = (zl: number): V3 => { const z = az + TILE * st + zl * ct; return [z, ay + TILE * ct - zl * st, z]; };
-    const z0 = i === 0 ? (-0.44 - az - TILE * st) / ct : 0;
-    const p0 = top(z0), p1 = top(c.tile + 0.012);
+function hipRidge(w: number, h: number): Solid[] {
+  const R = VILLAGE_SLOPE_RISE, a = Math.atan2(R, 1), e = Math.atan(VILLAGE_EAVE.fall), { thick, lip } = VILLAGE_TILE;
+  const tip = VILLAGE_EAVE_REACH.z, end = 0.5 + (thick + lip) * Math.sin(a);
+  /** A piece from t0 to t1 along the hip line, its underside `lift` over the foot line, sunk `sink`. */
+  const piece = (t0: number, t1: number, lift: number, sink: number) => {
+    const p0: V3 = [t0, villageFoot(t0) + lift, t0], p1: V3 = [t1, villageFoot(t1) + lift, t1];
     const dir = new T.Vector3(p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]);
-    const piece = boxSolid([-w / 2, 0, 0], [w / 2, h, dir.length()], lineFrame(p0, dir));
-    out.push(cuts(piece, [[[1, 0, 0], 0.785], [[0, 0, 1], 0.785]]));
-  }
-  return out;
+    return boxSolid([-w / 2, -sink, 0], [w / 2, h, dir.length()], lineFrame(p0, dir));
+  };
+  const pitch = cuts(piece(-0.5, end, (thick + lip) / Math.cos(a), 0.065), [[[0, 1, 0], VILLAGE_RIDGE_TOP], [[-1, 0, 0], 0.5], [[0, 0, -1], 0.5]]);
+  const eave = cuts(piece(0.5, tip, thick / Math.cos(e), 0.03), [[[1, 0, 0], tip], [[0, 0, 1], tip]]);
+  return [pitch, eave];
 }
 
 /**
- * Village hip: the panel's tile courses on both planes, mitred on the hip line
- * under a row of hip tiles that runs from the ridge caps' meeting square down
- * to the eave corner; the eaves overhang on +Z and +X as the panel's does, and
- * the frieze and rafter tails turn the corner with them.
+ * Village hip: the panel's three bands on both planes, mitred on the hip line
+ * under a hip ridge that runs from the ridges' meeting square down to the
+ * eave corner; the eaves overhang on +Z and +X as the panel's does, and the
+ * frieze and rafter tails turn the corner with them.
  */
 export function hipRoofVillage(k: Kit) {
-  const { b } = k;
-  const c = villageCourses(k.lod), { R, a } = c;
+  const R = VILLAGE_SLOPE_RISE, { half, capHalf } = VILLAGE_RIDGE;
   const timber = k.m('post'), tiles = k.m('corrugated');
   villageCeiling(k);
   draw(k, k.m('skin'), [hipWedge(R)]);
-  // Courses wide enough to reach the mitre over the corner overhang.
-  const courses: Solid[] = [];
-  for (let i = 0; i < c.count; i++) courses.push(cut(boxSolid([-0.5, 0, 0], [0.8, TILE, c.tile], c.course(i)), [1, 0, -1], 0, false));
-  draw(k, tiles, withMirror(courses));
-  // Where the two neighbours' half ridge caps meet: a square of cap.
-  b.box(tiles, [RIDGE_CAP.d, RIDGE_CAP.h, RIDGE_CAP.d], { position: [-0.5 + RIDGE_CAP.d / 2, R + 0.055, -0.5 + RIDGE_CAP.d / 2] }, 0);
-  draw(k, tiles, hipTiles(c, 0.13, 0.055));
-  // Frieze over both walls below, meeting at the corner.
-  b.box(timber, [1.1, 0.09, 0.1], { position: [0.05, -SLAB + 0.045, 0.55] }, 0);
-  b.box(timber, [0.1, 0.09, 1.0], { position: [0.55, -SLAB + 0.045, 0] }, 0);
-  if (!k.fine) return;
+  // Bands on the +Z plane, wide enough to reach the mitre over the corner overhang, and their twins on +X.
+  const reach = VILLAGE_EAVE_REACH.z + 0.01;
+  draw(k, tiles, withMirror(VILLAGE_BANDS.map(band => cut(prismSolid(band, -0.5, reach), [1, 0, -1], 0, false))));
+  // Where the two neighbours' half ridges meet: a square of block and of cap.
+  ridgeBox(k, [-0.5, -0.5 + half], [-0.5, -0.5 + half], [R_BASE, R_BLOCK]);
+  ridgeBox(k, [-0.5, -0.5 + capHalf], [-0.5, -0.5 + capHalf], [R_BLOCK, VILLAGE_RIDGE_TOP]);
+  draw(k, tiles, hipRidge(0.11, 0.05));
+  // Frieze over both walls below, mitred at the corner.
+  draw(k, timber, withMirror([cut(prismSolid(FRIEZE, -0.5, 0.7), [1, 0, -1], 0, false)]));
+  if (k.low) return;
   // Rafter tails as the panel's, on both eaves, and a hip rafter's tail under the corner.
-  const s0 = (0.59 + 0.5) / Math.cos(a), deep = 0.045;
-  const run = (R + SLAB - deep * Math.cos(a)) / Math.sin(a) - s0;
-  const tails: Solid[] = [-0.375, -0.125, 0.125, 0.375].map(x => boxSolid([x - deep / 2, -deep, 0], [x + deep / 2, 0, run], frame(c.along(s0), a)));
-  const t0 = 0.6, hipDir = new T.Vector3(1, -Math.tan(a), 1);
-  const hipTail = cut(boxSolid([-0.03, -0.05, 0], [0.03, 0, 0.16], lineFrame([t0, R - (t0 + 0.5) * Math.tan(a), t0], hipDir)), [0, -1, 0], SLAB);
+  const tails = RAFTERS.map(x => prismSolid(rafterTail(), x - RAFTER.wide / 2, x + RAFTER.wide / 2));
+  const p0: V3 = [RAFTER.from, villageFoot(RAFTER.from), RAFTER.from], fall = new T.Vector3(1, -VILLAGE_EAVE.fall, 1);
+  const hipTail = boxSolid([-0.03, -0.05, 0], [0.03, 0.002, (RAFTER.end - RAFTER.from) * fall.length()], lineFrame(p0, fall));
   draw(k, timber, [...withMirror(tails), hipTail]);
 }
 
@@ -237,26 +242,26 @@ export function hipRoofVillage(k: Kit) {
 const VILLAGE_GUTTER = { half: 0.035, depth: 0.025, thick: 0.012 };
 
 /**
- * Village valley: the panel's courses on both planes, cut back from the
+ * Village valley: the pitch's two bands on both planes (its eave band lies
+ * past the cell, where the runs it joins carry theirs), cut back from the
  * diagonal either side of an iron valley gutter sunk into the plaster, half
- * ridge caps along both ridges (−Z and −X) to meet the neighbours' caps back
- * to back, and no eave of its own.
+ * ridges along both ridges (−Z and −X) to meet the neighbours' back to back,
+ * and no eave of its own. The bands lie on the plaster, so no gap under a lip
+ * needs the gutter's iron run on under it.
  */
 export function valleyRoofVillage(k: Kit) {
-  const { b } = k;
-  const c = villageCourses(k.lod), { R } = c, g = VILLAGE_GUTTER;
+  const R = VILLAGE_SLOPE_RISE, g = VILLAGE_GUTTER, { half, capHalf } = VILLAGE_RIDGE;
   const tiles = k.m('corrugated');
   villageCeiling(k);
   draw(k, k.m('skin'), withMirror([valleyWedge(R, g.half, g.depth)]));
-  const courses: Solid[] = [];
-  for (let i = 0; i < c.count; i++) courses.push(cut(boxSolid([-0.5, 0, 0], [0.5, TILE, c.tile], c.course(i)), [-1, 0, 1], -g.half * Math.SQRT2));
-  draw(k, tiles, withMirror(courses));
-  // Half ridge caps on both ridges, as an L.
-  b.box(tiles, [1.0, RIDGE_CAP.h, RIDGE_CAP.d], { position: [0, R + 0.055, -0.5 + RIDGE_CAP.d / 2] }, 0);
-  b.box(tiles, [RIDGE_CAP.d, RIDGE_CAP.h, 1.0 - RIDGE_CAP.d], { position: [-0.5 + RIDGE_CAP.d / 2, R + 0.055, RIDGE_CAP.d / 2] }, 0);
-  // The gutter's flange runs on under the cut courses, so the gaps under their lips show iron, not plaster.
-  const flange = cuts(space(), [[[0, -1, -R], -R / 2], [[0, 1, R], R / 2 + 0.006], [[-1, 0, 1], -g.half * Math.SQRT2], [[1, 0, -1], (g.half + 0.05) * Math.SQRT2], [[1, 0, 0], 0.5], [[0, 0, -1], 0.5]]);
-  draw(k, k.m('steel'), withMirror([gutterWing(R, g.half, g.depth, g.thick), flange]));
+  draw(k, tiles, withMirror(VILLAGE_BANDS.slice(0, 2).map(band => cut(prismSolid(band, -0.5, 0.5), [-1, 0, 1], -g.half * Math.SQRT2))));
+  // Half ridges on both ridges, as an L of block and an L of cap.
+  ridgeBox(k, [-0.5, 0.5], [-0.5, -0.5 + half], [R_BASE, R_BLOCK]);
+  ridgeBox(k, [-0.5, -0.5 + half], [-0.5 + half, 0.5], [R_BASE, R_BLOCK]);
+  ridgeBox(k, [-0.5, 0.5], [-0.5, -0.5 + capHalf], [R_BLOCK, VILLAGE_RIDGE_TOP]);
+  ridgeBox(k, [-0.5, -0.5 + capHalf], [-0.5 + capHalf, 0.5], [R_BLOCK, VILLAGE_RIDGE_TOP]);
+  // The gutter stops under the ridges' blocks, whose ends would otherwise share the cell's end planes with it.
+  draw(k, k.m('steel'), withMirror([gutterWing(R, g.half, g.depth, g.thick, [[[0, 1, 0], R_BASE - 0.001]])]));
 }
 
 // ------------------------------------------------------------ industrial

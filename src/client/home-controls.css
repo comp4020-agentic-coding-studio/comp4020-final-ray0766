@@ -4,6 +4,9 @@ body.building #home-controls{display:none!important}
 body.home-interior-active #home-controls,body.home-interior-active #joystick,body.home-interior-active #boarding-prompt,body.home-interior-active #dock-guide,body.home-interior-active #interact,body.home-interior-active #conversation,body.home-interior-active .npc-label,body.home-interior-active #onboarding,body.home-interior-active #view-mode{display:none!important}
 @media(max-width:699px){#home-controls{top:76px;right:12px;width:185px;padding:10px 12px;border-radius:13px}.home-caption{font-size:12px}#home-controls button{min-height:43px;font-size:11px}#home-controls summary{font-size:13px}.home-remodel-actions{grid-template-columns:1fr}#home-remodel[open]{max-height:calc(100dvh - 230px);overflow:auto}}
 
+/* Keep transient directions outside the home card and touch-control band. */
+@media(max-width:699px){body:has(#home-controls:not([hidden])) #notice{top:auto;bottom:195px}}
+
 body.home-interior-active #open-menu,body.home-interior-active #open-map,body.home-interior-active #first-visit-tip,body.home-interior-active #notice{display:none!important}
 
 body.home-interior-active .minimal-bar,body.home-interior-active footer{display:none!important}

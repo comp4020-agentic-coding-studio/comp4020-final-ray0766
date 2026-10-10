@@ -10,12 +10,13 @@ import type { LodTier } from '../style/lod.ts';
 import type { StyleLibrary } from '../style/materials.ts';
 import { createHeightField } from './field.ts';
 import type { TerrainField } from './field.ts';
-import { floraModel, instanceFlora, planFlora } from './flora.ts';
+import { floraTriangles, instanceFlora, planFlora } from './flora.ts';
 import type { Clearing } from './flora.ts';
 import { icosphere } from './icosphere.ts';
 import { atmosphereMaterial, groundMaterial, seaIceMaterial, TerrainKit, waterMaterial } from './kit.ts';
 import type { PlanetEnvironment } from './env.ts';
 import { chord2, strataAt } from './styles/program.ts';
+import { villageFloraPlans } from './village.ts';
 import type { FloraKind, RGB } from './styles/program.ts';
 
 // buildPlanet turns an environment into renderable ground, water, atmosphere
@@ -223,7 +224,7 @@ function hue([r, g, b]: RGB): number {
 export function buildPlanet(env: PlanetEnvironment, _lib: StyleLibrary | null, lod: LodTier, options: BuildOptions = {}): PlanetHandle {
   const started = performance.now();
   const field = options.field ?? createHeightField(env);
-  // Without a kit of its own, the planet takes the library's look (the village grade and halo with ?look=village).
+  // Without a kit of its own, the planet takes the library's look (the village grade and halo with look: 'village').
   const kit = options.kit ?? new TerrainKit(lod, { look: _lib?.look ?? 'industrial' });
   const ownKit = !options.kit;
   if (kit.lod !== lod) throw new Error(`TerrainKit is for LOD ${kit.lod}, not ${lod}.`);
@@ -277,7 +278,7 @@ export function buildPlanet(env: PlanetEnvironment, _lib: StyleLibrary | null, l
   groundGeometry.setAttribute('cover', new T.BufferAttribute(cover, 1));
   groundGeometry.setIndex(new T.BufferAttribute(lv.indices, 1));
   groundGeometry.computeBoundingSphere();
-  const groundMat = groundMaterial(kit, program);
+  const groundMat = groundMaterial(kit, program, field.env);
   const ground = new T.Mesh(groundGeometry, groundMat);
   ground.name = 'terrain:ground';
   ground.castShadow = settings.shadows; ground.receiveShadow = settings.shadows;
@@ -314,7 +315,7 @@ export function buildPlanet(env: PlanetEnvironment, _lib: StyleLibrary | null, l
       g.setAttribute('depth', new T.BufferAttribute(depth, 1));
       g.setIndex(kept);
       g.computeBoundingSphere();
-      waterMat = look.kind === 'liquid' ? waterMaterial(kit, look, program) : seaIceMaterial(kit, look, program);
+      waterMat = look.kind === 'liquid' ? waterMaterial(kit, look, program, field.env) : seaIceMaterial(kit, look, program, field.env);
       const mesh = new T.Mesh(g, waterMat);
       mesh.name = look.kind === 'liquid' ? 'terrain:water' : 'terrain:sea-ice';
       mesh.receiveShadow = settings.shadows;
@@ -335,7 +336,7 @@ export function buildPlanet(env: PlanetEnvironment, _lib: StyleLibrary | null, l
   atmoGeometry.setAttribute('normal', new T.BufferAttribute(anor, 3));
   atmoGeometry.setIndex(new T.BufferAttribute(shell.indices, 1));
   atmoGeometry.computeBoundingSphere();
-  const atmoMat = atmosphereMaterial(program, kit.look);
+  const atmoMat = atmosphereMaterial(program, kit.look, field.env);
   const atmosphere = new T.Mesh(atmoGeometry, atmoMat);
   atmosphere.name = 'terrain:atmosphere';
   atmosphere.renderOrder = 2;
@@ -345,7 +346,7 @@ export function buildPlanet(env: PlanetEnvironment, _lib: StyleLibrary | null, l
   const fixedTris = lv.indices.length / 3 + waterTris + shell.indices.length / 3;
   const budget = BUDGET.terrain[lod];
   const triangles: Record<string, number> = {};
-  for (const rule of program.flora) triangles[rule.kind] = floraModel(rule.kind, kit).triangles;
+  for (const rule of program.flora) triangles[rule.kind] = floraTriangles(rule.kind, kit);
   const plans = planFlora(field, program.flora, { vegetationMax: settings.vegetationMax, triangleBudget: budget.triangles - fixedTris, triangles, clearings: options.clearings });
   if (options.minPlantHeight) for (const p of plans) p.instances = p.instances.filter(i => i.height >= options.minPlantHeight!);
   if (filtered) {
@@ -357,7 +358,8 @@ export function buildPlanet(env: PlanetEnvironment, _lib: StyleLibrary | null, l
       inst.base = water !== null && inst.base === water ? Math.max(water, drawn) : drawn;
     }
   }
-  const flora = instanceFlora(plans, kit, settings.shadows);
+  // The village look draws plants in its own flat colours (village.ts); placement is the same.
+  const flora = instanceFlora(kit.look === 'village' ? villageFloraPlans(plans, field.env) : plans, kit, settings.shadows);
   group.add(flora);
 
   const counted = measure(group);

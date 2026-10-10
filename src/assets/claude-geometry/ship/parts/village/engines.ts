@@ -5,6 +5,9 @@ import type { Ctx, Role } from '../../kit.ts';
 import { segs, smoothSkin, turn } from './shapes.ts';
 
 // Village engines: the industrial units' plugs, nozzle exits and exit radii kept.
+// One rolled lip at each opening and painted bands flush with the cowls; the
+// profiles turn in steps the lines either pass over (under about 50°) or draw
+// as one clean ring (over about 68°), never in between, where they flicker.
 
 /**
  * Smooth surface of revolution about local +Z that faces the way its profile
@@ -44,22 +47,33 @@ function spun(ctx: Ctx, role: Role, profile: [number, number][], segments: numbe
 // ------------------------------------------------------------------ engines
 
 /**
- * Round engine pod on a short pylon: a fat smooth cowl with a trim band, a
- * rounded intake lip round a dark fan and spinner, and a plain exhaust ring
- * with the glowing liner set inside, its exit where the nacelle's is.
+ * Round engine pod on a short pylon: a fat smooth cowl with a painted trim
+ * band, one rounded intake lip round a dark fan face, and a plain exhaust
+ * ring with the glowing liner set inside, its exit where the nacelle's is.
+ * The pylon is a smooth lens-section strut (a box drew all twelve edges at
+ * low and none at the other tiers, its chamfer collapsing at low only).
  */
 function roundPods(ctx: Ctx) {
-  const n = segs(ctx, 16, 12, 8);
-  ctx.box('secondary', [0.12, 0.07, 0.72], [0.06, 0, 0.62], undefined, 0.025);
+  const n = segs(ctx, 16, 12, 8), k = segs(ctx, 6, 4, 4);
+  // Pylon from the hull side into the cowl: lens sections 0.72 long and 0.07 deep, centred at z 0.62.
+  const strut = (x: number): Vec3[] => Array.from({ length: 2 * k }, (_, i) => {
+    const a = (Math.PI * i) / k;
+    return [x, 0.035 * Math.sin(a), 0.62 - 0.36 * Math.cos(a)] as Vec3;
+  });
+  smoothSkin(ctx, [strut(0), strut(0.12)], () => 'secondary');
   ctx.within({ position: [0.26, 0, 0] }, () => {
-    // A teardrop that is 0.34 m at its widest, the tile's figure: narrow lip, full body, tapering tail.
-    turn(ctx, 'primary', [[0.128, -0.06], [0.148, 0.03], [0.165, 0.2], [0.17, 0.42], [0.165, 0.7], [0.153, 0.98], [0.141, 1.2], [0.136, 1.3]], n);
-    turn(ctx, 'trim', [[0.17, 0.3], [0.173, 0.32], [0.173, 0.4], [0.17, 0.42]], n);
-    turn(ctx, 'metal', [[0.11, 0.0], [0.105, -0.07], [0.118, -0.1], [0.132, -0.085], [0.128, -0.06]], n);
-    turn(ctx, 'dark', [[0.0, 0.02], [0.11, 0.0]], n);
-    turn(ctx, 'metal', [[0.0, -0.08], [0.03, -0.06], [0.045, -0.02], [0.045, 0.015]], n);
+    // A teardrop that is 0.34 m at its widest, the tile's figure: narrow lip, full body, tapering tail; the band flush on it.
+    turn(ctx, 'primary', [[0.128, -0.06], [0.148, 0.03], [0.165, 0.2], [0.1673, 0.3]], n);
+    turn(ctx, 'trim', [[0.1673, 0.3], [0.17, 0.42]], n);
+    turn(ctx, 'primary', [[0.17, 0.42], [0.165, 0.7], [0.153, 0.98], [0.141, 1.2], [0.136, 1.3]], n);
+    // The intake lip rolls round from the throat to the cowl in 30° steps; the dark fan face is a shallow cone behind it.
+    const lip: [number, number][] = [[0.1, -0.05]];
+    for (let i = 0; i <= 6; i++) { const f = Math.PI + (Math.PI * i) / 6; lip.push([0.114 + 0.014 * Math.cos(f), -0.075 + 0.014 * Math.sin(f)]); }
+    lip.push([0.128, -0.06]);
+    spun(ctx, 'metal', lip, n);
+    turn(ctx, 'dark', [[0.0, -0.058], [0.1, -0.05]], n);
     // The ring walks out to the lip and back into the throat, so its inner wall faces the axis (spun, not turn).
-    spun(ctx, 'metal', [[0.136, 1.3], [0.14, 1.34], [0.135, 1.39], [0.126, 1.4], [0.1216, 1.398], [0.122, 1.34]], n);
+    spun(ctx, 'metal', [[0.136, 1.3], [0.14, 1.34], [0.135, 1.39], [0.126, 1.4], [0.1216, 1.4], [0.122, 1.34]], n);
     spun(ctx, 'liner', [[0.122, 1.34], [0.06, 1.32], [0.0, 1.31]], n);
     ctx.exhaust([0, 0, 1.4], 0.1216);
   });
@@ -74,10 +88,11 @@ function roundPods(ctx: Ctx) {
  */
 function bellEngine(ctx: Ctx) {
   const n = segs(ctx, 24, 14, 12), lo = ctx.detail === 0;
+  // The body's underside meets the waist at about 70°, so the waist draws as one ring at every tier.
   turn(ctx, 'primary', lo
-    ? [[0.19, 0.0], [0.265, 0.04], [0.283, 0.1], [0.25, 0.177], [0.214, 0.2]]
-    : [[0.19, 0.0], [0.24, 0.018], [0.272, 0.05], [0.285, 0.095], [0.276, 0.14], [0.25, 0.177], [0.214, 0.2]], n);
-  turn(ctx, 'trim', lo ? [[0.214, 0.2], [0.214, 0.232]] : [[0.214, 0.2], [0.223, 0.216], [0.214, 0.232]], n);
+    ? [[0.19, 0.0], [0.265, 0.04], [0.283, 0.1], [0.25, 0.177], [0.214, 0.188]]
+    : [[0.19, 0.0], [0.24, 0.018], [0.272, 0.05], [0.285, 0.095], [0.276, 0.14], [0.25, 0.177], [0.214, 0.188]], n);
+  turn(ctx, 'trim', [[0.214, 0.188], [0.214, 0.232]], n);
   turn(ctx, 'secondary', lo
     ? [[0.214, 0.232], [0.24, 0.32], [0.296, 0.393], [0.322, 0.417]]
     : [[0.214, 0.232], [0.224, 0.29], [0.255, 0.345], [0.296, 0.393], [0.322, 0.417]], n);
@@ -89,7 +104,7 @@ function bellEngine(ctx: Ctx) {
 
 /**
  * Three little drop pods on a rounded plate: a soft three-lobed plate with a
- * trim rim, and on each lobe a pod that is round where it sits on the plate
+ * painted rim, and on each lobe a pod that is round where it sits on the plate
  * and tapers aft to a rolled metal lip with the liner inside. The exits and
  * their radius are the pod cluster's.
  */
@@ -99,8 +114,9 @@ function dropPods(ctx: Ctx) {
     const t = (2 * Math.PI * i) / k, r = s * (0.245 + 0.045 * Math.cos(3 * (t - Math.PI / 2)));
     return [r * Math.cos(t), r * Math.sin(t), z];
   });
-  smoothSkin(ctx, [lobes(0.97, 0), lobes(1.03, 0.012), lobes(1.03, 0.034), lobes(0.97, 0.046)], () => 'trim');
-  smoothSkin(ctx, [lobes(0.97, 0.046), lobes(0.8, 0.058)], () => 'secondary', { end: 'secondary' });
+  // A straight painted rim and a nearly flat top: one clean ring where they meet.
+  smoothSkin(ctx, [lobes(1, 0), lobes(1, 0.046)], () => 'trim');
+  smoothSkin(ctx, [lobes(1, 0.046), lobes(0.8, 0.058)], () => 'secondary', { end: 'secondary' });
   for (const a of [Math.PI / 2, Math.PI / 2 + (2 * Math.PI) / 3, Math.PI / 2 + (4 * Math.PI) / 3]) {
     ctx.within({ position: [Math.cos(a) * 0.165, Math.sin(a) * 0.165, 0] }, () => {
       // A drop 0.24 m at its widest (the tile's 0.2 m pods): a round head off the plate, a tail tapering to the lip.

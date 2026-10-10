@@ -6,8 +6,11 @@ import type { Kit } from '../kit.ts';
 // like the furniture (origin on the edge midpoint at the slab top, +Z the
 // edge's outside) but they hang on the face of the wall standing on that edge
 // that looks into their cell, above head height, and they need that wall.
-// The lamp is a real practical light; the signs carry an emblem in relief and
-// no text (editable text is a host feature).
+// The lamp is a real practical light; the signs carry an emblem and no text
+// (editable text is a host feature). The industrial fixtures are painted
+// steel on a bracket bolted to the head beam, their emblems in relief; the
+// village ones hang from a straight timber bracket: a box lantern with dark
+// caps, and plain wooden signboards whose marks are flat geometric inlays.
 //
 // A fixture may meet either face of the wall, so it is fixed where both faces
 // are the same. Measured on wall.solid: the cladding and the plaster stand
@@ -50,19 +53,20 @@ const roundRect = (hu: number, hv: number, r: number, n: number, cu = 0, cv = 0)
   ...arc(cu + hu - r, cv + hv - r, r, r, 0, 0.5 * Math.PI, n), ...arc(cu - hu + r, cv + hv - r, r, r, 0.5 * Math.PI, Math.PI, n),
   ...arc(cu - hu + r, cv - hv + r, r, r, Math.PI, 1.5 * Math.PI, n), ...arc(cu + hu - r, cv - hv + r, r, r, 1.5 * Math.PI, 2 * Math.PI, n),
 ];
-/** A plate standing on the wall face, x across, an arched top (village back plates). */
-function archPlate(k: Kit, material: T.Material, half: number, y0: number, y1: number, z0: number, depth: number) {
-  if (k.low) { k.b.box(material, [2 * half, y1 - y0, depth], { position: [0, (y0 + y1) / 2, z0 - depth / 2] }, 0); return; }
-  const outline: P2[] = [[-half, y0], [half, y0], ...arc(0, y1 - half, half, half, 0, Math.PI, k.fine ? 8 : 4)];
-  k.b.extrude(material, outline, depth, { position: [0, 0, z0 - depth] });
-}
-/** A quarter-round iron scroll in the Z–Y plane from the wall plate (z0, y0) up to an arm at (z0 − r, y0 + r). */
-function scroll(k: Kit, material: T.Material, z0: number, y0: number, r: number, tube: number) {
-  k.b.geometry(material, new T.TorusGeometry(r, tube, k.fine ? 6 : 4, k.fine ? 10 : 6, 0.5 * Math.PI), { position: [0, y0, z0 - r], rotation: [0, -0.5 * Math.PI, 0] });
-}
-/** A ring link hanging in the Z–Y plane. */
-function link(k: Kit, material: T.Material, z: number, y: number, r: number, tube: number) {
-  k.b.geometry(material, new T.TorusGeometry(r, tube, k.fine ? 6 : 4, k.fine ? 12 : 8), { position: [0, y, z], rotation: [0, 0.5 * Math.PI, 0] });
+/**
+ * Village bracket: a timber plate on the wall face from `plate` up to under
+ * the top band, a square timber arm at `armY` (its top under 1.90 m) running
+ * out to `reach`, and (not at low) a straight timber brace from the plate up
+ * to the arm's underside at `brace` m out.
+ */
+function timberBracket(k: Kit, half: number, plate: number, armY: number, reach: number, brace: number) {
+  const { b } = k, wood = k.m('post'), arm = 0.03, front = FACE - 0.02;
+  b.box(wood, [2 * half, BAND - 0.01 - plate, FACE - front], { position: [0, (plate + BAND - 0.01) / 2, (FACE + front) / 2] }, 0);
+  b.box(wood, [arm, arm, front - reach], { position: [0, armY, (front + reach) / 2] }, 0);
+  if (k.low) return;
+  // The brace's ends sit in the plate and the arm; its corners stay in front of the wall face.
+  const y0 = plate + 0.04, z0 = front + 0.005, y1 = armY - arm / 2, z1 = brace, len = Math.hypot(y1 - y0, z1 - z0);
+  b.box(wood, [0.02, len, 0.02], { position: [0, (y0 + y1) / 2, (z0 + z1) / 2], rotation: [Math.atan2(z1 - z0, y1 - y0), 0, 0] }, 0);
 }
 
 /** Centre of the industrial bracket's arm: under a terrace ceiling's 1.90 m. */
@@ -112,38 +116,27 @@ export function wallLamp(k: Kit) {
   if (k.fine) b.geometry(k.m('bright'), new T.TorusGeometry(0.0425, 0.004, 4, 16), { position: [0, ly, lz], rotation: [0.5 * Math.PI, 0, 0] });
 }
 
+/** The village lantern's glowing box: its half width, bottom and top, under the arm at 1.87 m. */
+export const LANTERN_BOX = { half: 0.04, y0: 1.64, y1: 1.78 } as const;
+
 /**
- * Village wall lantern: a timber back board with an arched top, an iron arm
- * on a quarter-round scroll, and a lantern hanging from a ring: a pyramid
- * hood, lit panes between iron corner posts with a glazing bar round them,
- * and a drop finial below. The panes are the glow, as in every village
- * lantern here (the door lantern, the lantern post, the terrace pendant): the
- * look's glass is a dark teal at 0.88 opacity, so a lit core behind it read
- * as an unlit lantern in the renders.
+ * Village wall lantern: a timber plate, arm and brace, and a box lantern
+ * hanging from the arm on a short iron rod: a glowing paper box between two
+ * dark iron caps, thin iron corner posts (not at low). The paper is the glow,
+ * as in every village lantern here; the light point is at its middle.
  */
 export function wallLampVillage(k: Kit) {
   const { b } = k;
-  const iron = k.m('steel'), lz = -0.25, ly = 1.718;
-  archPlate(k, k.m('post'), 0.05, 1.7, 1.91, FACE, 0.02);
-  const back = FACE - 0.02, armY = 1.87;
-  b.box(iron, [0.018, 0.018, back - (lz - 0.012)], { position: [0, armY, (back + lz - 0.012) / 2] }, 0);
-  if (!k.low) {
-    scroll(k, iron, back, 1.76, armY - 0.009 - 1.76, 0.006);
-    link(k, iron, lz, armY - 0.023, 0.014, 0.004);
-  }
-  // Hood, top plate, the lit panes, bottom plate.
-  b.cylinder(iron, 0.012, SLIM * Math.SQRT2, 0.05, { position: [0, 1.805, lz], rotation: [0, 0.25 * Math.PI, 0] }, { segments: 4 });
-  b.box(iron, [2 * SLIM, 0.012, 2 * SLIM], { position: [0, 1.774, lz] }, 0);
-  b.box(k.m('lamp'), [0.07, 0.1, 0.07], { position: [0, ly, lz] }, 0);
-  b.box(iron, [0.086, 0.014, 0.086], { position: [0, 1.661, lz] }, 0);
+  const iron = k.m('steel'), lz = -0.25, ly = 1.718, armY = 1.87, { half, y0, y1 } = LANTERN_BOX, cap = 0.02;
+  timberBracket(k, 0.04, 1.695, armY, lz - 0.02, -0.2);
+  b.box(iron, [0.008, armY - 0.015 - (y1 + 0.025), 0.008], { position: [0, (armY - 0.015 + y1 + 0.025) / 2, lz] }, 0);
+  b.box(iron, [2 * SLIM, 0.025, 2 * SLIM], { position: [0, y1 + 0.0125, lz] }, 0);
+  b.box(k.m('lamp'), [2 * half, y1 - y0, 2 * half], { position: [0, (y0 + y1) / 2, lz] }, 0);
+  b.box(iron, [2 * SLIM, cap, 2 * SLIM], { position: [0, y0 - cap / 2, lz] }, 0);
   b.emitter('door', [0, ly, lz], SHINE);
   if (k.low) return;
-  for (const x of [-0.036, 0.036]) for (const dz of [-0.036, 0.036]) b.box(iron, [0.012, 0.1, 0.012], { position: [x, ly, lz + dz] }, 0);
-  for (const s of [-1, 1]) {
-    b.box(iron, [0.074, 0.008, 0.006], { position: [0, ly + 0.018, lz + s * 0.036] }, 0);
-    b.box(iron, [0.006, 0.008, 0.074], { position: [s * 0.036, ly + 0.018, lz] }, 0);
-  }
-  b.cylinder(iron, 0.02, 0, 0.03, { position: [0, 1.639, lz] }, { segments: k.fine ? 8 : 4 });
+  const c = half - 0.004;
+  for (const x of [-c, c]) for (const z of [-c, c]) b.box(iron, [0.012, y1 - y0, 0.012], { position: [x, (y0 + y1) / 2, lz + z] }, 0);
 }
 
 // ------------------------------------------------------------------ signs
@@ -213,30 +206,43 @@ function hangingSign(k: Kit, emblem: Emblem) {
 }
 
 /**
- * Village hanging sign: an iron plate with an arched top under the wall's top
- * band, an arm at 1.9 m on a quarter-round scroll ending in a ball, and a teal
- * board with rounded corners hanging from two rings, its emblem raised in
- * cream on both faces.
+ * The village signboard: z and y extents, the board's half thickness, the
+ * pale panel standing `panel` proud of it on both faces inside a dark rim
+ * `rim` wide, and how far each layer of a mark stands off the panel.
  */
-function hangingSignVillage(k: Kit, emblem: Emblem) {
-  const { b } = k;
-  const iron = k.m('steel'), plate = 0.015, armY = 1.9, arm = 0.022;
-  archPlate(k, iron, 0.03, 1.72, BAND - 0.005, FACE, plate);
-  const arm0 = FACE - plate, arm1 = -0.47;
-  b.box(iron, [arm, arm, arm0 - arm1], { position: [0, armY, (arm0 + arm1) / 2] }, 0);
-  if (!k.low) {
-    b.geometry(iron, new T.IcosahedronGeometry(0.016, k.fine ? 1 : 0), { position: [0, armY, arm1 - 0.01] });
-    scroll(k, iron, arm0, 1.79, armY - arm / 2 - 1.79, 0.007);
+export const SIGNBOARD = { z0: -0.215, z1: -0.465, y0: 1.62, y1: 1.84, t: 0.015, panel: 0.004, rim: 0.022, layer: 0.004 } as const;
+
+/** A flat mark on a village signboard: an outline in (u, v) about the board's middle (u along the board, v up), its material, and its layer (2 stands on 1). */
+interface Mark { shape: P2[]; material: 'leaf' | 'marking'; layer: 1 | 2 }
+const rect = (hu: number, hv: number, cv = 0): P2[] => [[-hu, cv - hv], [hu, cv - hv], [hu, cv + hv], [-hu, cv + hv]];
+/** An envelope: a teal body and its cream flap. */
+const envelopeMark = (): Mark[] => [
+  { shape: rect(0.08, 0.05), material: 'leaf', layer: 1 },
+  { shape: [[-0.07, 0.042], [0, -0.005], [0.07, 0.042]], material: 'marking', layer: 2 },
+];
+/** A tea bowl: a teal half disc on a short foot. */
+const bowlMark = (n: number): Mark[] => [
+  { shape: arc(0, 0.025, 0.075, 0.075, Math.PI, 2 * Math.PI, n), material: 'leaf', layer: 1 },
+  { shape: rect(0.03, 0.013, -0.058), material: 'leaf', layer: 1 },
+];
+
+/**
+ * Village hanging signboard: the timber bracket, two iron straps, and a dark
+ * timber board with a pale panel proud on both faces; marks inlaid flat on
+ * the panel, on both faces (symmetric, so each face reads the same way).
+ */
+function hangingSignVillage(k: Kit, marks: Mark[]) {
+  const { b } = k, wood = k.m('post');
+  const { z0, z1, y0, y1, t, panel, rim, layer } = SIGNBOARD, armY = 1.88;
+  timberBracket(k, 0.03, 1.7, armY, -0.48, -0.25);
+  const bz = (z0 + z1) / 2, by = (y0 + y1) / 2;
+  for (const dz of [-0.09, 0.09]) b.box(k.m('steel'), [0.008, armY - 0.015 - y1, 0.012], { position: [0, (armY - 0.015 + y1) / 2, bz + dz] }, 0);
+  b.box(wood, [2 * t, y1 - y0, z0 - z1], { position: [0, by, bz] }, 0);
+  b.box(k.m('tread'), [2 * (t + panel), y1 - y0 - 2 * rim, z0 - z1 - 2 * rim], { position: [0, by, bz] }, 0);
+  for (const m of marks) for (const s of [1, -1]) {
+    const off = t + panel + (m.layer - 1) * layer, x0 = s > 0 ? off : -off - layer;
+    extrudeZY(k, k.m(m.material), m.shape.map(([u, v]) => [bz + u, by + v] as P2), x0, x0 + layer);
   }
-  // Board z −0.215 … −0.465, y 1.635 … 1.86, on rings from the arm.
-  const bz = -0.34, by = 1.7475, hu = 0.125, hv = 0.1125, t = 0.015;
-  for (const dz of [-0.09, 0.09]) {
-    if (k.low) b.box(iron, [0.008, 0.035, 0.012], { position: [0, by + hv + 0.015, bz + dz] }, 0);
-    else link(k, iron, bz + dz, by + hv + 0.015, 0.0135, 0.0045);
-  }
-  const corner = k.low ? 1 : k.fine ? 5 : 3;
-  extrudeZY(k, k.m('leaf'), roundRect(hu, hv, 0.032, corner, bz, by), -t, t);
-  relief(k, k.m('marking'), emblem(k.low ? 1 : k.fine ? 4 : 2, { hu, hv, rounded: true }), { z: bz, y: by, t, d1: 0.01, d2: 0.016 });
 }
 
 /** Hanging sign with a plain painted border, for a host that adds text later. */
@@ -246,7 +252,7 @@ export const signMail = (k: Kit) => hangingSign(k, envelope);
 /** Hanging sign with a cup: tea or food. */
 export const signCup = (k: Kit) => hangingSign(k, cup);
 
-/** The village look's signs: the same emblems on the cottage bracket and board. */
-export const signBlankVillage = (k: Kit) => hangingSignVillage(k, border);
-export const signMailVillage = (k: Kit) => hangingSignVillage(k, envelope);
-export const signCupVillage = (k: Kit) => hangingSignVillage(k, cup);
+/** The village look's signboards: a plain one, the envelope and the tea bowl. */
+export const signBlankVillage = (k: Kit) => hangingSignVillage(k, []);
+export const signMailVillage = (k: Kit) => hangingSignVillage(k, envelopeMark());
+export const signCupVillage = (k: Kit) => hangingSignVillage(k, bowlMark(k.low ? 4 : k.fine ? 8 : 6));

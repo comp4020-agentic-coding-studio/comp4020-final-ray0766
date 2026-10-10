@@ -1,0 +1,744 @@
+{
+  "buildingBudget": {
+    "high": {
+      "drawCalls": 17,
+      "triangles": 150000
+    },
+    "low": {
+      "drawCalls": 10,
+      "triangles": 20000
+    },
+    "medium": {
+      "drawCalls": 17,
+      "triangles": 70000
+    }
+  },
+  "legacyFits": {
+    "4x4": {
+      "fit": 370,
+      "tried": 400
+    },
+    "5x4": {
+      "fit": 228,
+      "tried": 400
+    },
+    "5x5": {
+      "fit": 38,
+      "tried": 400
+    }
+  },
+  "note": "Computed by src/blueprint/tools/figures.ts in Node; tests/unit/blueprint/figures.test.ts compares this file with a fresh computation (UPDATE_SAMPLES=1 rewrites it). Triangles and draw calls are real geometry; legacyFits uses a Fibonacci lattice over the whole sphere, yaw 0, the dense ground footprint and core fitGround on legacyHeightField().",
+  "partBudget": {
+    "high": {
+      "drawCalls": 10,
+      "triangles": 4000
+    },
+    "low": {
+      "drawCalls": 10,
+      "triangles": 500
+    },
+    "medium": {
+      "drawCalls": 10,
+      "triangles": 1800
+    }
+  },
+  "partCosts": {
+    "floor.deck": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 328
+      },
+      "low": {
+        "drawCalls": 3,
+        "triangles": 72
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 168
+      }
+    },
+    "floor.grate": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 760
+      },
+      "low": {
+        "drawCalls": 2,
+        "triangles": 216
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 568
+      }
+    },
+    "furniture.bench": {
+      "high": {
+        "drawCalls": 2,
+        "triangles": 176
+      },
+      "low": {
+        "drawCalls": 2,
+        "triangles": 140
+      },
+      "medium": {
+        "drawCalls": 2,
+        "triangles": 176
+      }
+    },
+    "furniture.chair": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 752
+      },
+      "low": {
+        "drawCalls": 3,
+        "triangles": 128
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 588
+      }
+    },
+    "furniture.shelf": {
+      "high": {
+        "drawCalls": 8,
+        "triangles": 1656
+      },
+      "low": {
+        "drawCalls": 6,
+        "triangles": 260
+      },
+      "medium": {
+        "drawCalls": 8,
+        "triangles": 826
+      }
+    },
+    "furniture.sideboard": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 628
+      },
+      "low": {
+        "drawCalls": 3,
+        "triangles": 96
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 420
+      }
+    },
+    "furniture.table": {
+      "high": {
+        "drawCalls": 2,
+        "triangles": 1080
+      },
+      "low": {
+        "drawCalls": 2,
+        "triangles": 192
+      },
+      "medium": {
+        "drawCalls": 2,
+        "triangles": 584
+      }
+    },
+    "garden.bed": {
+      "high": {
+        "drawCalls": 5,
+        "triangles": 1368
+      },
+      "low": {
+        "drawCalls": 3,
+        "triangles": 192
+      },
+      "medium": {
+        "drawCalls": 5,
+        "triangles": 640
+      }
+    },
+    "garden.pot": {
+      "high": {
+        "drawCalls": 5,
+        "triangles": 428
+      },
+      "low": {
+        "drawCalls": 3,
+        "triangles": 180
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 380
+      }
+    },
+    "garden.tree": {
+      "high": {
+        "drawCalls": 2,
+        "triangles": 568
+      },
+      "low": {
+        "drawCalls": 1,
+        "triangles": 80
+      },
+      "medium": {
+        "drawCalls": 2,
+        "triangles": 268
+      }
+    },
+    "light.wall": {
+      "high": {
+        "drawCalls": 6,
+        "triangles": 640
+      },
+      "low": {
+        "drawCalls": 5,
+        "triangles": 168
+      },
+      "medium": {
+        "drawCalls": 6,
+        "triangles": 344
+      }
+    },
+    "pad.quarter": {
+      "high": {
+        "drawCalls": 5,
+        "triangles": 840
+      },
+      "low": {
+        "drawCalls": 5,
+        "triangles": 280
+      },
+      "medium": {
+        "drawCalls": 5,
+        "triangles": 648
+      }
+    },
+    "rail.guard": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 688
+      },
+      "low": {
+        "drawCalls": 2,
+        "triangles": 100
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 400
+      }
+    },
+    "ramp.entry": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 572
+      },
+      "low": {
+        "drawCalls": 3,
+        "triangles": 100
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 268
+      }
+    },
+    "roof.deck": {
+      "high": {
+        "drawCalls": 5,
+        "triangles": 608
+      },
+      "low": {
+        "drawCalls": 5,
+        "triangles": 144
+      },
+      "medium": {
+        "drawCalls": 5,
+        "triangles": 416
+      }
+    },
+    "roof.parapet": {
+      "high": {
+        "drawCalls": 5,
+        "triangles": 316
+      },
+      "low": {
+        "drawCalls": 4,
+        "triangles": 108
+      },
+      "medium": {
+        "drawCalls": 5,
+        "triangles": 220
+      }
+    },
+    "roof.plant": {
+      "high": {
+        "drawCalls": 6,
+        "triangles": 1620
+      },
+      "low": {
+        "drawCalls": 4,
+        "triangles": 300
+      },
+      "medium": {
+        "drawCalls": 6,
+        "triangles": 1092
+      }
+    },
+    "roof.slope": {
+      "high": {
+        "drawCalls": 6,
+        "triangles": 572
+      },
+      "low": {
+        "drawCalls": 5,
+        "triangles": 196
+      },
+      "medium": {
+        "drawCalls": 6,
+        "triangles": 252
+      }
+    },
+    "roof.slope.hip": {
+      "high": {
+        "drawCalls": 6,
+        "triangles": 620
+      },
+      "low": {
+        "drawCalls": 5,
+        "triangles": 348
+      },
+      "medium": {
+        "drawCalls": 6,
+        "triangles": 428
+      }
+    },
+    "roof.slope.valley": {
+      "high": {
+        "drawCalls": 5,
+        "triangles": 440
+      },
+      "low": {
+        "drawCalls": 4,
+        "triangles": 280
+      },
+      "medium": {
+        "drawCalls": 5,
+        "triangles": 312
+      }
+    },
+    "roof.verge.left": {
+      "high": {
+        "drawCalls": 2,
+        "triangles": 104
+      },
+      "low": {
+        "drawCalls": 1,
+        "triangles": 92
+      },
+      "medium": {
+        "drawCalls": 2,
+        "triangles": 104
+      }
+    },
+    "roof.verge.right": {
+      "high": {
+        "drawCalls": 2,
+        "triangles": 104
+      },
+      "low": {
+        "drawCalls": 1,
+        "triangles": 92
+      },
+      "medium": {
+        "drawCalls": 2,
+        "triangles": 104
+      }
+    },
+    "service.light": {
+      "high": {
+        "drawCalls": 5,
+        "triangles": 376
+      },
+      "low": {
+        "drawCalls": 4,
+        "triangles": 84
+      },
+      "medium": {
+        "drawCalls": 5,
+        "triangles": 216
+      }
+    },
+    "sign.blank": {
+      "high": {
+        "drawCalls": 4,
+        "triangles": 540
+      },
+      "low": {
+        "drawCalls": 4,
+        "triangles": 212
+      },
+      "medium": {
+        "drawCalls": 4,
+        "triangles": 284
+      }
+    },
+    "sign.cup": {
+      "high": {
+        "drawCalls": 4,
+        "triangles": 1444
+      },
+      "low": {
+        "drawCalls": 4,
+        "triangles": 284
+      },
+      "medium": {
+        "drawCalls": 4,
+        "triangles": 476
+      }
+    },
+    "sign.mail": {
+      "high": {
+        "drawCalls": 4,
+        "triangles": 444
+      },
+      "low": {
+        "drawCalls": 4,
+        "triangles": 156
+      },
+      "medium": {
+        "drawCalls": 4,
+        "triangles": 228
+      }
+    },
+    "stair.straight": {
+      "high": {
+        "drawCalls": 5,
+        "triangles": 2528
+      },
+      "low": {
+        "drawCalls": 4,
+        "triangles": 448
+      },
+      "medium": {
+        "drawCalls": 5,
+        "triangles": 1184
+      }
+    },
+    "step.entry": {
+      "high": {
+        "drawCalls": 1,
+        "triangles": 308
+      },
+      "low": {
+        "drawCalls": 1,
+        "triangles": 148
+      },
+      "medium": {
+        "drawCalls": 1,
+        "triangles": 292
+      }
+    },
+    "storage.barrel": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 1084
+      },
+      "low": {
+        "drawCalls": 2,
+        "triangles": 80
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 576
+      }
+    },
+    "storage.crates": {
+      "high": {
+        "drawCalls": 2,
+        "triangles": 1056
+      },
+      "low": {
+        "drawCalls": 2,
+        "triangles": 192
+      },
+      "medium": {
+        "drawCalls": 2,
+        "triangles": 608
+      }
+    },
+    "street.kerb": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 160
+      },
+      "low": {
+        "drawCalls": 2,
+        "triangles": 56
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 128
+      }
+    },
+    "street.kerb.corner": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 454
+      },
+      "low": {
+        "drawCalls": 2,
+        "triangles": 156
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 354
+      }
+    },
+    "street.paving": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 100
+      },
+      "low": {
+        "drawCalls": 1,
+        "triangles": 24
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 36
+      }
+    },
+    "street.pipes": {
+      "high": {
+        "drawCalls": 4,
+        "triangles": 936
+      },
+      "low": {
+        "drawCalls": 3,
+        "triangles": 168
+      },
+      "medium": {
+        "drawCalls": 4,
+        "triangles": 520
+      }
+    },
+    "street.road": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 68
+      },
+      "low": {
+        "drawCalls": 3,
+        "triangles": 36
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 36
+      }
+    },
+    "street.road.corner": {
+      "high": {
+        "drawCalls": 2,
+        "triangles": 36
+      },
+      "low": {
+        "drawCalls": 2,
+        "triangles": 36
+      },
+      "medium": {
+        "drawCalls": 2,
+        "triangles": 36
+      }
+    },
+    "street.road.plain": {
+      "high": {
+        "drawCalls": 1,
+        "triangles": 12
+      },
+      "low": {
+        "drawCalls": 1,
+        "triangles": 12
+      },
+      "medium": {
+        "drawCalls": 1,
+        "triangles": 12
+      }
+    },
+    "structure.beam": {
+      "high": {
+        "drawCalls": 2,
+        "triangles": 484
+      },
+      "low": {
+        "drawCalls": 1,
+        "triangles": 60
+      },
+      "medium": {
+        "drawCalls": 2,
+        "triangles": 244
+      }
+    },
+    "structure.column": {
+      "high": {
+        "drawCalls": 3,
+        "triangles": 196
+      },
+      "low": {
+        "drawCalls": 3,
+        "triangles": 36
+      },
+      "medium": {
+        "drawCalls": 3,
+        "triangles": 196
+      }
+    },
+    "wall.corrugated": {
+      "high": {
+        "drawCalls": 5,
+        "triangles": 852
+      },
+      "low": {
+        "drawCalls": 4,
+        "triangles": 132
+      },
+      "medium": {
+        "drawCalls": 5,
+        "triangles": 500
+      }
+    },
+    "wall.door": {
+      "high": {
+        "drawCalls": 10,
+        "triangles": 1472
+      },
+      "low": {
+        "drawCalls": 8,
+        "triangles": 472
+      },
+      "medium": {
+        "drawCalls": 10,
+        "triangles": 896
+      }
+    },
+    "wall.door.open": {
+      "high": {
+        "drawCalls": 10,
+        "triangles": 1472
+      },
+      "low": {
+        "drawCalls": 8,
+        "triangles": 472
+      },
+      "medium": {
+        "drawCalls": 10,
+        "triangles": 896
+      }
+    },
+    "wall.louvre": {
+      "high": {
+        "drawCalls": 6,
+        "triangles": 1360
+      },
+      "low": {
+        "drawCalls": 5,
+        "triangles": 312
+      },
+      "medium": {
+        "drawCalls": 6,
+        "triangles": 944
+      }
+    },
+    "wall.solid": {
+      "high": {
+        "drawCalls": 7,
+        "triangles": 904
+      },
+      "low": {
+        "drawCalls": 5,
+        "triangles": 176
+      },
+      "medium": {
+        "drawCalls": 7,
+        "triangles": 552
+      }
+    },
+    "wall.window": {
+      "high": {
+        "drawCalls": 8,
+        "triangles": 1592
+      },
+      "low": {
+        "drawCalls": 6,
+        "triangles": 360
+      },
+      "medium": {
+        "drawCalls": 8,
+        "triangles": 1080
+      }
+    }
+  },
+  "relayHut": {
+    "compactBytes": 2244,
+    "footprintRadius": 1.952776,
+    "footprintSamples": 18,
+    "groundFootprintSamples": 1247,
+    "hash": "6b5514cb44e732694ec114a0626214fb9829d74d96c5ff291a5ae5d41613ec9f",
+    "mergedWithPlinth": {
+      "high": {
+        "drawCalls": 14,
+        "triangles": 22288
+      },
+      "low": {
+        "drawCalls": 10,
+        "triangles": 5344
+      },
+      "medium": {
+        "drawCalls": 14,
+        "triangles": 14432
+      }
+    },
+    "name": "Relay hut",
+    "parts": 35,
+    "smoothSphereFoundation": 0.161201
+  },
+  "smoothSphereFoundation": {
+    "limit": 0.6,
+    "slabs": {
+      "3x2": 0.161201,
+      "4x4": 0.392305,
+      "5x4": 0.5,
+      "5x5": 0.606602
+    },
+    "warnAbove": 0.45
+  },
+  "stair": {
+    "goingM": 0.165455,
+    "halfWidthM": 0.32,
+    "pitchDegrees": 50.4,
+    "reachM": 0.376,
+    "riseM": 0.2,
+    "risers": 11,
+    "setbackM": 0.12
+  },
+  "surveyPost": {
+    "compactBytes": 4541,
+    "footprintRadius": 3.065476,
+    "footprintSamples": 37,
+    "groundFootprintSamples": 2689,
+    "hash": "9ee7459090fa6d8614cf3efc1e8a30748912906a6a9e0e7fa0f8bd8076d2e3a8",
+    "mergedWithPlinth": {
+      "high": {
+        "drawCalls": 14,
+        "triangles": 50516
+      },
+      "low": {
+        "drawCalls": 10,
+        "triangles": 11396
+      },
+      "medium": {
+        "drawCalls": 14,
+        "triangles": 32388
+      }
+    },
+    "name": "Survey post",
+    "parts": 72,
+    "smoothSphereFoundation": 0.416333
+  }
+}

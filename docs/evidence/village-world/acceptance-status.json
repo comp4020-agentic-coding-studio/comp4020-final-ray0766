@@ -1,0 +1,148 @@
+{
+  "status": "passed-pre-cutover-acceptance",
+  "publicTownVersion": 8,
+  "objects": 509,
+  "buildingsAndPavilions": 85,
+  "structures": 249,
+  "routeCount": 99,
+  "unitTests": {
+    "passed": 391,
+    "failed": 0,
+    "files": 76,
+    "workers": 4,
+    "priorParallelTimeout": "A 64-object home-paths test exceeded its original 10s timeout once, passed unchanged in 6.252s alone, then all 389 passed with four workers.",
+    "report": ".data/v8-final-unit-complete.json"
+  },
+  "typecheck": "passed",
+  "eslint": "passed",
+  "productionBuild": "passed",
+  "saveRehearsal": {
+    "status": "passed",
+    "players": 206,
+    "sourceUnchanged": true,
+    "protectedEqual": true,
+    "repeatStable": true,
+    "reopenStable": true,
+    "recoveries": [],
+    "report": ".data/v8-live-preflight-20261010T032020Z/report.json",
+    "scope": "Fresh read-only live snapshot of all 206 current players on 2026-10-10. The guarded cutover also takes a new stopped-service backup and repeats this check, covering any additions after this rehearsal."
+  },
+  "browser": "154.0.8037.99",
+  "physicalPhone": false,
+  "v8Views": 4,
+  "pageErrors": [],
+  "apiFailures": [],
+  "coldMaxFrameMs": [
+    116.6,
+    100,
+    83.3,
+    99.9
+  ],
+  "evidence": {
+    "v8NorthAndFront": "town-north-v8/report.json",
+    "fullGlobeBeforeNorthRefinement": "town-release/report.json",
+    "sameExistingPrivateHome": "private-final/report.json",
+    "photos": "photos/",
+    "finalJourneys": "journey-replay-v8/",
+    "stableTouchBuildReturn": "camera-settle-v8/report.json",
+    "finalGeometryBudget": "budget-release/town-render-budget.json"
+  },
+  "remaining": [],
+  "originalService": {
+    "port": 8098,
+    "headBeforeCutover": "b87ad09042515b99e92c0264b797847fd4c56214",
+    "stateAtThisPreCutoverSnapshot": "Unchanged; only a successful guarded cutover report establishes the replacement."
+  },
+  "isolatedPreview": 8134,
+  "libraryDelivery": {
+    "status": "blocked-by-automatic-approval",
+    "confirmedLibraryFileIds": [],
+    "localFiles": [
+      ".data/library-delivery/Village v8 · 整球总览.png",
+      ".data/library-delivery/Village v8 · 北极路口修复.png",
+      ".data/library-delivery/Village · 同一旧家390中文首屏.png"
+    ],
+    "reason": "The automatic reviewer rejected the original upload and one unchanged appeal, stating explicit approval covered acceptance/cutover but did not cover uploading screenshots to Library. No new upload process started; a separate approval question remains pending. Local screenshots are preserved."
+  },
+  "recordedAt": "2026-10-10T03:18:33.300829+00:00",
+  "purpose": "Committed acceptance snapshot before the guarded local 8098 cutover. The actual release result and fresh all-player backup/recovery report are written under .data/cutover-*/ after this commit.",
+  "gitDiffCheck": "passed",
+  "courseEvidenceCheck": "passed",
+  "browserJourneys": {
+    "desktop": {
+      "status": "passed",
+      "productAssertions": "passed",
+      "runnerCleanupStatus": "passed",
+      "questMode": "completed-delivery-revisit",
+      "sameOriginalIdentity": true,
+      "savedStateChecks": {
+        "exitedThroughActualControls": true,
+        "sameHome": true,
+        "sameObjectsAndBlueprints": true,
+        "sameFurnitureAndMaterial": true,
+        "sameQuestAndDeliveries": true
+      },
+      "maxFrameMs": 100.1,
+      "maxActionP95Ms": 16.8,
+      "framesOver100ms": 1,
+      "pageErrors": [],
+      "failedApiRequests": [],
+      "report": "journey-replay-v8/desktop-journey-result.json"
+    },
+    "touch-390": {
+      "status": "passed",
+      "productAssertions": "passed",
+      "runnerCleanupStatus": "passed",
+      "questMode": "completed-delivery-revisit",
+      "sameOriginalIdentity": true,
+      "savedStateChecks": {
+        "exitedThroughActualControls": true,
+        "sameHome": true,
+        "sameObjectsAndBlueprints": true,
+        "sameFurnitureAndMaterial": true,
+        "sameQuestAndDeliveries": true
+      },
+      "maxFrameMs": 83.2,
+      "maxActionP95Ms": 16.8,
+      "framesOver100ms": 0,
+      "pageErrors": [],
+      "failedApiRequests": [],
+      "report": "journey-replay-v8/touch-390-journey-result.json"
+    }
+  },
+  "priorAttempt": {
+    "evidence": "journey-release-v8/",
+    "desktop": "All product assertions passed; runner cleanup timed out exporting a large trace ZIP. Later same-identity replay passed with trace disabled and cleanup checked.",
+    "touch": "Original pickup and delivery, edits, return and persistence checks completed; strict failure check caught one /api/presence 409 immediately after takeoff. Fixed the shared visit-transition gate and verified the same identity without resetting its completed quest.",
+    "visual": "Original screenshots caught loading overlays and an overview-to-walk fog flash. Completion screenshots now wait for scene readiness; fog follows actual camera distance, including transition back to walking."
+  },
+  "budget": {
+    "status": "passed",
+    "report": "budget-release/town-render-budget.json",
+    "streetTriangles": 375502,
+    "streetMeshBatches": 449,
+    "streetPeakRetainedGeometryBytes": 69310080,
+    "overviewMeshBatches": 98,
+    "overviewRetainedGeometryBytes": 117137664,
+    "mediumCacheLimit": 8,
+    "eightViewCyclesStable": true,
+    "disposedGeometryBytes": 0,
+    "meaning": "Actual Chrome CPU/geometry accounting; mesh batches exclude other scene passes, retained bytes exclude textures/temporary arrays/driver copies. No physical-phone or sustained thermal claim."
+  },
+  "limitations": [
+    "No physical phone or sustained thermal/GPU timing measurement.",
+    "Road/platform joints retain visible height and grass seams; full collision and route checks pass, but the village is not claimed to have seamless road art.",
+    "Library upload remains separately blocked; screenshots are available locally.",
+    "Immediate overview-to-walk transition retains pointed cloud wedges at the sky pole; the 1500ms settled view is clear."
+  ],
+  "visualReview": {
+    "status": "passed-with-nonblocking-remainders",
+    "stableTouchScreenshot": "camera-settle-v8/touch-390-build-return-settled.png",
+    "remarks": [
+      "Stable walking view, entry, avatar and controls are readable; no loading overlay remains in the completed-room screenshots.",
+      "Public Sol corner has no white triangle fragments; raised board joints and projecting ends remain visible.",
+      "Immediate overview-to-walking transition still shows pointed cloud wedges near the sky pole; they are absent in the 1500ms settled view.",
+      "The right edge of the phone room is cropped; its central movement area and controls remain usable."
+    ]
+  }
+}

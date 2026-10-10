@@ -89,13 +89,14 @@ export class HomeControls {
     const home = this.player?.home;
     const d = home ? distance(position, home.door.position, radius) : Infinity;
     this.near = d <= 1.6;
-    this.get('enter').hidden = !this.near || !enabled;
+    this.get('enter').hidden = !home?.canEdit || !this.near || !enabled;
     this.get<HTMLButtonElement>('enter').disabled = this.pending || !home?.interior.doorOpen;
     const door = this.get<HTMLButtonElement>('door-toggle');
     door.hidden = !this.near || !enabled; door.disabled = this.pending;
     setText(door, home?.interior.doorOpen ? 'Close door' : 'Open door');
     door.setAttribute('aria-pressed', String(home?.interior.doorOpen ?? false));
-    this.get('door-hint').hidden = !this.near || !!home?.interior.doorOpen;
+    this.get('door-hint').hidden = !this.near || (!!home?.canEdit && !!home.interior.doorOpen);
+    setText(this.get('door-hint'),home?.canEdit?'Open the door before entering.':'Only the home owner can enter the room.');
     setText(this.get('distance'), Number.isFinite(d) ? `${Math.round(d)} m` : '');
     for (const button of this.root.querySelectorAll<HTMLButtonElement>('[data-home-variant],#home-workshop')) button.disabled = this.pending || !enabled;
     this.get<HTMLButtonElement>('undo').disabled = this.pending || !enabled || !home?.canUndo;
@@ -103,7 +104,7 @@ export class HomeControls {
     this.get<HTMLButtonElement>('path-apply').disabled=this.pending||!enabled||!this.paths?.added;
     this.get<HTMLButtonElement>('path-cancel').disabled=this.pending;
   }
-  get canEnter() { return this.near && this.enabled && !this.pending && !!this.player?.home?.interior.doorOpen && this.player.location?.kind !== 'interior'; }
+  get canEnter() { return !!this.player?.home?.canEdit && this.near && this.enabled && !this.pending && !!this.player?.home?.interior.doorOpen && this.player.location?.kind !== 'interior'; }
   async enter() {
     if (!this.canEnter) return;
     this.pending = true;

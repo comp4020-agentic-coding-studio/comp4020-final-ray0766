@@ -77,10 +77,14 @@ it('makes four distinct supported kit homes without moving or duplicating the du
   expect(new Set(documents.map(blueprint => JSON.stringify(blueprint.parts))).size).toBe(4);
 });
 
-it('seats the fixed 41-object sample dry on one shared field with room for the same remodels', () => {
+it('seats the bounded starter sample dry on one shared field with room for the same remodels', () => {
   const { manifest, objects, blueprints } = scene(), field = fieldOf(HOME_ENVIRONMENT, radius);
   expect(starterManifest(radius)).toEqual(manifest);
-  expect(objects).toHaveLength(41);
+  // New geometry can reject a decorative candidate. Routes and usable sites
+  // are the contract; an old persisted manifest is never regenerated here.
+  expect(manifest.infrastructure).toHaveLength(2);
+  expect(objects.filter(object=>object.kind==='structure')).toHaveLength(3);
+  expect(objects.filter(object=>object.kind==='path').length).toBeGreaterThan(12);
   expect(objects.length).toBeLessThan(MAX_OBJECTS);
   for (const object of objects) {
     expect(placementProblem(object.kind, object.position, objects, object.id, object.radius, radius, 2,{rotation:object.rotation,blueprintHash:object.blueprintHash,blueprints,field})).toBeNull();

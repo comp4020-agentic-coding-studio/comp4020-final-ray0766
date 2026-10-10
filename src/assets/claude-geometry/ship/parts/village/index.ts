@@ -15,7 +15,9 @@ import { VILLAGE_WINGS } from './wings.ts';
 // light points, the nozzle exits and their radius. Surfaces are smooth (shared
 // vertex normals) so the stepped light reads them as rounded paint, and
 // detail is a few friendly features (portholes, a cheat line, a bubble
-// canopy, ball-tipped mast), not hardware.
+// canopy, ball-tipped mast), not hardware. Drawn for the look's lines: small
+// features are painted flush rather than built proud, round pieces have eight
+// or more sides, and glass is an opaque tone with nothing behind it.
 
 /** The village look's builders, by category and part id; the factory falls back to the industrial ones. */
 export const VILLAGE_SHIP_BUILDERS: Partial<Record<Category, Record<string, (ctx: Ctx) => void>>> = {
@@ -43,7 +45,7 @@ export function villageInfo(): Record<string, { name: string; spec: string }> {
     'wedge-interceptor': { name: 'Soft racer', spec: '4.1 m · soft wedge · round belly' },
     'faceted-canopy': { name: 'Bubble canopy', spec: 'Tinted bubble · painted bow' },
     'slit-visor': { name: 'Lookout dome', spec: 'Round cupola · 60 mm slit' },
-    'raised-bridge': { name: 'Wheelhouse', spec: 'Glazed cabin · 2 seats · curved roof' },
+    'raised-bridge': { name: 'Wheelhouse', spec: 'Glazed cabin · curved roof' },
     swept: { name: 'Round wings', spec: '1.1 m span · tip pods' },
     delta: { name: 'Manta delta', spec: '1.15 m span · elevons · fence' },
     'stub-pylon': { name: 'Mail stubs', spec: '0.8 m span · 2 mail canisters' },

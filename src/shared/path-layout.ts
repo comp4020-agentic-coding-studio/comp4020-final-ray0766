@@ -102,9 +102,11 @@ function visualCoverage(route:ReturnType<typeof polyline>,paths:readonly PlacedO
  * player roads; new district generators can require connected paving routes.
  * Saved objects, seats and IDs are never reordered or modified. */
 export function planRoutePaths({routes,pavingRoutes,radius,environment,objects,blueprints={},maxObjects=MAX_OBJECTS,spacing=.7,idPrefix='route-path'}:RoutePathOptions):RoutePathPlan {
- if(!Number.isFinite(radius)||radius<=0||!Number.isFinite(spacing)||spacing<.4||spacing>2||!Number.isInteger(maxObjects)||maxObjects<0)throw Error('Invalid path planning budget or dimensions.');
+ if(!Number.isFinite(radius)||radius<=0||!Number.isFinite(spacing)||spacing<.4||spacing>2||!Number.isFinite(maxObjects)||!Number.isInteger(maxObjects)||maxObjects<0)throw Error('Invalid path planning budget or dimensions.');
  if([...routes,...(pavingRoutes??[])].some(route=>route.points.some(point=>!validPosition(point))))throw Error('Invalid path route directions.');
- const capacity=Math.max(0,Math.min(MAX_OBJECTS,maxObjects)-objects.length),field=fieldOf(environment,radius),cache=new PathPlacementCache();
+ // A trusted caller supplies its world policy. Private previews use the
+ // default 64; the authored public town explicitly passes its larger limit.
+ const capacity=Math.max(0,maxObjects-objects.length),field=fieldOf(environment,radius),cache=new PathPlacementCache();
  const coverage:RoutePathCoverage[]=routes.map(route=>({id:route.id,candidates:0,added:0,covered:0,blocked:0,budgetOmitted:0,gaps:[],maxGap:0,endDistance:Infinity,isolated:0,connected:false}));
  const paving=routes.map(route=>pavingRoutes?.find(paved=>paved.id===route.id)??route),lines=paving.map(route=>polyline(route.points,radius));
  const occupied=[...objects],existingIds=new Set(objects.map(object=>object.id)),existingPaths=objects.filter(o=>o.kind==='path'),accepted:PlacedObject[]=[],pending:{object:PlacedObject;routeIndex:number}[]=[];

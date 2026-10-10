@@ -2,7 +2,7 @@ import * as T from 'three';
 import { SLOPE_RISE } from '../decks.ts';
 import { extrudeZY } from '../kit.ts';
 import type { Kit } from '../kit.ts';
-import { VILLAGE_EAVE, VILLAGE_SLOPE_RISE } from '../village/decks.ts';
+import { ridge, VILLAGE_BANDS, VILLAGE_EAVE, VILLAGE_RIDGE_TOP, VILLAGE_SLOPE_RISE, villageFoot } from '../village/decks.ts';
 
 // Verge boards: the trim on an open gable end of a sloped roof panel (roof.slope).
 // Cell parts placed on the panel's own cell and turned as it is (the rules
@@ -37,13 +37,6 @@ function prism(k: Kit, mat: T.Material, outline: [number, number][], origin: [nu
   k.b.geometry(mat, g);
 }
 
-/** Half of a turned piece: a lathe over z ≥ 0 closed by a flat face on z = 0, so two halves back to back make it whole. */
-function halfTurned(k: Kit, mat: T.Material, profile: [number, number][], position: [number, number, number], segments: number) {
-  k.b.geometry(mat, new T.LatheGeometry(profile.map(([r, y]) => new T.Vector2(r, y)), segments, -Math.PI / 2, Math.PI), { position });
-  const outline = [...profile, ...profile.slice().reverse().filter(([r]) => r > 0).map(([r, y]) => [-r, y])].map(([r, y]) => new T.Vector2(r, y));
-  k.b.geometry(mat, new T.ShapeGeometry(new T.Shape(outline)), { position, rotation: [0, Math.PI, 0] });
-}
-
 /** Clip a Z–Y profile to z ≥ z0 (one plane, Sutherland–Hodgman). */
 function clipZ(poly: [number, number][], z0: number): [number, number][] {
   const out: [number, number][] = [];
@@ -58,24 +51,6 @@ function clipZ(poly: [number, number][], z0: number): [number, number][] {
 /** extrudeZY over the span between x0 and x1 on the verge's side. */
 const across = (k: Kit, mat: T.Material, profile: [number, number][], side: -1 | 1, x0: number, x1: number) =>
   extrudeZY(k, mat, profile, Math.min(side * x0, side * x1), Math.max(side * x0, side * x1));
-
-/**
- * The same with its edges rounded over `round` metres in `segments` facets
- * (three keep each step under the ink's crease angle, so only the silhouette
- * is inked). The rounding is taken inside the profile and the span, so the
- * piece keeps exactly their bounds.
- */
-function acrossRounded(k: Kit, mat: T.Material, profile: [number, number][], side: -1 | 1, x0: number, x1: number, round: number, segments: number) {
-  const r = k.b.settings.bevelSegments > 0 ? round : 0, lo = Math.min(side * x0, side * x1), hi = Math.max(side * x0, side * x1);
-  const shape = new T.Shape(profile.map(([z, y]) => new T.Vector2(-z, y)));
-  const g = new T.ExtrudeGeometry(shape, { depth: hi - lo - 2 * r, bevelEnabled: r > 0, bevelThickness: r, bevelSize: r, bevelOffset: -r, bevelSegments: segments });
-  // As extrudeZY: a quarter turn about Y sends the extrusion (+Z) along +X and the shape's x to −Z.
-  k.b.geometry(mat, g, { position: [lo + r, 0, 0], rotation: [0, Math.PI / 2, 0] });
-}
-
-/** Points on a quarter round of radius r about (cx, cy) from angle a0 to a1 (radians), n facets. */
-const arc = (cx: number, cy: number, r: number, a0: number, a1: number, n: number): [number, number][] =>
-  Array.from({ length: n + 1 }, (_, i) => { const t = a0 + (a1 - a0) * i / n; return [cx + r * Math.cos(t), cy + r * Math.sin(t)]; });
 
 // ------------------------------------------------------------ industrial
 
@@ -108,65 +83,38 @@ function industrialVerge(k: Kit, side: -1 | 1) {
 
 // ------------------------------------------------------------ village
 
-/** The village panel's tile courses (parts/village/decks.ts slopeRoof), repeated so the verge tiles continue them course for course. */
-const TILE = 0.04, LAP = 0.03, STEP = 0.03;
-function villageCourses(lod: Kit['lod']) {
-  const R = VILLAGE_SLOPE_RISE, a = Math.atan2(R, 1), length = Math.hypot(1, R) + VILLAGE_EAVE;
-  const count = lod === 'low' ? 3 : lod === 'high' ? 7 : 4, pitch = length / count, tile = pitch + LAP;
-  const tilt = a - Math.asin(STEP / tile);
-  const along = (s: number): [number, number] => [R - s * Math.sin(a), -0.5 + s * Math.cos(a)];
-  return { R, a, count, pitch, tile, tilt, along };
-}
+/** The village verge across the gable: the bands run on to `edge`, the barge board under them out to `board`. */
+const VERGE = { edge: 0.565, board: 0.545, depth: 0.11 };
+/** The plain ridge-end block, half of it on each verge: across the gable, out from the ridge line at its foot and at its top (it flares), and its top. */
+const RIDGE_END = { x: [0.53, 0.58] as const, foot: 0.1, half: 0.14, top: VILLAGE_RIDGE_TOP + 0.025 };
 
 /**
- * Village verge: each tile course runs on past the gable as a cloaked verge
- * tile, its edge turned down in a lip, and the half ridge cap runs on with
- * it; under the tiles a timber barge board follows the roof line, its lower
- * edge waved, sitting on the wall top where it reaches it and ending in a
- * rounded foot past the wall's corner. A turned knob on the ridge cap and a
- * drop under the boards' apex, each half on either verge, mark the ridge end.
+ * Village verge: each of the panel's three tile bands runs on past the
+ * gable over a straight timber barge board, which follows the roof line from
+ * the ridge to the eave's tip, its lower edge parallel to it (kept on the wall
+ * top as far as the wall's face, where the pitch keeps it anyway), cut plumb
+ * at both ends. The half ridge runs on with the bands, a plain ridge-end
+ * block stands over its end, and (not at low) a flat hanging board
+ * under the boards' apex; two verges back to back make each of them whole.
  */
 function villageVerge(k: Kit, side: -1 | 1) {
-  const { R, count, pitch, tile, tilt, along } = villageCourses(k.lod);
-  const timber = k.m('post'), tiles = k.m('corrugated');
-  const lip = 0.035, board = 0.545, edge = 0.565, r = 0.008, facets = k.low ? 1 : 3;
-  // Tile verge: the course's own section across the gable, and a lip down outside the board, its outer corners rounded.
-  const section: [number, number][] = [[0.5, 0], [0.5, TILE], ...arc(edge - r, TILE - r, r, Math.PI / 2, 0, facets),
-    ...arc(edge - r, -lip + r, r, 0, -Math.PI / 2, facets), [board, -lip], [board, 0]];
-  for (let i = 0; i < count; i++) {
-    // The first course's lip is cut plumb at the ridge, where the course itself starts.
-    prism(k, tiles, section.map(([x, v]) => [side * x, v]), along(i * pitch), tilt, v => (i === 0 ? Math.max(0, -v * Math.tan(tilt)) : 0), () => tile);
-  }
-  // Half ridge cap carried on to the verge's edge.
-  k.b.box(tiles, [0.07, 0.06, 0.08], { position: [side * 0.535, R + 0.055, -0.46] }, 0);
+  const R = VILLAGE_SLOPE_RISE, a = Math.atan2(R, 1), e = Math.atan(VILLAGE_EAVE.fall);
+  const timber = k.m('post'), tiles = k.m('corrugated'), { edge, board, depth } = VERGE;
+  for (const band of VILLAGE_BANDS) across(k, tiles, band, side, 0.5, edge);
+  ridge(k, tiles, Math.min(side * 0.5, side * edge), Math.max(side * 0.5, side * edge));
+  const base = R, { foot, half, top } = RIDGE_END;
+  across(k, tiles, [[-0.5, base], [-0.5 + foot, base], [-0.5 + half, top], [-0.5, top]], side, RIDGE_END.x[0], RIDGE_END.x[1]);
 
-  // Barge board, x 0.5 … board: top on the courses' line, lower edge waved in a lobe every
-  // 0.25 m (the fullest at the ridge), floored at the wall top up to the wall's face, then a rounded foot.
-  const top = (z: number) => R * (0.5 - z), depth = 0.1, wave = k.low ? 0 : 0.04, period = 0.25;
-  const per = k.fine ? 8 : 6, zFoot = 0.68, footDrop = 0.03;
-  const lower: [number, number][] = [];
-  const steps = wave ? Math.round((WALL_FACE + 0.5) / period * per) : 1;
-  for (let i = 0; i <= steps; i++) {
-    const z = -0.5 + (WALL_FACE + 0.5) * i / steps;
-    const y = Math.max(top(z) - depth - wave * (0.5 + 0.5 * Math.cos(2 * Math.PI * (z + 0.5) / period)), WALL_TOP);
-    const prev = lower[lower.length - 1];
-    if (prev && prev[1] === WALL_TOP && y === WALL_TOP && i < steps) continue;
-    lower.push([z, y]);
-  }
-  const footSteps = k.low ? 2 : k.fine ? 6 : 4;
-  for (let i = 1; i <= footSteps; i++) {
-    const t = i / footSteps;
-    lower.push([WALL_FACE + (zFoot - WALL_FACE) * t, WALL_TOP - footDrop * Math.sqrt(Math.max(0, 1 - (2 * t - 1) ** 2))]);
-  }
-  // Its back stands 1 mm off the gable: the long rounding facets would otherwise lie on the panel's end face.
-  acrossRounded(k, timber, [[-0.5, top(-0.5)], [zFoot, top(zFoot)], ...lower.reverse()], side, 0.501, board, 0.008, k.fine ? 3 : 2);
+  // Barge board: its top on the bands' undersides, its lower edge `depth` under it, square to the pitch and to the eave.
+  const tip = VILLAGE_BANDS[2][1][0], dp = depth / Math.cos(a), de = depth / Math.cos(e);
+  // Where the two lower edges meet, under the cell edge.
+  const zk = 0.5 - (dp - de) / (R - VILLAGE_EAVE.fall), yk = villageFoot(zk) - dp;
+  const lower = (z: number, d: number) => Math.max(villageFoot(z) - d, z <= WALL_FACE ? WALL_TOP : -Infinity);
+  across(k, timber, [[-0.5, R], [0.5, 0], [tip, villageFoot(tip)], [tip, lower(tip, de)], [zk, yk], [-0.5, lower(-0.5, dp)]], side, 0.501, board);
   if (k.low) return;
-
-  // Ridge end: a turned knob on the cap, a drop under the boards' apex.
-  const segs = k.fine ? 10 : 6;
-  halfTurned(k, timber, [[0.02, 0], [0.014, 0.008], [0.026, 0.022], [0.022, 0.036], [0.008, 0.048], [0, 0.054]], [side * 0.535, R + 0.085, -0.5], segs);
-  const apex = top(-0.5) - depth - wave;
-  halfTurned(k, timber, [[0, -0.085], [0.01, -0.078], [0.019, -0.058], [0.012, -0.035], [0.016, -0.018], [0.02, 0.01]], [side * 0.5225, apex, -0.5], segs);
+  // Hanging board under the apex: a flat half hexagon on the barge board's face, its top inside the board.
+  const apex = R - dp;
+  across(k, timber, [[-0.5, apex + 0.025], [-0.43, apex - 0.01], [-0.43, apex - 0.085], [-0.5, apex - 0.13]], side, board - 0.015, board + 0.005);
 }
 
 /** Verge board on the panel's −X (left) or +X (right) end, from its ridge to its eave. */

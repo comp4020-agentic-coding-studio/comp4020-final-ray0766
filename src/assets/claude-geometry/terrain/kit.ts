@@ -11,6 +11,11 @@ import { DETAIL_METRES, DETAIL_NAMES, detailMap, foliageCard } from './textures.
 import type { CardName, DetailName } from './textures.ts';
 import type { Vec3 } from '../core/vec.ts';
 import type { RGB, StyleProgram, WaterLook } from './styles/program.ts';
+import type { PlanetEnvironment } from './env.ts';
+import {
+  CARD_COLOUR, floraColour, GROUND_COLOUR, GROUND_DECL, groundUniforms, PLANET_SHADOW, SEA_ICE_COLOUR, SEA_ICE_DECL, seaIceUniforms,
+  villageAtmosphere, villageSurface, WATER_COLOUR, WATER_DECL, waterUniforms,
+} from './village.ts';
 
 // TerrainKit: the textures and plant/rock materials every planet of one LOD
 // shares, in the role a StyleLibrary plays for buildings. Everything it makes
@@ -189,10 +194,11 @@ function patchFragmentDecl(shader: { fragmentShader: string }, decl: string) {
 const vec3Of = (c: RGB) => new T.Vector3(c[0], c[1], c[2]);
 
 /**
- * A stylised look's grade (src/style/look.ts `terrain`), in the shader: on
+ * The warm look's grade (src/style/look.ts `terrain`), in the shader: on
  * the colour the terrain has already worked out (vertex albedo, strata, water
  * depth tint, plant tints), just before lighting. Field data, heights, sea
  * level and plant placement are untouched; only the surface's colour changes.
+ * The village look does not come here: it draws flat tones (village.ts).
  */
 function lookGrade<M extends T.MeshStandardMaterial>(kit: TerrainKit, m: M): M {
   const P = lookParams(kit.look);
@@ -217,8 +223,16 @@ function lookGrade<M extends T.MeshStandardMaterial>(kit: TerrainKit, m: M): M {
 }
 export const DEFAULT_SUN = new T.Vector3(6, 9, 7).normalize();
 
-/** Ground: vertex albedo + rock strata, slope/wetness channels, triplanar detail, limb haze. */
-export function groundMaterial(kit: TerrainKit, program: StyleProgram): T.MeshStandardMaterial {
+/** The planet's environment, which the village look needs for its style's tones and the player's overrides. */
+function villageEnv(env: PlanetEnvironment | undefined): PlanetEnvironment {
+  if (!env) throw new Error('A terrain material in the village look needs the planet environment (its style and palette).');
+  return env;
+}
+/** In the village look a surface is lit by its smooth vertex normal: the detail maps only break up colour edges. */
+const flatNormal = (detail: string): [string, string] => [`normal = normalize((viewMatrix * vec4(${detail}, 0.0)).xyz);`, 'normal = normalize((viewMatrix * vec4(gN, 0.0)).xyz);'];
+
+/** Ground: vertex albedo + rock strata, slope/wetness channels, triplanar detail, limb haze; flat tones in the village look (village.ts). */
+export function groundMaterial(kit: TerrainKit, program: StyleProgram, env?: PlanetEnvironment): T.MeshStandardMaterial {
   const s = program.strata;
   const colors = Array.from({ length: 12 }, (_, i) => vec3Of(s.colors[Math.min(i, s.colors.length - 1)]));
   const edges = Array.from({ length: 12 }, (_, i) => s.edges[Math.min(i, s.edges.length - 1)]);
@@ -298,11 +312,15 @@ export function groundMaterial(kit: TerrainKit, program: StyleProgram): T.MeshSt
   };
   m.customProgramCacheKey = () => 'terrain.ground.v2';
   m.userData.uniforms = uniforms;
+  if (kit.look === 'village') {
+    Object.assign(uniforms, groundUniforms(villageEnv(env), program));
+    return villageSurface(m, { tag: 'ground', decl: GROUND_DECL, colour: GROUND_COLOUR, drop: [GLSL_HAZE], normal: flatNormal('detailN') });
+  }
   return lookGrade(kit, m);
 }
 
 /** Liquid water: depth tint and opacity from a per-vertex depth, slow ripples, shore foam. */
-export function waterMaterial(kit: TerrainKit, look: WaterLook, program: StyleProgram): T.MeshStandardMaterial {
+export function waterMaterial(kit: TerrainKit, look: WaterLook, program: StyleProgram, env?: PlanetEnvironment): T.MeshStandardMaterial {
   const uniforms: Uniforms = {
     tRipple: { value: kit.texture('ripple') }, uRippleScale: { value: 1 / DETAIL_METRES.ripple }, uRippleStrength: { value: 0.3 },
     uShallow: { value: vec3Of(look.shallow) }, uDeep: { value: vec3Of(look.deep) }, uDepthScale: { value: look.depthScale },
@@ -346,11 +364,17 @@ export function waterMaterial(kit: TerrainKit, look: WaterLook, program: StylePr
   };
   m.customProgramCacheKey = () => 'terrain.water.v4';
   m.userData.uniforms = uniforms;
+  if (kit.look === 'village') {
+    // Opaque, writing depth: the lines then see the water's surface, not the sea bed under it.
+    Object.assign(uniforms, waterUniforms(villageEnv(env)));
+    m.transparent = false; m.depthWrite = true;
+    return villageSurface(m, { tag: 'water', decl: WATER_DECL, colour: WATER_COLOUR, drop: [GLSL_HAZE], normal: flatNormal('waterN') });
+  }
   return lookGrade(kit, m);
 }
 
 /** Frozen sea: opaque sheet, clear dark ice over depth, snow-dusted pressure seams near shore. */
-export function seaIceMaterial(kit: TerrainKit, look: WaterLook, program: StyleProgram): T.MeshStandardMaterial {
+export function seaIceMaterial(kit: TerrainKit, look: WaterLook, program: StyleProgram, env?: PlanetEnvironment): T.MeshStandardMaterial {
   const uniforms: Uniforms = {
     tIce: { value: kit.texture('ice') }, tGrain: { value: kit.texture('grain') },
     uIceScale: { value: 1 / DETAIL_METRES.ice }, uGrainScale: { value: 1 / DETAIL_METRES.grain },
@@ -400,11 +424,17 @@ export function seaIceMaterial(kit: TerrainKit, look: WaterLook, program: StyleP
   };
   m.customProgramCacheKey = () => 'terrain.sea-ice.v4';
   m.userData.uniforms = uniforms;
+  if (kit.look === 'village') {
+    Object.assign(uniforms, seaIceUniforms(villageEnv(env)));
+    return villageSurface(m, { tag: 'sea-ice', decl: SEA_ICE_DECL, colour: SEA_ICE_COLOUR, drop: [GLSL_HAZE], normal: flatNormal('iceN') });
+  }
   return lookGrade(kit, m);
 }
 
 /** Atmosphere halo just outside the limb: back faces of a shell, brightest at the ground, fading outwards. */
-export function atmosphereMaterial(program: StyleProgram, look: Look = 'industrial'): T.ShaderMaterial {
+export function atmosphereMaterial(program: StyleProgram, look: Look = 'industrial', env?: PlanetEnvironment): T.ShaderMaterial {
+  // The village look draws a thin flat rim band instead of a glow.
+  if (look === 'village') return villageAtmosphere(villageEnv(env));
   // The warm look softens the halo towards its own dusty colours, like everything else.
   const halo = lookParams(look) ? new T.Color(warmColour(new T.Color().setRGB(...program.atmosphere.color, T.LinearSRGBColorSpace))) : null;
   const m = new T.ShaderMaterial({
@@ -489,6 +519,7 @@ function floraMaterial(kit: TerrainKit, name: Exclude<FloraMaterialName, 'leafCa
       .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>\n${GLSL_DAYSIDE}\n${GLSL_PLANET_SHADOW}`);
   };
   m.customProgramCacheKey = () => `terrain.flora.${name}.v3`;
+  if (kit.look === 'village') return villageSurface(m, { tag: `flora-${name}`, colour: floraColour(name), swap: [[GLSL_PLANET_SHADOW, PLANET_SHADOW]], normal: flatNormal('floraN') });
   return lookGrade(kit, m);
 }
 
@@ -521,6 +552,7 @@ function cardMaterial(kit: TerrainKit, name: 'leafCard' | 'needleCard'): T.MeshS
       .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>\n${GLSL_DAYSIDE}\n${GLSL_PLANET_SHADOW}`);
   };
   m.customProgramCacheKey = () => `terrain.flora.${name}.v2`;
+  if (kit.look === 'village') return villageSurface(m, { tag: name, colour: CARD_COLOUR, swap: [[GLSL_PLANET_SHADOW, PLANET_SHADOW]] });
   return lookGrade(kit, m);
 }
 

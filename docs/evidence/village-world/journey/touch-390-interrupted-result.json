@@ -1,0 +1,18 @@
+{
+  "status": "interrupted",
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "browserVersion": "154.0.8037.99",
+  "baseURL": "http://127.0.0.1:8134",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "realPhone": false,
+  "completedEvidence": [
+    "touch-390-arrival.png",
+    "touch-390-overview.png"
+  ],
+  "conclusion": "No complete touch-journey result. The original Playwright execution session disappeared before its finally block produced a report. No product assertion failure or passing conclusion was captured.",
+  "identityRecovery": "The original browser context did not save storageState. A cookie-bearing touch trace was identified; another Playwright run cleared the shared test-results directory before extraction. Remaining temporary Chrome profiles had no localhost cookie. The original credential cannot be recovered; no database identity migration was performed.",
+  "nextRun": "Explicitly authorized fresh isolated touch fixture, with private storageState checkpoint immediately after begin and its own artifact output. It is a new acceptance run, not a claimed repair of a product failure."
+}

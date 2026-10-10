@@ -5,9 +5,10 @@ import type { LodTier } from './lod.ts';
 import { finishMap, makeDataTexture, patternTextures } from './textures.ts';
 import type { FinishName, PatternName, PatternTextures } from './textures.ts';
 import { GLOW, PALETTE } from './tokens.ts';
+import type { PaletteName } from './tokens.ts';
 import { applyCel } from './cel.ts';
-import { createInkMaterials } from './ink.ts';
-import type { InkMaterials } from './ink.ts';
+import { applyHueKeep, applyInterior, applyMottle } from './surface.ts';
+import type { MottleSpace } from './surface.ts';
 import { lookParams, warmColour } from './look.ts';
 import type { Look, LookParams } from './look.ts';
 import { assetUrl, SCAN_TEXTURE_SIZE, SCANS, scanPath, scanRepeat, TRANSCODER_PATH } from './scans.ts';
@@ -139,13 +140,18 @@ export class StyleLibrary {
   private hazardTexture: T.DataTexture | null = null;
   /** 1×1 roughness/metalness maps of the warm look, per finish. */
   private flats = new Map<FinishName, T.DataTexture>();
+  /** Indoor twins of stylised materials (indoor()). */
+  private indoors = new Map<T.MeshStandardMaterial, T.MeshStandardMaterial>();
+  /** Twins with their patches fixed to the model, for things that move (moving()). */
+  private movers = new Map<T.MeshStandardMaterial, T.MeshStandardMaterial>();
+  /** Material names the look's table has no colour for (unlisted()). */
+  private unlistedNames = new Set<string>();
   private anisotropy = 1;
   private disposed = false;
   readonly scans: boolean;
   readonly look: Look;
   /** The look's parameters; null for the industrial look. */
   private readonly P: LookParams | null;
-  private inkSet: InkMaterials | null = null;
   /** Tier whose SCAN_TEXTURE_SIZE row the texture sets are loaded at. */
   readonly scanDetail: LodTier;
   private scanTextures = new Map<string, Promise<T.Texture>>();
@@ -343,10 +349,11 @@ export class StyleLibrary {
    * `name` is the preset name or custom key, used by the warm look to pick the
    * material's colour; `keepColour` leaves an explicit colour (a leased paint) as given.
    */
-  private build(recipe: SurfaceRecipe, name = '', keepColour = false): T.MeshStandardMaterial {
+  private build(recipe: SurfaceRecipe, name = '', keepColour = false, space: MottleSpace = 'world'): T.MeshStandardMaterial {
     const P = this.P;
     if (P) {
       const relief = (recipe.relief ?? 1) * P.relief, flat = this.flat(recipe.finish);
+      if (!keepColour && P.materials[name] === undefined) this.unlistedNames.add(name);
       const material = new T.MeshStandardMaterial({
         color: keepColour ? recipe.color : P.materials[name] ?? warmColour(recipe.color),
         ...(relief > 0 ? { normalMap: this.pattern(recipe.pattern).normal, normalScale: new T.Vector2(relief, relief) } : {}),
@@ -354,7 +361,7 @@ export class StyleLibrary {
         roughness: 1, metalness: 1,
         envMapIntensity: Math.min(1, recipe.envIntensity ?? 1) * P.envIntensity,
       });
-      return this.stylise(material);
+      return this.stylise(material, space);
     }
     const p = this.pattern(recipe.pattern), orm = this.finish(recipe.finish);
     const relief = recipe.relief ?? 1;
@@ -372,25 +379,94 @@ export class StyleLibrary {
   }
 
   /**
-   * The village look's finishing touches on any opaque material it makes:
-   * stepped direct light, and a small depth offset so ink lines drawn on the
-   * model's edges win the depth test against its faces.
+   * Light a material the caller made (and frees) the way this look lights its
+   * own: in the village look, the stepped light and no image light, so a decal
+   * on a hull turns into shade where the hull does. Other looks leave it alone.
    */
-  private stylise<M extends T.MeshStandardMaterial>(material: M): M {
+  lightAsLook<M extends T.MeshStandardMaterial>(material: M): M {
     const P = this.P;
     if (!P?.cel) return material;
+    material.envMapIntensity = P.envIntensity;
     applyCel(material, P.cel);
-    material.polygonOffset = true; material.polygonOffsetFactor = 1; material.polygonOffsetUnits = 1;
     return material;
   }
 
-  /** The look's shared ink outline materials (village), or null when the look draws none. */
-  ink(): InkMaterials | null {
-    const o = this.P?.outline;
-    if (!o) return null;
+  /**
+   * Preset names and custom keys this library has coloured by rule (warmColour)
+   * because its look's table (LookParams.materials) has no entry for them. The
+   * warm look does that by design; in the village look every name a model asks
+   * for should be in the table, so this is a list of misses (held empty by
+   * tests/unit/core/look.test.ts and on every page in Chrome).
+   */
+  unlisted(): string[] { return [...this.unlistedNames].sort(); }
+
+  /** Whether the look lights surfaces under a roof as indoors (indoor()). */
+  get daylightIndoors(): boolean { return !!this.P?.interior; }
+
+  /**
+   * The twin of a stylised library material that lights surfaces under a roof
+   * as indoors (src/style/surface.ts applyInterior): for buildings, whose
+   * geometry carries the `cover` attribute (src/blueprint/cover.ts) — never for
+   * geometry without it. Shared and cached per material; the material itself
+   * where the look has no daylight indoors or did not stylise it.
+   */
+  indoor<M extends T.Material>(material: M): M {
+    const P = this.P;
+    const standard = material as unknown as T.MeshStandardMaterial;
+    if (!P?.interior || !P.cel || !standard.isMeshStandardMaterial || !material.userData.cel || material.userData.interior) return material;
     this.alive();
-    this.inkSet ??= createInkMaterials(o.color, o.width, o.lineOpacity);
-    return this.inkSet;
+    let twin = this.indoors.get(standard);
+    if (!twin) {
+      // A clone carries the colour and maps but not the shader patches; its copied flags would skip them.
+      const mottled = material.userData.mottle === true, space = (material.userData.mottleSpace as MottleSpace | undefined) ?? 'world';
+      twin = standard.clone();
+      twin.userData.cel = false; twin.userData.mottle = false; twin.userData.mottleSpace = undefined; twin.userData.interior = false;
+      twin.name = `${material.name}+indoor`;
+      applyCel(twin, P.cel);
+      if (P.mottle && mottled) applyMottle(twin, P.mottle, space);
+      applyInterior(twin, P.interior);
+      this.indoors.set(standard, markShared(twin));
+    }
+    return twin as unknown as M;
+  }
+
+  /**
+   * The village look's finishing touches on any opaque material it makes:
+   * stepped direct light and tonal patches (src/style/cel.ts, src/style/surface.ts).
+   * Daylight indoors goes on the indoor twins only (indoor()); the lines are
+   * drawn on screen, not by the materials.
+   */
+  private stylise<M extends T.MeshStandardMaterial>(material: M, space: MottleSpace | null = 'world'): M {
+    const P = this.P;
+    if (!P?.cel) return material;
+    applyCel(material, P.cel);
+    if (P.mottle && space) applyMottle(material, P.mottle, space);
+    return material;
+  }
+
+  /**
+   * The twin of a stylised library material for a model that moves (a ship,
+   * a turntable): its tonal patches are fixed to the model instead of the
+   * world, so they turn and fly with it rather than crawl over it. Shared and
+   * cached per material; the material itself where it has no world-fixed
+   * patches (other looks, glass, glows, leased paints, which are already
+   * fixed to their ship).
+   */
+  moving<M extends T.Material>(material: M): M {
+    const P = this.P;
+    const standard = material as unknown as T.MeshStandardMaterial;
+    if (!P?.mottle || !P.cel || !standard.isMeshStandardMaterial || material.userData.mottle !== true || material.userData.mottleSpace !== 'world' || material.userData.interior) return material;
+    this.alive();
+    let twin = this.movers.get(standard);
+    if (!twin) {
+      twin = standard.clone();
+      twin.userData.cel = false; twin.userData.mottle = false; twin.userData.mottleSpace = undefined;
+      twin.name = `${material.name}+moving`;
+      applyCel(twin, P.cel);
+      applyMottle(twin, P.mottle, 'object');
+      this.movers.set(standard, markShared(twin));
+    }
+    return twin as unknown as M;
   }
 
   /**
@@ -422,7 +498,8 @@ export class StyleLibrary {
     const key = `${finish}|${pattern}|${new T.Color(color).getHexString()}` + (relief !== 1 || env !== 1 ? `|r${relief}|e${env}` : '');
     let entry = this.paints.get(key);
     if (!entry) {
-      entry = { material: markShared(this.build({ finish, pattern, color, relief, envIntensity: env }, '', true)), refs: 0 };
+      // Only ships lease paints: their patches are fixed to the ship (object space), so they do not crawl as it turns or flies.
+      entry = { material: markShared(this.build({ finish, pattern, color, relief, envIntensity: env }, '', true, 'object')), refs: 0 };
       entry.material.name = `paint:${key}`;
       this.paints.set(key, entry);
     }
@@ -446,6 +523,20 @@ export class StyleLibrary {
    */
   glass(tint: 'clear' | 'smoked' | 'canopy' = 'clear'): T.MeshPhysicalMaterial {
     const P = this.P;
+    if (P?.cel) {
+      // Drawn flat like every other surface: a tinted tone in the two bands that writes depth, so a
+      // pane is outlined and nothing behind it is inked through it; no mottle (glass is one even
+      // tone, and canopies move). Below opacity 1 (the village's) what is behind shows faintly through,
+      // without its lines; at 1 the glass would be opaque.
+      const g = P.glass[tint];
+      return this.special(`glass:${tint}`, () => {
+        const m = new T.MeshPhysicalMaterial({
+          color: g.color, metalness: 0, roughness: g.roughness, envMapIntensity: P.envIntensity,
+          transparent: g.opacity < 1, opacity: g.opacity, depthWrite: true,
+        });
+        return applyCel(m, P.cel!);
+      }) as T.MeshPhysicalMaterial;
+    }
     if (P) {
       // Tinted glass with a soft sheen: it reads as glass by colour, not by mirrored highlights.
       const g = P.glass[tint];
@@ -478,8 +569,18 @@ export class StyleLibrary {
     })) as T.MeshPhysicalMaterial;
   }
 
-  /** Diagonal hazard striping for door frames, stair nosings and landing gear. Shared. */
+  /**
+   * Diagonal hazard striping for door frames, stair nosings and landing gear. Shared.
+   * A look with a `hazardBand` (the village) paints it as one plain band instead.
+   */
   hazard(): T.MeshStandardMaterial {
+    const band = this.P?.hazardBand;
+    if (band) {
+      return this.special('hazard', () => {
+        const flat = this.flat('paint');
+        return this.stylise(new T.MeshStandardMaterial({ color: band, roughnessMap: flat, metalnessMap: flat, roughness: 1, metalness: 1, envMapIntensity: this.P!.envIntensity }));
+      }) as T.MeshStandardMaterial;
+    }
     return this.special('hazard', () => {
       const size = LOD[this.lod].textureSize;
       const data = new Uint8Array(size * size * 4);
@@ -503,7 +604,27 @@ export class StyleLibrary {
    * model. Dark base colour so unlit it reads as a lens, not a painted stripe.
    */
   createGlow(color: string = PALETTE.sodium, intensity: number = GLOW.lit): T.MeshStandardMaterial {
-    return this.stylise(new T.MeshStandardMaterial({ color: this.P ? this.P.glowBase : '#15171a', emissive: color, emissiveIntensity: intensity, roughness: 0.35, metalness: 0 }));
+    const P = this.P;
+    // In the village look the lens takes no image light either: it is drawn flat, like everything else,
+    // in the look's own glow colour, which it keeps at any intensity instead of clipping (applyHueKeep).
+    // No tonal patches on a lens (its light covers them, and liners and nav lights move with their ship).
+    const glow = this.stylise(new T.MeshStandardMaterial({ color: P ? P.glowBase : '#15171a', emissive: P?.cel ? this.glowColour(color) : color, emissiveIntensity: intensity, roughness: 0.35, metalness: 0, ...(P?.cel ? { envMapIntensity: P.envIntensity } : {}) }), null);
+    return P?.cel ? applyHueKeep(glow) : glow;
+  }
+
+  /**
+   * The colour a glow is drawn in. In a flat look (the village) a palette glow
+   * colour (cyan, sodium, signal red, magenta) becomes the look's own
+   * (LookParams.glows), so every caller that passes PALETTE.sodium gets the
+   * village lamp light; any other colour, and every colour in the other looks,
+   * is kept. For glows a model draws without createGlow (a ship's nav lenses).
+   */
+  glowColour(color: T.ColorRepresentation): string {
+    const hex = '#' + new T.Color(color).getHexString();
+    const P = this.P;
+    if (!P?.cel) return hex;
+    for (const [name, glow] of Object.entries(P.glows)) if (glow && '#' + new T.Color(PALETTE[name as PaletteName]).getHexString() === hex) return glow;
+    return hex;
   }
 
   private special(key: string, make: () => T.Material): T.Material {
@@ -526,11 +647,14 @@ export class StyleLibrary {
     for (const m of this.presets.values()) m.dispose();
     for (const e of this.paints.values()) e.material.dispose();
     for (const m of this.specials.values()) m.dispose();
+    for (const m of this.indoors.values()) m.dispose();
+    this.indoors.clear();
+    for (const m of this.movers.values()) m.dispose();
+    this.movers.clear();
     for (const p of this.patterns.values()) { p.normal.dispose(); p.albedo.dispose(); }
     for (const f of this.finishes.values()) f.dispose();
     for (const f of this.flats.values()) f.dispose();
     this.hazardTexture?.dispose();
-    this.inkSet?.shell.dispose(); this.inkSet?.lines.dispose(); this.inkSet = null;
     for (const t of this.scanLoaded) this.free(t);
     this.scanLoaded = [];
     this.ktx2Loader?.dispose();

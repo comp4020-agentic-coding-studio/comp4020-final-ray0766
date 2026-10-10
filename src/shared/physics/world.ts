@@ -14,21 +14,24 @@ import { objectHeight, objectRadius } from '../planets.ts';
 import type { PlanetView, PlacedObject } from '../planets.ts';
 import { RADIUS, SPAWN } from '../world.ts';
 import type { Vec3 } from '../world.ts';
-import { homeDoorLeaf } from '../home-door.ts';
+import { homeDoorLeaves } from '../home-door.ts';
 import type { HomeDoorState } from '../home-door.ts';
 import { PART_COLLIDERS } from './parts.ts';
 import type { PartBox } from './parts.ts';
+import { villageLampColliders } from './props.ts';
+import { BODY_RADIUS, BODY_HEIGHT, STEP_HEIGHT, GROUND_SKIN as SKIN, GROUND_SUBSTEP as SUBSTEP } from './body.ts';
+export { BODY_RADIUS, BODY_HEIGHT, STEP_HEIGHT } from './body.ts';
 
-export const BODY_RADIUS=.18, BODY_HEIGHT=1.60, STEP_HEIGHT=.26, GRAVITY=12, MAX_FALL_SPEED=10, JUMP_SPEED=5.2;
+export const GRAVITY=12, MAX_FALL_SPEED=10, JUMP_SPEED=5.2;
 export const SPRINT_FLAG=1, JUMP_FLAG=2;
 export const FIXED_STEP=1/60, MAX_PATH_STEPS=28;
 // Bump whenever static collision semantics change. Durable ground rows and
 // movement batches use this same value; a scene revision alone is not enough.
-export const PHYSICS_VERSION=6;
+export const PHYSICS_VERSION=7;
 // Shared radial-ascent fix and public layout are released together.
-export const HUB_PHYSICS_VERSION=5;
+export const HUB_PHYSICS_VERSION=7;
 export const physicsVersionFor=(planetId:string)=>planetId==='hub'?HUB_PHYSICS_VERSION:PHYSICS_VERSION;
-const SKIN=.002, SUBSTEP=.035, ground=legacyHeightField();
+const ground=legacyHeightField();
 export interface GroundPose { position:Vec3; radius:number; verticalSpeed:number; grounded:boolean; jumpHeld?:boolean }
 export interface GroundState extends Omit<GroundPose,'position'> { sequence:number; sceneRevision:number; physicsVersion:number }
 export type MotionStep=[number,number,number,number]|[number,number,number,number,number];
@@ -63,6 +66,11 @@ export class GroundWorld {
         const body:Body={objectId:object.id,dir:vec(object.position),broad:objectRadius(object)+1,colliders:[]};
         for(const shape of PART_COLLIDERS[contract.part]())this.add(body,object.position,object.rotation,base,{...shape,center:shape.center.map((n,i)=>n+contract.offset[i]) as Vec3});
         this.bodies.push(body);
+      }else if(object.assetVersion===2&&object.kind==='lamp'){
+        const base=(this.generated?objectSeat(this.field,object,planet.blueprints).baseRadius:this.radius(object.position))+.015;
+        const body:Body={objectId:object.id,dir:vec(object.position),broad:objectRadius(object)+1,colliders:[]};
+        for(const shape of villageLampColliders())this.add(body,object.position,object.rotation,base,shape);
+        this.bodies.push(body);
       }else if(objectHeight(object)>.6){
         const radius=objectRadius(object),h=objectHeight(object),base=(this.generated?objectSeat(this.field,object,planet.blueprints).baseRadius:this.radius(object.position))+.015;
         const body:Body={objectId:object.id,dir:vec(object.position),broad:radius+1,colliders:[],round:{radius,height:h,base}};
@@ -88,7 +96,7 @@ export class GroundWorld {
       const t=partTransform(part,pivot),turn=new Quaternion().setFromAxisAngle(new Vector3(0,1,0),t.yaw);
       const dynamic=homeDoor?.buildingId===o.id&&homeDoor.partNumber===part.n&&part.part==='wall.door.open';
       const shapes=PART_COLLIDERS[part.part]();
-      const colliders=dynamic?[...shapes.filter(shape=>shape.tag!=='open leaf'&&shape.tag!=='closed leaf'),homeDoorLeaf(homeDoor.open)]:shapes;
+      const colliders=dynamic?[...shapes.filter(shape=>shape.tag!=='sliding leaf'),...homeDoorLeaves(homeDoor.open)]:shapes;
       for(const shape of colliders){
         const center=vec(shape.center).applyQuaternion(turn).add(vec(t.position));
         this.add(body,o.position,o.rotation,fit.baseRadius,{...shape,center:center.toArray() as Vec3,yaw:t.yaw+(shape.yaw??0)});

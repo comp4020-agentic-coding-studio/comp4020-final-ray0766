@@ -1,0 +1,1431 @@
+{
+  "createdAt": "2026-10-10T02:59:20.733Z",
+  "browser": "154.0.8037.99",
+  "host": {
+    "platform": "darwin",
+    "release": "27.0.0",
+    "cpu": "Apple M3",
+    "logicalCPUs": 8,
+    "physicalMemoryBytes": 17179869184
+  },
+  "fingerprints": {
+    "src/shared/public-town-data.ts": "49a178b5e9f3adef5166c3691419629b86d7c662732ed847d56a9e28ce478cd4",
+    "src/shared/public-town-layout.ts": "e7c773b9430d9f26ad0b56fc4d90edefca65e36ac23c8822194a0927e035acdf",
+    "src/client/public-town-art.ts": "eda048574732c3fba0585496c48a1d7f5720fee850d42a66e08fdbc76962b663",
+    "src/client/town-renderer.ts": "47c5cbe93324d4c4e627ee224286ab2276d6fb8f75972932bcbc245e61f8d50d",
+    "src/shared/terrain-prewarm.ts": "28cc03693b6ada9a4867c6543ee3a2b9b5cad964df025740b3c35dde55358ec2",
+    "src/shared/ground-fit-cache.ts": "a32477efd12b5a544093ee0a7751b8d425561841e5dd9c4fc299fa1288db9f8b",
+    "src/shared/blueprint-ground-footprint.ts": "8fc47672452b964794e305277915adc2b41589f83aa34f4b6b2945b15b76bff2",
+    "src/client/terrain-model.ts": "0f03f253b5c87d854f3b5be9ee402da4e1c082fdf01df71253f824faff84a01b"
+  },
+  "sourcesUnchanged": true,
+  "profilingTransforms": [
+    {
+      "source": "src/client/town-renderer.ts",
+      "sourceSha256": "47c5cbe93324d4c4e627ee224286ab2276d6fb8f75972932bcbc245e61f8d50d",
+      "profiledSha256": "84967160470be2b03ab59ecf2acf08d17e956ca8b0fe29dd226457972ece2652",
+      "meaning": "In-memory only: timestamp around chunk build/finalize including cleanup and around global merge including cleanup. No source file is changed."
+    }
+  ],
+  "requests": {
+    "total": 118,
+    "blocked": [],
+    "apiRequests": [],
+    "appEntryRequests": []
+  },
+  "errors": [],
+  "ledger": {
+    "version": 8,
+    "radius": 21.6,
+    "objects": 509,
+    "structures": 249,
+    "paths": 252,
+    "blueprints": 17,
+    "parts": 5267,
+    "districts": 12
+  },
+  "preparation": {
+    "mode": "Actual async factory with 6 ms inter-object batch target, rAF yields, exact ground fits. Individual fit/model/finalize/merge is synchronous and can exceed the target.",
+    "initWallMs": 4071.600000023842,
+    "firstModel": {
+      "readyObjects": 1,
+      "totalObjects": 509,
+      "readyChunks": 0,
+      "totalChunks": 48,
+      "lastBuildMs": 12.800000071525574,
+      "totalBuildMs": 12.800000071525574,
+      "elapsedMs": 2616.600000023842
+    },
+    "initialFitMs": 0.09999990463256836,
+    "initialBuildMs": 657.4000000953674,
+    "yields": 245,
+    "yieldIntervalMs": {
+      "count": 245,
+      "p50": 16.699999928474426,
+      "p95": 18.300000071525574,
+      "max": 18.600000023841858
+    },
+    "lowStepMs": {
+      "count": 509,
+      "p50": 0.6999999284744263,
+      "p95": 5.899999976158142,
+      "max": 12.800000071525574
+    },
+    "slowestLowSteps": [
+      {
+        "readyObjects": 1,
+        "totalObjects": 509,
+        "readyChunks": 0,
+        "totalChunks": 48,
+        "lastBuildMs": 12.800000071525574,
+        "totalBuildMs": 12.800000071525574,
+        "elapsedMs": 2616.600000023842
+      },
+      {
+        "readyObjects": 2,
+        "totalObjects": 509,
+        "readyChunks": 0,
+        "totalChunks": 48,
+        "lastBuildMs": 10.399999976158142,
+        "totalBuildMs": 23.200000047683716,
+        "elapsedMs": 2630.7999999523163
+      },
+      {
+        "readyObjects": 29,
+        "totalObjects": 509,
+        "readyChunks": 1,
+        "totalChunks": 48,
+        "lastBuildMs": 9.100000023841858,
+        "totalBuildMs": 65.40000009536743,
+        "elapsedMs": 2729.600000023842
+      },
+      {
+        "readyObjects": 120,
+        "totalObjects": 509,
+        "readyChunks": 6,
+        "totalChunks": 48,
+        "lastBuildMs": 7,
+        "totalBuildMs": 178.80000007152557,
+        "elapsedMs": 2976.5
+      },
+      {
+        "readyObjects": 484,
+        "totalObjects": 509,
+        "readyChunks": 45,
+        "totalChunks": 48,
+        "lastBuildMs": 6.800000071525574,
+        "totalBuildMs": 634.5000001192093,
+        "elapsedMs": 4014.2000000476837
+      },
+      {
+        "readyObjects": 77,
+        "totalObjects": 509,
+        "readyChunks": 3,
+        "totalChunks": 48,
+        "lastBuildMs": 6.799999952316284,
+        "totalBuildMs": 122.90000009536743,
+        "elapsedMs": 2849.5
+      },
+      {
+        "readyObjects": 100,
+        "totalObjects": 509,
+        "readyChunks": 4,
+        "totalChunks": 48,
+        "lastBuildMs": 6.700000047683716,
+        "totalBuildMs": 150.30000019073486,
+        "elapsedMs": 2910.5
+      },
+      {
+        "readyObjects": 410,
+        "totalObjects": 509,
+        "readyChunks": 35,
+        "totalChunks": 48,
+        "lastBuildMs": 6.700000047683716,
+        "totalBuildMs": 524.4999998807907,
+        "elapsedMs": 3779.5
+      },
+      {
+        "readyObjects": 3,
+        "totalObjects": 509,
+        "readyChunks": 0,
+        "totalChunks": 48,
+        "lastBuildMs": 6.600000023841858,
+        "totalBuildMs": 29.800000071525574,
+        "elapsedMs": 2643.7000000476837
+      },
+      {
+        "readyObjects": 393,
+        "totalObjects": 509,
+        "readyChunks": 32,
+        "totalChunks": 48,
+        "lastBuildMs": 6.5,
+        "totalBuildMs": 498.09999990463257,
+        "elapsedMs": 3728.7999999523163
+      }
+    ],
+    "groundLast": {
+      "done": 509,
+      "total": 509,
+      "elapsedMs": 2588.600000023842
+    },
+    "progressLast": {
+      "readyObjects": 509,
+      "totalObjects": 509,
+      "readyChunks": 48,
+      "totalChunks": 48,
+      "lastBuildMs": 1.1999999284744263,
+      "totalBuildMs": 657.4000000953674,
+      "elapsedMs": 4071.399999976158
+    }
+  },
+  "initial": {
+    "totalObjects": 509,
+    "totalChunks": 48,
+    "visibleObjects": 509,
+    "visibleChunks": 48,
+    "mediumChunks": 0,
+    "cachedMediumChunks": 0,
+    "pendingMediumChunks": 0,
+    "stagedMediumObjects": 0,
+    "globalLowBatch": false,
+    "activeTriangles": 503556,
+    "activeDrawCalls": 660,
+    "residentTriangles": 503556,
+    "residentGeometryBytes": 53039520,
+    "initialBuildMs": 657.4000000953674,
+    "lastBuildMs": 0,
+    "initialFitMs": 0.09999990463256836
+  },
+  "firstStreet": {
+    "district": "town-north-0",
+    "warmupUpdates": 83,
+    "totalObjects": 509,
+    "totalChunks": 48,
+    "visibleObjects": 320,
+    "visibleChunks": 29,
+    "mediumChunks": 8,
+    "cachedMediumChunks": 8,
+    "pendingMediumChunks": 0,
+    "stagedMediumObjects": 0,
+    "globalLowBatch": false,
+    "activeTriangles": 332712,
+    "activeDrawCalls": 402,
+    "residentTriangles": 607604,
+    "residentGeometryBytes": 64098144,
+    "initialBuildMs": 657.4000000953674,
+    "lastBuildMs": 1.2999999523162842,
+    "initialFitMs": 0.09999990463256836
+  },
+  "streetRows": [
+    {
+      "district": "town-north-0",
+      "warmupUpdates": 83,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 320,
+      "visibleChunks": 29,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 332712,
+      "activeDrawCalls": 402,
+      "residentTriangles": 607604,
+      "residentGeometryBytes": 64098144,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 1.2999999523162842,
+      "initialFitMs": 0.09999990463256836
+    },
+    {
+      "district": "town-north-1",
+      "warmupUpdates": 35,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 348,
+      "visibleChunks": 29,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 342284,
+      "activeDrawCalls": 400,
+      "residentTriangles": 581804,
+      "residentGeometryBytes": 61441776,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 1.399999976158142,
+      "initialFitMs": 0.09999990463256836
+    },
+    {
+      "district": "town-north-2",
+      "warmupUpdates": 75,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 342,
+      "visibleChunks": 30,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 345556,
+      "activeDrawCalls": 414,
+      "residentTriangles": 617568,
+      "residentGeometryBytes": 65109288,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 3.299999952316284,
+      "initialFitMs": 0.09999990463256836
+    },
+    {
+      "district": "town-north-3",
+      "warmupUpdates": 54,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 336,
+      "visibleChunks": 29,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 338258,
+      "activeDrawCalls": 393,
+      "residentTriangles": 599898,
+      "residentGeometryBytes": 63315696,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 1.0999999046325684,
+      "initialFitMs": 0.09999990463256836
+    },
+    {
+      "district": "town-middle-0",
+      "warmupUpdates": 127,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 279,
+      "visibleChunks": 26,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 306840,
+      "activeDrawCalls": 359,
+      "residentTriangles": 653876,
+      "residentGeometryBytes": 68826816,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 1.399999976158142,
+      "initialFitMs": 0.09999990463256836
+    },
+    {
+      "district": "town-middle-1",
+      "warmupUpdates": 76,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 309,
+      "visibleChunks": 28,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 327602,
+      "activeDrawCalls": 388,
+      "residentTriangles": 610262,
+      "residentGeometryBytes": 64412856,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 1.7000000476837158,
+      "initialFitMs": 0.09999990463256836
+    },
+    {
+      "district": "town-middle-2",
+      "warmupUpdates": 137,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 333,
+      "visibleChunks": 33,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 362824,
+      "activeDrawCalls": 449,
+      "residentTriangles": 647064,
+      "residentGeometryBytes": 68091264,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 1.399999976158142,
+      "initialFitMs": 0.09999990463256836
+    },
+    {
+      "district": "town-middle-3",
+      "warmupUpdates": 86,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 315,
+      "visibleChunks": 29,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 330438,
+      "activeDrawCalls": 404,
+      "residentTriangles": 613094,
+      "residentGeometryBytes": 64666728,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 2.5999999046325684,
+      "initialFitMs": 0.09999990463256836
+    },
+    {
+      "district": "town-south-0",
+      "warmupUpdates": 75,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 353,
+      "visibleChunks": 31,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 375502,
+      "activeDrawCalls": 432,
+      "residentTriangles": 616010,
+      "residentGeometryBytes": 64999656,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 2.8000000715255737,
+      "initialFitMs": 0.09999990463256836
+    },
+    {
+      "district": "town-south-1",
+      "warmupUpdates": 37,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 331,
+      "visibleChunks": 29,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 359354,
+      "activeDrawCalls": 405,
+      "residentTriangles": 611242,
+      "residentGeometryBytes": 64547064,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 2.5,
+      "initialFitMs": 0.09999990463256836
+    },
+    {
+      "district": "town-south-2",
+      "warmupUpdates": 46,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 310,
+      "visibleChunks": 29,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 341764,
+      "activeDrawCalls": 409,
+      "residentTriangles": 607528,
+      "residentGeometryBytes": 64098720,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 2.5,
+      "initialFitMs": 0.09999990463256836
+    },
+    {
+      "district": "town-south-3",
+      "warmupUpdates": 41,
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 325,
+      "visibleChunks": 28,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 344610,
+      "activeDrawCalls": 388,
+      "residentTriangles": 593434,
+      "residentGeometryBytes": 62633304,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 2.200000047683716,
+      "initialFitMs": 0.09999990463256836
+    }
+  ],
+  "streetMax": {
+    "activeTriangles": 375502,
+    "activeDrawCalls": 449,
+    "visibleObjects": 353,
+    "peakResidentGeometryBytes": 69310080,
+    "peakCachedMediumChunks": 8,
+    "peakStagedMediumObjects": 31
+  },
+  "updateTiming": {
+    "count": 963,
+    "p50": 0.6999999284744263,
+    "p95": 7.299999952316284,
+    "max": 9.600000023841858
+  },
+  "mediumBuildTiming": {
+    "count": 963,
+    "p50": 0.6000000238418579,
+    "p95": 7.199999928474426,
+    "max": 9.600000023841858
+  },
+  "chunkFinalize": {
+    "meaning": "Synchronous prepared-model merge/finalize and cleanup; all prepared counts must equal objects, so no model factories are included.",
+    "allPrepared": true,
+    "low": {
+      "count": 48,
+      "p50": 1.1999999284744263,
+      "p95": 2.5,
+      "max": 3
+    },
+    "medium": {
+      "count": 86,
+      "p50": 1.399999976158142,
+      "p95": 3,
+      "max": 3.200000047683716
+    },
+    "slowest": [
+      {
+        "ms": 3.200000047683716,
+        "lod": "medium",
+        "objects": 30,
+        "prepared": 30,
+        "meshes": 16,
+        "bytes": 2892024
+      },
+      {
+        "ms": 3.100000023841858,
+        "lod": "medium",
+        "objects": 32,
+        "prepared": 32,
+        "meshes": 15,
+        "bytes": 2954880
+      },
+      {
+        "ms": 3,
+        "lod": "low",
+        "objects": 23,
+        "prepared": 23,
+        "meshes": 15,
+        "bytes": 2119680
+      },
+      {
+        "ms": 3,
+        "lod": "medium",
+        "objects": 30,
+        "prepared": 30,
+        "meshes": 16,
+        "bytes": 2892024
+      },
+      {
+        "ms": 3,
+        "lod": "medium",
+        "objects": 32,
+        "prepared": 32,
+        "meshes": 15,
+        "bytes": 2954880
+      },
+      {
+        "ms": 3,
+        "lod": "medium",
+        "objects": 29,
+        "prepared": 29,
+        "meshes": 17,
+        "bytes": 2987352
+      },
+      {
+        "ms": 3,
+        "lod": "medium",
+        "objects": 32,
+        "prepared": 32,
+        "meshes": 15,
+        "bytes": 2954880
+      },
+      {
+        "ms": 2.899999976158142,
+        "lod": "medium",
+        "objects": 25,
+        "prepared": 25,
+        "meshes": 16,
+        "bytes": 2777112
+      },
+      {
+        "ms": 2.8000000715255737,
+        "lod": "medium",
+        "objects": 24,
+        "prepared": 24,
+        "meshes": 16,
+        "bytes": 2783232
+      },
+      {
+        "ms": 2.700000047683716,
+        "lod": "medium",
+        "objects": 23,
+        "prepared": 23,
+        "meshes": 16,
+        "bytes": 2718432
+      }
+    ]
+  },
+  "globalMerge": {
+    "summary": {
+      "count": 16,
+      "p50": 19,
+      "p95": 21.600000023841858,
+      "max": 21.600000023841858
+    },
+    "measurements": [
+      {
+        "ms": 21.600000023841858,
+        "meshes": 98,
+        "bytes": 53039520
+      },
+      {
+        "ms": 19.699999928474426,
+        "meshes": 97,
+        "bytes": 53039520
+      },
+      {
+        "ms": 20,
+        "meshes": 98,
+        "bytes": 53039520
+      },
+      {
+        "ms": 21.399999976158142,
+        "meshes": 97,
+        "bytes": 53039520
+      },
+      {
+        "ms": 21,
+        "meshes": 98,
+        "bytes": 53039520
+      },
+      {
+        "ms": 20,
+        "meshes": 97,
+        "bytes": 53039520
+      },
+      {
+        "ms": 19.199999928474426,
+        "meshes": 98,
+        "bytes": 53039520
+      },
+      {
+        "ms": 18.700000047683716,
+        "meshes": 97,
+        "bytes": 53039520
+      },
+      {
+        "ms": 18.600000023841858,
+        "meshes": 98,
+        "bytes": 53039520
+      },
+      {
+        "ms": 18.5,
+        "meshes": 97,
+        "bytes": 53039520
+      },
+      {
+        "ms": 18.699999928474426,
+        "meshes": 98,
+        "bytes": 53039520
+      },
+      {
+        "ms": 18.399999976158142,
+        "meshes": 97,
+        "bytes": 53039520
+      },
+      {
+        "ms": 18.600000023841858,
+        "meshes": 98,
+        "bytes": 53039520
+      },
+      {
+        "ms": 19,
+        "meshes": 97,
+        "bytes": 53039520
+      },
+      {
+        "ms": 18.600000023841858,
+        "meshes": 98,
+        "bytes": 53039520
+      },
+      {
+        "ms": 18.300000071525574,
+        "meshes": 97,
+        "bytes": 53039520
+      }
+    ]
+  },
+  "viewCycles": [
+    {
+      "index": 0,
+      "overview": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 21.700000047683716,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 21.799999952316284
+      },
+      "overviewReuse": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0.10000002384185791
+      },
+      "orbit": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 97,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 19.799999952316284,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 19.899999976158142
+      },
+      "returned": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 320,
+          "visibleChunks": 29,
+          "mediumChunks": 8,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": false,
+          "activeTriangles": 332712,
+          "activeDrawCalls": 402,
+          "residentTriangles": 607604,
+          "residentGeometryBytes": 64098144,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0.10000002384185791
+      }
+    },
+    {
+      "index": 1,
+      "overview": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 20,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 20
+      },
+      "overviewReuse": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0.19999992847442627
+      },
+      "orbit": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 97,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 21.399999976158142,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 21.399999976158142
+      },
+      "returned": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 320,
+          "visibleChunks": 29,
+          "mediumChunks": 8,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": false,
+          "activeTriangles": 332712,
+          "activeDrawCalls": 402,
+          "residentTriangles": 607604,
+          "residentGeometryBytes": 64098144,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0.10000002384185791
+      }
+    },
+    {
+      "index": 2,
+      "overview": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 21,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 21.100000023841858
+      },
+      "overviewReuse": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0
+      },
+      "orbit": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 97,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 20,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 20.100000023841858
+      },
+      "returned": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 320,
+          "visibleChunks": 29,
+          "mediumChunks": 8,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": false,
+          "activeTriangles": 332712,
+          "activeDrawCalls": 402,
+          "residentTriangles": 607604,
+          "residentGeometryBytes": 64098144,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0
+      }
+    },
+    {
+      "index": 3,
+      "overview": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 19.199999928474426,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 19.299999952316284
+      },
+      "overviewReuse": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0
+      },
+      "orbit": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 97,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 18.700000047683716,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 18.899999976158142
+      },
+      "returned": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 320,
+          "visibleChunks": 29,
+          "mediumChunks": 8,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": false,
+          "activeTriangles": 332712,
+          "activeDrawCalls": 402,
+          "residentTriangles": 607604,
+          "residentGeometryBytes": 64098144,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0.10000002384185791
+      }
+    },
+    {
+      "index": 4,
+      "overview": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 18.600000023841858,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 18.700000047683716
+      },
+      "overviewReuse": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0
+      },
+      "orbit": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 97,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 18.5,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 18.5
+      },
+      "returned": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 320,
+          "visibleChunks": 29,
+          "mediumChunks": 8,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": false,
+          "activeTriangles": 332712,
+          "activeDrawCalls": 402,
+          "residentTriangles": 607604,
+          "residentGeometryBytes": 64098144,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0.10000002384185791
+      }
+    },
+    {
+      "index": 5,
+      "overview": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 18.699999928474426,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 18.699999928474426
+      },
+      "overviewReuse": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0.10000002384185791
+      },
+      "orbit": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 97,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 18.399999976158142,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 18.399999976158142
+      },
+      "returned": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 320,
+          "visibleChunks": 29,
+          "mediumChunks": 8,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": false,
+          "activeTriangles": 332712,
+          "activeDrawCalls": 402,
+          "residentTriangles": 607604,
+          "residentGeometryBytes": 64098144,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0.10000002384185791
+      }
+    },
+    {
+      "index": 6,
+      "overview": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 18.600000023841858,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 18.600000023841858
+      },
+      "overviewReuse": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0.10000002384185791
+      },
+      "orbit": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 97,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 19,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 19
+      },
+      "returned": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 320,
+          "visibleChunks": 29,
+          "mediumChunks": 8,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": false,
+          "activeTriangles": 332712,
+          "activeDrawCalls": 402,
+          "residentTriangles": 607604,
+          "residentGeometryBytes": 64098144,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0.09999990463256836
+      }
+    },
+    {
+      "index": 7,
+      "overview": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 18.600000023841858,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 18.600000023841858
+      },
+      "overviewReuse": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 98,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0
+      },
+      "orbit": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 509,
+          "visibleChunks": 1,
+          "mediumChunks": 0,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": true,
+          "activeTriangles": 503556,
+          "activeDrawCalls": 97,
+          "residentTriangles": 1111160,
+          "residentGeometryBytes": 117137664,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 18.300000071525574,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 18.399999976158142
+      },
+      "returned": {
+        "stats": {
+          "totalObjects": 509,
+          "totalChunks": 48,
+          "visibleObjects": 320,
+          "visibleChunks": 29,
+          "mediumChunks": 8,
+          "cachedMediumChunks": 8,
+          "pendingMediumChunks": 0,
+          "stagedMediumObjects": 0,
+          "globalLowBatch": false,
+          "activeTriangles": 332712,
+          "activeDrawCalls": 402,
+          "residentTriangles": 607604,
+          "residentGeometryBytes": 64098144,
+          "initialBuildMs": 657.4000000953674,
+          "lastBuildMs": 0,
+          "initialFitMs": 0.09999990463256836
+        },
+        "wallMs": 0
+      }
+    }
+  ],
+  "resourceChecks": {
+    "stableReturned": true,
+    "stableOverview": true,
+    "baseline": {
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 320,
+      "visibleChunks": 29,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 332712,
+      "activeDrawCalls": 402,
+      "residentTriangles": 607604,
+      "residentGeometryBytes": 64098144,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 1.2000000476837158,
+      "initialFitMs": 0.09999990463256836
+    },
+    "retainedBeforeDispose": {
+      "totalObjects": 509,
+      "totalChunks": 48,
+      "visibleObjects": 320,
+      "visibleChunks": 29,
+      "mediumChunks": 8,
+      "cachedMediumChunks": 8,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 332712,
+      "activeDrawCalls": 402,
+      "residentTriangles": 607604,
+      "residentGeometryBytes": 64098144,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 0,
+      "initialFitMs": 0.09999990463256836
+    },
+    "afterDispose": {
+      "totalObjects": 509,
+      "totalChunks": 0,
+      "visibleObjects": 0,
+      "visibleChunks": 0,
+      "mediumChunks": 0,
+      "cachedMediumChunks": 0,
+      "pendingMediumChunks": 0,
+      "stagedMediumObjects": 0,
+      "globalLowBatch": false,
+      "activeTriangles": 0,
+      "activeDrawCalls": 0,
+      "residentTriangles": 0,
+      "residentGeometryBytes": 0,
+      "initialBuildMs": 657.4000000953674,
+      "lastBuildMs": 0,
+      "initialFitMs": 0.09999990463256836
+    },
+    "disposedRootChildren": 0,
+    "emptyAfterDispose": true
+  },
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "localStorageKeys": [],
+  "meaning": "Actual installed Google Chrome with DOM canvas for ordinary Path material. No app/main, identity, database/API request, or WebGL renderer. Calls mean active mesh batches, not total frame draw calls. Bytes count retained vertex/index buffers including low, cached/staged medium and global low copy; exclude textures, JS/temporary arrays and GPU/driver copies. CPU timings include lightweight in-memory profiling; they are not FPS, GPU timing or physical-phone measurements. Steady street detail is advanced in a tight loop; preparation uses rAF.",
+  "passed": true
+}

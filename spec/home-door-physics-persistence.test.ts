@@ -6,7 +6,7 @@ import { Quaternion, Vector3 } from 'three';
 import { openStore } from '../src/server/store.ts';
 import { GroundWorld, FIXED_STEP } from '../src/shared/physics/world.ts';
 import type { GroundPose, MotionStep } from '../src/shared/physics/world.ts';
-import { homeDoorLeaf } from '../src/shared/home-door.ts';
+import { homeDoorLeaves } from '../src/shared/home-door.ts';
 import type { HomeDescriptor } from '../src/shared/home.ts';
 import type { PlayerState, Vec3 } from '../src/shared/world.ts';
 import { SPAWN } from '../src/shared/world.ts';
@@ -51,7 +51,12 @@ function enter(store: Store, id: string) {
   const player = store.state(id), home = player.home!;
   place(store, id, geometry(home, new GroundWorld(store.universe(id).currentPlanet)).pose(0, .9));
   const near = store.state(id);
-  return store.enterHome(id, { planetId: near.planetId, buildingId: home.buildingId, visitEpoch: near.location!.visitEpoch }).player;
+  if(id==='owner')return store.enterHome(id,{planetId:near.planetId,buildingId:home.buildingId,visitEpoch:near.location!.visitEpoch}).player;
+  // A visitor saved indoors before owner-only entry was introduced must still
+  // be protected by door safety and able to leave. New visitor entry is denied.
+  const loc={kind:'interior',planetId:near.planetId,buildingId:home.buildingId,interiorId:home.interiorId,position:[0,0,home.interior.room.depth/2-1],yaw:Math.PI,sequence:0,visitEpoch:near.location!.visitEpoch+1};
+  store.db.prepare('UPDATE home_locations SET document=? WHERE player_id=?').run(JSON.stringify(loc),id);
+  return store.state(id);
 }
 
 it('blocks real ground traversal when closed and restores the same opening after save and reopen', () => {
@@ -90,7 +95,7 @@ it('blocks a valid flat-room path at the closed leaf and accepts it after openin
 }, 10_000);
 
 it('refuses a door sweep occupied by any saved exterior or interior visitor with zero writes', () => {
-  const { store } = fixture(2), home = store.state('owner').home!, world = new GroundWorld(store.universe('owner').currentPlanet), frame = geometry(home, world), leaf = homeDoorLeaf(false);
+  const { store } = fixture(2), home = store.state('owner').home!, world = new GroundWorld(store.universe('owner').currentPlanet), frame = geometry(home, world), leaf = homeDoorLeaves(false)[0];
   // No presence heartbeat is registered: disconnected saved visitors still count.
   const doorway = frame.pose(leaf.center[0], leaf.center[2]);
   expect(world.blocked(doorway)).toBe(false);
@@ -110,17 +115,16 @@ it('refuses a door sweep occupied by any saved exterior or interior visitor with
   expect(store.state('visitor-1').location).toEqual(atDoor);
 }, 15_000);
 
-it('refuses opening onto an exterior visitor occupying the open leaf without changing door or player state', () => {
+it('opens beside a saved exterior visitor in the former inward swing without moving them', () => {
   const { store } = fixture(1); toggle(store, false);
-  const current = store.universe('owner'), world = new GroundWorld(current.currentPlanet), frame = geometry(current.player.home!, world), leaf = homeDoorLeaf(true);
-  const occupied = frame.pose(leaf.center[0], leaf.center[2] - .18);
+  const current = store.universe('owner'), world = new GroundWorld(current.currentPlanet), frame = geometry(current.player.home!, world);
+  const occupied = frame.pose(-.3,-.5);
   expect(world.blocked(occupied)).toBe(false);
   place(store, 'visitor-0', occupied);
-  const visitor = store.state('visitor-0'), before = changes(store);
-  expect(() => toggle(store, true)).toThrow();
-  expect(changes(store)).toBe(before);
+  const visitor = store.state('visitor-0');
+  toggle(store, true);
   expect(store.state('visitor-0').position).toEqual(visitor.position);
-  expect(store.state('owner').home!.interior).toMatchObject({ doorOpen: false, doorVersion: 1 });
+  expect(store.state('owner').home!.interior).toMatchObject({ doorOpen: true, doorVersion: 2 });
 }, 10_000);
 
 it('fences pre-toggle movement while preserving valid standing and airborne saves exactly', () => {
@@ -147,7 +151,7 @@ it('moves the paired collision with the house and exits an indoor visitor at the
   store.updateObject('owner', { planetId: before.ownedPlanetId, objectId: h.buildingId, expectedVersion: homeObject.version, position: homeObject.position, rotation: (homeObject.rotation + .02) % (Math.PI * 2) });
   const moved = store.state('visitor-0').home!;
   expect(moved.door.frame).not.toEqual(h.door.frame);
-  const closed = toggle(store, false), world = new GroundWorld(closed.currentPlanet), frame = geometry(moved, world), leaf = homeDoorLeaf(false);
+  const closed = toggle(store, false), world = new GroundWorld(closed.currentPlanet), frame = geometry(moved, world), leaf = homeDoorLeaves(false)[0];
   expect(world.blocked(frame.pose(leaf.center[0], leaf.center[2]))).toBe(true);
   expect(store.state('visitor-0').location).toEqual(visitor.location);
   toggle(store, true);

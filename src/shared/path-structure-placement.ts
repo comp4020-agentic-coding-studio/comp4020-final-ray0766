@@ -10,7 +10,7 @@ import type { BlueprintContents } from './blueprints.ts';
 import { surfaceFooting, gradeFoundations } from './terrain-grading.ts';
 import { PART_COLLIDERS } from './physics/parts.ts';
 import type { PartBox } from './physics/parts.ts';
-import { HOME_DOOR_LEAF } from './home-door.ts';
+import { homeDoorSweepBoxes } from './home-door.ts';
 import type { PlacedObject } from './planets.ts';
 import type { Vec3 } from './world.ts';
 
@@ -92,12 +92,7 @@ export function pathPlacementCheck(field:HeightField,objects:readonly PlacedObje
     const transform=partTransform(part,pivot);
     for(const shape of PART_COLLIDERS[part.part]())prepared.solids.push(shapeBox(shape,transform.position,transform.yaw));
     if(part.part==='wall.door.open'||part.part==='wall.door'){
-      const leaf=HOME_DOOR_LEAF,[x,y,z]=leaf.hinge;
-      for(let step=0;step<=18;step++){
-        const angle=step*Math.PI/36;
-        const shape:PartBox={tag:'door sweep',center:[x+Math.cos(angle)*leaf.width/2,y+leaf.height/2,z-Math.sin(angle)*leaf.width/2],half:[leaf.width/2+.025,leaf.height/2,leaf.thickness/2+.025],yaw:angle};
-        prepared.sweeps.push(shapeBox(shape,transform.position,transform.yaw));
-      }
+      for(const shape of homeDoorSweepBoxes())prepared.sweeps.push(shapeBox(shape,transform.position,transform.yaw));
     }
   }
   const depth=fit.foundationDepth+.46;

@@ -1,0 +1,69 @@
+{
+  "status": "passed",
+  "baseURL": "http://127.0.0.1:8134",
+  "browser": "Installed Google Chrome via Playwright channel chrome",
+  "browserVersion": "154.0.8037.99",
+  "host": {
+    "platform": "darwin",
+    "osRelease": "27.0.0",
+    "cpu": "Apple M3",
+    "cpuLogicalCount": 8,
+    "memoryGiB": 16,
+    "realPhone": false
+  },
+  "provenance": {
+    "sourceCommit": "d06a54a7ab7ba849b5e90db1984a27a4b053ae0d",
+    "synthetic": true,
+    "databaseIsIsolatedCopy": true,
+    "privateLabelsReplacedForEvidence": true,
+    "sourceFixtureSha256": "aaad0a70d9860da220569e64b4cb3b946fa5750eb3ab8d646071bf3526cab3ba",
+    "database": "/Users/ray/Documents/Codex/2026-10-08/task-2/little-worlds-village/.data/village-preview.sqlite",
+    "createdAt": "2026-10-09T19:05:57.036Z",
+    "originalRowsUnchanged": true
+  },
+  "checks": [
+    "New-cottage preview displays a real geometry ghost; cancel creates no object, blueprint, interior or content write",
+    "Explicit UI confirmation binds the original door part n=5 and correct world frame",
+    "Both old building IDs, placements, versions, full 29-part blueprint hash, names/groups and library versions remain unchanged after reload"
+  ],
+  "pageErrors": [],
+  "writeRoutes": [
+    "/api/presence",
+    "/api/presence",
+    "/api/home/setup/preview",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/presence",
+    "/api/home/setup/preview",
+    "/api/presence",
+    "/api/home/setup/confirm",
+    "/api/presence"
+  ],
+  "fixtureMeaning": "Separate synthetic alias of an actual old 29-part building with original door n=5, names/groups replaced only in the isolated browser copy. No identity token or private labels included.",
+  "renderer": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "viewport": {
+      "width": 1440,
+      "height": 1000,
+      "dpr": 1
+    },
+    "drawingBuffer": {
+      "width": 1440,
+      "height": 1000
+    },
+    "touchPoints": 0,
+    "visibility": "visible",
+    "webglVendor": "Google Inc. (Apple)",
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+  },
+  "binding": {
+    "partNumber": 5,
+    "buildingVersion": 1,
+    "objectCount": 2,
+    "blueprintPartCount": 29,
+    "oneExplicitConfirm": true,
+    "sameInteriorAfterReload": true
+  },
+  "preservedContentDigest": "b0d228a790a9e13e2ca0ac3ce471f00657bc9c917c1bc6d16628b300ce02140f"
+}

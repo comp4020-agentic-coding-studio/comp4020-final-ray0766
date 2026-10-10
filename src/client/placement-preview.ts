@@ -1,11 +1,11 @@
 import * as T from 'three';
+import {VILLAGE_UI} from '../assets/claude-geometry/style/tokens.ts';
 import { disposeObject3D } from '../assets/claude-geometry/core/dispose.ts';
 
-/** A transient placement keeps owned model resources until its handle is released.
- * Ink shells must be hidden before tinting: their renderer callback requires the
- * original ink uniforms, and crease lines must not show through the ghost. */
+/* A transient placement restores the exact indoor/material twins before release.
+ * Transparent state overlays write no depth, so the pen never traces them. */
 export function makePlacementPreview(root: T.Group, invalid: boolean) {
-  const tint = new T.MeshBasicMaterial({ color: invalid ? '#c87055' : '#7b9b70', transparent: true, opacity: .45, depthWrite: false });
+  const tint = new T.MeshBasicMaterial({ color: invalid ? VILLAGE_UI.scene.bad : VILLAGE_UI.scene.ok, transparent: true, opacity: .2, depthWrite: false });
   const originals: { mesh: T.Mesh; material: T.Material | T.Material[] }[] = [];
   root.userData.noPracticalLights = true;
   root.traverse(o => {

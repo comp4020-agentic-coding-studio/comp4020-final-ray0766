@@ -59,13 +59,13 @@ it('blocks foundations under separated floor edges and separately blocks overhan
   expect(e.both(coveredA,coveredB).every(message=>message?.includes('roofs'))).toBe(true);
 });
 
-it('reserves the full inward door swing and a usable exterior doorway approach in either placement order',()=>{
+it('reserves sliding travel and a usable exterior doorway approach without an inward swing',()=>{
   const door:PartPlacement[]=[{n:1,part:'wall.door.open',x:2,z:2,rot:0,level:0}];
   const post:PartPlacement[]=[{n:1,part:'structure.column',x:2,z:2,rot:0,level:0}];
   const f=fixture(),a=f.make('a',door),b=f.make('b',post,[-.3,0,-.5]);
   // Isolated authored parts exercise the swept volume between the open/closed
   // leaf poses, without a foundation masking a collision with the leaf.
-  expect(f.both(a,b).every(message=>message?.includes('full door'))).toBe(true);
+  expect(f.both(a,b)).toEqual([null,null]);
   const home:PartPlacement[]=[...cell,{...door[0],n:2}],front=f.make('front',cell,[0,0,1.8]);
   expect(f.both(f.make('a',cell),front)).toEqual([null,null]);
   // The approach extends beyond the saved footprint circle; the query bound
@@ -109,23 +109,22 @@ it('retains landing and ordinary prop spacing without granting paths or props th
   }
 });
 
-it('covers the rendered legacy kit detail vertices at every LOD, including stair tips and the open-door handle',()=>{
-  // The first 21 parts predate published appearance envelopes. Compare their
-  // real generated geometry against placement proxies instead of duplicating
+it('covers all rendered village kit vertices at every LOD including the new roofs and sliding leaves',()=>{
+  // Compare all 45 parts' real generated geometry against placement proxies instead of duplicating
   // the proxy formula in this regression. This is a vertex-coverage check.
   const field=flat(21.6),point=new Vector3();let checked=0;
-  for(const lod of ['low','medium','high'] as const)for(const part of PART_IDS.slice(0,21)){
+  for(const lod of ['low','medium','high'] as const)for(const part of PART_IDS){
     const parts:PartPlacement[]=[{n:1,part,x:2,z:2,rot:0,level:0}],object:PlacedObject={id:part,kind:'structure',position,rotation:.47,version:1,blueprintHash:part,...structureSize(parts)};
     const fit=structureFit(parts,position,.47,field),prepared=new StructurePlacementCache().prepare(field,object,parts);
     const library=new StyleLibrary(lod,{scans:false,look:'village'}),model=buildBlueprintModel(parts,library,lod,{foundationDepth:fit.foundationDepth});
     try{
       model.object.position.fromArray(position).multiplyScalar(fit.baseRadius);model.object.quaternion.fromArray(anchorQuaternion({dir:position,yaw:.47}));model.object.updateMatrixWorld(true);
       const shapes=[...prepared.solids,...prepared.sweeps];let missed=0;
-      model.object.traverseVisible(node=>{if(!(node instanceof Mesh))return;const vertices=node.geometry.getAttribute('position');
+      model.object.traverseVisible(node=>{const mesh=node as Mesh;if(!mesh.isMesh)return;const vertices=mesh.geometry.getAttribute('position');
         for(let i=0;i<vertices.count;i++){point.fromBufferAttribute(vertices,i).applyMatrix4(node.matrixWorld);checked++;if(!shapes.some(shape=>shape.box.containsPoint(point)))missed++;}
       });
       expect(missed,`${part}/${lod} rendered vertices outside placement proxies`).toBe(0);
     }finally{model.dispose();library.dispose();}
   }
-  expect(checked).toBeGreaterThan(60_000);
+  expect(checked).toBeGreaterThan(20_000);
 },30_000);

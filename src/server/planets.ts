@@ -6,7 +6,8 @@ import { partTransform, pivotOf } from '../assets/claude-geometry/blueprint/mode
 import { normalizeHomeInterior } from '../shared/home.ts';
 import { HOME_DOOR_PART } from '../shared/home-layout.ts';
 import { HOME_ENVIRONMENT } from '../shared/home-layout.ts';
-import {SAMPLE_PUBLIC_ENVIRONMENT,SAMPLE_PUBLIC_VERSION} from '../shared/sample-public-village.ts';
+import {SAMPLE_PUBLIC_ENVIRONMENT,SAMPLE_PUBLIC_VERSION,samplePublicVillage} from '../shared/sample-public-village.ts';
+import { PUBLIC_TOWN_CAPACITY } from '../shared/world-capacity.ts';
 import { QUICK_PARTS } from '../shared/quick-parts.ts';
 import { radiusForSlot, safeRadius } from '../shared/world-size.ts';
 import { decodeEnvironment,encodeEnvironment } from '../assets/claude-geometry/terrain/env.ts';
@@ -52,7 +53,13 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     if (!p) throw new RequestError(404, 'That planet could not be found.');
     return {...p,radius:p.world_radius??p.sample_radius??p.radius,revision:(sampleRadius||worldRadius)&&p.kind==='hub'?1000+SAMPLE_PUBLIC_VERSION:p.revision,environment:(sampleRadius||worldRadius)&&p.kind==='hub'?SAMPLE_PUBLIC_ENVIRONMENT:p.environment};
   };
-  const summary = (p: PlanetRow, id: string): PlanetSummary => ({ id: p.id, name: p.name, kind: p.kind, claimed: p.owner_id !== null, mine: p.owner_id === id, revision: (sampleRadius||worldRadius)&&p.kind==='hub'?1000+SAMPLE_PUBLIC_VERSION:p.revision, objectCount: p.objectCount,slot:p.slot,radius:p.world_radius??p.sample_radius??p.radius,center:planetCenter(p.slot),environment:(sampleRadius||worldRadius)&&p.kind==='hub'?SAMPLE_PUBLIC_ENVIRONMENT:p.environment??null });
+  const summary = (p: PlanetRow, id: string): PlanetSummary => {
+    const radius=p.world_radius??p.sample_radius??p.radius;
+    const town=(sampleRadius||worldRadius)&&p.kind==='hub'?samplePublicVillage(radius):null;
+    const publicTown=town?{objects:town.objects.length,structures:town.objects.filter(o=>o.kind==='structure').length,districts:PUBLIC_TOWN_CAPACITY.districts,version:town.version}:undefined;
+    return { id:p.id,name:p.name,kind:p.kind,claimed:p.owner_id!==null,mine:p.owner_id===id,revision:town?1000+SAMPLE_PUBLIC_VERSION:p.revision,
+      objectCount:p.objectCount+(publicTown?.objects??0),slot:p.slot,radius,center:planetCenter(p.slot),environment:town?SAMPLE_PUBLIC_ENVIRONMENT:p.environment??null,...(publicTown?{publicTown}:{}) };
+  };
   const objects = (planetId: string): PlacedObject[] => {
     const sizes=new Map<string,ReturnType<typeof structureSize>>();
     return (db.prepare('SELECT id,kind,position,rotation,version,blueprint_hash,radius,height,(SELECT asset_version FROM object_assets a WHERE a.object_id=planet_objects.id) AS asset_version FROM planet_objects WHERE planet_id=? ORDER BY rowid').all(planetId) as unknown as ObjectRow[]).map(r=>{

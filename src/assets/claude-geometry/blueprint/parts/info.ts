@@ -6,7 +6,9 @@ import type { PartId } from './catalogue.ts';
 // round 8 the box each look's model keeps to, a suggested collider, what can
 // be walked on and what it needs kept clear (docs/WORKSHOP.md prints these).
 // Names follow the village look, the one the main project shows; the Chinese
-// names of the first 21 parts are the main project's own (src/client/messages.ts).
+// names of the first 21 parts are the main project's own (src/client/messages.ts,
+// keyed by the English village names); where the Japanese-town restyle renamed a
+// part, docs/restyle/parts.md lists the new pairs for the main project to add.
 
 /** A box in part-local metres. */
 export interface Box { min: [number, number, number]; max: [number, number, number] }
@@ -56,25 +58,25 @@ const rampBoxes: ColliderBox[] = [
 export const PART_INFO: Record<PartId, PartInfo> = {
   'floor.deck': { zh: { name: '木板地面', blurb: '石板上铺木板' }, tags: ['floor', 'indoor', 'room'] },
   'floor.grate': { zh: { name: '架空木栈道', blurb: '留缝木条，木框' }, tags: ['floor', 'boardwalk', 'dock', 'outdoor'] },
-  'wall.solid': { zh: { name: '灰泥墙', blurb: '灰泥墙面，木柱' }, tags: ['wall', 'plain', 'house'] },
-  'wall.door': { zh: { name: '小屋门墙', blurb: '镶板门，壁灯' }, tags: ['wall', 'door', 'entrance', 'house'] },
-  'wall.window': { zh: { name: '百叶窗墙', blurb: '推拉窗、百叶、花箱' }, tags: ['wall', 'window', 'house'] },
-  'wall.louvre': { zh: { name: '百叶通风口', blurb: '木百叶，小雨棚' }, tags: ['wall', 'vent', 'house'] },
-  'wall.corrugated': { zh: { name: '木板棚墙', blurb: '石基上的竖板与压条' }, tags: ['wall', 'shed', 'workshop'] },
+  'wall.solid': { zh: { name: '灰泥墙', blurb: '灰泥墙面，下部木板' }, tags: ['wall', 'plain', 'house'] },
+  'wall.door': { zh: { name: '格子拉门', blurb: '六扇推拉格子门，门灯' }, tags: ['wall', 'door', 'entrance', 'house'] },
+  'wall.window': { zh: { name: '格子窗墙', blurb: '出格子，内衬障子纸' }, tags: ['wall', 'window', 'house'] },
+  'wall.louvre': { zh: { name: '连子窗', blurb: '方木连子，小瓦檐' }, tags: ['wall', 'vent', 'house'] },
+  'wall.corrugated': { zh: { name: '木板仓墙', blurb: '石基上的板条墙' }, tags: ['wall', 'shed', 'workshop'] },
   'structure.column': { zh: { name: '角柱', blurb: '顶点上的木柱' }, tags: ['structure', 'post', 'porch'] },
   'stair.straight': { zh: { name: '小屋楼梯', blurb: '1×2 格，一层高' }, tags: ['structure', 'stair', 'level change'] },
-  'rail.guard': { zh: { name: '木栅栏', blurb: '阳台与屋顶边缘' }, tags: ['fence', 'boundary', 'balcony'] },
-  'roof.deck': { zh: { name: '屋顶露台', blurb: '陶瓦，下方吊灯' }, tags: ['roof', 'flat roof', 'terrace', 'walkable'] },
-  'roof.parapet': { zh: { name: '灰泥矮墙', blurb: '带压顶的屋顶边' }, tags: ['roof', 'boundary', 'terrace'] },
-  'roof.slope': { zh: { name: '瓦屋顶', blurb: '陶瓦，35° 坡' }, tags: ['roof', 'pitched roof'] },
-  'roof.plant': { zh: { name: '屋顶空调机组', blurb: '圆风扇的空调机' }, tags: ['roof', 'equipment', 'utility'] },
-  'wall.door.open': { zh: { name: '敞开的小屋门', blurb: '门向内敞开' }, tags: ['wall', 'door', 'entrance', 'house'] },
-  'street.paving': { zh: { name: '石板步道', blurb: '错缝石板' }, tags: ['street', 'path', 'courtyard', 'walkable'] },
-  'street.road': { zh: { name: '巷道', blurb: '压实路面，中线' }, tags: ['street', 'lane', 'walkable'] },
-  'street.kerb': { zh: { name: '石质路缘', blurb: '石路缘，排水口' }, tags: ['street', 'kerb', 'edge'] },
-  'street.pipes': { zh: { name: '矮树篱', blurb: '石基上的修剪树篱' }, tags: ['street', 'hedge', 'boundary', 'garden'] },
-  'service.light': { zh: { name: '灯笼柱', blurb: '3.4 米灯柱，吊灯笼' }, tags: ['street', 'light', 'public'] },
-  'pad.quarter': { zh: { name: '四分之一石平台', blurb: '2×2 停机坪的一角' }, tags: ['landing', 'ship', 'public'] },
+  'rail.guard': { zh: { name: '竹栏杆', blurb: '阳台与屋顶边缘' }, tags: ['fence', 'boundary', 'balcony'] },
+  'roof.deck': { zh: { name: '屋顶露台', blurb: '木板晒台，下方纸灯' }, tags: ['roof', 'flat roof', 'terrace', 'walkable'] },
+  'roof.parapet': { zh: { name: '灰泥矮墙', blurb: '瓦压顶的屋顶边' }, tags: ['roof', 'boundary', 'terrace'] },
+  'roof.slope': { zh: { name: '瓦屋顶', blurb: '宽瓦带，深檐' }, tags: ['roof', 'pitched roof'] },
+  'roof.plant': { zh: { name: '屋顶水箱', blurb: '木架上的圆木水箱' }, tags: ['roof', 'equipment', 'utility'] },
+  'wall.door.open': { zh: { name: '敞开的格子拉门', blurb: '门扇推到两侧' }, tags: ['wall', 'door', 'entrance', 'house'] },
+  'street.paving': { zh: { name: '石板步道', blurb: '大石块错缝铺砌' }, tags: ['street', 'path', 'courtyard', 'walkable'] },
+  'street.road': { zh: { name: '巷道', blurb: '路面、边沟与中线' }, tags: ['street', 'lane', 'walkable'] },
+  'street.kerb': { zh: { name: '石质路缘', blurb: '一块石路缘' }, tags: ['street', 'kerb', 'edge'] },
+  'street.pipes': { zh: { name: '木水渠', blurb: '两个木架上的木槽' }, tags: ['street', 'water', 'channel', 'boundary', 'garden'] },
+  'service.light': { zh: { name: '灯笼柱', blurb: '3.4 米木柱，纸灯笼' }, tags: ['street', 'light', 'public'] },
+  'pad.quarter': { zh: { name: '四分之一石平台', blurb: '2×2 石停机坪的一角' }, tags: ['landing', 'ship', 'public'] },
 
   'street.road.plain': {
     zh: { name: '无标线巷道', blurb: '弯道外侧、路口与小巷' }, tags: ['street', 'lane', 'junction', 'alley', 'walkable'],
@@ -83,14 +85,14 @@ export const PART_INFO: Record<PartId, PartInfo> = {
     connects: 'Stands on the ground at level 0 (a deck). Meets roadway, lane corner and paving cells flush at y 0 on all four edges; kerbs may stand on its edges.',
   },
   'street.road.corner': {
-    zh: { name: '巷道转角', blurb: '中线在此转弯' }, tags: ['street', 'lane', 'junction', 'corner', 'walkable'],
+    zh: { name: '巷道转角', blurb: '中线与边沟在此转弯' }, tags: ['street', 'lane', 'junction', 'corner', 'walkable'],
     envelope: both(box([-0.5, -0.16, -0.5], [0.5, 0.004, 0.5])), colliders: [slab],
-    walk: 'Walkable deck, top at y 0 over the whole cell; the two half dashes are paint.',
-    connects: 'Stands on the ground at level 0. Its half dashes sit on its local +Z and +X edge midpoints, where a roadway turned towards that edge has its own half dash, so the centre line turns across the cell; four make a crossing, two with straight roadways a T.',
+    walk: 'Walkable deck, top at y 0 over the whole cell; the two half dashes are paint. In the village look a 15 mm slit runs round the gutter lid in its (−X, −Z) corner.',
+    connects: 'Stands on the ground at level 0. Its half dashes sit on its local +Z and +X edge midpoints, where a roadway turned towards that edge has its own half dash, so the centre line turns across the cell; four make a crossing, two with straight roadways a T. In the village look its (−X, −Z) corner carries the gutter round the vertex where the side gutters of the two roadways beside it meet.',
   },
   'street.kerb.corner': {
     zh: { name: '石路缘转角', blurb: '路缘绕过格子一角' }, tags: ['street', 'kerb', 'corner', 'junction', 'edge'],
-    envelope: { industrial: box([-0.5, -0.05, -0.5], [0.74, 0.145, 0.74]), village: box([-0.5, -0.05, -0.5], [0.735, 0.14, 0.735]) },
+    envelope: { industrial: box([-0.5, -0.05, -0.5], [0.74, 0.145, 0.74]), village: box([-0.5, -0.05, -0.5], [0.58, 0.14, 0.58]) },
     colliders: [{ center: [0, 0.065, 0.5], size: [1, 0.13, 0.18], support: true }, { center: [0.5, 0.065, 0], size: [0.18, 0.13, 1], support: true }],
     walk: 'As the straight kerb: a 0.13–0.14 m step, under the 0.26 m step height.',
     connects: 'Stands on a deck in its own cell and takes its local +Z and +X edges and the vertex between them. Each arm ends where a straight kerb on the next edge begins, with the same section.',
@@ -109,28 +111,28 @@ export const PART_INFO: Record<PartId, PartInfo> = {
   },
   'roof.slope.hip': {
     zh: { name: '瓦屋顶外角', blurb: '坡屋顶的外转角（四坡）' }, tags: ['roof', 'pitched roof', 'corner', 'hip'],
-    envelope: { industrial: box([-0.5, -0.165, -0.5], [0.68, 0.43, 0.68]), village: box([-0.5, -0.16, -0.5], [0.79, 0.8, 0.79]) },
-    colliders: [{ center: [0.145, 0.23, 0.145], size: [1.29, 0.62, 1.29], support: false, note: 'envelope like the main roof.slope box, grown over both eaves; not walkable' }],
+    envelope: { industrial: box([-0.5, -0.165, -0.5], [0.68, 0.43, 0.68]), village: box([-0.5, -0.16, -0.5], [0.97, 0.66, 0.97]) },
+    colliders: [{ center: [0.231, 0.245, 0.231], size: [1.462, 0.81, 1.462], support: false, note: 'the village roof panel’s box (to its ridge, y 0.65), grown over both eaves to the kawara eave’s tip (0.962); covers the industrial model too; not walkable' }],
     walk: 'Not walkable (as roof.slope). Eaves on local +Z and +X keep their edges, the decks beyond and the diagonal deck clear.',
     connects: 'Covers its cell at a roof level, carried like a slope by a wall or post below one of its edges or corners. Meets a roof.slope run draining the same way along each of its two high edges, or another hip (pyramid), surface for surface.',
   },
   'roof.slope.valley': {
     zh: { name: '瓦屋顶内角', blurb: '坡屋顶的内转角（天沟）' }, tags: ['roof', 'pitched roof', 'corner', 'valley'],
-    envelope: { industrial: box([-0.5, -0.165, -0.5], [0.5, 0.43, 0.5]), village: box([-0.5, -0.16, -0.5], [0.5, 0.8, 0.5]) },
-    colliders: [{ center: [0, 0.23, 0], size: [1, 0.62, 1], support: false, note: 'envelope; not walkable' }],
+    envelope: { industrial: box([-0.5, -0.165, -0.5], [0.5, 0.43, 0.5]), village: box([-0.5, -0.16, -0.5], [0.5, 0.66, 0.5]) },
+    colliders: [{ center: [0, 0.245, 0], size: [1, 0.81, 1], support: false, note: 'envelope, to the village ridge (y 0.65); not walkable' }],
     walk: 'Not walkable. No eaves of its own: the two runs it meets drain past its low corner.',
     connects: 'Covers its cell at a roof level. Its two high edges (local −Z, −X) carry half ridge caps and meet the back-to-back partners of the two runs it joins; its two low edges meet runs draining to +Z and +X.',
   },
   'roof.verge.left': {
     zh: { name: '山墙封檐板（左）', blurb: '山墙端的收边，左侧' }, tags: ['roof', 'trim', 'gable', 'verge'],
-    envelope: { industrial: box([-0.58, -0.22, -0.55], [-0.5, 0.47, 0.7]), village: box([-0.58, -0.2, -0.53], [-0.5, 0.84, 0.81]) },
+    envelope: { industrial: box([-0.58, -0.22, -0.55], [-0.5, 0.47, 0.7]), village: box([-0.58, -0.23, -0.5], [-0.5, 0.71, 0.97]) },
     colliders: [],
     walk: 'Trim only, inside the roof panel’s collider. Keeps the deck beyond its gable open.',
     connects: 'Placed on a roof.slope run’s own cell, turned as it is; takes the run’s local −X edge. Meets the panel’s end from ridge to eave; two verges meet square at a ridge.',
   },
   'roof.verge.right': {
     zh: { name: '山墙封檐板（右）', blurb: '山墙端的收边，右侧' }, tags: ['roof', 'trim', 'gable', 'verge'],
-    envelope: { industrial: box([0.5, -0.22, -0.55], [0.58, 0.47, 0.7]), village: box([0.5, -0.2, -0.53], [0.58, 0.84, 0.81]) },
+    envelope: { industrial: box([0.5, -0.22, -0.55], [0.58, 0.47, 0.7]), village: box([0.5, -0.23, -0.5], [0.58, 0.71, 0.97]) },
     colliders: [],
     walk: 'Trim only, inside the roof panel’s collider. Keeps the deck beyond its gable open.',
     connects: 'Placed on a roof.slope run’s own cell, turned as it is; takes the run’s local +X edge.',
@@ -143,21 +145,21 @@ export const PART_INFO: Record<PartId, PartInfo> = {
     connects: 'On a cell edge, between corner posts on both of its vertices at the same level; ends on the posts’ faces (x ±0.39; the village beam runs on to the timber shaft, ±0.40, below the post’s band). Shares the edge with a fence, hedge or kerb below; not with a wall.',
   },
   'furniture.table': {
-    zh: { name: '圆桌', blurb: '椅子可塞到桌下' }, tags: ['furniture', 'table', 'dining', 'kitchen', 'cafe', 'courtyard'],
+    zh: { name: '矮桌', blurb: '凳子可塞到桌下' }, tags: ['furniture', 'table', 'dining', 'kitchen', 'cafe', 'courtyard'],
     envelope: both(box([-0.31, 0, -0.31], [0.31, 0.76, 0.31])),
     colliders: [{ center: [0, 0.38, 0], size: [0.6, 0.76, 0.6], support: false }],
     walk: 'An obstacle. Stays out of a door’s cells; leaves its cell’s sides to chairs.',
-    connects: 'Stands on a floor or roof deck in the middle of its cell. Chairs on the cell’s sides tuck under it.',
+    connects: 'Stands on a floor or roof deck in the middle of its cell. Chairs on the cell’s sides tuck under it (in the village look a low table, its top at 0.45 m, with stools 0.30 m high).',
   },
   'furniture.chair': {
-    zh: { name: '椅子', blurb: '靠格边摆放，面朝格内' }, tags: ['furniture', 'seat', 'dining', 'cafe'],
+    zh: { name: '木凳', blurb: '靠格边摆放，面朝格内' }, tags: ['furniture', 'seat', 'dining', 'cafe'],
     envelope: both(box([-0.21, 0, -0.5], [0.21, 0.9, -0.13])),
     colliders: [{ center: [0, 0.45, -0.315], size: [0.42, 0.9, 0.37], support: false }],
     walk: 'An obstacle; a look only (no sitting). Below 0.70 m it may reach the cell centre (tucked under a table); above, only its back, within 0.20 m of the edge line.',
     connects: 'Stands on a floor or roof deck against one side of its cell, facing in; opposite a second chair at most.',
   },
   'furniture.sideboard': {
-    zh: { name: '矮柜', blurb: '靠墙的低柜' }, tags: ['furniture', 'storage', 'cupboard', 'kitchen', 'living room', 'counter', 'stall'],
+    zh: { name: '抽屉柜', blurb: '靠墙的矮抽屉柜' }, tags: ['furniture', 'storage', 'cupboard', 'drawers', 'kitchen', 'living room', 'counter', 'stall'],
     envelope: both(box([-0.34, 0, -0.48], [0.34, 0.92, -0.13])),
     colliders: [{ center: [0, 0.45, -0.305], size: [0.68, 0.9, 0.35], support: false }],
     walk: 'An obstacle; a look only (nothing is stored). Its top is a surface for later decor sockets.',

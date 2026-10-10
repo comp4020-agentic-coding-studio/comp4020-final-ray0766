@@ -1,4 +1,5 @@
 import { QUICK_PARTS } from './quick-parts.ts';
+import { PRIVATE_CAPACITY } from './world-capacity.ts';
 import { distance, normalize, SPAWN, validPosition } from './world.ts';
 import type { PlayerState, Vec3 } from './world.ts';
 import type { BlueprintContents } from './blueprints.ts';
@@ -19,12 +20,12 @@ export const CATALOGUE = {
 } as const;
 export type BuildKind = keyof typeof CATALOGUE;
 export type ObjectKind = BuildKind | 'structure';
-export const MAX_OBJECTS = 64;
+export const MAX_OBJECTS = PRIVATE_CAPACITY.objects;
 export interface PlacedObject { id: string; kind: ObjectKind; position: Vec3; rotation: number; version: number; blueprintHash?: string; radius?: number; height?: number; assetVersion?: 2 }
 export const objectName = (o: Pick<PlacedObject, 'kind'>) => o.kind === 'structure' ? 'Custom structure' : CATALOGUE[o.kind].name;
-export const objectRadius = (o: Pick<PlacedObject, 'kind' | 'radius' | 'assetVersion'>) => o.kind === 'structure' ? o.radius ?? 0 : o.assetVersion===2?(QUICK_PARTS[o.kind]?.radius??CATALOGUE[o.kind].radius):CATALOGUE[o.kind].radius;
-export const objectHeight = (o: Pick<PlacedObject, 'kind' | 'height' | 'assetVersion'>) => o.kind === 'structure' ? o.height ?? 0 : o.assetVersion===2?(QUICK_PARTS[o.kind]?.height??CATALOGUE[o.kind].height):CATALOGUE[o.kind].height;
-export interface PlanetSummary { id: string; name: string; kind: 'hub' | 'garden'; claimed: boolean; mine: boolean; revision: number; objectCount: number; center:Vec3; slot:number; radius?:number; environment?:string|null }
+export const objectRadius = (o: Pick<PlacedObject, 'kind' | 'radius' | 'assetVersion'>) => o.kind === 'structure' ? o.radius ?? 0 : o.assetVersion===2?(o.kind==='lamp'?.3694:QUICK_PARTS[o.kind]?.radius??CATALOGUE[o.kind].radius):CATALOGUE[o.kind].radius;
+export const objectHeight = (o: Pick<PlacedObject, 'kind' | 'height' | 'assetVersion'>) => o.kind === 'structure' ? o.height ?? 0 : o.assetVersion===2?(o.kind==='lamp'?2.2:QUICK_PARTS[o.kind]?.height??CATALOGUE[o.kind].height):CATALOGUE[o.kind].height;
+export interface PlanetSummary { id: string; name: string; kind: 'hub' | 'garden'; claimed: boolean; mine: boolean; revision: number; objectCount: number; center:Vec3; slot:number; radius?:number; environment?:string|null; publicTown?: { objects:number; structures:number; districts:number; version:number } }
 export interface PlanetView extends PlanetSummary { objects: PlacedObject[]; blueprints?: BlueprintContents; home?: HomeDescriptor | null; homeDoor?: HomeDoorState; homeManifest?: HomeInfrastructureManifest }
 export interface Universe { player: PlayerState; planets: PlanetSummary[]; ownedPlanetId: string | null; currentPlanet: PlanetView }
 export function isBuildKind(value: unknown): value is BuildKind { return typeof value === 'string' && Object.hasOwn(CATALOGUE, value); }

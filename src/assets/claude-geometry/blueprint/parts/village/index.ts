@@ -4,15 +4,15 @@ import { floorDeck, grateDeck, roofDeck, slopeRoof } from './decks.ts';
 import { parapet, plantUnit, stair } from './structure.ts';
 import { cornerColumn, guardRail, padQuarter, serviceLight, streetKerb, streetPaving, streetPipes, streetRoad } from './street.ts';
 import { corrugatedWall, doorOpenWall, doorWall, louvreWall, solidWall, windowWall } from './walls.ts';
-import { entryRamp, entrySteps } from '../home/entry.ts';
+import { entryRampVillage, entryStepsVillage } from '../home/entry.ts';
 import { beamVillage } from '../home/frame.ts';
-import { chair, shelf, sideboard, table } from '../home/furniture.ts';
-import { flowerBed } from '../home/bed.ts';
+import { chairVillage, shelfVillage, sideboardVillage, tableVillage } from '../home/furniture.ts';
+import { flowerBedVillage } from '../home/bed.ts';
 import { bench, pot, tree } from '../home/garden.ts';
-import { kerbCornerVillage, roadCorner, roadPlain } from '../home/joins.ts';
+import { kerbCornerVillage, roadCornerVillage, roadPlain } from '../home/joins.ts';
 import { hipRoofVillage, valleyRoofVillage } from '../home/roofs.ts';
 import { vergeLeftVillage, vergeRightVillage } from '../home/verges.ts';
-import { barrel, crates } from '../home/storage.ts';
+import { barrelVillage, cratesVillage } from '../home/storage.ts';
 import { signBlankVillage, signCupVillage, signMailVillage, wallLampVillage } from '../home/fixtures.ts';
 
 // The village look's models for blueprint parts (docs/VILLAGE.md). Same part
@@ -42,26 +42,29 @@ export const VILLAGE_EMITS: Partial<Record<PartId, Emit>> = {
   'street.pipes': streetPipes,
   'service.light': serviceLight,
   'pad.quarter': padQuarter,
-  // Round 8: parts drawn alike in both looks are listed with their one model,
-  // so the village look gives them their ink; roof closures and the kerb
-  // corner have their own, to meet the village panel and kerb.
+  // Round 8: the plain lane, and the pot, tree and bench (the props' own
+  // builders), are drawn alike in both looks, with the village look's materials;
+  // the rest have their own village twins: roof closures, lane corner and kerb
+  // corner to meet the village panel, gutter and kerb, square stone steps and a
+  // boarded ramp, and the Japanese town's furniture, crates, barrel, planting
+  // bed, lantern and signboards.
   'street.road.plain': roadPlain,
-  'street.road.corner': roadCorner,
+  'street.road.corner': roadCornerVillage,
   'street.kerb.corner': kerbCornerVillage,
-  'step.entry': entrySteps,
-  'ramp.entry': entryRamp,
+  'step.entry': entryStepsVillage,
+  'ramp.entry': entryRampVillage,
   'roof.slope.hip': hipRoofVillage,
   'roof.slope.valley': valleyRoofVillage,
   'roof.verge.left': vergeLeftVillage,
   'roof.verge.right': vergeRightVillage,
   'structure.beam': beamVillage,
-  'furniture.table': table,
-  'furniture.chair': chair,
-  'furniture.sideboard': sideboard,
-  'furniture.shelf': shelf,
-  'storage.crates': crates,
-  'storage.barrel': barrel,
-  'garden.bed': flowerBed,
+  'furniture.table': tableVillage,
+  'furniture.chair': chairVillage,
+  'furniture.sideboard': sideboardVillage,
+  'furniture.shelf': shelfVillage,
+  'storage.crates': cratesVillage,
+  'storage.barrel': barrelVillage,
+  'garden.bed': flowerBedVillage,
   'garden.pot': pot,
   'garden.tree': tree,
   'furniture.bench': bench,
@@ -75,27 +78,27 @@ export const VILLAGE_EMITS: Partial<Record<PartId, Emit>> = {
 export const VILLAGE_BLURBS: Record<PartId, string> = {
   'floor.deck': 'Boards on a stone slab',
   'floor.grate': 'Slats with gaps, timber frame',
-  'wall.solid': 'Plaster, timber posts',
-  'wall.door': 'Panelled door, lantern',
-  'wall.window': 'Sash, shutters, flower box',
-  'wall.louvre': 'Timber vent, little hood',
-  'wall.corrugated': 'Boards and battens on stone',
+  'wall.solid': 'Plaster over a board lower wall',
+  'wall.door': 'Six sliding leaves, lantern',
+  'wall.window': 'Lattice box over shoji',
+  'wall.louvre': 'Square slats, small tiled hood',
+  'wall.corrugated': 'Board and batten on stone',
   'structure.column': 'Timber post at a vertex',
   'stair.straight': '1×2 cells, one storey',
   'rail.guard': 'Balcony and roof edge',
-  'roof.deck': 'Clay tiles, pendant below',
-  'roof.parapet': 'Roof edge with coping',
-  'roof.slope': 'Clay tiles, 35° pitch',
-  'roof.plant': 'Air unit with a round fan',
-  'wall.door.open': 'Door held open inward',
-  'street.paving': 'Flagstones, running bond',
-  'street.road': 'Packed lane, centre line',
-  'street.kerb': 'Stone kerb, drain',
-  'street.pipes': 'Clipped hedge on a curb',
-  'service.light': '3.4 m post, hanging lantern',
-  'pad.quarter': 'Quarter of a 2×2 pad',
+  'roof.deck': 'Board deck, lantern below',
+  'roof.parapet': 'Roof edge, tiled coping',
+  'roof.slope': 'Wide tile bands, deep eave',
+  'roof.plant': 'Wooden tank, timber stand',
+  'wall.door.open': 'Leaves slid to the jambs',
+  'street.paving': 'Large stones breaking joint',
+  'street.road': 'Lane, side gutter, centre line',
+  'street.kerb': 'Stone edging, one stone',
+  'street.pipes': 'Board trough on two stands',
+  'service.light': '3.4 m timber post, paper lantern',
+  'pad.quarter': 'Quarter of a 2×2 stone pad',
   'street.road.plain': 'Lane with no centre line',
-  'street.road.corner': 'Centre line turning',
+  'street.road.corner': 'Centre line and gutter turning',
   'street.kerb.corner': 'Kerb round a corner',
   'step.entry': 'Stone steps down to the ground',
   'ramp.entry': '1×2 cells, 0.6 m down',
@@ -104,9 +107,9 @@ export const VILLAGE_BLURBS: Record<PartId, string> = {
   'roof.verge.left': 'Gable trim, left side',
   'roof.verge.right': 'Gable trim, right side',
   'structure.beam': 'Timber beam between posts',
-  'furniture.table': 'Chairs tuck under it',
+  'furniture.table': 'Stools tuck under it',
   'furniture.chair': 'Against a side, faces in',
-  'furniture.sideboard': 'Low cupboard against a wall',
+  'furniture.sideboard': 'Low chest against a wall',
   'furniture.shelf': 'Tall open shelves',
   'storage.crates': 'Two stacked crates',
   'storage.barrel': 'Small barrel',
@@ -125,22 +128,22 @@ export const VILLAGE_NAMES: Record<PartId, string> = {
   'floor.deck': 'Plank floor',
   'floor.grate': 'Open boardwalk',
   'wall.solid': 'Plaster wall',
-  'wall.louvre': 'Louvred vent',
-  'wall.corrugated': 'Board shed wall',
+  'wall.louvre': 'Slatted vent',
+  'wall.corrugated': 'Board store wall',
   'stair.straight': 'Cottage stair',
   'roof.deck': 'Roof terrace',
   'roof.parapet': 'Plaster parapet',
-  'roof.plant': 'Rooftop air unit',
-  'wall.window': 'Shuttered window',
-  'wall.door': 'Cottage door',
-  'wall.door.open': 'Cottage door, open',
+  'roof.plant': 'Rooftop water tank',
+  'wall.window': 'Lattice window',
+  'wall.door': 'Lattice door',
+  'wall.door.open': 'Lattice door, open',
   'structure.column': 'Corner post',
-  'rail.guard': 'Picket fence',
+  'rail.guard': 'Bamboo railing',
   'roof.slope': 'Tiled roof',
   'street.paving': 'Flagstone footway',
   'street.road': 'Lane',
   'street.kerb': 'Stone kerb',
-  'street.pipes': 'Low hedge',
+  'street.pipes': 'Water channel',
   'service.light': 'Lantern post',
   'pad.quarter': 'Stone pad quarter',
   'street.road.plain': 'Plain lane',
@@ -153,9 +156,9 @@ export const VILLAGE_NAMES: Record<PartId, string> = {
   'roof.verge.left': 'Verge board, left',
   'roof.verge.right': 'Verge board, right',
   'structure.beam': 'Porch beam',
-  'furniture.table': 'Round table',
-  'furniture.chair': 'Chair',
-  'furniture.sideboard': 'Sideboard',
+  'furniture.table': 'Low table',
+  'furniture.chair': 'Stool',
+  'furniture.sideboard': 'Chest of drawers',
   'furniture.shelf': 'Shelf',
   'storage.crates': 'Crates',
   'storage.barrel': 'Barrel',

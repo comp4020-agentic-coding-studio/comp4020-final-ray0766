@@ -10,6 +10,7 @@ import { icosphere } from './icosphere.ts';
 import type { FloraMaterialName, TerrainKit } from './kit.ts';
 import { chord2, layerSeed } from './styles/program.ts';
 import type { FloraKind, FloraRule } from './styles/program.ts';
+import { VILLAGE_MAKERS } from './village-flora.ts';
 
 // Plants and loose rocks. Each kind is one reference model, 1 m tall with its
 // base at y = 0, built with PartBuilder so its pieces merge per material and
@@ -293,15 +294,20 @@ const MAKERS: Record<FloraKind, Maker> = {
 
 export interface FloraModel { kind: FloraKind; pieces: Piece[]; triangles: number }
 
-/** Build (or fetch from the kit) the reference model of a plant kind at a LOD. */
+/**
+ * Build (or fetch from the kit) the reference model of a plant kind at a LOD.
+ * A village kit takes the kind's village model (village-flora.ts) where it has one.
+ */
 export function floraModel(kind: FloraKind, kit: TerrainKit): FloraModel {
   const names: FloraMaterialName[] = [];
-  const geometries = kit.cachedGeometry(`flora:${kind}`, () => {
+  const village = kit.look === 'village' ? VILLAGE_MAKERS[kind] : undefined;
+  const geometries = kit.cachedGeometry(village ? `flora:${kind}:village` : `flora:${kind}`, () => {
     const b = new PartBuilder(kit.lod);
     const mats = new Map<T.Material, FloraMaterialName>();
     const m = (n: FloraMaterialName) => { const mat = kit.flora(n); mats.set(mat, n); return mat; };
     const ctx: MakerContext = { leaves: [], card: 'leafCard' };
-    MAKERS[kind](b, m, kit.lod, ctx);
+    if (village) village(b, m, kit.lod);
+    else MAKERS[kind](b, m, kit.lod, ctx);
     const built = b.build(`flora:${kind}`);
     // Foliage cards keep their own UVs (0–1 per card), so they bypass PartBuilder's metre UVs.
     if (ctx.leaves.length) built.group.add(new T.Mesh(cardGeometry(ctx.leaves, kit.lod, hashString(kind)), m(ctx.card)));
@@ -318,6 +324,39 @@ export function floraModel(kind: FloraKind, kit: TerrainKit): FloraModel {
   const pieces = geometries.map((geometry, i) => ({ material: names[i], geometry }));
   const triangles = geometries.reduce((n, g) => n + g.getAttribute('position').count / 3, 0);
   return { kind, pieces, triangles };
+}
+
+const industrialCost = new Map<string, number>();
+
+/**
+ * Triangles of a kind's industrial model at a LOD, built with a stand-in
+ * material and thrown away (it depends on nothing but the kind and the LOD).
+ */
+export function industrialFloraTriangles(kind: FloraKind, lod: LodTier): number {
+  const key = `${kind}:${lod}`;
+  let n = industrialCost.get(key);
+  if (n === undefined) {
+    const b = new PartBuilder(lod), stand = new T.MeshBasicMaterial();
+    const ctx: MakerContext = { leaves: [], card: 'leafCard' };
+    MAKERS[kind](b, () => stand, lod, ctx);
+    const built = b.build(`flora:${kind}`);
+    for (const child of built.group.children) (child as T.Mesh).geometry.dispose();
+    stand.dispose();
+    // Each clump's cards are two triangles apiece.
+    n = built.triangles + ctx.leaves.length * cardsPerClump(lod) * 2;
+    industrialCost.set(key, n);
+  }
+  return n;
+}
+
+/**
+ * The triangles planFlora caps a kind by: its industrial model's in every
+ * look, so a planet grows exactly the same plants whatever its look. A village
+ * model costs no more (tests/unit/terrain/village-flora.test.ts), so the
+ * planet still fits its budget.
+ */
+export function floraTriangles(kind: FloraKind, kit: TerrainKit): number {
+  return kit.look === 'village' && VILLAGE_MAKERS[kind] ? industrialFloraTriangles(kind, kit.lod) : floraModel(kind, kit).triangles;
 }
 
 export interface Clearing { dir: Vec3; radius: number }

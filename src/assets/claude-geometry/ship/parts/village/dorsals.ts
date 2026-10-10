@@ -1,19 +1,22 @@
 import * as T from 'three';
 import type { Vec3 } from '../../../core/vec.ts';
 import type { Ctx, Role } from '../../kit.ts';
-import { segs, turn } from './shapes.ts';
+import { ball, segs, turn } from './shapes.ts';
 
 // Village dorsal equipment: under the industrial parts' height on the deck socket.
+// Every round piece has eight or more sides and balls four or more rows, so
+// they draw their outlines only (six-sided poles and detail-0 balls creased
+// half-way and flickered).
 
 // ------------------------------------------------------------------- dorsal
 
-/** Mast with a ball top and a little pennant, under the sensor mast's height. */
+/** Mast with a ball top and a little pennant (a painted plate thick enough to draw as one shape), under the sensor mast's height. */
 function ballMast(ctx: Ctx) {
-  const n = segs(ctx, 14, 10, 6);
+  const n = segs(ctx, 14, 10, 8);
   turn(ctx, 'metal', [[0.0, 0.03], [0.06, 0.03], [0.065, 0.0]], n, { rotation: [-Math.PI / 2, 0, 0] });
-  ctx.cylinder('dark', 0.012, 0.016, 0.28, { position: [0, 0.17, 0] }, Math.max(6, n / 2));
-  ctx.b.geometry(ctx.mat('trim'), new T.IcosahedronGeometry(0.035, ctx.detail >= 1 ? 1 : 0), { position: [0, 0.33, 0] });
-  if (ctx.detail >= 1) ctx.box('trim', [0.006, 0.06, 0.1], [0, 0.26, 0.055], undefined, 0);
+  ctx.cylinder('dark', 0.012, 0.016, 0.28, { position: [0, 0.17, 0] }, 8);
+  ball(ctx, 'trim', 0.035, 8, 4, [0, 0.33, 0]);
+  if (ctx.detail >= 1) ctx.box('trim', [0.016, 0.06, 0.1], [0, 0.26, 0.059], undefined, 0);
 }
 
 /**
@@ -53,15 +56,6 @@ function smoothLathe(ctx: Ctx, role: Role, profile: [number, number][], n: numbe
   ctx.b.geometry(ctx.mat(role), g);
 }
 
-/** Smooth ball of radius r, `rows` bands from pole to pole. */
-function ball(ctx: Ctx, role: Role, r: number, n: number, rows: number, position: Vec3) {
-  const profile = Array.from({ length: rows + 1 }, (_, i) => {
-    const a = -Math.PI / 2 + Math.PI * i / rows;
-    return [i === 0 || i === rows ? 0 : r * Math.cos(a), r * Math.sin(a)] as [number, number];
-  });
-  turn(ctx, role, profile, n, { position });
-}
-
 /**
  * Dish on a fork: a smooth turned bowl with a rounded trim rim and a ball feed
  * on a slim stalk at its focus, held at the rim's sides by a round-tubed U
@@ -74,8 +68,9 @@ function forkDish(ctx: Ctx) {
   turn(ctx, 'metal', [[0.085, 0], [0.08, 0.03], [0.052, 0.062], [0, 0.074]], segs(ctx, 12, 12, 8), { rotation: [-Math.PI / 2, 0, 0] });
   // The elevation axis lies in the rim's plane; the fork holds the rim at its sides.
   const pivot: Vec3 = [0, 0.228, 0], fork = 0.175;
-  ctx.b.geometry(ctx.mat('secondary'), new T.TorusGeometry(fork, 0.013, segs(ctx, 6, 4, 4), segs(ctx, 8, 6, 6), Math.PI), { position: pivot, rotation: [0, 0, Math.PI] });
-  for (const s of [-1, 1]) ball(ctx, 'metal', 0.022, segs(ctx, 8, 6, 4), segs(ctx, 3, 2, 2), [s * fork, pivot[1], 0]);
+  ctx.b.geometry(ctx.mat('secondary'), new T.TorusGeometry(fork, 0.013, 8, segs(ctx, 8, 6, 6), Math.PI), { position: pivot, rotation: [0, 0, Math.PI] });
+  // Ball pivots, left out at low LOD (4 cm across).
+  if (ctx.detail >= 1) for (const s of [-1, 1]) ball(ctx, 'metal', 0.022, 8, 4, [s * fork, pivot[1], 0]);
   // The bowl opens towards local +Z with its rim plane at z 0, then tilts to look up and aft.
   ctx.within({ position: pivot, rotation: [-0.93, 0, 0] }, () => {
     const z0 = -depth;
@@ -83,8 +78,8 @@ function forkDish(ctx: Ctx) {
     smoothLathe(ctx, 'secondary', [[0, z0 - 0.014], [R * 0.55, z0 + depth * 0.3 - 0.012], [R - 0.004, -0.016]], n);
     smoothLathe(ctx, 'trim', [[R - 0.004, -0.016], [R + 0.01, -0.006], [R - 0.006, -0.004]], n);
     // Ball feed on a slim stalk from the bowl's centre.
-    turn(ctx, 'metal', [[0.007, z0], [0.006, 0.052]], segs(ctx, 6, 5, 4));
-    ball(ctx, 'trim', 0.026, segs(ctx, 9, 6, 6), segs(ctx, 4, 3, 3), [0, 0, 0.07]);
+    turn(ctx, 'metal', [[0.007, z0], [0.006, 0.052]], 8);
+    ball(ctx, 'trim', 0.026, 8, 4, [0, 0, 0.07]);
   });
 }
 

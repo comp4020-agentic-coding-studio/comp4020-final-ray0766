@@ -1,59 +1,75 @@
 import * as T from 'three';
-import { PRESENTATION } from './presentation.ts';
-import {terrainModel} from './terrain-model.ts';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { RADIUS } from '../shared/world.ts';
+import {PRESENTATION} from './presentation.ts';
+import {terrainModel,terrainModelAsync} from './terrain-model.ts';
+import {RADIUS} from '../shared/world.ts';
+import {samplePublicVillage,isSamplePublicRadius} from '../shared/sample-public-village.ts';
+import {createPublicTownArt,createPublicTownArtAsync} from './public-town-art.ts';
+import type {TownRenderPreparation} from './town-renderer.ts';
+import {applyArtMaterial} from './art-profile.ts';
+import {VILLAGE} from '../assets/claude-geometry/style/look.ts';
 
-// Orbital lunar maps: NASA SVS; see ASSET-CREDITS.md.
-function mesh(p:T.Object3D,g:T.BufferGeometry,m:T.Material,pos:[number,number,number]=[0,0,0]){const a=new T.Mesh(g,m);a.position.fromArray(pos);p.add(a);return a;}
-function hash(x:number,y:number,z:number){let n=Math.imul(x,73856093)^Math.imul(y,19349663)^Math.imul(z,83492791);n=Math.imul(n^(n>>>13),1274126177);return((n^(n>>>16))>>>0)/4294967295;}
-function noise(x:number,y:number,z:number){const ix=Math.floor(x),iy=Math.floor(y),iz=Math.floor(z),fx=x-ix,fy=y-iy,fz=z-iz;const sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy),sz=fz*fz*(3-2*fz);let result=0;for(let a=0;a<2;a++)for(let b=0;b<2;b++)for(let c=0;c<2;c++)result+=hash(ix+a,iy+b,iz+c)*(a?sx:1-sx)*(b?sy:1-sy)*(c?sz:1-sz);return result;}
-const worlds=new Map<number,T.MeshStandardMaterial>();
-const moonColor=new T.TextureLoader().load('/textures/lroc-color-2k.jpg');moonColor.colorSpace=T.SRGBColorSpace;moonColor.anisotropy=4;
-const moonHeight=new T.TextureLoader().load('/textures/lola-height-1k.jpg');
-function planetMaterial(seed:number){
-  const key=seed%4;if(worlds.has(key))return worlds.get(key)!;
-  if(key!==0){const material=new T.MeshStandardMaterial({map:moonColor,bumpMap:moonHeight,bumpScale:.21,color:['#ffffff','#c8c2b9','#aab9c2','#c3bab1'][key],roughness:.97,metalness:0,envMapIntensity:.06});worlds.set(key,material);return material;}
-  const canvas=document.createElement('canvas');canvas.width=512;canvas.height=256;const ctx=canvas.getContext('2d')!,im=ctx.createImageData(512,256);
-  const relief=document.createElement('canvas');relief.width=512;relief.height=256;const rctx=relief.getContext('2d')!,rim=rctx.createImageData(512,256);
-  const palettes=[[97,111,111],[129,117,101],[93,111,124],[135,126,112]];
-  for(let y=0;y<256;y++)for(let x=0;x<512;x++){
-    const theta=x/512*Math.PI*2,phi=y/256*Math.PI,nx=Math.cos(theta)*Math.sin(phi),ny=Math.cos(phi),nz=Math.sin(theta)*Math.sin(phi);let f=0,amp=.56,scale=3;
-    for(let o=0;o<5;o++){f+=noise(nx*scale+key*17,ny*scale+key*31,nz*scale+key*13)*amp;amp*=.5;scale*=2.08;}
-    const ridge=Math.abs(noise(nx*20+key*11,ny*20,nz*20)-.5)*.14;
-    const water=key===0&&f<.46,ice=Math.abs(ny)>.93+noise(nx*12,ny*12,nz*12)*.05;const value=water?.66:.67+(f-.3)*.48+ridge;
-    const color=ice?[174,188,185]:water?[37,66,75]:palettes[key],at=(y*512+x)*4;
-    for(let c=0;c<3;c++){im.data[at+c]=color[c]*value*1.1;rim.data[at+c]=(water?.35:f)*255;}im.data[at+3]=255;rim.data[at+3]=255;
+/** Distant legacy worlds keep their slot and radius. Their original procedural
+ * land/sea distribution is drawn as flat colours rather than lunar photo maps. */
+function legacyOrbit(slot:number,radius:number){
+  const root=new T.Group(),geometry=new T.IcosahedronGeometry(radius,4),positions=geometry.getAttribute('position'),colors:number[]=[];
+  const land=['#5ea476','#e0d3ab','#91b7aa','#bfa98a'][slot%4];
+  for(let i=0;i<positions.count;i++){
+    const point=new T.Vector3().fromBufferAttribute(positions,i).normalize();
+    const patch=Math.sin(point.x*8+slot*1.37)*Math.cos(point.z*9-point.y*3);
+    const colour=new T.Color(Math.abs(point.y)>.87?'#eef3f1':slot%4===0&&patch<-.18?'#3f8ab3':land);
+    colors.push(colour.r,colour.g,colour.b);
   }
-  ctx.putImageData(im,0,0);rctx.putImageData(rim,0,0);
-  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;const bump=new T.CanvasTexture(relief);const material=new T.MeshStandardMaterial({map,bumpMap:bump,bumpScale:.14,roughness:.92,metalness:0,envMapIntensity:.12});worlds.set(key,material);return material;
+  geometry.setAttribute('color',new T.Float32BufferAttribute(colors,3));
+  const material=applyArtMaterial(new T.MeshStandardMaterial({vertexColors:true,roughness:1,metalness:0}));material.userData.ownedResource=true;
+  const globe=new T.Mesh(geometry,material);root.add(globe);
+  root.userData.disposeOwned=()=>{geometry.dispose();material.dispose();root.removeFromParent();};
+  return root;
 }
+
 export function orbitalPlanet(slot:number,environment?:string|null,radius=RADIUS){
-  if(environment){const model=terrainModel(environment,[],{},'low',false,radius);model.setSunDirection([...PRESENTATION.space.sun.position]);return model.object;}
-  const root=new T.Group();const globe=mesh(root,new T.SphereGeometry(radius,64,40),planetMaterial(slot));globe.rotation.y=slot*1.37;
-  if(slot===0){
-    // Coarse orbital representation of the compact public village, bounded to one draw.
-    const count=12,geometry=new T.BoxGeometry(1,1,1),material=new T.MeshStandardMaterial({color:'#d8c9a6',metalness:0,roughness:.9});material.userData.ownedResource=true;
-    const city=new T.InstancedMesh(geometry,material,count),dummy=new T.Object3D();
-    for(let i=0;i<count;i++){const a=i*2.399963,r=.25+Math.sqrt(i/count)*5.5,n=new T.Vector3(Math.cos(a)*r,10,Math.sin(a)*r-2).normalize(),h=.18+(Math.sin(i*72.15)*.5+.5)**2*1.5;dummy.position.copy(n).multiplyScalar(radius+h/2);dummy.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),n);dummy.scale.set(.15+(i%5)*.04,h,.22);dummy.updateMatrix();city.setMatrixAt(i,dummy.matrix);}root.add(city);
+  const village=slot===0&&isSamplePublicRadius(radius)?samplePublicVillage(radius):null;
+  if(village){
+    const root=new T.Group(),terrain=terrainModel(village.environment,village.objects,village.blueprints,'low',false,radius,village.routes);
+    const town=createPublicTownArt(village,radius,{mediumCacheChunks:0});root.add(terrain.object,town.root);
+    terrain.setSunDirection([...PRESENTATION.space.sun.position]);
+    root.userData.updateTown=(eye:T.Vector3)=>{root.userData.townStats=town.update(eye,undefined,{lowOnly:true,globalLow:true});};
+    let disposed=false;root.userData.disposeOwned=()=>{if(disposed)return;disposed=true;town.dispose();terrain.dispose();root.removeFromParent();};
+    return root;
   }
-  const atmosphere=new T.ShaderMaterial({transparent:true,depthWrite:false,side:T.BackSide,blending:T.AdditiveBlending,uniforms:{tint:{value:new T.Color(slot%4===1?'#8e765b':'#548494')}},vertexShader:'varying vec3 n;varying vec3 v;void main(){vec4 p=modelViewMatrix*vec4(position,1.);n=normalize(normalMatrix*normal);v=normalize(-p.xyz);gl_Position=projectionMatrix*p;}',fragmentShader:'varying vec3 n;varying vec3 v;uniform vec3 tint;void main(){float rim=pow(1.-abs(dot(normalize(n),normalize(v))),3.5);gl_FragColor=vec4(tint,rim*.2);}'});
-  atmosphere.userData.ownedResource=true;mesh(root,new T.SphereGeometry(radius*1.028,48,24),atmosphere);return root;
+  if(environment){const model=terrainModel(environment,[],{},'low',false,radius);model.setSunDirection([...PRESENTATION.space.sun.position]);return model.object;}
+  return legacyOrbit(slot,radius);
 }
-export function configureSpace(scene:T.Scene,renderer:T.WebGLRenderer){
+
+/** Build away from the visible scene. The existing distant sphere stays
+ * visible until the full-detail handle is ready and atomically attached. */
+export async function orbitalPlanetAsync(slot:number,environment:string|null|undefined,radius:number,preparation:TownRenderPreparation & {onGroundProgress?:(done:number,total:number)=>void}={}){
+  const yieldFrame=preparation.yieldFrame??(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>resolve())));
+  const check=()=>{if(preparation.signal?.aborted)throw new DOMException('Loading cancelled.','AbortError');};
+  await yieldFrame();check();
+  const village=slot===0&&isSamplePublicRadius(radius)?samplePublicVillage(radius):null;
+  if(!village&&!environment)return legacyOrbit(slot,radius);
+  let town:Awaited<ReturnType<typeof createPublicTownArtAsync>>|undefined,terrain:ReturnType<typeof terrainModel>|undefined;
+  try{
+    if(village)town=await createPublicTownArtAsync(village,radius,{mediumCacheChunks:0},preparation);
+    await yieldFrame();check();
+    terrain=await terrainModelAsync(village?.environment??environment!,village?.objects??[],village?.blueprints??{},'low',false,radius,village?.routes??[],
+      {signal:preparation.signal,budgetMs:preparation.budgetMs??6,yieldFrame,onProgress:preparation.onGroundProgress});
+    terrain.setSunDirection([...PRESENTATION.space.sun.position]);
+    if(!town)return terrain.object;
+    const root=new T.Group(),ownedTown=town,ownedTerrain=terrain;root.add(terrain.object,town.root);
+    root.userData.updateTown=(eye:T.Vector3)=>{root.userData.townStats=ownedTown.update(eye,undefined,{lowOnly:true,globalLow:true});};
+    let disposed=false;root.userData.disposeOwned=()=>{if(disposed)return;disposed=true;ownedTown.dispose();ownedTerrain.dispose();root.removeFromParent();};
+    return root;
+  }catch(error){town?.dispose();terrain?.dispose();throw error;}
+}
+
+export function configureSpace(scene:T.Scene,_renderer:T.WebGLRenderer){
   const look=PRESENTATION.space;
-  scene.background=new T.Color(look.background);scene.fog=new T.FogExp2(look.fog.color,look.fog.density);
-  const environment=new RoomEnvironment();const generator=new T.PMREMGenerator(renderer);scene.environment=generator.fromScene(environment,look.pmremSigma).texture;scene.environmentIntensity=look.environmentIntensity;environment.dispose();generator.dispose();
-  scene.add(new T.HemisphereLight(look.fill.sky,look.fill.ground,look.fill.intensity));
-  const sun=new T.DirectionalLight(look.sun.color,look.sun.intensity);sun.position.fromArray(look.sun.position);scene.add(sun);
-  const rim=new T.DirectionalLight(look.rim.color,look.rim.intensity);rim.position.fromArray(look.rim.position);scene.add(rim);
-  // Sparse geometry supplies scale and parallax; no particle wall or bloom veil.
-  const positions:number[]=[],colors:number[]=[];let seed=103;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-  for(let i=0;i<950;i++){const p=new T.Vector3(random()-.5,random()-.5,random()-.5).normalize().multiplyScalar(900+random()*1300);positions.push(...p.toArray());const b=.32+random()*.58;colors.push(b,b*.94,b*.86);}
-  const stars=new T.BufferGeometry();stars.setAttribute('position',new T.Float32BufferAttribute(positions,3));stars.setAttribute('color',new T.Float32BufferAttribute(colors,3));scene.add(new T.Points(stars,new T.PointsMaterial({vertexColors:true,size:1.7,sizeAttenuation:true,transparent:true,opacity:.8,depthWrite:false})));
-  // A distant moon is scenery, deliberately far outside the reachable constellation.
-  const moonMaterial=planetMaterial(3).clone();moonMaterial.fog=false;const moon=mesh(scene,new T.SphereGeometry(950,64,40),moonMaterial,[-4800,-4500,10500]);moon.rotation.z=.4;
-  const ringCanvas=document.createElement('canvas');ringCanvas.width=512;ringCanvas.height=512;const rc=ringCanvas.getContext('2d')!,ri=rc.createImageData(512,512);
-  for(let y=0;y<512;y++)for(let x=0;x<512;x++){const r=Math.hypot(x-256,y-256)/256,at=(y*512+x)*4;const bands=.64+.2*Math.sin(r*730)+.13*Math.sin(r*1790);ri.data[at]=142*bands;ri.data[at+1]=138*bands;ri.data[at+2]=126*bands;ri.data[at+3]=(r>.74&&r<1?(.12+bands*.6)*(r>.88&&r<.903?.08:1):0)*255;}rc.putImageData(ri,0,0);const ringMap=new T.CanvasTexture(ringCanvas);ringMap.colorSpace=T.SRGBColorSpace;
-  const ring=mesh(scene,new T.RingGeometry(1250,1680,160,1),new T.MeshStandardMaterial({map:ringMap,roughness:1,metalness:0,transparent:true,opacity:.8,side:T.DoubleSide,fog:false,depthWrite:false}),[-4800,-4500,10500]);ring.rotation.set(1.12,.3,-.18);
+  scene.background=null;scene.fog=new T.FogExp2(VILLAGE.fog,look.fog.density);
+  scene.environment=null;scene.environmentIntensity=0;
+  scene.add(new T.HemisphereLight(VILLAGE.light.sky,VILLAGE.light.ground,VILLAGE.light.fillIntensity));
+  const sun=new T.DirectionalLight(VILLAGE.light.key,VILLAGE.light.keyIntensity);sun.position.fromArray(look.sun.position);scene.add(sun);
+  // The camera-following cloud sky belongs to the drawing pipeline. There are
+  // no image lights, star field or extra scenery worlds behind the real atlas.
+  void _renderer;
 }

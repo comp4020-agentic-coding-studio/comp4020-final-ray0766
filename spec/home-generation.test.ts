@@ -26,7 +26,7 @@ beforeAll(() => {
 describe('versioned, constrained home neighbourhoods', () => {
   it.each(seeds)('seed %i uses legal player parts and placement with reserved build capacity', seed => {
     const manifest = fixtures.get(seed)!, { objects, blueprints } = homeManifestScene(manifest), field = fieldOf(manifest.environment, radius), cache = new PathPlacementCache();
-    expect(manifest).toMatchObject({ generator: 'home-neighbourhood', version: HOME_GENERATOR_VERSION, seed, catalogueVersion: 'district-kit-v2', environment: SHORT_STREET_ENVIRONMENT, fallback: false });
+    expect(manifest).toMatchObject({ generator: 'home-neighbourhood', version: HOME_GENERATOR_VERSION, seed, catalogueVersion: 'village-kit-v1', environment: SHORT_STREET_ENVIRONMENT, fallback: false });
     expect(manifest.infrastructure).toHaveLength(3);
     expect(objects.length).toBeLessThanOrEqual(HOME_GENERATION_BUDGET.maxObjects);
     expect(MAX_OBJECTS - objects.length).toBeGreaterThanOrEqual(HOME_GENERATION_BUDGET.reservedObjects);
@@ -61,7 +61,7 @@ describe('versioned, constrained home neighbourhoods', () => {
     // Every seed's placement is checked above. Exercise the object contract
     // here on both lane orientations without repeating every exact fit.
     for (const manifest of [fixtures.get(0)!, fixtures.get(4)!]) {
-      expect(manifest.version).toBe(5);
+      expect(manifest.version).toBe(6);
       const { objects, blueprints } = homeManifestScene(manifest), field = fieldOf(manifest.environment, radius), cache = new PathPlacementCache();
       const paths = objects.filter(object => object.kind === 'path');
       const scenery = objects.filter(object => object.kind !== 'path' && object.kind !== 'structure');

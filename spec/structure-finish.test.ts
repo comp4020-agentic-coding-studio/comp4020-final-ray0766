@@ -4,7 +4,7 @@ import type { PartPlacement, Rot } from '../src/assets/claude-geometry/blueprint
 import { rotDir } from '../src/assets/claude-geometry/blueprint/model.ts';
 import { StyleLibrary } from '../src/assets/claude-geometry/style/materials.ts';
 import { libraryMaterials, STOREY, WALL_H, WALL_T } from '../src/assets/claude-geometry/blueprint/parts/kit.ts';
-import { BASE_COURSE, TOP_BAND } from '../src/assets/claude-geometry/blueprint/parts/village/walls.ts';
+import { KOSHI, TOP_BAND } from '../src/assets/claude-geometry/blueprint/parts/village/walls.ts';
 import { buildStructureFinish, planStructureFinish, STRUCTURE_FINISH_MAX_PROJECTION } from '../src/client/structure-finish.ts';
 import { homeVariant } from '../src/shared/home-layout.ts';
 
@@ -87,7 +87,7 @@ it.each([0, 1, 2, 3] as Rot[])('covers only the existing exterior solid-wall pos
   const material = libraryMaterials(lib).get('post');
   const capMesh = finish.object.children.find(child => (child as Mesh).material === material)!;
   const bounds = new Box3().setFromObject(capMesh);
-  expect(bounds.min.y).toBeCloseTo(level * STOREY + BASE_COURSE);
+  expect(bounds.min.y).toBeCloseTo(level * STOREY + KOSHI);
   expect(bounds.max.y).toBeCloseTo(level * STOREY + WALL_H - TOP_BAND);
   const coordinate = dz ? 'z' : 'x', normal = dz || dx;
   const outerFace = Math.max(normal * bounds.min[coordinate], normal * bounds.max[coordinate]);
@@ -160,7 +160,7 @@ it('is deterministic under part order and does not mutate the structural documen
   resources.push(first, reordered);
   expect(first.seed).toBe(reordered.seed); expect(first.segments).toEqual(reordered.segments);
   expect(first.drawCalls).toBeLessThanOrEqual(2);
-  expect(first.object.userData).toMatchObject({ decorative: true, collision: false, support: false, finishVersion: 2 });
+  expect(first.object.userData).toMatchObject({ decorative: true, collision: false, support: false, finishVersion: 3 });
   expect(JSON.stringify(parts)).toBe(before);
   const attributes = (handle: typeof first) => handle.object.children.map(child => Array.from((child as Mesh).geometry.getAttribute('position').array));
   expect(attributes(first)).toEqual(attributes(reordered));

@@ -158,6 +158,7 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
     enter(id:string,body:Record<string,unknown>,now=Date.now()){
       strict(body,['planetId','buildingId','visitEpoch']);if(!enabled)throw new RequestError(404,'Home sample is unavailable.');
       const loc=location(id),h=byBuilding(body.buildingId);epoch(loc,body.visitEpoch);const p=player(id);
+      if(planets.planet(h.planet_id).owner_id!==id)throw new RequestError(403,'Only the home owner can enter the room.');
       if(loc.kind!=='exterior'||p.planet_id!==h.planet_id||body.planetId!==h.planet_id||JSON.parse(String(p.flight??'{"mode":"ground"}')).mode!=='ground')throw new RequestError(409,'Walk to this home first.');
       if(distance(JSON.parse(String(p.position)),door(h).position,planets.planet(h.planet_id).radius)>1.7)throw new RequestError(409,'Walk closer to the home door.');
       const room=interior(h);if(!room.doorOpen)throw new RequestError(409,'Open the door before entering.');
@@ -207,7 +208,7 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
       const kind=variant==='base'?'starter':variant==='extended'?'extension':variant as 'terrace'|'roof';
       const row=db.prepare('SELECT document FROM home_manifests WHERE planet_id=?').get(planetId);
       const receipt=row?JSON.parse(String(row.document)) as HomeInfrastructureManifest:null;
-      return receipt?.catalogueVersion==='district-kit-v2'
+      return receipt&&(receipt.catalogueVersion==='district-kit-v2'||receipt.catalogueVersion==='village-kit-v1')
         ?districtHome(kind,(receipt.objects.find(object=>object.id===receipt.homeBuildingId)?.rotation??0)>Math.PI)
         :homeVariant(kind);
     },

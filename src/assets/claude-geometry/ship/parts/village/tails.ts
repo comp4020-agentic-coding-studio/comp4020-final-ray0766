@@ -110,7 +110,7 @@ function butterflyTail(ctx: Ctx) {
       t: Math.max(0.004, (0.075 - 0.03 * f) * Math.sqrt(Math.max(0, 1 - f ** 6))),
     };
   };
-  const ys = ctx.detail === 2 ? [0, 0.18, 0.33, 0.44, 0.5, 0.54, H] : ctx.detail === 1 ? [0, 0.22, 0.38, 0.44, 0.52, H] : [0, 0.3, 0.44, 0.52, H];
+  const ys = ctx.detail === 2 ? [0, 0.18, 0.33, 0.44, 0.5, 0.54, H] : ctx.detail === 1 ? [0, 0.22, 0.38, 0.44, 0.5, 0.54, H] : [0, 0.3, 0.44, 0.52, H];
   const stations = ys.map(station), n = segs(ctx, 8, 8, 6);
   bothSides(ctx, () => ctx.within({ position: [0.09, 0, 0], rotation: [0, 0, -0.7] }, () => {
     smoothFin(ctx, stations, 0.44, n);
@@ -120,7 +120,7 @@ function butterflyTail(ctx: Ctx) {
   saddle(ctx, 'secondary', [
     { z: -0.34, a: 0.03, b: 0.006 }, { z: -0.24, a: 0.1, b: 0.06 }, { z: -0.06, a: 0.13, b: 0.085 },
     { z: 0.28, a: 0.13, b: 0.08 }, { z: 0.4, a: 0.09, b: 0.05 }, { z: 0.43, a: 0.03, b: 0.006 },
-  ].filter((_, i) => ctx.detail > 0 || i % 2 === 0 || i === 5), segs(ctx, 7, 7, 5));
+  ].filter((_, i) => ctx.detail > 0 || i !== 3), 7);
 }
 
 export const VILLAGE_TAILS: Record<string, (ctx: Ctx) => void> = { 'single-fin': roundFin, 'twin-fin': roundTwinFins, 'v-tail': butterflyTail };

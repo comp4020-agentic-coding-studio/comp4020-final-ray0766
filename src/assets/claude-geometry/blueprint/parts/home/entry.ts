@@ -9,11 +9,15 @@ import type { Kit } from '../kit.ts';
 // are under it. Cell parts on level 0 only: origin at the top cell's centre,
 // the top edge at local −Z joins the floor behind, they descend towards +Z.
 //
-// Drawn alike in both looks (stone and boards in the village look, precast
-// and tread plate in the industrial one). Nothing rises above the floor
-// (y 0), so a door's threshold and a corner post's foot on the top edge, and
-// walls or rails on the decks beside, stand clear of them. The solid bodies
-// reach down to ENTRY_DROP + ENTRY_EMBED across the whole cell width.
+// The industrial look draws precast steps and a boarded ramp with rounded
+// edges; the village look draws its own twins (entryStepsVillage,
+// entryRampVillage): square stone steps, and a ramp of three wide boards and
+// three cleats, between plain stone cheeks, on the same treads, slope and
+// cheeks, so one set of colliders fits both, and on the same constants
+// below. Nothing rises above the floor (y 0), so a door's threshold and a
+// corner post's foot on the top edge, and walls or rails on the decks
+// beside, stand clear of them. The solid bodies reach down to ENTRY_DROP +
+// ENTRY_EMBED across the whole cell width.
 
 /** Total drop of the entrance parts: MAX_FOUNDATION_DEPTH (core/ground.ts). */
 export const ENTRY_DROP = 0.6;
@@ -98,9 +102,10 @@ function alongZ(k: Kit, material: T.Material, section: Pt[], stations: [number, 
  * Stone cheek on the +X side (−X mirrored): a wall from the bottom up to a
  * coping whose top runs at rise 0 of the path, rounded on both edges and proud
  * of the wall on the inside by `lip` over a drip edge (no lip: a rounded upstand).
+ * Square: no rounding at all, a plain wall cut flat along the path.
  */
-function cheek(k: Kit, side: number, stations: [number, number][], opts: { lip: number; coping: number; round: number }) {
-  const seg = k.low ? 0 : 3, f = true, r = opts.round;
+function cheek(k: Kit, side: number, stations: [number, number][], opts: { lip: number; coping: number; round: number; square?: boolean }) {
+  const seg = k.low || opts.square ? 0 : 3, f = true, r = opts.round;
   const wall = CHEEK + opts.lip;
   const s: Pt[] = [
     pt(wall, BOTTOM), pt(OUT, BOTTOM),
@@ -112,6 +117,40 @@ function cheek(k: Kit, side: number, stations: [number, number][], opts: { lip: 
   alongZ(k, k.m('concrete'), mirrored, stations);
 }
 
+/** Treads of the entrance steps: rise, going, slab thickness, and how far each slab's nosing stands over the riser below. */
+const STEP = { rise: 0.15, going: 0.25, slab: 0.05, set: 0.02 } as const;
+
+/**
+ * The steps' stone: one mass under the slabs down to the bottom, its risers
+ * set back under the nosings, and four tread slabs, `inner` either side of
+ * the centre line; `nose` and `under` are the segments rounding each slab's
+ * nosing and the edge beneath it (none: square).
+ */
+function stepStones(k: Kit, inner: number, nose: number, under: number) {
+  const stone = k.m('concrete');
+  const { rise, going, slab, set } = STEP;
+  const top = (i: number) => -rise * (i + 1), front = (i: number) => -0.5 + going * (i + 1);
+  const body: Pt[] = [pt(-0.5, BOTTOM), pt(0.5, BOTTOM), pt(0.5, top(3) - slab)];
+  for (let i = 2; i >= 0; i--) body.push(pt(front(i) - set, top(i + 1) - slab), pt(front(i) - set, top(i) - slab));
+  body.push(pt(-0.5, top(0) - slab));
+  acrossX(k, stone, body, -inner, inner);
+  for (let i = 0; i < 4; i++) {
+    const y = top(i), z1 = front(i), z0 = i === 0 ? -0.5 : front(i - 1) - set, last = i === 3;
+    const s: Pt[] = [pt(z0, y - slab)];
+    // The bottom tread's front is the body's: it stands on the ground, nothing under it to shade.
+    s.push(...(last ? [pt(z1, y - slab)] : arc(z1 - 0.012, y - slab + 0.012, 0.012, -Math.PI / 2, 0, under)));
+    s.push(...arc(z1 - 0.03, y - 0.03, 0.03, 0, Math.PI / 2, nose), pt(z0, y));
+    acrossX(k, stone, s, -inner, inner);
+  }
+}
+
+/** The cheeks' copings run 0.1 above the steps' nosing line (y = −0.6 z − 0.3), never above the floor: the path they follow. */
+const STEP_COPING: [number, number][] = (() => {
+  const coping = (z: number) => Math.min(0, -0.6 * z - 0.3 + 0.1);
+  const level = (0.1 - 0.3) / 0.6;
+  return [[-0.5, 0], [level, 0], [0.5, coping(0.5)]];
+})();
+
 /**
  * Four stone steps between stone cheeks. Treads at −0.15, −0.30, −0.45 and
  * −0.60 on 0.25 m goings, the first riser being the floor slab's own edge at
@@ -121,28 +160,21 @@ function cheek(k: Kit, side: number, stations: [number, number][], opts: { lip: 
  * where that line would rise above it.
  */
 export function entrySteps(k: Kit) {
-  const stone = k.m('concrete');
-  const rise = 0.15, going = 0.25, slab = 0.05, set = 0.02, lip = 0.015;
-  const top = (i: number) => -rise * (i + 1), front = (i: number) => -0.5 + going * (i + 1);
+  const lip = 0.015;
   // Under each slab's bed one stone mass reaches down to the bottom, its risers set back under the nosings.
-  const inner = CHEEK + lip;
-  const body: Pt[] = [pt(-0.5, BOTTOM), pt(0.5, BOTTOM), pt(0.5, top(3) - slab)];
-  for (let i = 2; i >= 0; i--) body.push(pt(front(i) - set, top(i + 1) - slab), pt(front(i) - set, top(i) - slab));
-  body.push(pt(-0.5, top(0) - slab));
-  acrossX(k, stone, body, -inner, inner);
-  const nose = k.low ? 0 : k.fine ? 4 : 3, under = k.low ? 0 : 1;
-  for (let i = 0; i < 4; i++) {
-    const y = top(i), z1 = front(i), z0 = i === 0 ? -0.5 : front(i - 1) - set, last = i === 3;
-    const s: Pt[] = [pt(z0, y - slab)];
-    // The bottom tread's front is the body's: it stands on the ground, nothing under it to shade.
-    s.push(...(last ? [pt(z1, y - slab)] : arc(z1 - 0.012, y - slab + 0.012, 0.012, -Math.PI / 2, 0, under)));
-    s.push(...arc(z1 - 0.03, y - 0.03, 0.03, 0, Math.PI / 2, nose), pt(z0, y));
-    acrossX(k, stone, s, -inner, inner);
-  }
-  // Cheeks: copings 0.1 above the nosing line (y = −0.6 z − 0.3), never above the floor.
-  const coping = (z: number) => Math.min(0, -0.6 * z - 0.3 + 0.1);
-  const level = (0.1 - 0.3) / 0.6;
-  for (const side of [-1, 1]) cheek(k, side, [[-0.5, 0], [level, 0], [0.5, coping(0.5)]], { lip, coping: 0.06, round: 0.025 });
+  stepStones(k, CHEEK + lip, k.low ? 0 : k.fine ? 4 : 3, k.low ? 0 : 1);
+  for (const side of [-1, 1]) cheek(k, side, STEP_COPING, { lip, coping: 0.06, round: 0.025 });
+}
+
+/**
+ * Village twin: the same treads and cheeks cut square, as dressed stone
+ * steps are: square nosings 20 mm over the riser below, which the
+ * lines find as a crease and a shadow line at every step, and plain cheeks,
+ * a wall cut flat along the same coping line with no lip.
+ */
+export function entryStepsVillage(k: Kit) {
+  stepStones(k, CHEEK, 0, 0);
+  for (const side of [-1, 1]) cheek(k, side, STEP_COPING, { lip: 0, coping: 0, round: 0, square: true });
 }
 
 /**
@@ -173,5 +205,31 @@ export function entryRamp(k: Kit) {
   const angle = Math.atan(fall), zs = k.low ? [0.125, 0.625, 1.125] : [-0.125, 0.125, 0.375, 0.625, 0.875, 1.125, 1.375];
   for (const z of zs) {
     b.within({ position: [0, surface(z), z], rotation: [angle, 0, 0] }, () => b.box(k.m('post'), [2 * CHEEK - 0.03, cleat, 0.04], { position: [0, cleat / 2, 0] }, 0.006));
+  }
+}
+
+/**
+ * Village twin: the same 0.3 in 1 fall between the same cheeks, cut square
+ * (plain stone cheeks, no lip, no rounding), boarded in three wide boards on
+ * the plank floor's third-of-a-metre module, so a floor's board joints run on
+ * down the ramp (one sheet at low), and three square timber cleats where the
+ * industrial ramp has its low-LOD three: few lines, each one a board joint
+ * or a cleat.
+ */
+export function entryRampVillage(k: Kit) {
+  const { b } = k;
+  const fall = ENTRY_DROP / 2, board = 0.03, upstand = 0.05, cleat = 0.018, gap = 0.006;
+  const surface = (z: number) => -fall * (z + 0.5), foot = surface(1.5);
+  acrossX(k, k.m('concrete'), [pt(-0.5, BOTTOM), pt(1.5, BOTTOM), pt(1.5, foot - board), pt(-0.5, -board)], -CHEEK, CHEEK);
+  const level = -0.5 + upstand / fall;
+  for (const side of [-1, 1]) cheek(k, side, [[-0.5, 0], [level, 0], [1.5, foot + upstand]], { lip: 0, coping: 0, round: 0, square: true });
+  const edges = k.low ? [-CHEEK, CHEEK] : [-CHEEK, -1 / 6, 1 / 6, CHEEK];
+  for (let i = 0; i + 1 < edges.length; i++) {
+    const x0 = edges[i] + (i > 0 ? gap / 2 : 0), x1 = edges[i + 1] - (i + 2 < edges.length ? gap / 2 : 0);
+    alongZ(k, k.m('tread'), [pt(x0, -board, true), pt(x1, -board, true), pt(x1, 0, true), pt(x0, 0, true)], [[-0.5, 0], [1.5, foot]]);
+  }
+  const angle = Math.atan(fall);
+  for (const z of [0.125, 0.625, 1.125]) {
+    b.within({ position: [0, surface(z), z], rotation: [angle, 0, 0] }, () => b.box(k.m('post'), [2 * CHEEK - 0.03, cleat, 0.04], { position: [0, cleat / 2, 0] }, 0));
   }
 }

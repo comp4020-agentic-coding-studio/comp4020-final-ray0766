@@ -16,6 +16,11 @@ const stores:ReturnType<typeof openStore>[]=[];
 const dirs:string[]=[];
 const sample=()=>{const s=openStore(':memory:',{homeSample:true});stores.push(s);s.create('owner');return s;};
 const enter=(s:ReturnType<typeof openStore>,id='owner')=>{const p=s.state(id);return s.enterHome(id,{planetId:p.planetId,buildingId:p.home!.buildingId,visitEpoch:p.location!.visitEpoch});};
+// Existing saved indoor guests keep a safe exit after owner-only entry ships.
+function legacyVisitorInside(s:ReturnType<typeof openStore>,id='visitor'){
+ const p=s.state(id),h=p.home!,loc={kind:'interior',planetId:p.planetId,buildingId:h.buildingId,interiorId:h.interiorId,position:[0,0,h.interior.room.depth/2-1],yaw:Math.PI,sequence:0,visitEpoch:p.location!.visitEpoch+1};
+ s.db.prepare('UPDATE home_locations SET document=? WHERE player_id=?').run(JSON.stringify(loc),id);return s.universe(id);
+}
 afterEach(()=>{for(const s of stores.splice(0)){try{s.close();}catch{ /* already closed to test reopening */ }}for(const d of dirs.splice(0))rmSync(d,{recursive:true,force:true});});
 
 it('starts an isolated sample at its sole home and never regenerates its persisted manifest',()=>{
@@ -67,7 +72,7 @@ it('rejects every exterior editing route indoors before any persistent write',()
 
 it('keeps visitors read-only, validates furniture clearances and scopes presence to the same home',()=>{
   const s=sample();s.create('visitor');const owner=s.state('owner'),h=owner.home!,presence=presenceStore(s.state);s.visit('visitor',owner.planetId);
-  s.db.prepare('UPDATE players SET position=? WHERE id=?').run(JSON.stringify(owner.position),'visitor');enter(s);enter(s,'visitor');
+  s.db.prepare('UPDATE players SET position=? WHERE id=?').run(JSON.stringify(owner.position),'visitor');enter(s);legacyVisitorInside(s);
   const inside=s.state('owner'),visitor=s.state('visitor');expect(visitor.home!.canEdit).toBe(false);
   const save={buildingId:h.buildingId,expectedVersion:1,material:'sage',items:h.interior.items};
   expect(()=>s.saveHome('visitor',save)).toThrow('Only');s.saveHome('owner',save);expect(s.state('owner').home!.interior.material).toBe('sage');
@@ -87,7 +92,7 @@ it('replaces and undoes exterior content under one building id, replays hashes, 
   const snapshot=s.historySnapshot('owner',old.planetId),decoded=decodeSnapshot(snapshot.document);expect(decoded.ok).toBe(true);if(decoded.ok)expect(decoded.value.objects[h.buildingId].spec).toMatchObject({blueprintHash:changed.currentPlanet.objects.find(o=>o.id===h.buildingId)!.blueprintHash});
   expect(()=>s.removeObject('owner',{planetId:old.planetId,objectId:h.buildingId,expectedVersion:2})).toThrow('belongings');
   s.undoHome('owner',{buildingId:h.buildingId,expectedVersion:2});expect(s.state('owner').home).toMatchObject({buildingId:h.buildingId,variant:h.variant,canUndo:false,buildingVersion:3});
-  s.create('visitor');s.visit('visitor',old.planetId);s.db.prepare('UPDATE players SET position=? WHERE id=?').run(JSON.stringify(h.door.position),'visitor');enter(s,'visitor');
+  s.create('visitor');s.visit('visitor',old.planetId);s.db.prepare('UPDATE players SET position=? WHERE id=?').run(JSON.stringify(h.door.position),'visitor');legacyVisitorInside(s);
   // Relocate onto clear ground: rotating in the compact street now correctly
   // conflicts with its neighbouring paving and is not a valid movement fixture.
   s.updateObject('owner',{planetId:old.planetId,objectId:h.buildingId,position:samplePoint(21.6,10,5),rotation:.1,expectedVersion:3});

@@ -1,6 +1,7 @@
 import * as T from 'three';
 import {setHTML,setText} from './i18n.ts';
 import './photo-mode.css';
+import {createVillageDrawing} from './village-drawing.ts';
 
 export type PhotoCamera = T.PerspectiveCamera | T.OrthographicCamera;
 export interface PhotoView {scene:T.Scene;camera:PhotoCamera;target:T.Vector3;prepare?:(camera:PhotoCamera)=>void}
@@ -27,6 +28,7 @@ function resizeCamera(camera:PhotoCamera,aspect:number){
 export class PhotoMode {
   private root=document.createElement('section');
   private current:PhotoView|null=null;
+  private drawing:ReturnType<typeof createVillageDrawing>|null=null;
   private original:{scene:T.Scene;fog:T.Fog|T.FogExp2|null;background:T.Scene['background']}|null=null;
   private priorFocus:HTMLElement|null=null;
   private mode:'follow'|'overview'='overview';
@@ -73,10 +75,11 @@ export class PhotoMode {
     if(!this.active||this.saving)return;
     this.restoreScene();this.current=null;this.drag=null;this.root.hidden=true;document.body.classList.remove('photo-mode');this.bridge.pause(false);this.priorFocus?.focus();
   }
-  private restoreScene(){if(this.original){this.original.scene.fog=this.original.fog;this.original.scene.background=this.original.background;this.original=null;}}
+  private restoreScene(){this.drawing?.dispose();this.drawing=null;if(this.original){this.original.scene.fog=this.original.fog;this.original.scene.background=this.original.background;this.original=null;}}
   private reframe(mode:'follow'|'overview'){
     if(this.saving)return;this.restoreScene();this.mode=mode;
     this.current=this.bridge.view(mode,innerWidth,innerHeight);const {scene,camera}=this.current;
+    this.drawing=createVillageDrawing(this.bridge.renderer,scene,camera);
     this.original={scene,fog:scene.fog?.clone()??null,background:scene.background};
     if(!scene.background)scene.background=(scene.fog?.color??this.bridge.renderer.getClearColor(new T.Color())).clone();
     this.basePosition.copy(camera.position);this.zoom=1;this.get<HTMLInputElement>('zoom').value='1';
@@ -99,7 +102,7 @@ export class PhotoMode {
   }
   frame(){
     if(!this.current||this.saving)return;
-    this.current.prepare?.(this.current.camera);this.bridge.renderer.render(this.current.scene,this.current.camera);
+    this.current.prepare?.(this.current.camera);this.drawing?.render(this.current.target,this.mode==='overview');
   }
   async capture(){
     const view=this.current;if(!view||this.saving)return;this.saving=true;
@@ -109,8 +112,9 @@ export class PhotoMode {
     const photoCamera=view.camera.clone() as PhotoCamera;resizeCamera(photoCamera,dimensions.width/dimensions.height);
     for(const control of this.root.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select'))control.disabled=true;
     setText(this.get('status'),'Rendering your photo…');
+    let exportDrawing:ReturnType<typeof createVillageDrawing>|null=null;
     try{
-      renderer.setPixelRatio(factor);renderer.setSize(dimensions.width,dimensions.height,false);view.prepare?.(photoCamera);renderer.render(view.scene,photoCamera);
+      renderer.setPixelRatio(factor);renderer.setSize(dimensions.width,dimensions.height,false);view.prepare?.(photoCamera);exportDrawing=createVillageDrawing(renderer,view.scene,photoCamera);exportDrawing.render(view.target,this.mode==='overview');
       const canvas=document.createElement('canvas');canvas.width=dimensions.width;canvas.height=dimensions.height;
       const context=canvas.getContext('2d');if(!context)throw Error('Photo export is unavailable.');
       context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';context.drawImage(renderer.domElement,0,0,canvas.width,canvas.height);
@@ -120,7 +124,7 @@ export class PhotoMode {
       setText(this.get('status'),'Photo saved. Keep exploring or try another view.');
     }catch(error){setText(this.get('status'),error instanceof Error?error.message:'Photo export failed.');}
     finally{
-      renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);resizeCamera(view.camera,innerWidth/innerHeight);this.saving=false;
+      exportDrawing?.dispose();renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);resizeCamera(view.camera,innerWidth/innerHeight);this.saving=false;
       for(const control of this.root.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select'))control.disabled=false;
       this.frame();
     }

@@ -65,7 +65,9 @@ it('checks real walls, furniture and staircase overhangs while leaving clear gro
  const door=fixture(14,0,base.structure.position,[...deck,{n:5,part:'wall.door.open',x:1,z:2,level:0,rot:0}]);
  const doorPath=door.path(-.5,1.55);
  expect(base.check(doorPath,[base.structure])).toBe(null);
- expect(door.check(doorPath,[door.structure])).toMatch(/door’s opening space/);
+ // Sliding leaves stay on the wall face; the old swing no longer excludes
+ // an otherwise supported path in front of the threshold.
+ expect(door.check(doorPath,[door.structure])).toBe(null);
  const roofs=[...deck,{n:5,part:'roof.slope',x:1,z:2,level:2,rot:0}] as PartPlacement[];
  const f=fixture(14,0,base.structure.position,roofs);
  expect(f.check(near,[f.structure])).toBe(null);

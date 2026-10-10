@@ -158,13 +158,10 @@ export function partEmit(id: PartId, look: Look = 'industrial'): Emit {
 
 /**
  * Emit a part in a look into a kit. A part the look has no model for is drawn
- * by its industrial model without the ink shell (PartBuilder.shellOff), so it
- * costs exactly its industrial triangles there too.
+ * by its industrial model, so it costs exactly its industrial triangles there too.
  */
 export function emitPart(id: PartId, look: Look, k: Kit) {
-  const own = look === 'village' && VILLAGE_EMITS[id] !== undefined;
-  k.b.shellOff = look !== 'industrial' && !own;
-  try { partEmit(id, look)(k); } finally { k.b.shellOff = false; }
+  partEmit(id, look)(k);
 }
 
 /** A part's name and palette line as a look shows them (rule messages keep the catalogue's names). */
@@ -188,11 +185,11 @@ export function partCost(id: PartId, lod: LodTier): { triangles: number; drawCal
     const source = countingMaterials(lod), b = new PartBuilder(lod);
     PARTS[id].emit(makeKit(b, source));
     const built = b.build(id);
-    // A part drawn the same in both looks pays for its ink in the village look,
-    // so the budget (which counts triangles) takes whichever look has more. The
+    // The budget (which counts triangles) takes whichever look has more. The
     // village models of the first 21 parts are held under their industrial
-    // ones, so for them this is the industrial count. Draw calls stay the
-    // catalogue model's: a building's are bounded by its kit materials.
+    // ones, and a part with no village model is drawn by its industrial one,
+    // so this is the industrial count. Draw calls stay the catalogue model's:
+    // a building's are bounded by its kit materials.
     const village = lookPartCost(id, lod, 'village');
     c = { triangles: Math.max(built.triangles, village.triangles), drawCalls: built.drawCalls };
     built.group.traverse(o => (o as { geometry?: { dispose(): void } }).geometry?.dispose());
@@ -202,7 +199,7 @@ export function partCost(id: PartId, lod: LodTier): { triangles: number; drawCal
   return c;
 }
 
-/** Triangles and draw calls of a part's catalogue model alone (no ink), as the industrial look draws it. */
+/** Triangles and draw calls of a part's catalogue model alone, as the industrial look draws it. */
 export function industrialPartCost(id: PartId, lod: LodTier): { triangles: number; drawCalls: number } {
   const source = countingMaterials(lod), b = new PartBuilder(lod);
   PARTS[id].emit(makeKit(b, source));
@@ -215,8 +212,7 @@ export function industrialPartCost(id: PartId, lod: LodTier): { triangles: numbe
 export const allPartCosts = () => PART_IDS.flatMap(id => LOD_TIERS.map(lod => ({ id, lod, ...partCost(id, lod) })));
 
 /**
- * Triangles and draw calls of a part's model in a look, ink outline included,
- * counted like partCost. The village models are held to their industrial
+ * Triangles and draw calls of a part's model in a look, counted like partCost. The village models are held to their industrial
  * part's cost (tests/unit/blueprint/village.test.ts), so the budget rules,
  * which count with partCost, hold for village buildings too.
  */

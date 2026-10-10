@@ -3,13 +3,13 @@ import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts
 import { edgeKey, pivotOf, rotDir, slotsOf, vertexKey } from '../assets/claude-geometry/blueprint/model.ts';
 import { PARTS } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
 import { libraryMaterials, SLAB, STOREY, WALL_H, WALL_T } from '../assets/claude-geometry/blueprint/parts/kit.ts';
-import { BASE_COURSE, TOP_BAND } from '../assets/claude-geometry/blueprint/parts/village/walls.ts';
+import { KOSHI, TOP_BAND } from '../assets/claude-geometry/blueprint/parts/village/walls.ts';
 import { disposeObject3D } from '../assets/claude-geometry/core/dispose.ts';
 import { PartBuilder } from '../assets/claude-geometry/style/geometry.ts';
 import type { StyleLibrary } from '../assets/claude-geometry/style/materials.ts';
 import { worldMaterials } from './shared-assets.ts';
 
-export const STRUCTURE_FINISH_VERSION = 2;
+export const STRUCTURE_FINISH_VERSION = 3;
 /** Additional reach beyond an existing slab/frieze/post face, never a floor surface. */
 export const STRUCTURE_FINISH_MAX_PROJECTION = .02;
 export interface FinishSegment {
@@ -56,12 +56,12 @@ function wallJoints(parts: readonly PartPlacement[], pivot: { x: number; z: numb
     if (incident.some(edge => !ownEdges.has(edge) && protectedEdges.has(edge))) continue;
     const [dx, dz] = rotDir(a.rot), axis = dz ? 'x' : 'z';
     const along = axis === 'x' ? x - pivot.x : z - pivot.z;
-    // Village dress() has two 50 mm end posts, 15 mm proud of the plaster.
+    // Village timberOutside() has two 50 mm end posts, 15 mm proud of the plaster.
     // A 40 mm cover sits on those posts, extending their face by only 14 mm.
     const line = axis === 'x' ? z - pivot.z + dz * (WALL_T / 2 + .022)
       : x - pivot.x + dx * (WALL_T / 2 + .022);
     result.push({ kind: 'existing-wall-joint', axis, from: along - .02, to: along + .02, line,
-      y: a.level * STOREY + (BASE_COURSE + WALL_H - TOP_BAND) / 2, material: 'post' });
+      y: a.level * STOREY + (KOSHI + WALL_H - TOP_BAND) / 2, material: 'post' });
   }
   return result;
 }
@@ -169,7 +169,7 @@ export function buildStructureFinish(parts: readonly PartPlacement[], lib: Style
   const builder = new PartBuilder(lib.lod), materials = libraryMaterials(lib);
   for (const s of segments) {
     const length = s.to - s.from, thickness = s.kind === 'slab-edge' ? .02 : .014;
-    const height = s.kind === 'slab-edge' ? .06 : s.kind === 'existing-wall-joint' ? WALL_H - TOP_BAND - BASE_COURSE : .022;
+    const height = s.kind === 'slab-edge' ? .06 : s.kind === 'existing-wall-joint' ? WALL_H - TOP_BAND - KOSHI : .022;
     const along = (s.from + s.to) / 2;
     builder.box(materials.get(s.material), s.axis === 'x' ? [length, height, thickness] : [thickness, height, length],
       { position: s.axis === 'x' ? [along, s.y, s.line] : [s.line, s.y, along] }, 0);

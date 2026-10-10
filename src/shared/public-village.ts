@@ -76,6 +76,7 @@ for(const road of PUBLIC_WALKS){let made=0;for(let k=1;k<road.length;k++){const 
 const clusters=[[3,-6],[-3,-4],[4,6],[-4,6],[15,1],[-16,2],[17,11],[-18,12],[8,22],[-9,24],[20,-10],[-20,-14],[0,28],[0,-24]];
 for(let i=0;i<10;i++)for(const [cx,cz]of clusters){if(HUB_OBJECTS.filter(o=>o.kind==='tree').length>=20)break;const a=i*2.39996,r=.8+Math.sqrt(i)*1.2,point=villagePoint(cx+Math.cos(a)*r,cz+Math.sin(a)*r);if(routeDistance(point)>1.2)prop('tree',point,i*Math.PI/12);}
 for(const [kind,limit]of [['bench',4],['flowers',8]] as const)for(let i=0;i<180&&HUB_OBJECTS.filter(o=>o.kind===kind).length<limit;i++){const a=i*2.39996,r=4+Math.sqrt(i)*.75,point=villagePoint(Math.cos(a)*r,Math.sin(a)*r);if(routeDistance(point)>.85)prop(kind,point,Math.round(a/(Math.PI/12))*Math.PI/12);}
-// The boarding marker is also a normal quick-build prop, at catalogue size.
-for(const x of [-.95,.95])prop('lamp',localPoint(HUB_DOCK,0,x,0));
+// Ordinary lanterns flank the approach, leaving the transverse delivery
+// bearing into the boarding point clear of their wider stone bases.
+for(const x of [-.95,.95])prop('lamp',localPoint(HUB_DOCK,0,x,.5));
 export const HUB_COUNTS={buildings:16,walkInRooms:16,structures:HUB_LOTS.length,objects:HUB_OBJECTS.length,...Object.fromEntries(['tree','path','bench','flowers','lamp'].map(kind=>[kind,HUB_OBJECTS.filter(o=>o.kind===kind).length])),blueprintLamps:24};

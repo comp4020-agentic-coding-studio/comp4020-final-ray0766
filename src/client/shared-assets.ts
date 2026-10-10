@@ -12,7 +12,7 @@ import { createWorldStyleLibrary } from './presentation.ts';
 import { harbourMaterials } from './harbour-materials.ts';
 import type { Vec3 } from '../shared/world.ts';
 
-export const SHARED_ASSET_VERSION='sunseed-village/3';
+export const SHARED_ASSET_VERSION='sunseed-village/14e244f';
 let materialLibrary: StyleLibrary | null = null;
 export const worldMaterials = () => materialLibrary ??= createWorldStyleLibrary();
 export type SharedAssetId=PartId|'service.pipe'|'service.light'|'pad.tile';
@@ -25,14 +25,15 @@ export function assetConnections(id:SharedAssetId){
   if(id==='structure.column'||id==='service.pipe')return[{name:'base',position:[0,0,0]},{name:'top',position:[0,2.2,0]}];
   return[{name:'centre',position:[0,0,0]},{name:'front',position:[0,0,.5]},{name:'back',position:[0,0,-.5]}];
 }
-export function sharedParts(instances:readonly AssetInstance[],lod:LodTier='medium'){
-  const p=harbourMaterials(),b=new PartBuilder(lod),lib=worldMaterials();
+export function sharedParts(instances:readonly AssetInstance[],lod:LodTier='medium',lib:StyleLibrary=worldMaterials()){
+  const b=new PartBuilder(lod);let host:ReturnType<typeof harbourMaterials>|undefined;
+  const hostPalette=()=>host??=harbourMaterials();
   const source=libraryMaterials(lib),kit=makeKit(b,source);
   for(const instance of instances)b.within({position:instance.position,rotation:[0,instance.yaw??0,0]},()=>{
-    if(instance.part==='service.pipe'){
+    if(instance.part==='service.pipe'){const p=hostPalette();
       // A simple rain pipe and timber brackets, inside the former service pipe.
       b.cylinder(p.metal,.055,.055,2.2,{position:[0,1.1,0]});for(const y of [.18,1.1,2.02]){b.cylinder(p.copper,.072,.072,.065,{position:[0,y,0]});b.box(p.dark,[.20,.09,.10],{position:[0,y,-.07]},0);}
-    }else if(instance.part==='service.light'){
+    }else if(instance.part==='service.light'){const p=hostPalette();
       // This host prop stays 2.23 m high; it is not the blueprint's 3.42 m lamp.
       b.box(p.concrete,[.25,.12,.25],{position:[0,.06,0]},0);
       b.cylinder(p.dark,.045,.065,1.80,{position:[0,1.02,0]},{segments:6});
@@ -42,13 +43,13 @@ export function sharedParts(instances:readonly AssetInstance[],lod:LodTier='medi
       b.box(p.pale,[.35,.02,.23],{position:[0,2.14,0]},0);
       b.cylinder(p.copper,0,.25,.08,{position:[0,2.19,0],rotation:[0,Math.PI/4,0]},{segments:4});
       b.emitter('street',[0,1.96,0],[0,-1,0]);
-    }else if(instance.part==='pad.tile'){
+    }else if(instance.part==='pad.tile'){const p=hostPalette();
       emitPart('floor.deck',lib.look,kit);for(const x of [-.44,.44])b.box(p.pale,[.027,.01,.65],{position:[x,.012,0]},0);b.box(p.pale,[.08,.008,.33],{position:[0,.014,0]},0);
     }else emitPart(instance.part,lib.look,kit);
   });
   const built=b.build(SHARED_ASSET_VERSION);built.group.userData.assetKit=SHARED_ASSET_VERSION;built.group.userData.parts=instances.map(i=>({...i,position:[...i.position]}));built.group.userData.lod=lod;
   liningCastsNoShadow(built.group,source,lod);
-  built.group.traverse(o=>{if(o instanceof T.Mesh&&(o.material===p.amber||(o.material as T.Material).name==='blueprint:lamp'))o.castShadow=false;});
+  built.group.traverse(o=>{if(o instanceof T.Mesh&&(o.material===host?.amber||(o.material as T.Material).name==='blueprint:lamp'))o.castShadow=false;});
   instances.forEach((item,i)=>{const socket=new T.Object3D();socket.name=`asset:${i}:${item.part}`;socket.position.fromArray(item.position);socket.rotation.y=item.yaw??0;socket.userData={part:item.part,connections:assetConnections(item.part)};built.group.add(socket);});
   let disposed=false;built.group.userData.disposeOwned=()=>{if(disposed)return;disposed=true;disposeObject3D(built.group);};
   return built.group;

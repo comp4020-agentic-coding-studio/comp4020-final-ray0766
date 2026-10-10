@@ -7,11 +7,12 @@ import { SIDE_BACK } from './furniture.ts';
 // does (edge-mounted, backs 0.13 m in from the edge line, no further than the
 // cell centre). Looks only: they hold nothing.
 //
-// One model for both looks: boards ('tread') on timber battens and an iron
-// hooped barrel in the village look, tread plate on painted steel in the
-// industrial one. Boards and staves meet in shallow V joints whose faces lean
-// about 27° off the board face: the joints read in a shapes-only render, and
-// the look's ink (creases over 35°) draws one line at each joint's root.
+// The industrial look's crates and barrel: tread plate on painted steel, the
+// boards and staves meeting in shallow V joints whose faces lean about 27° off
+// the board face, so the joints read in a shapes-only render. The village look
+// has its own twins at the end of this file (plain boarded crates, a barrel with
+// two hoops): the screen-space lines crease only past 60°, so a V joint draws
+// nothing there and a few big faces draw the forms.
 
 type P2 = [number, number];
 
@@ -155,5 +156,74 @@ export function barrel(k: Kit) {
   for (const y of hoops) {
     const y0 = y - band / 2, y1 = y + band / 2;
     lathe(iron, [[staveR(y0) - STAVE_D - 0.002, y0], [staveR(y0) + 0.006, y0], [staveR(y1) + 0.006, y1], [staveR(y1) - STAVE_D - 0.002, y1]]);
+  }
+}
+
+// ------------------------------------------------------------------ village twins
+
+/**
+ * A village crate's pieces: corner battens standing `proud` of the boarded
+ * sides, `batten` square and `short` shy of the box's top and bottom (so their
+ * ends never share a plane with the boards'), and the joint between the two
+ * boards of each side: `joint` wide, its dark backing set 6 mm in.
+ */
+export const VILLAGE_CRATE = { proud: 0.01, batten: 0.04, short: 0.005, joint: 0.008 } as const;
+
+/**
+ * One village crate standing on y = 0, centred on x and z, w × h × d over its
+ * battens: two wide boards a side with one dark joint between them (one box
+ * at low), four corner battens, and a cleat across each end for a handle.
+ */
+function crateVillage(k: Kit, w: number, h: number, d: number) {
+  const { b } = k, boards = k.m('tread'), timber = k.m('post');
+  const { proud, batten, short, joint } = VILLAGE_CRATE;
+  const hx = w / 2 - proud, hz = d / 2 - proud, j = h / 2;
+  if (k.low) b.box(boards, [2 * hx, h, 2 * hz], { position: [0, h / 2, 0] }, 0);
+  else {
+    b.box(boards, [2 * hx, j - joint / 2, 2 * hz], { position: [0, (j - joint / 2) / 2, 0] }, 0);
+    b.box(boards, [2 * hx, h - j - joint / 2, 2 * hz], { position: [0, (h + j + joint / 2) / 2, 0] }, 0);
+    b.box(timber, [2 * hx - 0.012, joint + 0.02, 2 * hz - 0.012], { position: [0, j, 0] }, 0);
+  }
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    b.box(timber, [batten, h - 2 * short, batten], { position: [sx * (w / 2 - batten / 2), h / 2, sz * (d / 2 - batten / 2)] }, 0);
+  }
+  if (!k.low) for (const sx of [-1, 1]) b.box(timber, [0.022, 0.045, 2 * hz - 2 * (batten - proud)], { position: [sx * (hx + 0.011), h * 0.66, 0] }, 0);
+}
+
+/**
+ * Two wooden crates, the smaller stacked on the larger and turned a little,
+ * on two timber skids: the industrial pair's sizes and places.
+ */
+export function cratesVillage(k: Kit) {
+  const { b } = k, z = SIDE_BACK - 0.005 - LOWER.d / 2;
+  for (const dz of [-1, 1]) b.box(k.m('post'), [LOWER.w - 0.08, SKID, 0.05], { position: [0, SKID / 2, z + dz * (LOWER.d / 2 - 0.06)] }, 0);
+  b.within({ position: [0, SKID, z] }, () => crateVillage(k, LOWER.w, LOWER.h, LOWER.d));
+  b.within({ position: [UPPER.x, SKID + LOWER.h, z], rotation: [0, UPPER.yaw, 0] }, () => crateVillage(k, UPPER.w, UPPER.h, UPPER.d));
+}
+
+/** The village barrel: height, end and middle radii, the head let in under the rim, the two hoops. */
+export const TARU = { h: 0.62, end: 0.155, mid: 0.17, rim: 0.018, drop: 0.018, hoops: [0.11, 0.51], band: 0.04, proud: 0.006 } as const;
+/** The taru's face radius at height y: straight from each end to the middle (its lathe has three points). */
+const taruR = (y: number) => TARU.end + (TARU.mid - TARU.end) * (1 - Math.abs((2 * y) / TARU.h - 1));
+
+/**
+ * Village barrel, 0.34 m across, 0.62 m high: a smooth body bulging a
+ * little to the middle, a head let in under the stave ends, and two dark
+ * hoops 6 mm proud (at low a flat head and two plain bands).
+ */
+export function barrelVillage(k: Kit) {
+  const { b } = k, boards = k.m('tread'), hoop = k.m('post');
+  const { h, end, mid, rim, drop, hoops, band, proud } = TARU;
+  const place = { position: [0, 0, SIDE_BACK - 0.005 - mid - 0.01] as [number, number, number] };
+  const seg = k.fine ? 14 : k.low ? 8 : 10;
+  /** A profile lathed one band at a time, so its folds stay crisp. */
+  const bands = (mat: T.Material, profile: P2[]) => { for (let i = 0; i + 1 < profile.length; i++) b.lathe(mat, [profile[i], profile[i + 1]], place, seg); };
+  b.lathe(boards, [[end, 0], [mid, h / 2], [end, h]], place, seg);
+  if (k.low) b.lathe(boards, [[end, h], [0, h]], place, seg);
+  else bands(boards, [[end, h], [end - rim, h], [end - rim, h - drop], [0, h - drop]]);
+  for (const y of hoops) {
+    const y0 = y - band / 2, y1 = y + band / 2;
+    if (k.low) b.lathe(hoop, [[taruR(y0) + proud, y0], [taruR(y1) + proud, y1]], place, seg);
+    else bands(hoop, [[taruR(y0) - 0.004, y0], [taruR(y0) + proud, y0], [taruR(y1) + proud, y1], [taruR(y1) - 0.004, y1]]);
   }
 }

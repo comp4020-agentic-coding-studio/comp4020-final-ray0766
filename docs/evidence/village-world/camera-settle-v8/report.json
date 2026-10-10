@@ -1,0 +1,78 @@
+{
+  "status": "passed",
+  "browser": "154.0.8037.99",
+  "renderer": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "dpr": 1
+    },
+    "drawingBuffer": {
+      "width": 390,
+      "height": 844
+    },
+    "touchPoints": 1,
+    "visibility": "visible",
+    "webglVendor": "Google Inc. (Apple)",
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+  },
+  "sameOriginalTouchIdentity": true,
+  "waitAfterBuildExitMs": 1500,
+  "objectsAndBlueprintsUnchanged": true,
+  "furnitureAndQuestUnchanged": true,
+  "errors": [],
+  "failedAPI": [],
+  "samples": [
+    {
+      "label": "finish-build-and-settle-camera",
+      "durationMs": 4004.2000000476837,
+      "frames": {
+        "samples": 240,
+        "p50": 16.699999999999818,
+        "p95": 16.700000000000728,
+        "p99": 16.800000000000182,
+        "max": 16.800000000000182,
+        "mean": 16.66625
+      },
+      "longFrames": {
+        "over33_3ms": 0,
+        "over50ms": 0,
+        "over100ms": 0
+      },
+      "longTasks": null,
+      "drawCalls": {
+        "samples": 241,
+        "p50": 230,
+        "p95": 259,
+        "p99": 294,
+        "max": 294,
+        "mean": 231.2240663900415
+      },
+      "triangles": {
+        "samples": 241,
+        "p50": 198471,
+        "p95": 203717,
+        "p99": 210005,
+        "max": 210005,
+        "mean": 198516.47717842323
+      },
+      "renderCpuSubmissionMs": {
+        "samples": 241,
+        "p50": 1.807,
+        "p95": 2.037,
+        "p99": 2.347,
+        "max": 2.347,
+        "mean": 1.6849253112033162
+      },
+      "continuouslyForeground": true,
+      "phaseFrameCounts": {
+        "ground": 241
+      },
+      "actionMs": 1705,
+      "paddingAfterActionMs": 2295,
+      "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+    }
+  ],
+  "meaning": "Actual touch controls enter and leave Build after the completed journey, using its original isolated identity. No building edits or task reset. Stable screenshot is captured after a 1500ms camera-settling wait; this checks presentation, not physical-phone performance."
+}

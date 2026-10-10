@@ -4,6 +4,7 @@ import type { ModelHandle } from '../core/dispose.ts';
 import { PartBuilder } from '../style/geometry.ts';
 import type { LodTier } from '../style/lod.ts';
 import type { StyleLibrary } from '../style/materials.ts';
+import { writeCover } from './cover.ts';
 import { groundCells, partTransform, pivotOf } from './model.ts';
 import type { PartPlacement } from './model.ts';
 import { emitPart } from './parts/catalogue.ts';
@@ -60,6 +61,14 @@ export function buildBlueprintModel(parts: readonly PartPlacement[] | { parts: r
   liningCastsNoShadow(group, source, lod);
   // Village look: lantern glass is the light itself and casts no shadow (it would shade its own lamp).
   if (lib.look === 'village') { const lamp = source.get('lamp'); group.traverse(o => { if ((o as T.Mesh).material === lamp) o.castShadow = false; }); }
+  // Daylight indoors (village look): every mesh learns which of its surfaces are under cover and
+  // draws with its material's indoor twin, one for one, so the draw calls stay as they are. The
+  // model's own lamp keeps its material: its glow is animated through it.
+  if (lib.daylightIndoors) {
+    writeCover(group, list, pivot);
+    const own = new Set<T.Material>(source.owned());
+    group.traverse(o => { const m = o as T.Mesh; if (m.isMesh && !own.has(m.material as T.Material)) m.material = lib.indoor(m.material as T.Material); });
+  }
   if (options.sockets !== false) {
     for (const p of ordered) {
       const t = partTransform(p, pivot);

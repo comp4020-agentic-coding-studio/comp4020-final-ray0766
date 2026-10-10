@@ -4,6 +4,8 @@ import type { Ctx, Role } from '../../kit.ts';
 import { segs, smoothSkin, turn } from './shapes.ts';
 
 // Village wings: the industrial wings' root plug, span and navigation-light points kept.
+// Round pieces have eight or more sides at every tier (six-sided ones crease
+// half-way, so the lines flicker on them), and painted bands lie flush.
 
 // -------------------------------------------------------------------- wings
 
@@ -29,7 +31,7 @@ function roundWing(ctx: Ctx) {
   ];
   smoothSkin(ctx, stations, j => (j < pts ? 'primary' : 'secondary'), { end: 'primary' });
   // Tip pod round the light point, a fat little teardrop.
-  turn(ctx, 'trim', [[0.0, 0.215], [0.03, 0.235], [0.042, 0.28], [0.04, 0.38], [0.025, 0.45], [0.0, 0.48]], segs(ctx, 12, 8, 6), { position: [1.09, 0.045, 0] });
+  turn(ctx, 'trim', [[0.0, 0.215], [0.03, 0.235], [0.042, 0.28], [0.04, 0.38], [0.025, 0.45], [0.0, 0.48]], segs(ctx, 12, 8, 8), { position: [1.09, 0.045, 0] });
   navLight(ctx, [1.09 + 0.0189, 0.045, 0.26], [0.4, 0, -1], 'side');
 }
 
@@ -62,8 +64,9 @@ function along(line: [number, number][], x: number): number {
  * blunt, rounded apex, bows forward and sweeps into a round tip of 0.14 m
  * radius whose outermost point carries the light where the delta's is; the
  * trailing edge (the hinge line) runs nearly straight behind. A separate trim
- * elevon hangs behind it with a visible gap, and one small rounded fence
- * stands on top. Upper surface primary, lower secondary.
+ * elevon hangs on it, its leading edge on the hinge line (an 18 mm gap drew
+ * the hinge twice, with the floor showing between), and one small rounded
+ * fence stands on top. Upper surface primary, lower secondary.
  */
 function softDelta(ctx: Ctx) {
   const pts = segs(ctx, 5, 5, 3);
@@ -94,9 +97,9 @@ function softDelta(ctx: Ctx) {
   stations.push(lens(pts, tipX, zc, zc, 0, dy(tipX)));
   smoothSkin(ctx, stations, j => (j < pts ? 'primary' : 'secondary'));
 
-  // Elevon: a thin flap 18 mm behind the hinge line, closing to a point through a short round
+  // Elevon: a thin flap hung on the hinge line, closing to a point through a short round
   // at each end (f is the share of its full chord and depth).
-  const ep = segs(ctx, 3, 3, 2), x0 = 0.12, x1 = 0.9, gap = 0.018;
+  const ep = segs(ctx, 3, 3, 2), x0 = 0.12, x1 = 0.9, gap = 0;
   const flap = (x: number, f: number) => {
     const h = te(x) + gap, chord = 0.17 - 0.05 * x, trim = chord * (1 - f) * 0.5;
     return lens(ep, x, h + trim, h + chord - trim, (0.02 - 0.006 * x) * f, dy(x), 1, 0.5);
@@ -113,18 +116,19 @@ function softDelta(ctx: Ctx) {
   navLight(ctx, [1.13 + 0.008, -0.025, 0.42 + 0.06], [1, 0, -0.2], 'side');
 }
 
-/** Rounded mail canister along z: a nose cap, a body, a raised trim band and a rounded tail. */
+/** Rounded mail canister along z: a nose cap, a body with a painted trim band round it, and a rounded tail. */
 function canister(ctx: Ctx, at: Vec3, r: number, len: number) {
-  const n = segs(ctx, 12, 12, 6), z0 = -len / 2, z1 = len / 2, cap = z0 + r * 1.1;
+  const n = segs(ctx, 12, 12, 8), z0 = -len / 2, z1 = len / 2, cap = z0 + r * 1.1;
   ctx.within({ position: at }, () => {
-    turn(ctx, 'trim', [[0, z0], [r * 0.5, z0 + r * 0.13], [r * 0.87, z0 + r * 0.5], [r * 1.04, cap]], n);
-    const body: [number, number][] = ctx.detail === 2 ? [[r, cap], [r, z1 - r * 0.9], [r * 0.82, z1 - r * 0.38], [r * 0.45, z1 - r * 0.07], [0, z1]]
-      : ctx.detail === 1 ? [[r, cap], [r, z1 - r * 0.85], [r * 0.7, z1 - r * 0.25], [0, z1]] : [[r, cap], [r, z1 - r * 0.7], [0, z1]];
-    turn(ctx, 'primary', body, n);
-    if (ctx.detail >= 1) {
-      const zb = (cap + z1) / 2 - r * 0.2;
-      turn(ctx, 'trim', [[r * 0.99, zb - r * 0.4], [r * 1.1, zb], [r * 0.99, zb + r * 0.4]], n);
-    }
+    turn(ctx, 'trim', [[0, z0], [r * 0.5, z0 + r * 0.13], [r * 0.87, z0 + r * 0.5], [r, cap]], n);
+    const tail: [number, number][] = ctx.detail === 2 ? [[r, z1 - r * 0.9], [r * 0.82, z1 - r * 0.38], [r * 0.45, z1 - r * 0.07], [0, z1]]
+      : [[r, z1 - r * 0.85], [r * 0.7, z1 - r * 0.25], [0, z1]];
+    if (ctx.detail === 0) { turn(ctx, 'primary', [[r, cap], ...tail], n); return; }
+    // The band, flush with the body, a little behind its middle.
+    const zb = (cap + z1) / 2 - r * 0.2, a = zb - r * 0.4, b = zb + r * 0.4;
+    turn(ctx, 'primary', [[r, cap], [r, a]], n);
+    turn(ctx, 'trim', [[r, a], [r, b]], n);
+    turn(ctx, 'primary', [[r, b], ...tail], n);
   });
 }
 
@@ -154,7 +158,7 @@ function stubCanisters(ctx: Ctx) {
   const pod: [number, number][] = ctx.detail === 0
     ? [[0, -0.37], [0.05, -0.26], [0.045, 0.08], [0, 0.27]]
     : [[0, -0.37], [0.033, -0.35], [0.051, -0.29], [0.056, -0.16], [0.048, 0.04], [0.026, 0.19], [0, 0.27]];
-  turn(ctx, 'trim', pod, segs(ctx, 12, 12, 6), { position: [0.77, 0.02, 0] });
+  turn(ctx, 'trim', pod, segs(ctx, 12, 12, 8), { position: [0.77, 0.02, 0] });
   // Two canisters on pylons.
   for (const [x, r, len] of [[0.3, 0.076, 0.68], [0.565, 0.06, 0.54]] as const) {
     const zc = (le(x) + te(x)) / 2, under = -depth(x) / 2 * 0.85, y = under - 0.055 - r;

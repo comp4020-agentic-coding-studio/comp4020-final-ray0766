@@ -8,7 +8,7 @@ import type { Vec3 } from '../../core/vec.ts';
 import { objectList } from '../../core/world.ts';
 import type { WorldState } from '../../core/world.ts';
 import type { Stage } from '../../shell/stage.ts';
-import { UI } from '../../style/tokens.ts';
+import { UI, VILLAGE_UI } from '../../style/tokens.ts';
 import { buildBlueprintModel } from '../model3d.ts';
 import type { BlueprintModel } from '../model3d.ts';
 import { fitStructureOnGround, placedTransform, structureGroundRules } from '../placement.ts';
@@ -58,18 +58,24 @@ export class StructuresView {
   private ghostRing: T.LineLoop;
   private selectedId: string | null = null;
   private owned: { dispose(): void }[] = [];
-  private ghostFill: Record<'ok' | 'bad', T.MeshStandardMaterial>;
+  private ghostFill: Record<'ok' | 'bad', T.Material>;
   private ringMat: Record<'sel' | 'ok' | 'bad', T.LineBasicMaterial>;
 
   constructor(stage: Stage, field: HeightField, registry: StructureRegistry) {
     this.stage = stage; this.field = field; this.registry = registry;
     this.root.name = 'structures';
     const own = <M extends { dispose(): void }>(m: M) => { this.owned.push(m); return markShared(m); };
-    // A faint lit tint, no glow: the model's form stays readable and whatever stands behind it stays visible.
-    const fill = (c: string) => own(new T.MeshStandardMaterial({ color: c, transparent: true, opacity: 0.16, depthWrite: false, roughness: 0.7, metalness: 0 }));
-    this.ghostFill = { ok: fill(UI.ok), bad: fill(UI.danger) };
-    const line = (c: string) => own(new T.LineBasicMaterial({ color: c, transparent: true, opacity: 0.95, depthTest: false }));
-    this.ringMat = { sel: line(UI.info), ok: line(UI.ok), bad: line(UI.danger) };
+    // A faint tint, no glow: the model's form stays readable and whatever stands behind it stays visible.
+    // The village look draws it flat and unlit, in its own state colours (tokens.ts VILLAGE_UI.scene).
+    const village = stage.look === 'village', S = VILLAGE_UI.scene;
+    const fill = (c: string) => own(village
+      ? new T.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.2, depthWrite: false })
+      : new T.MeshStandardMaterial({ color: c, transparent: true, opacity: 0.16, depthWrite: false, roughness: 0.7, metalness: 0 }));
+    const [sel, ok, bad] = village ? [S.select, S.ok, S.bad] : [UI.info, UI.ok, UI.danger];
+    this.ghostFill = { ok: fill(ok), bad: fill(bad) };
+    // No depth from overlay lines: the village look draws its own lines from depth and would ink round them.
+    const line = (c: string) => own(new T.LineBasicMaterial({ color: c, transparent: true, opacity: 0.95, depthTest: false, depthWrite: false }));
+    this.ringMat = { sel: line(sel), ok: line(ok), bad: line(bad) };
     const circle = own(new T.BufferGeometry().setFromPoints(Array.from({ length: 64 }, (_, i) => new T.Vector3(Math.cos(i / 64 * Math.PI * 2), 0, Math.sin(i / 64 * Math.PI * 2)))));
     this.ring = new T.LineLoop(circle, this.ringMat.sel);
     this.ghostRing = new T.LineLoop(circle, this.ringMat.ok);
@@ -153,10 +159,8 @@ export class StructuresView {
       const bounds = new T.Box3();
       model.object.traverse(o => {
         const m = o as T.Mesh;
-        // A ghost is a tinted volume: the village look's ink shell and lines are not part of it
-        // (the workshop's ghost hides them too), and the shell has no bounding box of its own.
-        if (o.name === 'ink-shell' || o.name === 'ink-lines') o.visible = false;
-        else if (m.isMesh) {
+        // A ghost is a tinted volume; its fill writes no depth, so the village look's lines leave it alone.
+        if (m.isMesh) {
           m.material = this.ghostFill[ok ? 'ok' : 'bad']; m.castShadow = false; m.receiveShadow = false; m.renderOrder = 6;
           if (!m.geometry.boundingBox) m.geometry.computeBoundingBox();
           bounds.union(m.geometry.boundingBox!);

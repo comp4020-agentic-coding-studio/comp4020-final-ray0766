@@ -1,31 +1,37 @@
-import * as T from 'three';
 import type { Vec3 } from '../../../core/vec.ts';
 import type { Ctx, Role } from '../../kit.ts';
-import { segs, smoothSkin, turn } from './shapes.ts';
+import { ball, flushDisc, segs, smoothSkin, turn } from './shapes.ts';
 
 // Village cockpits: inside the industrial cockpits' footprint on the deck.
+// The village look draws ship glass as an opaque tone (factory.ts
+// villageShipMaterials), so nothing is built behind it: no seats, consoles or
+// wheel. Bands of colour lie flush on the shape (no proud rings), so the lines
+// draw each cockpit's outline and its few real edges.
 
 // ------------------------------------------------------------------ cockpit
 
-/** Bubble canopy: a half-ellipsoid of glass with a painted bow and a faired back, a seat and panel inside. */
+/**
+ * Bubble canopy: a half-ellipsoid of glass on a low sill, a painted band where
+ * it meets the faired back, the fairing running down to the deck. The band
+ * and the fairing continue the glass's own curve, so the joint is a change of
+ * colour, not a ring standing proud.
+ */
 function bubbleCanopy(ctx: Ctx) {
-  const n = segs(ctx, 14, 10, 6), rows = segs(ctx, 9, 7, 4);
+  const n = segs(ctx, 14, 10, 8), rows = segs(ctx, 9, 7, 4);
   // Glass from the windscreen foot at z −0.54 back to its joint with the fairing; a half turn over the top, taller than wide.
+  const end = 1.05;
   const glass: [number, number][] = Array.from({ length: rows + 1 }, (_, i) => {
-    const t = -Math.PI / 2 + (Math.PI / 2 + 1.05) * i / rows;
+    const t = -Math.PI / 2 + (Math.PI / 2 + end) * i / rows;
     return [Math.max(0.004, 0.25 * Math.cos(t)), -0.12 + 0.42 * Math.sin(t)];
   });
   const up = { position: [0, 0.03, 0] as Vec3, scale: [1, 1.36, 1] as Vec3 };
   turn(ctx, 'glass', glass, n, up, Math.PI, 0);
-  // Faired back from the joint down to the deck, and a painted bow over the joint.
-  turn(ctx, 'primary', [[0.13, 0.24], [0.12, 0.34], [0.09, 0.46], [0.05, 0.56], [0.006, 0.62]], n, up, Math.PI, 0);
-  turn(ctx, 'trim', [[0.128, 0.215], [0.136, 0.23], [0.136, 0.26], [0.126, 0.275]], n, up, Math.PI, 0);
-  for (const s of [-1, 1]) ctx.box('primary', [0.04, 0.035, 1.12], [s * 0.255, 0.0175, 0.02], undefined, 0.012);
-  ctx.box('primary', [0.55, 0.035, 0.04], [0, 0.0175, -0.55], undefined, 0.012);
-  // Inside: seat back and headrest, an instrument panel.
-  ctx.box('dark', [0.24, 0.2, 0.06], [0, 0.13, 0.05], [-0.15, 0, 0], 0.02);
-  ctx.box('dark', [0.14, 0.07, 0.05], [0, 0.255, 0.07], undefined, 0.02);
-  ctx.box('dark', [0.32, 0.08, 0.1], [0, 0.12, -0.36], [0.4, 0, 0], 0.012);
+  const joint = glass[glass.length - 1];
+  turn(ctx, 'trim', [joint, [0.125, 0.29]], n, up, Math.PI, 0);
+  turn(ctx, 'primary', [[0.125, 0.29], [0.12, 0.34], [0.09, 0.46], [0.05, 0.56], [0.006, 0.62]], n, up, Math.PI, 0);
+  // The sill: square rails along both sides and across the front, hard-edged at every tier.
+  for (const s of [-1, 1]) ctx.box('primary', [0.04, 0.035, 1.12], [s * 0.255, 0.0175, 0.02], undefined, 0);
+  ctx.box('primary', [0.55, 0.035, 0.04], [0, 0.0175, -0.55], undefined, 0);
 }
 
 // -------------------------------------------------------- deck-house plans
@@ -61,27 +67,26 @@ const LOOKOUT: Plan = { a: 0.27, bf: 0.3, bb: 0.3, zc: -0.06, pf: 2, pb: 2 };
 /**
  * Lookout dome (slit visor): a round lamp-room cupola instead of the
  * faceted armour. A flared, rounded collar at the deck, a short drum, the
- * 60 mm vision slit as a dark band all the way round between a brass ring
- * and a brass brow, then a domed cap with a ball finial, as on a lamp room's
- * vent. No plates, bolts or hatches.
+ * 60 mm vision slit as a dark band all the way round between two painted
+ * brass bands, then a domed cap with a ball finial sitting on it, as on a
+ * lamp room's vent. The bands lie flush on the drum. No plates, bolts or hatches.
  */
 function lookoutDome(ctx: Ctx) {
   const n = segs(ctx, 14, 12, 10), hi = ctx.detail === 2;
   house(ctx, 'secondary', LOOKOUT, hi ? [[1.15, 0, 0], [1.13, 0, 0.03], [1.07, 0, 0.06], [1, 0, 0.085]] : [[1.15, 0, 0], [1.1, 0, 0.045], [1, 0, 0.085]], n);
   house(ctx, 'primary', LOOKOUT, [[1, 0, 0.085], [1, 0, 0.2]], n);
-  // Brass ring, the 60 mm slit, and the brass brow over it.
-  house(ctx, 'trim', LOOKOUT, [[1, 0, 0.2], [1.05, 0, 0.214], [1, 0, 0.228]], n);
+  // Brass band, the 60 mm slit, brass band.
+  house(ctx, 'trim', LOOKOUT, [[1, 0, 0.2], [1, 0, 0.228]], n);
   house(ctx, 'dark', LOOKOUT, [[1, 0, 0.228], [1, 0, 0.288]], n);
-  house(ctx, 'trim', LOOKOUT, hi ? [[1, 0, 0.288], [1.09, 0, 0.296], [1.07, 0, 0.312], [1, 0, 0.322]] : [[1, 0, 0.288], [1.09, 0, 0.302], [1, 0, 0.322]], n);
+  house(ctx, 'trim', LOOKOUT, [[1, 0, 0.288], [1, 0, 0.322]], n);
   // Domed cap.
   const rows = segs(ctx, 5, 3, 2);
   house(ctx, 'primary', LOOKOUT, Array.from({ length: rows + 1 }, (_, i): Station => {
     const t = (Math.PI / 2) * (i / rows);
     return [Math.cos(t), 0, 0.322 + 0.18 * Math.sin(t)];
   }), n);
-  // Ball finial.
-  if (hi) ctx.cylinder('metal', 0.011, 0.016, 0.04, { position: [0, 0.505, LOOKOUT.zc] }, 8);
-  ctx.b.geometry(ctx.mat('trim'), new T.IcosahedronGeometry(0.026, ctx.detail >= 1 ? 1 : 0), { position: [0, 0.535, LOOKOUT.zc] });
+  // Ball finial, sunk a little into the top of the cap.
+  ball(ctx, 'trim', 0.026, 8, 4, [0, 0.518, LOOKOUT.zc]);
 }
 
 // ---------------------------------------------------------------- wheelhouse
@@ -95,18 +100,18 @@ const SILL: Station = [1, 0, 0.182], HEAD: Station = [1, -0.03, 0.36];
 
 /**
  * Wheelhouse (raised bridge): a small boat's wheelhouse on the deck. A
- * rounded painted lower house with a trim rubbing strake, a band of glass
- * round the front and sides between chunky painted posts, leaning in towards a
- * cambered roof whose brim overhangs all round; two seats and a console inside
- * (and the wheel at high detail), a porthole in the back wall.
+ * rounded painted lower house with a trim band under the windows, a band of
+ * glass round the front and sides between chunky painted posts, leaning in
+ * towards a cambered roof whose brim overhangs all round, a porthole painted
+ * on the back wall.
  */
 function wheelhouse(ctx: Ctx) {
   const n = segs(ctx, 24, 16, 12), hi = ctx.detail === 2;
   // The back wall runs between the ring points nearest the back corners (45° either side of straight aft).
   const corner = (2 * Math.PI * Math.round(n / 8)) / n, back = Math.sin(corner);
   house(ctx, 'primary', HOUSE, [[1, 0, 0], [1, 0, 0.15]], n);
-  // Rubbing strake under the windows; its top is the cabin floor.
-  house(ctx, 'trim', HOUSE, ctx.detail === 0 ? [[1, 0, 0.15], SILL] : [[1, 0, 0.15], [1, 0.016, 0.166], SILL], n, { end: 'dark' });
+  // A painted band under the windows, flush with the house.
+  house(ctx, 'trim', HOUSE, [[1, 0, 0.15], SILL], n);
   house(ctx, t => (Math.sin(t) > back ? 'primary' : 'glass'), HOUSE, [SILL, HEAD], n);
   // Cambered roof with a rounded brim.
   house(ctx, 'secondary', ROOF, hi
@@ -121,18 +126,13 @@ function wheelhouse(ctx: Ctx) {
   for (const t of [-Math.PI / 4, -3 * Math.PI / 4, corner, Math.PI - corner]) post(t);
   if (ctx.detail >= 1) for (const t of [-Math.PI / 2, 0, Math.PI]) post(t);
 
-  // Inside: a console under the front windows, two seats, the wheel at the starboard seat.
-  ctx.box('dark', [0.42, 0.07, 0.08], [0, 0.215, -0.34], [0.35, 0, 0], 0);
-  for (const x of [-0.11, 0.11]) {
-    ctx.box('dark', [0.15, 0.04, 0.14], [x, 0.2, 0.02], undefined, 0);
-    ctx.box('dark', [0.15, 0.15, 0.035], [x, 0.275, 0.1], [0.15, 0, 0], 0);
-  }
-  if (hi) ctx.b.geometry(ctx.mat('trim'), new T.TorusGeometry(0.045, 0.008, 3, 10), { position: [0.11, 0.27, -0.27], rotation: [-0.5, 0, 0] });
-  // Porthole in the back wall, square to the leaning glazing.
+  // Porthole painted on the back wall, which leans in with the glazing (30 mm over its height).
   if (ctx.detail >= 1) {
-    const c = planPoint(HOUSE, Math.PI / 2, [1, -0.016, 0.27]), lean: Vec3 = [Math.PI / 2 - 0.166, 0, 0];
-    ctx.cylinder('metal', 0.046, 0.046, 0.016, { position: c, rotation: lean }, segs(ctx, 12, 10, 8));
-    ctx.cylinder('glass', 0.034, 0.034, 0.02, { position: c, rotation: lean }, segs(ctx, 12, 10, 8));
+    const y = 0.27, d = (HEAD[1] * (y - SILL[2])) / (HEAD[2] - SILL[2]);
+    const c = planPoint(HOUSE, Math.PI / 2, [1, d, y]), wall: Vec3 = [0, -HEAD[1], HEAD[2] - SILL[2]];
+    const k = segs(ctx, 12, 12, 10);
+    flushDisc(ctx, 'metal', c, wall, 0.046, 0.034, k);
+    flushDisc(ctx, 'glass', c, wall, 0.034, 0, k);
   }
 }
 

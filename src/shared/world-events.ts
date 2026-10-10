@@ -1,6 +1,7 @@
 // Host-owned event protocol, adapted from the pinned claude-geometry core/world.ts.
 // Adds blueprint replacement without changing any immutable vendored file.
 import { normalizeYaw } from '../assets/claude-geometry/core/anchor.ts';
+import { PRIVATE_CAPACITY } from './world-capacity.ts';
 import type { SurfaceAnchor } from '../assets/claude-geometry/core/anchor.ts';
 import { Check, fail } from '../assets/claude-geometry/core/doc.ts';
 import { normalize } from '../assets/claude-geometry/core/vec.ts';
@@ -26,7 +27,7 @@ export const PROP_RADIUS = { cottage: 1.05, tree: .40, path: .42, flowers: .28, 
 export type PropKind = keyof typeof PROP_RADIUS;
 export const PROP_KINDS = Object.keys(PROP_RADIUS) as PropKind[];
 /** Main project's per-planet capacity. */
-export const MAX_OBJECTS = 64;
+export const MAX_OBJECTS = PRIVATE_CAPACITY.objects;
 export const BLUEPRINT_HASH_PATTERN = /^[0-9a-f]{64}$/;
 
 export type ObjectSpec =

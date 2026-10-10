@@ -7,23 +7,23 @@ import { textureFormat } from './resource-policy.ts';
 import {HOME_SAMPLE_RADIUS} from '../shared/home.ts';
 import {adaptArtLibrary,ART_LIGHT,ART_PALETTE} from './art-profile.ts';
 
-// The host opts into R7; the immutable library keeps its industrial default.
+// Every host scene opts into the same village look; library defaults stay industrial.
 // Do not import the Stage implementation here: its postprocessing stays lazy.
 export const PRESENTATION = {
-  renderer: { toneMapping: T.NeutralToneMapping, outputColorSpace: T.SRGBColorSpace, worldExposure: 1, previewExposure: 1 },
+  renderer: { toneMapping: T.NoToneMapping, outputColorSpace: T.SRGBColorSpace, worldExposure: 1, previewExposure: 1 },
   materials: { lod: 'medium', scans: false, look: 'village' },
-  practical: { lod: 'medium', enabled: true },
+  practical: { lod: 'medium', enabled: false },
   ground: {
     hub: { ...ART_LIGHT, shadowExtent: 18, shadowFar: 75, fog: { color: ART_PALETTE.fog, density: .0033 } },
     garden: { ...ART_LIGHT, shadowExtent: 16, shadowFar: 65, fog: { color: ART_PALETTE.fog, near: 28, far: 65 } },
     sample: { ...ART_LIGHT, shadowExtent: 20, shadowFar: 80, fog: { color: ART_PALETTE.fog, near: 30, far: 78 } },
   },
   space: {
-    background: '#040810', fog: { color: '#080e18', density: .00013 },
-    pmremSigma: .08, environmentIntensity: .42,
-    fill: { sky: '#7196b4', ground: '#070a0e', intensity: .5 },
-    sun: { color: '#eedcca', intensity: 3.5, position: [-80, 130, 70] },
-    rim: { color: '#587a9b', intensity: 1.3, position: [65, -20, -80] },
+    background: VILLAGE.cloudSky!.light, fog: { color: VILLAGE.fog, density: .00013 },
+    pmremSigma: .08, environmentIntensity: VILLAGE.envIntensity,
+    fill: { sky: VILLAGE.light.sky, ground: VILLAGE.light.ground, intensity: VILLAGE.light.fillIntensity },
+    sun: { color: VILLAGE.light.key, intensity: VILLAGE.light.keyIntensity, position: [-80, 130, 70] },
+    rim: { color: VILLAGE.light.rim, intensity: VILLAGE.light.rimIntensity, position: [65, -20, -80] },
   },
 } as const;
 
@@ -35,7 +35,7 @@ export function previewOptions(kind: PreviewKind, container: HTMLElement): Stage
     container, lod: PRESENTATION.materials.lod, scans: PRESENTATION.materials.scans, look: PRESENTATION.materials.look,
     textures: textureFormat(), mood: kind === 'workshop' || kind === 'shipyard' ? 'hangar' : 'dusk',
     environment: 'procedural', practicalLights: PRESENTATION.practical.enabled,
-    backdrop: false, fog: null, fov: 44, ambientOcclusion: false, background: VILLAGE.thumbnail,
+    backdrop: false, planet: kind === 'terrain' || kind === 'history', fog: null, fov: 44, ambientOcclusion: false, background: VILLAGE.thumbnail,
   };
 }
 
@@ -45,14 +45,19 @@ export function configureRenderer(renderer: Pick<T.WebGLRenderer, 'toneMapping' 
   renderer.toneMappingExposure = view === 'world' ? PRESENTATION.renderer.worldExposure : PRESENTATION.renderer.previewExposure;
 }
 export const createWorldStyleLibrary = () => adaptArtLibrary(new StyleLibrary(PRESENTATION.materials.lod, { scans: PRESENTATION.materials.scans, look: PRESENTATION.materials.look }));
-export const createWorldPracticalLights = () => new PracticalLights(PRESENTATION.practical.lod, { enabled: PRESENTATION.practical.enabled, scale: VILLAGE.practical });
+export const createWorldPracticalLights = () => {
+  const pool=new PracticalLights(PRESENTATION.practical.lod, { enabled: PRESENTATION.practical.enabled, scale: VILLAGE.practical });
+  pool.group.visible=false;
+  return pool;
+};
 export const groundPresentation = (planetId: string,radius=0) => Math.abs(radius-HOME_SAMPLE_RADIUS)<1e-6?PRESENTATION.ground.sample:PRESENTATION.ground[planetId === 'hub' ? 'hub' : 'garden'];
 
-/** Keep walking fog depth when the overview camera pulls back to fit a phone. */
-export function updateGroundFog(scene: T.Scene, planetId: string, radius: number, cameraRadius: number, overview: boolean) {
+/** Follow the actual camera through the overview transition, including its
+ * return to walking. The mode flag changes before the camera finishes moving. */
+export function updateGroundFog(scene: T.Scene, planetId: string, radius: number, cameraRadius: number) {
   const preset = groundPresentation(planetId, radius).fog;
   if (!(scene.fog instanceof T.Fog) || !('near' in preset)) return;
-  const pullback = overview ? Math.max(0, cameraRadius - radius - 8) : 0;
+  const pullback = Math.max(0, cameraRadius - radius - 8);
   scene.fog.near = preset.near + pullback;
   scene.fog.far = preset.far + pullback;
 }
@@ -81,7 +86,7 @@ export function fitGroundSunShadowDepth(sun:T.DirectionalLight){
  sun.position.copy(sun.target.position).addScaledVector(groundSunOffset,depth/distance);
 }
 
-/** Same warm key/cool fill as outdoors, fitted to the actual room dimensions. */
+/** Same white key and fill as outdoors, fitted to the actual room dimensions. */
 export function configureHomeLighting(scene:T.Scene,fill:T.HemisphereLight,sun:T.DirectionalLight,width:number,depth:number,height:number){
  scene.background=new T.Color(ART_LIGHT.roomBackground);
  fill.color.set(ART_LIGHT.fill);fill.groundColor.set(ART_LIGHT.roomGround);fill.intensity=ART_LIGHT.fillIntensity;

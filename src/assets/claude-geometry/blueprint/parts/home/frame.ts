@@ -1,5 +1,5 @@
 import type { Material } from 'three';
-import { extrudeZY, small, WALL_H } from '../kit.ts';
+import { small, WALL_H } from '../kit.ts';
 import type { Kit } from '../kit.ts';
 import { TOP_BAND } from '../village/walls.ts';
 
@@ -78,8 +78,7 @@ export function beam(k: Kit) {
  * A straight brace from the post face (x = ±L) at BRACE_FOOT up to the
  * underside, cut square to both: `t` thick in its plane, `w` across it.
  */
-function kneeBrace(k: Kit, material: Material, side: number, t: number, w: number) {
-  const L = BEAM_HALF_SPAN;
+function kneeBrace(k: Kit, material: Material, side: number, t: number, w: number, L = BEAM_HALF_SPAN) {
   // Centre line from the foot to the head; its two edges are cut by the post face and the underside.
   const p0: P2 = [L, BRACE_FOOT + t * 0.95], p1: P2 = [L - BRACE_IN + t * 0.6, SOFFIT];
   const len = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]), d: P2 = [(p1[0] - p0[0]) / len, (p1[1] - p0[1]) / len], n: P2 = [-d[1], d[0]];
@@ -91,36 +90,26 @@ function kneeBrace(k: Kit, material: Material, side: number, t: number, w: numbe
 }
 
 /**
- * Village: a chunky timber beam, 0.15 × 0.2 m, its underside rounded. Its
- * cogged top meets the slab between 60 mm gaps, two of which house a roof
- * terrace's ceiling joists where they cross the edge and rest on the beam; at
- * low LOD, where the terrace draws no joists, the top is whole. Curved timber
- * brackets under both ends, the cottage porch's knee braces, inside 0.15 m of
- * the posts.
+ * Village: a plain timber beam, 0.15 × 0.2 m, square in section and
+ * cut square at its ends. Below the post's band it runs on to the timber
+ * shaft (VILLAGE_SHAFT); above, it stops at the band. Two housings in its top
+ * take a roof terrace's ceiling joists where they cross the edge and rest on
+ * the beam (the 0.08 m joist and 5 mm either side); at low LOD, where the
+ * terrace draws no joists and the post no band, the beam is one block to the
+ * shafts. Under both ends a straight timber knee brace from the shaft,
+ * inside 0.15 m of the posts.
  */
 export function beamVillage(k: Kit) {
   const { b } = k;
-  // At low LOD the post has no band, so the whole beam reaches its shaft.
-  const L = k.low ? VILLAGE_SHAFT : BEAM_HALF_SPAN, S = VILLAGE_SHAFT, top = WALL_H, bottom = SOFFIT, half = 0.075, timber = k.m('post');
-  const seat = top - 0.06, r = 0.032, n = k.low ? 1 : k.fine ? 4 : 2;
-  // Below the post's band the body runs on to the shaft; above it, a block between the bands.
-  const body: P2[] = [
-    [-half, BAND_FOOT], ...arc(-half + r, bottom + r, r, r, Math.PI, 1.5 * Math.PI, n), ...arc(half - r, bottom + r, r, r, 1.5 * Math.PI, 2 * Math.PI, n), [half, BAND_FOOT],
-  ];
-  extrudeZY(k, timber, body, -S, S);
+  const S = VILLAGE_SHAFT, L = BEAM_HALF_SPAN, top = WALL_H, bottom = SOFFIT, half = 0.075, timber = k.m('post');
+  for (const s of [-1, 1]) kneeBrace(k, timber, s, 0.05, 0.07, S);
+  if (k.low) { b.box(timber, [2 * S, top - bottom, 2 * half], { position: [0, (top + bottom) / 2, 0] }, 0); return; }
+  b.box(timber, [2 * S, BAND_FOOT - bottom, 2 * half], { position: [0, (BAND_FOOT + bottom) / 2, 0] }, 0);
+  const seat = top - 0.06, housing = 0.045;
   b.box(timber, [2 * L, seat - BAND_FOOT, 2 * half], { position: [0, (seat + BAND_FOOT) / 2, 0] }, 0);
-  // Cogged top: blocks with 0.09 m gaps every 0.2 m, two of them the joists' housings
-  // (the 0.08 m joist and 5 mm either side), so an empty housing reads as part of the rhythm.
-  const gap = 0.045, cogs = [-CROSSING, -CROSSING / 3, CROSSING / 3, CROSSING];
-  const edges = k.low ? [-L, L] : [-L, ...cogs.flatMap(x => [x - gap, x + gap]), L];
+  const edges = [-L, -CROSSING - housing, -CROSSING + housing, CROSSING - housing, CROSSING + housing, L];
   for (let i = 0; i + 1 < edges.length; i += 2) {
     const [x0, x1] = [edges[i], edges[i + 1]];
     b.box(timber, [x1 - x0, top - seat, 2 * half], { position: [(x0 + x1) / 2, (top + seat) / 2, 0] }, 0);
   }
-  // Brackets: solid in the corner, a concave quarter-ellipse below, small flats at both tips.
-  // They stand wholly below the band, so they seat on the shaft.
-  const xi = S - BRACE_IN, tip = 0.015, m = k.low ? 3 : k.fine ? 9 : 5;
-  const curve = arc(xi, BRACE_FOOT, S - tip - xi, bottom - tip - BRACE_FOOT, 0.5 * Math.PI, 0, m);
-  const bracket: P2[] = [[S, bottom], [xi, bottom], ...curve, [S, BRACE_FOOT]];
-  for (const s of [-1, 1]) b.extrude(timber, bracket.map(([x, y]) => [s * x, y] as P2), 0.07, { position: [0, 0, -0.035] });
 }

@@ -12,9 +12,12 @@ import { PROP_RADIUS } from '../core/world.ts';
 import type { PropKind } from '../core/world.ts';
 import { PartBuilder } from '../style/geometry.ts';
 import type { StyleLibrary } from '../style/materials.ts';
+import { lookGlow } from '../style/look.ts';
 import { GLOW, PALETTE } from '../style/tokens.ts';
+import { VILLAGE_LAMP } from '../style/village.ts';
 import type { Foundation } from './planet.ts';
 import type { AnchoredObject } from './policy.ts';
+import { stoneBed, stoneFooting, stoneMaterials, stonePad, stoneSlab } from './stonework.ts';
 import { sinCos } from './trig.ts';
 
 // Foundation pads: stand-ins for placed objects so the terrain policy has
@@ -161,6 +164,10 @@ export interface PadOptions {
 export function buildPad(pad: PlacedPad, fit: GroundFit, lib: StyleLibrary, conflict: boolean, options: PadOptions = {}): PadModel {
   const carrier = options.carrier === true, bed = carrier && options.bed === true && pad.spec.shape.kind === 'circle';
   const b = new PartBuilder(lib.lod);
+  if (lib.look === 'village') {
+    villagePad(b, pad.spec.shape, lib, Math.max(0.12, fit.foundationDepth + 0.1), conflict, carrier, bed);
+    return seat(b, pad, fit, conflict);
+  }
   const concrete = lib.preset('concrete'), steel = lib.preset('frame'), bright = lib.preset('frameLight'), hazard = lib.hazard();
   // Painted tread plate for the hatch: bare deck steel mirrors the black sky
   // and reads as a hole from orbit; a mid-grey paint keeps the lid legible.
@@ -258,6 +265,11 @@ export function buildPad(pad: PlacedPad, fit: GroundFit, lib: StyleLibrary, conf
       }
     }
   }
+  return seat(b, pad, fit, conflict);
+}
+
+/** Build the pad's merged model and seat it on its anchor at the fit's floor plane. */
+function seat(b: PartBuilder, pad: PlacedPad, fit: GroundFit, conflict: boolean): PadModel {
   const built = b.build(`pad:${pad.id}`);
   const group = built.group;
   const p = localToPlanet(pad.anchor, fit.baseRadius, [0, 0, 0]);
@@ -271,6 +283,49 @@ export function buildPad(pad: PlacedPad, fit: GroundFit, lib: StyleLibrary, conf
     get disposed() { return handle.disposed; },
     dispose: () => handle.dispose(),
   };
+}
+
+/**
+ * The village look's pad in the shared stonework design (stonework.ts): a
+ * carrier is a flush stone footing the prop stands on, a bed a stone kerb
+ * round soil, a bare round pad a stone drum with a cobbled rim and a brass
+ * datum, a rectangular one a stone slab with a cobbled rim. The status lamp
+ * stays where the industrial pad has it, in a brass
+ * box with the village lantern colour (the village warning tone when in
+ * conflict), and the conflict strip runs where it does, in that tone. The
+ * plinth reaches as deep as the industrial one.
+ */
+function villagePad(b: PartBuilder, shape: PadShape, lib: StyleLibrary, depth: number, conflict: boolean, carrier: boolean, bed: boolean) {
+  const m = stoneMaterials(lib);
+  const glow = lib.createGlow(conflict ? lookGlow('village', 'signalRed', PALETTE.signalRed) : VILLAGE_LAMP, conflict ? GLOW.lit : GLOW.pilot);
+  const cap = 0.09, bottom = -cap - depth + 0.01, strip = 0.03, stripY = -0.042, segments = b.settings.radialSegments;
+  if (shape.kind === 'circle') {
+    const r = shape.radius;
+    if (bed) stoneBed(b, m, { radius: r, top: 0, bottom, segments, kerb: 0.075, rise: 0.035 });
+    else if (carrier) stoneFooting(b, m.stone, { radius: r, top: 0, bottom, segments });
+    else {
+      stonePad(b, m, { radius: r, top: 0, bottom, segments });
+      // Survey datum at the centre.
+      b.cylinder(m.brass, 0.035, 0.04, 0.012, { position: [0, 0.006, 0] }, { segments: 10 });
+    }
+    // The housing's face and lens where the industrial pad has them, its back let 3 cm into the drum, so it sits on
+    // the stone between two of the drum's facets at every LOD (the industrial housing rests on the steel edge angle).
+    b.box(m.brass, [0.12, 0.05, 0.085], { position: [0, -0.03, r + 0.0125] }, 0);
+    b.box(glow, [0.08, 0.014, 0.008], { position: [0, -0.03, r + 0.057] }, 0);
+    if (conflict) b.cylinder(glow, r + 0.02, r + 0.02, strip, { position: [0, stripY, 0] }, { segments: lib.lod === 'low' ? 24 : 48, open: true });
+    return;
+  }
+  const { width: w, depth: d } = shape;
+  stoneSlab(b, m, { width: w + 0.01, depth: d + 0.01, top: 0, bottom });
+  // Against the slab's side (d / 2 + 0.005), its face where the industrial housing's is.
+  b.box(m.brass, [0.14, 0.05, 0.065], { position: [0, -0.03, d / 2 + 0.0275] }, 0);
+  b.box(glow, [0.1, 0.014, 0.008], { position: [0, -0.03, d / 2 + 0.062] }, 0);
+  if (conflict) {
+    const o = 0.026;
+    for (const [x, z, lw, ld] of [[0, d / 2 + o, w + 2 * o, 0.006], [0, -d / 2 - o, w + 2 * o, 0.006], [w / 2 + o, 0, 0.006, d + 2 * o], [-w / 2 - o, 0, 0.006, d + 2 * o]] as const) {
+      b.box(glow, [lw, strip, ld], { position: [x, stripY, z] }, 0);
+    }
+  }
 }
 
 /** Planet-space point above the pad's centre, for labels. */

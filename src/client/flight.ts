@@ -3,13 +3,16 @@ import * as T from 'three';
 import { ORBIT_DETAIL_BUDGET,ORBIT_VISIBLE_BUDGET,regionFor } from '../shared/regions.ts';
 import { makeShip } from './ship-model.ts';
 import type { ShipDesign } from '../assets/claude-geometry/ship/design.ts';
-import { orbitalPlanet, configureSpace } from './space-art.ts';
+import { orbitalPlanetAsync, configureSpace } from './space-art.ts';
+import {beginSceneLoading,sceneLoadingActive,yieldSceneFrame} from './loading-state.ts';
 import { bearing, flightStep, forward, LAND_SPEED, spaceDistance, wrapAngle } from '../shared/flight.ts';
 import type { FlightState } from '../shared/flight.ts';
 import type { PlanetSummary, Universe } from '../shared/planets.ts';
 import type { PlayerState } from '../shared/world.ts';
 import { bodyRadius, landingRadius } from '../shared/world-size.ts';
 import { RADIUS } from '../shared/world.ts';
+import {createVillageDrawing} from './village-drawing.ts';
+import {applyArtMaterial} from './art-profile.ts';
 import { needsFlightDetour } from './flight-guidance.ts';
 const el=<E extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as E;
 interface Bridge {
@@ -22,14 +25,16 @@ export class SpaceFlight {
   scene=new T.Scene();camera=new T.PerspectiveCamera(58,innerWidth/innerHeight,.1,18000);
   presentation=false;pilot:FlightState|null=null; planets:PlanetSummary[]=[];busy=false;
   private ship=makeShip();private bodies=new Map<string,{root:T.Group,low:T.Mesh,detail:T.Group|null,label:HTMLButtonElement,radius?:number,environment?:string|null}>();
-  private lowGeometry=new T.IcosahedronGeometry(RADIUS,2);private lowMaterials=['#a49d89','#758893','#9a8771'].map(color=>new T.MeshStandardMaterial({color,roughness:1}));
+  private lowGeometry=new T.IcosahedronGeometry(RADIUS,2);private lowMaterials=['#5ea476','#91b7aa','#e0d3ab'].map(color=>applyArtMaterial(new T.MeshStandardMaterial({color,roughness:1})));
+  private drawing:ReturnType<typeof createVillageDrawing>;
+  private detailPreparation:{controller:AbortController;feedback:ReturnType<typeof beginSceneLoading>}|null=null;
   private beacons:T.Points|null=null;private lodAt=-Infinity;private labelIds=new Set<string>();
   private keys=new Set<string>();private stick=new T.Vector2();private held={thrust:false,brake:false};
   private ack:FlightState|null=null;private saving:Promise<void>|null=null;private saveAt=0;private cameraStarted=false;private hudAt=0;
   private dialog=el<HTMLDialogElement>('flight-dialog');private action:'launch'|'land'='launch';private landingId:string|null=null;private pendingTarget:string|null=null;
   private look=new T.PerspectiveCamera();private turn=new T.Quaternion();private steering=new T.Vector2();private enginePower=0;private bank=0;private reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   constructor(private bridge:Bridge){
-    configureSpace(this.scene,bridge.renderer);this.scene.add(this.ship.root);
+    configureSpace(this.scene,bridge.renderer);this.scene.add(this.ship.root);this.drawing=createVillageDrawing(bridge.renderer,this.scene,this.camera,true);
     el('board-ship').onclick=()=>this.openLaunch();el('land-ship').onclick=()=>this.openLanding();
     el('cancel-flight').onclick=()=>this.dialog.close();el('confirm-flight').onclick=()=>void this.transition();
     this.dialog.addEventListener('close',()=>this.clear());this.dialog.addEventListener('cancel',e=>{if(this.busy)e.preventDefault();});
@@ -53,9 +58,10 @@ export class SpaceFlight {
     setInterval(()=>{if(this.active&&bridge.online()&&!this.busy&&!document.hidden)void this.flush();},350);
   }
   get active(){return this.pilot?.mode==='space';}
-  private get paused(){return this.presentation||this.busy||!this.bridge.online()||document.hidden||!!document.querySelector('dialog[open]');}
+  private get paused(){return sceneLoadingActive()||this.presentation||this.busy||!this.bridge.online()||document.hidden||!!document.querySelector('dialog[open]');}
   clear(){this.keys.clear();this.stick.set(0,0);this.held.thrust=false;this.held.brake=false;this.steering.set(0,0);el('flight-knob').style.transform='';}
   receive(f:FlightState,force=false){
+    if(f.mode!=='space'&&this.detailPreparation){this.detailPreparation.controller.abort();this.detailPreparation.feedback.finish();this.detailPreparation=null;}
     if(!this.pilot||force||f.mode!==this.pilot.mode||f.journey!==this.pilot.journey){this.pilot=structuredClone(f);this.ack=structuredClone(f);this.cameraStarted=false;this.clear();}
     document.body.classList.toggle('in-space',!!this.active);el('flight-hud').hidden=!this.active;el('flight-labels').hidden=!this.active;
     if(this.pendingTarget&&this.active){this.pilot!.targetId=this.pendingTarget;this.pendingTarget=null;}
@@ -83,10 +89,43 @@ export class SpaceFlight {
     this.labelIds=new Set(sorted.filter(p=>spaceDistance(this.pilot!.position,p.center)<400).slice(0,5).map(p=>p.id));if(this.pilot.targetId)this.labelIds.add(this.pilot.targetId);
     for(const p of this.planets){
       const body=this.bodies.get(p.id)!;body.root.visible=visible.has(p.id);body.low.visible=!detailed.has(p.id);
-      if(detailed.has(p.id)&&!body.detail){body.detail=orbitalPlanet(p.slot,p.environment,bodyRadius(p));body.root.add(body.detail);}
-      else if(!detailed.has(p.id)&&body.detail){this.disposeOrbit(body.detail);body.detail=null;}
+      if(!detailed.has(p.id)&&body.detail){this.disposeOrbit(body.detail);body.detail=null;}
+      body.low.visible=!body.detail;
     }
-    this.bridge.canvas.dataset.orbitDetailed=String(detailed.size);this.bridge.canvas.dataset.orbitVisible=String(visible.size);this.bridge.canvas.dataset.orbitTotal=String(this.planets.length);
+    if(!this.detailPreparation)this.prepareDetails(sorted.filter(p=>detailed.has(p.id)&&!this.bodies.get(p.id)!.detail));
+    this.bridge.canvas.dataset.orbitDetailed=String([...this.bodies.values()].filter(body=>!!body.detail).length);this.bridge.canvas.dataset.orbitVisible=String(visible.size);this.bridge.canvas.dataset.orbitTotal=String(this.planets.length);
+  }
+
+  private prepareDetails(planets:PlanetSummary[]){
+    if(!planets.length||!this.active)return;
+    const controller=new AbortController(),signal=controller.signal,feedback=beginSceneLoading('Preparing nearby worlds…');
+    const task=this.detailPreparation={controller,feedback};this.clear();
+    void(async()=>{
+      let pending:T.Group|null=null;
+      try{
+        await yieldSceneFrame(signal);await yieldSceneFrame(signal);
+        for(let i=0;i<planets.length;i++){
+          const planet=planets[i],body=this.bodies.get(planet.id)!;
+          feedback.update('Preparing the view…',i,planets.length);
+          pending=await orbitalPlanetAsync(planet.slot,planet.environment,bodyRadius(planet),{signal,budgetMs:6,yieldFrame:()=>yieldSceneFrame(signal),
+            onGroundProgress:(done,total)=>feedback.update('Preparing the ground…',done,total),
+            onProgress:p=>feedback.update('Bringing buildings into view…',p.readyObjects,p.totalObjects)});
+          feedback.update('Finishing the view…',i,planets.length);await yieldSceneFrame(signal);
+          await this.bridge.renderer.compileAsync(pending,this.camera,this.scene);
+          if(signal.aborted||!this.active||this.detailPreparation!==task)throw new DOMException('Loading cancelled.','AbortError');
+          // A universe poll may have changed the environment while preparing.
+          if(body.environment!==planet.environment||body.radius!==planet.radius){this.disposeOrbit(pending);pending=null;continue;}
+          body.detail=pending;body.root.add(pending);pending=null;body.low.visible=false;
+          feedback.update('Preparing the view…',i+1,planets.length);await yieldSceneFrame(signal);
+        }
+        if(this.detailPreparation===task){this.detailPreparation=null;this.lodAt=-Infinity;}feedback.finish();
+      }catch(error){
+        if(pending)this.disposeOrbit(pending);
+        if(signal.aborted||this.detailPreparation!==task){feedback.finish();return;}
+        feedback.fail('Could not finish loading. Your saved world is unchanged.',()=>{controller.abort();feedback.finish();if(this.detailPreparation===task)this.detailPreparation=null;this.lodAt=-Infinity;});
+        console.error('Orbit preparation failed',error);
+      }
+    })();
   }
 
   mark(id:string){
@@ -131,8 +170,10 @@ export class SpaceFlight {
     const cameraRange=innerWidth<600?16.2:10.5;const behind=pos.clone().addScaledVector(front,-cameraRange-f.speed*.045).addScaledVector(up,4.3).addScaledVector(right,innerWidth<600?.45:1.35);
     this.look.position.copy(behind);this.look.up.copy(up);this.look.lookAt(pos.clone().addScaledVector(front,13));
     if(!this.cameraStarted){this.camera.position.copy(behind);this.camera.quaternion.copy(this.look.quaternion);this.cameraStarted=true;}
-    this.camera.position.lerp(behind,this.reduced?1:1-Math.exp(-7*dt));this.camera.quaternion.slerp(this.look.quaternion,this.reduced?1:1-Math.exp(-6*dt));
-    this.camera.fov+=(52+(this.reduced?0:f.speed*.13)-this.camera.fov)*(1-Math.exp(-3*dt));this.camera.updateProjectionMatrix();this.updateLod(now);renderer.render(this.scene,this.camera);
+    this.camera.up.copy(up);this.camera.position.lerp(behind,this.reduced?1:1-Math.exp(-7*dt));this.camera.quaternion.slerp(this.look.quaternion,this.reduced?1:1-Math.exp(-6*dt));
+    this.camera.fov+=(52+(this.reduced?0:f.speed*.13)-this.camera.fov)*(1-Math.exp(-3*dt));this.camera.updateProjectionMatrix();this.updateLod(now);
+    for(const body of this.bodies.values())if(body.root.visible&&body.detail?.userData.updateTown)body.detail.userData.updateTown(this.camera.position.clone().sub(body.root.position));
+    const drawingTarget=this.nearby();this.drawing.render(drawingTarget?new T.Vector3(...drawingTarget.center):pos,true);
     if(now-this.hudAt<80)return;this.hudAt=now;
     setText(el('ship-speed'), f.speed.toFixed(0).padStart(2,'0'));setText(el('flight-throttle'), paused?'STANDBY':input.brake?'BRAKING':input.thrust?'MAIN DRIVE':'COAST');setText(el('flight-heading'), `HDG ${Math.round((f.yaw*180/Math.PI+360)%360).toString().padStart(3,'0')}°  /  PITCH ${Math.round(f.pitch*180/Math.PI)}°`);el('velocity-bar').style.width=`${f.speed/36*100}%`;document.body.classList.toggle('ship-braking',input.brake);el('flight-hud').dataset.speed=f.speed.toFixed(3);el('flight-hud').dataset.position=JSON.stringify(f.position);
     const closest=this.nearby();if(closest)setText(el('location-chip'), regionFor(closest.slot).name.toUpperCase()+' / FLIGHT');const distance=closest?spaceDistance(f.position,closest.center):Infinity;const landing=distance<=(closest?landingRadius(closest):0)&&f.speed<=LAND_SPEED;

@@ -1,0 +1,64 @@
+[
+  {
+    "name": "desktop-same-home",
+    "browser": "154.0.8037.99",
+    "renderer": {
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "drawingBuffer": {
+        "width": 1440,
+        "height": 1000
+      },
+      "touchPoints": 0,
+      "visibility": "visible",
+      "webglVendor": "Google Inc. (Apple)",
+      "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+    },
+    "sameOriginalIsolatedIdentity": true,
+    "originalHomeVersion": 5,
+    "arrivalFraming": {
+      "obstruction": 0,
+      "street": 0.3125,
+      "score": 3.5130123729224287
+    },
+    "noticeClear": true,
+    "unchangedContents": true,
+    "contentDigest": "080104d439d25a21cbeb40683481ba1d100ba05cf6c49c725e8e099d57c45f19",
+    "errors": []
+  },
+  {
+    "name": "touch-390-same-home",
+    "browser": "154.0.8037.99",
+    "renderer": {
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "drawingBuffer": {
+        "width": 390,
+        "height": 844
+      },
+      "touchPoints": 1,
+      "visibility": "visible",
+      "webglVendor": "Google Inc. (Apple)",
+      "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+    },
+    "sameOriginalIsolatedIdentity": true,
+    "originalHomeVersion": 5,
+    "arrivalFraming": {
+      "obstruction": 0,
+      "street": 0.5833333333333334,
+      "score": 4.733333333333333
+    },
+    "noticeClear": true,
+    "unchangedContents": true,
+    "contentDigest": "080104d439d25a21cbeb40683481ba1d100ba05cf6c49c725e8e099d57c45f19",
+    "errors": []
+  }
+]

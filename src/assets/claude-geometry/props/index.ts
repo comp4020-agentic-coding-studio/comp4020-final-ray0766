@@ -14,7 +14,6 @@ import { buildConifer } from './conifer.ts';
 import { buildWorkLight } from './work-light.ts';
 import { libraryPropMaterials, VILLAGE_PROP_BUILDERS, VILLAGE_PROP_NAMES } from './village.ts';
 import type { Look } from '../style/look.ts';
-import { lookParams } from '../style/look.ts';
 
 // Industrial versions of the main project's six catalogue kinds (a76575a
 // src/shared/planets.ts CATALOGUE). The kind keys stay the same so placed
@@ -71,8 +70,6 @@ const BUILDERS: Record<PropKind, (lib: StyleLibrary, b: PartBuilder) => void> = 
 /** Build one prop with fresh, owned geometry (and owned glow materials), in the library's look. */
 export function buildProp(kind: PropKind, lib: StyleLibrary): BuiltPart {
   const b = new PartBuilder(lib.lod);
-  const outline = lookParams(lib.look)?.outline, ink = outline ? lib.ink() : null;
-  if (outline && ink) b.ink = { materials: ink, crease: outline.crease };
   if (lib.look === 'village') VILLAGE_PROP_BUILDERS[kind](libraryPropMaterials(lib), b);
   else BUILDERS[kind](lib, b);
   const part = b.build(`prop.${kind}`);
@@ -121,10 +118,8 @@ export class PropKit {
       this.buildMs.set(kind, performance.now() - start);
       t.group.traverse(o => {
         const mesh = o as T.Mesh;
-        // Ink lines (village look) are LineSegments: their geometry is shared by the copies too.
-        if (!mesh.isMesh && !(o as T.LineSegments).isLineSegments) return;
-        markShared(mesh.geometry); this.owned.push(mesh.geometry);
         if (!mesh.isMesh) return;
+        markShared(mesh.geometry); this.owned.push(mesh.geometry);
         const m = mesh.material as T.Material;
         if (isOwnedGlow(m)) { markShared(m); this.owned.push(m); this.glows.add(m); }
       });

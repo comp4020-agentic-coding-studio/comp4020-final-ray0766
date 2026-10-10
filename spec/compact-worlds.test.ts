@@ -36,10 +36,15 @@ it('uses the same radial field for terrain vertices, water, normals and physics 
 });
 
 it('keeps metre-based placement, boarding and flight clearance coherent across sizes',()=>{
- const point=normalize([0,1,-.6]),neighbour=new Vector3(...point).applyAxisAngle(new Vector3(1,0,0),.049).toArray() as Vec3;
- const objects=[{id:'lamp',kind:'lamp' as const,position:point,rotation:0,version:1}];
- expect(placementProblem('lamp',neighbour,objects,undefined,undefined,10)).toContain('too close');
- expect(placementProblem('lamp',neighbour,objects,undefined,undefined,12)).toBeNull();
+ const point=normalize([0,1,-.6]);
+ // Saved lamps keep their old footprint; current lamps use the wider lantern.
+ // Each angular gap straddles its metre-based clearance at 10 m and 12 m.
+ for(const [candidateVersion,existingVersion,angle]of [[1,1,.049],[2,1,.062],[2,2,.072]] as const){
+  const neighbour=new Vector3(...point).applyAxisAngle(new Vector3(1,0,0),angle).toArray() as Vec3;
+  const objects=[{id:'lamp',kind:'lamp' as const,position:point,rotation:0,version:1,...(existingVersion===2?{assetVersion:2 as const}:{})}];
+  expect(placementProblem('lamp',neighbour,objects,undefined,undefined,10,candidateVersion)).toContain('too close');
+  expect(placementProblem('lamp',neighbour,objects,undefined,undefined,12,candidateVersion)).toBeNull();
+ }
  const near=new Vector3(...SPAWN).applyAxisAngle(new Vector3(1,0,0),.15).toArray() as Vec3;
  expect(canBoard('garden',near,10)).toBe(true);expect(canBoard('garden',near,12)).toBe(false);
  for(const radius of [10,11,12,14]){

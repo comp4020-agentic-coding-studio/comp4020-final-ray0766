@@ -58,9 +58,9 @@ it('uses the offset blueprint lantern column and the low hedge without changing 
   // The former central column is no longer an invisible obstacle.
   expect(world.blocked({position:dir,radius:base+.003,verticalSpeed:0,grounded:true})).toBe(false);
   const hedge=PART_COLLIDERS['street.pipes']()[0];
-  expect(hedge.center[2]-hedge.half[2]).toBeCloseTo(-.01,6);
-  expect(hedge.center[2]+hedge.half[2]).toBeCloseTo(.33,6);
-  expect(hedge.center[1]+hedge.half[1]).toBeCloseTo(.48,6);
+  expect(hedge.center[2]-hedge.half[2]).toBeCloseTo(.02,6);
+  expect(hedge.center[2]+hedge.half[2]).toBeCloseTo(.30,6);
+  expect(hedge.center[1]+hedge.half[1]).toBeCloseTo(.46,6);
   const local=new GroundWorld({id:'local',revision:1,objects:[{id:'local-lamp',kind:'lamp',position:dir,rotation:0,version:1}]});
   expect(local.bodies[0].round?.height).toBe(2.1);
 });

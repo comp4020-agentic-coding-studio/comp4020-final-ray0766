@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 import type {Page} from '@playwright/test';
-import {mkdirSync,writeFileSync} from 'node:fs';
+import {chmodSync,mkdirSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {Quaternion,Vector3} from 'three';
 import {activate,begin,flyTo,groundWalk,hostContext,integrationUrl,measureAction,menu,rendererContext,roomDoor,roomWalk,universe,visibleControl} from '../../scripts/integration-browser-helpers.ts';
@@ -18,6 +18,9 @@ import {spaceDistance} from '../../src/shared/flight.ts';
 import {samplePublicVillage,isSamplePublicRadius} from '../../src/shared/sample-public-village.ts';
 
 const evidence=process.env.INTEGRATION_EVIDENCE??'docs/evidence/integration';
+// This long real-control journey keeps screenshots, API results and frame
+// samples. Its measured 40 MB trace export exceeded the whole test timeout.
+test.use({trace:'off'});
 const library=async(page:Page):Promise<LibraryEntry[]>=>{const r=await page.request.get('/api/blueprints');expect(r.status()).toBe(200);return r.json();};
 function editCandidate(u:Universe):{object:PlacedObject;part:PartPlacement;parts:PartPlacement[]}{
  const field=fieldOf(u.currentPlanet.environment,u.currentPlanet.radius);
@@ -87,15 +90,45 @@ async function closeAndBlock(page:Page,touch:boolean){
 }
 
 for(const touch of [false,true])test(`integration full journey: ${touch?'390 touch':'desktop keyboard'}`,async({browser})=>{
- test.setTimeout(600000);mkdirSync(evidence,{recursive:true});
- const baseURL=integrationUrl(),name=touch?'touch-390':'desktop',context=await browser.newContext({baseURL,viewport:touch?{width:390,height:844}:{width:1440,height:1000},isMobile:touch,hasTouch:touch,locale:'en-US'}),page=await context.newPage();
- const samples:Record<string,unknown>[]=[],checks:string[]=[],errors:string[]=[],requests:{route:string;status:number}[]=[];
- const report:Record<string,unknown>={status:'failed',browser:'Installed Google Chrome via Playwright channel chrome',browserVersion:browser.version(),baseURL,host:hostContext(),fixture:'New isolated anonymous browser identity. Every movement, edit, quest action and flight transition uses actual UI/keyboard/touch controls. APIs below only read acknowledged state.',checks,samples,pageErrors:errors,apiResponses:requests};
- const shot=(label:string)=>page.screenshot({path:join(evidence,`${name}-${label}.png`)});
+ test.setTimeout(600000);mkdirSync(evidence,{recursive:true});mkdirSync('.data',{recursive:true});
+ const baseURL=integrationUrl(),name=touch?'touch-390':'desktop',storageState=touch?process.env.INTEGRATION_TOUCH_STORAGE_STATE:process.env.INTEGRATION_DESKTOP_STORAGE_STATE;
+ const context=await browser.newContext({baseURL,viewport:touch?{width:390,height:844}:{width:1440,height:1000},isMobile:touch,hasTouch:touch,locale:'en-US',...(storageState?{storageState}:{})}),page=await context.newPage();
+ const samples:Record<string,unknown>[]=[],checks:string[]=[],errors:string[]=[],requests:{route:string;status:number}[]=[],screenshotSettling:Record<string,unknown>[]=[];
+ const report:Record<string,unknown>={status:'failed',productAssertions:'not-completed',runnerCleanupStatus:'pending',browser:'Installed Google Chrome via Playwright channel chrome',browserVersion:browser.version(),baseURL,host:hostContext(),fixture:`${storageState?'Existing isolated identity restored from a private storage-state file':'New isolated anonymous browser identity'}. Every movement, edit, quest action and flight transition uses actual UI/keyboard/touch controls. APIs below only read acknowledged state.`,checks,samples,pageErrors:errors,apiResponses:requests,screenshotSettling,screenshotTimingMeaning:'Action samples retain their original measurement window, including loading within that window. The separately reported screenshot settling waits for loading to finish and two animation frames; it is additional time outside the action samples.'};
+ const shot=async(label:string)=>{
+  const started=Date.now();
+  await expect(page.locator('.scene-loading-overlay')).toBeHidden({timeout:45000});
+  await expect(page.locator('body')).not.toHaveClass(/scene-loading/,{timeout:45000});
+  await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));
+  screenshotSettling.push({label,waitBeforeCaptureMs:Date.now()-started});
+  await page.screenshot({path:join(evidence,`${name}-${label}.png`)});console.log(`[journey:${name}] ${label}`);
+ };
+ const saveIdentity=async(stage:'checkpoint'|'failed')=>{const path=join('.data',`village-journey-${touch?'touch':'desktop'}-${stage}.json`);await context.storageState({path});chmodSync(path,0o600);};
  page.on('pageerror',error=>errors.push(error.message));page.on('response',response=>{const url=new URL(response.url());if(url.pathname.startsWith('/api/')&&response.request().method()==='POST')requests.push({route:url.pathname,status:response.status()});});
+ let productFailure:unknown,cleanupFailure:unknown;
  try{
-  await begin(page,touch);report.renderer=await rendererContext(page);
+  await begin(page,touch);await saveIdentity('checkpoint');report.renderer=await rendererContext(page);
   let initial=await universe(page);
+  if(initial.player.location?.kind==='interior'){
+   const restored=initial,restoredLibrary=await library(page);
+   await measureAction(page,'restore-saved-room-and-exit',samples,async()=>{
+    await expect(page.locator('.home-interior-ui')).toBeVisible();await roomDoor(page,touch);
+    if(!(await universe(page)).player.home!.interior.doorOpen)await activate(page,'#home-toggle-door',touch);
+    await activate(page,'#home-exit',touch);await expect(page.locator('.home-interior-ui')).not.toBeVisible();
+    await expect.poll(async()=>(await universe(page)).player.location?.kind).toBe('exterior');
+   });
+   initial=await universe(page);
+   expect(initial.ownedPlanetId).toBe(restored.ownedPlanetId);expect(initial.currentPlanet.id).toBe(restored.currentPlanet.id);
+   expect(initial.currentPlanet.objects).toEqual(restored.currentPlanet.objects);expect(await library(page)).toEqual(restoredLibrary);
+   expect(initial.player.home!.interiorId).toBe(restored.player.home!.interiorId);
+   expect(initial.player.home!.interior.items).toEqual(restored.player.home!.interior.items);expect(initial.player.home!.interior.material).toBe(restored.player.home!.interior.material);
+   expect(initial.player.quest).toBe(restored.player.quest);expect(initial.player.deliveries).toBe(restored.player.deliveries);
+   report.restoredRoom={exitedThroughActualControls:true,sameHome:true,sameObjectsAndBlueprints:true,sameFurnitureAndMaterial:true,sameQuestAndDeliveries:true};
+  }
+  const initialQuest=initial.player.quest,initialDeliveries=initial.player.deliveries,completedDelivery=initialQuest==='delivered';
+  report.initialQuest=initialQuest;report.questMode=completedDelivery?'completed-delivery-revisit':'pickup-and-delivery';report.initialDeliveries=initialDeliveries;
+  if(!storageState)expect(initialQuest).toBe('available');
+  if(completedDelivery)expect(initialDeliveries).toBe(1);else expect(initialQuest).toBe('available');
   if(!initial.ownedPlanetId){
    const target=initial.planets.filter(p=>p.kind==='garden'&&!p.claimed).sort((a,b)=>spaceDistance(a.center,initial.currentPlanet.center)-spaceDistance(b.center,initial.currentPlanet.center))[0];
    report.firstClaimFlight=await measureAction(page,'flight-to-claim',samples,()=>flyTo(page,target,touch));await menu(page,'#claim-planet',touch);initial=await universe(page);
@@ -122,19 +155,32 @@ for(const touch of [false,true])test(`integration full journey: ${touch?'390 tou
   report.pathEdit=await measureAction(page,'ordinary-path-rotate-place-remove',samples,()=>ordinaryPaths(page,touch));await shot('paths');
   const beforeTrip=await universe(page),savedObjects=beforeTrip.currentPlanet.objects,savedLibrary=await library(page);
   report.outbound=await measureAction(page,'walk-board-fly-land-public',samples,()=>flyTo(page,beforeTrip.planets.find(p=>p.id==='hub')!,touch));
-  const hub=(await universe(page)).currentPlanet,paths=isSamplePublicRadius(hub.radius??14)?samplePublicVillage(hub.radius).routes.map(r=>r.points):[[SPAWN,NPCS.mica.position],[SPAWN,NPCS.sol.position],[SPAWN,HUB_DOCK]];
-  await menu(page,'#delivery-toggle',touch);
-  await measureAction(page,'public-walk-pickup-deliver',samples,async()=>{
+  const hub=(await universe(page)).currentPlanet;
+  // The complete town also exposes ring streets and meridians. Select the
+  // three task corridors by identity, never by their position in that list.
+  const paths=isSamplePublicRadius(hub.radius??14)?['public-post','public-orchard','public-harbour'].map(id=>{
+   const route=samplePublicVillage(hub.radius).routes.find(route=>route.id===id);expect(route,`Missing ${id} corridor`).toBeTruthy();return route!.points;
+  }):[[SPAWN,NPCS.mica.position],[SPAWN,NPCS.sol.position],[SPAWN,HUB_DOCK]];
+  if(!await page.locator('body').evaluate(node=>node.classList.contains('delivery-open')))await menu(page,'#delivery-toggle',touch);
+  await measureAction(page,completedDelivery?'public-walk-completed-delivery-revisit':'public-walk-pickup-deliver',samples,async()=>{
    // Hub landing is at the port, so return by the authored harbour corridor.
    for(const point of [...paths[2]].reverse().slice(1))await groundWalk(page,point,touch);
    for(const point of paths[0].slice(1))await groundWalk(page,point,touch,point===paths[0].at(-1)?1.05:.38);
-   await expect(page.locator('#interact')).toBeVisible();await activate(page,'#interact',touch);await expect.poll(async()=>(await universe(page)).player.quest).toBe('carrying');
+   await expect(page.locator('#interact')).toBeVisible();await activate(page,'#interact',touch);
+   if(completedDelivery){
+    await expect(page.locator('#conversation')).toBeVisible();await expect(page.locator('#speaker')).toContainText('Mica');
+    const revisited=await universe(page);expect(revisited.player.quest).toBe('delivered');expect(revisited.player.deliveries).toBe(initialDeliveries);
+   }else await expect.poll(async()=>(await universe(page)).player.quest).toBe('carrying');
    if(await page.locator('#conversation').isVisible())await activate(page,'#close-conversation',touch);
    for(const point of [...paths[0]].reverse().slice(1))await groundWalk(page,point,touch);
    for(const point of paths[1].slice(1))await groundWalk(page,point,touch,point===paths[1].at(-1)?1.05:.38);
    await activate(page,'#interact',touch);await expect.poll(async()=>(await universe(page)).player.quest).toBe('delivered');
+   if(completedDelivery){
+    await expect(page.locator('#conversation')).toBeVisible();await expect(page.locator('#speaker')).toContainText('Sol');
+    expect((await universe(page)).player.deliveries).toBe(initialDeliveries);
+   }
    if(await page.locator('#conversation').isVisible())await activate(page,'#close-conversation',touch);
-  });await shot('public-delivery');
+  });await shot(completedDelivery?'public-revisit':'public-delivery');
   for(const point of [...paths[1]].reverse().slice(1))await groundWalk(page,point,touch);
   for(const point of paths[2].slice(1))await groundWalk(page,point,touch);
   const returnTarget=(await universe(page)).planets.find(p=>p.id===homeId)!;
@@ -144,10 +190,32 @@ for(const touch of [false,true])test(`integration full journey: ${touch?'390 tou
   await measureAction(page,'walk-home-and-enter-after-flight',samples,async()=>{for(const point of homeRoute.points.slice(1))await groundWalk(page,point,touch);await activate(page,'#home-enter',touch);await expect(page.locator('.home-interior-ui')).toBeVisible();});
   expect((await universe(page)).player.home!.interior.items).toEqual(savedRoom.items);await page.reload();await expect(page.locator('.home-interior-ui')).toBeVisible();
   expect((await universe(page)).player.quest).toBe('delivered');expect((await universe(page)).player.home!.interiorId).toBe(homeInterior);
-  checks.push('Ordinary structure edited in place with private name/groups retained','Ordinary Path rotated, newly placed and removed through Build','Real takeoff, radius-aware piloting, public landing, actual delivery, return flight and room re-entry','Edits and quest survive the complete journey and refresh');
+  if(completedDelivery)expect((await universe(page)).player.deliveries).toBe(initialDeliveries);
+  checks.push('Ordinary structure edited in place with private name/groups retained','Ordinary Path rotated, newly placed and removed through Build',completedDelivery?'Real takeoff, radius-aware piloting, public landing, completed-task conversations without additional deliveries, return flight and room re-entry':'Real takeoff, radius-aware piloting, public landing, actual delivery, return flight and room re-entry','Edits and quest survive the complete journey and refresh');
   await shot('returned-home');expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(touch?390:1440);expect(errors).toEqual([]);expect(requests.filter(r=>r.status>=400)).toEqual([]);
   expect(samples.every(s=>s.continuouslyForeground===true)).toBe(true);expect(samples.every(s=>!s.samplingFailed)).toBe(true);
-  report.status='passed';report.rendererAtEnd=await rendererContext(page);report.final={sameHome:true,sameSavedObjects:true,samePrivateBlueprintMetadata:true,delivered:true};
- }catch(error){report.error=String(error);await shot('failure').catch(()=>undefined);throw error;}
- finally{writeFileSync(join(evidence,`${name}-journey-result.json`),JSON.stringify(report,null,2)+'\n');for(const key of ['w','a','s','d','ArrowUp','ArrowDown'])await page.keyboard.up(key).catch(()=>undefined);await page.goto('about:blank').catch(()=>undefined);await context.close();}
+  report.rendererAtEnd=await rendererContext(page);report.final={sameHome:true,sameSavedObjects:true,samePrivateBlueprintMetadata:true,delivered:true,questMode:report.questMode};report.productAssertions='passed';report.status='product-passed-cleanup-pending';
+ }catch(error){
+  report.productAssertions='failed';report.error=String(error);await shot('failure').catch(()=>undefined);
+  productFailure=error;
+ }
+ // Preserve failed identities only through the same private 0600 writer used
+ // for the initial checkpoint, before closing the browser context.
+ finally{
+  if(report.productAssertions!=='passed')await saveIdentity('failed').then(()=>{report.privateIdentityPreserved=true;}).catch(()=>{report.privateIdentityPreserved=false;});
+  const writeReport=()=>writeFileSync(join(evidence,`${name}-journey-result.json`),JSON.stringify(report,null,2)+'\n');
+  // Keep product evidence even if the runner is interrupted during cleanup.
+  writeReport();
+  try{
+   for(const key of ['w','a','s','d','ArrowUp','ArrowDown'])await page.keyboard.up(key).catch(()=>undefined);
+   await page.goto('about:blank').catch(()=>undefined);await context.close();
+   report.runnerCleanupStatus='passed';report.status=report.productAssertions==='passed'?'passed':'failed';
+  }catch(error){
+   report.runnerCleanupStatus='failed';report.runnerCleanupError=String(error);report.status='failed';
+   cleanupFailure=error;
+  }finally{writeReport();}
+ }
+ // Preserve the first product failure while still treating cleanup as a gate.
+ if(report.productAssertions!=='passed')throw productFailure;
+ if(report.runnerCleanupStatus==='failed')throw cleanupFailure;
 });

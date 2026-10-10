@@ -1,22 +1,44 @@
+import * as T from 'three';
 import type { Vec3 } from '../../../core/vec.ts';
-import { rotationToNormal } from '../../geom.ts';
 import { bothSides } from '../../kit.ts';
 import type { Ctx, Role } from '../../kit.ts';
-import { sectionRing, segs, smoothSkin, STRIPE } from './shapes.ts';
+import { FLUSH, flushDisc, flushPanel, sectionRing, segs, smoothSkin, STRIPE } from './shapes.ts';
 import type { Groups, Section } from './shapes.ts';
 
 // Village hulls: the industrial hulls' decks, sides, aft faces, sockets and
 // registration panels kept; rounded sections and noses in between.
+//
+// Detail is painted, not built: portholes, lamps, the van's cargo door and the
+// band round each tail lie flush on the skin (shapes.ts flushDisc), so they
+// read by colour and the lines draw only the hull's own outline and the van's
+// fender. A ring standing 8 to 14 mm proud drew two 1 px crease rings round
+// every porthole and collar at shipyard distance.
+
+/** Width of the painted trim band round the aft end of every hull. */
+const TAIL_BAND = 0.032;
+
+/** Rings of the same length mixed point by point: a section between two of a hull's sections. */
+const between = (a: Vec3[], b: Vec3[], t: number): Vec3[] => a.map((p, i) => [p[0] + (b[i][0] - p[0]) * t, p[1] + (b[i][1] - p[1]) * t, p[2] + (b[i][2] - p[2]) * t] as Vec3);
+
+/** A painted porthole: glass in a ring of bare metal, both flush on a surface facing `n`. */
+function porthole(ctx: Ctx, at: Vec3, n: Vec3, r: number, lift = FLUSH) {
+  const k = segs(ctx, 16, 12, 10);
+  flushDisc(ctx, 'metal', at, n, r + 0.014, r, k, lift);
+  flushDisc(ctx, 'glass', at, n, r, 0, k, lift);
+}
 
 // --------------------------------------------------------------------- hull
 
 /**
  * Courier hull: a rounded box section that keeps the industrial hull's flat
  * deck (y 0.28, ±0.3), sides (x ±0.42) and aft face (z 1.75), with an
- * egg-shaped nose that rounds off at z −2.39, the industrial nose tip, so the
- * tile's 4.2 m still holds. Upper body in primary, a trim
- * cheat line that sweeps round the nose, secondary below it (where the
- * registration sits), two portholes a side.
+ * egg-shaped nose that rounds off at z −2.398, by the industrial nose tip.
+ * Upper body in primary, a trim cheat line that sweeps round the nose,
+ * secondary below it (where the registration sits), a trim band round the
+ * tail and two painted portholes a side. The tile's 4.2 m was the nose to an
+ * aft collar 15 mm behind the aft face; with the collar painted flush, the
+ * nose reaches 4 mm further and the aft face stands 4 mm behind the plug plane
+ * (inside the engines' plugs), 4.152 m.
  */
 function courierHull(ctx: Ctx) {
   const k = segs(ctx, 6, 4, 2);
@@ -34,23 +56,21 @@ function courierHull(ctx: Ctx) {
   const body: Section = { z: -1.2, a: 0.42, b: 0.32, yc: -0.04, p: 6 };
   const sections: Section[] = [];
   // Nose: elliptical in side view, the section rounding from box to ellipse towards the tip.
-  for (const u of ctx.detail === 0 ? [0.995, 0.9, 0.66, 0.3] : [0.995, 0.96, 0.9, 0.8, 0.66, 0.46, 0.24]) {
+  for (const u of ctx.detail === 0 ? [0.9983, 0.9, 0.66, 0.3] : [0.9983, 0.96, 0.9, 0.8, 0.66, 0.46, 0.24]) {
     const s = Math.sqrt(1 - u * u);
     sections.push({ z: -1.2 - 1.2 * u, a: body.a * s, b: body.b * s, yc: body.yc, p: 6 - 3.6 * u });
   }
-  sections.push(body, { ...body, z: 0.85 }, { z: 1.4, a: 0.41, b: 0.295, yc: -0.015, p: 6 }, { z: 1.75, a: 0.39, b: 0.26, yc: 0.02, p: 6 });
-  smoothSkin(ctx, sections.map(s => sectionRing(s, angles)), role, { start: 'trim', end: 'secondary' });
-  // A trim collar round the aft face, standing 15 mm aft of it as the industrial hull's rim does.
-  const aft = sections[sections.length - 1], collar = (z: number): Section => ({ ...aft, z, a: aft.a + 0.008, b: aft.b + 0.008 });
-  smoothSkin(ctx, [collar(1.72), collar(1.765)].map(s => sectionRing(s, angles)), () => 'trim');
+  const tail: Section = { z: 1.4, a: 0.41, b: 0.295, yc: -0.015, p: 6 }, aft: Section = { z: 1.754, a: 0.39, b: 0.26, yc: 0.02, p: 6 };
+  const t = (aft.z - TAIL_BAND - tail.z) / (aft.z - tail.z), mix = (k: 'a' | 'b' | 'yc') => tail[k] + (aft[k] - tail[k]) * t;
+  const band: Section = { z: aft.z - TAIL_BAND, a: mix('a'), b: mix('b'), yc: mix('yc'), p: 6 };
+  sections.push(body, { ...body, z: 0.85 }, tail, band);
+  smoothSkin(ctx, sections.map(s => sectionRing(s, angles)), role, { start: 'trim' });
+  smoothSkin(ctx, [band, aft].map(s => sectionRing(s, angles)), () => 'trim', { end: 'secondary' });
 
   // Portholes ahead of the wing, clear of the registration (z −1.01…−0.59) and the engine pylon (z ≥ 0.7).
   if (ctx.detail === 0) return;
   bothSides(ctx, () => {
-    for (const z of [-0.3, 0.1]) {
-      ctx.cylinder('metal', 0.056, 0.056, 0.014, { position: [0.421, 0.045, z], rotation: [0, 0, Math.PI / 2] }, segs(ctx, 16, 12, 8));
-      ctx.cylinder('glass', 0.042, 0.042, 0.018, { position: [0.423, 0.045, z], rotation: [0, 0, Math.PI / 2] }, segs(ctx, 16, 12, 8));
-    }
+    for (const z of [-0.3, 0.1]) porthole(ctx, [0.42, 0.045, z], [1, 0, 0], 0.042);
   });
 }
 
@@ -78,26 +98,6 @@ function fillet(c: P2, din: P2, dout: P2, r: number, n: number): P2[] {
   return Array.from({ length: n + 1 }, (_, i) => [o[0] + r * Math.cos(a1 + d * i / n), o[1] + r * Math.sin(a1 + d * i / n)] as P2);
 }
 
-/** A ring pushed `d` outward in its own plane, along each point's smoothed normal (collars). */
-function grow(ring: Vec3[], d: number, dz = 0): Vec3[] {
-  const n = ring.length;
-  const c = ring.reduce<Vec3>((s, p) => [s[0] + p[0] / n, s[1] + p[1] / n, s[2] + p[2] / n], [0, 0, 0]);
-  return ring.map((p, j) => {
-    const a = ring[(j + n - 1) % n], b = ring[(j + 1) % n];
-    let [nx, ny] = norm2(b[1] - a[1], -(b[0] - a[0]));
-    if (nx * (p[0] - c[0]) + ny * (p[1] - c[1]) < 0) { nx = -nx; ny = -ny; }
-    return [p[0] + nx * d, p[1] + ny * d, p[2] + dz] as Vec3;
-  });
-}
-
-/** Round porthole on a surface: a metal ring and the glass, standing along the outward normal `n`. */
-function porthole(ctx: Ctx, at: Vec3, n: Vec3, r: number) {
-  const k = segs(ctx, 16, 12, 8);
-  ctx.within({ position: at, rotation: rotationToNormal(n) }, () => {
-    ctx.cylinder('metal', r + 0.014, r + 0.014, 0.014, { position: [0, 0.001, 0] }, k);
-    ctx.cylinder('glass', r, r, 0.018, { position: [0, 0.003, 0] }, k);
-  });
-}
 
 /**
  * A half-round bead laid along a path on a surface (fender, rub strake): each
@@ -145,10 +145,11 @@ function vanRing(s: VanSection, bowl: number, side: number, arc: number): Vec3[]
  * Hauler hull as a friendly parcel van or harbour tug: a tall rounded box
  * that keeps the industrial hull's flat deck (y 0.4, ±0.42), sides (x ±0.58)
  * and aft face (z 1.75), its full round nose closing on a fat trim fender
- * that runs round the bow at y −0.3. One raised cargo door with a rounded
- * outline and a round window, two portholes aft of it, two round lamps low
- * on the bow and two tail lamps; primary above the fender, secondary in the
- * shallow bowl under it. No ribs, skids or rails.
+ * that runs round the bow at y −0.3: the van's one strong line. The rest is
+ * painted flush: a cargo door with rounded corners, its round window and
+ * handle, two portholes aft of it, two round lamps low on the bow, two tail
+ * lamps and a trim band round the tail; primary above the fender, secondary
+ * in the shallow bowl under it. No ribs, skids or rails.
  */
 function vanHull(ctx: Ctx) {
   const bowl = segs(ctx, 4, 3, 2), side = ctx.detail === 2 ? 1 : 0, arc = segs(ctx, 4, 3, 2);
@@ -169,10 +170,10 @@ function vanHull(ctx: Ctx) {
   const rings = sections.map(s => vanRing(s, bowl, side, arc));
   const ref = rings[nose.length];
   const role: Groups = j => ((ref[j][1] + ref[(j + 1) % ref.length][1]) / 2 < FENDER_Y - 1e-6 ? 'secondary' : 'primary');
-  smoothSkin(ctx, rings, role, { end: 'secondary' });
-  // A trim collar round the aft face, as on the courier.
-  const last = rings[rings.length - 1];
-  smoothSkin(ctx, [grow(last, 0.008, -0.03), grow(last, 0.008, 0.015)], () => 'trim');
+  // The trim band round the tail, painted on the last stretch of skin.
+  const last = rings[rings.length - 1], band = between(rings[rings.length - 2], last, 1 - TAIL_BAND / (aft.z - 1.3));
+  smoothSkin(ctx, [...rings.slice(0, -1), band], role);
+  smoothSkin(ctx, [band, last], () => 'trim', { end: 'secondary' });
 
   // The fender: along the fender line from the aft face round the bow and back, its ends rounded off.
   const halfAt = (z: number) => (z <= 1.3 ? BODY.a : BODY.a + (aft.a - BODY.a) * (z - 1.3) / 0.45);
@@ -186,7 +187,7 @@ function vanHull(ctx: Ctx) {
   bead(ctx, 'trim', [...right, tip, ...right.slice().reverse().map(({ p, s }) => ({ p: [-p[0], p[1], p[2]] as Vec3, s }))], [0, 1, 0], 0.036, 0.036, segs(ctx, 6, 4, 2));
 
   if (ctx.detail >= 1) {
-    // Two round lamps low on the bow, just above the fender: where the nose surface passes through (±0.3, −0.17).
+    // Two round lamps low on the bow, just above the fender, painted on the nose where it passes through (±0.3, −0.17).
     const halfWidth = (s: VanSection, y: number) => {
       if (y >= s.top) return 0;
       const dy = y - (s.top - s.r);
@@ -197,37 +198,50 @@ function vanHull(ctx: Ctx) {
       for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (halfWidth(noseAt(m), y) > x) lo = m; else hi = m; }
       return zb - length * (lo + hi) / 2;
     };
-    const x0 = 0.3, y0 = -0.17, h = 0.01, z0 = noseZ(x0, y0);
-    const n: Vec3 = [(noseZ(x0 + h, y0) - noseZ(x0 - h, y0)) / (2 * h), (noseZ(x0, y0 + h) - noseZ(x0, y0 - h)) / (2 * h), -1];
     bothSides(ctx, () => {
-      porthole(ctx, [x0, y0, z0], n, 0.05);
+      bowLamp(ctx, 0.3, -0.17, 0.05, noseZ, segs(ctx, 16, 12, 10));
       // A round tail lamp in each upper corner of the aft face, clear of the aft engines' flanges.
-      ctx.within({ position: [0.42, 0.2, aft.z], rotation: [Math.PI / 2, 0, 0] }, () => {
-        ctx.cylinder('metal', 0.054, 0.054, 0.012, { position: [0, 0.002, 0] }, segs(ctx, 16, 12, 8));
-        ctx.cylinder('trim', 0.04, 0.04, 0.016, { position: [0, 0.004, 0] }, segs(ctx, 16, 12, 8));
-      });
+      flushDisc(ctx, 'trim', [0.42, 0.2, aft.z], [0, 0, 1], 0.045, 0, segs(ctx, 16, 12, 10));
     });
   }
 
-  // Cargo door: one panel standing 14 mm proud, its outline rounded, between the registration and the wing root; a round window and a trim handle.
-  const corner = segs(ctx, 3, 2, 1);
-  const outline = (grow0: number): [number, number][] => {
-    const zc = -0.37, yc = -0.03, hz = 0.28, hy = 0.19, rc = 0.07, out: [number, number][] = [];
-    for (const [cz, cy, a0] of [[1, 1, 0], [-1, 1, Math.PI / 2], [-1, -1, Math.PI], [1, -1, 1.5 * Math.PI]] as const) {
-      for (let i = 0; i <= corner; i++) {
-        const a = a0 + (Math.PI / 2) * i / corner;
-        out.push([zc + cz * (hz - rc) + (rc + grow0) * Math.cos(a), yc + cy * (hy - rc) + (rc + grow0) * Math.sin(a)]);
-      }
+  // Cargo door between the registration and the wing root, painted flush in the secondary colour, its corners rounded; a round window and a handle on it.
+  const corner = segs(ctx, 4, 3, 2);
+  const door: [number, number][] = [];
+  const zc = -0.37, yc = -0.03, hz = 0.28, hy = 0.19, rc = 0.07;
+  for (const [cz, cy, a0] of [[1, 1, 0], [-1, 1, Math.PI / 2], [-1, -1, Math.PI], [1, -1, 1.5 * Math.PI]] as const) {
+    for (let i = 0; i <= corner; i++) {
+      const a = a0 + (Math.PI / 2) * i / corner;
+      door.push([zc + cz * (hz - rc) + rc * Math.cos(a), yc + cy * (hy - rc) + rc * Math.sin(a)]);
     }
-    return out;
-  };
+  }
+  // The side plane x = 0.58, seen from outside: u along −y, v along −z (rotation of +Y onto +X).
+  const plane: { position: Vec3; rotation: Vec3 } = { position: [BODY.a, 0, 0], rotation: [0, 0, -Math.PI / 2] };
+  const onSide = ([z, y]: [number, number]): [number, number] => [-y, -z];
   bothSides(ctx, () => {
-    smoothSkin(ctx, [[-0.004, 0.009], [0.014, 0]].map(([dx, g]) => outline(g).map(([z, y]) => [BODY.a + dx, y, z] as Vec3)), () => 'primary', { end: 'primary' });
+    flushPanel(ctx, 'secondary', door.map(onSide), plane);
     if (ctx.detail === 0) return;
-    porthole(ctx, [BODY.a + 0.014, 0.05, -0.37], [1, 0, 0], 0.05);
-    ctx.rod('trim', [BODY.a + 0.022, -0.06, -0.6], [BODY.a + 0.022, -0.06, -0.5], 0.011, 8);
+    porthole(ctx, [BODY.a, 0.05, -0.37], [1, 0, 0], 0.05, 2 * FLUSH);
+    flushPanel(ctx, 'trim', ([[-0.6, -0.071], [-0.5, -0.071], [-0.5, -0.049], [-0.6, -0.049]] as [number, number][]).map(onSide), plane, 2 * FLUSH);
     for (const z of [0.22, 0.5]) porthole(ctx, [BODY.a, 0.06, z], [1, 0, 0], 0.045);
   });
+}
+
+/**
+ * A round lamp painted on the van's bow: a disc of trim whose points follow
+ * the nose (`noseZ` gives the surface's z at x, y), lifted FLUSH towards the
+ * front, so it lies on the curve instead of standing off it as a flat disc would.
+ */
+function bowLamp(ctx: Ctx, x0: number, y0: number, r: number, noseZ: (x: number, y: number) => number, k: number) {
+  const at = (x: number, y: number): Vec3 => [x, y, noseZ(x, y) - FLUSH];
+  const p: number[] = [];
+  for (let i = 0; i < k; i++) {
+    const t0 = (2 * Math.PI * i) / k, t1 = (2 * Math.PI * (i + 1)) / k;
+    p.push(...at(x0, y0), ...at(x0 + r * Math.cos(t1), y0 + r * Math.sin(t1)), ...at(x0 + r * Math.cos(t0), y0 + r * Math.sin(t0)));
+  }
+  const g = new T.BufferGeometry();
+  g.setAttribute('position', new T.Float32BufferAttribute(p, 3));
+  ctx.b.geometry(ctx.mat('trim'), g);
 }
 
 // ---------------------------------------------------------- wedge interceptor
@@ -292,9 +306,10 @@ function racerHull(ctx: Ctx) {
   const rings = [...nose, racerRing(full.pts, zb), racerRing(full.pts, 1.3), racerRing(racerHalf(AFT, k).pts, AFT.z)];
   const roles = [...full.roles, ...full.roles.slice().reverse()];
   smoothSkin(ctx, rings.slice(0, cone), () => 'trim');
-  smoothSkin(ctx, rings.slice(cone - 1), j => roles[j], { end: 'secondary' });
-  const last = rings[rings.length - 1];
-  smoothSkin(ctx, [grow(last, 0.008, -0.03), grow(last, 0.008, 0.015)], () => 'trim');
+  // The trim band round the tail, painted on the last stretch of skin.
+  const last = rings[rings.length - 1], band = between(rings[rings.length - 2], last, 1 - TAIL_BAND / (AFT.z - 1.3));
+  smoothSkin(ctx, [...rings.slice(cone - 1, -1), band], j => roles[j]);
+  smoothSkin(ctx, [band, last], () => 'trim', { end: 'secondary' });
 
   // Portholes on the upper slope, between the registration and the side engine.
   if (ctx.detail === 0) return;

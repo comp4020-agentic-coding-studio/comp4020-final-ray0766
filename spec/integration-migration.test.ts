@@ -1,4 +1,4 @@
-import { afterEach, expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync, readFileSync, copyFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -17,6 +17,10 @@ import type { GroundPose } from '../src/shared/physics/world.ts';
 import { structureFit } from '../src/shared/blueprints.ts';
 import { planetCenter } from '../src/shared/flight.ts';
 import { SAMPLE_PUBLIC_VERSION } from '../src/shared/sample-public-village.ts';
+
+// These operator checks include a cold subprocess, several complete worlds,
+// SQLite copies and reopening. Their wall clock is not a frame-time budget.
+vi.setConfig({ testTimeout: 15_000 });
 
 type Store=ReturnType<typeof openStore>;
 const stores:Store[]=[],directories:string[]=[];

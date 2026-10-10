@@ -31,10 +31,8 @@ export class PartTemplates {
       const built = buildPart(id, this.lib);
       built.group.traverse(o => {
         const mesh = o as T.Mesh;
-        // Ink lines (village look) are LineSegments; their geometry is shared by the instances too.
-        if (!mesh.isMesh && !(o as T.LineSegments).isLineSegments) return;
-        this.owned.push(markShared(mesh.geometry));
         if (!mesh.isMesh) return;
+        this.owned.push(markShared(mesh.geometry));
         const m = mesh.material as T.Material;
         // The lamp glow is the one material a part owns; the template keeps it.
         if (!isShared(m)) this.owned.push(markShared(m));

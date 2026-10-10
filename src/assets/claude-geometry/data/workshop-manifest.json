@@ -1,0 +1,7676 @@
+{
+  "budget": {
+    "building": {
+      "high": {
+        "drawCalls": 17,
+        "triangles": 150000
+      },
+      "low": {
+        "drawCalls": 10,
+        "triangles": 20000
+      },
+      "medium": {
+        "drawCalls": 17,
+        "triangles": 70000
+      }
+    },
+    "part": {
+      "high": {
+        "drawCalls": 10,
+        "triangles": 4000
+      },
+      "low": {
+        "drawCalls": 10,
+        "triangles": 500
+      },
+      "medium": {
+        "drawCalls": 10,
+        "triangles": 1800
+      }
+    }
+  },
+  "format": "planet-claude-modules/part-manifest",
+  "parts": [
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Concrete slab, tread plate",
+          "village": "Boards on a stone slab"
+        },
+        "zh": "石板上铺木板"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.0048,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "category": "Floor",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 328,
+          "low": 72,
+          "medium": 168
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 328
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 72
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 168
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 48
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 24
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 48
+          }
+        }
+      },
+      "flags": {
+        "floor": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "floor.deck",
+      "index": 0,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "concrete",
+          "steel",
+          "tread"
+        ],
+        "village": [
+          "village:boards",
+          "village:stone"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its cell, on the ground at level 0 or carried above",
+      "names": {
+        "en": {
+          "industrial": "Floor deck",
+          "village": "Plank floor"
+        },
+        "zh": "木板地面"
+      },
+      "role": "deck",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "deck 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "floor",
+        "indoor",
+        "room"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Open grating on channels",
+          "village": "Slats with gaps, timber frame"
+        },
+        "zh": "留缝木条，木框"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.0099,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.12,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.12,
+            -0.5
+          ]
+        }
+      },
+      "category": "Floor",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 760,
+          "low": 216,
+          "medium": 568
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 760
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 216
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 568
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 144
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 96
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 144
+          }
+        }
+      },
+      "flags": {
+        "floor": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "floor.grate",
+      "index": 1,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:boards",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its cell, on the ground at level 0 or carried above",
+      "names": {
+        "en": {
+          "industrial": "Grated catwalk",
+          "village": "Open boardwalk"
+        },
+        "zh": "架空木栈道"
+      },
+      "role": "deck",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "deck 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "floor",
+        "boardwalk",
+        "dock",
+        "outdoor"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Clad panel, conduit",
+          "village": "Plaster over a board lower wall"
+        },
+        "zh": "灰泥墙面，下部木板"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            2.04,
+            0.142
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.12
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            2.04,
+            0.105
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.105
+          ]
+        }
+      },
+      "category": "Wall",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 904,
+          "low": 176,
+          "medium": 552
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 7,
+            "triangles": 904
+          },
+          "low": {
+            "drawCalls": 5,
+            "triangles": 176
+          },
+          "medium": {
+            "drawCalls": 7,
+            "triangles": 552
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 108
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 84
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 108
+          }
+        }
+      },
+      "flags": {
+        "plainFaces": true
+      },
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "wall.solid",
+      "index": 2,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "leaf",
+          "post",
+          "skin",
+          "skinInner",
+          "steel",
+          "tread"
+        ],
+        "village": [
+          "village:plaster",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a cell edge, on a floor beside it or a wall below",
+      "names": {
+        "en": {
+          "industrial": "Solid wall",
+          "village": "Plaster wall"
+        },
+        "zh": "灰泥墙"
+      },
+      "role": "wall",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "beam edge h2,3 L1"
+        ],
+        "occupies": [
+          "edge h2,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "wall",
+        "plain",
+        "house"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Steel door, status lamp",
+          "village": "Six sliding leaves, lantern"
+        },
+        "zh": "六扇推拉格子门，门灯"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            2.04,
+            0.152
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.14
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            2.04,
+            0.152
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.1
+          ]
+        }
+      },
+      "category": "Wall",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 1472,
+          "low": 472,
+          "medium": 896
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 10,
+            "triangles": 1472
+          },
+          "low": {
+            "drawCalls": 8,
+            "triangles": 472
+          },
+          "medium": {
+            "drawCalls": 10,
+            "triangles": 896
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 612
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 252
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 612
+          }
+        }
+      },
+      "flags": {
+        "door": true
+      },
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "wall.door",
+      "index": 3,
+      "lights": {
+        "industrial": [
+          {
+            "direction": [
+              0,
+              -0.6,
+              0.8
+            ],
+            "kind": "door",
+            "position": [
+              0,
+              1.98,
+              0.152
+            ]
+          }
+        ],
+        "village": [
+          {
+            "direction": [
+              0,
+              -0.6,
+              0.8
+            ],
+            "kind": "door",
+            "position": [
+              0,
+              1.98,
+              0.152
+            ]
+          }
+        ]
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "glassSmoked",
+          "hazard",
+          "lamp",
+          "leaf",
+          "post",
+          "skin",
+          "skinInner",
+          "steel",
+          "tread"
+        ],
+        "village": [
+          "lamp",
+          "village:boards",
+          "village:line",
+          "village:stone",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a cell edge, on a floor beside it or a wall below",
+      "names": {
+        "en": {
+          "industrial": "Door wall",
+          "village": "Lattice door"
+        },
+        "zh": "格子拉门"
+      },
+      "role": "wall",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "beam edge h2,3 L1",
+          "side 2,2 0 L1",
+          "side 2,3 2 L1",
+          "side 2,2 3 L1"
+        ],
+        "occupies": [
+          "edge h2,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "wall",
+        "door",
+        "entrance",
+        "house"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Double glazed, sun hood",
+          "village": "Lattice box over shoji"
+        },
+        "zh": "出格子，内衬障子纸"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            2.04,
+            0.289
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.12
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            2.04,
+            0.23
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.12
+          ]
+        }
+      },
+      "category": "Wall",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 1592,
+          "low": 360,
+          "medium": 1080
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 8,
+            "triangles": 1592
+          },
+          "low": {
+            "drawCalls": 6,
+            "triangles": 360
+          },
+          "medium": {
+            "drawCalls": 8,
+            "triangles": 1080
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 372
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 324
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 372
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "wall.window",
+      "index": 4,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "glass",
+          "leaf",
+          "membrane",
+          "post",
+          "skin",
+          "skinInner",
+          "steel",
+          "tread"
+        ],
+        "village": [
+          "village:line",
+          "village:plaster",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a cell edge, on a floor beside it or a wall below",
+      "names": {
+        "en": {
+          "industrial": "Window wall",
+          "village": "Lattice window"
+        },
+        "zh": "格子窗墙"
+      },
+      "role": "wall",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "beam edge h2,3 L1"
+        ],
+        "occupies": [
+          "edge h2,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "wall",
+        "window",
+        "house"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Vent blades, weather hood",
+          "village": "Square slats, small tiled hood"
+        },
+        "zh": "方木连子，小瓦檐"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            2.04,
+            0.2473
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.105
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            2.04,
+            0.2451
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.105
+          ]
+        }
+      },
+      "category": "Wall",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 1360,
+          "low": 312,
+          "medium": 944
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 6,
+            "triangles": 1360
+          },
+          "low": {
+            "drawCalls": 5,
+            "triangles": 312
+          },
+          "medium": {
+            "drawCalls": 6,
+            "triangles": 944
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 4,
+            "triangles": 348
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 276
+          },
+          "medium": {
+            "drawCalls": 4,
+            "triangles": 348
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "wall.louvre",
+      "index": 5,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "leaf",
+          "post",
+          "skin",
+          "skinInner",
+          "steel",
+          "tread"
+        ],
+        "village": [
+          "village:iron",
+          "village:plaster",
+          "village:tile",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a cell edge, on a floor beside it or a wall below",
+      "names": {
+        "en": {
+          "industrial": "Louvre wall",
+          "village": "Slatted vent"
+        },
+        "zh": "连子窗"
+      },
+      "role": "wall",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "beam edge h2,3 L1"
+        ],
+        "occupies": [
+          "edge h2,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "wall",
+        "vent",
+        "house"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Corrugated sheet on girts",
+          "village": "Board and batten on stone"
+        },
+        "zh": "石基上的板条墙"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            2.04,
+            0.1327
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.105
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            2.04,
+            0.105
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.09
+          ]
+        }
+      },
+      "category": "Wall",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 852,
+          "low": 132,
+          "medium": 500
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 852
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 132
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 500
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 108
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 84
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 108
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "wall.corrugated",
+      "index": 6,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "concrete",
+          "corrugated",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:stone",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a cell edge, on a floor beside it or a wall below",
+      "names": {
+        "en": {
+          "industrial": "Shed wall",
+          "village": "Board store wall"
+        },
+        "zh": "木板仓墙"
+      },
+      "role": "wall",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "beam edge h2,3 L1"
+        ],
+        "occupies": [
+          "edge h2,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "wall",
+        "shed",
+        "workshop"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Steel post at a vertex",
+          "village": "Timber post at a vertex"
+        },
+        "zh": "顶点上的木柱"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.15,
+            2.04,
+            0.15
+          ],
+          "min": [
+            -0.15,
+            0,
+            -0.15
+          ]
+        },
+        "village": {
+          "max": [
+            0.11,
+            2.04,
+            0.11
+          ],
+          "min": [
+            -0.11,
+            0,
+            -0.11
+          ]
+        }
+      },
+      "category": "Structure",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 196,
+          "low": 36,
+          "medium": 196
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 196
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 36
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 196
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 36
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 24
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 36
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the grid vertex at the slab top; the cell corner it turns to is its +X+Z corner",
+      "id": "structure.column",
+      "index": 7,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "hazard",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:stone",
+          "village:timber"
+        ]
+      },
+      "mount": "vertex",
+      "mountFace": "a grid vertex, on a floor at its foot or a column below",
+      "names": {
+        "en": {
+          "industrial": "Corner column",
+          "village": "Corner post"
+        },
+        "zh": "角柱"
+      },
+      "role": "column",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "vertex 3,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "structure",
+        "post",
+        "porch"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "1×2 cells, one storey",
+          "village": "1×2 cells, one storey"
+        },
+        "zh": "1×2 格，一层高"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.376,
+            3.0529,
+            0.4896
+          ],
+          "min": [
+            -0.376,
+            0,
+            -1.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.3525,
+            3.0375,
+            0.4896
+          ],
+          "min": [
+            -0.3525,
+            0,
+            -1.5
+          ]
+        }
+      },
+      "category": "Structure",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 2528,
+          "low": 448,
+          "medium": 1184
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 2528
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 448
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 1184
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 260
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 236
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 260
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "stair.straight",
+      "index": 8,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "hazard",
+          "post",
+          "steel",
+          "tread"
+        ],
+        "village": [
+          "village:boards",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "two cells on floors, rising one level",
+      "names": {
+        "en": {
+          "industrial": "Straight stair",
+          "village": "Cottage stair"
+        },
+        "zh": "小屋楼梯"
+      },
+      "role": "stair",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [
+          "stair side: edge v3,2 L1",
+          "stair side: edge v2,2 L1",
+          "stair side: edge v3,1 L1",
+          "stair side: edge v2,1 L1",
+          "landing edge: edge h2,1 L1",
+          "stairwell: edge v3,1 L2",
+          "stairwell: edge v2,1 L2",
+          "top exit: edge h2,1 L2"
+        ],
+        "keepsClear": [
+          "edge h2,3 L1",
+          "side 2,2 0 L1",
+          "face 2,2 0 L1",
+          "side 2,2 1 L1",
+          "face 2,2 1 L1",
+          "side 2,2 2 L1",
+          "face 2,2 2 L1",
+          "side 2,2 3 L1",
+          "face 2,2 3 L1",
+          "side 2,1 0 L1",
+          "face 2,1 0 L1",
+          "side 2,1 1 L1",
+          "face 2,1 1 L1",
+          "side 2,1 2 L1",
+          "face 2,1 2 L1",
+          "side 2,1 3 L1",
+          "face 2,1 3 L1"
+        ],
+        "occupies": [
+          "space 2,2 L1",
+          "space 2,1 L1",
+          "edge h2,2 L1",
+          "deck 2,2 L2",
+          "deck 2,1 L2"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "structure",
+        "stair",
+        "level change"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Balcony and roof edge",
+          "village": "Balcony and roof edge"
+        },
+        "zh": "阳台与屋顶边缘"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            1.097,
+            0.01
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.13
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            1.07,
+            -0.025
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.095
+          ]
+        }
+      },
+      "category": "Structure",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 688,
+          "low": 100,
+          "medium": 400
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 688
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 100
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 400
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 96
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 60
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 96
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "rail.guard",
+      "index": 9,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:boards",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a cell edge, on a floor beside it or a wall below",
+      "names": {
+        "en": {
+          "industrial": "Guard railing",
+          "village": "Bamboo railing"
+        },
+        "zh": "竹栏杆"
+      },
+      "role": "guard",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "edge h2,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "fence",
+        "boundary",
+        "balcony"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Membrane and pavers",
+          "village": "Board deck, lantern below"
+        },
+        "zh": "木板晒台，下方纸灯"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.045,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.3,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.275,
+            -0.5
+          ]
+        }
+      },
+      "category": "Roof",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 608,
+          "low": 144,
+          "medium": 416
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 608
+          },
+          "low": {
+            "drawCalls": 5,
+            "triangles": 144
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 416
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 120
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 60
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 120
+          }
+        }
+      },
+      "flags": {
+        "floor": true,
+        "roof": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "roof.deck",
+      "index": 10,
+      "lights": {
+        "industrial": [
+          {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "kind": "ceiling",
+            "position": [
+              0,
+              -0.265,
+              -0.05
+            ]
+          }
+        ],
+        "village": [
+          {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "kind": "ceiling",
+            "position": [
+              0,
+              -0.265,
+              -0.05
+            ]
+          }
+        ]
+      },
+      "materials": {
+        "industrial": [
+          "concrete",
+          "lamp",
+          "leaf",
+          "membrane",
+          "steel"
+        ],
+        "village": [
+          "lamp",
+          "village:boards",
+          "village:iron",
+          "village:stone",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its cell, on the ground at level 0 or carried above",
+      "names": {
+        "en": {
+          "industrial": "Roof deck",
+          "village": "Roof terrace"
+        },
+        "zh": "屋顶露台"
+      },
+      "role": "deck",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "deck 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "roof",
+        "flat roof",
+        "terrace",
+        "walkable"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Roof edge with coping",
+          "village": "Roof edge, tiled coping"
+        },
+        "zh": "瓦压顶的屋顶边"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.6256,
+            0.1403
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.1403
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0.62,
+            0.14
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.113
+          ]
+        }
+      },
+      "category": "Roof",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 316,
+          "low": 108,
+          "medium": 220
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 316
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 108
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 220
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 40
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 28
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 40
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "roof.parapet",
+      "index": 11,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "membrane",
+          "post",
+          "skin",
+          "skinInner",
+          "steel"
+        ],
+        "village": [
+          "village:plaster",
+          "village:tile",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a cell edge, on a floor beside it or a wall below",
+      "names": {
+        "en": {
+          "industrial": "Parapet",
+          "village": "Plaster parapet"
+        },
+        "zh": "灰泥矮墙"
+      },
+      "role": "guard",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "edge h2,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "roof",
+        "boundary",
+        "terrace"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Standing seam, gutter",
+          "village": "Wide tile bands, deep eave"
+        },
+        "zh": "宽瓦带，深檐"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.422,
+            0.675
+          ],
+          "min": [
+            -0.5,
+            -0.1639,
+            -0.5398
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0.65,
+            0.9621
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "category": "Roof",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 572,
+          "low": 196,
+          "medium": 252
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 6,
+            "triangles": 572
+          },
+          "low": {
+            "drawCalls": 5,
+            "triangles": 196
+          },
+          "medium": {
+            "drawCalls": 6,
+            "triangles": 252
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 144
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 96
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 144
+          }
+        }
+      },
+      "flags": {
+        "roof": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "roof.slope",
+      "index": 12,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "concrete",
+          "leaf",
+          "post",
+          "skin",
+          "steel"
+        ],
+        "village": [
+          "village:plaster",
+          "village:tile",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its cell at a roof level, over a wall or post below one of its edges or corners",
+      "names": {
+        "en": {
+          "industrial": "Sloped roof",
+          "village": "Tiled roof"
+        },
+        "zh": "瓦屋顶"
+      },
+      "role": "slope",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "side 2,2 0 L1",
+          "face 2,2 0 L1",
+          "side 2,2 1 L1",
+          "face 2,2 1 L1",
+          "side 2,2 2 L1",
+          "face 2,2 2 L1",
+          "side 2,2 3 L1",
+          "face 2,2 3 L1",
+          "edge h2,3 L1",
+          "deck 2,3 L1"
+        ],
+        "occupies": [
+          "deck 2,2 L1",
+          "space 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "roof",
+        "pitched roof"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Condenser on a skid",
+          "village": "Wooden tank, timber stand"
+        },
+        "zh": "木架上的圆木水箱"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.3553,
+            0.775,
+            0.36
+          ],
+          "min": [
+            -0.3553,
+            0,
+            -0.364
+          ]
+        },
+        "village": {
+          "max": [
+            0.312,
+            0.63,
+            0.312
+          ],
+          "min": [
+            -0.312,
+            0,
+            -0.312
+          ]
+        }
+      },
+      "category": "Roof",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 1620,
+          "low": 300,
+          "medium": 1092
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 6,
+            "triangles": 1620
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 300
+          },
+          "medium": {
+            "drawCalls": 6,
+            "triangles": 1092
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 264
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 136
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 216
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "roof.plant",
+      "index": 13,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "lamp",
+          "leaf",
+          "membrane",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:boards",
+          "village:iron",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "a floor or roof deck in its cell",
+      "names": {
+        "en": {
+          "industrial": "Plant unit",
+          "village": "Rooftop water tank"
+        },
+        "zh": "屋顶水箱"
+      },
+      "role": "equipment",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "side 2,2 0 L1",
+          "side 2,2 1 L1",
+          "side 2,2 2 L1",
+          "side 2,2 3 L1"
+        ],
+        "occupies": [
+          "space 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "roof",
+        "equipment",
+        "utility"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Door held open inward",
+          "village": "Leaves slid to the jambs"
+        },
+        "zh": "门扇推到两侧"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            2.04,
+            0.152
+          ],
+          "min": [
+            -0.5499,
+            0,
+            -0.86
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            2.04,
+            0.152
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.1
+          ]
+        }
+      },
+      "category": "Wall",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 1472,
+          "low": 472,
+          "medium": 896
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 10,
+            "triangles": 1472
+          },
+          "low": {
+            "drawCalls": 8,
+            "triangles": 472
+          },
+          "medium": {
+            "drawCalls": 10,
+            "triangles": 896
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 612
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 252
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 612
+          }
+        }
+      },
+      "flags": {
+        "door": true
+      },
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "wall.door.open",
+      "index": 14,
+      "lights": {
+        "industrial": [
+          {
+            "direction": [
+              0,
+              -0.6,
+              0.8
+            ],
+            "kind": "door",
+            "position": [
+              0,
+              1.98,
+              0.152
+            ]
+          }
+        ],
+        "village": [
+          {
+            "direction": [
+              0,
+              -0.6,
+              0.8
+            ],
+            "kind": "door",
+            "position": [
+              0,
+              1.98,
+              0.152
+            ]
+          }
+        ]
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "glassSmoked",
+          "hazard",
+          "lamp",
+          "leaf",
+          "post",
+          "skin",
+          "skinInner",
+          "steel",
+          "tread"
+        ],
+        "village": [
+          "lamp",
+          "village:boards",
+          "village:line",
+          "village:stone",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a cell edge, on a floor beside it or a wall below",
+      "names": {
+        "en": {
+          "industrial": "Open door",
+          "village": "Lattice door, open"
+        },
+        "zh": "敞开的格子拉门"
+      },
+      "role": "wall",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "beam edge h2,3 L1",
+          "side 2,2 0 L1",
+          "side 2,3 2 L1",
+          "side 2,2 3 L1"
+        ],
+        "occupies": [
+          "edge h2,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "wall",
+        "door",
+        "entrance",
+        "house"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Precast paving slabs",
+          "village": "Large stones breaking joint"
+        },
+        "zh": "大石块错缝铺砌"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.002,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "category": "Street",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 100,
+          "low": 24,
+          "medium": 36
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 100
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 24
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 36
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 34
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 24
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 34
+          }
+        }
+      },
+      "flags": {
+        "floor": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "street.paving",
+      "index": 15,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "concrete",
+          "pavers",
+          "post"
+        ],
+        "village": [
+          "village:cobble",
+          "village:iron"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its cell, on the ground at level 0 or carried above",
+      "names": {
+        "en": {
+          "industrial": "Footway",
+          "village": "Flagstone footway"
+        },
+        "zh": "石板步道"
+      },
+      "role": "deck",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "deck 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "street",
+        "path",
+        "courtyard",
+        "walkable"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Asphalt, centre line",
+          "village": "Lane, side gutter, centre line"
+        },
+        "zh": "路面、边沟与中线"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.003,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0.003,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "category": "Street",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 68,
+          "low": 36,
+          "medium": 36
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 68
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 36
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 36
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 4,
+            "triangles": 26
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 26
+          },
+          "medium": {
+            "drawCalls": 4,
+            "triangles": 26
+          }
+        }
+      },
+      "flags": {
+        "floor": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "street.road",
+      "index": 16,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "asphalt",
+          "concrete",
+          "marking"
+        ],
+        "village": [
+          "village:iron",
+          "village:lane",
+          "village:line",
+          "village:stone"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its cell, on the ground at level 0 or carried above",
+      "names": {
+        "en": {
+          "industrial": "Roadway",
+          "village": "Lane"
+        },
+        "zh": "巷道"
+      },
+      "role": "deck",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "deck 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "street",
+        "lane",
+        "walkable"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Precast kerb, gully grate",
+          "village": "Stone edging, one stone"
+        },
+        "zh": "一块石路缘"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.1455,
+            0.24
+          ],
+          "min": [
+            -0.5,
+            -0.05,
+            -0.075
+          ]
+        },
+        "village": {
+          "max": [
+            0.4975,
+            0.14,
+            0.075
+          ],
+          "min": [
+            -0.4975,
+            -0.05,
+            -0.075
+          ]
+        }
+      },
+      "category": "Street",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 160,
+          "low": 56,
+          "medium": 128
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 160
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 56
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 128
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 1,
+            "triangles": 20
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 20
+          },
+          "medium": {
+            "drawCalls": 1,
+            "triangles": 20
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "street.kerb",
+      "index": 17,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "concrete",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:stone"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a cell edge, on a floor beside it or a wall below",
+      "names": {
+        "en": {
+          "industrial": "Kerb",
+          "village": "Stone kerb"
+        },
+        "zh": "石质路缘"
+      },
+      "role": "guard",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "edge h2,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "street",
+        "kerb",
+        "edge"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Lagged main and return",
+          "village": "Board trough on two stands"
+        },
+        "zh": "两个木架上的木槽"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.487,
+            0.33
+          ],
+          "min": [
+            -0.5,
+            0,
+            -0.01
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0.46,
+            0.3
+          ],
+          "min": [
+            -0.5,
+            0,
+            0.02
+          ]
+        }
+      },
+      "category": "Street",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 936,
+          "low": 168,
+          "medium": 520
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 4,
+            "triangles": 936
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 168
+          },
+          "medium": {
+            "drawCalls": 4,
+            "triangles": 520
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 96
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 96
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 96
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "street.pipes",
+      "index": 18,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "leaf",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:boards",
+          "village:paint",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a cell edge, on a floor beside it or a wall below",
+      "names": {
+        "en": {
+          "industrial": "Pipe rack",
+          "village": "Water channel"
+        },
+        "zh": "木水渠"
+      },
+      "role": "guard",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "edge h2,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "street",
+        "water",
+        "channel",
+        "boundary",
+        "garden"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "light",
+      "blurbs": {
+        "en": {
+          "industrial": "3.4 m column, warm head",
+          "village": "3.4 m timber post, paper lantern"
+        },
+        "zh": "3.4 米木柱，纸灯笼"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            -0.17,
+            3.42,
+            0.57
+          ],
+          "min": [
+            -0.43,
+            0,
+            -0.43
+          ]
+        },
+        "village": {
+          "max": [
+            -0.19,
+            3.42,
+            0.44
+          ],
+          "min": [
+            -0.41,
+            0,
+            -0.41
+          ]
+        }
+      },
+      "category": "Street",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 376,
+          "low": 84,
+          "medium": 216
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 376
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 84
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 216
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 168
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 60
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 144
+          }
+        }
+      },
+      "flags": {
+        "behaviour": "light",
+        "tall": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "service.light",
+      "index": 19,
+      "lights": {
+        "industrial": [
+          {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "kind": "street",
+            "position": [
+              -0.3,
+              3.31,
+              0.36
+            ]
+          }
+        ],
+        "village": [
+          {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "kind": "street",
+            "position": [
+              -0.3,
+              3.31,
+              0.36
+            ]
+          }
+        ]
+      },
+      "materials": {
+        "industrial": [
+          "lamp",
+          "leaf",
+          "marking",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "lamp",
+          "village:stone",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "a floor or roof deck in its cell",
+      "names": {
+        "en": {
+          "industrial": "Street light",
+          "village": "Lantern post"
+        },
+        "zh": "灯笼柱"
+      },
+      "role": "equipment",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "side 2,2 0 L1",
+          "face 2,2 0 L1",
+          "side 2,2 1 L1",
+          "face 2,2 1 L1",
+          "side 2,2 2 L1",
+          "face 2,2 2 L1",
+          "side 2,2 3 L1",
+          "face 2,2 3 L1"
+        ],
+        "occupies": [
+          "space 2,2 L1",
+          "rise 2,2 L2"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "street",
+        "light",
+        "public"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Quarter of a 2×2 pad",
+          "village": "Quarter of a 2×2 stone pad"
+        },
+        "zh": "2×2 石停机坪的一角"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.011,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0.011,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "category": "Street",
+      "colliders": null,
+      "connects": null,
+      "contract": null,
+      "cost": {
+        "budgetTriangles": {
+          "high": 840,
+          "low": 280,
+          "medium": 648
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 840
+          },
+          "low": {
+            "drawCalls": 5,
+            "triangles": 280
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 648
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 4,
+            "triangles": 410
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 218
+          },
+          "medium": {
+            "drawCalls": 4,
+            "triangles": 314
+          }
+        }
+      },
+      "flags": {
+        "floor": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "pad.quarter",
+      "index": 20,
+      "lights": {
+        "industrial": [
+          {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "kind": "pad",
+            "position": [
+              0.43,
+              0.011,
+              0.43
+            ]
+          },
+          {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "kind": "pad",
+            "position": [
+              0.43,
+              0.011,
+              -0.25
+            ]
+          },
+          {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "kind": "pad",
+            "position": [
+              -0.25,
+              0.011,
+              0.43
+            ]
+          }
+        ],
+        "village": [
+          {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "kind": "pad",
+            "position": [
+              0.43,
+              0.011,
+              0.43
+            ]
+          },
+          {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "kind": "pad",
+            "position": [
+              0.43,
+              0.011,
+              -0.25
+            ]
+          },
+          {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "kind": "pad",
+            "position": [
+              -0.25,
+              0.011,
+              0.43
+            ]
+          }
+        ]
+      },
+      "materials": {
+        "industrial": [
+          "concrete",
+          "hazard",
+          "lamp",
+          "marking",
+          "steel"
+        ],
+        "village": [
+          "lamp",
+          "village:iron",
+          "village:line",
+          "village:stone"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its cell, on the ground at level 0 or carried above",
+      "names": {
+        "en": {
+          "industrial": "Pad quarter",
+          "village": "Stone pad quarter"
+        },
+        "zh": "四分之一石平台"
+      },
+      "role": "deck",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r1–r7",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "deck 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "landing",
+        "ship",
+        "public"
+      ],
+      "walk": null
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "No marking: bends, junctions, alleys",
+          "village": "Lane with no centre line"
+        },
+        "zh": "弯道外侧、路口与小巷"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "category": "Street",
+      "colliders": [
+        {
+          "center": [
+            0,
+            -0.08,
+            0
+          ],
+          "size": [
+            1,
+            0.16,
+            1
+          ],
+          "support": true
+        }
+      ],
+      "connects": "Stands on the ground at level 0 (a deck). Meets roadway, lane corner and paving cells flush at y 0 on all four edges; kerbs may stand on its edges.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.004,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0.004,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 12,
+          "low": 12,
+          "medium": 12
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 1,
+            "triangles": 12
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 12
+          },
+          "medium": {
+            "drawCalls": 1,
+            "triangles": 12
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 1,
+            "triangles": 12
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 12
+          },
+          "medium": {
+            "drawCalls": 1,
+            "triangles": 12
+          }
+        }
+      },
+      "flags": {
+        "floor": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "street.road.plain",
+      "index": 21,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "asphalt"
+        ],
+        "village": [
+          "village:lane"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its cell, on the ground at level 0 or carried above",
+      "names": {
+        "en": {
+          "industrial": "Plain roadway",
+          "village": "Plain lane"
+        },
+        "zh": "无标线巷道"
+      },
+      "role": "deck",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "deck 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "street",
+        "lane",
+        "junction",
+        "alley",
+        "walkable"
+      ],
+      "walk": "Walkable deck, top at y 0 over the whole cell."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Centre line turning a corner",
+          "village": "Centre line and gutter turning"
+        },
+        "zh": "中线与边沟在此转弯"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.003,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0.003,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "category": "Street",
+      "colliders": [
+        {
+          "center": [
+            0,
+            -0.08,
+            0
+          ],
+          "size": [
+            1,
+            0.16,
+            1
+          ],
+          "support": true
+        }
+      ],
+      "connects": "Stands on the ground at level 0. Its half dashes sit on its local +Z and +X edge midpoints, where a roadway turned towards that edge has its own half dash, so the centre line turns across the cell; four make a crossing, two with straight roadways a T. In the village look its (−X, −Z) corner carries the gutter round the vertex where the side gutters of the two roadways beside it meet.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.004,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0.004,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 36,
+          "low": 36,
+          "medium": 36
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 36
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 36
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 36
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 4,
+            "triangles": 34
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 34
+          },
+          "medium": {
+            "drawCalls": 4,
+            "triangles": 34
+          }
+        }
+      },
+      "flags": {
+        "floor": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "street.road.corner",
+      "index": 22,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "asphalt",
+          "marking"
+        ],
+        "village": [
+          "village:iron",
+          "village:lane",
+          "village:line",
+          "village:stone"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its cell, on the ground at level 0 or carried above",
+      "names": {
+        "en": {
+          "industrial": "Roadway corner",
+          "village": "Lane corner"
+        },
+        "zh": "巷道转角"
+      },
+      "role": "deck",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "deck 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "street",
+        "lane",
+        "junction",
+        "corner",
+        "walkable"
+      ],
+      "walk": "Walkable deck, top at y 0 over the whole cell; the two half dashes are paint. In the village look a 15 mm slit runs round the gutter lid in its (−X, −Z) corner."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Kerb round a cell corner",
+          "village": "Kerb round a corner"
+        },
+        "zh": "路缘绕过格子一角"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.74,
+            0.1455,
+            0.74
+          ],
+          "min": [
+            -0.5,
+            -0.05,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.575,
+            0.14,
+            0.575
+          ],
+          "min": [
+            -0.4975,
+            -0.05,
+            -0.4975
+          ]
+        }
+      },
+      "category": "Street",
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.065,
+            0.5
+          ],
+          "size": [
+            1,
+            0.13,
+            0.18
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            0.5,
+            0.065,
+            0
+          ],
+          "size": [
+            0.18,
+            0.13,
+            1
+          ],
+          "support": true
+        }
+      ],
+      "connects": "Stands on a deck in its own cell and takes its local +Z and +X edges and the vertex between them. Each arm ends where a straight kerb on the next edge begins, with the same section.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.74,
+            0.145,
+            0.74
+          ],
+          "min": [
+            -0.5,
+            -0.05,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.58,
+            0.14,
+            0.58
+          ],
+          "min": [
+            -0.5,
+            -0.05,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 454,
+          "low": 156,
+          "medium": 354
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 454
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 156
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 354
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 1,
+            "triangles": 104
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 68
+          },
+          "medium": {
+            "drawCalls": 1,
+            "triangles": 80
+          }
+        }
+      },
+      "flags": {
+        "trim": {
+          "on": "floor",
+          "sides": [
+            0,
+            1
+          ]
+        }
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "street.kerb.corner",
+      "index": 23,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "concrete",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:stone"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its own cell’s edges, on a floor deck in that cell",
+      "names": {
+        "en": {
+          "industrial": "Kerb corner",
+          "village": "Stone kerb corner"
+        },
+        "zh": "石路缘转角"
+      },
+      "role": "trim",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "edge h2,3 L1",
+          "edge v3,2 L1",
+          "vertex 3,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "street",
+        "kerb",
+        "corner",
+        "junction",
+        "edge"
+      ],
+      "walk": "As the straight kerb: a 0.13–0.14 m step, under the 0.26 m step height."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Four 0.15 m steps to the ground",
+          "village": "Stone steps down to the ground"
+        },
+        "zh": "四级 0.15 米台阶下到地面"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.9,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.9,
+            -0.5
+          ]
+        }
+      },
+      "category": "Structure",
+      "colliders": [
+        {
+          "center": [
+            0,
+            -0.525,
+            -0.375
+          ],
+          "size": [
+            0.8,
+            0.75,
+            0.25
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            0,
+            -0.6,
+            -0.125
+          ],
+          "size": [
+            0.8,
+            0.6,
+            0.25
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            0,
+            -0.675,
+            0.125
+          ],
+          "size": [
+            0.8,
+            0.45,
+            0.25
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            0,
+            -0.75,
+            0.375
+          ],
+          "size": [
+            0.8,
+            0.3,
+            0.25
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            -0.45,
+            -0.45,
+            -0.375
+          ],
+          "note": "cheek: the coping’s highest point over each going (it runs 0.1 m above the nosing line, never above the floor)",
+          "size": [
+            0.1,
+            0.9,
+            0.25
+          ],
+          "support": false
+        },
+        {
+          "center": [
+            -0.45,
+            -0.475,
+            -0.125
+          ],
+          "size": [
+            0.1,
+            0.85,
+            0.25
+          ],
+          "support": false
+        },
+        {
+          "center": [
+            -0.45,
+            -0.55,
+            0.125
+          ],
+          "size": [
+            0.1,
+            0.7,
+            0.25
+          ],
+          "support": false
+        },
+        {
+          "center": [
+            -0.45,
+            -0.625,
+            0.375
+          ],
+          "size": [
+            0.1,
+            0.55,
+            0.25
+          ],
+          "support": false
+        },
+        {
+          "center": [
+            0.45,
+            -0.45,
+            -0.375
+          ],
+          "size": [
+            0.1,
+            0.9,
+            0.25
+          ],
+          "support": false
+        },
+        {
+          "center": [
+            0.45,
+            -0.475,
+            -0.125
+          ],
+          "size": [
+            0.1,
+            0.85,
+            0.25
+          ],
+          "support": false
+        },
+        {
+          "center": [
+            0.45,
+            -0.55,
+            0.125
+          ],
+          "size": [
+            0.1,
+            0.7,
+            0.25
+          ],
+          "support": false
+        },
+        {
+          "center": [
+            0.45,
+            -0.625,
+            0.375
+          ],
+          "size": [
+            0.1,
+            0.55,
+            0.25
+          ],
+          "support": false
+        }
+      ],
+      "connects": "Level 0 only. Its top edge (local −Z) meets a ground-floor deck at y 0; only a door (or nothing) on that edge. Its foot edge (local +Z) stays clear. No plinth is drawn under it: it reaches the ground itself.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.5,
+            0,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.9,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.9,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 308,
+          "low": 148,
+          "medium": 292
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 1,
+            "triangles": 308
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 148
+          },
+          "medium": {
+            "drawCalls": 1,
+            "triangles": 292
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 1,
+            "triangles": 124
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 124
+          },
+          "medium": {
+            "drawCalls": 1,
+            "triangles": 124
+          }
+        }
+      },
+      "flags": {
+        "cells": 1
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "step.entry",
+      "index": 24,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "concrete"
+        ],
+        "village": [
+          "village:stone"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "the ground at level 0, from a ground-floor deck behind its top edge",
+      "names": {
+        "en": {
+          "industrial": "Entrance steps",
+          "village": "Entrance steps"
+        },
+        "zh": "入口台阶"
+      },
+      "role": "entry",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "step top: edge h2,2 L0"
+        ],
+        "keepsClear": [
+          "edge h2,3 L0"
+        ],
+        "occupies": [
+          "deck 2,2 L0",
+          "space 2,2 L0"
+        ],
+        "placedAt": {
+          "level": 0,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "structure",
+        "steps",
+        "entrance",
+        "level change",
+        "walkable"
+      ],
+      "walk": "Treads at y −0.15, −0.30, −0.45, −0.60 on 0.25 m goings between stone cheeks (x ±0.40), from the floor at y 0; lower treads sink into higher ground. The cheeks’ copings run 0.10 m above the nosings, never above the floor. Its foot edge (local +Z) is kept clear; only a door may stand on its top edge."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "1×2 cells, 0.6 m down",
+          "village": "1×2 cells, 0.6 m down"
+        },
+        "zh": "1×2 格，下降 0.6 米"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0,
+            1.5
+          ],
+          "min": [
+            -0.5,
+            -0.9,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0,
+            1.5
+          ],
+          "min": [
+            -0.5,
+            -0.9,
+            -0.5
+          ]
+        }
+      },
+      "category": "Structure",
+      "colliders": [
+        {
+          "center": [
+            0,
+            -0.352202,
+            0.5
+          ],
+          "note": "preferred: one plane on the boards (0.3 in 1); needs the host to support pitched boxes (to verify)",
+          "pitch": 0.291457,
+          "size": [
+            0.8,
+            0.1,
+            2.088061
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            0,
+            -0.475,
+            -0.333333
+          ],
+          "note": "fallback: six level boxes topped at each third of a metre’s middle (rises of 0.10 m, within 0.05 m of the boards)",
+          "size": [
+            0.8,
+            0.85,
+            0.333333
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            0,
+            -0.525,
+            0
+          ],
+          "size": [
+            0.8,
+            0.75,
+            0.333333
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            0,
+            -0.575,
+            0.333333
+          ],
+          "size": [
+            0.8,
+            0.65,
+            0.333333
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            0,
+            -0.625,
+            0.666667
+          ],
+          "size": [
+            0.8,
+            0.55,
+            0.333333
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            0,
+            -0.675,
+            1
+          ],
+          "size": [
+            0.8,
+            0.45,
+            0.333333
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            0,
+            -0.725,
+            1.333333
+          ],
+          "size": [
+            0.8,
+            0.35,
+            0.333333
+          ],
+          "support": true
+        },
+        {
+          "center": [
+            -0.45,
+            -0.302202,
+            0.5
+          ],
+          "note": "cheeks: 0.05 m above the boards",
+          "pitch": 0.291457,
+          "size": [
+            0.1,
+            0.2,
+            2.088061
+          ],
+          "support": false
+        },
+        {
+          "center": [
+            0.45,
+            -0.302202,
+            0.5
+          ],
+          "pitch": 0.291457,
+          "size": [
+            0.1,
+            0.2,
+            2.088061
+          ],
+          "support": false
+        }
+      ],
+      "connects": "Level 0 only, over two cells towards local +Z. Top edge as the steps; the edge between its cells is its own; foot edge clear.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.06,
+            1.5
+          ],
+          "min": [
+            -0.5,
+            -0.9,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0.06,
+            1.5
+          ],
+          "min": [
+            -0.5,
+            -0.9,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 572,
+          "low": 100,
+          "medium": 268
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 572
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 100
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 268
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 124
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 100
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 124
+          }
+        }
+      },
+      "flags": {
+        "cells": 2
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "ramp.entry",
+      "index": 25,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "concrete",
+          "post",
+          "tread"
+        ],
+        "village": [
+          "village:boards",
+          "village:stone",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "the ground at level 0, from a ground-floor deck behind its top edge",
+      "names": {
+        "en": {
+          "industrial": "Entrance ramp",
+          "village": "Entrance ramp"
+        },
+        "zh": "入口坡道"
+      },
+      "role": "entry",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "step top: edge h2,2 L0"
+        ],
+        "keepsClear": [
+          "edge h2,4 L0"
+        ],
+        "occupies": [
+          "deck 2,2 L0",
+          "space 2,2 L0",
+          "deck 2,3 L0",
+          "space 2,3 L0",
+          "edge h2,3 L0"
+        ],
+        "placedAt": {
+          "level": 0,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "structure",
+        "ramp",
+        "entrance",
+        "level change",
+        "cart",
+        "walkable"
+      ],
+      "walk": "One 0.30 in 1 slope (16.7°) of boards between cheeks (x ±0.40) from y 0 at its top edge to −0.60 at its foot, two cells long, with cleats 0.02 m high; foot kept clear, only a door on its top edge."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Outer corner of a sloped roof",
+          "village": "Outer roof corner"
+        },
+        "zh": "坡屋顶的外转角（四坡）"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.675,
+            0.4153,
+            0.675
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.9621,
+            0.65,
+            0.9621
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "category": "Roof",
+      "colliders": [
+        {
+          "center": [
+            0.231,
+            0.245,
+            0.231
+          ],
+          "note": "the village roof panel’s box (to its ridge, y 0.65), grown over both eaves to the kawara eave’s tip (0.962); covers the industrial model too; not walkable",
+          "size": [
+            1.462,
+            0.81,
+            1.462
+          ],
+          "support": false
+        }
+      ],
+      "connects": "Covers its cell at a roof level, carried like a slope by a wall or post below one of its edges or corners. Meets a roof.slope run draining the same way along each of its two high edges, or another hip (pyramid), surface for surface.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.68,
+            0.43,
+            0.68
+          ],
+          "min": [
+            -0.5,
+            -0.165,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.97,
+            0.66,
+            0.97
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 620,
+          "low": 348,
+          "medium": 428
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 6,
+            "triangles": 620
+          },
+          "low": {
+            "drawCalls": 5,
+            "triangles": 348
+          },
+          "medium": {
+            "drawCalls": 6,
+            "triangles": 428
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 272
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 164
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 272
+          }
+        }
+      },
+      "flags": {
+        "eaves": [
+          0,
+          1
+        ],
+        "roof": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "roof.slope.hip",
+      "index": 26,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "concrete",
+          "leaf",
+          "post",
+          "skin",
+          "steel"
+        ],
+        "village": [
+          "village:plaster",
+          "village:tile",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its cell at a roof level, over a wall or post below one of its edges or corners",
+      "names": {
+        "en": {
+          "industrial": "Hip roof corner",
+          "village": "Tiled hip"
+        },
+        "zh": "瓦屋顶外角"
+      },
+      "role": "slope",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "side 2,2 0 L1",
+          "face 2,2 0 L1",
+          "side 2,2 1 L1",
+          "face 2,2 1 L1",
+          "side 2,2 2 L1",
+          "face 2,2 2 L1",
+          "side 2,2 3 L1",
+          "face 2,2 3 L1",
+          "edge h2,3 L1",
+          "deck 2,3 L1",
+          "rise 2,3 L1",
+          "edge v3,2 L1",
+          "deck 3,2 L1",
+          "rise 3,2 L1",
+          "deck 3,3 L1",
+          "rise 3,3 L1"
+        ],
+        "occupies": [
+          "deck 2,2 L1",
+          "space 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "roof",
+        "pitched roof",
+        "corner",
+        "hip"
+      ],
+      "walk": "Not walkable (as roof.slope). Eaves on local +Z and +X keep their edges, the decks beyond and the diagonal deck clear."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Inner corner of a sloped roof",
+          "village": "Inner roof corner"
+        },
+        "zh": "坡屋顶的内转角（天沟）"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.4247,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0.65,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "category": "Roof",
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.245,
+            0
+          ],
+          "note": "envelope, to the village ridge (y 0.65); not walkable",
+          "size": [
+            1,
+            0.81,
+            1
+          ],
+          "support": false
+        }
+      ],
+      "connects": "Covers its cell at a roof level. Its two high edges (local −Z, −X) carry half ridge caps and meet the back-to-back partners of the two runs it joins; its two low edges meet runs draining to +Z and +X.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.5,
+            0.43,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.165,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.5,
+            0.66,
+            0.5
+          ],
+          "min": [
+            -0.5,
+            -0.16,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 440,
+          "low": 280,
+          "medium": 312
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 440
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 280
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 312
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 4,
+            "triangles": 152
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 152
+          },
+          "medium": {
+            "drawCalls": 4,
+            "triangles": 152
+          }
+        }
+      },
+      "flags": {
+        "eaves": [],
+        "roof": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "roof.slope.valley",
+      "index": 27,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "concrete",
+          "leaf",
+          "skin",
+          "steel"
+        ],
+        "village": [
+          "village:iron",
+          "village:plaster",
+          "village:tile",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "its cell at a roof level, over a wall or post below one of its edges or corners",
+      "names": {
+        "en": {
+          "industrial": "Valley roof corner",
+          "village": "Tiled valley"
+        },
+        "zh": "瓦屋顶内角"
+      },
+      "role": "slope",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "side 2,2 0 L1",
+          "face 2,2 0 L1",
+          "side 2,2 1 L1",
+          "face 2,2 1 L1",
+          "side 2,2 2 L1",
+          "face 2,2 2 L1",
+          "side 2,2 3 L1",
+          "face 2,2 3 L1"
+        ],
+        "occupies": [
+          "deck 2,2 L1",
+          "space 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "roof",
+        "pitched roof",
+        "corner",
+        "valley"
+      ],
+      "walk": "Not walkable. No eaves of its own: the two runs it meets drain past its low corner."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Gable end trim, left side",
+          "village": "Gable trim, left side"
+        },
+        "zh": "山墙端的收边，左侧"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            -0.5,
+            0.4216,
+            0.664
+          ],
+          "min": [
+            -0.558,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            -0.5,
+            0.675,
+            0.9621
+          ],
+          "min": [
+            -0.58,
+            -0.2259,
+            -0.5
+          ]
+        }
+      },
+      "category": "Roof",
+      "colliders": [],
+      "connects": "Placed on a roof.slope run’s own cell, turned as it is; takes the run’s local −X edge. Meets the panel’s end from ridge to eave; two verges meet square at a ridge.",
+      "contract": {
+        "industrial": {
+          "max": [
+            -0.5,
+            0.47,
+            0.7
+          ],
+          "min": [
+            -0.58,
+            -0.22,
+            -0.55
+          ]
+        },
+        "village": {
+          "max": [
+            -0.5,
+            0.71,
+            0.97
+          ],
+          "min": [
+            -0.58,
+            -0.23,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 104,
+          "low": 92,
+          "medium": 104
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 104
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 56
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 104
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 104
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 92
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 104
+          }
+        }
+      },
+      "flags": {
+        "trim": {
+          "on": "slope",
+          "sides": [
+            3
+          ]
+        }
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "roof.verge.left",
+      "index": 28,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "steel"
+        ],
+        "village": [
+          "village:tile",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "the open end of a roof.slope panel in its cell, turned the same way",
+      "names": {
+        "en": {
+          "industrial": "Verge, left",
+          "village": "Verge board, left"
+        },
+        "zh": "山墙封檐板（左）"
+      },
+      "role": "trim",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "deck 1,2 L1",
+          "rise 1,2 L1"
+        ],
+        "occupies": [
+          "edge v2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "roof",
+        "trim",
+        "gable",
+        "verge"
+      ],
+      "walk": "Trim only, inside the roof panel’s collider. Keeps the deck beyond its gable open."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Gable end trim, right side",
+          "village": "Gable trim, right side"
+        },
+        "zh": "山墙端的收边，右侧"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.558,
+            0.4216,
+            0.664
+          ],
+          "min": [
+            0.5,
+            -0.16,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.58,
+            0.675,
+            0.9621
+          ],
+          "min": [
+            0.5,
+            -0.2259,
+            -0.5
+          ]
+        }
+      },
+      "category": "Roof",
+      "colliders": [],
+      "connects": "Placed on a roof.slope run’s own cell, turned as it is; takes the run’s local +X edge.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.58,
+            0.47,
+            0.7
+          ],
+          "min": [
+            0.5,
+            -0.22,
+            -0.55
+          ]
+        },
+        "village": {
+          "max": [
+            0.58,
+            0.71,
+            0.97
+          ],
+          "min": [
+            0.5,
+            -0.23,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 104,
+          "low": 92,
+          "medium": 104
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 104
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 56
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 104
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 104
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 92
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 104
+          }
+        }
+      },
+      "flags": {
+        "trim": {
+          "on": "slope",
+          "sides": [
+            1
+          ]
+        }
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "roof.verge.right",
+      "index": 29,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "steel"
+        ],
+        "village": [
+          "village:tile",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "the open end of a roof.slope panel in its cell, turned the same way",
+      "names": {
+        "en": {
+          "industrial": "Verge, right",
+          "village": "Verge board, right"
+        },
+        "zh": "山墙封檐板（右）"
+      },
+      "role": "trim",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [
+          "deck 3,2 L1",
+          "rise 3,2 L1"
+        ],
+        "occupies": [
+          "edge v3,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "roof",
+        "trim",
+        "gable",
+        "verge"
+      ],
+      "walk": "Trim only, inside the roof panel’s collider. Keeps the deck beyond its gable open."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Beam between two posts",
+          "village": "Timber beam between posts"
+        },
+        "zh": "两根柱之间的梁"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.39,
+            2.04,
+            0.04
+          ],
+          "min": [
+            -0.39,
+            1.593,
+            -0.04
+          ]
+        },
+        "village": {
+          "max": [
+            0.4,
+            2.04,
+            0.075
+          ],
+          "min": [
+            -0.4,
+            1.6224,
+            -0.075
+          ]
+        }
+      },
+      "category": "Structure",
+      "colliders": [
+        {
+          "center": [
+            0,
+            1.94,
+            0
+          ],
+          "size": [
+            0.78,
+            0.2,
+            0.14
+          ],
+          "support": false
+        }
+      ],
+      "connects": "On a cell edge, between corner posts on both of its vertices at the same level; ends on the posts’ faces (x ±0.39; the village beam runs on to the timber shaft, ±0.40, below the post’s band). Shares the edge with a fence, hedge or kerb below; not with a wall.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.39,
+            2.04,
+            0.075
+          ],
+          "min": [
+            -0.39,
+            1.55,
+            -0.075
+          ]
+        },
+        "village": {
+          "max": [
+            0.4,
+            2.04,
+            0.075
+          ],
+          "min": [
+            -0.4,
+            1.55,
+            -0.075
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 484,
+          "low": 60,
+          "medium": 244
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 484
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 60
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 244
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 1,
+            "triangles": 84
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 36
+          },
+          "medium": {
+            "drawCalls": 1,
+            "triangles": 84
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "structure.beam",
+      "index": 30,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a cell edge, between corner posts on both of its vertices",
+      "names": {
+        "en": {
+          "industrial": "Porch beam",
+          "village": "Porch beam"
+        },
+        "zh": "门廊梁"
+      },
+      "role": "beam",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "beam edge h2,3 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "structure",
+        "beam",
+        "porch",
+        "awning",
+        "stall"
+      ],
+      "walk": "Clear headroom under it: 1.84 m to the beam (the door opening is 1.86–1.90 m). Brackets, if any, stay within 0.15 m of the posts."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Chairs tuck under it",
+          "village": "Stools tuck under it"
+        },
+        "zh": "凳子可塞到桌下"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.3,
+            0.75,
+            0.3002
+          ],
+          "min": [
+            -0.3,
+            0,
+            -0.3002
+          ]
+        },
+        "village": {
+          "max": [
+            0.3,
+            0.45,
+            0.3
+          ],
+          "min": [
+            -0.3,
+            0,
+            -0.3
+          ]
+        }
+      },
+      "category": "Furniture",
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.38,
+            0
+          ],
+          "size": [
+            0.6,
+            0.76,
+            0.6
+          ],
+          "support": false
+        }
+      ],
+      "connects": "Stands on a floor or roof deck in the middle of its cell. Chairs on the cell’s sides tuck under it (in the village look a low table, its top at 0.45 m, with stools 0.30 m high).",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.31,
+            0.76,
+            0.31
+          ],
+          "min": [
+            -0.31,
+            0,
+            -0.31
+          ]
+        },
+        "village": {
+          "max": [
+            0.31,
+            0.76,
+            0.31
+          ],
+          "min": [
+            -0.31,
+            0,
+            -0.31
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 1080,
+          "low": 192,
+          "medium": 584
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 1080
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 192
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 584
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 120
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 60
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 120
+          }
+        }
+      },
+      "flags": {
+        "clearOfDoors": true,
+        "sides": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "furniture.table",
+      "index": 31,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "post",
+          "tread"
+        ],
+        "village": [
+          "village:boards",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "a floor or roof deck in its cell",
+      "names": {
+        "en": {
+          "industrial": "Round table",
+          "village": "Low table"
+        },
+        "zh": "矮桌"
+      },
+      "role": "equipment",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "doorway: edge h2,3 L1",
+          "doorway: edge v3,2 L1",
+          "doorway: edge h2,2 L1",
+          "doorway: edge v2,2 L1"
+        ],
+        "keepsClear": [],
+        "occupies": [
+          "space 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "furniture",
+        "table",
+        "dining",
+        "kitchen",
+        "cafe",
+        "courtyard"
+      ],
+      "walk": "An obstacle. Stays out of a door’s cells; leaves its cell’s sides to chairs."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Against a side, faces in",
+          "village": "Against a side, faces in"
+        },
+        "zh": "靠格边摆放，面朝格内"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.201,
+            0.8772,
+            -0.1338
+          ],
+          "min": [
+            -0.201,
+            0,
+            -0.43
+          ]
+        },
+        "village": {
+          "max": [
+            0.17,
+            0.3,
+            -0.15
+          ],
+          "min": [
+            -0.17,
+            0,
+            -0.4
+          ]
+        }
+      },
+      "category": "Furniture",
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.45,
+            -0.315
+          ],
+          "size": [
+            0.42,
+            0.9,
+            0.37
+          ],
+          "support": false
+        }
+      ],
+      "connects": "Stands on a floor or roof deck against one side of its cell, facing in; opposite a second chair at most.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.21,
+            0.9,
+            -0.13
+          ],
+          "min": [
+            -0.21,
+            0,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.21,
+            0.9,
+            -0.13
+          ],
+          "min": [
+            -0.21,
+            0,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 752,
+          "low": 128,
+          "medium": 588
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 752
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 128
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 588
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 84
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 60
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 84
+          }
+        }
+      },
+      "flags": {
+        "tuck": true
+      },
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "furniture.chair",
+      "index": 32,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "leaf",
+          "post",
+          "tread"
+        ],
+        "village": [
+          "village:boards",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a floor or roof deck, against one side of its cell (edge-mounted, inside the cell)",
+      "names": {
+        "en": {
+          "industrial": "Chair",
+          "village": "Stool"
+        },
+        "zh": "木凳"
+      },
+      "role": "furnishing",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "furniture back: edge h2,3 L1",
+          "furniture flank: edge v3,2 L1",
+          "furniture flank: edge v2,2 L1"
+        ],
+        "keepsClear": [
+          "side 2,2 1 L1",
+          "side 2,2 3 L1"
+        ],
+        "occupies": [
+          "side 2,2 0 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "furniture",
+        "seat",
+        "dining",
+        "cafe"
+      ],
+      "walk": "An obstacle; a look only (no sitting). Below 0.70 m it may reach the cell centre (tucked under a table); above, only its back, within 0.20 m of the edge line."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Low cabinet against a wall",
+          "village": "Low chest against a wall"
+        },
+        "zh": "靠墙的矮抽屉柜"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.34,
+            0.9,
+            -0.135
+          ],
+          "min": [
+            -0.34,
+            0,
+            -0.475
+          ]
+        },
+        "village": {
+          "max": [
+            0.34,
+            0.9,
+            -0.135
+          ],
+          "min": [
+            -0.34,
+            0,
+            -0.471
+          ]
+        }
+      },
+      "category": "Furniture",
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.45,
+            -0.305
+          ],
+          "size": [
+            0.68,
+            0.9,
+            0.35
+          ],
+          "support": false
+        }
+      ],
+      "connects": "Against one side of its cell, back 0.13 m off the edge line; walls with sills or hoods behind or beside it face away.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.34,
+            0.92,
+            -0.13
+          ],
+          "min": [
+            -0.34,
+            0,
+            -0.48
+          ]
+        },
+        "village": {
+          "max": [
+            0.34,
+            0.92,
+            -0.13
+          ],
+          "min": [
+            -0.34,
+            0,
+            -0.48
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 628,
+          "low": 96,
+          "medium": 420
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 628
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 96
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 420
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 228
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 84
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 228
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "furniture.sideboard",
+      "index": 33,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "leaf",
+          "post",
+          "tread"
+        ],
+        "village": [
+          "village:boards",
+          "village:iron",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a floor or roof deck, against one side of its cell (edge-mounted, inside the cell)",
+      "names": {
+        "en": {
+          "industrial": "Sideboard",
+          "village": "Chest of drawers"
+        },
+        "zh": "抽屉柜"
+      },
+      "role": "furnishing",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "furniture back: edge h2,3 L1",
+          "furniture flank: edge v3,2 L1",
+          "furniture flank: edge v2,2 L1"
+        ],
+        "keepsClear": [
+          "side 2,2 1 L1",
+          "side 2,2 3 L1",
+          "space 2,2 L1"
+        ],
+        "occupies": [
+          "side 2,2 0 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "furniture",
+        "storage",
+        "cupboard",
+        "drawers",
+        "kitchen",
+        "living room",
+        "counter",
+        "stall"
+      ],
+      "walk": "An obstacle; a look only (nothing is stored). Its top is a surface for later decor sockets."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Tall open shelves",
+          "village": "Tall open shelves"
+        },
+        "zh": "高的开放式层架"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.34,
+            1.815,
+            -0.132
+          ],
+          "min": [
+            -0.34,
+            0,
+            -0.445
+          ]
+        },
+        "village": {
+          "max": [
+            0.34,
+            1.815,
+            -0.132
+          ],
+          "min": [
+            -0.34,
+            0,
+            -0.445
+          ]
+        }
+      },
+      "category": "Furniture",
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.92,
+            -0.29
+          ],
+          "size": [
+            0.68,
+            1.84,
+            0.32
+          ],
+          "support": false
+        }
+      ],
+      "connects": "Against one side of its cell; tall, so it also takes that wall face (no lamp or sign above it).",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.34,
+            1.85,
+            -0.13
+          ],
+          "min": [
+            -0.34,
+            0,
+            -0.45
+          ]
+        },
+        "village": {
+          "max": [
+            0.34,
+            1.85,
+            -0.13
+          ],
+          "min": [
+            -0.34,
+            0,
+            -0.45
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 1656,
+          "low": 260,
+          "medium": 826
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 8,
+            "triangles": 1656
+          },
+          "low": {
+            "drawCalls": 6,
+            "triangles": 260
+          },
+          "medium": {
+            "drawCalls": 8,
+            "triangles": 826
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 8,
+            "triangles": 740
+          },
+          "low": {
+            "drawCalls": 5,
+            "triangles": 224
+          },
+          "medium": {
+            "drawCalls": 8,
+            "triangles": 512
+          }
+        }
+      },
+      "flags": {
+        "tall": true
+      },
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "furniture.shelf",
+      "index": 34,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "concrete",
+          "corrugated",
+          "glass",
+          "hazard",
+          "leaf",
+          "membrane",
+          "post",
+          "tread"
+        ],
+        "village": [
+          "village:bloom-coral",
+          "village:boards",
+          "village:leaf",
+          "village:line",
+          "village:paint",
+          "village:stone",
+          "village:tile",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a floor or roof deck, against one side of its cell (edge-mounted, inside the cell)",
+      "names": {
+        "en": {
+          "industrial": "Shelf",
+          "village": "Shelf"
+        },
+        "zh": "高架"
+      },
+      "role": "furnishing",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "furniture back: edge h2,3 L1",
+          "furniture flank: edge v3,2 L1",
+          "furniture flank: edge v2,2 L1"
+        ],
+        "keepsClear": [
+          "side 2,2 1 L1",
+          "side 2,2 3 L1",
+          "space 2,2 L1"
+        ],
+        "occupies": [
+          "side 2,2 0 L1",
+          "face 2,2 0 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "furniture",
+        "storage",
+        "shelf",
+        "kitchen",
+        "living room",
+        "shop"
+      ],
+      "walk": "An obstacle; a look only. Tall: takes its wall face too, so no lamp or sign above it."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Two stacked crates",
+          "village": "Two stacked crates"
+        },
+        "zh": "两只叠放的木箱"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.33,
+            0.79,
+            -0.135
+          ],
+          "min": [
+            -0.33,
+            0,
+            -0.485
+          ]
+        },
+        "village": {
+          "max": [
+            0.332,
+            0.79,
+            -0.135
+          ],
+          "min": [
+            -0.332,
+            0,
+            -0.485
+          ]
+        }
+      },
+      "category": "Furniture",
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.45,
+            -0.315
+          ],
+          "size": [
+            0.68,
+            0.9,
+            0.37
+          ],
+          "support": false
+        }
+      ],
+      "connects": "Against one side of its cell, on a deck.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.34,
+            0.9,
+            -0.13
+          ],
+          "min": [
+            -0.34,
+            0,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.34,
+            0.9,
+            -0.13
+          ],
+          "min": [
+            -0.34,
+            0,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 1056,
+          "low": 192,
+          "medium": 608
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 1056
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 192
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 608
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 240
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 144
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 240
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "storage.crates",
+      "index": 35,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "post",
+          "tread"
+        ],
+        "village": [
+          "village:boards",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a floor or roof deck, against one side of its cell (edge-mounted, inside the cell)",
+      "names": {
+        "en": {
+          "industrial": "Crates",
+          "village": "Crates"
+        },
+        "zh": "货箱"
+      },
+      "role": "furnishing",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "furniture back: edge h2,3 L1",
+          "furniture flank: edge v3,2 L1",
+          "furniture flank: edge v2,2 L1"
+        ],
+        "keepsClear": [
+          "side 2,2 1 L1",
+          "side 2,2 3 L1",
+          "space 2,2 L1"
+        ],
+        "occupies": [
+          "side 2,2 0 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "storage",
+        "cargo",
+        "crate",
+        "dock",
+        "stall",
+        "workshop"
+      ],
+      "walk": "An obstacle; a look only (no inventory)."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Small barrel",
+          "village": "Small barrel"
+        },
+        "zh": "小木桶"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.1754,
+            0.66,
+            -0.1445
+          ],
+          "min": [
+            -0.1754,
+            0,
+            -0.4955
+          ]
+        },
+        "village": {
+          "max": [
+            0.1657,
+            0.62,
+            -0.145
+          ],
+          "min": [
+            -0.1657,
+            0,
+            -0.485
+          ]
+        }
+      },
+      "category": "Furniture",
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.35,
+            -0.315
+          ],
+          "size": [
+            0.37,
+            0.7,
+            0.37
+          ],
+          "support": false
+        }
+      ],
+      "connects": "Against one side of its cell, on a deck.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.2,
+            0.7,
+            -0.13
+          ],
+          "min": [
+            -0.2,
+            0,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.2,
+            0.7,
+            -0.13
+          ],
+          "min": [
+            -0.2,
+            0,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 1084,
+          "low": 80,
+          "medium": 576
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 1084
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 80
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 576
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 308
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 80
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 220
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "storage.barrel",
+      "index": 36,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "post",
+          "steel",
+          "tread"
+        ],
+        "village": [
+          "village:boards",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a floor or roof deck, against one side of its cell (edge-mounted, inside the cell)",
+      "names": {
+        "en": {
+          "industrial": "Barrel",
+          "village": "Barrel"
+        },
+        "zh": "木桶"
+      },
+      "role": "furnishing",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "furniture back: edge h2,3 L1",
+          "furniture flank: edge v3,2 L1",
+          "furniture flank: edge v2,2 L1"
+        ],
+        "keepsClear": [
+          "side 2,2 1 L1",
+          "side 2,2 3 L1",
+          "space 2,2 L1"
+        ],
+        "occupies": [
+          "side 2,2 0 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "storage",
+        "cargo",
+        "barrel",
+        "dock",
+        "stall",
+        "kitchen"
+      ],
+      "walk": "An obstacle; a look only."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Raised bed filling a cell",
+          "village": "Raised bed filling a cell"
+        },
+        "zh": "占满一格的高花床"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.38,
+            0.6186,
+            0.38
+          ],
+          "min": [
+            -0.38,
+            0,
+            -0.38
+          ]
+        },
+        "village": {
+          "max": [
+            0.38,
+            0.5163,
+            0.38
+          ],
+          "min": [
+            -0.38,
+            0,
+            -0.38
+          ]
+        }
+      },
+      "category": "Garden",
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.2,
+            0
+          ],
+          "size": [
+            0.76,
+            0.4,
+            0.76
+          ],
+          "support": false
+        }
+      ],
+      "connects": "In the middle of its cell on a deck (paving, terrace), within 0.38 m of the centre; not in a door’s cells.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.38,
+            0.65,
+            0.38
+          ],
+          "min": [
+            -0.38,
+            0,
+            -0.38
+          ]
+        },
+        "village": {
+          "max": [
+            0.38,
+            0.65,
+            0.38
+          ],
+          "min": [
+            -0.38,
+            0,
+            -0.38
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 1368,
+          "low": 192,
+          "medium": 640
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 1368
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 192
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 640
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 400
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 160
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 200
+          }
+        }
+      },
+      "flags": {
+        "clearOfDoors": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "garden.bed",
+      "index": 37,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "concrete",
+          "hazard",
+          "marking",
+          "membrane",
+          "post"
+        ],
+        "village": [
+          "village:bloom-coral",
+          "village:leaf",
+          "village:line",
+          "village:stone",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "a floor or roof deck in its cell",
+      "names": {
+        "en": {
+          "industrial": "Flower bed",
+          "village": "Flower bed"
+        },
+        "zh": "花床"
+      },
+      "role": "equipment",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "doorway: edge h2,3 L1",
+          "doorway: edge v3,2 L1",
+          "doorway: edge h2,2 L1",
+          "doorway: edge v2,2 L1"
+        ],
+        "keepsClear": [
+          "side 2,2 0 L1",
+          "side 2,2 1 L1",
+          "side 2,2 2 L1",
+          "side 2,2 3 L1"
+        ],
+        "occupies": [
+          "space 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "garden",
+        "plants",
+        "flowers",
+        "courtyard",
+        "public"
+      ],
+      "walk": "An obstacle (0.40 m edge). Decor only: nothing grows or is harvested."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Against a side of a cell",
+          "village": "Pot against a side"
+        },
+        "zh": "靠格边摆放"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.2,
+            0.634,
+            -0.13
+          ],
+          "min": [
+            -0.2,
+            0,
+            -0.53
+          ]
+        },
+        "village": {
+          "max": [
+            0.2017,
+            0.4966,
+            -0.13
+          ],
+          "min": [
+            -0.2,
+            0,
+            -0.53
+          ]
+        }
+      },
+      "category": "Garden",
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.32,
+            -0.32
+          ],
+          "size": [
+            0.4,
+            0.64,
+            0.4
+          ],
+          "support": false
+        }
+      ],
+      "connects": "Against one side of its cell on a deck; the pot’s back is 0.13 m off the edge line, as the furniture’s.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.21,
+            0.65,
+            -0.11
+          ],
+          "min": [
+            -0.21,
+            0,
+            -0.53
+          ]
+        },
+        "village": {
+          "max": [
+            0.21,
+            0.65,
+            -0.11
+          ],
+          "min": [
+            -0.21,
+            0,
+            -0.53
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 428,
+          "low": 180,
+          "medium": 380
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 428
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 180
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 380
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 4,
+            "triangles": 420
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 168
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 374
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "garden.pot",
+      "index": 38,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "corrugated",
+          "hazard",
+          "membrane",
+          "post",
+          "skin"
+        ],
+        "village": [
+          "village:bloom-coral",
+          "village:leaf",
+          "village:plaster",
+          "village:tile"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "a floor or roof deck, against one side of its cell (edge-mounted, inside the cell)",
+      "names": {
+        "en": {
+          "industrial": "Flower pot",
+          "village": "Flower pot"
+        },
+        "zh": "花盆"
+      },
+      "role": "furnishing",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "furniture back: edge h2,3 L1",
+          "furniture flank: edge v3,2 L1",
+          "furniture flank: edge v2,2 L1"
+        ],
+        "keepsClear": [
+          "side 2,2 1 L1",
+          "side 2,2 3 L1",
+          "space 2,2 L1"
+        ],
+        "occupies": [
+          "side 2,2 0 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "garden",
+        "plants",
+        "flowers",
+        "decor",
+        "entrance"
+      ],
+      "walk": "An obstacle; the quick-build flower pot’s own model. Decor only."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Open sky above, no walls",
+          "village": "Open sky above, no walls"
+        },
+        "zh": "上方要留空，格边不能有墙"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.4114,
+            2.3538,
+            0.4114
+          ],
+          "min": [
+            -0.4247,
+            0,
+            -0.4114
+          ]
+        },
+        "village": {
+          "max": [
+            0.4054,
+            2.3,
+            0.2508
+          ],
+          "min": [
+            -0.4322,
+            0,
+            -0.2283
+          ]
+        }
+      },
+      "category": "Garden",
+      "colliders": [
+        {
+          "center": [
+            0,
+            1.05,
+            0
+          ],
+          "note": "as the quick-build tree’s cylinder (r 0.40, h 2.1)",
+          "size": [
+            0.8,
+            2.1,
+            0.8
+          ],
+          "support": false
+        }
+      ],
+      "connects": "In the middle of its cell on a deck; open sky above (it takes the deck above), no wall on its edges.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.45,
+            2.42,
+            0.45
+          ],
+          "min": [
+            -0.45,
+            0,
+            -0.45
+          ]
+        },
+        "village": {
+          "max": [
+            0.45,
+            2.42,
+            0.45
+          ],
+          "min": [
+            -0.45,
+            0,
+            -0.45
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 568,
+          "low": 80,
+          "medium": 268
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 568
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 80
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 268
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 550
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 80
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 262
+          }
+        }
+      },
+      "flags": {
+        "above": true,
+        "noWalls": true,
+        "tall": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "garden.tree",
+      "index": 39,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "membrane",
+          "post"
+        ],
+        "village": [
+          "village:leaf",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "a floor or roof deck in its cell",
+      "names": {
+        "en": {
+          "industrial": "Tree",
+          "village": "Round tree"
+        },
+        "zh": "圆冠树"
+      },
+      "role": "equipment",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "tree: edge h2,3 L1",
+          "tree: edge v3,2 L1",
+          "tree: edge h2,2 L1",
+          "tree: edge v2,2 L1"
+        ],
+        "keepsClear": [
+          "side 2,2 0 L1",
+          "face 2,2 0 L1",
+          "side 2,2 1 L1",
+          "face 2,2 1 L1",
+          "side 2,2 2 L1",
+          "face 2,2 2 L1",
+          "side 2,2 3 L1",
+          "face 2,2 3 L1",
+          "space 2,2 L2"
+        ],
+        "occupies": [
+          "space 2,2 L1",
+          "deck 2,2 L2",
+          "rise 2,2 L2"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "garden",
+        "plants",
+        "tree",
+        "courtyard",
+        "public"
+      ],
+      "walk": "An obstacle; the quick-build tree’s own model. Takes the deck above it; no wall on its cell’s edges."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Ends reach over two edges",
+          "village": "Ends reach over two edges"
+        },
+        "zh": "两端越过格边"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.58,
+            0.86,
+            0.23
+          ],
+          "min": [
+            -0.58,
+            0,
+            -0.25
+          ]
+        },
+        "village": {
+          "max": [
+            0.58,
+            0.44,
+            0.19
+          ],
+          "min": [
+            -0.58,
+            0,
+            -0.19
+          ]
+        }
+      },
+      "category": "Furniture",
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.45,
+            0
+          ],
+          "size": [
+            1.16,
+            0.9,
+            0.5
+          ],
+          "support": false
+        }
+      ],
+      "connects": "In the middle of its cell on a deck, along its local x; the two edges its ends cross stay clear.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.59,
+            0.9,
+            0.26
+          ],
+          "min": [
+            -0.59,
+            0,
+            -0.26
+          ]
+        },
+        "village": {
+          "max": [
+            0.59,
+            0.9,
+            0.26
+          ],
+          "min": [
+            -0.59,
+            0,
+            -0.26
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 176,
+          "low": 140,
+          "medium": 176
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 176
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 140
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 176
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 2,
+            "triangles": 52
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 52
+          },
+          "medium": {
+            "drawCalls": 2,
+            "triangles": 52
+          }
+        }
+      },
+      "flags": {
+        "clearOfDoors": true,
+        "reach": true
+      },
+      "frame": "origin at the cell centre on the walking surface (y 0 = slab top); +Y up; +Z the part’s front",
+      "id": "furniture.bench",
+      "index": 40,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "steel",
+          "tread"
+        ],
+        "village": [
+          "village:boards",
+          "village:timber"
+        ]
+      },
+      "mount": "cell",
+      "mountFace": "a floor or roof deck in its cell",
+      "names": {
+        "en": {
+          "industrial": "Bench",
+          "village": "Park bench"
+        },
+        "zh": "长椅"
+      },
+      "role": "equipment",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [
+          "doorway: edge h2,3 L1",
+          "doorway: edge v3,2 L1",
+          "doorway: edge h2,2 L1",
+          "doorway: edge v2,2 L1"
+        ],
+        "keepsClear": [
+          "side 2,2 0 L1",
+          "side 2,2 1 L1",
+          "side 2,2 2 L1",
+          "side 2,2 3 L1",
+          "edge v3,2 L1",
+          "edge v2,2 L1"
+        ],
+        "occupies": [
+          "space 2,2 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "furniture",
+        "seat",
+        "courtyard",
+        "public",
+        "garden"
+      ],
+      "walk": "An obstacle; the quick-build bench’s own model, 1.16 m long: its ends cross its cell’s local ±X edges by 0.08 m, so those edges stay clear. A look only (no sitting)."
+    },
+    {
+      "behaviour": "light",
+      "blurbs": {
+        "en": {
+          "industrial": "On a plain wall, lit",
+          "village": "On a plaster wall, lit"
+        },
+        "zh": "装在灰泥墙上，会亮"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.06,
+            2.0225,
+            -0.105
+          ],
+          "min": [
+            -0.06,
+            1.68,
+            -0.298
+          ]
+        },
+        "village": {
+          "max": [
+            0.048,
+            1.91,
+            -0.09
+          ],
+          "min": [
+            -0.048,
+            1.62,
+            -0.298
+          ]
+        }
+      },
+      "category": "Light",
+      "colliders": [],
+      "connects": "On the face of a plaster wall (wall.solid) standing on its edge, looking into its cell; its light point is the lantern’s centre.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.12,
+            2.04,
+            -0.09
+          ],
+          "min": [
+            -0.12,
+            1.6,
+            -0.36
+          ]
+        },
+        "village": {
+          "max": [
+            0.12,
+            2.04,
+            -0.09
+          ],
+          "min": [
+            -0.12,
+            1.6,
+            -0.36
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 640,
+          "low": 168,
+          "medium": 344
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 6,
+            "triangles": 640
+          },
+          "low": {
+            "drawCalls": 5,
+            "triangles": 168
+          },
+          "medium": {
+            "drawCalls": 6,
+            "triangles": 344
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 132
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 72
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 132
+          }
+        }
+      },
+      "flags": {
+        "behaviour": "light"
+      },
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "light.wall",
+      "index": 41,
+      "lights": {
+        "industrial": [
+          {
+            "direction": [
+              0,
+              -0.6,
+              -0.8
+            ],
+            "kind": "door",
+            "position": [
+              0,
+              1.75,
+              -0.25
+            ]
+          }
+        ],
+        "village": [
+          {
+            "direction": [
+              0,
+              -0.6,
+              -0.8
+            ],
+            "kind": "door",
+            "position": [
+              0,
+              1.718,
+              -0.25
+            ]
+          }
+        ]
+      },
+      "materials": {
+        "industrial": [
+          "bright",
+          "glass",
+          "lamp",
+          "leaf",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "lamp",
+          "village:iron",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "the face of a plain wall (wall.solid) on its edge, inside its cell",
+      "names": {
+        "en": {
+          "industrial": "Wall lamp",
+          "village": "Wall lantern"
+        },
+        "zh": "壁灯"
+      },
+      "role": "fixture",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "face 2,2 0 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "light",
+        "lamp",
+        "entrance",
+        "indoor",
+        "outdoor"
+      ],
+      "walk": "Above head height: nothing below 1.60 m, the top of the player’s capsule (the lantern’s underside is at 1.62 m in the village look, 1.68 m in the industrial one), within 0.36 m of the edge line. A real practical light (kind door), in the host’s light pool."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Plain board on a bracket",
+          "village": "Plain board on a bracket"
+        },
+        "zh": "支架上的空白牌"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.04,
+            2.0225,
+            -0.105
+          ],
+          "min": [
+            -0.04,
+            1.625,
+            -0.483
+          ]
+        },
+        "village": {
+          "max": [
+            0.03,
+            1.91,
+            -0.09
+          ],
+          "min": [
+            -0.03,
+            1.62,
+            -0.48
+          ]
+        }
+      },
+      "category": "Light",
+      "colliders": [],
+      "connects": "On the face of a plaster wall (wall.solid) on its edge, looking into its cell.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.06,
+            2.04,
+            -0.09
+          ],
+          "min": [
+            -0.06,
+            1.55,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.06,
+            2.04,
+            -0.09
+          ],
+          "min": [
+            -0.06,
+            1.55,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 540,
+          "low": 212,
+          "medium": 284
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 4,
+            "triangles": 540
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 212
+          },
+          "medium": {
+            "drawCalls": 4,
+            "triangles": 284
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 3,
+            "triangles": 84
+          },
+          "low": {
+            "drawCalls": 1,
+            "triangles": 72
+          },
+          "medium": {
+            "drawCalls": 3,
+            "triangles": 84
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "sign.blank",
+      "index": 42,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "leaf",
+          "marking",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:boards",
+          "village:iron",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "the face of a plain wall (wall.solid) on its edge, inside its cell",
+      "names": {
+        "en": {
+          "industrial": "Hanging sign",
+          "village": "Hanging sign"
+        },
+        "zh": "吊牌"
+      },
+      "role": "fixture",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "face 2,2 0 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "sign",
+        "shop",
+        "house name",
+        "public"
+      ],
+      "walk": "Above head height (from 1.62 m). Carries no text: editable text is a host feature."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Envelope on a hanging board",
+          "village": "Envelope on a board"
+        },
+        "zh": "信封图案"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.04,
+            2.0225,
+            -0.105
+          ],
+          "min": [
+            -0.04,
+            1.625,
+            -0.483
+          ]
+        },
+        "village": {
+          "max": [
+            0.03,
+            1.91,
+            -0.09
+          ],
+          "min": [
+            -0.03,
+            1.62,
+            -0.48
+          ]
+        }
+      },
+      "category": "Light",
+      "colliders": [],
+      "connects": "On the face of a plaster wall (wall.solid) on its edge, looking into its cell.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.06,
+            2.04,
+            -0.09
+          ],
+          "min": [
+            -0.06,
+            1.55,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.06,
+            2.04,
+            -0.09
+          ],
+          "min": [
+            -0.06,
+            1.55,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 444,
+          "low": 156,
+          "medium": 228
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 4,
+            "triangles": 444
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 156
+          },
+          "medium": {
+            "drawCalls": 4,
+            "triangles": 228
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 5,
+            "triangles": 124
+          },
+          "low": {
+            "drawCalls": 3,
+            "triangles": 112
+          },
+          "medium": {
+            "drawCalls": 5,
+            "triangles": 124
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "sign.mail",
+      "index": 43,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "leaf",
+          "marking",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:boards",
+          "village:iron",
+          "village:line",
+          "village:paint",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "the face of a plain wall (wall.solid) on its edge, inside its cell",
+      "names": {
+        "en": {
+          "industrial": "Post sign",
+          "village": "Post sign"
+        },
+        "zh": "邮局吊牌"
+      },
+      "role": "fixture",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "face 2,2 0 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "sign",
+        "shop",
+        "post",
+        "public"
+      ],
+      "walk": "Above head height. A painted envelope; no text."
+    },
+    {
+      "behaviour": "none (a look only)",
+      "blurbs": {
+        "en": {
+          "industrial": "Cup on a hanging board",
+          "village": "Cup on a board"
+        },
+        "zh": "杯子图案"
+      },
+      "boxHigh": {
+        "industrial": {
+          "max": [
+            0.04,
+            2.0225,
+            -0.105
+          ],
+          "min": [
+            -0.04,
+            1.625,
+            -0.483
+          ]
+        },
+        "village": {
+          "max": [
+            0.03,
+            1.91,
+            -0.09
+          ],
+          "min": [
+            -0.03,
+            1.62,
+            -0.48
+          ]
+        }
+      },
+      "category": "Light",
+      "colliders": [],
+      "connects": "On the face of a plaster wall (wall.solid) on its edge, looking into its cell.",
+      "contract": {
+        "industrial": {
+          "max": [
+            0.06,
+            2.04,
+            -0.09
+          ],
+          "min": [
+            -0.06,
+            1.55,
+            -0.5
+          ]
+        },
+        "village": {
+          "max": [
+            0.06,
+            2.04,
+            -0.09
+          ],
+          "min": [
+            -0.06,
+            1.55,
+            -0.5
+          ]
+        }
+      },
+      "cost": {
+        "budgetTriangles": {
+          "high": 1444,
+          "low": 284,
+          "medium": 476
+        },
+        "industrial": {
+          "high": {
+            "drawCalls": 4,
+            "triangles": 1444
+          },
+          "low": {
+            "drawCalls": 4,
+            "triangles": 284
+          },
+          "medium": {
+            "drawCalls": 4,
+            "triangles": 476
+          }
+        },
+        "village": {
+          "high": {
+            "drawCalls": 4,
+            "triangles": 172
+          },
+          "low": {
+            "drawCalls": 2,
+            "triangles": 128
+          },
+          "medium": {
+            "drawCalls": 4,
+            "triangles": 156
+          }
+        }
+      },
+      "flags": {},
+      "frame": "origin on the cell edge’s midpoint at the slab top; x along the edge (−0.5…0.5); +Z the edge’s outside (exterior)",
+      "id": "sign.cup",
+      "index": 44,
+      "lights": {
+        "industrial": [],
+        "village": []
+      },
+      "materials": {
+        "industrial": [
+          "leaf",
+          "marking",
+          "post",
+          "steel"
+        ],
+        "village": [
+          "village:boards",
+          "village:iron",
+          "village:paint",
+          "village:timber"
+        ]
+      },
+      "mount": "edge",
+      "mountFace": "the face of a plain wall (wall.solid) on its edge, inside its cell",
+      "names": {
+        "en": {
+          "industrial": "Cup sign",
+          "village": "Tea sign"
+        },
+        "zh": "茶馆吊牌"
+      },
+      "role": "fixture",
+      "rotations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "round": "r8",
+      "slots": {
+        "edgeRules": [],
+        "keepsClear": [],
+        "occupies": [
+          "face 2,2 0 L1"
+        ],
+        "placedAt": {
+          "level": 1,
+          "rot": 0,
+          "x": 2,
+          "z": 2
+        }
+      },
+      "tags": [
+        "sign",
+        "shop",
+        "cafe",
+        "food",
+        "stall"
+      ],
+      "walk": "Above head height. A painted cup; no text."
+    }
+  ],
+  "units": "metres; cells 1 m, storeys 2.2 m, slab 0.16 m; quarter turns about +Y (rot 0–3)",
+  "version": 2
+}

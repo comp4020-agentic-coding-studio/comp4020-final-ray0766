@@ -28,7 +28,7 @@ it('stores one generated layout per owned planet with concrete IDs, hashes and e
     const id = `owner-${i}`;
     s.create(id);
     const u = s.universe(id), manifest = u.currentPlanet.homeManifest!;
-    expect(manifest).toMatchObject({ generator: 'home-neighbourhood', version: HOME_GENERATION_VERSION, seed: homeGenerationSeed(u.ownedPlanetId!), radius: HOME_SAMPLE_RADIUS, environment: u.currentPlanet.environment, catalogueVersion: 'district-kit-v2' });
+    expect(manifest).toMatchObject({ generator: 'home-neighbourhood', version: HOME_GENERATION_VERSION, seed: homeGenerationSeed(u.ownedPlanetId!), radius: HOME_SAMPLE_RADIUS, environment: u.currentPlanet.environment, catalogueVersion: 'village-kit-v1' });
     expect(u.player.home!.variant).toBe('custom');
     expect(manifest.objects).toEqual(u.currentPlanet.objects);
     expect(manifest.routes.find(route => route.id === 'home')!.points.length).toBeGreaterThanOrEqual(2);
@@ -116,7 +116,10 @@ it('rolls back identity, claim, generated objects and terrain if the receipt can
   for (const table of ['players', 'planet_objects', 'blueprint_library', 'home_interiors', 'home_manifests', 'history_events']) expect(s.db.prepare(`SELECT count(*) AS n FROM ${table}`).get()!.n, table).toBe(0);
 });
 
-it('keeps a synthetic v1 sample, user labels and its sole saved room byte-for-byte on reopen and claim', () => {
+it.each([
+  { generator: 'home-sample', version: 1, catalogueVersion: 'home-kit-v1' },
+  { generator: 'home-neighbourhood', version: 5, catalogueVersion: 'district-kit-v2' },
+])('keeps a synthetic v$version receipt, user labels and its sole saved room byte-for-byte on reopen and claim', metadata => {
   // Construct an old-format fixture in this test's temporary database only.
   // This never reads or copies the active fixed-sample database.
   const path = databasePath(), s = sample(path);
@@ -129,8 +132,8 @@ it('keeps a synthetic v1 sample, user labels and its sole saved room byte-for-by
   s.createObject('old-owner', { planetId: planet, objectId: building, kind: 'structure', position: plan.home.position, rotation: plan.home.rotation, blueprintHash: saved.hash });
   const room = { ...defaultHomeInterior(), version: 7, material: 'blue' };
   s.db.prepare('INSERT INTO home_interiors(planet_id,building_id,interior_id,document) VALUES(?,?,?,?)').run(planet, building, interior, JSON.stringify(room));
-  const manifest = { generator: 'home-sample', version: 1, seed: 20261008, radius: HOME_SAMPLE_RADIUS, environment: HOME_ENVIRONMENT, catalogueVersion: 'home-kit-v1', routes: plan.routes, homeBuildingId: building, objects: s.universe('old-owner').currentPlanet.objects.map(({ id, kind, blueprintHash, position, rotation }) => ({ id, kind, blueprintHash, position, rotation })) };
-  s.db.prepare('INSERT INTO home_manifests(planet_id,version,document,hash) VALUES(?,1,?,?)').run(planet, JSON.stringify(manifest), createHash('sha256').update(canonicalJson(manifest)).digest('hex'));
+  const manifest = { ...metadata, seed: 20261008, radius: HOME_SAMPLE_RADIUS, environment: HOME_ENVIRONMENT, routes: plan.routes, homeBuildingId: building, objects: s.universe('old-owner').currentPlanet.objects.map(({ id, kind, blueprintHash, position, rotation }) => ({ id, kind, blueprintHash, position, rotation })) };
+  s.db.prepare('INSERT INTO home_manifests(planet_id,version,document,hash) VALUES(?,?,?,?)').run(planet, metadata.version, JSON.stringify(manifest), createHash('sha256').update(canonicalJson(manifest)).digest('hex'));
   const tables = ['players', 'planets', 'planet_objects', 'blueprint_contents', 'blueprint_library', 'home_interiors', 'home_manifests', 'history_heads', 'history_events', 'history_snapshots'];
   const rows = (store: typeof s) => Object.fromEntries(tables.map(table => [table, store.db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all()]));
   const state = s.universe('old-owner'), before = rows(s);

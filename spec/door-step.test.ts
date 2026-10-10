@@ -20,7 +20,7 @@ function fixture(kind:'door'|'closed-door'|'stairs'='door'){
  const world=new GroundWorld({id:'planet',revision:1,objects:[object],blueprints:{kit:blueprint.parts}});
  const at=(x:number,z:number,y=0)=>localToDir(anchor,base,[x,y,z]);
  const local=(p:GroundPose)=>new Vector3(...p.position).multiplyScalar(p.radius).addScaledVector(new Vector3(...position),-base).applyQuaternion(inverse);
- const [x,y,z]=stairs?[-.16296620926884386,.2034572315974914,1.3112787721240373]:[-.6035958465613444,.0026608865571455254,.6240106527764611];
+ const [x,y,z]=stairs?[-.08,.2034572315974914,1.3112787721240373]:[-.6035958465613444,.0026608865571455254,.6240106527764611];
  const start=at(x,z,y),pose:GroundPose={position:start,radius:Math.hypot(base+y,x,z),verticalSpeed:0,grounded:true};
  function next(p:GroundPose,step:number){const a=new Vector3(...p.position),b=new Vector3(...at(stairs?0:-.58,stairs?-1.04:1.6,local(p).y)),distance=a.angleTo(b)*p.radius;return a.lerp(b,Math.min(1,step/Math.max(distance,.000001))).normalize().toArray() as Vec3;}
  return {blueprint,object,world,at,local,pose,next};
@@ -52,7 +52,7 @@ it.each(['door','stairs'] as const)('replays the low-speed %s path on the server
 
 it('slides off the existing stair rail corner at small steps without exceeding input distance or penetrating a solid',()=>{
  const f=fixture('stairs');
- for(const step of [.012,.025]){let pose=f.pose;
+ for(const step of [.012,.025]){let pose=f.pose;expect(f.world.blocked(pose)).toBe(false);
   for(let i=0;i<400;i++){const old=pose;pose=f.world.move(pose,f.next(pose,step),FIXED_STEP);expect(f.world.blocked(pose)).toBe(false);expect(new Vector3(...old.position).angleTo(new Vector3(...pose.position))*old.radius).toBeLessThanOrEqual(step+.0001);}
   expect(f.local(pose).y).toBeCloseTo(2.2,1);expect(f.local(pose).z).toBeCloseTo(-1.04,2);
  }

@@ -1,5 +1,6 @@
 import * as T from 'three';
 import type { Vec3 } from '../../../core/vec.ts';
+import { rotationToNormal } from '../../geom.ts';
 import type { Ctx, Role } from '../../kit.ts';
 
 // Shared shapes for the village ship parts (docs/VILLAGE.md): smooth lofts and
@@ -80,6 +81,63 @@ export function turn(ctx: Ctx, role: Role, profile: [number, number][], segments
 }
 
 export const segs = (ctx: Ctx, high: number, medium: number, low: number) => (ctx.detail === 2 ? high : ctx.detail === 1 ? medium : low);
+
+/**
+ * Smooth ball of radius r, `rows` bands from pole to pole, `n` round. Eight
+ * or more round and four or more rows keep every facet's turn under the
+ * lines' crease ramp, so a ball draws only its outline (an icosahedron at
+ * detail 0 or 1 creased into a cut gem).
+ */
+export function ball(ctx: Ctx, role: Role, r: number, n: number, rows: number, position: Vec3) {
+  const profile = Array.from({ length: rows + 1 }, (_, i) => {
+    const a = -Math.PI / 2 + Math.PI * i / rows;
+    return [i === 0 || i === rows ? 0 : r * Math.cos(a), r * Math.sin(a)] as [number, number];
+  });
+  turn(ctx, role, profile, n, { position });
+}
+
+/** How far a painted disc or panel lies off the surface it is painted on: clear of it in depth, no step the lines can find. */
+export const FLUSH = 0.0015;
+
+/**
+ * A flat disc of colour (or a ring, with `rIn`) lying FLUSH off a surface at
+ * `at`, facing `n`: a porthole, lamp or badge drawn in paint. A raised ring
+ * draws as two 1 px crease rings once its side is a few pixels tall; a flush
+ * one draws nothing, and reads by its colour, as the cheat line does.
+ */
+export function flushDisc(ctx: Ctx, role: Role, at: Vec3, n: Vec3, rOut: number, rIn = 0, segments = 16, lift = FLUSH) {
+  const p: number[] = [];
+  const ring = (r: number, i: number): Vec3 => { const t = (2 * Math.PI * i) / segments; return [r * Math.cos(t), lift, -r * Math.sin(t)]; };
+  for (let i = 0; i < segments; i++) {
+    const a = ring(rOut, i), b = ring(rOut, i + 1);
+    if (rIn <= 0) { p.push(0, lift, 0, ...a, ...b); continue; }
+    const c = ring(rIn, i), d = ring(rIn, i + 1);
+    p.push(...c, ...a, ...b, ...c, ...b, ...d);
+  }
+  flat(ctx, role, p, { position: at, rotation: rotationToNormal(n) });
+}
+
+/**
+ * A flat panel of colour lying FLUSH off a plane: `outline` in the plane's
+ * (u, v) coordinates, counter-clockwise seen from the outside, convex; `frame`
+ * puts the plane's u along local +X, v along −Z and the outside along +Y.
+ */
+export function flushPanel(ctx: Ctx, role: Role, outline: [number, number][], frame: { position?: Vec3; rotation?: Vec3 }, lift = FLUSH) {
+  const p: number[] = [];
+  // Either winding is accepted: a clockwise outline is walked the other way round.
+  const area = outline.reduce((s, [u0, v0], i) => { const [u1, v1] = outline[(i + 1) % outline.length]; return s + u0 * v1 - u1 * v0; }, 0);
+  const pts = area < 0 ? outline.slice().reverse() : outline;
+  const at = ([u, v]: [number, number]): Vec3 => [u, lift, -v];
+  for (let i = 1; i < pts.length - 1; i++) p.push(...at(pts[0]), ...at(pts[i]), ...at(pts[i + 1]));
+  flat(ctx, role, p, frame);
+}
+
+function flat(ctx: Ctx, role: Role, positions: number[], placement: { position?: Vec3; rotation?: Vec3 }) {
+  const g = new T.BufferGeometry();
+  g.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
+  g.setAttribute('normal', new T.Float32BufferAttribute(positions.map((_, i) => (i % 3 === 1 ? 1 : 0)), 3));
+  ctx.b.geometry(ctx.mat(role), g, placement);
+}
 
 
 // --------------------------------------------------------------- sections

@@ -39,6 +39,15 @@ function warmSky(P: LookParams, y: number): T.Color {
   return y >= 0 ? horizon.clone().lerp(zenith, Math.pow(y, 0.7)) : horizon.clone().lerp(ground, Math.min(1, -y * 3));
 }
 
+/**
+ * Whether a look's own lights and sky stand in for a mood's: a stylised look's
+ * in every mood but orbit, and a flat look's (the village: daytime only) in
+ * orbit too. The warm look keeps the orbit mood's one sun in a dark sky.
+ */
+export function looksLit(P: LookParams | null, mood: Mood): P is LookParams {
+  return P !== null && (mood !== 'orbit' || P.toneMapping === 'none');
+}
+
 function environmentScene(mood: Mood, look: Look = 'industrial'): T.Scene {
   const scene = new T.Scene();
   const basic = (color: T.Color, side: T.Side = T.FrontSide) => new T.MeshBasicMaterial({ color, side });
@@ -47,7 +56,7 @@ function environmentScene(mood: Mood, look: Look = 'industrial'): T.Scene {
     m.position.set(...position); m.rotation.set(...rotation); scene.add(m);
   };
   const P = lookParams(look);
-  if (P && mood !== 'orbit') {
+  if (looksLit(P, mood)) {
     // An open sky instead of a room: soft colour from above and the horizon, and a
     // faint sun where the key light is, so reflections agree with the shadows.
     const dome = new T.SphereGeometry(20, 32, 16);
@@ -229,7 +238,7 @@ export interface LightRig { group: T.Group; key: T.DirectionalLight; fill: T.Hem
 export function createLightRig(mood: Mood, shadows: boolean, extent = 8, look: Look = 'industrial'): LightRig {
   const group = new T.Group();
   group.name = `lights:${mood}`;
-  const P = lookParams(look), warm = P !== null && mood !== 'orbit', W = (P ?? lookParams('warm')!).light;
+  const P = lookParams(look), warm = looksLit(P, mood), W = (P ?? lookParams('warm')!).light;
   const key = new T.DirectionalLight(warm ? W.key : mood === 'orbit' ? '#fff3e2' : '#ffdcb6', warm ? W.keyIntensity : mood === 'orbit' ? 3.4 : 2.6);
   if (warm) key.position.set(...W.keyPosition); else key.position.set(6, 9, 7);
   key.castShadow = shadows;
@@ -242,8 +251,10 @@ export function createLightRig(mood: Mood, shadows: boolean, extent = 8, look: L
     if (warm) { key.shadow.radius = W.shadowRadius; key.shadow.intensity = W.shadowIntensity; }
   }
   // In orbit there is one sun: a rim light there would add a second specular glint on water and glass.
+  // The village look has no rim in any mood (rimIntensity 0), so its orbit daylight keeps that rule.
   const rim = new T.DirectionalLight(warm ? W.rim : '#a9c4e2', warm ? W.rimIntensity : mood === 'hangar' ? 0.6 : mood === 'dusk' ? 0.5 : 0);
-  rim.visible = mood !== 'orbit';
+  // Off where it adds nothing (orbit, or a look with no rim): an unlit light still costs every shader.
+  rim.visible = mood !== 'orbit' && rim.intensity > 0;
   rim.position.set(-7, 4, -8);
   const fill = warm
     ? new T.HemisphereLight(W.sky, W.ground, W.fillIntensity)

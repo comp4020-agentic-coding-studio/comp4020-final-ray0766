@@ -77,3 +77,48 @@ export const UI = {
   danger: '#ff5a4c',
   ok: '#7fcf8f',
 } as const;
+
+/**
+ * Interface tokens of the village look (the pages' default; look: 'village' in
+ * the API). The page tones are the ones src/shell/theme.css declares under
+ * :root[data-look="village"]: paper from the plaster and trim colours, ink
+ * text, a deep green for the primary action (the darkest green of the planting,
+ * and not a colour of any wall, roof or sky), a blue for selection and
+ * information. Every text tone is at least 4.5:1 on every panel ground it is
+ * drawn on (tests/unit/core/village-ui.test.ts computes it;
+ * tests/e2e/village-pages.spec.ts measures it on the pages).
+ *
+ * `scene` holds the state colours drawn inside the 3D view: selection, the
+ * fits and refused placement ghosts, the locate ring, the build grids, faded
+ * levels and the thumbnail ground. Selection and the three states are clear,
+ * saturated hues the village palette does not use, so a state never reads as
+ * a material: each is at least 0.1 apart in OKLab from every village material
+ * colour, lit or in shade, from the sky and from the other states (also tested).
+ */
+export const VILLAGE_UI = {
+  bg: '#e9e5d3',
+  panel: '#f1f2ea',
+  tile: '#f8f8f3',
+  field: '#fbfbf8',
+  line: '#d3d2c4',
+  lineStrong: '#8d9698',
+  text: '#283034',
+  muted: '#535f63',
+  accent: '#2f6e4d',
+  accentInk: '#f1f2ea',
+  info: '#2c5c9a',
+  danger: '#a93a2b',
+  ok: '#3d6a1e',
+  warn: '#8a5a12',
+  scene: {
+    select: '#3b6ff0',
+    ok: '#a8d61e',
+    bad: '#f2243a',
+    locate: '#c43fd0',
+    /** Pencil grid on the work yard, and the faded upper levels' tint: the lines' ink. */
+    grid: '#283034',
+    faded: '#283034',
+    /** Ground of palette icons and library thumbnails: a pale wash of the sky. */
+    thumbnail: '#d5ebe3',
+  },
+} as const;

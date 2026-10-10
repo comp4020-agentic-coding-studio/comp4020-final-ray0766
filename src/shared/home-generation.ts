@@ -20,16 +20,16 @@ import type { Vec3 } from './world.ts';
 
 /** Includes the home and all props; these are deliberately below player caps. */
 export const HOME_GENERATION_BUDGET = Object.freeze({ maxObjects: 40, maxStructures: 4, reservedObjects: 24, reservedStructures: 4, minSceneryObjects: 8 });
-export const HOME_GENERATOR_VERSION = 5;
+export const HOME_GENERATOR_VERSION = 6;
 export const HOME_GENERATION_VERSION = HOME_GENERATOR_VERSION;
 export const HOME_GENERATION_ATTEMPTS = 8;
 export type HomeGenerationFallback = 'invalid-environment' | 'unsafe-environment' | 'bounded-layout-fallback';
 export interface GeneratedHomeManifest extends HomeManifest {
   environment: string;
   generator: 'home-neighbourhood';
-  version: 5;
+  version: typeof HOME_GENERATOR_VERSION;
   seed: number;
-  catalogueVersion: 'district-kit-v2';
+  catalogueVersion: 'village-kit-v1';
   fallback: boolean;
   fallbackReason?: HomeGenerationFallback;
 }
@@ -236,5 +236,5 @@ export function generateHomeManifest(radius: number, seed: number, environment?:
   }
   if (!result) throw new Error('No legal home neighbourhood fits this radius; nothing has been generated or saved.');
   return { ...result, environment: selected, generator: 'home-neighbourhood', version: HOME_GENERATION_VERSION, seed,
-    catalogueVersion: 'district-kit-v2', fallback: !!fallbackReason, ...(fallbackReason ? { fallbackReason } : {}) };
+    catalogueVersion: 'village-kit-v1', fallback: !!fallbackReason, ...(fallbackReason ? { fallbackReason } : {}) };
 }

@@ -9,6 +9,10 @@ import { LOD } from '../../style/lod.ts';
 import type { LodTier } from '../../style/lod.ts';
 import type { StyleLibrary } from '../../style/materials.ts';
 import { makeDataTexture, normalFromHeight } from '../../style/textures.ts';
+import { GLOW } from '../../style/tokens.ts';
+import { VILLAGE_LAMP } from '../../style/village.ts';
+import { stoneLamp, stoneMaterials, stonePad, touchdownMarks } from '../../terrain/stonework.ts';
+import { villageFlatGround } from '../../terrain/village.ts';
 import { libraryMaterials, makeKit } from '../parts/kit.ts';
 
 // The planet the placement view builds on. Everything else in this module
@@ -86,9 +90,10 @@ export const LANDING_PAD_RADIUS = LANDING_CLEARANCE + 0.04;
  */
 export function buildLandingPad(lib: StyleLibrary, lod: LodTier, skirt = 0): T.Group {
   const b = new PartBuilder(lod);
-  const k = makeKit(b, libraryMaterials(lib));
   const padR = LANDING_CLEARANCE;
   const bottom = Math.max(0.08, skirt);
+  if (lib.look === 'village') return villageLandingPad(b, lib, padR, bottom);
+  const k = makeKit(b, libraryMaterials(lib));
   b.cylinder(k.m('concrete'), padR, LANDING_PAD_RADIUS, 0.04 + bottom, { position: [0, (0.04 - bottom) / 2, 0] }, { segments: 32 });
   b.cylinder(k.m('hazard'), padR - 0.02, padR - 0.02, 0.012, { position: [0, 0.046, 0] }, { segments: 32 });
   b.cylinder(k.m('concrete'), padR - 0.16, padR - 0.16, 0.016, { position: [0, 0.048, 0] }, { segments: 32 });
@@ -100,8 +105,52 @@ export function buildLandingPad(lib: StyleLibrary, lod: LodTier, skirt = 0): T.G
   return b.build('landing-pad').group;
 }
 
+/**
+ * The village look's landing pad, the same disc in the shared stonework
+ * design (src/terrain/stonework.ts): a stone drum battered out to
+ * LANDING_PAD_RADIUS at its foot, a cobbled rim, touchdown marks, and the four
+ * lamps where the industrial pad has them (lens tops at the same height), let
+ * into the rim. No hazard ring or iron blocks.
+ */
+function villageLandingPad(b: PartBuilder, lib: StyleLibrary, padR: number, bottom: number): T.Group {
+  const m = stoneMaterials(lib), low = b.lod === 'low', segments = low ? 24 : 32;
+  const glow = lib.createGlow(VILLAGE_LAMP, GLOW.lit);
+  glow.name = 'blueprint:lamp';
+  const { rimTop } = stonePad(b, m, { radius: padR, foot: LANDING_PAD_RADIUS, top: 0.04, bottom: -bottom, segments });
+  touchdownMarks(b, m.line, padR, 0.04, segments);
+  for (let i = 0; i < 4; i++) {
+    const a = i * Math.PI / 2 + Math.PI / 4;
+    stoneLamp(b, glow, [Math.cos(a) * (padR - 0.08), rimTop, Math.sin(a) * (padR - 0.08)], 0.033, 0.094 - rimTop, low ? 6 : 8);
+  }
+  return b.build('landing-pad').group;
+}
+
 /** Dust colours, tinted by height and slope: oxide in the hollows, grey on the rises. */
 const DUST_LOW = new T.Color('#5c4637'), DUST_HIGH = new T.Color('#8b8176'), ROCK = new T.Color('#4a4642');
+
+/** The regolith material: vertex tint over the procedural regolith maps, with real normal detail. */
+function regolithMaterial(lod: LodTier): T.MeshStandardMaterial {
+  const size = LOD[lod].textureSize;
+  const maps = regolithMaps(size);
+  const normalMap = makeDataTexture(normalFromHeight(maps.height, size, 3.2), size, false);
+  const albedo = makeDataTexture(maps.albedo, size, true);
+  return new T.MeshStandardMaterial({ name: 'blueprint:regolith', vertexColors: true, map: albedo, normalMap, normalScale: new T.Vector2(1.2, 1.2), roughness: 0.95, metalness: 0, envMapIntensity: 0.7 });
+}
+
+/**
+ * The regolith in the village look: the terrain kit's flat drawing
+ * (src/terrain/village.ts villageFlatGround) on the same vertex tint, no
+ * textures. Oxide hollows become a deep meadow, the middle heights the
+ * village ground green, grey rises a dry grass, steep rock the village's pale
+ * stone with gravel.
+ */
+function villageRegolith(): T.MeshStandardMaterial {
+  const hex = (c: T.Color) => `#${c.getHexString()}` as const;
+  return villageFlatGround('blueprint:regolith', [
+    { key: hex(DUST_LOW), tone: '#4d9563' }, { key: hex(DUST_LOW.clone().lerp(DUST_HIGH, 0.5)), tone: '#5ea476' },
+    { key: hex(DUST_HIGH), tone: '#93ad6e', gravel: 0.15 }, { key: hex(ROCK), tone: '#b2ae9f', gravel: 0.5 },
+  ], '#6f6c62');
+}
 
 /**
  * A displaced icosphere for any HeightField (the legacy a76575a formula in the
@@ -145,12 +194,8 @@ export function createPlanet(field: HeightField, lib: StyleLibrary, lod: LodTier
   geometry.setAttribute('uv', new T.BufferAttribute(uv, 2));
   geometry.setAttribute('color', new T.BufferAttribute(colors, 3));
   geometry.computeBoundingSphere();
-  const size = LOD[lod].textureSize;
-  const maps = regolithMaps(size);
-  const normalMap = makeDataTexture(normalFromHeight(maps.height, size, 3.2), size, false);
-  const albedo = makeDataTexture(maps.albedo, size, true);
   // Owned by this planet (not the library) and freed with it by disposeObject3D.
-  const material = new T.MeshStandardMaterial({ name: 'blueprint:regolith', vertexColors: true, map: albedo, normalMap, normalScale: new T.Vector2(1.2, 1.2), roughness: 0.95, metalness: 0, envMapIntensity: 0.7 });
+  const material = lib.look === 'village' ? villageRegolith() : regolithMaterial(lod);
   const ground = new T.Mesh(geometry, material);
   ground.name = 'ground';
   ground.receiveShadow = LOD[lod].shadows;

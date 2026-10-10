@@ -17,12 +17,13 @@ import type { PaletteName } from './tokens.ts';
 // lights included), LOD and texture pipeline.
 // 'village' is the full rework that followed: its own models for buildings,
 // street, props and ships (blueprint/parts/village, props/village,
-// ship/parts/village), drawn with ink outlines and stepped direct light, in a
-// palette of its own. Part ids, frames, anchors, sockets and envelopes stay;
-// where a shape needs a size change it is listed in docs/VILLAGE.md.
-// The colours are this module's own; they follow the relationships of the main
-// project's early world (warm key, cool fill, mid-to-high values, teal darks,
-// terracotta accents), not its values.
+// ship/parts/village), drawn as a flat illustration: two bands of light (lit,
+// and shade at half of it), hand-drawn lines found on screen (src/style/lines.ts),
+// a flat cloud sky and a few tonal patches on every surface, in a palette of
+// its own that leans towards a small Japanese town (white plaster, dark
+// timber, slate-grey tiles, deep greens). Part ids, frames, anchors, sockets
+// and envelopes stay; where a shape needs a size change it is listed in
+// docs/VILLAGE.md.
 
 export type Look = 'industrial' | 'warm' | 'village';
 export const LOOKS: readonly Look[] = ['industrial', 'warm', 'village'];
@@ -39,6 +40,11 @@ export interface LookParams {
   envIntensity: number;
   glass: { clear: GlassParams; smoked: GlassParams; canopy: GlassParams; envIntensity: number };
   hazard: readonly [string, string];
+  /**
+   * A flat look's hazard marking: one plain painted band in this colour (StyleLibrary.hazard()),
+   * in place of the diagonal stripes and their relief.
+   */
+  hazardBand?: string;
   glowBase: string;
   ink: { dark: string; light: string };
   light: {
@@ -59,8 +65,30 @@ export interface LookParams {
   bloom: { strength: number; radius: number; threshold: number };
   /** Stepped direct light (village): the lit share of a surface jumps between bands instead of fading. */
   cel?: { shade: number; mid: number; midAt: number; litAt: number; soft: number };
-  /** Ink outlines (village): silhouettes from an inverted shell, creases from edges sharper than `crease`. */
-  outline?: { color: string; width: number; crease: number; lineOpacity: number };
+  /**
+   * Hand-drawn lines found in screen space from the scene's depth (village,
+   * src/style/lines.ts). `width` and `wobble` are in CSS pixels (a silhouette
+   * is about 1.25 × width wide, a crease one pixel); `breaks` is the share of a
+   * line left out as gaps; `depth` is the jump in 1/z, relative, that makes a
+   * silhouette and `normal` the turn (1 − cos) that makes a crease. Creases
+   * fade out over `creaseFade` metres from the camera, everything over `fade`.
+   */
+  edges?: {
+    color: string; width: number; wobble: number; breaks: number; depth: number; normal: number;
+    creaseFade: readonly [number, number]; fade: readonly [number, number];
+  };
+  /** A flat sky in three tones with long ragged cloud bands (src/style/sky.ts), in place of the blurred dome. */
+  cloudSky?: { deep: string; mid: string; light: string; scale: number };
+  /** Posterised patches on every stylised surface, darkened by this share of their colour (src/style/surface.ts). */
+  mottle?: number;
+  /** 'none': colours are drawn as lit, without a tone curve, so lit = colour and shade = half of it. */
+  toneMapping?: 'none';
+  /**
+   * Daylight indoors (src/style/surface.ts): under a roof the sun is scaled by
+   * `key` and the sky fill by `fill`, so a room is lighter than the shade
+   * outside without a lamp lit.
+   */
+  interior?: { fill: number; key: number };
 }
 interface GlassParams { color: string; opacity: number; roughness: number }
 
@@ -163,83 +191,121 @@ export const WARM: LookParams = {
 };
 
 /**
- * The village look. Light walls, mid roofs and wood, dark openings and iron,
- * so a facade reads in grey as well as in colour: cream plaster and stone,
- * terracotta tiles, honey floorboards, teal-sage doors and shutters, dark teal
- * glass, iron in a teal-tinted dark. Lit and shaded sides are flat bands under
- * a warm sun and a cool sky, with ink lines on silhouettes and edges.
+ * The village look. White plaster, dark timber and slate-grey tiles over deep
+ * greens, so a street reads in grey as well as in colour: light walls, mid
+ * roofs and boards, dark openings and iron, a teal-green paint for doors and
+ * shutters. Drawn flat: a white sun and an equal white sky fill, so a lit
+ * surface shows its own colour and a shaded one (or one in cast shadow) half
+ * of it, in linear light; no tone curve, no image light, no rim; dark slate
+ * lines on silhouettes and near creases; a flat teal sky with cloud bands.
  */
 export const VILLAGE: LookParams = {
   materials: {
     // Building kit (blueprint/parts/kit.ts maps each KitMaterial to one of these in this look).
-    'village:plaster': '#efe3c6',
-    'village:plaster-in': '#f4ebd8',
-    'village:timber': '#7d5b43',
-    'village:iron': '#46514f',
-    'village:brass': '#c8a05a',
-    'village:boards': '#b88e62',
-    'village:stone': '#cbbfa6',
-    'village:paint': '#5f8b82',
-    'village:tile': '#c26b4b',
-    'village:tile-dark': '#8c5a46',
-    'village:cobble': '#d4c7a6',
-    'village:lane': '#8e968e',
-    'village:line': '#f2ead3',
-    'village:ground': '#93a77e',
+    'village:plaster': '#e9e5d3',
+    'village:plaster-in': '#f1ede0',
+    'village:timber': '#5f4c3e',
+    // Darks stay off the ink (#283034) in shade: iron there is sRGB (61, 70, 72), the dark tile
+    // (52, 64, 74); at #394447 and #46525a they fell to (39, 47, 50) and (49, 58, 64), so lines on
+    // a shaded lamp post, hull or roof drowned.
+    'village:iron': '#566265',
+    'village:brass': '#c09a55',
+    'village:boards': '#a88e6c',
+    'village:stone': '#c7c2b1',
+    'village:paint': '#4e8a84',
+    'village:tile': '#5c6a72',       // kawara slate
+    'village:tile-dark': '#4b5a66',
+    'village:cobble': '#cec8b5',
+    'village:lane': '#6b8184',
+    'village:line': '#f1f2ea',
+    'village:ground': '#5ea476',
     // Props and planting.
-    'village:leaf': '#7fa36b', 'village:leaf-light': '#9cbb7c', 'village:leaf-dark': '#5f8a5a',
-    'village:bark': '#8a6a4f', 'village:pot': '#c47a55', 'village:soil': '#6f5240',
-    'village:bloom-yellow': '#ecc45a', 'village:bloom-coral': '#e98f7d', 'village:bloom-white': '#f6f0e1',
+    'village:leaf': '#52a06d', 'village:leaf-light': '#7abb88', 'village:leaf-dark': '#2f6e4d',
+    'village:bark': '#6a5c4e', 'village:pot': '#b56a52', 'village:soil': '#6a5948',
+    'village:bloom-yellow': '#e3c25e', 'village:bloom-coral': '#dc8571', 'village:bloom-white': '#f1f2ea',
     // Shared presets other modules ask for (props, shipyard), in the same palette.
-    cladding: '#efe3c6', claddingDark: '#6f8a83', corrugated: '#9db58b', frame: '#c7c1b0', frameLight: '#e3dccb',
-    framePainted: '#46514f', sheet: '#5f8b82', deck: '#b88e62', concrete: '#cbbfa6', rubber: '#6f5240',
-    hull: '#f1e6cc', hullDark: '#46514f', accent: '#e0a24f',
-    'ship:bare-steel': '#c7c1b0', 'ship:bare-alloy': '#e3dccb', 'ship:heat': '#9b7a62', 'ship:hangar-slab': '#d8cdb1',
-    'blueprint:bay-floor': '#a8bb8c',
+    cladding: '#e9e5d3', claddingDark: '#5f7a76', corrugated: '#8fae86', frame: '#bdb8a8', frameLight: '#dcd8c8',
+    framePainted: '#566265', sheet: '#4e8a84', deck: '#a88e6c', concrete: '#c7c2b1', rubber: '#6a5948',
+    hull: '#ebe7d6', hullDark: '#566265', accent: '#d79a4a',
+    'ship:bare-steel': '#bdb8a8', 'ship:bare-alloy': '#dcd8c8', 'ship:heat': '#8a705c', 'ship:hangar-slab': '#cfc9b6',
+    'blueprint:bay-floor': '#86b48f',
+    // Module keys a caller may still ask for in this look, in the nearest village tone so that
+    // StyleLibrary.unlisted() stays empty: cast concrete is stone, rails and staffs are timber, a
+    // hatch is boards, a planting bed's mulch is soil, loose basalt is a darker stone. Since round 9
+    // no village model or page in this repository asks for them (their callers draw only in the
+    // industrial look now); they are kept for a host that builds those pieces in the village look.
+    // 'timeline:regolith' only lends its finish maps to a ground, so its colour is never drawn.
+    'blueprint:precast': '#c7c2b1', 'blueprint:tube': '#5f4c3e',
+    'showcase:staff-bone': '#f1f2ea', 'showcase:staff-red': '#b85a4a',
+    'terrain:hatch-plate': '#a88e6c', 'terrain:bed-mulch': '#6a5948',
+    'timeline:basalt': '#9a9384', 'timeline:regolith': '#ffffff',
+    // props-ships: the village ships' own surfaces (src/ship/factory.ts villageShipMaterials):
+    // canopy glass drawn as an opaque slate-teal, and the dark role (throats, the lookout's slit,
+    // the mast) a warm dark whose shade band stays clear of the line ink, as iron's does not.
+    'ship:canopy': '#4a6f70', 'ship:dark': '#6b5c4f',
   },
   paints: {
-    bone: '#f1e6cc', graphite: '#46514f', gunmetal: '#7e9690', alloy: '#d9d3c4', amber: '#e0a24f',
-    teal: '#5f9b92', crimson: '#c4614b', cobalt: '#6585a3', olive: '#93a571', oxide: '#a06c4d',
+    bone: '#ebe7d6', graphite: '#566265', gunmetal: '#6f8784', alloy: '#d3d0c2', amber: '#d79a4a',
+    teal: '#4e8a84', crimson: '#b85a4a', cobalt: '#58799a', olive: '#86a06a', oxide: '#9a6449',
   },
   glows: { cyan: '#a8eadb', sodium: '#ffcf8c', signalRed: '#ff9473', magenta: '#f39cbd' },
   finish: { paint: [0.88, 0], metal: [0.7, 0.05], concrete: [0.95, 0], rubber: [0.95, 0] },
   relief: 0,
-  envIntensity: 0.22,
+  // No image light: it would shade surfaces in gradients between the two bands. three takes a
+  // material's image light from scene.environmentIntensity when it lights from scene.environment,
+  // so the Stage (and the thumbnails) set that to this; glass reflects nothing either.
+  envIntensity: 0,
+  // Drawn flat in the two bands and writing depth (StyleLibrary.glass): the pane is outlined and
+  // what is behind it shows faintly, without its lines, through a slate-blue tint (darker and bluer
+  // than the teal-green shutters beside the windows); off the ink in shade like every other tone.
   glass: {
-    clear: { color: '#3f5a5e', opacity: 0.88, roughness: 0.35 },
-    smoked: { color: '#33494c', opacity: 0.92, roughness: 0.35 },
-    canopy: { color: '#4a6f70', opacity: 0.82, roughness: 0.3 },
-    envIntensity: 0.5,
+    clear: { color: '#4f6e78', opacity: 0.88, roughness: 1 },
+    smoked: { color: '#455e68', opacity: 0.92, roughness: 1 },
+    canopy: { color: '#4a6f70', opacity: 0.82, roughness: 1 },
+    envIntensity: 0,
   },
-  hazard: ['#f2ead3', '#c26b4b'],
-  glowBase: '#6b5640',
-  ink: { dark: '#3a4a46', light: '#f6eedb' },
+  hazard: ['#f1f2ea', '#b85a4a'],
+  // Pad corner marks, the survey pin and the workshop's border are painted red, like the staff bands.
+  hazardBand: '#b85a4a',
+  glowBase: '#5e5040',
+  ink: { dark: '#283034', light: '#f1f2ea' },
   light: {
-    key: '#fff0d6', keyIntensity: 2.8,
+    // Lit = (key + fill) / π = 1 and shade = fill / π = 0.5 of a surface's colour,
+    // in linear light; white, so colours come out as given.
+    key: '#ffffff', keyIntensity: 1.571,
     /** About 43° up from the front left of the village scene: fronts and left sides lit, shadows to the back right. */
     keyPosition: [-5, 8, 6],
-    rim: '#d8eee8', rimIntensity: 0.35,
-    sky: '#cde6df', ground: '#b8a27c', fillIntensity: 1.05,
-    shadowRadius: 2, shadowIntensity: 0.62,
+    rim: '#ffffff', rimIntensity: 0,
+    sky: '#ffffff', ground: '#ffffff', fillIntensity: 1.571,
+    // A full shadow takes all of the key: cast shadows are the shade band.
+    shadowRadius: 1, shadowIntensity: 1,
   },
-  sky: { zenith: '#83bdb9', horizon: '#cfe4dc', ground: '#b9ad8c', sun: 2 },
-  fog: '#cfe2da',
+  // The dome glass reflects; the backdrop itself is the cloud sky.
+  sky: { zenith: '#6fc2b8', horizon: '#a9e2d3', ground: '#a8a088', sun: 2 },
+  fog: '#a9d9cc',
   thumbnail: '#efe6d2',
-  fogDensity: 0.45,
-  practical: 0.6,
+  fogDensity: 0.08,
+  // Lamps glow but light nothing by day (src/shell/stage.ts turns the pool off).
+  practical: 0,
   backgroundIntensity: 1,
   backgroundBlurriness: 0.35,
   exposure: 1,
-  // No ambient occlusion pass: the stepped light and the ink already draw where
+  // No ambient occlusion pass: the two bands and the lines already draw where
   // things meet, the pass's soft halos fight the flat bands, and it redraws the
   // whole scene (about half a frame's draw calls on the village sample).
   ao: 0,
   terrain: { saturation: 0.7, scale: 0.8, lift: 0.06, warm: [1.04, 1.0, 0.9], detail: 0.25 },
-  // Only the plume at full thrust blooms: lit plaster under the key is well over 1
-  // before tone mapping, and a threshold of 1 hazed every sunny wall.
-  bloom: { strength: 0.12, radius: 0.25, threshold: 2.8 },
-  cel: { shade: 0, mid: 0.55, midAt: 0.1, litAt: 0.42, soft: 0.03 },
-  outline: { color: '#2f3d3a', width: 1.5, crease: 35, lineOpacity: 0.7 },
+  // Without a tone curve a lit surface is at most its colour (≤ 1), and a glow keeps its hue at no
+  // more than 1 in any channel (StyleLibrary.createGlow): only additive effects (plumes) can bloom.
+  bloom: { strength: 0.12, radius: 0.25, threshold: 1 },
+  // Two bands: shade below a tenth of the way round, lit above, with a narrow soft edge.
+  cel: { shade: 0, mid: 0, midAt: 0.5, litAt: 0.1, soft: 0.012 },
+  edges: { color: '#283034', width: 1.6, wobble: 0.9, breaks: 0.1, depth: 0.02, normal: 0.5, creaseFade: [15, 40], fade: [45, 90] },
+  cloudSky: { deep: '#4c9fa6', mid: '#6fc2b8', light: '#a9e2d3', scale: 1 },
+  mottle: 0.04,
+  toneMapping: 'none',
+  // Indoors: sun × 0.5, fill × 1.5, so shade is 0.75 of a colour and lit stays at it.
+  interior: { fill: 1.5, key: 0.5 },
 };
 
 /** The parameters of a stylised look, or null for the industrial look. */

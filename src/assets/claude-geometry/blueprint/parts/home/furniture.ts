@@ -11,11 +11,13 @@ import type { Kit } from '../kit.ts';
 //   their backs 0.13 m in from the edge line, clear of every wall's inner
 //   face, and reaching no further than the cell centre (z ≥ −0.5).
 //
-// One model per part for both looks: turned and boarded timber, teal paint
-// and a few things on the shelves in the village look; the same shapes in
-// painted steel, tread plate and sheet in the industrial one. Edges are eased
+// The industrial look's models (table, chair, sideboard, shelf) are turned and
+// boarded shapes in painted steel, tread plate and sheet, their edges eased
 // (bevelled extrusions, chamfers, lathed profiles) so the forms read without
-// colour. All of them are looks only: nothing sits, stores or opens.
+// colour. The village look has its own twins at the end of this file: a low
+// table with stools, a chest of drawers and an open shelf, big flat forms the
+// screen-space lines can draw. All of them are looks only: nothing sits,
+// stores or opens.
 
 /** Back of a piece standing against a side, in its frame (clear of wall linings, window boards and skirtings). */
 export const SIDE_BACK = -0.13;
@@ -284,4 +286,147 @@ export function shelf(k: Kit) {
   }
   lying(paint, 0.15, s3, 0.21, 0.04, -0.1);
   lying(bloom, 0.15, s3 + 0.04, 0.18, 0.035, 0.06);
+}
+
+// ------------------------------------------------------------------ village twins
+//
+// The village look's furniture for a small Japanese town (docs/restyle/parts.md):
+// dark timber frames and pale boards in big flat pieces, so the lines draw
+// their edges, the drawer gaps and the shelves, and nothing else. They stand
+// where the industrial pieces stand (backs from SIDE_BACK) and inside the same
+// envelopes (info.ts).
+
+/**
+ * The low table: its top (two boards along z with an open joint at x 0), the
+ * apron under the top's edges and the four legs at its corners.
+ */
+export const LOW_TABLE = { top: 0.45, board: 0.035, half: 0.3, joint: 0.008, apron: 0.06, apronOut: 0.265, apronT: 0.02, leg: 0.05 } as const;
+/** The stool that tucks under it: seat top, seat board, half width, front and back of the seat (z), legs and their inset. */
+export const STOOL = { top: 0.3, board: 0.04, half: 0.17, front: -0.4, back: SIDE_BACK - 0.02, leg: 0.04, inset: 0.015 } as const;
+
+/**
+ * Low table, 0.6 m square, its top at 0.45 m: two wide boards on an
+ * apron 6 cm deep, four square legs. Stools on two opposite sides tuck under
+ * it: their seats (0.30 m) pass under the apron (from 0.355 m) between the
+ * legs (from 0.215 m off the middle).
+ */
+export function tableVillage(k: Kit) {
+  const { b } = k, wood = k.m('post'), boards = k.m('tread');
+  const { top, board, half, joint, apron, apronOut, apronT, leg } = LOW_TABLE;
+  const under = top - board, at = apronOut - leg / 2;
+  if (k.low) b.box(boards, [2 * half, board, 2 * half], { position: [0, top - board / 2, 0] }, 0);
+  else for (const s of [-1, 1]) b.box(boards, [half - joint / 2, board, 2 * half], { position: [s * (half + joint / 2) / 2, top - board / 2, 0] }, 0);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) b.box(wood, [leg, under, leg], { position: [sx * at, under / 2, sz * at] }, 0);
+  if (k.low) return;
+  // Apron between the legs' inner faces, flush with their outer faces.
+  const run = 2 * (at - leg / 2), y = under - apron / 2, c = apronOut - apronT / 2;
+  for (const s of [-1, 1]) {
+    b.box(wood, [run, apron, apronT], { position: [0, y, s * c] }, 0);
+    b.box(wood, [apronT, apron, run], { position: [s * c, y, 0] }, 0);
+  }
+}
+
+/**
+ * Stool against a side of its cell: a board seat 0.34 × 0.25 m at
+ * 0.30 m on four square legs, a stretcher along each side (not at low).
+ * Nothing of it is above 0.30 m, so it tucks under the low table.
+ */
+export function chairVillage(k: Kit) {
+  const { b } = k, wood = k.m('post'), boards = k.m('tread');
+  const { top, board, half, front, back, leg, inset } = STOOL;
+  const seat = top - board, lx = half - inset - leg / 2, z0 = front + inset + leg / 2, z1 = back - inset - leg / 2;
+  b.box(boards, [2 * half, board, back - front], { position: [0, top - board / 2, (front + back) / 2] }, 0);
+  for (const s of [-1, 1]) for (const z of [z0, z1]) b.box(wood, [leg, seat, leg], { position: [s * lx, seat / 2, z] }, 0);
+  if (!k.low) for (const s of [-1, 1]) b.box(wood, [0.025, 0.03, z1 - z0 - leg], { position: [s * lx, 0.1, (z0 + z1) / 2] }, 0);
+}
+
+/**
+ * The chest of drawers: its top board (left clear for decor) and carcass, the
+ * plinth set back under it, and the drawer fronts standing proud of the
+ * carcass with gaps between them.
+ */
+export const CHEST = { top: 0.9, board: 0.03, half: 0.33, front: -0.445, plinth: 0.06, frame: 0.025, gap: 0.012, proud: 0.012 } as const;
+
+/**
+ * Chest of drawers against a wall, 0.66 m wide and 0.90 m high: a dark
+ * timber carcass on a plinth, a pale top board overhanging it, and pale
+ * drawer fronts in three rows (two small drawers over two wide ones), each
+ * with an iron pull on a square plate (two on a wide drawer; none at low). The
+ * dark carcass shows in the gaps, so the drawers read as drawers in colour and
+ * in lines.
+ */
+export function sideboardVillage(k: Kit) {
+  const { b } = k, wood = k.m('post'), boards = k.m('tread'), iron = k.m('steel');
+  const { top, board, half, front, plinth, frame, gap, proud } = CHEST;
+  const back = SIDE_BACK - 0.005, body = top - board;
+  // Plinth: 12 mm in from the front and the sides, so its top draws a line round the foot.
+  const pb = back - 0.005, pf = front + 0.012;
+  b.box(wood, [2 * half - 0.024, plinth, pb - pf], { position: [0, plinth / 2, (pb + pf) / 2] }, 0);
+  b.box(wood, [2 * half, body - plinth, back - front], { position: [0, (plinth + body) / 2, (back + front) / 2] }, 0);
+  // Top: 1 cm over the sides, 2 cm over the front, 2 mm short of the carcass's back.
+  const tb = back - 0.002, tf = front - 0.02;
+  b.box(boards, [2 * half + 0.02, board, tb - tf], { position: [0, body + board / 2, (tb + tf) / 2] }, 0);
+  // Drawers: three rows inside the carcass's frame.
+  const x0 = half - frame, y0 = plinth + frame, rows = 3, rh = (body - frame - y0 - (rows - 1) * gap) / rows;
+  // Pulls: a square iron plate on the drawer front and a flat bar hanging low on it, as a tansu's fittings.
+  const dz = front - proud / 2, face = front - proud;
+  const pull = (x: number, y: number) => {
+    if (k.low) return;
+    b.box(iron, [0.075, 0.05, 0.004], { position: [x, y, face - 0.002] }, 0);
+    b.box(iron, [0.09, 0.014, 0.01], { position: [x, y - 0.012, face - 0.004 - 0.005] }, 0);
+  };
+  for (let r = 0; r < rows; r++) {
+    const y = y0 + r * (rh + gap) + rh / 2;
+    if (r < rows - 1) {
+      b.box(boards, [2 * x0, rh, proud], { position: [0, y, dz] }, 0);
+      for (const s of [-1, 1]) pull(s * 0.15, y);
+    } else for (const s of [-1, 1]) {
+      const w = x0 - gap / 2, x = s * (x0 + gap / 2) / 2;
+      b.box(boards, [w, rh, proud], { position: [x, y, dz] }, 0);
+      pull(x, y);
+    }
+  }
+}
+
+/** The open shelf: height (top board's top), half width, side boards, front (z), back (z), shelf bottoms and boards. */
+export const OPEN_SHELF = { top: 1.815, crown: 0.025, half: 0.34, side: 0.03, front: -0.43, back: SIDE_BACK - 0.002, backT: 0.014, shelves: [0.06, 0.48, 0.9, 1.32], board: 0.03 } as const;
+
+/**
+ * Open shelf against a wall, 0.68 m wide and 1.815 m high: two dark
+ * timber sides under a timber top board, a pale boarded back, four pale
+ * shelves over a kick board set back at the floor, and two or three things a
+ * shelf: a stoneware jar and a slate lacquer box; two teal tea caddies and a
+ * folded cloth on a second; a stack of three stone bowls and a small jar; a
+ * potted plant and a wooden tea box at the top.
+ */
+export function shelfVillage(k: Kit) {
+  const { b } = k, wood = k.m('post'), boards = k.m('tread'), stone = k.m('concrete'), slate = k.m('corrugated');
+  const { top, crown, half, side, front, back, backT, shelves, board } = OPEN_SHELF;
+  const inner = half - side, high = top - crown, zc = -0.29;
+  for (const s of [-1, 1]) b.box(wood, [side, high, back - front], { position: [s * (half - side / 2), high / 2, (back + front) / 2] }, 0);
+  b.box(wood, [2 * half, crown, back - front + 0.015], { position: [0, high + crown / 2, (back + front - 0.015) / 2] }, 0);
+  b.box(boards, [2 * inner, high, backT], { position: [0, high / 2, back - backT / 2] }, 0);
+  if (!k.low) b.box(wood, [2 * inner, shelves[0], 0.02], { position: [0, shelves[0] / 2, front + 0.03] }, 0);
+  const sb = back - backT, sf = front + 0.01;
+  for (const y of shelves) b.box(boards, [2 * inner, board, sb - sf], { position: [0, y + board / 2, (sb + sf) / 2] }, 0);
+  const [s0, s1, s2, s3] = shelves.map(y => y + board);
+  const seg = k.fine ? 12 : k.low ? 6 : 8;
+  // Bottom shelf: a stoneware jar with a shoulder and a short neck, a slate lacquer box.
+  if (k.low) b.cylinder(stone, 0.08, 0.08, 0.24, { position: [-0.15, s0 + 0.12, zc] }, { segments: seg });
+  else b.lathe(stone, [[0.07, 0], [0.095, 0.08], [0.09, 0.17], [0.06, 0.215], [0.065, 0.24], [0, 0.24]], { position: [-0.15, s0, zc] }, seg);
+  b.box(slate, [0.2, 0.12, 0.18], { position: [0.15, s0 + 0.06, zc] }, 0);
+  // Second shelf: two tea caddies in the teal paint, a folded cloth (coral, cream on top).
+  for (const x of k.low ? [-0.2] : [-0.21, -0.1]) b.cylinder(k.m('leaf'), 0.045, 0.045, 0.14, { position: [x, s1 + 0.07, zc] }, { segments: seg });
+  b.box(k.m('hazard'), [0.18, 0.05, 0.2], { position: [0.15, s1 + 0.025, zc] }, 0);
+  if (!k.low) b.box(k.m('marking'), [0.15, 0.04, 0.17], { position: [0.15, s1 + 0.07, zc] }, 0);
+  // Third shelf: three stone bowls stacked, a small jar.
+  if (!k.low) {
+    b.lathe(stone, [[0.045, 0], [0.09, 0.045], [0.06, 0.05], [0.09, 0.095], [0.06, 0.1], [0.09, 0.145], [0, 0.145]], { position: [-0.16, s2, zc] }, seg);
+    b.lathe(stone, [[0.05, 0], [0.068, 0.06], [0.064, 0.12], [0.042, 0.15], [0, 0.15]], { position: [0.17, s2, zc] }, seg);
+  }
+  // Top shelf: a plant in a slate pot, a wooden tea box.
+  if (k.low) b.cylinder(slate, 0.065, 0.05, 0.11, { position: [-0.15, s3 + 0.055, zc] }, { segments: seg });
+  else b.lathe(slate, [[0.05, 0], [0.066, 0.11], [0, 0.11]], { position: [-0.15, s3, zc] }, seg);
+  b.geometry(k.m('membrane'), new T.IcosahedronGeometry(0.09, k.fine ? 1 : 0), { position: [-0.15, s3 + 0.18, zc], scale: [1.1, 0.85, 1] });
+  b.box(wood, [0.16, 0.1, 0.16], { position: [0.16, s3 + 0.05, zc] }, 0);
 }

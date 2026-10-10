@@ -1,7 +1,8 @@
 import * as T from 'three';
 import { disposeObject3D, markShared } from '../../core/dispose.ts';
 import type { Stage } from '../../shell/stage.ts';
-import { PALETTE, UI } from '../../style/tokens.ts';
+import { PALETTE, UI, VILLAGE_UI } from '../../style/tokens.ts';
+import { villageMaterial } from '../../style/village.ts';
 import type { BlueprintEditor } from '../editor.ts';
 import { buildBlueprintModel } from '../model3d.ts';
 import type { BlueprintModel } from '../model3d.ts';
@@ -19,9 +20,15 @@ import type { PartTemplates } from './templates.ts';
 // that shares the part template's buffers; it is never drawn and exists only
 // so the pointer can pick individual parts. Grid cell (x, z) spans world
 // x ∈ [x − 2.5, x − 1.5], so the bay is centred on the origin.
+// In the village look the bay is a work yard on the village ground (a cobbled
+// yard in a timber kerb, a pencil grid), and the state colours, faded levels
+// and ghosts take the look's interface tokens (tokens.ts VILLAGE_UI.scene) as
+// flat, unlit tints: nothing in that look is shaded smoothly.
 
 export type Draft = Omit<PartPlacement, 'n'>;
 const HALF = GRID.cells / 2;
+/** Sides of the ground under the bay, metres: the industrial bay's floor, and the village ground out to the horizon. */
+const GROUND = { industrial: 40, village: 400 };
 
 interface Instance { object: T.Group; key: string; part: PartId; level: number; selected: T.Object3D[] }
 interface LevelModel { model: BlueprintModel; key: string; faded: boolean }
@@ -37,48 +44,74 @@ export class WorkshopView {
   lastBuildMs = 0;
   private ghost: { object: T.Group; key: string } | null = null;
   private levelGrid: T.LineSegments;
+  private floorGrid: T.LineSegments;
+  private readonly village: boolean;
   private owned: { dispose(): void }[] = [];
   private ray = new T.Raycaster();
   private plane = new T.Plane(new T.Vector3(0, 1, 0), 0);
   level = 0;
 
-  private faded: T.MeshStandardMaterial;
+  private faded: T.Material;
   private selLine: T.LineBasicMaterial;
   private selFill: T.MeshBasicMaterial;
-  private ghostMat: Record<'ok' | 'bad', { fill: T.MeshStandardMaterial; line: T.LineBasicMaterial }>;
+  private ghostMat: Record<'ok' | 'bad', { fill: T.Material; line: T.LineBasicMaterial }>;
 
   constructor(stage: Stage, editor: BlueprintEditor, templates: PartTemplates) {
     this.stage = stage; this.editor = editor; this.templates = templates;
     this.root.name = 'workshop';
     const own = <M extends { dispose(): void }>(m: M): M => { this.owned.push(m); return m; };
-    this.faded = own(markShared(new T.MeshStandardMaterial({ color: '#7d8a93', transparent: true, opacity: 0.13, depthWrite: false, roughness: 0.7, metalness: 0 })));
-    this.selLine = own(markShared(new T.LineBasicMaterial({ color: UI.info, transparent: true, opacity: 0.95, depthTest: false })));
+    const village = stage.look === 'village', S = VILLAGE_UI.scene;
+    this.village = village;
+    this.faded = own(markShared(village
+      ? new T.MeshBasicMaterial({ color: S.faded, transparent: true, opacity: 0.12, depthWrite: false })
+      : new T.MeshStandardMaterial({ color: '#7d8a93', transparent: true, opacity: 0.13, depthWrite: false, roughness: 0.7, metalness: 0 })));
+    const info = village ? S.select : UI.info;
+    // Overlay lines write no depth: the village look draws its lines from depth (src/style/lines.ts), and would ink round them.
+    this.selLine = own(markShared(new T.LineBasicMaterial({ color: info, transparent: true, opacity: 0.95, depthTest: false, depthWrite: false })));
     // Selection is the outline; the fill is only a breath of tint so the part's detail stays readable.
-    this.selFill = own(markShared(new T.MeshBasicMaterial({ color: UI.info, transparent: true, opacity: 0.035, depthWrite: false })));
-    // Ghosts: a faint lit tint without glow, so the part's form reads and what is behind it stays visible.
+    this.selFill = own(markShared(new T.MeshBasicMaterial({ color: info, transparent: true, opacity: 0.035, depthWrite: false })));
+    // Ghosts: a faint tint without glow, so the part's form reads and what is behind it stays visible
+    // (lit in the industrial look, flat in the village look).
     const ghost = (c: string) => ({
-      fill: own(markShared(new T.MeshStandardMaterial({ color: c, transparent: true, opacity: 0.2, depthWrite: false, roughness: 0.7, metalness: 0 }))),
-      line: own(markShared(new T.LineBasicMaterial({ color: c, transparent: true, opacity: 0.9, depthTest: false }))),
+      fill: own(markShared(village
+        ? new T.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.22, depthWrite: false })
+        : new T.MeshStandardMaterial({ color: c, transparent: true, opacity: 0.2, depthWrite: false, roughness: 0.7, metalness: 0 }))),
+      line: own(markShared(new T.LineBasicMaterial({ color: c, transparent: true, opacity: 0.9, depthTest: false, depthWrite: false }))),
     });
-    this.ghostMat = { ok: ghost(UI.ok), bad: ghost(UI.danger) };
+    this.ghostMat = village ? { ok: ghost(S.ok), bad: ghost(S.bad) } : { ok: ghost(UI.ok), bad: ghost(UI.danger) };
 
-    // Assembly bay: a dark sealed-concrete floor under the slabs and a hazard border round the build area.
+    // Assembly bay: a dark sealed-concrete floor under the slabs and a hazard border round the build area;
+    // in the village look a cobbled yard on the village ground, edged with a timber kerb.
+    // The village ground reaches the horizon, as the village sample's does (src/village/sample.ts): that look has no
+    // fog, so a 40 m floor would show its edge and corner against the cloud sky, a board hanging in the air.
     const lib = stage.library;
-    const floor = new T.Mesh(new T.PlaneGeometry(40, 40), lib.custom('blueprint:bay-floor', { finish: 'concrete', pattern: 'concrete', color: PALETTE.graphite, relief: 0.6 }));
+    const side = village ? GROUND.village : GROUND.industrial;
+    const floor = new T.Mesh(new T.PlaneGeometry(side, side), village ? villageMaterial(lib, 'village:ground') : lib.custom('blueprint:bay-floor', { finish: 'concrete', pattern: 'concrete', color: PALETTE.graphite, relief: 0.6 }));
+    floor.name = 'workshop-ground';
     floor.rotation.x = -Math.PI / 2; floor.position.y = -0.172; floor.receiveShadow = true;
-    floor.geometry.setAttribute('uv', new T.Float32BufferAttribute(floor.geometry.getAttribute('uv').array.map((v: number) => v * 20), 2));
+    // The concrete pattern repeats every 2 m; the village ground has no map (its mottle is fixed in the world).
+    if (!village) floor.geometry.setAttribute('uv', new T.Float32BufferAttribute(floor.geometry.getAttribute('uv').array.map((v: number) => v * 20), 2));
     this.root.add(floor);
+    if (village) {
+      const yard = new T.Mesh(new T.PlaneGeometry(GRID.cells + 0.2, GRID.cells + 0.2), villageMaterial(lib, 'village:cobble'));
+      yard.rotation.x = -Math.PI / 2; yard.position.y = -0.171; yard.receiveShadow = true;
+      this.root.add(yard);
+    }
     const border = new T.Group();
     for (const [x, z, w, d] of [[0, -HALF - 0.05, GRID.cells + 0.2, 0.1], [0, HALF + 0.05, GRID.cells + 0.2, 0.1], [-HALF - 0.05, 0, 0.1, GRID.cells], [HALF + 0.05, 0, 0.1, GRID.cells]]) {
-      const strip = new T.Mesh(new T.BoxGeometry(w, 0.004, d), lib.hazard());
+      const strip = new T.Mesh(new T.BoxGeometry(w, 0.004, d), village ? villageMaterial(lib, 'village:timber') : lib.hazard());
       strip.position.set(x, -0.169, z); strip.receiveShadow = true;
       border.add(strip);
     }
     this.root.add(border);
-    // Faint floor grid at level 0 and a brighter grid on the active level.
-    this.root.add(this.gridLines(-0.168, new T.LineBasicMaterial({ color: '#3b454e', transparent: true, opacity: 0.8 })));
-    this.levelGrid = this.gridLines(0.004, new T.LineBasicMaterial({ color: UI.info, transparent: true, opacity: 0.32, depthWrite: false }));
+    // Faint floor grid at level 0 and a brighter grid on the active level (in the village look: pencil, and the selection blue).
+    this.floorGrid = this.gridLines(-0.168, new T.LineBasicMaterial(village ? { color: S.grid, transparent: true, opacity: 0.35, depthWrite: false } : { color: '#3b454e', transparent: true, opacity: 0.8, depthWrite: false }));
+    this.floorGrid.name = 'floor-grid';
+    this.root.add(this.floorGrid);
+    this.levelGrid = this.gridLines(0.004, new T.LineBasicMaterial({ color: info, transparent: true, opacity: village ? 0.5 : 0.32, depthWrite: false }));
+    this.levelGrid.name = 'level-grid';
     this.root.add(this.levelGrid);
+    this.showFloorGrid();
     stage.scene.add(this.root);
     this.editor.onChange(() => this.sync());
     this.sync();
@@ -100,7 +133,17 @@ export class WorkshopView {
   setLevel(level: number) {
     this.level = Math.max(0, Math.min(GRID.levels - 1, level));
     this.levelGrid.position.y = this.level * STOREY;
+    this.showFloorGrid();
     this.sync();
+  }
+
+  /**
+   * On level 0 the two grids sit 17 cm apart, so each cell is drawn twice a few pixels apart. On the pale village
+   * yard both show, so there the floor grid steps aside while level 0 is active; the industrial floor grid nearly
+   * vanishes into the dark bay and stays.
+   */
+  private showFloorGrid() {
+    this.floorGrid.visible = !this.village || this.level > 0;
   }
 
   /** Bring the drawn levels and the pick proxies in line with the editor. */
@@ -124,7 +167,9 @@ export class WorkshopView {
         const t = partTransform(p, { x: HALF, z: HALF });
         inst.object.position.set(...t.position);
         inst.object.rotation.set(0, t.yaw, 0);
-        inst.object.updateMatrix();
+        // World matrices now, not at the next draw: a tap can come before the next frame
+        // (undo, then click at once) and would be picked against where the part was last drawn.
+        inst.object.updateMatrixWorld();
         inst.key = key; inst.level = p.level;
         for (const o of inst.selected) { o.position.copy(inst.object.position); o.rotation.copy(inst.object.rotation); }
       }
@@ -154,9 +199,8 @@ export class WorkshopView {
   private setFaded(entry: LevelModel, faded: boolean) {
     if (entry.faded === faded) return;
     entry.faded = faded;
+    // The faded material writes no depth, so a faded level also drops out of the village look's lines.
     entry.model.object.traverse(o => {
-      // A faded level shows no ink (village look): its lines would read through the tint.
-      if (o.name === 'ink-shell' || o.name === 'ink-lines') { o.visible = !faded; return; }
       const mesh = o as T.Mesh;
       if (!mesh.isMesh) return;
       if (faded) { mesh.userData.base ??= mesh.material; mesh.material = this.faded; mesh.castShadow = false; }
@@ -198,8 +242,7 @@ export class WorkshopView {
     if (!this.ghost) {
       const object = this.templates.instance(draft.part);
       const mats = this.ghostMat[ok ? 'ok' : 'bad'];
-      // The look's ink is not part of a ghost: it has its own outline below.
-      object.traverse(o => { if (o.name === 'ink-shell' || o.name === 'ink-lines') o.visible = false; });
+      // The fill writes no depth, so the village look's lines leave a ghost alone: it has its own outline below.
       object.traverse(o => { const m = o as T.Mesh; if (m.isMesh) { m.material = mats.fill; m.castShadow = false; m.receiveShadow = false; m.renderOrder = 5; } });
       const line = new T.LineSegments(this.templates.get(draft.part).outline, mats.line);
       line.renderOrder = 11;

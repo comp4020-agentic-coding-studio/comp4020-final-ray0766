@@ -20,7 +20,7 @@ it('uses legal player blueprints, authentic content hashes, ordinary placement a
  for(const l of HUB_LOTS)expect(structureFit(l.blueprint.parts,l.object.position,l.object.rotation,PUBLIC_FIELD).problem).toBeNull();
 });
 it('walks all delivery/boarding bearings through the central alley with shared colliders',()=>{
- const w=world();for(const road of PUBLIC_WALKS){let p=w.recover(w.pose(road[0]));for(const end of road.slice(1))p=walk(w,p,end);}
+ const w=world();for(const road of PUBLIC_WALKS)for(const points of [road,[...road].reverse()]){let p=w.recover(w.pose(points[0]));for(const end of points.slice(1))p=walk(w,p,end);}
 });
 it('enters all sixteen rooms through real open-door parts and keeps ceiling jumps safe',()=>{
  const w=world();for(const {object:o,blueprint:b}of HUB_LOTS){const anchor={dir:o.position,yaw:o.rotation},fit=structureFit(b.parts,o.position,o.rotation,PUBLIC_FIELD),at=(x:number,z:number)=>localToDir(anchor,fit.baseRadius,[x,0,z]),q=new Quaternion().fromArray(anchorQuaternion(anchor)).invert();

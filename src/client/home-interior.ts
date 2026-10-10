@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {createVillageDrawing} from './village-drawing.ts';
 import { courier } from './character.ts';
 import { disposeGeometry } from './build-art.ts';
 import { createWorldStyleLibrary,configureHomeLighting } from './presentation.ts';
@@ -15,6 +16,7 @@ import type { PresenceSnapshot } from '../shared/presence.ts';
 import { homeIndoorDoorOrigin } from '../shared/home-door.ts';
 import { createHomeDoor } from './home-door.ts';
 import { createHomeRoomArt, applyHomeRoomTheme } from './home-room-art.ts';
+import {beginSceneLoading,yieldSceneFrame} from './loading-state.ts';
 import './home-interior.css';
 
 export interface HomeInteriorOptions {
@@ -75,7 +77,7 @@ const translation: Record<string, [string, string]> = {
   retry: ['Reconnect', '重新连接'], pending: ['Opening the door…', '正在开门…'],
   material: ['Wall colour', '墙面颜色'], furniture: ['Furniture', '家具'], rotate: ['Turn', '旋转'],
   warm: ['Cream', '奶油'], sage: ['Sage', '浅绿'], blue: ['Sky', '浅蓝'],
-  table: ['Table', '圆桌'], chair: ['Chair', '椅子'], shelf: ['Shelf', '书架'], plant: ['Plant', '盆栽'],
+  table: ['Low table', '矮桌'], chair: ['Stool', '木凳'], shelf: ['Shelf', '书架'], plant: ['Plant', '盆栽'],
   edited: ['Preview · save to keep your changes', '布置预览 · 保存后保留修改'],
   blocked: ['Leave the doorway and a walking route clear.', '请给门口和行走路线留出空间。'],
   readonly: ['You can explore; the owner arranges this room.', '可以自由参观，房间由主人布置。'],
@@ -86,6 +88,7 @@ const translation: Record<string, [string, string]> = {
 export class HomeInterior {
   readonly scene = new T.Scene();
   readonly camera = new T.OrthographicCamera(-5, 5, 5, -5, .05, 100);
+  private drawing:ReturnType<typeof createVillageDrawing>;
   private readonly ui = document.createElement('section');
   private readonly library = createWorldStyleLibrary();
   private room = new T.Group();
@@ -123,10 +126,13 @@ export class HomeInterior {
   private currentVisit = '';
   private abort = new AbortController();
   private _active = false;
+  private preparation: {key:string;visit:string;controller:AbortController;task:ReturnType<typeof beginSceneLoading>} | null = null;
   get active() { return this._active; }
+  get preparing() { return this.preparation !== null; }
   get facing(): Vec3 { return [Math.sin(this.yaw), 0, Math.cos(this.yaw)]; }
 
   constructor(private readonly options: HomeInteriorOptions) {
+    this.drawing=createVillageDrawing(options.renderer,this.scene,this.camera);
     this.scene.add(this.room, this.furniture, this.avatar.root, this.selection, this.doorView.root);
     this.selection.rotation.x = -Math.PI / 2; this.selection.visible = false;
     configureHomeLighting(this.scene,this.fill,this.sun,HOME_ROOM.width,HOME_ROOM.depth,HOME_ROOM.height);
@@ -142,8 +148,8 @@ export class HomeInterior {
     const on = (id: string, fn: () => void) => this.get(id).addEventListener('click', fn, { signal: this.abort.signal });
     on('home-exit', () => { if (this.nearExit()) void this.leave(); });
     on('home-toggle-door', () => void this.toggleDoor());
-    on('home-camera-view', () => { this.overview = !this.overview; this.lastViewport = ''; this.updateControls(); });
-    on('home-photo',()=>{if(!this.pendingAction)window.dispatchEvent(new Event('open-photo-mode'));});
+    on('home-camera-view', () => { if(this.preparing)return;this.overview = !this.overview; this.lastViewport = ''; this.updateControls(); });
+    on('home-photo',()=>{if(!this.pendingAction&&!this.preparing)window.dispatchEvent(new Event('open-photo-mode'));});
     on('home-arrange', () => this.beginEditing());
     on('home-cancel', () => this.cancelEditing());
     on('home-save', () => void this.saveDraft());
@@ -162,7 +168,7 @@ export class HomeInterior {
     document.addEventListener('visibilitychange', () => { if (document.hidden) { this.clearInput(); if(!this.photoMode)void this.flush(); } }, { signal: this.abort.signal });
     const joystick = this.get('home-joystick');
     const drag = (e: PointerEvent) => { const rect = joystick.getBoundingClientRect(); this.stick.set((e.clientX - rect.left - rect.width / 2) / 34, (e.clientY - rect.top - rect.height / 2) / 34).clampLength(0, 1); this.get('home-stick').style.transform = `translate(${this.stick.x * 25}px,${this.stick.y * 25}px)`; };
-    joystick.addEventListener('pointerdown', e => { if (this.editing || !this.online || this.pendingAction) return; e.preventDefault(); this.stickPointer = e.pointerId; joystick.setPointerCapture(e.pointerId); drag(e); }, { signal: this.abort.signal });
+    joystick.addEventListener('pointerdown', e => { if (this.preparing || this.editing || !this.online || this.pendingAction) return; e.preventDefault(); this.stickPointer = e.pointerId; joystick.setPointerCapture(e.pointerId); drag(e); }, { signal: this.abort.signal });
     joystick.addEventListener('pointermove', e => { if (this.stickPointer === e.pointerId) drag(e); }, { signal: this.abort.signal });
     for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) joystick.addEventListener(name, () => { this.stickPointer = null; this.stick.set(0, 0); this.get('home-stick').style.transform = ''; }, { signal: this.abort.signal });
     this.localize();
@@ -179,7 +185,7 @@ export class HomeInterior {
   private setStatus(key: string) { this.statusKey = key; this.get('home-room-status').textContent = this.text(key); }
   private clearInput() { this.keys.clear(); this.stick.set(0, 0); this.moving = 0; this.get('home-stick').style.transform = ''; }
   private keyDown = (event: KeyboardEvent) => {
-    if (!this.active || this.photoMode || event.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (!this.active || this.preparing || this.photoMode || event.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;
     if ((event.target as Element)?.closest('input,select,textarea,[contenteditable]')) return;
     const key = event.key.toLowerCase();
     if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'e', 'escape', ' '].includes(key)) {
@@ -191,35 +197,38 @@ export class HomeInterior {
   };
   private keyUp = (event: KeyboardEvent) => { if (!this.active) return; this.keys.delete(event.key.toLowerCase()); };
 
-  receive(player: PlayerState) {
+  receive(player: PlayerState, restoring=false):boolean {
     const location = player.location;
     // A move callback may resolve after a newer poll or another space change.
     // Do not let this module bypass the host's stale-response protection.
     const previous = this.acknowledged?.location;
-    if (this.acknowledged && player.revision < this.acknowledged.revision) return;
-    if (previous && location && location.visitEpoch < previous.visitEpoch) return;
-    if (previous?.kind === 'interior' && location?.kind === 'interior' && previous.visitEpoch === location.visitEpoch && location.sequence < previous.sequence) return;
-    if (!player.home || location?.kind !== 'interior') { if (this.active) this.close(); return; }
-    if (this.home?.interiorId === player.home.interiorId && (player.home.interior.version < this.home.interior.version || player.home.interior.doorVersion < this.home.interior.doorVersion)) return;
+    if (this.acknowledged && player.revision < this.acknowledged.revision) return false;
+    if (previous && location && location.visitEpoch < previous.visitEpoch) return false;
+    if (previous?.kind === 'interior' && location?.kind === 'interior' && previous.visitEpoch === location.visitEpoch && location.sequence < previous.sequence) return false;
+    if (player.home && location?.kind==='interior' && this.home?.interiorId === player.home.interiorId && (player.home.interior.version < this.home.interior.version || player.home.interior.doorVersion < this.home.interior.doorVersion)) return false;
+    // Exterior snapshots also advance the fence: a delayed save/door response
+    // must not reopen the previous room after another tab has already left it.
+    this.acknowledged = player;
+    if (!player.home || location?.kind !== 'interior') { if (this.active || this.preparing) this.close(); return true; }
     const visit = `${location.interiorId}:${location.visitEpoch}`;
-    const arriving = visit !== this.currentVisit;
-    this.acknowledged = player; this.home = player.home;
+    const arriving = restoring || visit !== this.currentVisit;
+    this.home = player.home;
     if (arriving) {
       this.currentVisit = visit; this.position = [...location.position]; this.yaw = location.yaw;
       this.editing = false; this.dirty = false; this.clearInput();
       this.draft = copy(player.home.interior); this.draftVersion = this.draft.version; this.selected = this.draft.items[0]?.id ?? '';
-      this._active = true; this.ui.hidden = false; document.body.classList.add('home-interior-active');
+      this._active = true; this.ui.hidden = true; document.body.classList.add('home-interior-active');
       this.avatar.setColor(player.character); this.online = true; this.setStatus(player.home.canEdit ? 'entering' : 'readonly');
     }
     const sourceKey = `${player.home.interiorId}:${player.home.interior.version}`;
-    if (sourceKey !== this.sourceKey) {
-      this.sourceKey = sourceKey;
+    if (arriving || sourceKey !== this.sourceKey || this.preparation?.visit !== undefined && this.preparation.visit !== visit) {
       if (!this.editing || this.pendingAction) { this.draft = copy(player.home.interior); this.draftVersion = this.draft.version; }
-      this.buildRoom(); this.buildFurniture(); this.applyTheme((this.draft ?? player.home.interior).material);
+      if(this.preparation?.key!==sourceKey||this.preparation.visit!==visit)void this.prepareRoom(sourceKey,visit);
       if (!homePositionAllowed(this.position, player.home.interior.items, HOME_BODY_RADIUS, player.home.interior.room, player.home.interior.doorOpen)) this.position = [...location.position];
     }
     this.doorView.setOpen(player.home.interior.doorOpen, arriving);
     this.avatar.setColor(player.character); this.populateItems(); this.updateControls();
+    return true;
   }
 
   setOnline(online: boolean) {
@@ -231,7 +240,7 @@ export class HomeInterior {
 
   /** Only scoped indoor visitors belong here. Position is planar, never normalized. */
   receivePresence(snapshot: PresenceSnapshot) {
-    if (!this.active || snapshot.scope !== `home:${this.home?.buildingId}` || snapshot.visitEpoch !== this.acknowledged?.location?.visitEpoch) return;
+    if (!this.active || this.preparing || snapshot.scope !== `home:${this.home?.buildingId}` || snapshot.visitEpoch !== this.acknowledged?.location?.visitEpoch) return;
     const current = new Set(snapshot.visitors.map(v => v.id));
     for (const [id, guest] of this.guests) if (!current.has(id)) { disposeGeometry(guest.root); this.guests.delete(id); }
     for (const visitor of snapshot.visitors.slice(0, 8)) {
@@ -241,38 +250,81 @@ export class HomeInterior {
     }
   }
 
-  private buildRoom() {
-    disposeGeometry(this.room); this.room = new T.Group(); this.scene.add(this.room);
-    const interior = this.draft ?? this.home!.interior, { width, depth, height } = interior.room;
-    configureHomeLighting(this.scene,this.fill,this.sun,width,depth,height);
-    this.room.add(createHomeRoomArt(interior.room, this.library).group);
+  private async prepareRoom(key:string,visit:string) {
+    this.cancelPreparation();
+    const preparation={key,visit,controller:new AbortController(),task:beginSceneLoading('Preparing your room…')};
+    this.preparation=preparation;this.clearInput();this.updateControls();
+    const {signal}=preparation.controller,interior=copy(this.draft??this.home!.interior);
+    let room:T.Group|null=null,furniture:T.Group|null=new T.Group();
+    const current=()=>this.preparation===preparation&&!signal.aborted&&this.currentVisit===visit;
+    const next=async()=>{await yieldSceneFrame(signal);if(!current())throw new DOMException('Loading cancelled.','AbortError');};
+    try{
+      await next();await next();
+      preparation.task.update('Preparing the room…');
+      room=this.createRoom(interior);await next();
+      for(const [index,item] of interior.items.entries()){
+        preparation.task.update('Preparing furniture…',index,interior.items.length);
+        furniture.add(this.createFurnitureItem(item));await next();
+      }
+      this.applyTheme(interior.material,room,furniture);
+      preparation.task.update('Finishing the view…');await next();
+      // Compile the complete new surfaces without replacing the last ready scene.
+      const staging=new T.Scene(),fill=new T.HemisphereLight(),sun=new T.DirectionalLight();
+      configureHomeLighting(staging,fill,sun,interior.room.width,interior.room.depth,interior.room.height);
+      staging.add(room,furniture,fill,sun,sun.target,this.avatar.root.clone(true),this.doorView.root.clone(true));
+      try{await this.options.renderer.compileAsync(staging,this.camera);}finally{sun.shadow.dispose();}
+      await next();
+      disposeGeometry(this.room);disposeGeometry(this.furniture);
+      this.room=room;this.furniture=furniture;room=null;furniture=null;this.scene.add(this.room,this.furniture);
+      const {width,depth,height}=interior.room;configureHomeLighting(this.scene,this.fill,this.sun,width,depth,height);
+      this.doorView.root.position.fromArray(homeIndoorDoorOrigin(interior.room));this.lastViewport='';this.sourceKey=key;
+      // Finish every render pass behind the already-painted feedback before input returns.
+      this.frame(0,performance.now()/1000,true);await next();
+      this.preparation=null;this.ui.hidden=false;this.updateControls();preparation.task.finish();
+    }catch(error){
+      if(current()){
+        this.get('home-room-status').textContent=error instanceof Error?error.message:this.text('offline');
+        preparation.task.fail('Could not finish loading. Your saved world is unchanged.',()=>{
+          if(current())void this.prepareRoom(key,visit);
+        });
+      }else preparation.task.finish();
+    }finally{if(room)disposeGeometry(room);if(furniture)disposeGeometry(furniture);}
+  }
+  private cancelPreparation(){
+    const preparation=this.preparation;if(!preparation)return;
+    this.preparation=null;preparation.controller.abort();preparation.task.finish();
+  }
+  private createRoom(interior:InteriorData) {
+    const room=new T.Group();
+    room.add(createHomeRoomArt(interior.room, this.library).group);
     const exit = homeExit(interior.room);
-    this.doorView.root.position.fromArray(homeIndoorDoorOrigin(interior.room));
     const mat = new T.MeshBasicMaterial({ color: ART_PALETTE.gold, transparent: true, opacity: .7, depthWrite: false });
-    const doorway = new T.Mesh(new T.PlaneGeometry(1.05, .35), mat); doorway.rotation.x = -Math.PI / 2; doorway.position.set(0, .015, exit[2]); this.room.add(doorway);
+    const doorway = new T.Mesh(new T.PlaneGeometry(1.05, .35), mat); doorway.rotation.x = -Math.PI / 2; doorway.position.set(0, .015, exit[2]); room.add(doorway);
     const arrow = new T.Shape(); arrow.moveTo(-.15, -.08); arrow.lineTo(.15, -.08); arrow.lineTo(0, .14); arrow.closePath();
-    const marker = new T.Mesh(new T.ShapeGeometry(arrow), new T.MeshBasicMaterial({ color: ART_PALETTE.ink, side: T.DoubleSide })); marker.rotation.x = Math.PI / 2; marker.position.set(0, .024, exit[2]); this.room.add(marker);
-    this.lastViewport = '';
+    const marker = new T.Mesh(new T.ShapeGeometry(arrow), new T.MeshBasicMaterial({ color: ART_PALETTE.ink, side: T.DoubleSide })); marker.rotation.x = Math.PI / 2; marker.position.set(0, .024, exit[2]); room.add(marker);
+    return room;
   }
 
   private buildFurniture() {
     disposeGeometry(this.furniture); this.furniture = new T.Group(); this.scene.add(this.furniture);
-    for (const item of (this.draft ?? this.home!.interior).items) {
+    for (const item of (this.draft ?? this.home!.interior).items)this.furniture.add(this.createFurnitureItem(item));
+  }
+  private createFurnitureItem(item:HomeItem) {
       const b = new PartBuilder('medium'), source = libraryMaterials(this.library), kit = makeKit(b, source);
       emitPart(PART[item.kind], 'village', kit); const built = b.build(`home-item-${item.id}`);
       // Catalogue edge furniture uses its back edge as origin; indoor records
       // use footprint centres. Recenter without changing scale or height.
       const box = new T.Box3().setFromObject(built.group), center = box.getCenter(new T.Vector3());
       built.group.position.set(-center.x, 0, -center.z);
-      const root = new T.Group(); root.add(built.group); root.position.fromArray(item.position); root.rotation.y = item.yaw; root.userData.homeItem = item.id; this.furniture.add(root);
+      const root = new T.Group(); root.add(built.group); root.position.fromArray(item.position); root.rotation.y = item.yaw; root.userData.homeItem = item.id;
       source.owned().forEach(material => { material.userData.ownedResource = true; });
-    }
+      return root;
   }
 
-  private applyTheme(material: InteriorData['material']) {
+  private applyTheme(material: InteriorData['material'],room=this.room,furniture=this.furniture) {
     const [plaster, paint] = THEMES[material];
-    applyHomeRoomTheme(this.room, material);
-    for (const root of [this.room, this.furniture]) root.traverse(o => {
+    applyHomeRoomTheme(room, material);
+    for (const root of [room, furniture]) root.traverse(o => {
       if (!(o instanceof T.Mesh)) return;
       for (const m of Array.isArray(o.material) ? o.material : [o.material]) if (m instanceof T.MeshStandardMaterial) {
         if (m.name === 'custom:village:plaster') m.color.set(plaster);
@@ -281,9 +333,9 @@ export class HomeInterior {
     });
   }
 
-  private canChange() { return this.active && this.online && this.home?.canEdit && this.editing && !this.pendingAction; }
-  private beginEditing() { if (!this.home?.canEdit || !this.online || this.pendingAction) return; this.clearInput(); this.editing = true; this.draft = copy(this.home.interior); this.draftVersion = this.draft.version; this.selected ||= this.draft.items[0]?.id ?? ''; this.populateItems(); this.updateControls(); }
-  private cancelEditing() { if (this.pendingAction || !this.home) return; this.editing = false; this.dirty = false; this.draft = copy(this.home.interior); this.buildFurniture(); this.applyTheme(this.draft.material); this.setStatus('saved'); this.updateControls(); }
+  private canChange() { return this.active && !this.preparing && this.online && this.home?.canEdit && this.editing && !this.pendingAction; }
+  private beginEditing() { if (this.preparing || !this.home?.canEdit || !this.online || this.pendingAction) return; this.clearInput(); this.editing = true; this.draft = copy(this.home.interior); this.draftVersion = this.draft.version; this.selected ||= this.draft.items[0]?.id ?? ''; this.populateItems(); this.updateControls(); }
+  private cancelEditing() { if (this.preparing || this.pendingAction || !this.home) return; this.editing = false; this.dirty = false; this.draft = copy(this.home.interior); this.buildFurniture(); this.applyTheme(this.draft.material); this.setStatus('saved'); this.updateControls(); }
   private populateItems() {
     const select = this.get<HTMLSelectElement>('home-item-select'), items = this.draft?.items ?? [];
     const signature = items.map(i => `${i.id}:${i.kind}`).join('|') + this.locale;
@@ -298,9 +350,10 @@ export class HomeInterior {
     if (!homeFurnitureFits(candidate.items, this.position, candidate.room, this.home!.interior.doorOpen)) { this.setStatus('blocked'); return; }
     this.draft = candidate; this.dirty = true; this.buildFurniture(); this.applyTheme(candidate.material); this.setStatus('edited'); this.updateControls();
   }
-  private nearExit() { return this.active && !!this.home && homeNearDoor(this.position, this.home.interior.room); }
+  private nearExit() { return this.active && !this.preparing && !!this.home && homeNearDoor(this.position, this.home.interior.room); }
   private updateControls() {
-    const enabled = this.online && !this.pendingAction;
+    const enabled = this.online && !this.pendingAction && !this.preparing;
+    this.get<HTMLButtonElement>('home-camera-view').disabled=!enabled;this.get<HTMLButtonElement>('home-photo').disabled=!enabled;
     this.get<HTMLButtonElement>('home-exit').disabled = !enabled || !this.nearExit() || this.editing || !this.home?.interior.doorOpen;
     const doorButton = this.get<HTMLButtonElement>('home-toggle-door');
     doorButton.disabled = !enabled || !this.nearExit() || this.editing;
@@ -324,12 +377,12 @@ export class HomeInterior {
     this.ui.querySelectorAll<HTMLButtonElement>('.home-item-moves button,.home-material-row button').forEach(b => { b.disabled = !enabled; });
   }
 
-  frame(delta: number, nowSeconds: number) {
-    if (!this.active || !this.home || this.photoMode) return;
+  frame(delta: number, nowSeconds: number, preparingFrame=false) {
+    if (!this.active || this.preparing&&!preparingFrame || !this.home || this.photoMode) return;
     if (document.documentElement.lang !== this.locale) this.localize();
     const dt = Math.min(.05, Math.max(0, delta));
     this.moving = 0;
-    if (this.online && !this.pendingAction && !this.editing && !document.hidden) {
+    if (this.online && !this.preparing && !this.pendingAction && !this.editing && !document.hidden) {
       const input = new T.Vector2(this.stick.x + Number(this.keys.has('d') || this.keys.has('arrowright')) - Number(this.keys.has('a') || this.keys.has('arrowleft')), this.stick.y + Number(this.keys.has('s') || this.keys.has('arrowdown')) - Number(this.keys.has('w') || this.keys.has('arrowup'))).clampLength(0, 1);
       // Screen-space controls against the fixed indoor camera.
       const right = new T.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 0); right.y = 0; right.normalize();
@@ -364,7 +417,7 @@ export class HomeInterior {
     } else this.camera.zoom = 1;
     this.camera.updateMatrixWorld(true); this.camera.updateProjectionMatrix();
     this.doorView.frame(dt, matchMedia('(prefers-reduced-motion: reduce)').matches);
-    this.options.renderer.render(this.scene, this.camera);
+    this.drawing.render();
     const canvas = this.options.renderer.domElement;
     canvas.dataset.homeInterior = this.home.interiorId; canvas.dataset.homePosition = JSON.stringify(this.position); canvas.dataset.homeVersion = String(this.home.interior.version);
     canvas.dataset.homeDoorOpen = String(this.home.interior.doorOpen); canvas.dataset.homeArea = String(this.home.interior.room.width * this.home.interior.room.depth);
@@ -375,7 +428,7 @@ export class HomeInterior {
   async flush(): Promise<void> {
     if (this.pendingMove) { await this.pendingMove; return; }
     const saved = this.acknowledged?.location;
-    if (!this.active || !this.online || !this.home || saved?.kind !== 'interior' || distance(this.position, saved.position) < .005) return;
+    if (!this.active || this.preparing || !this.online || !this.home || saved?.kind !== 'interior' || distance(this.position, saved.position) < .005) return;
     const visit = this.currentVisit;
     const body = { buildingId: this.home.buildingId, visitEpoch: saved.visitEpoch, sequence: saved.sequence + 1, position: [...this.position] as Vec3, yaw: this.yaw };
     this.pendingMove = this.options.move(body).then(next => { if (visit !== this.currentVisit) return; this.receive(next); this.options.applyPlayer(next); }).catch(error => {
@@ -418,13 +471,20 @@ export class HomeInterior {
     finally { this.pendingAction = false; this.updateControls(); }
   }
   private async recover() {
-    if (this.pendingAction) return;
+    if (this.preparing || this.pendingAction) return;
     this.pendingAction = true; this.clearInput();
-    try { const next = await this.options.recover(); this.currentVisit = ''; this.receive(next.player); this.options.applyUniverse(next); this.setOnline(true); }
+    try {
+      const next = await this.options.recover();
+      // Recovery can race a newer poll. Reset only the visit that passed the
+      // same revision/epoch/sequence guards as every other received snapshot.
+      if(!this.receive(next.player,true))return;
+      this.options.applyUniverse(next);this.setOnline(true);
+    }
     catch (error) { this.get('home-room-status').textContent = error instanceof Error ? error.message : this.text('offline'); }
     finally { this.pendingAction = false; this.updateControls(); }
   }
   private close() {
+    this.cancelPreparation();
     this.photoMode=false;
     this._active = false; this.ui.hidden = true; this.currentVisit = ''; this.sourceKey = ''; this.clearInput(); this.editing = false; this.dirty = false;
     document.body.classList.remove('home-interior-active');
@@ -432,7 +492,7 @@ export class HomeInterior {
     for (const key of ['homeInterior', 'homePosition', 'homeVersion', 'homePending', 'homeDrawCalls', 'homeDoorOpen', 'homeArea']) delete this.options.renderer.domElement.dataset[key];
   }
   dispose() {
-    this.close(); this.abort.abort(); this.ui.remove();
+    this.close(); this.abort.abort(); this.ui.remove();this.drawing.dispose();
     disposeGeometry(this.room); disposeGeometry(this.furniture); disposeGeometry(this.avatar.root); disposeGeometry(this.selection); this.doorView.dispose(); this.library.dispose();this.sun.shadow.dispose();
   }
 

@@ -10,7 +10,7 @@ const source = new WeakMap<Node, string>();
 const verbatim = new WeakSet<Node>();
 const attributes = new WeakMap<Element, Map<string, string>>();
 const ignored = 'input,textarea,script,style,noscript,[contenteditable],.language-picker,[data-i18n-verbatim]';
-const attributeNames = ['aria-label', 'title', 'placeholder'] as const;
+const attributeNames = ['aria-label', 'title', 'placeholder', 'label'] as const;
 const normalize = (value: string) => value.trim().replace(/\s+/g, ' ');
 const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const matchers = patterns.map(([english, chinese, terms = []]) => ({

@@ -12,13 +12,14 @@ import { allPartCombinations, SHIP_ENVELOPE } from '../src/assets/claude-geometr
 import { makePlacementPreview } from '../src/client/placement-preview.ts';
 import { createWorldStyleLibrary } from '../src/client/presentation.ts';
 
-it('keeps every vendored file byte-identical to its provenance and records the pinned R7 and R8 source revisions', () => {
+it('keeps every source module and model manifest byte-identical to the pinned village handover', () => {
   const root = new URL('../src/assets/claude-geometry/', import.meta.url);
   const manifest = JSON.parse(readFileSync(new URL('PROVENANCE.json', root), 'utf8'));
   for (const [file, hash] of Object.entries(manifest.files)) expect(createHash('sha256').update(readFileSync(new URL(file, root))).digest('hex'), file).toBe(hash);
-  expect(Object.keys(manifest.files)).toHaveLength(106);
-  expect(Object.values(manifest.fileCommits).filter(c => c === '5a73b228f13b8b20460ea6f9403167fdfedc08be')).toHaveLength(27);
-  expect(manifest.commit).toBe('a4546bb120d969774776f1fbe2cb1c990a7c3e66');
+  expect(Object.keys(manifest.files)).toHaveLength(114);
+  expect(new Set(Object.values(manifest.fileCommits))).toEqual(new Set([manifest.commit]));
+  expect(manifest.commit).toBe('14e244f0852195da5fff4a83fdc824229a47021d');
+  for (const [file, data] of Object.entries(manifest.r9.data) as [string,{sha256:string}][]) expect(createHash('sha256').update(readFileSync(new URL(file, root))).digest('hex'),file).toBe(data.sha256);
 });
 
 it('draws every saved ship combination inside its envelope and medium budget without changing industrial defaults', () => {
@@ -39,21 +40,20 @@ it('draws every saved ship combination inside its envelope and medium budget wit
   } finally { library.dispose(); industrial.dispose(); }
 }, 120_000);
 
-it('cancels and disposes an inked placement without executing ink callbacks on a tint or releasing shared materials', () => {
+it('cancels a depth-free placement and restores the actual indoor material twins before disposal', () => {
   const library = createWorldStyleLibrary(), model = buildBlueprintModel(industrialCabin(), library);
-  const shell = model.object.getObjectByName('ink-shell') as T.Mesh;
-  const lines = model.object.getObjectByName('ink-lines')!;
-  expect(shell).toBeInstanceOf(T.Mesh); expect(lines).toBeInstanceOf(T.LineSegments);
-  const ink = shell.material as T.Material; let sharedDisposals = 0, tintDisposals = 0;
-  ink.addEventListener('dispose', () => sharedDisposals++);
+  expect(model.object.getObjectByName('ink-shell')).toBeUndefined();
+  expect(model.object.getObjectByName('ink-lines')).toBeUndefined();
+  const solid=model.object.children.find(o=>o instanceof T.Mesh&&(o.material as T.Material).userData.interior) as T.Mesh;
+  expect(solid).toBeInstanceOf(T.Mesh);expect(solid.geometry.getAttribute('cover')).toBeDefined();
+  const original=solid.material as T.Material;let sharedDisposals=0,tintDisposals=0;
+  original.addEventListener('dispose',()=>sharedDisposals++);
   model.object.userData.disposeOwned = () => model.dispose();
   makePlacementPreview(model.object, false);
-  expect(shell.visible).toBe(false); expect(lines.visible).toBe(false); expect(shell.material).toBe(ink);
-  const solid = model.object.children.find(o => o instanceof T.Mesh && o !== shell) as T.Mesh;
+  expect((solid.material as T.Material).depthWrite).toBe(false);expect(solid.material).not.toBe(original);
   (solid.material as T.Material).addEventListener('dispose', () => tintDisposals++);
-  const renderable: T.Object3D[] = []; model.object.traverseVisible(o => renderable.push(o));
-  expect(renderable).not.toContain(shell); expect(model.object.userData.noPracticalLights).toBe(true);
+  expect(model.object.userData.noPracticalLights).toBe(true);
   model.object.userData.disposeOwned(); model.object.userData.disposeOwned();
-  expect(model.disposed).toBe(true); expect(tintDisposals).toBe(1); expect(sharedDisposals).toBe(0);
+  expect(model.disposed).toBe(true);expect(solid.material).toBe(original); expect(tintDisposals).toBe(1); expect(sharedDisposals).toBe(0);
   library.dispose(); expect(sharedDisposals).toBe(1);
 });

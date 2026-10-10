@@ -1,17 +1,19 @@
 import type { Blueprint, PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
 import { blueprintFootprint, partTransform, pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
-import { fitStructureOnGround } from '../assets/claude-geometry/blueprint/placement.ts';
+import { structureGroundFootprint } from './blueprint-ground-footprint.ts';
+import { seatedFit } from './ground-fit-cache.ts';
 import type { HeightField } from '../assets/claude-geometry/core/ground.ts';
 import { legacyHeightField } from '../assets/claude-geometry/core/ground.ts';
 import { STOREY } from '../assets/claude-geometry/blueprint/parts/kit.ts';
 import type { Vec3 } from './world.ts';
 import { PART_INFO } from '../assets/claude-geometry/blueprint/parts/info.ts';
 import { SLOPE_BOUNDS } from './physics/parts.ts';
+import { PRIVATE_CAPACITY } from './world-capacity.ts';
 
 export interface LibraryEntry { blueprint: Blueprint; hash: string; version: number }
 export type BlueprintContents = Record<string, PartPlacement[]>;
 export const MAX_BLUEPRINTS = 24;
-export const MAX_STRUCTURES = 8;
+export const MAX_STRUCTURES = PRIVATE_CAPACITY.structures;
 export const BLUEPRINT_BODY_LIMIT = 65_536;
 export function structureSize(parts: readonly PartPlacement[]) {
   let radius=blueprintFootprint(parts).radius;
@@ -30,4 +32,4 @@ export function structureSize(parts: readonly PartPlacement[]) {
 }
 const ground = legacyHeightField();
 export const structureFit = (parts: readonly PartPlacement[], position: Vec3, rotation: number, field:HeightField=ground) =>
-  fitStructureOnGround(field, { dir: position, yaw: rotation }, { parts: [...parts] });
+  seatedFit(field, { dir: position, yaw: rotation }, structureGroundFootprint(parts));

@@ -15,9 +15,19 @@ it('keeps terrain and building presentation stable for door-only revisions but r
 });
 it('keeps a 390px pulled-back globe visible and restores walking fog on return',()=>{
   const scene=new Scene();scene.fog=new Fog('#9cc8c4',30,78);
-  updateGroundFog(scene,'hub',21.6,117,true);
+  updateGroundFog(scene,'hub',21.6,117);
   expect(scene.fog.near).toBeGreaterThan(117-21.6);
   expect(scene.fog.far-scene.fog.near).toBe(48);
-  updateGroundFog(scene,'hub',21.6,28,false);
+  const pulledBackNear=scene.fog.near;
+  // Finishing Build changes the mode immediately; the phone camera is still
+  // far away and must not disappear into walking-distance fog for that frame.
+  updateGroundFog(scene,'hub',21.6,117);
+  expect(scene.fog.near).toBe(pulledBackNear);
+  for(const distance of [95,70,45]){
+    updateGroundFog(scene,'hub',21.6,distance);
+    expect(scene.fog.near).toBeGreaterThan(distance-21.6);
+    expect(scene.fog.far-scene.fog.near).toBeCloseTo(48,10);
+  }
+  updateGroundFog(scene,'hub',21.6,28);
   expect(scene.fog.near).toBe(30);expect(scene.fog.far).toBe(78);
 });

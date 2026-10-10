@@ -17,6 +17,13 @@ const create = () => {
 };
 const enter = (store: ReturnType<typeof openStore>, id: string) => {
   const player = store.state(id);
+  if(id==='visitor'){
+    // Preserve a guest saved indoors before owner-only entry. This fixture
+    // exercises their existing state; it does not authorize a fresh entry.
+    const home=player.home!,location={kind:'interior',planetId:player.planetId,buildingId:home.buildingId,interiorId:home.interiorId,position:[0,0,home.interior.room.depth/2-1],yaw:Math.PI,sequence:0,visitEpoch:player.location!.visitEpoch+1};
+    store.db.prepare('UPDATE home_locations SET document=? WHERE player_id=?').run(JSON.stringify(location),id);
+    return store.state(id);
+  }
   return store.enterHome(id, { planetId: player.planetId, buildingId: player.home!.buildingId, visitEpoch: player.location!.visitEpoch }).player;
 };
 afterEach(() => {

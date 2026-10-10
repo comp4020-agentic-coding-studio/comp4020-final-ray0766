@@ -26,7 +26,7 @@ export function courier(identity:Character|'mica'|'sol'){
   add(head,new T.SphereGeometry(.18,12,10),'#d9b78c',[0,.025,0]);
   add(head,new T.SphereGeometry(.19,12,8,0,Math.PI*2,0,Math.PI/2),'#f3ecdb',[0,.03,0]);
   add(head,new T.CylinderGeometry(.192,.192,.035,12),'#7d5b43',[0,.04,0]);
-  const visor=new T.Mesh(new T.SphereGeometry(.18,20,12),new T.MeshPhysicalMaterial(COURIER_LOOK.visor));visor.material.userData.ownedResource=true;visor.scale.set(1,.63,.82);visor.position.set(0,.025,.105);head.add(visor);
+  const visor=new T.Mesh(new T.SphereGeometry(.18,20,12),applyArtMaterial(new T.MeshPhysicalMaterial(COURIER_LOOK.visor)));visor.material.userData.ownedResource=true;visor.scale.set(1,.63,.82);visor.position.set(0,.025,.105);head.add(visor);
   for(const x of [-.19,.19])add(head,new T.CapsuleGeometry(.043,.07,3,6),'#7d5b43',[x,.005,.01]);
   add(head,new RoundedBoxGeometry(.28,.025,.18,2,.012),'#f3ecdb',[0,.06,.135]);
   const arms=[-1,1].map(side=>{const upper=new T.Group(),forearm=new T.Group();torso.add(upper);upper.position.set(side*.27,.19,0);add(upper,new T.CapsuleGeometry(.075,.21,4,10),coat,[0,-.15,0],true);upper.add(forearm);forearm.position.y=-.30;add(forearm,new T.CapsuleGeometry(.067,.16,4,10),coat,[0,-.12,0],true);add(forearm,new T.CylinderGeometry(.07,.07,.045,8),'#f3ecdb',[0,-.20,0]);add(forearm,new T.SphereGeometry(.073,10,8),'#7d5b43',[0,-.275,.015]);return{upper,forearm};});

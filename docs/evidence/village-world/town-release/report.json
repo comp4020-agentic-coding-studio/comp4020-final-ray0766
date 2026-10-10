@@ -1,0 +1,1905 @@
+{
+  "browser": "Installed Google Chrome via Playwright",
+  "version": "154.0.8037.99",
+  "physicalPhone": false,
+  "errors": [],
+  "api": [],
+  "results": [
+    {
+      "name": "1440-front",
+      "fixtureMeaning": "Initial saved positions prepared only in disposable database; subsequent movement uses real keyboard or touch controls.",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "samples": [
+        {
+          "label": "1440-front-cold-page-load",
+          "readyMs": 9072.599999904633,
+          "firstFrameMs": 27.499999952316287,
+          "feedbackFirstObservedMs": 3543.999999952316,
+          "loadingFrames": 289,
+          "frames": {
+            "samples": 525,
+            "p50": 16.699999999999818,
+            "p95": 16.800000000000068,
+            "p99": 33.399999999999636,
+            "max": 100
+          },
+          "longTasks": {
+            "samples": 4,
+            "p50": 68,
+            "p95": 112,
+            "p99": 112,
+            "max": 112
+          },
+          "longFrames": {
+            "over50ms": 3,
+            "over100ms": 0
+          },
+          "timingMeaning": "Fresh browser context, sampling from pre-app init script through complete loading and Begin. Includes loading frames and server/asset wait; firstFrameMs exposes any delay before the first rAF. No physical-phone or GPU-timing claim."
+        },
+        {
+          "label": "1440-front-settled-ground",
+          "durationMs": 2004.2999999523163,
+          "frames": {
+            "samples": 120,
+            "p50": 16.69999999999891,
+            "p95": 16.799999999999272,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.665833333333346
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 121,
+            "p50": 345,
+            "p95": 345,
+            "p99": 345,
+            "max": 345,
+            "mean": 345
+          },
+          "triangles": {
+            "samples": 121,
+            "p50": 422557,
+            "p95": 422557,
+            "p99": 422557,
+            "max": 422557,
+            "mean": 422557
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 121,
+            "p50": 0.89,
+            "p95": 1.263,
+            "p99": 1.263,
+            "max": 1.263,
+            "mean": 0.9078099173553734
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 121
+          },
+          "actionMs": 2002,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-front-overview",
+          "durationMs": 2003.8000000715256,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.799999999999272,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.66638655462186
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 286,
+            "p95": 286,
+            "p99": 286,
+            "max": 286,
+            "mean": 286
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 634963,
+            "p95": 634963,
+            "p99": 634963,
+            "max": 634963,
+            "mean": 634963
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.637,
+            "p95": 2.17,
+            "p99": 2.17,
+            "max": 2.17,
+            "mean": 1.4718916666666668
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2003,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-front-actual-walk",
+          "durationMs": 2003.5,
+          "frames": {
+            "samples": 119,
+            "p50": 16.700000000000728,
+            "p95": 16.80000000000291,
+            "p99": 16.80000000000291,
+            "max": 16.80000000000291,
+            "mean": 16.66638655462184
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 338,
+            "p95": 514,
+            "p99": 812,
+            "max": 877,
+            "mean": 362.05833333333334
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 411673,
+            "p95": 510401,
+            "p99": 711063,
+            "max": 739491,
+            "mean": 423350
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 0.837,
+            "p95": 1.767,
+            "p99": 2.17,
+            "max": 2.17,
+            "mean": 1.1198749999999993
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 1278,
+          "paddingAfterActionMs": 722,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        }
+      ],
+      "data": {
+        "engine": "three.js r186",
+        "shipDesign": "{\"format\":\"planet-modules/ship-design\",\"glow\":\"cyan\",\"id\":\"3f6b2c1e-8a4d-4e7b-9c21-5d0f7a9e1b01\",\"name\":\"Courier\",\"paint\":{\"primary\":\"bone\",\"secondary\":\"gunmetal\",\"trim\":\"amber\"},\"parts\":{\"cockpit\":\"faceted-canopy\",\"dorsal\":\"sensor-mast\",\"engines\":\"twin-nacelle\",\"hull\":\"slim-courier\",\"tail\":\"single-fin\",\"wings\":\"swept\"},\"registration\":\"LW-0742\",\"version\":1}",
+        "visitors": "0",
+        "nearbyVisitors": "0",
+        "visibleVisitors": "0",
+        "detailedVisitors": "0",
+        "presencePlanet": "hub",
+        "placedAssetKit": "sunseed-village/14e244f",
+        "placedAssetKinds": "",
+        "terrainId": "planet-terrain@2:c30367efe94582078f8bb3f692d5d414a5fbf4a8dd8833345755fd7fc52c399c:radius-21.6:graded",
+        "visitorRadii": "[]",
+        "placedShadowObjects": "0",
+        "placedShadowTotal": "0",
+        "villageDrawing": "14e244f",
+        "lineFadeScale": "1",
+        "drawCalls": "336",
+        "triangles": "404165",
+        "publicCounts": "{\"structures\":250,\"objects\":510,\"destinations\":[\"post\",\"orchard\",\"harbour\"]}",
+        "townStats": "{\"totalObjects\":510,\"totalChunks\":48,\"visibleObjects\":309,\"visibleChunks\":30,\"mediumChunks\":8,\"cachedMediumChunks\":8,\"pendingMediumChunks\":0,\"stagedMediumObjects\":0,\"globalLowBatch\":false,\"activeTriangles\":354164,\"activeDrawCalls\":419,\"residentTriangles\":653876,\"residentGeometryBytes\":68826816,\"initialBuildMs\":704.6999998092651,\"lastBuildMs\":0,\"initialFitMs\":0.10000002384185791}",
+        "practical": "{\"slots\":{\"spots\":2,\"points\":2,\"shadows\":0},\"lit\":0,\"litShadows\":0,\"assigned\":[],\"fittingsInReach\":0,\"clustersInReach\":0,\"enabled\":false}",
+        "textureFormat": "webp",
+        "scanFormats": "[]",
+        "feetRadius": "21.6197358896849",
+        "verticalSpeed": "0",
+        "sprinting": "false",
+        "jumpHeld": "false",
+        "grounded": "true",
+        "groundSupport": "street.road.plain",
+        "cameraPosition": "[12.827361396013295,0,22.876509715730887]",
+        "cameraHead": "[16.30291506736284,0,16.180968053495203]",
+        "playerVisible": "true",
+        "cameraHeading": "[0.7044472836434157,0,-0.709756313510076]",
+        "cameraPitch": "0",
+        "groundScale": "2.16",
+        "groundRadius": "21.6",
+        "quality": "full",
+        "portDistance": "43.09239604947792",
+        "groundPosition": "[0.7097563135100758,0,0.7044472836434157]",
+        "renderCpuMs": "0.817",
+        "lightLevels": "[0,0,0,0]"
+      }
+    },
+    {
+      "name": "1440-right",
+      "fixtureMeaning": "Initial saved positions prepared only in disposable database; subsequent movement uses real keyboard or touch controls.",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "samples": [
+        {
+          "label": "1440-right-cold-page-load",
+          "readyMs": 6039.399999976158,
+          "firstFrameMs": 25.499999976158144,
+          "feedbackFirstObservedMs": 92.19999997615814,
+          "loadingFrames": 289,
+          "frames": {
+            "samples": 345,
+            "p50": 16.699999999999818,
+            "p95": 16.799999999999955,
+            "p99": 50,
+            "max": 100
+          },
+          "longTasks": {
+            "samples": 4,
+            "p50": 68,
+            "p95": 93,
+            "p99": 93,
+            "max": 93
+          },
+          "longFrames": {
+            "over50ms": 3,
+            "over100ms": 0
+          },
+          "timingMeaning": "Fresh browser context, sampling from pre-app init script through complete loading and Begin. Includes loading frames and server/asset wait; firstFrameMs exposes any delay before the first rAF. No physical-phone or GPU-timing claim."
+        },
+        {
+          "label": "1440-right-settled-ground",
+          "durationMs": 2003,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.799999999999272,
+            "max": 16.80000000000109,
+            "mean": 16.665546218487385
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 369,
+            "p95": 369,
+            "p99": 369,
+            "max": 369,
+            "mean": 369
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 378029,
+            "p95": 378029,
+            "p99": 378029,
+            "max": 378029,
+            "mean": 378029
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 0.81,
+            "p95": 0.957,
+            "p99": 0.957,
+            "max": 0.957,
+            "mean": 0.8342500000000003
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2002,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-right-overview",
+          "durationMs": 2004.3000000715256,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.799999999999272,
+            "max": 16.80000000000109,
+            "mean": 16.665546218487385
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 286,
+            "p95": 286,
+            "p99": 286,
+            "max": 286,
+            "mean": 286
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 631939,
+            "p95": 631939,
+            "p99": 631939,
+            "max": 631939,
+            "mean": 631939
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 2.397,
+            "p95": 2.843,
+            "p99": 2.843,
+            "max": 2.843,
+            "mean": 2.4517500000000023
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2003,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-right-actual-walk",
+          "durationMs": 2003.2000000476837,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.799999999999272,
+            "max": 16.799999999999272,
+            "mean": 16.66638655462186
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 363,
+            "p95": 556,
+            "p99": 800,
+            "max": 861,
+            "mean": 384.40833333333336
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 358395,
+            "p95": 482243,
+            "p99": 646079,
+            "max": 691795,
+            "mean": 369711.5833333333
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.09,
+            "p95": 2.397,
+            "p99": 2.397,
+            "max": 2.397,
+            "mean": 1.3357250000000007
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 1587,
+          "paddingAfterActionMs": 413,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        }
+      ],
+      "data": {
+        "engine": "three.js r186",
+        "shipDesign": "{\"format\":\"planet-modules/ship-design\",\"glow\":\"cyan\",\"id\":\"3f6b2c1e-8a4d-4e7b-9c21-5d0f7a9e1b01\",\"name\":\"Courier\",\"paint\":{\"primary\":\"bone\",\"secondary\":\"gunmetal\",\"trim\":\"amber\"},\"parts\":{\"cockpit\":\"faceted-canopy\",\"dorsal\":\"sensor-mast\",\"engines\":\"twin-nacelle\",\"hull\":\"slim-courier\",\"tail\":\"single-fin\",\"wings\":\"swept\"},\"registration\":\"LW-0742\",\"version\":1}",
+        "visitors": "0",
+        "nearbyVisitors": "0",
+        "visibleVisitors": "0",
+        "detailedVisitors": "0",
+        "presencePlanet": "hub",
+        "placedAssetKit": "sunseed-village/14e244f",
+        "placedAssetKinds": "",
+        "terrainId": "planet-terrain@2:c30367efe94582078f8bb3f692d5d414a5fbf4a8dd8833345755fd7fc52c399c:radius-21.6:graded",
+        "visitorRadii": "[]",
+        "placedShadowObjects": "0",
+        "placedShadowTotal": "0",
+        "villageDrawing": "14e244f",
+        "lineFadeScale": "1",
+        "drawCalls": "352",
+        "triangles": "339123",
+        "publicCounts": "{\"structures\":250,\"objects\":510,\"destinations\":[\"post\",\"orchard\",\"harbour\"]}",
+        "townStats": "{\"totalObjects\":510,\"totalChunks\":48,\"visibleObjects\":320,\"visibleChunks\":32,\"mediumChunks\":8,\"cachedMediumChunks\":8,\"pendingMediumChunks\":0,\"stagedMediumObjects\":0,\"globalLowBatch\":false,\"activeTriangles\":344962,\"activeDrawCalls\":435,\"residentTriangles\":636290,\"residentGeometryBytes\":67026024,\"initialBuildMs\":695.8999997377396,\"lastBuildMs\":0,\"initialFitMs\":0}",
+        "practical": "{\"slots\":{\"spots\":2,\"points\":2,\"shadows\":0},\"lit\":0,\"litShadows\":0,\"assigned\":[],\"fittingsInReach\":0,\"clustersInReach\":0,\"enabled\":false}",
+        "textureFormat": "webp",
+        "scanFormats": "[]",
+        "feetRadius": "21.645155881029165",
+        "verticalSpeed": "0",
+        "sprinting": "false",
+        "jumpHeld": "false",
+        "grounded": "true",
+        "groundSupport": "street.road.plain",
+        "cameraPosition": "[25.938538369223238,0,4.043311302515739]",
+        "cameraHead": "[22.820282937223443,0,-2.8305265690148156]",
+        "playerVisible": "true",
+        "cameraHeading": "[-0.12309229751079788,0,-0.9923952268594973]",
+        "cameraPitch": "0",
+        "groundScale": "2.16",
+        "groundRadius": "21.6",
+        "quality": "full",
+        "portDistance": "32.3743124409857",
+        "groundPosition": "[0.9923952268594974,0,-0.1230922975107979]",
+        "renderCpuMs": "1.080",
+        "lightLevels": "[0,0,0,0]"
+      }
+    },
+    {
+      "name": "1440-back",
+      "fixtureMeaning": "Initial saved positions prepared only in disposable database; subsequent movement uses real keyboard or touch controls.",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "samples": [
+        {
+          "label": "1440-back-cold-page-load",
+          "readyMs": 5083.599999904633,
+          "firstFrameMs": -0.6000000715255736,
+          "feedbackFirstObservedMs": 99.49999992847442,
+          "loadingFrames": 287,
+          "frames": {
+            "samples": 290,
+            "p50": 16.699999999999818,
+            "p95": 16.80000000000001,
+            "p99": 50,
+            "max": 83.30000000000018
+          },
+          "longTasks": {
+            "samples": 4,
+            "p50": 61,
+            "p95": 84,
+            "p99": 84,
+            "max": 84
+          },
+          "longFrames": {
+            "over50ms": 2,
+            "over100ms": 0
+          },
+          "timingMeaning": "Fresh browser context, sampling from pre-app init script through complete loading and Begin. Includes loading frames and server/asset wait; firstFrameMs exposes any delay before the first rAF. No physical-phone or GPU-timing claim."
+        },
+        {
+          "label": "1440-back-settled-ground",
+          "durationMs": 2004,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.800000000000182,
+            "max": 16.800000000000182,
+            "mean": 16.6655462184874
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 363,
+            "p95": 363,
+            "p99": 363,
+            "max": 363,
+            "mean": 363
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 378249,
+            "p95": 378249,
+            "p99": 378249,
+            "max": 378249,
+            "mean": 378249
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.327,
+            "p95": 1.467,
+            "p99": 1.467,
+            "max": 1.467,
+            "mean": 1.3519833333333358
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2003,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-back-overview",
+          "durationMs": 2001.3999999761581,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.6655462184874
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 286,
+            "p95": 286,
+            "p99": 286,
+            "max": 286,
+            "mean": 286
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 643171,
+            "p95": 643171,
+            "p99": 643171,
+            "max": 643171,
+            "mean": 643171
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 2.06,
+            "p95": 2.317,
+            "p99": 2.317,
+            "max": 2.317,
+            "mean": 2.09325
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2001,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-back-actual-walk",
+          "durationMs": 2003.6000000238419,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.799999999999272,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.6655462184874
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 373,
+            "p95": 515,
+            "p99": 826,
+            "max": 894,
+            "mean": 398.44166666666666
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 377523,
+            "p95": 467023,
+            "p99": 666563,
+            "max": 720315,
+            "mean": 391275.01666666666
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.113,
+            "p95": 1.943,
+            "p99": 2.093,
+            "max": 2.093,
+            "mean": 1.3289999999999995
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 1618,
+          "paddingAfterActionMs": 382,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        }
+      ],
+      "data": {
+        "engine": "three.js r186",
+        "shipDesign": "{\"format\":\"planet-modules/ship-design\",\"glow\":\"cyan\",\"id\":\"3f6b2c1e-8a4d-4e7b-9c21-5d0f7a9e1b01\",\"name\":\"Courier\",\"paint\":{\"primary\":\"bone\",\"secondary\":\"gunmetal\",\"trim\":\"amber\"},\"parts\":{\"cockpit\":\"faceted-canopy\",\"dorsal\":\"sensor-mast\",\"engines\":\"twin-nacelle\",\"hull\":\"slim-courier\",\"tail\":\"single-fin\",\"wings\":\"swept\"},\"registration\":\"LW-0742\",\"version\":1}",
+        "visitors": "0",
+        "nearbyVisitors": "0",
+        "visibleVisitors": "0",
+        "detailedVisitors": "0",
+        "presencePlanet": "hub",
+        "placedAssetKit": "sunseed-village/14e244f",
+        "placedAssetKinds": "",
+        "terrainId": "planet-terrain@2:c30367efe94582078f8bb3f692d5d414a5fbf4a8dd8833345755fd7fc52c399c:radius-21.6:graded",
+        "visitorRadii": "[]",
+        "placedShadowObjects": "0",
+        "placedShadowTotal": "0",
+        "villageDrawing": "14e244f",
+        "lineFadeScale": "1",
+        "drawCalls": "368",
+        "triangles": "371251",
+        "publicCounts": "{\"structures\":250,\"objects\":510,\"destinations\":[\"post\",\"orchard\",\"harbour\"]}",
+        "townStats": "{\"totalObjects\":510,\"totalChunks\":48,\"visibleObjects\":339,\"visibleChunks\":31,\"mediumChunks\":8,\"cachedMediumChunks\":8,\"pendingMediumChunks\":0,\"stagedMediumObjects\":0,\"globalLowBatch\":false,\"activeTriangles\":357342,\"activeDrawCalls\":433,\"residentTriangles\":631242,\"residentGeometryBytes\":66505176,\"initialBuildMs\":672.8999998569489,\"lastBuildMs\":0,\"initialFitMs\":0}",
+        "practical": "{\"slots\":{\"spots\":2,\"points\":2,\"shadows\":0},\"lit\":0,\"litShadows\":0,\"assigned\":[],\"fittingsInReach\":0,\"clustersInReach\":0,\"enabled\":false}",
+        "textureFormat": "webp",
+        "scanFormats": "[]",
+        "feetRadius": "21.626703658079702",
+        "verticalSpeed": "0",
+        "sprinting": "false",
+        "jumpHeld": "false",
+        "grounded": "true",
+        "groundSupport": "street.road.plain",
+        "cameraPosition": "[17.36593520619743,0,-19.663385993966106]",
+        "cameraHead": "[9.904668127110822,0,-20.73225651691123]",
+        "playerVisible": "true",
+        "cameraHeading": "[-0.902316399490176,0,-0.4310743731783244]",
+        "cameraPitch": "0",
+        "groundScale": "2.16",
+        "groundRadius": "21.6",
+        "quality": "full",
+        "portDistance": "21.93397103532437",
+        "groundPosition": "[0.4310743731783244,0,-0.902316399490176]",
+        "renderCpuMs": "0.993",
+        "lightLevels": "[0,0,0,0]"
+      }
+    },
+    {
+      "name": "1440-left",
+      "fixtureMeaning": "Initial saved positions prepared only in disposable database; subsequent movement uses real keyboard or touch controls.",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "samples": [
+        {
+          "label": "1440-left-cold-page-load",
+          "readyMs": 5131.299999952316,
+          "firstFrameMs": 4.1,
+          "feedbackFirstObservedMs": 104.1,
+          "loadingFrames": 288,
+          "frames": {
+            "samples": 294,
+            "p50": 16.699999999999818,
+            "p95": 16.799999999999955,
+            "p99": 50,
+            "max": 83.30000000000018
+          },
+          "longTasks": {
+            "samples": 4,
+            "p50": 61,
+            "p95": 90,
+            "p99": 90,
+            "max": 90
+          },
+          "longFrames": {
+            "over50ms": 2,
+            "over100ms": 0
+          },
+          "timingMeaning": "Fresh browser context, sampling from pre-app init script through complete loading and Begin. Includes loading frames and server/asset wait; firstFrameMs exposes any delay before the first rAF. No physical-phone or GPU-timing claim."
+        },
+        {
+          "label": "1440-left-settled-ground",
+          "durationMs": 2001.3999999761581,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.800000000000182,
+            "max": 16.800000000000182,
+            "mean": 16.66638655462184
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 369,
+            "p95": 369,
+            "p99": 369,
+            "max": 369,
+            "mean": 369
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 397247,
+            "p95": 397247,
+            "p99": 397247,
+            "max": 397247,
+            "mean": 397247
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.73,
+            "p95": 1.867,
+            "p99": 1.867,
+            "max": 1.867,
+            "mean": 1.6233249999999977
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2000,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-left-overview",
+          "durationMs": 2003.5,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.799999999999272,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.6655462184874
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 286,
+            "p95": 286,
+            "p99": 286,
+            "max": 286,
+            "mean": 286
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 621571,
+            "p95": 621571,
+            "p99": 621571,
+            "max": 621571,
+            "mean": 621571
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.527,
+            "p95": 2.293,
+            "p99": 2.293,
+            "max": 2.293,
+            "mean": 1.6176500000000016
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2003,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-left-actual-walk",
+          "durationMs": 2002.3999999761581,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.799999999999272,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.66638655462184
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 354,
+            "p95": 503,
+            "p99": 812,
+            "max": 879,
+            "mean": 385.34166666666664
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 364675,
+            "p95": 458403,
+            "p99": 678841,
+            "max": 727691,
+            "mean": 387760.7
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.087,
+            "p95": 1.31,
+            "p99": 1.31,
+            "max": 1.31,
+            "mean": 1.1446666666666692
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 1610,
+          "paddingAfterActionMs": 390,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        }
+      ],
+      "data": {
+        "engine": "three.js r186",
+        "shipDesign": "{\"format\":\"planet-modules/ship-design\",\"glow\":\"cyan\",\"id\":\"3f6b2c1e-8a4d-4e7b-9c21-5d0f7a9e1b01\",\"name\":\"Courier\",\"paint\":{\"primary\":\"bone\",\"secondary\":\"gunmetal\",\"trim\":\"amber\"},\"parts\":{\"cockpit\":\"faceted-canopy\",\"dorsal\":\"sensor-mast\",\"engines\":\"twin-nacelle\",\"hull\":\"slim-courier\",\"tail\":\"single-fin\",\"wings\":\"swept\"},\"registration\":\"LW-0742\",\"version\":1}",
+        "visitors": "0",
+        "nearbyVisitors": "0",
+        "visibleVisitors": "0",
+        "detailedVisitors": "0",
+        "presencePlanet": "hub",
+        "placedAssetKit": "sunseed-village/14e244f",
+        "placedAssetKinds": "",
+        "terrainId": "planet-terrain@2:c30367efe94582078f8bb3f692d5d414a5fbf4a8dd8833345755fd7fc52c399c:radius-21.6:graded",
+        "visitorRadii": "[]",
+        "placedShadowObjects": "0",
+        "placedShadowTotal": "0",
+        "villageDrawing": "14e244f",
+        "lineFadeScale": "1",
+        "drawCalls": "348",
+        "triangles": "349739",
+        "publicCounts": "{\"structures\":250,\"objects\":510,\"destinations\":[\"post\",\"orchard\",\"harbour\"]}",
+        "townStats": "{\"totalObjects\":510,\"totalChunks\":48,\"visibleObjects\":343,\"visibleChunks\":31,\"mediumChunks\":8,\"cachedMediumChunks\":8,\"pendingMediumChunks\":0,\"stagedMediumObjects\":0,\"globalLowBatch\":false,\"activeTriangles\":362268,\"activeDrawCalls\":434,\"residentTriangles\":631840,\"residentGeometryBytes\":66623328,\"initialBuildMs\":700.6000008583069,\"lastBuildMs\":0,\"initialFitMs\":0}",
+        "practical": "{\"slots\":{\"spots\":2,\"points\":2,\"shadows\":0},\"lit\":0,\"litShadows\":0,\"assigned\":[],\"fittingsInReach\":0,\"clustersInReach\":0,\"enabled\":false}",
+        "textureFormat": "webp",
+        "scanFormats": "[]",
+        "feetRadius": "21.61312619892773",
+        "verticalSpeed": "0",
+        "sprinting": "false",
+        "jumpHeld": "false",
+        "grounded": "true",
+        "groundSupport": "street.road.plain",
+        "cameraPosition": "[-18.85442619273181,0,18.222269686349993]",
+        "cameraHead": "[-20.256520179943063,0,10.815662486756901]",
+        "playerVisible": "true",
+        "cameraHeading": "[-0.47100130849178296,0,-0.8821325112470509]",
+        "cameraPitch": "0",
+        "groundScale": "2.16",
+        "groundRadius": "21.6",
+        "quality": "full",
+        "portDistance": "39.95141787031405",
+        "groundPosition": "[-0.8821325112470508,0,0.4710013084917829]",
+        "renderCpuMs": "1.087",
+        "lightLevels": "[0,0,0,0]"
+      }
+    },
+    {
+      "name": "1440-north",
+      "fixtureMeaning": "Initial saved positions prepared only in disposable database; subsequent movement uses real keyboard or touch controls.",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "samples": [
+        {
+          "label": "1440-north-cold-page-load",
+          "readyMs": 5127.200000047684,
+          "firstFrameMs": -0.6999999761581419,
+          "feedbackFirstObservedMs": 99.30000002384186,
+          "loadingFrames": 288,
+          "frames": {
+            "samples": 293,
+            "p50": 16.699999999999818,
+            "p95": 16.800000000000182,
+            "p99": 50,
+            "max": 100
+          },
+          "longTasks": {
+            "samples": 4,
+            "p50": 61,
+            "p95": 97,
+            "p99": 97,
+            "max": 97
+          },
+          "longFrames": {
+            "over50ms": 1,
+            "over100ms": 0
+          },
+          "timingMeaning": "Fresh browser context, sampling from pre-app init script through complete loading and Begin. Includes loading frames and server/asset wait; firstFrameMs exposes any delay before the first rAF. No physical-phone or GPU-timing claim."
+        },
+        {
+          "label": "1440-north-settled-ground",
+          "durationMs": 2002.2999999523163,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.800000000000182,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.6655462184874
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 488,
+            "p95": 488,
+            "p99": 488,
+            "max": 488,
+            "mean": 488
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 335537,
+            "p95": 335537,
+            "p99": 335537,
+            "max": 335537,
+            "mean": 335537
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.893,
+            "p95": 1.91,
+            "p99": 1.91,
+            "max": 1.91,
+            "mean": 1.823449999999999
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2002,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-north-overview",
+          "durationMs": 2008.1000000238419,
+          "frames": {
+            "samples": 120,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.700000000000728,
+            "max": 16.700000000000728,
+            "mean": 16.665833333333346
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 121,
+            "p50": 316,
+            "p95": 316,
+            "p99": 316,
+            "max": 316,
+            "mean": 316
+          },
+          "triangles": {
+            "samples": 121,
+            "p50": 634119,
+            "p95": 634119,
+            "p99": 634119,
+            "max": 634119,
+            "mean": 634119
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 121,
+            "p50": 1.037,
+            "p95": 2.683,
+            "p99": 2.683,
+            "max": 2.683,
+            "mean": 1.4769338842975217
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 121
+          },
+          "actionMs": 2003,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-north-actual-walk",
+          "durationMs": 2003.5,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.66638655462184
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 484,
+            "p95": 574,
+            "p99": 762,
+            "max": 824,
+            "mean": 497.45
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 332979,
+            "p95": 423245,
+            "p99": 585493,
+            "max": 634707,
+            "mean": 346601.4166666667
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.293,
+            "p95": 2.13,
+            "p99": 2.683,
+            "max": 2.683,
+            "mean": 1.613791666666667
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 968,
+          "paddingAfterActionMs": 1032,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        }
+      ],
+      "data": {
+        "engine": "three.js r186",
+        "shipDesign": "{\"format\":\"planet-modules/ship-design\",\"glow\":\"cyan\",\"id\":\"3f6b2c1e-8a4d-4e7b-9c21-5d0f7a9e1b01\",\"name\":\"Courier\",\"paint\":{\"primary\":\"bone\",\"secondary\":\"gunmetal\",\"trim\":\"amber\"},\"parts\":{\"cockpit\":\"faceted-canopy\",\"dorsal\":\"sensor-mast\",\"engines\":\"twin-nacelle\",\"hull\":\"slim-courier\",\"tail\":\"single-fin\",\"wings\":\"swept\"},\"registration\":\"LW-0742\",\"version\":1}",
+        "visitors": "0",
+        "nearbyVisitors": "0",
+        "visibleVisitors": "0",
+        "detailedVisitors": "0",
+        "presencePlanet": "hub",
+        "placedAssetKit": "sunseed-village/14e244f",
+        "placedAssetKinds": "",
+        "terrainId": "planet-terrain@2:c30367efe94582078f8bb3f692d5d414a5fbf4a8dd8833345755fd7fc52c399c:radius-21.6:graded",
+        "visitorRadii": "[]",
+        "placedShadowObjects": "0",
+        "placedShadowTotal": "0",
+        "villageDrawing": "14e244f",
+        "lineFadeScale": "1",
+        "drawCalls": "484",
+        "triangles": "332979",
+        "publicCounts": "{\"structures\":250,\"objects\":510,\"destinations\":[\"post\",\"orchard\",\"harbour\"]}",
+        "townStats": "{\"totalObjects\":510,\"totalChunks\":48,\"visibleObjects\":336,\"visibleChunks\":29,\"mediumChunks\":8,\"cachedMediumChunks\":8,\"pendingMediumChunks\":0,\"stagedMediumObjects\":0,\"globalLowBatch\":false,\"activeTriangles\":340160,\"activeDrawCalls\":403,\"residentTriangles\":575188,\"residentGeometryBytes\":60736320,\"initialBuildMs\":688.3999996185303,\"lastBuildMs\":0,\"initialFitMs\":0.10000002384185791}",
+        "practical": "{\"slots\":{\"spots\":2,\"points\":2,\"shadows\":0},\"lit\":0,\"litShadows\":0,\"assigned\":[],\"fittingsInReach\":0,\"clustersInReach\":0,\"enabled\":false}",
+        "textureFormat": "webp",
+        "scanFormats": "[]",
+        "feetRadius": "21.80893553961846",
+        "verticalSpeed": "0",
+        "sprinting": "false",
+        "jumpHeld": "false",
+        "grounded": "true",
+        "groundSupport": "street.road.plain",
+        "cameraPosition": "[2.150019504630823,24.667262314513273,9.184746589422941]",
+        "cameraHead": "[1.959219595105025,23.003264981594437,1.8296322288675058]",
+        "playerVisible": "true",
+        "cameraHeading": "[-0.00007930278394038614,0.07929424579275592,-0.9968512508369675]",
+        "cameraPitch": "0",
+        "groundScale": "2.16",
+        "groundRadius": "21.6",
+        "quality": "full",
+        "portDistance": "15.28438428227181",
+        "groundPosition": "[0.08459886214344128,0.9932781643716865,0.07900329554169348]",
+        "renderCpuMs": "1.650",
+        "lightLevels": "[0,0,0,0]"
+      }
+    },
+    {
+      "name": "1440-south",
+      "fixtureMeaning": "Initial saved positions prepared only in disposable database; subsequent movement uses real keyboard or touch controls.",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 1440,
+          "height": 1000
+        },
+        "touchPoints": 0,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "samples": [
+        {
+          "label": "1440-south-cold-page-load",
+          "readyMs": 6070.899999976158,
+          "firstFrameMs": 23.70000002384186,
+          "feedbackFirstObservedMs": 107.00000002384186,
+          "loadingFrames": 291,
+          "frames": {
+            "samples": 347,
+            "p50": 16.699999999999818,
+            "p95": 16.799999999999727,
+            "p99": 49.900000000000546,
+            "max": 100
+          },
+          "longTasks": {
+            "samples": 4,
+            "p50": 66,
+            "p95": 85,
+            "p99": 85,
+            "max": 85
+          },
+          "longFrames": {
+            "over50ms": 2,
+            "over100ms": 0
+          },
+          "timingMeaning": "Fresh browser context, sampling from pre-app init script through complete loading and Begin. Includes loading frames and server/asset wait; firstFrameMs exposes any delay before the first rAF. No physical-phone or GPU-timing claim."
+        },
+        {
+          "label": "1440-south-settled-ground",
+          "durationMs": 2004.5,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.6655462184874
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 352,
+            "p95": 352,
+            "p99": 352,
+            "max": 352,
+            "mean": 352
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 361013,
+            "p95": 361013,
+            "p99": 361013,
+            "max": 361013,
+            "mean": 361013
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.39,
+            "p95": 1.733,
+            "p99": 1.733,
+            "max": 1.733,
+            "mean": 1.3448333333333344
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2003,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-south-overview",
+          "durationMs": 2003.7999999523163,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.799999999999272,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.66638655462186
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 286,
+            "p95": 286,
+            "p99": 286,
+            "max": 286,
+            "mean": 286
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 639715,
+            "p95": 639715,
+            "p99": 639715,
+            "max": 639715,
+            "mean": 639715
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 2.143,
+            "p95": 2.277,
+            "p99": 2.373,
+            "max": 2.373,
+            "mean": 2.0822083333333294
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2003,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "1440-south-actual-walk",
+          "durationMs": 2005.1999999284744,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.799999999999272,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.66638655462184
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 346,
+            "p95": 445,
+            "p99": 708,
+            "max": 770,
+            "mean": 366.51666666666665
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 370547,
+            "p95": 446497,
+            "p99": 614415,
+            "max": 666503,
+            "mean": 382355.86666666664
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.037,
+            "p95": 2.373,
+            "p99": 2.373,
+            "max": 2.373,
+            "mean": 1.3305499999999997
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 1287,
+          "paddingAfterActionMs": 713,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        }
+      ],
+      "data": {
+        "engine": "three.js r186",
+        "shipDesign": "{\"format\":\"planet-modules/ship-design\",\"glow\":\"cyan\",\"id\":\"3f6b2c1e-8a4d-4e7b-9c21-5d0f7a9e1b01\",\"name\":\"Courier\",\"paint\":{\"primary\":\"bone\",\"secondary\":\"gunmetal\",\"trim\":\"amber\"},\"parts\":{\"cockpit\":\"faceted-canopy\",\"dorsal\":\"sensor-mast\",\"engines\":\"twin-nacelle\",\"hull\":\"slim-courier\",\"tail\":\"single-fin\",\"wings\":\"swept\"},\"registration\":\"LW-0742\",\"version\":1}",
+        "visitors": "0",
+        "nearbyVisitors": "0",
+        "visibleVisitors": "0",
+        "detailedVisitors": "0",
+        "presencePlanet": "hub",
+        "placedAssetKit": "sunseed-village/14e244f",
+        "placedAssetKinds": "",
+        "terrainId": "planet-terrain@2:c30367efe94582078f8bb3f692d5d414a5fbf4a8dd8833345755fd7fc52c399c:radius-21.6:graded",
+        "visitorRadii": "[]",
+        "placedShadowObjects": "0",
+        "placedShadowTotal": "0",
+        "villageDrawing": "14e244f",
+        "lineFadeScale": "1",
+        "drawCalls": "344",
+        "triangles": "370547",
+        "publicCounts": "{\"structures\":250,\"objects\":510,\"destinations\":[\"post\",\"orchard\",\"harbour\"]}",
+        "townStats": "{\"totalObjects\":510,\"totalChunks\":48,\"visibleObjects\":347,\"visibleChunks\":29,\"mediumChunks\":8,\"cachedMediumChunks\":8,\"pendingMediumChunks\":0,\"stagedMediumObjects\":0,\"globalLowBatch\":false,\"activeTriangles\":370498,\"activeDrawCalls\":408,\"residentTriangles\":596982,\"residentGeometryBytes\":63058536,\"initialBuildMs\":705.1999995708466,\"lastBuildMs\":0,\"initialFitMs\":0.10000002384185791}",
+        "practical": "{\"slots\":{\"spots\":2,\"points\":2,\"shadows\":0},\"lit\":0,\"litShadows\":0,\"assigned\":[],\"fittingsInReach\":0,\"clustersInReach\":0,\"enabled\":false}",
+        "textureFormat": "webp",
+        "scanFormats": "[]",
+        "feetRadius": "21.671072817919395",
+        "verticalSpeed": "0",
+        "sprinting": "false",
+        "jumpHeld": "false",
+        "grounded": "true",
+        "groundSupport": "street.road.plain",
+        "cameraPosition": "[-2.5707820315146868,-25.74254823800685,4.60221565135441]",
+        "cameraHead": "[-2.309005032991543,-22.7858519616368,-2.3330751869452477]",
+        "playerVisible": "true",
+        "cameraHeading": "[0.00508071005628979,0.10134800379626907,-0.9948380614511265]",
+        "cameraPitch": "0",
+        "groundScale": "2.16",
+        "groundRadius": "21.6",
+        "quality": "full",
+        "portDistance": "52.05323699641903",
+        "groundPosition": "[-0.1002996277043281,-0.9897823677400689,-0.10134519817552566]",
+        "renderCpuMs": "1.350",
+        "lightLevels": "[0,0,0,0]"
+      }
+    },
+    {
+      "name": "390-front",
+      "fixtureMeaning": "Initial saved positions prepared only in disposable database; subsequent movement uses real keyboard or touch controls.",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 390,
+          "height": 844,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 390,
+          "height": 844
+        },
+        "touchPoints": 1,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "samples": [
+        {
+          "label": "390-front-cold-page-load",
+          "readyMs": 6016.399999976158,
+          "firstFrameMs": 21.899999928474426,
+          "feedbackFirstObservedMs": 105.29999992847442,
+          "loadingFrames": 292,
+          "frames": {
+            "samples": 344,
+            "p50": 16.699999999999818,
+            "p95": 16.800000000000182,
+            "p99": 50,
+            "max": 83.30000000000018
+          },
+          "longTasks": {
+            "samples": 4,
+            "p50": 69,
+            "p95": 93,
+            "p99": 93,
+            "max": 93
+          },
+          "longFrames": {
+            "over50ms": 3,
+            "over100ms": 0
+          },
+          "timingMeaning": "Fresh browser context, sampling from pre-app init script through complete loading and Begin. Includes loading frames and server/asset wait; firstFrameMs exposes any delay before the first rAF. No physical-phone or GPU-timing claim."
+        },
+        {
+          "label": "390-front-settled-ground",
+          "durationMs": 2004.1999999284744,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.799999999999272,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.66638655462184
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 277,
+            "p95": 277,
+            "p99": 277,
+            "max": 277,
+            "mean": 277
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 365469,
+            "p95": 365469,
+            "p99": 365469,
+            "max": 365469,
+            "mean": 365469
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.217,
+            "p95": 1.307,
+            "p99": 1.307,
+            "max": 1.307,
+            "mean": 1.1842499999999991
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2003,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "390-front-overview",
+          "durationMs": 2003.3999999761581,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.799999999999272,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.66638655462186
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 286,
+            "p95": 286,
+            "p99": 286,
+            "max": 286,
+            "mean": 286
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 635395,
+            "p95": 635395,
+            "p99": 635395,
+            "max": 635395,
+            "mean": 635395
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 2.523,
+            "p95": 2.777,
+            "p99": 2.777,
+            "max": 2.777,
+            "mean": 2.5089249999999956
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2002,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "390-front-actual-walk",
+          "durationMs": 2002.6000000238419,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.6655462184874
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 282,
+            "p95": 451,
+            "p99": 898,
+            "max": 898,
+            "mean": 310.6666666666667
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 354781,
+            "p95": 475389,
+            "p99": 731819,
+            "max": 731819,
+            "mean": 372551.48333333334
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 1.123,
+            "p95": 2.74,
+            "p99": 2.74,
+            "max": 2.74,
+            "mean": 1.3236666666666677
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 1512,
+          "paddingAfterActionMs": 488,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        }
+      ],
+      "data": {
+        "engine": "three.js r186",
+        "shipDesign": "{\"format\":\"planet-modules/ship-design\",\"glow\":\"cyan\",\"id\":\"3f6b2c1e-8a4d-4e7b-9c21-5d0f7a9e1b01\",\"name\":\"Courier\",\"paint\":{\"primary\":\"bone\",\"secondary\":\"gunmetal\",\"trim\":\"amber\"},\"parts\":{\"cockpit\":\"faceted-canopy\",\"dorsal\":\"sensor-mast\",\"engines\":\"twin-nacelle\",\"hull\":\"slim-courier\",\"tail\":\"single-fin\",\"wings\":\"swept\"},\"registration\":\"LW-0742\",\"version\":1}",
+        "visitors": "0",
+        "nearbyVisitors": "0",
+        "visibleVisitors": "0",
+        "detailedVisitors": "0",
+        "presencePlanet": "hub",
+        "placedAssetKit": "sunseed-village/14e244f",
+        "placedAssetKinds": "",
+        "terrainId": "planet-terrain@2:c30367efe94582078f8bb3f692d5d414a5fbf4a8dd8833345755fd7fc52c399c:radius-21.6:graded",
+        "visitorRadii": "[]",
+        "placedShadowObjects": "0",
+        "placedShadowTotal": "0",
+        "villageDrawing": "14e244f",
+        "lineFadeScale": "1",
+        "drawCalls": "281",
+        "triangles": "350691",
+        "publicCounts": "{\"structures\":250,\"objects\":510,\"destinations\":[\"post\",\"orchard\",\"harbour\"]}",
+        "townStats": "{\"totalObjects\":510,\"totalChunks\":48,\"visibleObjects\":315,\"visibleChunks\":31,\"mediumChunks\":8,\"cachedMediumChunks\":8,\"pendingMediumChunks\":0,\"stagedMediumObjects\":0,\"globalLowBatch\":false,\"activeTriangles\":363156,\"activeDrawCalls\":431,\"residentTriangles\":653876,\"residentGeometryBytes\":68826816,\"initialBuildMs\":684.3000000715256,\"lastBuildMs\":0,\"initialFitMs\":0.10000002384185791}",
+        "practical": "{\"slots\":{\"spots\":2,\"points\":2,\"shadows\":0},\"lit\":0,\"litShadows\":0,\"assigned\":[],\"fittingsInReach\":0,\"clustersInReach\":0,\"enabled\":false}",
+        "textureFormat": "webp",
+        "scanFormats": "[]",
+        "feetRadius": "21.636647481624983",
+        "verticalSpeed": "0",
+        "sprinting": "false",
+        "jumpHeld": "false",
+        "grounded": "true",
+        "groundSupport": "street.road.plain",
+        "cameraPosition": "[12.147311278490278,-3.5886093846989136,23.464645634733607]",
+        "cameraHead": "[16.089338185633483,-3.247226307430101,16.092690281651056]",
+        "playerVisible": "true",
+        "cameraHeading": "[0.7071530474630812,-0.00027114274003997747,-0.7070604598938424]",
+        "cameraPitch": "0",
+        "groundScale": "2.16",
+        "groundRadius": "21.6",
+        "quality": "compact",
+        "portDistance": "45.835050297062615",
+        "groundPosition": "[0.6999427906350826,-0.14126576352753753,0.7000886185997848]",
+        "renderCpuMs": "0.900",
+        "lightLevels": "[0,0,0,0]"
+      }
+    },
+    {
+      "name": "390-north",
+      "fixtureMeaning": "Initial saved positions prepared only in disposable database; subsequent movement uses real keyboard or touch controls.",
+      "renderer": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 390,
+          "height": 844,
+          "dpr": 1
+        },
+        "drawingBuffer": {
+          "width": 390,
+          "height": 844
+        },
+        "touchPoints": 1,
+        "visibility": "visible",
+        "webglVendor": "Google Inc. (Apple)",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)"
+      },
+      "samples": [
+        {
+          "label": "390-north-cold-page-load",
+          "readyMs": 6031.399999976158,
+          "firstFrameMs": 18.299999952316284,
+          "feedbackFirstObservedMs": 101.59999995231628,
+          "loadingFrames": 289,
+          "frames": {
+            "samples": 345,
+            "p50": 16.699999999999818,
+            "p95": 16.799999999999727,
+            "p99": 49.899999999999636,
+            "max": 83.39999999999964
+          },
+          "longTasks": {
+            "samples": 4,
+            "p50": 65,
+            "p95": 93,
+            "p99": 93,
+            "max": 93
+          },
+          "longFrames": {
+            "over50ms": 3,
+            "over100ms": 0
+          },
+          "timingMeaning": "Fresh browser context, sampling from pre-app init script through complete loading and Begin. Includes loading frames and server/asset wait; firstFrameMs exposes any delay before the first rAF. No physical-phone or GPU-timing claim."
+        },
+        {
+          "label": "390-north-settled-ground",
+          "durationMs": 2002.2999999523163,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.799999999999272,
+            "p99": 16.799999999999272,
+            "max": 16.80000000000109,
+            "mean": 16.66638655462184
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 331,
+            "p95": 331,
+            "p99": 331,
+            "max": 331,
+            "mean": 331
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 260313,
+            "p95": 260313,
+            "p99": 260313,
+            "max": 260313,
+            "mean": 260313
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 0.787,
+            "p95": 0.803,
+            "p99": 0.803,
+            "max": 0.803,
+            "mean": 0.7746333333333326
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2002,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "390-north-overview",
+          "durationMs": 2003.7000000476837,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.80000000000109,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.66638655462186
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 316,
+            "p95": 316,
+            "p99": 316,
+            "max": 316,
+            "mean": 316
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 635847,
+            "p95": 635847,
+            "p99": 635847,
+            "max": 635847,
+            "mean": 635847
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 0.937,
+            "p95": 1.003,
+            "p99": 1.003,
+            "max": 1.003,
+            "mean": 0.935341666666666
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 2003,
+          "paddingAfterActionMs": 0,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        },
+        {
+          "label": "390-north-actual-walk",
+          "durationMs": 2004.2999999523163,
+          "frames": {
+            "samples": 119,
+            "p50": 16.69999999999891,
+            "p95": 16.799999999999272,
+            "p99": 16.80000000000109,
+            "max": 16.80000000000109,
+            "mean": 16.66638655462186
+          },
+          "longFrames": {
+            "over33_3ms": 0,
+            "over50ms": 0,
+            "over100ms": 0
+          },
+          "longTasks": null,
+          "drawCalls": {
+            "samples": 120,
+            "p50": 330,
+            "p95": 561,
+            "p99": 844,
+            "max": 844,
+            "mean": 362.275
+          },
+          "triangles": {
+            "samples": 120,
+            "p50": 255291,
+            "p95": 429593,
+            "p99": 644579,
+            "max": 644579,
+            "mean": 280288.5333333333
+          },
+          "renderCpuSubmissionMs": {
+            "samples": 120,
+            "p50": 0.84,
+            "p95": 1.277,
+            "p99": 1.277,
+            "max": 1.277,
+            "mean": 0.9360333333333348
+          },
+          "continuouslyForeground": true,
+          "phaseFrameCounts": {
+            "ground": 120
+          },
+          "actionMs": 1331,
+          "paddingAfterActionMs": 669,
+          "timingMeaning": "Foreground Chrome rAF intervals during the named action plus explicit settling time, including all loading frames. p50/p95/p99 are frame scheduling, not GPU timings. renderCpuSubmissionMs is the app rolling submission counter. Interior triangle count and stale workshop/loading renderer counters are omitted. No physical-phone or sustained thermal claim."
+        }
+      ],
+      "data": {
+        "engine": "three.js r186",
+        "shipDesign": "{\"format\":\"planet-modules/ship-design\",\"glow\":\"cyan\",\"id\":\"3f6b2c1e-8a4d-4e7b-9c21-5d0f7a9e1b01\",\"name\":\"Courier\",\"paint\":{\"primary\":\"bone\",\"secondary\":\"gunmetal\",\"trim\":\"amber\"},\"parts\":{\"cockpit\":\"faceted-canopy\",\"dorsal\":\"sensor-mast\",\"engines\":\"twin-nacelle\",\"hull\":\"slim-courier\",\"tail\":\"single-fin\",\"wings\":\"swept\"},\"registration\":\"LW-0742\",\"version\":1}",
+        "visitors": "0",
+        "nearbyVisitors": "0",
+        "visibleVisitors": "0",
+        "detailedVisitors": "0",
+        "presencePlanet": "hub",
+        "placedAssetKit": "sunseed-village/14e244f",
+        "placedAssetKinds": "",
+        "terrainId": "planet-terrain@2:c30367efe94582078f8bb3f692d5d414a5fbf4a8dd8833345755fd7fc52c399c:radius-21.6:graded",
+        "visitorRadii": "[]",
+        "placedShadowObjects": "0",
+        "placedShadowTotal": "0",
+        "villageDrawing": "14e244f",
+        "lineFadeScale": "1",
+        "drawCalls": "331",
+        "triangles": "255995",
+        "publicCounts": "{\"structures\":250,\"objects\":510,\"destinations\":[\"post\",\"orchard\",\"harbour\"]}",
+        "townStats": "{\"totalObjects\":510,\"totalChunks\":48,\"visibleObjects\":341,\"visibleChunks\":29,\"mediumChunks\":8,\"cachedMediumChunks\":8,\"pendingMediumChunks\":0,\"stagedMediumObjects\":0,\"globalLowBatch\":false,\"activeTriangles\":341046,\"activeDrawCalls\":402,\"residentTriangles\":575194,\"residentGeometryBytes\":60737952,\"initialBuildMs\":685.1999999284744,\"lastBuildMs\":0,\"initialFitMs\":0}",
+        "practical": "{\"slots\":{\"spots\":2,\"points\":2,\"shadows\":0},\"lit\":0,\"litShadows\":0,\"assigned\":[],\"fittingsInReach\":0,\"clustersInReach\":0,\"enabled\":false}",
+        "textureFormat": "webp",
+        "scanFormats": "[]",
+        "feetRadius": "21.81904192592285",
+        "verticalSpeed": "0",
+        "sprinting": "false",
+        "jumpHeld": "false",
+        "grounded": "true",
+        "groundSupport": "street.road.plain",
+        "cameraPosition": "[-0.35166970014677984,24.2868685552255,11.417617177303402]",
+        "cameraHead": "[-0.25451329149647295,22.951263983562132,3.158988494196528]",
+        "playerVisible": "true",
+        "cameraHeading": "[0.008846532691805322,0.13644440497146015,-0.9906082289236836]",
+        "cameraPitch": "0",
+        "groundScale": "2.16",
+        "groundRadius": "21.6",
+        "quality": "compact",
+        "portDistance": "16.434705385864845",
+        "groundPosition": "[-0.010985058955403283,0.990600477004746,0.1363452362120365]",
+        "renderCpuMs": "0.787",
+        "lightLevels": "[0,0,0,0]"
+      }
+    }
+  ]
+}
