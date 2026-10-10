@@ -1,11 +1,11 @@
 import {expect,it} from 'vitest';
 import {Vector3,Quaternion} from 'three';
-import {PART_IDS,partLabel} from '../src/assets/claude-geometry/blueprint/parts/catalogue.ts';
-import {PART_INFO} from '../src/assets/claude-geometry/blueprint/parts/info.ts';
+import {LEGACY_PART_IDS as PART_IDS,partLabel} from '../src/shared/blueprint-parts.ts';
+import {PART_INFO} from '../src/shared/blueprint-parts.ts';
 import {homeCottage,cornerLane,padStall} from '../src/assets/claude-geometry/blueprint/samples.ts';
-import {layoutErrors,placementProblem,partTransform,pivotOf,groundCells} from '../src/assets/claude-geometry/blueprint/model.ts';
-import type {PartPlacement} from '../src/assets/claude-geometry/blueprint/model.ts';
-import {blueprintHash,decodeBlueprint,encodeBlueprint} from '../src/assets/claude-geometry/blueprint/codec.ts';
+import {layoutErrors,placementProblem,partTransform,pivotOf,groundCells} from '../src/shared/blueprint-model.ts';
+import type {PartPlacement} from '../src/shared/blueprint-model.ts';
+import {blueprintHash,decodeBlueprint,encodeBlueprint} from '../src/shared/blueprint-codec.ts';
 import {anchorQuaternion} from '../src/assets/claude-geometry/core/anchor.ts';
 import {PART_COLLIDERS} from '../src/shared/physics/parts.ts';
 import {GroundWorld,FIXED_STEP,JUMP_FLAG,PHYSICS_VERSION} from '../src/shared/physics/world.ts';

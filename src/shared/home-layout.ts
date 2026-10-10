@@ -1,7 +1,7 @@
 import type { BlueprintId } from '../assets/claude-geometry/core/ids.ts';
 import { localToDir } from '../assets/claude-geometry/core/anchor.ts';
-import type { Blueprint, PartPlacement, Rot } from '../assets/claude-geometry/blueprint/model.ts';
-import type { PartId } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import type { Blueprint, PartPlacement, Rot } from './blueprint-model.ts';
+import type { PartId } from './blueprint-parts.ts';
 import { defaultEnvironment, encodeEnvironment } from '../assets/claude-geometry/terrain/env.ts';
 import { structureSize } from './blueprints.ts';
 import { placementProblem } from './planets.ts';

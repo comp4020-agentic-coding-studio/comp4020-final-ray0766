@@ -1,11 +1,12 @@
+import { isDoorPartId } from './blueprint-parts.ts';
 import { Matrix3, Matrix4, Quaternion, Vector3 } from 'three';
 import { OBB } from 'three/addons/math/OBB.js';
 import { anchorQuaternion } from '../assets/claude-geometry/core/anchor.ts';
 import { fitGround, groundRadius } from '../assets/claude-geometry/core/ground.ts';
 import { chord2 } from '../assets/claude-geometry/terrain/styles/program.ts';
 import type { HeightField } from '../assets/claude-geometry/core/ground.ts';
-import { groundCells, partTransform, pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
-import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
+import { groundCells, partTransform, pivotOf } from './blueprint-model.ts';
+import type { PartPlacement } from './blueprint-model.ts';
 import type { BlueprintContents } from './blueprints.ts';
 import { surfaceFooting, gradeFoundations } from './terrain-grading.ts';
 import { PART_COLLIDERS } from './physics/parts.ts';
@@ -91,8 +92,8 @@ export function pathPlacementCheck(field:HeightField,objects:readonly PlacedObje
   for(const part of parts){
     const transform=partTransform(part,pivot);
     for(const shape of PART_COLLIDERS[part.part]())prepared.solids.push(shapeBox(shape,transform.position,transform.yaw));
-    if(part.part==='wall.door.open'||part.part==='wall.door'){
-      for(const shape of homeDoorSweepBoxes())prepared.sweeps.push(shapeBox(shape,transform.position,transform.yaw));
+    if(isDoorPartId(part.part)){
+      for(const shape of homeDoorSweepBoxes(part.part))prepared.sweeps.push(shapeBox(shape,transform.position,transform.yaw));
     }
   }
   const depth=fit.foundationDepth+.46;

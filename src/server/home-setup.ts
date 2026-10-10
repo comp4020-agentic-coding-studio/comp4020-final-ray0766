@@ -1,8 +1,9 @@
+import { isOpenDoorPartId } from '../shared/blueprint-parts.ts';
 import { createHash, randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
-import { encodeBlueprint, hashInput } from '../assets/claude-geometry/blueprint/codec.ts';
-import { partTransform, pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
-import type { Blueprint } from '../assets/claude-geometry/blueprint/model.ts';
+import { encodeBlueprint, hashInput } from '../shared/blueprint-codec.ts';
+import { partTransform, pivotOf } from '../shared/blueprint-model.ts';
+import type { Blueprint } from '../shared/blueprint-model.ts';
 import { anchorQuaternion, localToDir, localToPlanet } from '../assets/claude-geometry/core/anchor.ts';
 import { canonicalJson } from '../assets/claude-geometry/core/doc.ts';
 import { quatFromAxisAngle, quatMultiply } from '../assets/claude-geometry/core/vec.ts';
@@ -85,7 +86,7 @@ export function homeSetupStore(db: DatabaseSync, planets: ReturnType<typeof plan
       const parts = blueprints.parts(object.blueprintHash), pivot = pivotOf(parts);
       // Upstairs exits need an explicit saved support height; this rollout
       // offers ground-level entrances only, with any original part number.
-      return parts.filter(part => part.part === 'wall.door.open' && partTransform(part, pivot).position[1] <= .25).map(part => ({ buildingId: object.id, partNumber: part.n, buildingName }));
+      return parts.filter(part => isOpenDoorPartId(part.part) && partTransform(part, pivot).position[1] <= .25).map(part => ({ buildingId: object.id, partNumber: part.n, buildingName }));
     });
     let reason: string | undefined, proposed: HomeSetupAddition | undefined;
     if (existingHome) reason = 'This planet already has its one home interior.';
@@ -104,12 +105,12 @@ export function homeSetupStore(db: DatabaseSync, planets: ReturnType<typeof plan
     return { ...result, hash };
   }
   function guardDoor(planet: PlanetView, object: PlacedObject, partNumber: number) {
-    const parts = blueprints.parts(object.blueprintHash), part = parts.find(item => item.n === partNumber && item.part === 'wall.door.open');
+    const parts = blueprints.parts(object.blueprintHash), part = parts.find(item => item.n === partNumber && isOpenDoorPartId(item.part));
     if (!part) throw new RequestError(409, 'Choose an existing open door from the current preview.');
     const anchor = { dir: object.position, yaw: object.rotation }, transform = partTransform(part, pivotOf(parts));
     const fit = structureFit(parts, object.position, object.rotation, fieldOf(planet.environment, planet.radius));
     const frame = { position: localToPlanet(anchor, fit.baseRadius, transform.position), quaternion: quatMultiply(anchorQuaternion(anchor), quatFromAxisAngle([0, 1, 0], transform.yaw)) };
-    if (occupiedExteriorDoor(db, planet.id, frame, () => new GroundWorld(planet))) throw new RequestError(409, 'Someone is in the doorway. Step clear before setting up this home.');
+    if (occupiedExteriorDoor(db, planet.id, frame, () => new GroundWorld(planet), part.part as import('../shared/home-door.ts').HomeDoorPartId)) throw new RequestError(409, 'Someone is in the doorway. Step clear before setting up this home.');
   }
   return {
     preview(id: string, body: Record<string, unknown>): HomeSetupPreview {

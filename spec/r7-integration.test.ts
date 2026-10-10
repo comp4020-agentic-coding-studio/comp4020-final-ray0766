@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { StyleLibrary } from '../src/assets/claude-geometry/style/materials.ts';
 import { BUDGET } from '../src/assets/claude-geometry/style/lod.ts';
-import { buildBlueprintModel } from '../src/assets/claude-geometry/blueprint/model3d.ts';
+import { buildBlueprintModel } from '../src/shared/blueprint-model3d.ts';
 import { industrialCabin } from '../src/assets/claude-geometry/blueprint/samples.ts';
 import { createShipModel, envelopeProblems } from '../src/assets/claude-geometry/ship/factory.ts';
 import { cloneDesign, STARTERS } from '../src/assets/claude-geometry/ship/design.ts';

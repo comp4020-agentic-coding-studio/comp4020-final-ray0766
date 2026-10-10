@@ -5,8 +5,8 @@ import {randomUUID} from 'node:crypto';
 import {distance,normalize} from '../../src/shared/world.ts';
 import {PHYSICS_VERSION} from '../../src/shared/physics/world.ts';
 import {industrialCabin} from '../../src/assets/claude-geometry/blueprint/samples.ts';
-import type {Blueprint,PartPlacement} from '../../src/assets/claude-geometry/blueprint/model.ts';
-import {encodeBlueprint} from '../../src/assets/claude-geometry/blueprint/codec.ts';
+import type {Blueprint,PartPlacement} from '../../src/shared/blueprint-model.ts';
+import {encodeBlueprint} from '../../src/shared/blueprint-codec.ts';
 import {closeVisit,launch,menuAction,openMenu,readUniverse,visit} from './flight-helper.ts';
 import {frame,readFeet,walk} from './physics-helper.ts';
 

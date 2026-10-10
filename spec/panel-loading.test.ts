@@ -46,7 +46,7 @@ vi.mock('../src/assets/claude-geometry/style/geometry.ts',async importOriginal=>
 vi.mock('../src/assets/claude-geometry/blueprint/parts/kit.ts',async importOriginal=>({
   ...await importOriginal<object>(),libraryMaterials:()=>({owned:()=>[]}),
 }));
-vi.mock('../src/assets/claude-geometry/blueprint/parts/catalogue.ts',async importOriginal=>({
+vi.mock('../src/shared/blueprint-parts.ts',async importOriginal=>({
   ...await importOriginal<object>(),emitPart:vi.fn(),
 }));
 vi.mock('../src/client/build-art.ts',()=>({disposeGeometry:(root:T.Object3D)=>{
@@ -92,7 +92,7 @@ beforeEach(()=>{
   mocks.room.mockImplementation(()=>{const model=ownedModel(`room-${rooms.length}`);rooms.push(model);return model;});
   mocks.furniture.mockImplementation((name:string)=>{const model=ownedModel(name);furniture.push(model);return model;});
   mocks.courier.mockImplementation(()=>({root:new T.Group(),setColor:vi.fn(),animate:vi.fn()}));
-  mocks.door.mockImplementation(()=>({root:new T.Group(),setOpen:vi.fn(),frame:vi.fn(),dispose:vi.fn()}));
+  mocks.door.mockImplementation(()=>({root:new T.Group(),setOpen:vi.fn(),setPart:vi.fn(),frame:vi.fn(),dispose:vi.fn()}));
   mocks.drawing.mockImplementation(()=>({render:vi.fn(),resize:vi.fn(),dispose:vi.fn()}));
 });
 afterEach(async()=>{

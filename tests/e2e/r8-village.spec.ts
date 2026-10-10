@@ -7,7 +7,7 @@ import {SPAWN,NPCS,distance} from '../../src/shared/world.ts';
 import {HUB_DOCK} from '../../src/shared/ports.ts';
 import {GroundWorld} from '../../src/shared/physics/world.ts';
 import {localToDir} from '../../src/assets/claude-geometry/core/anchor.ts';
-import {encodeBlueprint} from '../../src/assets/claude-geometry/blueprint/codec.ts';
+import {encodeBlueprint} from '../../src/shared/blueprint-codec.ts';
 import {test,expect} from '@playwright/test';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {closeVisit,openMenu,menuAction,readUniverse,visit,walkToPort} from './flight-helper.ts';

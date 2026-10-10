@@ -1,3 +1,4 @@
+import type { HomeDoorPartId } from '../shared/home-door.ts';
 import type { DatabaseSync } from 'node:sqlite';
 import { Quaternion, Vector3 } from 'three';
 import type { Vec3 } from '../shared/world.ts';
@@ -7,7 +8,7 @@ import { homeDoorSweepContains } from '../shared/home-door.ts';
 
 /** Includes disconnected people; a presence timeout never makes a body safe to
  * close a door onto. This read-only guard runs within the caller's write lock. */
-export function occupiedExteriorDoor(db:DatabaseSync,planetId:string,frame:NonNullable<HomeDescriptor['door']['frame']>,world:()=>GroundWorld):boolean {
+export function occupiedExteriorDoor(db:DatabaseSync,planetId:string,frame:NonNullable<HomeDescriptor['door']['frame']>,world:()=>GroundWorld,partId:HomeDoorPartId='wall.door.open'):boolean {
   const inverse=new Quaternion().fromArray(frame.quaternion).invert();
   let collisionWorld:GroundWorld|undefined;
   for(const p of db.prepare('SELECT id,position,flight FROM players WHERE planet_id=?').all(planetId)){
@@ -21,7 +22,7 @@ export function occupiedExteriorDoor(db:DatabaseSync,planetId:string,frame:NonNu
     else {collisionWorld??=world();const base=collisionWorld.radius(dir);radius=collisionWorld.support(dir,base+.26).radius;}
     const feet=new Vector3(...dir).multiplyScalar(radius).sub(new Vector3(...frame.position)).applyQuaternion(inverse).toArray() as Vec3;
     const up=new Vector3(...dir).applyQuaternion(inverse).toArray() as Vec3;
-    if(homeDoorSweepContains(feet,up))return true;
+    if(homeDoorSweepContains(feet,up,partId))return true;
   }
   return false;
 }

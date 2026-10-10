@@ -1,21 +1,21 @@
 import { localizedOption, setAttribute, setHTML, setText, translate } from './i18n.ts';
 import * as T from 'three';
-import { BlueprintEditor } from '../assets/claude-geometry/blueprint/editor.ts';
-import { encodeBlueprint } from '../assets/claude-geometry/blueprint/codec.ts';
+import { BlueprintEditor } from './blueprint-editor.ts';
+import { encodeBlueprint } from '../shared/blueprint-codec.ts';
 import { industrialCabin, homeCottage, cornerLane, padStall } from '../assets/claude-geometry/blueprint/samples.ts';
-import { partTransform } from '../assets/claude-geometry/blueprint/model.ts';
-import type { Blueprint, PartPlacement, Rot } from '../assets/claude-geometry/blueprint/model.ts';
-import { PART_IDS } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
-import type { PartId } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import { partTransform } from '../shared/blueprint-model.ts';
+import type { Blueprint, PartPlacement, Rot } from '../shared/blueprint-model.ts';
+import { isDoorPartId, isOpenDoorPartId, isPartId, isWideDoorPartId, isWideEntryPartId, PART_IDS, PART_INFO, PARTS, partBlurb } from '../shared/blueprint-parts.ts';
+import type { PartId } from '../shared/blueprint-parts.ts';
 import { STOREY } from '../assets/claude-geometry/blueprint/parts/kit.ts';
-import { WorkshopView } from '../assets/claude-geometry/blueprint/view/workshop-view.ts';
-import { PartTemplates } from '../assets/claude-geometry/blueprint/view/templates.ts';
+import { WorkshopView, PartTemplates, partIcon } from './blueprint-view.ts';
+import { WIDE_DOOR } from '../shared/wide-door.ts';
 import type { Stage } from '../assets/claude-geometry/shell/stage.ts';
 import type { LibraryEntry } from '../shared/blueprints.ts';
 import './workshop.css';
 import { villagePartDiagnostic, villagePartLabel } from './part-labels.ts';
 import { createPresentationStage } from './presentation-stage.ts';
-import { SAMPLE_PUBLIC_BLUEPRINTS } from '../shared/sample-public-village.ts';
+import { samplePublicWorkshopPlans } from '../shared/sample-public-village.ts';
 import {beginSceneLoading,yieldSceneFrame} from './loading-state.ts';
 
 export interface WorkshopBridge {
@@ -24,6 +24,7 @@ export interface WorkshopBridge {
   place: (entry: LibraryEntry) => void;
   allowed: () => boolean;
 }
+export interface WorkshopOpenOptions { homeDoorPartNumber?: number }
 // This adapter owns UI/lifecycle and server transport. All snapping, groups,
 // undo, support checks, picking and geometry remain Claude's committed editor.
 export class Workshop {
@@ -32,6 +33,8 @@ export class Workshop {
   private stage: Stage | null = null;
   private view: WorkshopView | null = null;
   private templates: PartTemplates | null = null;
+  private icons = new Map<PartId, string>();
+  private homeDoorPartNumber: number | undefined;
   private entries: LibraryEntry[] = [];
   private saved: LibraryEntry | null = null;
   private level = 0;
@@ -50,8 +53,10 @@ export class Workshop {
       <aside class="ws-panel"><fieldset id="ws-fields"><div class="ws-row"><button id="ws-new">New</button><button id="ws-cabin">Cabin starter</button><button id="ws-copy">Save as copy</button></div>
       <div class="ws-row"><label>Example <select id="ws-example"><option value="home">Lived-in cottage</option><option value="lane">Corner lane and courtyard</option><option value="stall">Pad-side stall</option></select></label><button id="ws-example-load">Load example</button></div>
       <label>Tool <select id="ws-tool"><option value="select">Select / inspect</option></select></label>
+      <div id="ws-part-info" class="ws-part-info" hidden><img id="ws-part-icon" width="64" height="64" alt=""><div><p id="ws-part-blurb"></p><small><span>Dimensions</span> · <span id="ws-part-dimensions" data-i18n-verbatim></span></small><p id="ws-part-rule"></p></div></div>
       <div class="ws-row"><label>Column <select id="ws-x"></select></label><label>Row <select id="ws-z"></select></label><label>Turn <select id="ws-rot"><option value="0">0°</option><option value="1">90°</option><option value="2">180°</option><option value="3">270°</option></select></label></div>
-      <button id="ws-add">Add at cell</button><small>Walls snap to the chosen cell edge. Upper parts need support.</small>
+      <div class="ws-row"><button id="ws-add">Add at cell</button><button id="ws-replace-door" aria-describedby="ws-door-note">Replace selected door</button></div><small>Walls snap to the chosen cell edge. Upper parts need support.</small>
+      <small id="ws-door-note" hidden>Door tools set the blueprint pose. A bound home uses its Open/Close action during play.</small>
       <div class="ws-row"><button id="ws-undo">Undo</button><button id="ws-redo">Redo</button><button id="ws-remove">Remove</button><button id="ws-rotate">Rotate</button></div>
       <details><summary id="ws-parts-title">Parts & groups</summary><label>Parts (multiple selection)<select id="ws-parts" multiple size="5"></select></label><div class="ws-row"><button id="ws-all">Select all</button><button id="ws-clear">Deselect</button><button id="ws-up">Level up</button><button id="ws-down">Level down</button></div><div class="ws-row"><button id="ws-left">←</button><button id="ws-forward">↑</button><button id="ws-back">↓</button><button id="ws-right">→</button></div><label>Group name <input id="ws-group-name" maxlength="40" placeholder="e.g. Cabin shell"></label><div class="ws-row"><button id="ws-group">Group selection</button><button id="ws-ungroup">Ungroup</button></div><p id="ws-groups" data-i18n-verbatim></p></details>
       <details open><summary>My saved blueprints</summary><select id="ws-library" data-i18n-verbatim aria-label="Saved blueprints"></select><button id="ws-load">Open saved blueprint</button><p class="ws-private">Names and groups stay in your private library. Visitors see placed geometry.</p></details></fieldset></aside></div>
@@ -60,7 +65,8 @@ export class Workshop {
     const tool=this.get<HTMLSelectElement>('tool');
     for(const id of PART_IDS) tool.add(localizedOption(villagePartLabel(id), id));
     const villagePlans=document.createElement('optgroup');setAttribute(villagePlans,'label','Village plans');
-    for(const [i,blueprint]of SAMPLE_PUBLIC_BLUEPRINTS.entries())villagePlans.append(localizedOption(blueprint.name,`sample-${i}`));
+    const samplePlans=samplePublicWorkshopPlans();
+    for(const [i,blueprint]of samplePlans.entries())villagePlans.append(localizedOption(blueprint.name,`sample-${i}`));
     this.get<HTMLSelectElement>('example').append(villagePlans);
     for(const id of ['x','z']) for(let n=0;n<5;n++)this.get<HTMLSelectElement>(id).add(localizedOption(String(n+1), String(n)));
     this.on('close',()=>this.close());
@@ -70,14 +76,15 @@ export class Workshop {
     this.on('apply',()=>void this.applyPlaced());
     this.on('new',()=>{if(!this.discard())return;this.hover=null;this.saved=null;this.editor.reset();this.editor.rename('Untitled structure');this.changed();this.frame();});
     this.on('cabin',()=>{if(this.discard())this.starter();});
-    this.on('example-load',()=>{if(!this.discard())return;const key=this.get<HTMLSelectElement>('example').value;const sample=key.startsWith('sample-')?SAMPLE_PUBLIC_BLUEPRINTS[Number(key.slice(7))]:undefined;const bp=sample?structuredClone(sample):(key==='home'?homeCottage:key==='lane'?cornerLane:padStall)();bp.id=crypto.randomUUID() as Blueprint['id'];this.hover=null;this.saved=null;this.editor.load(bp);this.level=0;this.get<HTMLSelectElement>('level').value='0';this.view?.setLevel(0);this.get<HTMLSelectElement>('tool').value='select';this.changed();this.frame();this.status('Example loaded · save your own copy.');});
-    this.on('copy',()=>{const bp=this.editor.toBlueprint();bp.id=crypto.randomUUID() as Blueprint['id'];this.saved=null;this.editor.load(bp);this.changed();void this.save();});
+    this.on('example-load',()=>{if(!this.discard())return;const key=this.get<HTMLSelectElement>('example').value;const sample=key.startsWith('sample-')?samplePlans[Number(key.slice(7))]:undefined;const bp=sample?structuredClone(sample):(key==='home'?homeCottage:key==='lane'?cornerLane:padStall)();bp.id=crypto.randomUUID() as Blueprint['id'];this.hover=null;this.saved=null;this.editor.load(bp);this.level=0;this.get<HTMLSelectElement>('level').value='0';this.view?.setLevel(0);this.get<HTMLSelectElement>('tool').value='select';this.changed();this.frame();this.status('Example loaded · save your own copy.');});
+    this.on('copy',()=>void this.save(true));
     this.on('load',()=>{if(!this.discard())return;const e=this.entries.find(e=>e.blueprint.id===this.get<HTMLSelectElement>('library').value);if(e)this.load(e);});
     this.get<HTMLInputElement>('name').oninput=()=>this.editor.rename(this.get<HTMLInputElement>('name').value);
     this.get<HTMLSelectElement>('level').onchange=()=>{this.level=Number(this.get<HTMLSelectElement>('level').value);this.view?.setLevel(this.level);this.hover=null;this.frame();this.updatePreview();};
     tool.onchange=()=>{this.hover=null;this.changed();};
     for(const id of ['x','z','rot'])this.get<HTMLSelectElement>(id).onchange=()=>{this.hover=null;this.updatePreview();};
     this.on('frame',()=>this.frame());this.on('inside',()=>this.inside());this.on('add',()=>this.addAtCell());
+    this.on('replace-door',()=>this.replaceSelectedDoor());
     this.on('undo',()=>this.result(this.editor.undo()));this.on('redo',()=>this.result(this.editor.redo()));
     this.on('remove',()=>this.result(this.editor.remove()));this.on('rotate',()=>this.result(this.editor.rotateSelection()));
     this.on('all',()=>this.editor.selectAll(this.editor.parts.map(p=>p.n)));this.on('clear',()=>this.editor.select(null));
@@ -96,9 +103,10 @@ export class Workshop {
   private discard(){return !this.unsaved||window.confirm(translate('Discard the unsaved blueprint changes?'));}
   private status(text:string){setText(this.get('status'), text);}
   private result(result:{message:string;problem?:unknown}){this.status(result.problem?villagePartDiagnostic(result.message):result.message);}
-  async open(initial?: Blueprint, applyToPlaced?: (entry: LibraryEntry) => Promise<void>, applyLabel='Apply to my home'){
+  async open(initial?: Blueprint, applyToPlaced?: (entry: LibraryEntry) => Promise<void>, applyLabel='Apply to my home', options:WorkshopOpenOptions={}){
     if(this.opened||!this.bridge.allowed())return;
     this.applyToPlaced=applyToPlaced??null;
+    this.homeDoorPartNumber=options.homeDoorPartNumber;
     setText(this.get('apply'),applyLabel);
     this.get('apply').hidden=!this.applyToPlaced;this.get('place').hidden=!!this.applyToPlaced;
     this.dialog.showModal();document.body.classList.add('workshop-open');
@@ -143,7 +151,7 @@ export class Workshop {
       if(current()){
         this.releaseView();
         this.status(error instanceof Error?error.message:'Workshop unavailable. Close and retry.');
-        loading.task.fail('Could not finish loading. Your saved world is unchanged.',()=>{if(current()){this.close(true);void this.open(initial,applyToPlaced,applyLabel);}});
+        loading.task.fail('Could not finish loading. Your saved world is unchanged.',()=>{if(current()){this.close(true);void this.open(initial,applyToPlaced,applyLabel,options);}});
       }else loading.task.finish();
     }
   }
@@ -159,15 +167,21 @@ export class Workshop {
     // that editor with the disposed view; reusing it would call a dead library.
     this.pointer=null;this.hover=null;this.saved=null;this.editor=new BlueprintEditor();this.editor.onChange(()=>this.changed());
     this.level=0;this.get<HTMLSelectElement>('level').value='0';this.get<HTMLSelectElement>('tool').value='select';
+    this.icons.clear();this.get<HTMLImageElement>('part-icon').removeAttribute('src');
+    this.homeDoorPartNumber=undefined;
   }
   private starter(){this.hover=null;const bp=industrialCabin();bp.id=crypto.randomUUID() as Blueprint['id'];this.saved=null;this.editor.load(bp);this.level=0;this.get<HTMLSelectElement>('level').value='0';this.view?.setLevel(0);this.changed();this.frame();}
   private load(entry:LibraryEntry){this.hover=null;this.saved=entry;this.editor.load(entry.blueprint);this.level=0;this.get<HTMLSelectElement>('level').value='0';this.view?.setLevel(0);this.changed();this.frame();this.status('Saved blueprint opened.');}
   private libraryOptions(){const select=this.get<HTMLSelectElement>('library');select.replaceChildren(...this.entries.map(e=>localizedOption(e.blueprint.name, e.blueprint.id, false, false, true)));if(this.saved)select.value=this.saved.blueprint.id;}
-  private async save(){
+  private async save(asCopy=false){
     const problem=this.editor.saveProblem();if(problem){this.status(problem);return;}
+    const blueprint=this.editor.toBlueprint();if(asCopy)blueprint.id=crypto.randomUUID() as Blueprint['id'];
     this.busy=true;this.changed();this.status('Saving blueprint…');
     try{
-      const entry=await this.bridge.save({document:JSON.parse(encodeBlueprint(this.editor.toBlueprint())),expectedVersion:this.saved?.version??0});
+      // Keep the current identity, history and saved version until the server
+      // accepts a copy. A failed request must leave the original draft intact.
+      const entry=await this.bridge.save({document:JSON.parse(encodeBlueprint(blueprint)),expectedVersion:asCopy?0:this.saved?.version??0});
+      if(asCopy)this.editor.load(entry.blueprint);
       this.saved=entry;this.editor.markSaved();const index=this.entries.findIndex(e=>e.blueprint.id===entry.blueprint.id);if(index<0)this.entries.push(entry);else this.entries[index]=entry;
       this.libraryOptions();this.status('Saved to your server library. Ready to place.');
     }catch(error){this.status(error instanceof Error?error.message:'Save failed. Your draft is still open.');}
@@ -198,6 +212,13 @@ export class Workshop {
   }
   private addAtCell(){this.hover=null;const draft=this.cellDraft();if(!draft){this.status('Choose a part tool first.');return;}
     this.result(this.editor.add(draft));this.updatePreview();}
+  private selectedDoors(){return this.editor.parts.filter(p=>this.editor.selection.has(p.n)&&isDoorPartId(p.part));}
+  private replaceSelectedDoor(){
+    const doors=this.selectedDoors(),part=this.get<HTMLSelectElement>('tool').value;
+    if(doors.length!==1||!isDoorPartId(part)){this.status('Select one existing door and choose a door tool.');return;}
+    if(doors[0].n===this.homeDoorPartNumber&&!isOpenDoorPartId(part)){this.status('Keep the home entrance open in this blueprint. Use Open/Close door during play.');return;}
+    this.result(this.editor.replaceDoor(doors[0].n,part));this.updatePreview();
+  }
   private frame(){
     if(!this.stage||!this.templates)return;
     const box=this.view?.bounds()??new T.Box3();
@@ -212,11 +233,12 @@ export class Workshop {
   }
   private inside(){
     if(!this.stage||!this.editor.parts.length)return;
-    const door=this.editor.parts.find(p=>p.part==='wall.door.open');
+    const door=this.editor.parts.find(p=>isOpenDoorPartId(p.part));
     if(!door){this.status('Add an open doorway to use the interior view.');return;}
     this.editor.select(null);
     const t=partTransform(door,{x:2.5,z:2.5}), front=new T.Vector3(Math.sin(t.yaw),0,Math.cos(t.yaw));
     const eye=new T.Vector3(...t.position).add(new T.Vector3(0,1.15,0)).addScaledVector(front,-.18);
+    if(isWideDoorPartId(door.part))eye.addScaledVector(new T.Vector3(Math.cos(t.yaw),0,-Math.sin(t.yaw)),WIDE_DOOR.centerX);
     this.stage.camera.fov=74;this.stage.camera.updateProjectionMatrix();
     this.stage.camera.position.copy(eye);this.stage.controls.target.copy(eye).addScaledVector(front,-1.25);this.stage.controls.update();this.stage.renderOnce();
     this.status('Interior view. Drag to look around, or Frame model to return.');
@@ -235,11 +257,30 @@ export class Workshop {
     this.get<HTMLButtonElement>('place').disabled=this.busy||this.unsaved||!this.saved;
     this.get<HTMLButtonElement>('undo').disabled=!this.editor.canUndo;this.get<HTMLButtonElement>('redo').disabled=!this.editor.canRedo;
     this.get<HTMLButtonElement>('load').disabled=!this.entries.length;
+    const selectedDoors=this.selectedDoors(),doorTool=this.get<HTMLSelectElement>('tool').value;
+    const boundClosed=selectedDoors.length===1&&selectedDoors[0].n===this.homeDoorPartNumber&&!isOpenDoorPartId(doorTool);
+    this.get<HTMLButtonElement>('replace-door').disabled=this.busy||selectedDoors.length!==1||!isDoorPartId(doorTool)||boundClosed;
+    this.get('door-note').hidden=!isDoorPartId(doorTool)&&selectedDoors.length===0;
+    setText(this.get('door-note'),boundClosed?'Keep the home entrance open in this blueprint. Use Open/Close door during play.':'Door tools set the blueprint pose. A bound home uses its Open/Close action during play.');
     setText(this.get('count'), `${this.editor.parts.length} / 120 parts · ${this.unsaved?'Unsaved':'Saved'}`);
     setText(this.get('parts-title'), `Parts & groups (${this.editor.selection.size} selected)`);
     const list=this.get<HTMLSelectElement>('parts');const scroll=list.scrollTop;
     list.replaceChildren(...this.editor.parts.map(p=>{const o=localizedOption(`#${p.n} ${villagePartLabel(p.part)} · L${p.level+1}`, String(p.n));o.selected=this.editor.selection.has(p.n);return o;}));list.scrollTop=scroll;
     this.updatePreview();
+    this.updatePartInfo();
     setText(this.get('groups'), this.editor.groups.map(g=>`${g.name} (${g.members.length})`).join(' · '));
+  }
+  private updatePartInfo(){
+    const part=this.get<HTMLSelectElement>('tool').value,card=this.get('part-info');
+    card.hidden=!isPartId(part);if(!isPartId(part))return;
+    setText(this.get('part-blurb'),partBlurb(part,'village'));
+    setText(this.get('part-rule'),isWideDoorPartId(part)?'Spans two adjacent edges. Both cells need floors. Keep both inward door swings clear.':isWideEntryPartId(part)?'Spans two cells at ground level. Needs floors behind both cells. Keep the foot edges clear.':PARTS[part].mount==='edge'?'Walls snap to the chosen cell edge. Upper parts need support.':'Place within the build grid. Upper parts need support.');
+    const envelope=PART_INFO[part].envelope?.village;
+    const size=envelope?new T.Vector3(...envelope.max).sub(new T.Vector3(...envelope.min)):this.templates?new T.Box3().setFromObject(this.templates.get(part).group).getSize(new T.Vector3()):null;
+    this.get('part-dimensions').textContent=size?`${size.x.toFixed(2)} × ${size.y.toFixed(2)} × ${size.z.toFixed(2)} m`:'';
+    if(this.stage&&!this.busy){
+      let icon=this.icons.get(part);if(!icon){icon=partIcon(this.stage,part);this.icons.set(part,icon);}
+      this.get<HTMLImageElement>('part-icon').src=icon;
+    }
   }
 }

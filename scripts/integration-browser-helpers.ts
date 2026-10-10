@@ -83,14 +83,42 @@ export async function measureAction<T>(page:Page,label:string,samples:Record<str
 export async function groundWalk(page:Page,target:Vec3,touch=false,tolerance=.38,timeoutMs=45000){
  const cdp=touch?await page.context().newCDPSession(page):null,held=new Set<string>();let touching=false;
  const until=Date.now()+timeoutMs;
+ const feetNow=()=>page.locator('#world canvas').evaluate(el=>({position:JSON.parse(el.dataset.groundPosition!) as Vec3,north:JSON.parse(el.dataset.cameraHeading!) as Vec3,radius:Number(el.dataset.groundRadius)}));
+ const release=async()=>{for(const key of held)await page.keyboard.up(key);held.clear();if(cdp&&touching){await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});touching=false;}};
  try{while(Date.now()<until){
   if(await page.locator('body').evaluate(node=>node.classList.contains('scene-loading'))){
-   for(const key of held)await page.keyboard.up(key);held.clear();
-   if(cdp&&touching){await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});touching=false;}
+   await release();
    await page.waitForTimeout(50);continue;
   }
-  const feet=await page.locator('#world canvas').evaluate(el=>({position:JSON.parse(el.dataset.groundPosition!) as Vec3,north:JSON.parse(el.dataset.cameraHeading!) as Vec3,radius:Number(el.dataset.groundRadius)}));
-  const gap=distance(feet.position,target,feet.radius);if(gap<tolerance){await page.waitForTimeout(50);return;}
+  const feet=await feetNow(),gap=distance(feet.position,target,feet.radius);
+  // Canvas telemetry updates at 10 Hz. Release real controls before settling
+  // and re-reading; accepting stale proximity while still holding a key
+  // allowed another .3–.5 m of motion beyond a fine waypoint.
+  if(gap<tolerance){await release();await page.waitForTimeout(250);const settled=await feetNow();if(distance(settled.position,target,settled.radius)<tolerance)return;continue;}
+  if(!cdp&&tolerance<=.2){
+   // Precision routes cannot be followed by rounding their bearing to eight
+   // keys: that takes a different side of a narrow pillar. Use the ordinary
+   // mouse camera turn and W, still subject to all app movement/collision.
+   await release();const up=new Vector3(...feet.position),north=new Vector3(...feet.north),toward=new Vector3(...target).projectOnPlane(up).normalize(),turn=Math.atan2(up.dot(new Vector3().crossVectors(north,toward)),north.dot(toward));
+   if(Math.abs(turn)>.015){
+    const view=page.viewportSize()!,x=view.width*.55,y=view.height*.44,delta=-Math.max(-.65,Math.min(.65,turn))/.004;
+    await page.mouse.move(x,y);await page.mouse.down();
+    try{
+     // Cross the real 7 px drag threshold before fine adjustments, so a
+     // small turn is never interpreted as a click-to-walk command.
+     if(Math.abs(delta)<=8)await page.mouse.move(x+Math.sign(delta)*8,y);
+     await page.mouse.move(x+delta,y);
+    }finally{await page.mouse.up();}
+    await page.waitForTimeout(150);continue;
+   }
+   await page.keyboard.down('w');held.add('w');await page.waitForTimeout(Math.min(90,Math.max(18,(gap-tolerance)/3*650)));await release();await page.waitForTimeout(250);continue;
+  }
+  if(!cdp&&gap<.9){
+   await release();await page.waitForTimeout(250);const settled=await feetNow(),remaining=distance(settled.position,target,settled.radius);if(remaining<tolerance)return;
+   const up=new Vector3(...settled.position),north=new Vector3(...settled.north),direction=new Vector3(...target).projectOnPlane(up).normalize(),right=new Vector3().crossVectors(north,up).normalize(),x=direction.dot(right),y=direction.dot(north);
+   for(const key of [...(Math.abs(x)>.30?[x>0?'d':'a']:[]),...(Math.abs(y)>.30?[y>0?'w':'s']:[])]){await page.keyboard.down(key);held.add(key);}
+   await page.waitForTimeout(Math.min(65,Math.max(18,(remaining-tolerance)/3*720)));await release();await page.waitForTimeout(250);continue;
+  }
   const up=new Vector3(...feet.position),north=new Vector3(...feet.north),direction=new Vector3(...target).projectOnPlane(up).normalize(),right=new Vector3().crossVectors(north,up).normalize();
   const x=direction.dot(right),y=direction.dot(north);
   if(cdp){const b=(await page.locator('#joystick').boundingBox())!,cx=b.x+b.width/2,cy=b.y+b.height/2,scale=Math.min(1,gap/.65);
@@ -98,7 +126,7 @@ export async function groundWalk(page:Page,target:Vec3,touch=false,tolerance=.38
    await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:cx+x*34*scale,y:cy-y*34*scale,id:1}]});
   }else{const next=new Set([...(Math.abs(x)>.30?[x>0?'d':'a']:[]),...(Math.abs(y)>.30?[y>0?'w':'s']:[])]);for(const key of held)if(!next.has(key)){await page.keyboard.up(key);held.delete(key);}for(const key of next)if(!held.has(key)){await page.keyboard.down(key);held.add(key);}}
   await page.waitForTimeout(gap<.8?50:100);
- }}finally{for(const key of held)await page.keyboard.up(key);if(cdp){if(touching)await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await cdp.detach();}await page.waitForTimeout(300);}
+ }}finally{await release();if(cdp)await cdp.detach();await page.waitForTimeout(300);}
  throw Error('Real walking could not reach the navigation waypoint.');
 }
 export async function roomWalk(page:Page,targetX:number,touch=false,targetZ?:number){

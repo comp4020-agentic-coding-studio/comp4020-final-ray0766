@@ -17,7 +17,18 @@ vi.mock('../src/client/presentation-stage.ts',()=>({createPresentationStage:()=>
   library:{},scene:new T.Scene(),camera:new T.PerspectiveCamera(),controls:{enabled:true},resize:vi.fn(),frameBox:vi.fn(),
   onFrame:vi.fn(),ready:vi.fn(async()=>{}),renderOnce:vi.fn(),start:vi.fn(),dispose:vi.fn(),
 })}));
-vi.mock('../src/assets/claude-geometry/blueprint/view/templates.ts',()=>({PartTemplates:class {get(){}dispose(){}}}));
+vi.mock('../src/assets/claude-geometry/blueprint/view/templates.ts',()=>({PartTemplates:class {
+  // Real bounds for the dimensions UI, without building or rendering an asset.
+  private geometry=new T.BoxGeometry(2,.25,1.5);
+  private material=new T.MeshBasicMaterial();
+  private group=new T.Group().add(new T.Mesh(this.geometry,this.material));
+  get(){return {group:this.group};}
+  dispose(){this.geometry.dispose();this.material.dispose();}
+}}));
+vi.mock('../src/assets/claude-geometry/blueprint/view/thumbnail.ts',()=>({
+  // Icon pixels require WebGL; the surrounding part-info UI remains real.
+  partIcon:()=> 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%2F%3E',
+}));
 vi.mock('../src/assets/claude-geometry/blueprint/view/workshop-view.ts',()=>({WorkshopView:class {
   level=0;
   constructor(stage:{renderer:{domElement:HTMLCanvasElement}}){document.getElementById('ws-stage')!.append(stage.renderer.domElement);}
@@ -72,6 +83,9 @@ async function workshop(){
 describe('workshop placement feedback and draft protection',()=>{
   it('revalidates the preview after adding, undoing and changing the active level',async()=>{
     await workshop();el('ws-new').click();select('ws-tool','floor.deck');
+    expect(el('ws-part-info').hidden).toBe(false);
+    expect(el('ws-part-dimensions').textContent).toBe('2.00 × 0.25 × 1.50 m');
+    expect(el<HTMLImageElement>('ws-part-icon').src).toMatch(/^data:image\/svg\+xml,/);
     const canvas=el('ws-stage').querySelector('canvas')!;
     pointer(canvas,'pointermove');expect(preview.ghost.mock.lastCall?.[1]).toBe(true);
     pointer(canvas,'pointerdown');pointer(canvas,'pointerup');
@@ -81,6 +95,7 @@ describe('workshop placement feedback and draft protection',()=>{
     select('ws-level','1');expect(preview.ghost.mock.lastCall?.[0]?.level).toBe(1);
     expect(preview.ghost.mock.lastCall?.[1]).toBe(false);
     select('ws-tool','select');expect(preview.ghost.mock.lastCall?.[0]).toBeNull();
+    expect(el('ws-part-info').hidden).toBe(true);
   });
   it('explains invalid and valid cell placements before adding, and disabled save/place actions',async()=>{
     await workshop();el('ws-new').click();

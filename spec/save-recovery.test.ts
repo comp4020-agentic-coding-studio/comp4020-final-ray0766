@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { openStore } from '../src/server/store.ts';
 import { industrialCabin } from '../src/assets/claude-geometry/blueprint/samples.ts';
-import { encodeBlueprint } from '../src/assets/claude-geometry/blueprint/codec.ts';
+import { encodeBlueprint } from '../src/shared/blueprint-codec.ts';
 import { STARTERS, encodeShipDesign } from '../src/assets/claude-geometry/ship/design.ts';
 import { defaultEnvironment, encodeEnvironment } from '../src/assets/claude-geometry/terrain/env.ts';
 import { normalize } from '../src/shared/world.ts';

@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 import {mkdirSync,writeFileSync,existsSync} from 'node:fs';
 import {randomUUID} from 'node:crypto';
 import {homeCottage,cornerLane,padStall} from '../../src/assets/claude-geometry/blueprint/samples.ts';
-import {PART_IDS} from '../../src/assets/claude-geometry/blueprint/parts/catalogue.ts';
+import {PART_IDS} from '../../src/shared/blueprint-parts.ts';
 import {structureSize,structureFit} from '../../src/shared/blueprints.ts';
 import {fieldOf} from '../../src/shared/terrain.ts';
 import {placementProblem} from '../../src/shared/planets.ts';
@@ -18,8 +18,8 @@ test('R8 player workflow: flight, actual assembly controls, all samples, save/re
  try{
   await p.goto('/?measure=1');if(await p.locator('#begin').isVisible())await p.locator('#begin').click();await openMenu(p);const skip=p.getByRole('button',{name:'Skip tips',exact:true});if(await skip.isVisible())await skip.click();await p.locator('#resume').click();
   if(!(await readUniverse(p)).currentPlanet.mine){await visit(p);await menuAction(p,'claim-planet');await p.locator('#resume').click();check('Real boarding, flight, landing and claim');}await c.storageState({path:'.data/r8-owner.json'});
-  await menuAction(p,'open-workshop');await expect(p.locator('#ws-save')).toBeEnabled();await expect(p.locator('#ws-tool option')).toHaveCount(46);
-  for(const id of PART_IDS.slice(21)){await p.locator('#ws-tool').selectOption(id);await expect(p.locator('#ws-tool')).toHaveValue(id);}check('All 24 new tools exposed in the actual player workshop');
+  await menuAction(p,'open-workshop');await expect(p.locator('#ws-save')).toBeEnabled();await expect(p.locator('#ws-tool option')).toHaveCount(PART_IDS.length+1);
+  for(const id of PART_IDS.slice(21)){await p.locator('#ws-tool').selectOption(id);await expect(p.locator('#ws-tool')).toHaveValue(id);}check('All appended tools exposed in the actual player workshop');
   for(const [key,make]of [['home',homeCottage],['lane',cornerLane],['stall',padStall]] as const){
    const bp=make();await p.locator('#ws-example').selectOption(key);await p.locator('#ws-example-load').click();await expect(p.locator('#ws-parts option')).toHaveCount(bp.parts.length);
    await p.locator('#ws-save').click();await expect(p.locator('#ws-count')).toContainText('Saved');await p.waitForTimeout(600);await p.screenshot({path:`${dir}/desktop-${key}.png`});

@@ -1,4 +1,4 @@
-import type { Blueprint } from '../assets/claude-geometry/blueprint/model.ts';
+import type { Blueprint } from './blueprint-model.ts';
 import type { Vec3 } from './world.ts';
 
 export interface HomeSetupCandidate { buildingId: string; partNumber: number; buildingName: string }

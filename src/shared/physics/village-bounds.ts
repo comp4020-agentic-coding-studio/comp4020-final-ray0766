@@ -1,10 +1,14 @@
-import type {PartId} from '../../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import type {PartId} from '../blueprint-parts.ts';
+import { wideDoorEnvelope } from '../wide-door.ts';
+import { wideEntryEnvelope } from '../wide-entry.ts';
 import type {Vec3} from '../world.ts';
 
 /** Source 14e244f, union of actual high/medium/low village geometry, rounded
  * outward to 0.1 mm. Appearance/placement bounds, never walking surfaces.
  * Contract tests rebuild source meshes; runtime physics needs no renderer. */
 export const VILLAGE_PART_BOUNDS:Record<PartId,{min:Vec3;max:Vec3}>={
+  'wall.door-wide': wideDoorEnvelope,
+  'wall.door-wide.open': wideDoorEnvelope,
   'floor.deck': {min:[-0.5,-0.16,-0.5],max:[0.5,0,0.5]},
   'floor.grate': {min:[-0.5,-0.12,-0.5],max:[0.5,0,0.5]},
   'wall.solid': {min:[-0.5,0,-0.105],max:[0.5,2.04,0.105]},
@@ -30,6 +34,7 @@ export const VILLAGE_PART_BOUNDS:Record<PartId,{min:Vec3;max:Vec3}>={
   'street.road.corner': {min:[-0.5,-0.16,-0.5],max:[0.5,0.003,0.5]},
   'street.kerb.corner': {min:[-0.4975,-0.05,-0.4975],max:[0.575,0.14,0.575]},
   'step.entry': {min:[-0.5,-0.9,-0.5],max:[0.5,0,0.5]},
+  'step.entry-wide': wideEntryEnvelope,
   'ramp.entry': {min:[-0.5,-0.9,-0.5],max:[0.5,0,1.5]},
   'roof.slope.hip': {min:[-0.5,-0.16,-0.5],max:[0.9622,0.65,0.9622]},
   'roof.slope.valley': {min:[-0.5,-0.16,-0.5],max:[0.5,0.65,0.5]},

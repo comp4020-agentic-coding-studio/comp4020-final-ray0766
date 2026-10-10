@@ -11,7 +11,7 @@ import {SurfaceWalker} from '../src/client/motion.ts';
 import {openStore} from '../src/server/store.ts';
 import {presenceStore} from '../src/server/presence.ts';
 import {industrialCabin} from '../src/assets/claude-geometry/blueprint/samples.ts';
-import type {PartPlacement} from '../src/assets/claude-geometry/blueprint/model.ts';
+import type {PartPlacement} from '../src/shared/blueprint-model.ts';
 import {structureFit,structureSize} from '../src/shared/blueprints.ts';
 import {fieldOf} from '../src/shared/terrain.ts';
 import {anchorQuaternion,localToDir} from '../src/assets/claude-geometry/core/anchor.ts';

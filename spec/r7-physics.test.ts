@@ -12,10 +12,10 @@ import { structureFit, structureSize } from '../src/shared/blueprints.ts';
 import { normalize } from '../src/shared/world.ts';
 import type { Vec3 } from '../src/shared/world.ts';
 import { anchorQuaternion } from '../src/assets/claude-geometry/core/anchor.ts';
-import { blueprintFootprint } from '../src/assets/claude-geometry/blueprint/model.ts';
-import type { PartPlacement } from '../src/assets/claude-geometry/blueprint/model.ts';
+import { blueprintFootprint } from '../src/shared/blueprint-model.ts';
+import type { PartPlacement } from '../src/shared/blueprint-model.ts';
 import { industrialCabin } from '../src/assets/claude-geometry/blueprint/samples.ts';
-import { encodeBlueprint } from '../src/assets/claude-geometry/blueprint/codec.ts';
+import { encodeBlueprint } from '../src/shared/blueprint-codec.ts';
 import { canAcceptPlayer } from '../src/client/sync.ts';
 
 const roofParts=(rot:0|1|2|3):PartPlacement[]=>[

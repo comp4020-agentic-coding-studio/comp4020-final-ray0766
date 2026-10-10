@@ -1,8 +1,8 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
 import { canonicalJson } from '../assets/claude-geometry/core/doc.ts';
-import { decodeBlueprint, encodeBlueprint, hashInput } from '../assets/claude-geometry/blueprint/codec.ts';
-import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
+import { decodeBlueprint, encodeBlueprint, hashInput } from '../shared/blueprint-codec.ts';
+import type { PartPlacement } from '../shared/blueprint-model.ts';
 import { BLUEPRINT_BODY_LIMIT, MAX_BLUEPRINTS } from '../shared/blueprints.ts';
 import type { LibraryEntry } from '../shared/blueprints.ts';
 import { RequestError } from './errors.ts';

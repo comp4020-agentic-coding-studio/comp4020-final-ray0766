@@ -3,14 +3,16 @@ export {HABITAT_CABIN} from '../shared/harbour-layout.ts';
 import * as T from 'three';
 import { PartBuilder } from '../assets/claude-geometry/style/geometry.ts';
 import type { LodTier } from '../assets/claude-geometry/style/lod.ts';
-import { PART_IDS,emitPart } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
-import type { PartId } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import { PART_IDS,emitPart } from '../shared/blueprint-parts.ts';
+import type { PartId } from '../shared/blueprint-parts.ts';
 import type { StyleLibrary } from '../assets/claude-geometry/style/materials.ts';
 import { disposeObject3D } from '../assets/claude-geometry/core/dispose.ts';
 import { libraryMaterials, liningCastsNoShadow, makeKit } from '../assets/claude-geometry/blueprint/parts/kit.ts';
 import { createWorldStyleLibrary } from './presentation.ts';
 import { harbourMaterials } from './harbour-materials.ts';
 import type { Vec3 } from '../shared/world.ts';
+import { isWideDoor, WIDE_DOOR } from '../shared/wide-door.ts';
+import { WIDE_ENTRY_ID, WIDE_ENTRY } from '../shared/wide-entry.ts';
 
 export const SHARED_ASSET_VERSION='sunseed-village/14e244f';
 let materialLibrary: StyleLibrary | null = null;
@@ -21,6 +23,8 @@ export interface AssetInstance {part:SharedAssetId;position:Vec3;yaw?:number}
 // Connection hints are asset metadata, not a second editor or server authority.
 export const SHARED_ASSETS: readonly SharedAssetId[]=[...PART_IDS,'service.pipe','pad.tile'];
 export function assetConnections(id:SharedAssetId){
+  if(isWideDoor(id))return[{name:'left',position:[WIDE_DOOR.centerX-WIDE_DOOR.width/2,0,0]},{name:'right',position:[WIDE_DOOR.centerX+WIDE_DOOR.width/2,0,0]},{name:'top',position:[WIDE_DOOR.centerX,WIDE_DOOR.height,0]}];
+  if(id===WIDE_ENTRY_ID)return[{name:'centre',position:[WIDE_ENTRY.centerX,0,0]},{name:'front',position:[WIDE_ENTRY.centerX,-WIDE_ENTRY.count*WIDE_ENTRY.rise,WIDE_ENTRY.depth/2]},{name:'back',position:[WIDE_ENTRY.centerX,-WIDE_ENTRY.rise,-WIDE_ENTRY.depth/2]},{name:'left',position:[WIDE_ENTRY.centerX-WIDE_ENTRY.width/2,-WIDE_ENTRY.rise,-WIDE_ENTRY.depth/2]},{name:'right',position:[WIDE_ENTRY.centerX+WIDE_ENTRY.width/2,-WIDE_ENTRY.rise,-WIDE_ENTRY.depth/2]}];
   if(id.startsWith('wall.'))return[{name:'left',position:[-.5,0,0]},{name:'right',position:[.5,0,0]},{name:'top',position:[0,2.2,0]}];
   if(id==='structure.column'||id==='service.pipe')return[{name:'base',position:[0,0,0]},{name:'top',position:[0,2.2,0]}];
   return[{name:'centre',position:[0,0,0]},{name:'front',position:[0,0,.5]},{name:'back',position:[0,0,-.5]}];

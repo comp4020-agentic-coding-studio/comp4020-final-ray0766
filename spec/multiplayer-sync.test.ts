@@ -15,7 +15,7 @@ import { PRESENCE_TTL } from '../src/shared/presence.ts';
 import { GroundWorld,PHYSICS_VERSION,FIXED_STEP } from '../src/shared/physics/world.ts';
 import type { MotionStep } from '../src/shared/physics/world.ts';
 import { industrialCabin } from '../src/assets/claude-geometry/blueprint/samples.ts';
-import { encodeBlueprint } from '../src/assets/claude-geometry/blueprint/codec.ts';
+import { encodeBlueprint } from '../src/shared/blueprint-codec.ts';
 import { localToDir } from '../src/assets/claude-geometry/core/anchor.ts';
 import { structureFit } from '../src/shared/blueprints.ts';
 import { defaultHomeInterior } from '../src/shared/home.ts';

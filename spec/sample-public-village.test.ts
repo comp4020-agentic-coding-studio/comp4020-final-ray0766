@@ -1,5 +1,6 @@
 import {expect,it} from 'vitest';
 import {samplePublicVillage,SAMPLE_PUBLIC_VERSION} from '../src/shared/sample-public-village.ts';
+import {PUBLIC_TOWN_VERSION} from '../src/shared/public-town-layout.ts';
 import {GroundWorld} from '../src/shared/physics/world.ts';
 import {HUB_OBJECTS,PUBLIC_CONTENTS} from '../src/shared/public-village.ts';
 import {NPCS,SPAWN,distance} from '../src/shared/world.ts';
@@ -11,14 +12,17 @@ import {localToDir} from '../src/assets/claude-geometry/core/anchor.ts';
 
 const village=samplePublicVillage();
 it('retains the landing, delivery and harbour bearings within the whole-sphere public template',()=>{
- expect(village.version).toBe(SAMPLE_PUBLIC_VERSION);expect(SAMPLE_PUBLIC_VERSION).toBe(8);
+ expect(village.version).toBe(SAMPLE_PUBLIC_VERSION);expect(SAMPLE_PUBLIC_VERSION).toBe(PUBLIC_TOWN_VERSION);expect(SAMPLE_PUBLIC_VERSION).toBe(10);
  expect(village.radius).toBe(21.6);expect(village.destinations.map(d=>d.id)).toEqual(['post','orchard','harbour']);
  expect(village.destinations.map(d=>d.position)).toEqual([NPCS.mica.position,NPCS.sol.position,HUB_DOCK]);
  for(const destination of village.destinations){
   const building=village.objects.find(o=>o.id===destination.buildingId)!;
   expect(building).toBeDefined();expect(distance(building.position,destination.position,village.radius)).toBeLessThan(6.2);
  }
- for(const id of ['public-post','public-orchard','public-harbour'])expect(village.routes.find(r=>r.id===id)!.points[0]).toEqual(SPAWN);
+ for(const id of ['public-post','public-orchard','public-harbour']){
+  const route=village.routes.find(r=>r.id===id);
+  expect(route,`Missing preserved task route ${id}`).toBeDefined();expect(route!.points[0]).toEqual(SPAWN);
+ }
  expect(canBoard('hub',HUB_DOCK,village.radius)).toBe(true);
 });
 it('keeps old harbour geometry and private database rows separate from the current public projection',()=>{

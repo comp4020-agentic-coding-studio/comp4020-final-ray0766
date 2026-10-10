@@ -1,9 +1,12 @@
 import { occupiedExteriorDoor } from './home-door-safety.ts';
+import { isOpenDoorPartId, isWideDoorPartId } from '../shared/blueprint-parts.ts';
 import { GroundWorld } from '../shared/physics/world.ts';
 import { localToPlanet, anchorQuaternion } from '../assets/claude-geometry/core/anchor.ts';
 import { quatMultiply, quatFromAxisAngle } from '../assets/claude-geometry/core/vec.ts';
-import { partTransform, pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
-import { normalizeHomeInterior } from '../shared/home.ts';
+import { partTransform, pivotOf } from '../shared/blueprint-model.ts';
+import { normalizeHomeInterior, homeDoorFurnitureAllowed, homePositionAllowed } from '../shared/home.ts';
+import type { HomeLocation } from '../shared/home.ts';
+import type { HomeDoorPartId } from '../shared/home-door.ts';
 import { HOME_DOOR_PART } from '../shared/home-layout.ts';
 import { HOME_ENVIRONMENT } from '../shared/home-layout.ts';
 import {SAMPLE_PUBLIC_ENVIRONMENT,SAMPLE_PUBLIC_VERSION,samplePublicVillage} from '../shared/sample-public-village.ts';
@@ -89,14 +92,14 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
   };
   const clearHomeDoorPlacement=(planetId:string,o:PlacedObject,hash:string)=>{
     const home=db.prepare('SELECT door_part FROM home_interiors WHERE building_id=?').get(o.id);if(!home)return;
-    const p=planet(planetId),parts=blueprints.parts(hash),part=parts.find(part=>part.n===Number(home.door_part??HOME_DOOR_PART)&&part.part==='wall.door.open');
+    const p=planet(planetId),parts=blueprints.parts(hash),part=parts.find(part=>part.n===Number(home.door_part??HOME_DOOR_PART)&&isOpenDoorPartId(part.part));
     if(!part)return;
     const t=partTransform(part,pivotOf(parts)),anchor={dir:o.position,yaw:o.rotation},fit=structureFit(parts,o.position,o.rotation,fieldOf(p.environment,p.radius));
     const frame={position:localToPlanet(anchor,fit.baseRadius,t.position),quaternion:quatMultiply(anchorQuaternion(anchor),quatFromAxisAngle([0,1,0],t.yaw))};
     if(occupiedExteriorDoor(db,planetId,frame,()=>{
       const placed=objects(planetId),contents=Object.fromEntries(placed.flatMap(item=>item.blueprintHash?[[item.blueprintHash,blueprints.parts(item.blueprintHash)]]:[]));
       return new GroundWorld({...summary(p,''),objects:placed,blueprints:contents});
-    }))throw new RequestError(409,'Someone is in the doorway. Move the home after they step clear.');
+    },part.part as HomeDoorPartId))throw new RequestError(409,'Someone is in the doorway. Move the home after they step clear.');
   };
   const bump = (p: string) => db.prepare('UPDATE planets SET revision=revision+1 WHERE id=?').run(p);
   const same = (old: PlacedObject, p: Vec3, rotation: number) => Math.abs(old.rotation - rotation) < 1e-8 && old.position.every((v, i) => Math.abs(v - p[i]) < 1e-8);
@@ -106,9 +109,20 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     if(!old||old.kind!=='structure')throw new RequestError(404,'Choose a placed structure.');
     if(!Number.isSafeInteger(body.expectedVersion)||old.version!==body.expectedVersion)throw new RequestError(409,'This object changed in another tab.');
     if(!undo)blueprints.owns(id,body.blueprintHash);
-    const parts=blueprints.parts(body.blueprintHash),h=db.prepare('SELECT variant,door_part FROM home_interiors WHERE building_id=?').get(oid);
-    if(h&&!parts.some(p=>p.n===Number(h.door_part??HOME_DOOR_PART)&&p.part==='wall.door.open'))throw new RequestError(409,'Keep the home entrance so its saved interior remains accessible.');
+    const parts=blueprints.parts(body.blueprintHash),h=db.prepare('SELECT variant,door_part,document FROM home_interiors WHERE building_id=?').get(oid);
+    const entry=h?parts.find(p=>p.n===Number(h.door_part??HOME_DOOR_PART)&&isOpenDoorPartId(p.part)):undefined;
+    if(h&&!entry)throw new RequestError(409,'Keep the home entrance so its saved interior remains accessible.');
     if(body.blueprintHash===old.blueprintHash)return;
+    // Explicit new-door edits may change the interior leaves, but never move
+    // saved furniture or people to make the new geometry fit.
+    if(h&&entry&&isWideDoorPartId(entry.part)){
+      const room=normalizeHomeInterior(JSON.parse(String(h.document)));
+      if(!homeDoorFurnitureAllowed(room.items,room.room,entry.part))throw new RequestError(409,'Keep both door leaves clear of the saved furniture before changing this home.');
+      for(const row of db.prepare('SELECT document FROM home_locations').all()){
+        const at=JSON.parse(String(row.document)) as HomeLocation;
+        if(at.kind==='interior'&&at.buildingId===oid&&!homePositionAllowed(at.position,room.items,undefined,room.room,room.doorOpen,entry.part))throw new RequestError(409,'A visitor is standing in the new doorway. Leave their saved space clear.');
+      }
+    }
     placement(old.kind,old.position,old.rotation,p.id,oid,String(body.blueprintHash));const size=structureSize(parts);
     if(h)clearHomeDoorPlacement(p.id,old,String(body.blueprintHash));
     if(!undo)db.prepare('INSERT INTO object_replacements(planet_id,object_id,before_hash,after_hash,before_variant,after_variant,object_version) VALUES(?,?,?,?,?,?,?)').run(p.id,oid,old.blueprintHash!,String(body.blueprintHash),String(h?.variant??'custom'),variant,old.version+1);

@@ -1,4 +1,4 @@
-import type {PartId} from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import type {PartId} from './blueprint-parts.ts';
 import type {Vec3} from './world.ts';
 // Metre-identical models and collision boxes. The pot's translation only
 // recentres its edge-local origin for an ordinary world placement.

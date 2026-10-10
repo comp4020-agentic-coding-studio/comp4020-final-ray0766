@@ -8,7 +8,7 @@ import type {Vec3} from '../src/shared/world.ts';
 import {industrialCabin} from '../src/assets/claude-geometry/blueprint/samples.ts';
 import {localToDir,anchorQuaternion} from '../src/assets/claude-geometry/core/anchor.ts';
 import {structureFit,structureSize} from '../src/shared/blueprints.ts';
-import {encodeBlueprint} from '../src/assets/claude-geometry/blueprint/codec.ts';
+import {encodeBlueprint} from '../src/shared/blueprint-codec.ts';
 import {openStore} from '../src/server/store.ts';
 
 function fixture(kind:'door'|'closed-door'|'stairs'='door'){

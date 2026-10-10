@@ -11,7 +11,7 @@ import type {Vec3} from '../../src/shared/world.ts';
 import {distance} from '../../src/shared/world.ts';
 import {structureFit} from '../../src/shared/blueprints.ts';
 import {fieldOf} from '../../src/shared/terrain.ts';
-import {partTransform,pivotOf} from '../../src/assets/claude-geometry/blueprint/model.ts';
+import {partTransform,pivotOf} from '../../src/shared/blueprint-model.ts';
 import {localToPlanet} from '../../src/assets/claude-geometry/core/anchor.ts';
 import {activate,begin,groundWalk,hostContext,integrationUrl,menu,rendererContext,roomWalk,universe,visibleControl} from '../../scripts/integration-browser-helpers.ts';
 

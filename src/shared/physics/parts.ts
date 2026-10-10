@@ -1,6 +1,7 @@
-import { PART_INFO } from '../../assets/claude-geometry/blueprint/parts/info.ts';
-import { PART_IDS } from '../../assets/claude-geometry/blueprint/parts/catalogue.ts';
-import type { PartId } from '../../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import { PART_INFO, PART_IDS } from '../blueprint-parts.ts';
+import type { PartId } from '../blueprint-parts.ts';
+import { wideDoorFrame, wideDoorLeaves } from '../wide-door.ts';
+import { wideEntryBoxes } from '../wide-entry.ts';
 import { homeDoorLeaves } from '../home-door.ts';
 import { VILLAGE_PART_BOUNDS } from './village-bounds.ts';
 import type { Vec3 } from '../world.ts';
@@ -98,6 +99,8 @@ export const PART_COLLIDERS:Record<PartId,()=>PartBox[]>={
  'roof.deck':()=>[...slab(),...[-.3,.3].map(z=>box('ceiling joist',[0,-.19,z],[1,.06,.08])),box('ceiling lantern',[0,-.2175,-.05],[.08,.115,.08])],
  'wall.solid':()=>bounds('wall.solid'),'wall.window':()=>bounds('wall.window'),'wall.louvre':()=>bounds('wall.louvre'),'wall.corrugated':()=>bounds('wall.corrugated'),
  'wall.door':()=>door(false),'wall.door.open':()=>door(true),
+ 'wall.door-wide':()=>[...wideDoorFrame(),...wideDoorLeaves(false)],'wall.door-wide.open':()=>[...wideDoorFrame(),...wideDoorLeaves(true)],
+ 'step.entry-wide':wideEntryBoxes,
  'structure.column':()=>bounds('structure.column'),'stair.straight':stairs,
  'rail.guard':()=>bounds('rail.guard'),'roof.parapet':()=>bounds('roof.parapet'),
  'roof.slope':slopeRoof,'roof.plant':()=>bounds('roof.plant'),

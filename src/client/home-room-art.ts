@@ -1,3 +1,5 @@
+import type { HomeDoorPartId } from '../shared/home-door.ts';
+import { isWideDoor, WIDE_DOOR } from '../shared/wide-door.ts';
 import * as T from 'three';
 import { PartBuilder } from '../assets/claude-geometry/style/geometry.ts';
 import type { StyleLibrary } from '../assets/claude-geometry/style/materials.ts';
@@ -6,7 +8,7 @@ import type { HomeMaterial, HomeRoom } from '../shared/home.ts';
 import { HOME_ART_THEMES } from './art-profile.ts';
 
 /** Room finishes are derived visuals, never furniture or collision geometry. */
-export function createHomeRoomArt(room: HomeRoom, library: StyleLibrary) {
+export function createHomeRoomArt(room: HomeRoom, library: StyleLibrary, doorPartId: HomeDoorPartId = 'wall.door.open') {
   const { width, depth, height } = room;
   const b = new PartBuilder('medium'), source = libraryMaterials(library), kit = makeKit(b, source);
   // Continuous room surfaces use their shape; the host draws screen-space lines.
@@ -80,13 +82,15 @@ export function createHomeRoomArt(room: HomeRoom, library: StyleLibrary) {
     b.box(trim, [.13, height, .13], { position: [x, height / 2, z] }, .012);
   }
   b.box(wood, [.09, .1, depth], { position: [width / 2, -.006, 0] }, .008);
-  for (const side of [-1, 1]) b.box(wood, [(width - 1.2) / 2, .1, .09], { position: [side * (width / 4 + .3), -.006, depth / 2] }, .008);
+  const opening=isWideDoor(doorPartId)?WIDE_DOOR.width-2*WIDE_DOOR.jamb:1.2;
+  for (const side of [-1, 1]) b.box(wood, [(width - opening) / 2, .1, .09], { position: [side * (width / 4 + opening/4), -.006, depth / 2] }, .008);
   const built = b.build('home-room-finish');
   // Opaque daylight panes must not cast a second shadow over their openings.
   built.group.traverse(object => {
     if (object instanceof T.Mesh && (object.material === glass || object.material === distant)) object.castShadow = false;
   });
   built.group.userData.roomDimensions = { ...room };
+  built.group.userData.doorOpeningWidth = opening;
   return built;
 }
 

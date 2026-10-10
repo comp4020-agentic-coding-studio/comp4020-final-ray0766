@@ -9,7 +9,7 @@ import { presenceStore } from '../src/server/presence.ts';
 import { HOME_EXIT, HOME_ROOM } from '../src/shared/home.ts';
 import { decodeSnapshot } from '../src/shared/timeline-codec.ts';
 import { SPAWN } from '../src/shared/world.ts';
-import { encodeBlueprint } from '../src/assets/claude-geometry/blueprint/codec.ts';
+import { encodeBlueprint } from '../src/shared/blueprint-codec.ts';
 import { homeVariant, samplePoint } from '../src/shared/home-layout.ts';
 
 const stores:ReturnType<typeof openStore>[]=[];

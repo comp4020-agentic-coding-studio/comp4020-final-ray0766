@@ -10,7 +10,7 @@ import {STYLES,defaultEnvironment,encodeEnvironment,decodeEnvironment} from '../
 import {createHeightField} from '../src/assets/claude-geometry/terrain/field.ts';
 import {chooseSites,padFootprint} from '../src/assets/claude-geometry/terrain/pads.ts';
 import {buildPlanet} from '../src/assets/claude-geometry/terrain/planet.ts';
-import {blueprintGroundFootprint} from '../src/assets/claude-geometry/blueprint/model.ts';
+import {blueprintGroundFootprint} from '../src/shared/blueprint-model.ts';
 import {fieldOf,objectSeat,foundations,gradedField} from '../src/shared/terrain.ts';
 import {GroundWorld,PHYSICS_VERSION,FIXED_STEP} from '../src/shared/physics/world.ts';
 import {SPAWN} from '../src/shared/world.ts';
@@ -18,7 +18,7 @@ import type {Vec3} from '../src/shared/world.ts';
 import {placementProblem} from '../src/shared/planets.ts';
 import {groundFlight,flightStep,firstCollision,SAFE_RADIUS} from '../src/shared/flight.ts';
 import {industrialCabin} from '../src/assets/claude-geometry/blueprint/samples.ts';
-import {encodeBlueprint} from '../src/assets/claude-geometry/blueprint/codec.ts';
+import {encodeBlueprint} from '../src/shared/blueprint-codec.ts';
 const env=encodeEnvironment(defaultEnvironment('desert'));
 const setup=(path=':memory:')=>{const s=openStore(path);s.create('owner',0);s.create('visitor',0);const p=s.universe('owner').planets.find(p=>p.kind==='garden')!;s.claim('owner',p.id);s.visit('owner',p.id);return {s,planet:p.id};};
 const apply=(s:ReturnType<typeof openStore>,planet:string,environment=env)=>s.terrain('owner',{planetId:planet,environment,expectedRevision:s.universe('owner').currentPlanet.revision});

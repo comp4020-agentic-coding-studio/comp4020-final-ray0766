@@ -1,7 +1,7 @@
 import { Group, Mesh } from 'three';
-import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
-import { edgeKey, pivotOf, rotDir, slotsOf, vertexKey } from '../assets/claude-geometry/blueprint/model.ts';
-import { PARTS } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import type { PartPlacement } from '../shared/blueprint-model.ts';
+import { edgeKey, pivotOf, rotDir, slotsOf, vertexKey } from '../shared/blueprint-model.ts';
+import { PARTS } from '../shared/blueprint-parts.ts';
 import { libraryMaterials, SLAB, STOREY, WALL_H, WALL_T } from '../assets/claude-geometry/blueprint/parts/kit.ts';
 import { KOSHI, TOP_BAND } from '../assets/claude-geometry/blueprint/parts/village/walls.ts';
 import { disposeObject3D } from '../assets/claude-geometry/core/dispose.ts';

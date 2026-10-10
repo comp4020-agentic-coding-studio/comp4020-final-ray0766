@@ -15,10 +15,10 @@ import { canAcceptUniverse } from './sync.ts';
 import {lazyPanel,openPanel} from './lazy-panel.ts';
 import type { LibraryEntry } from '../shared/blueprints.ts';
 import { structureFit, structureSize } from '../shared/blueprints.ts';
-import { buildBlueprintModel } from '../assets/claude-geometry/blueprint/model3d.ts';
+import { buildBlueprintModel } from '../shared/blueprint-model3d.ts';
 import { placedTransform } from '../assets/claude-geometry/blueprint/placement.ts';
-import type { Blueprint, PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
-import { pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
+import type { Blueprint, PartPlacement } from '../shared/blueprint-model.ts';
+import { pivotOf } from '../shared/blueprint-model.ts';
 import { SHARED_ASSET_VERSION, worldMaterials } from './shared-assets.ts';
 import type { Obstacle } from './scene.ts';
 import { PRESENTATION } from './presentation.ts';
@@ -140,7 +140,7 @@ export class Colony {
       feedback.finish();await panel.open(blueprint,async entry=>{
         const next=await this.bridge.write('objects/replace',{planetId:u.currentPlanet.id,objectId:object.id,expectedVersion:object.version,blueprintHash:entry.hash});
         this.accept(next);this.bridge.notice(home?'Home updated. Your room and furniture are safe.':'Structure updated in place.');
-      },home?'Apply to my home':'Apply to this structure');
+      },home?'Apply to my home':'Apply to this structure',home&&u.currentPlanet.homeDoor?.buildingId===object.id?{homeDoorPartNumber:u.currentPlanet.homeDoor.partNumber}:{});
     }catch(error){if(!controller.signal.aborted)this.bridge.notice(error instanceof Error?error.message:'Could not open this structure in the workshop.');}
     finally{feedback.finish();if(this.structureWorkshopOpening===token)this.structureWorkshopOpening=null;}
   }

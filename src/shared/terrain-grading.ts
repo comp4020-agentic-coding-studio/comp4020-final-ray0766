@@ -4,9 +4,9 @@ import type { SurfaceAnchor } from '../assets/claude-geometry/core/anchor.ts';
 import { numericNormal } from '../assets/claude-geometry/core/ground.ts';
 import type { HeightField } from '../assets/claude-geometry/core/ground.ts';
 import { padFootprint, padCovers } from '../assets/claude-geometry/terrain/pads.ts';
-import { blueprintCovers } from '../assets/claude-geometry/blueprint/model.ts';
+import { blueprintCovers } from './blueprint-model.ts';
 import { structureGroundFootprint } from './blueprint-ground-footprint.ts';
-import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
+import type { PartPlacement } from './blueprint-model.ts';
 import type { Vec3 } from './world.ts';
 
 /** The same footing and radial lowering for rendering, physics and placement.

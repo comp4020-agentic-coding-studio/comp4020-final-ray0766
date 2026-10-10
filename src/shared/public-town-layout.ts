@@ -1,7 +1,10 @@
 import {Quaternion,Vector3} from 'three';
 import type {BlueprintId} from '../assets/claude-geometry/core/ids.ts';
-import type {Blueprint,PartPlacement} from '../assets/claude-geometry/blueprint/model.ts';
-import {partTransform,pivotOf} from '../assets/claude-geometry/blueprint/model.ts';
+import type {Blueprint,PartPlacement} from './blueprint-model.ts';
+import {partTransform,pivotOf} from './blueprint-model.ts';
+import {isDoorPartId,isWideDoorPartId} from './blueprint-parts.ts';
+import {WIDE_DOOR} from './wide-door.ts';
+import {WIDE_ENTRY_ID,WIDE_ENTRY} from './wide-entry.ts';
 import {homeCottage,padStall,relayHut,surveyPost,villageCottage} from '../assets/claude-geometry/blueprint/samples.ts';
 import {defaultEnvironment,encodeEnvironment} from '../assets/claude-geometry/terrain/env.ts';
 import {anchorFrame,localToDir} from '../assets/claude-geometry/core/anchor.ts';
@@ -10,25 +13,39 @@ import {HOME_INFRASTRUCTURE} from './home-layout.ts';
 import type {HomeSurfaceRoute} from './home-layout.ts';
 import {structureFit,structureSize} from './blueprints.ts';
 import type {BlueprintContents} from './blueprints.ts';
-import {placementProblem} from './planets.ts';
-import type {PlacedObject,BuildKind} from './planets.ts';
+import {createPublicTownPlacementCheck} from './public-town-reservations.ts';
+import type {PlacedObject} from './planets.ts';
 import {fieldOf,objectSeat} from './terrain.ts';
 import {HUB_DOCK} from './ports.ts';
-import {HUB_SHIP} from './harbour-layout.ts';
-import {NPCS,SPAWN,distance} from './world.ts';
+import {NPCS,distance} from './world.ts';
 import type {Vec3} from './world.ts';
 import {PUBLIC_TOWN_CAPACITY} from './world-capacity.ts';
 import {StructurePlacementCache} from './structure-placement.ts';
 import {PUBLIC_TOWN_DATA} from './public-town-data.ts';
+import {TOWN_AUTHORED_BLUEPRINTS} from './town-authored-blueprints.ts';
 import {planRoutePaths} from './path-layout.ts';
 import type {RoutePathCoverage} from './path-layout.ts';
 import {PART_COLLIDERS} from './physics/parts.ts';
 import {GroundWorld} from './physics/world.ts';
-import {PathPlacementCache} from './path-structure-placement.ts';
+import {townPlacePlans,townPlacePoint} from './town-place-layout.ts';
+import {TOWN_LOCAL_STREETS} from './town-local-streets.ts';
+import {TOWN_STREET_NETWORK,TOWN_PLACE_STREET} from './town-street-network.ts';
+import {townAuthoredEntrancePoints} from './town-authored-entries.ts';
+import {TOWN_ENTRY_CONNECTIONS} from './town-entry-connections.ts';
+import {townWorksite} from './town-worksite-blueprints.ts';
+import {townStoneLane} from './town-stone-lanes.ts';
+import type {TownStoneLaneReport} from './town-stone-lanes.ts';
+import {TOWN_CRITICAL_SUPPORTS,TOWN_ANCHOR_BUILDINGS} from './town-critical-supports.ts';
+import {streetHouse} from './town-street-houses.ts';
+import {townDoorHouse} from './town-door-houses.ts';
+import {townConnectedFront,townClearEntryHome} from './town-connected-fronts.ts';
+import {townSpatialVariants} from './town-spatial-variants.ts';
+import {townAuthoredPose} from './town-authored-poses.ts';
+import {townPostHouse,townLongWorkshop,townSharedCourt,townHarbourLookout,townStreetGallery,townCourtEdge} from './town-place-blueprints.ts';
 
 /** The public town is an explicit larger template; no extra scenery sits
  * outside its object ledger. Private construction retains its own limits. */
-export const PUBLIC_TOWN_VERSION=8;
+export const PUBLIC_TOWN_VERSION=10;
 export const PUBLIC_TOWN_LIMITS=PUBLIC_TOWN_CAPACITY;
 const environment=defaultEnvironment('temperate',20261009);
 Object.assign(environment.params,{relief:.3,roughness:.025,vegetation:.36,waterLevel:-.3,woodland:.05,outcrops:0});
@@ -37,9 +54,15 @@ export interface TownDistrict {id:string;name:string;nameZh:string;center:Vec3;o
 export interface PublicTown {
  version:number;radius:number;environment:string;objects:PlacedObject[];blueprints:BlueprintContents;
  routes:HomeSurfaceRoute[];pavingRoutes:HomeSurfaceRoute[];renderDistricts:TownDistrict[];
+ /** Proposed paving lines, including rejected spans; never navigation. */
+ pavingPlans?:HomeSurfaceRoute[];
  destinations:{id:string;position:Vec3;buildingId:string}[];
- buildings:string[];roadObjects:string[];landmarks:{id:string;position:Vec3}[];
+ buildings:string[];roadObjects:string[];siteObjects?:string[];landmarks:{id:string;position:Vec3;kind?:'navigation'|'structure';objectId?:string}[];
  entranceCoverage?:RoutePathCoverage[];
+ pavingCoverage?:RoutePathCoverage[];
+ stoneCoverage?:TownStoneLaneReport[];
+ worksites?:{id:string;placeId:string;objectId:string;position:Vec3}[];
+ places?:{id:string;name:string;nameZh:string;center:Vec3;intent:string;objectIds:string[];siteObjectIds?:string[];boundaryObjectIds?:string[];streetIds?:string[];walk:Vec3[]}[];
 }
 export const townPoint=(latitude:number,longitude:number):Vec3=>{
  const a=latitude*Math.PI/180,b=longitude*Math.PI/180;
@@ -69,7 +92,7 @@ function deck(name:string,width:number,length:number):Blueprint {
 const teaHouse=districtHome();
 teaHouse.parts=teaHouse.parts.map(part=>part.part==='sign.mail'?{...part,part:'sign.cup'}:part);
 function gardenPavilion():Blueprint {
- const blueprint=structuredClone(HOME_INFRASTRUCTURE[0]);
+ const blueprint:Blueprint=structuredClone(HOME_INFRASTRUCTURE[0]);
  const add=(part:PartPlacement['part'],x:number,z:number,rot:PartPlacement['rot']=0)=>blueprint.parts.push({n:100+blueprint.parts.length,part,x,z,rot,level:0});
  for(const x of [0,3])for(const z of [1,2,3])add('street.paving',x,z);
  add('street.paving',1,3);
@@ -93,10 +116,36 @@ export const PUBLIC_TOWN_BLUEPRINTS:Blueprint[]=[
  townCottage(),homeCottage(),relayHut(),townSurveyPost(),districtHome(),districtWorkshopWithEntryStep(),
  {...teaHouse,name:'Tea house'},structuredClone(HOME_INFRASTRUCTURE[0]),padStall(),
  deck('lane',2,4),deck('crossing',3,3),deck('polar lane',2,2),deck('polar square',2,2),gardenPavilion(),deck('junction lane',2,3),deck('short lane',2,1),deck('door landing',1,1),deck('polar court',4,4),
+ streetHouse('court'),streetHouse('hall'),streetHouse('terrace'),streetHouse('gable'),deck('long lane',2,5),
+ townPostHouse(),townLongWorkshop(),townSharedCourt(),townHarbourLookout(),
+ townWorksite('garden'),townWorksite('repair'),townWorksite('counter'),townWorksite('sorting'),
+ townStoneLane(1),townStoneLane(2),townStoneLane(3),
+ townDoorHouse('front-left'),townDoorHouse('court-side'),townDoorHouse('court-back'),townDoorHouse('gable-side'),
+ townStreetGallery(),townCourtEdge(),townCourtEdge(true),townStoneLane(4),townStoneLane(5),
 ].map((blueprint,index)=>({...blueprint,id:`51549d27-cabe-4d99-af34-a1${String(index).padStart(10,'0')}` as BlueprintId,
- name:`Town · ${blueprint.name}`}));
+ name:`Town · ${blueprint.name.replace(/^(Town · )+/,'')}`}));
 // Content-addressed ordinary blueprints, checked against the canonical codec.
-export const PUBLIC_TOWN_HASHES=['fa832dd85a321da376c731f777aa65e9796eed7da65e96a7321ea544a62baf25','c4374061b3e838eab1143a8c8bf29bb23876372bda9b77682ca545f5165f939d','6b5514cb44e732694ec114a0626214fb9829d74d96c5ff291a5ae5d41613ec9f','b254c8da217d42e1112353691e312ee21c16496b775494fb6a2761a379f0b94d','f9fb9e44efa78eeae6fd373d3a461bd9a2a62440faffa25688c5e768d8f9975d','7cd68a5f77f81fd8b1ffde1cbac991cb563403a57d0f6cc0764f8552994831ad','e8298b4d01de8e410bda20f4b8888168a65f62daf4819fa9cb9690b40f349e04','acbe5d36207566bb42e99dc0850bfce807fffabcb44b0e20d2739aa36dc0e456','46394bc396801e6891b57d90d4324fd8c8a1097a75d013f4733aeef49350439d','52aa04b090db2053f17173dfd296968bd792c30ee11e28a1b4ec62312ea980cc','60f7fec9a8a440a836baf0adc9350d30520ccd190952e6a948a7bd783f4bb883','494d519acc7affd7e805356f9b84b0cf63458d3706fe8e99d6b649cdb52807ca','494d519acc7affd7e805356f9b84b0cf63458d3706fe8e99d6b649cdb52807ca','c2417bcc6bf65c0638137e0bfc58546aff86200850faa24ff44f15b7c52fb78f','457ffda315ad31cfddc2f7be027599b0694fdc834dc7a384fb9d887d11f90ad8','6bf4e0365416a10462af3f5ba6b95a6019cb92d21e1de59ee273f3e8ba3a3a49','38cc9e0b084feff754f6614e159975aeb50213c74591e8abdabb0e9bbbeb2d01','e3c936baa638fb4951892814280fce47e11f5ffba6896e342cb4de18ac3d4af3'];
+export const PUBLIC_TOWN_HASHES=["fa832dd85a321da376c731f777aa65e9796eed7da65e96a7321ea544a62baf25","c4374061b3e838eab1143a8c8bf29bb23876372bda9b77682ca545f5165f939d","6b5514cb44e732694ec114a0626214fb9829d74d96c5ff291a5ae5d41613ec9f","b254c8da217d42e1112353691e312ee21c16496b775494fb6a2761a379f0b94d","f9fb9e44efa78eeae6fd373d3a461bd9a2a62440faffa25688c5e768d8f9975d","7cd68a5f77f81fd8b1ffde1cbac991cb563403a57d0f6cc0764f8552994831ad","e8298b4d01de8e410bda20f4b8888168a65f62daf4819fa9cb9690b40f349e04","acbe5d36207566bb42e99dc0850bfce807fffabcb44b0e20d2739aa36dc0e456","46394bc396801e6891b57d90d4324fd8c8a1097a75d013f4733aeef49350439d","52aa04b090db2053f17173dfd296968bd792c30ee11e28a1b4ec62312ea980cc","60f7fec9a8a440a836baf0adc9350d30520ccd190952e6a948a7bd783f4bb883","494d519acc7affd7e805356f9b84b0cf63458d3706fe8e99d6b649cdb52807ca","494d519acc7affd7e805356f9b84b0cf63458d3706fe8e99d6b649cdb52807ca","c2417bcc6bf65c0638137e0bfc58546aff86200850faa24ff44f15b7c52fb78f","457ffda315ad31cfddc2f7be027599b0694fdc834dc7a384fb9d887d11f90ad8","6bf4e0365416a10462af3f5ba6b95a6019cb92d21e1de59ee273f3e8ba3a3a49","38cc9e0b084feff754f6614e159975aeb50213c74591e8abdabb0e9bbbeb2d01","e3c936baa638fb4951892814280fce47e11f5ffba6896e342cb4de18ac3d4af3","9091370a66ce3f6af4905f4b7dfb1b08eadb9b25e0b8959fca5b20bd296ff3fa","7f6a6eca52aec087a7dc12f40cc7e43387343e4bb0bbe32a78e4194c2babc0f0","75719fbab9e9717a6d6278ec4b45fe3a4cee490e5c4755f9d45d2fc96c2e3a1c","7cf83dd53588254c99fdcd038ac3850070ad8d1c9504d6759e739b2742ea382a","dece6bcf8e0997b498ec6c44fb4ed4325c9e23150581accc28524544277c9886","152acb632b77f40a05bf4aaf3821d109ec8f8045c0bf41369fe344d5ed2f2f60","2ee5ebe993a365905906dec5d29b54e4494d233765109cd0d03cc8199820e5c5","43153196379b06aead81443163b2ffb5de8b7e94085ba33ec9bb097071157e8f","d42191c0a7ef4a3943bb55ca7048c301299010641cfea76e77b943f0578783f0","356b1c24939061876bec3e91f155c317e434e667dee7f9130d1d6fdc82212ba5","439d0a22c9268e9454d84e3f4e1ad190ff032d2b84e9cf2782312ac0bf40e6f1","21fa16f738df52ab4ca568d90a7c990bbc4558771cca8155069e8899b1247447","56a6c8c49aa724f1bbe88a169802d3f8911f8bbf54d4f1dd76444f1bc37eb1a8","f8674286acef5afc49c60b6c6e5a15c7281d2032b8871fd8500e53a37eabb3ec","b61d67a9fef94dd65bbd653b80f8b9d0d418d2737b4a2fc0f3a34c5d4604d671","1dcd1dd3f18058671ff1193b12cd944fb747ff2f339b0fcf4cc3f6f0fca2e39c","cc4572cc6a10517a9be2eadeb97b282aae17a433436babe9a469a8447aca0df9","66f828ae12daab5485534593afc2547e894bce9c93559a99589a4f24113878b8","66ab302f35f49de7a8e495afeade52186377769d4e0ba003e5c403ec2af2309f","75cb7c72b40d334c7b2520410790ae91e9de5d2ee0806931a7fe362525380361","98ad9b0581e6a0c5d6d9555e6a7747f04fe55389e627eb5159d70825cf1260e7","26e7d5dd4f80efea811e6b8d05f623673230f51b8e21ad47c915162f82a0523c","06d94103ffd66eebfc30f91c1999ba71cceb090034028a6a811989f4911d0ff2","795731f7460ef19cc1d7f84d3f425378ff7dd25c69b126aacd38cfeadbe5e3ba","b5adcc7ed102a5a96534f92e8867e928d838c08a608249a722440e00eebef32f"];
+// Final place-specific variants remain ordinary editable blueprint documents.
+const connectedFronts=[townConnectedFront('long-corner'),townConnectedFront('short-return'),townConnectedFront('open-gallery'),townClearEntryHome()];
+const spatialVariants=townSpatialVariants(PUBLIC_TOWN_BLUEPRINTS);
+for(const blueprint of [...connectedFronts,...spatialVariants.map(variant=>variant.blueprint)]){
+ const index=PUBLIC_TOWN_BLUEPRINTS.length;
+ PUBLIC_TOWN_BLUEPRINTS.push({...blueprint,id:`51549d27-cabe-4d99-af34-a1${String(index).padStart(10,'0')}` as BlueprintId,
+  name:`Town · ${blueprint.name.replace(/^(Town · )+/,'')}`});
+}
+PUBLIC_TOWN_HASHES.push('2fce82e71a59bf667db9a8ccf635b7394b32edeabe85cfa40f42287956dd8849',
+ '340057f2a79ef40129a69fb64a54ea4ab9b822f6bb76a7f51393808d8de371f4',
+ '404b21ec696f767f81a7c24acbfb0e00ac18ed4a7582d374202786109af44edd',
+ '959f99a05895d62c1bca6d713dfcdc18321105e4daf2a82707e171d077f5bd71',
+ ...spatialVariants.map(variant=>variant.hash));
+// Keep the first 43 player workshop plans and all existing content hashes stable.
+for(const [hash,parts] of Object.entries(TOWN_AUTHORED_BLUEPRINTS)){
+ if(PUBLIC_TOWN_HASHES.includes(hash))throw Error('Duplicate authored blueprint hash');
+ const index=PUBLIC_TOWN_BLUEPRINTS.length;
+ PUBLIC_TOWN_BLUEPRINTS.push({id:(`51549d27-cabe-4d99-af34-a1${String(index).padStart(10,'0')}`) as BlueprintId,name:`Town · Authored block ${index}`,parts,groups:[]});
+ PUBLIC_TOWN_HASHES.push(hash);
+}
 function facing(point:Vec3,toward:Vec3):number {
  const up=new Vector3(...point),q=new Quaternion().setFromUnitVectors(new Vector3(0,1,0),up);
  const forward=new Vector3(...toward).projectOnPlane(up).normalize().applyQuaternion(q.invert());
@@ -115,14 +164,15 @@ function entranceRoutes(objects:PlacedObject[],buildings:string[],roadObjects:st
    minZ:Math.min(...parts.map(p=>p.z))-pivot.z,maxZ:Math.max(...parts.map(p=>p.z+1))-pivot.z};
  });
  return objects.filter(o=>buildings.includes(o.id)).flatMap(object=>{
-  const parts=blueprints[object.blueprintHash!],entry=parts.find(p=>p.part==='step.entry'||p.part==='ramp.entry')
-   ??parts.find(p=>p.level===0&&(p.part==='wall.door.open'||p.part==='wall.door'));
+  const parts=blueprints[object.blueprintHash!],entry=parts.find(p=>p.part==='step.entry'||p.part==='ramp.entry'||p.part===WIDE_ENTRY_ID)
+   ??parts.find(p=>p.level===0&&isDoorPartId(p.part));
   if(!entry)return [];
   const t=partTransform(entry,pivotOf(parts)),base=structureFit(parts,object.position,object.rotation,field).baseRadius;
   const support=PART_COLLIDERS[entry.part]().filter(box=>box.support);
   const outer=support.length?Math.max(...support.map(box=>box.center[2]+Math.abs(Math.cos(box.pitch??0))*box.half[2]+Math.abs(Math.sin(box.pitch??0))*box.half[1])):.15;
+  const centerX=entry.part===WIDE_ENTRY_ID?WIDE_ENTRY.centerX:isWideDoorPartId(entry.part)?WIDE_DOOR.centerX:0;
   const start=localToDir({dir:object.position,yaw:object.rotation},base,
-   [t.position[0]+Math.sin(t.yaw)*(outer+.56),0,t.position[2]+Math.cos(t.yaw)*(outer+.56)]);
+   [t.position[0]+Math.cos(t.yaw)*centerX+Math.sin(t.yaw)*(outer+.56),0,t.position[2]-Math.sin(t.yaw)*centerX+Math.cos(t.yaw)*(outer+.56)]);
   const point=new Vector3(...start);
   const candidates=roads.flatMap(road=>{
    const dot=point.dot(road.up);if(dot<.7)return [];
@@ -138,34 +188,6 @@ function entranceRoutes(objects:PlacedObject[],buildings:string[],roadObjects:st
   if(!chosen)return [];
   return [{id:`town-frontdoor-${object.id}`,width:.75,points:[start,chosen.end]}];
  });
-}
-/** Authoring-only search for a courtyard walk. Every lattice cell is an
- * actual legal ordinary Path, so the route follows the available alley. */
-function gardenWalk(route:HomeSurfaceRoute,objects:PlacedObject[],blueprints:BlueprintContents,radius:number):{route:HomeSurfaceRoute;objects:PlacedObject[]} {
- const start=route.points[0],end=route.points.at(-1)!,length=distance(start,end,radius),yaw=facing(start,end),steps=Math.max(1,Math.ceil(length/.62));
- const field=fieldOf(PUBLIC_TOWN_ENVIRONMENT,radius),cache=new PathPlacementCache(),nodes=new Map<string,PlacedObject|null>();
- const node=(x:number,z:number)=>{
-  const key=`${x},${z}`;if(nodes.has(key))return nodes.get(key)!;
-  const reach=Math.tan(length/radius)*radius,position=localToDir({dir:start,yaw},radius,[x*.6,0,z*reach/steps]);
-  const onward=localToDir({dir:start,yaw},radius,[x*.6,0,z*reach/steps+.1]);
-  const object:PlacedObject={id:`${route.id}-stone-${x}-${z}`,kind:'path',assetVersion:2,version:PUBLIC_TOWN_VERSION,position,rotation:facing(position,onward)};
-  const problem=placementProblem('path',position,objects,undefined,undefined,radius,2,{rotation:object.rotation,blueprints,field,cache})||objectSeat(field,object,blueprints).problem;
-  nodes.set(key,problem?null:object);return nodes.get(key)!;
- };
- const initial=node(0,0);if(!initial)throw Error(`Court gate has no legal first stone: ${route.id}`);
- const pending=[{x:0,z:0,g:0,key:'0,0'}],costs=new Map([['0,0',0]]),previous=new Map<string,string>();let goal='';
- while(pending.length){
-  pending.sort((a,b)=>(a.g+Math.abs(a.x)*.6+Math.abs(steps-a.z)*length/steps)-(b.g+Math.abs(b.x)*.6+Math.abs(steps-b.z)*length/steps));
-  const current=pending.shift()!;if(Math.abs(current.x)<=2&&current.z===steps){goal=current.key;break;}
-  for(const [dx,dz]of [[0,1],[-1,0],[1,0],[0,-1]]){
-   const x=current.x+dx,z=current.z+dz,key=`${x},${z}`;if(Math.abs(x)>7||z< -2||z>steps+2||!node(x,z))continue;
-   const g=current.g+(dx?.6:length/steps);if(g>=(costs.get(key)??Infinity))continue;
-   costs.set(key,g);previous.set(key,current.key);pending.push({x,z,g,key});
-  }
- }
- if(!goal)throw Error(`No ordinary path through courtyard alley: ${route.id}`);
- const path:PlacedObject[]=[];for(let key:string|undefined=goal;key;key=previous.get(key))path.unshift(nodes.get(key)!);
- return {route:{...route,points:path.map(o=>o.position)},objects:path};
 }
 /** A garden connection may already cross its own paving, steps or the
  * street. Measure the union of real support surfaces and the actual Path
@@ -232,196 +254,182 @@ export function publicTown(radius=21.6):PublicTown {
  assertTownCapacity(town.objects);
  cache.set(radius,town);return town;
 }
-/** Whole-sphere authored street network. Latitude rings are joined by four
- * meridians; every object remains an ordinary editable construction item. */
-export function generatePublicTown(radius=21.6):PublicTown {
+/** Every door's real outward approach, independent of whether its street is
+ * paved or ordinary walkable terrain. Authoring/navigation consumes these
+ * points; a missing stone never becomes a fictional paved connection. */
+export function townEntrancePoints(town:Pick<PublicTown,'objects'|'blueprints'|'environment'|'radius'>):{id:string;point:Vec3;buildingId:string}[]{
+ const field=fieldOf(town.environment,town.radius);
+ const automatic=town.objects.filter(object=>object.kind==='structure').flatMap(object=>{
+  const parts=town.blueprints[object.blueprintHash!],steps=parts.filter(p=>p.part==='step.entry'||p.part==='ramp.entry'||p.part===WIDE_ENTRY_ID);
+  const entries=steps.length?steps:parts.filter(p=>p.level===0&&isDoorPartId(p.part));
+  const base=structureFit(parts,object.position,object.rotation,field).baseRadius;
+  return entries.map((entry,index)=>{
+   const t=partTransform(entry,pivotOf(parts)),support=PART_COLLIDERS[entry.part]().filter(box=>box.support);
+   const outer=support.length?Math.max(...support.map(box=>box.center[2]+Math.abs(Math.cos(box.pitch??0))*box.half[2]+Math.abs(Math.sin(box.pitch??0))*box.half[1])):.15;
+   const centerX=entry.part===WIDE_ENTRY_ID?WIDE_ENTRY.centerX:isWideDoorPartId(entry.part)?WIDE_DOOR.centerX:0;
+   const point=localToDir({dir:object.position,yaw:object.rotation},base,
+    [t.position[0]+Math.cos(t.yaw)*centerX+Math.sin(t.yaw)*(outer+.56),0,t.position[2]-Math.sin(t.yaw)*centerX+Math.cos(t.yaw)*(outer+.56)]);
+   return {id:`town-frontdoor-${object.id}${index?`-entry-${entry.n}`:''}`,point,buildingId:object.id};
+  });
+ });
+ return [...automatic,...townAuthoredEntrancePoints(town,automatic)];
+}
+
+
+/** Two ordinary cobble-cluster lanes form a narrow 1.5 m surface. Bends are
+ * authored in the place plan; rejected stones remain visible in the report. */
+export function townPlacePavingRoutes(radius=21.6):HomeSurfaceRoute[]{
+ return TOWN_LOCAL_STREETS.filter(route=>route.id!=='town-street-courts-exit').flatMap(route=>[-.36,.36].map((offset,lane)=>({
+  id:`${route.id}-${lane}`,width:.75,points:route.points.map((point,i)=>{
+   const up=new Vector3(...point),before=new Vector3(...route.points[Math.max(0,i-1)]),after=new Vector3(...route.points[Math.min(route.points.length-1,i+1)]);
+   const tangent=after.sub(before).projectOnPlane(up).normalize(),side=new Vector3().crossVectors(tangent,up).normalize();
+   return up.multiplyScalar(radius).addScaledVector(side,offset).normalize().toArray() as Vec3;
+  }),
+ })));
+}
+
+export interface TownAuthoringReport { attempts:{id:string;template:number;latitude:number;longitude:number;problem:string}[]; unplaced:{id:string;latitude:number;longitude:number}[] }
+/** Places are deliberately authored as different spatial compositions. Long
+ * generic latitude roads no longer consume the town's construction budget.
+ * Actual geometry uses the ordinary placement contract; fixed public task
+ * areas have a separate conservative occupied-space reservation. */
+export function generatePublicTown(radius=21.6,report?:TownAuthoringReport):PublicTown {
+ if(Math.abs(radius-21.6)<1e-6){
+  const town=structuredClone(publicTown(radius));
+  const check=createPublicTownPlacementCheck(fieldOf(town.environment,radius),radius,town.blueprints,new StructurePlacementCache());
+  for(const object of town.objects){const problem=check(object,town.objects);if(problem)throw Error(`Invalid authored town placement ${object.id}: ${problem}`);}
+  return town;
+ }
  if(PUBLIC_TOWN_HASHES.length!==PUBLIC_TOWN_BLUEPRINTS.length)throw Error('Town blueprint hashes have not been verified.');
  const blueprints=Object.fromEntries(PUBLIC_TOWN_BLUEPRINTS.map((b,i)=>[PUBLIC_TOWN_HASHES[i],b.parts]));
- const objects:PlacedObject[]=[],buildings:string[]=[],roadObjects:string[]=[],routes:HomeSurfaceRoute[]=[];
- const field=fieldOf(PUBLIC_TOWN_ENVIRONMENT,radius),meridians=[45,135,225,315],structureCache=new StructurePlacementCache();
- const addStructure=(id:string,index:number,position:Vec3,rotation:number,road=false)=>{
-  const parts=PUBLIC_TOWN_BLUEPRINTS[index].parts;
-  const object:PlacedObject={id:`town-${id}`,kind:'structure',position,rotation,version:PUBLIC_TOWN_VERSION,
-   blueprintHash:PUBLIC_TOWN_HASHES[index],...structureSize(parts)};
-  if(distance(position,SPAWN,radius)<object.radius!+1||distance(position,HUB_SHIP,radius)<object.radius!+2.5)return false;
-  if(objectSeat(field,object,blueprints).problem)return false;
-  if(!road&&placementProblem('structure',position,objects,object.id,object.radius,radius,2,
-   {rotation,blueprintHash:object.blueprintHash,blueprints,field,structureCache}))return false;
-  objects.push(object);(road?roadObjects:buildings).push(object.id);return true;
- };
- const intersections=[...[-45,0,45].flatMap(latitude=>meridians.map(longitude=>({id:`cross-${latitude}-${longitude}`,latitude,longitude}))),
-  {id:'north-square',latitude:90,longitude:0},{id:'south-square',latitude:-90,longitude:0}];
- for(const node of intersections){
-  const point=townPoint(node.latitude,node.longitude);
-  const toward=townPoint(Math.abs(node.latitude)===90?node.latitude-Math.sign(node.latitude)*.1:node.latitude+.1,Math.abs(node.latitude)===90?45:node.longitude);
-  if(node.latitude===90)addStructure(node.id,17,localToDir({dir:point,yaw:Math.PI/4},radius,[-1,0,.8]),Math.PI/4,true);
-  else addStructure(node.id,Math.abs(node.latitude)===90?12:10,point,facing(point,toward),true);
- }
- const laneIndex=(length:number)=>length===4?9:length===3?14:length===2?11:15;
- const run=(id:string,length:number,at:(distance:number)=>Vec3,startClear:number,endClear:number)=>{
-  const usable=length-startClear-endClear,count=Math.ceil(usable/4),last=Math.max(1,Math.ceil(usable-4*(count-1)));
-  const sizes=Array.from({length:count},(_,i)=>i===count-1?last:4),overlap=count>1?(sizes.reduce((a,b)=>a+b,0)-usable)/(count-1):0;
-  let cursor=startClear;
-  for(const [index,size] of sizes.entries()){
-   const center=cursor+size/2,point=at(center);
-   addStructure(`${id}-${index}`,laneIndex(size),point,facing(point,at(Math.min(length,center+.1))),true);
-   cursor+=size-overlap;
-  }
- };
- for(const latitude of [-45,0,45]){
-  const circumference=2*Math.PI*radius*Math.cos(latitude*Math.PI/180),count=Math.ceil(circumference/3.5);
-  routes.push({id:`town-ring-${latitude}`,width:2,points:Array.from({length:count+1},(_,i)=>townPoint(latitude,i*360/count))});
-  for(const longitude of meridians)run(`lane-ring-${latitude}-${longitude}`,circumference/4,d=>townPoint(latitude,longitude+d/circumference*360),1.48,1.48);
- }
- for(const longitude of meridians){
-  const count=Math.ceil(Math.PI*radius/3.5);
-  routes.push({id:`town-meridian-${longitude}`,width:2,points:Array.from({length:count+1},(_,i)=>townPoint(-90+i*180/count,longitude))});
-  for(const latitude of [-90,-45,0,45])run(`lane-meridian-${longitude}-${latitude}`,Math.PI*radius/4,d=>townPoint(latitude+d/radius*180/Math.PI,longitude),latitude===-90?.98:1.48,latitude===45?.98:1.48);
- }
- // The four terminal boards stop outside the unified court's real deck
- // boundary. Distances include the seated sphere projection, so they do not
- // draw a second board edge across the interior of the ordinary 4x4 plan.
- for(const [longitude,fromPole,index]of [[45,3.29,15],[135,2.495,14],[225,2.685,14],[315,3.49,15]]){
-  const object=objects.find(o=>o.id===`town-lane-meridian-${longitude}-45-3`);
-  if(object)Object.assign(object,{position:townPoint(90-fromPole/radius*180/Math.PI,longitude),
-   blueprintHash:PUBLIC_TOWN_HASHES[index],...structureSize(PUBLIC_TOWN_BLUEPRINTS[index].parts)});
- }
- const north=townPoint(90,0);
- const polarRoute=(longitude:number,latitude:number)=>{const count=Math.ceil((90-latitude)/8);return Array.from({length:count+1},(_,i)=>townPoint(90-(90-latitude)*i/count,longitude));};
- const micaLatitude=Math.asin(NPCS.mica.position[1])*180/Math.PI,solLatitude=Math.asin(NPCS.sol.position[1])*180/Math.PI;
- const connectors:HomeSurfaceRoute[]=[
-  {id:'town-arrival-court',width:2,points:[SPAWN,north]},
-  {id:'town-post-link',width:2,points:[townPoint(micaLatitude,135),NPCS.mica.position]},
-  {id:'town-orchard-link',width:2,points:[townPoint(solLatitude,225),NPCS.sol.position]},
-  {id:'town-harbour-link',width:2,points:[townPoint(45,160),townPoint(54,160),HUB_DOCK]},
- ];
- for(const route of connectors){
-  routes.push(route);
-  if(route.id==='town-arrival-court'){
-   // The entire arrival court is one ordinary 4x4 blueprint/plane. Separate
-   // tangent boards leave visible edges crossing the interior of the court.
-   continue;
-  }
-  for(let edge=1;edge<route.points.length;edge++){
-   const a=new Vector3(...route.points[edge-1]),b=new Vector3(...route.points[edge]),length=a.angleTo(b)*radius,count=Math.max(1,Math.ceil(length/3.7));
-   for(let i=0;i<count;i++){
-    const position=a.clone().lerp(b,(i+.5)/count).normalize().toArray() as Vec3;
-    addStructure(`${route.id}-${edge}-${i}`,9,position,facing(position,route.points[edge]),true);
+ const objects:PlacedObject[]=[...TOWN_CRITICAL_SUPPORTS,...TOWN_ANCHOR_BUILDINGS].map(o=>({...structuredClone(o),version:PUBLIC_TOWN_VERSION}));
+ const buildings=TOWN_ANCHOR_BUILDINGS.map(o=>o.id),roadObjects=TOWN_CRITICAL_SUPPORTS.map(o=>o.id);
+ const field=fieldOf(PUBLIC_TOWN_ENVIRONMENT,radius),structureCache=new StructurePlacementCache();
+ const placementCheck=createPublicTownPlacementCheck(field,radius,blueprints,structureCache);
+ const plans=townPlacePlans(),places:NonNullable<PublicTown['places']>=[];
+ // These three streets have been read at walking height. Place their actual
+ // street walls first so a previously rejected neighbour cannot consume a
+ // newly opened corner and silently erase an accepted street on regeneration.
+ // This is only authoring order: every part still passes the same fit/OBB rules.
+ const streetWalls=new Set(['post-1','post-2','post-3','post-4','post-5','post-6','post-8','post-9','post-10','post-11',
+  'craft-1','craft-2','craft-3','craft-4','craft-5','craft-6','craft-7','craft-8','craft-9','craft-10','craft-11','craft-12','craft-14','craft-15','craft-16',
+  'courts-1','courts-2','courts-3','courts-4','courts-5','courts-6','courts-7','courts-8','courts-9','courts-10','courts-12','courts-13','courts-14']);
+ const connectingFronts=new Set(['arrival-1','arrival-2','arrival-3','arrival-4','back-junction-1','back-junction-2','back-junction-3','timber-yard-5','wash-court-5','work-to-home-1','work-to-home-4']);
+ const priority=(id:string)=>streetWalls.has(id)?0:connectingFronts.has(id)?1:2;
+ const plotOrder=plans.flatMap(place=>place.plots.map(plot=>({place,plot}))).sort((a,b)=>priority(a.plot.id)-priority(b.plot.id));
+ const placedByPlace=new Map(plans.map(place=>[place.id,[] as string[]]));
+ for(const {place,plot}of plotOrder){
+   let accepted:PlacedObject|undefined;
+   for(const [dx,dz]of [[0,0]]){
+    if(accepted)break;
+    const intended=townPlacePoint(place,radius,plot.x+dx,plot.z+dz),angle=plot.turn*Math.PI/180;
+    const toward=townPlacePoint(place,radius,plot.x+dx+Math.sin(angle)*.1,plot.z+dz+Math.cos(angle)*.1);
+    const {position:point,rotation}=townAuthoredPose(`town-${plot.id}`,intended,facing(intended,toward),radius);
+    for(const index of [plot.template]){
+     const parts=PUBLIC_TOWN_BLUEPRINTS[index].parts;
+     const object:PlacedObject={id:`town-${plot.id}`,kind:'structure',position:point,rotation,version:PUBLIC_TOWN_VERSION,
+      blueprintHash:PUBLIC_TOWN_HASHES[index],...structureSize(parts)};
+     const problem=placementCheck(object,objects);
+     if(problem){report?.attempts.push({id:object.id,template:index,latitude:Math.asin(point[1])*180/Math.PI,longitude:Math.atan2(point[0],point[2])*180/Math.PI,problem});continue;}
+     accepted=object;break;
+    }
    }
+   if(accepted){objects.push(accepted);buildings.push(accepted.id);placedByPlace.get(place.id)!.push(accepted.id);}
+   else{const point=townPlacePoint(place,radius,plot.x,plot.z);report?.unplaced.push({id:`town-${plot.id}`,latitude:Math.asin(point[1])*180/Math.PI,longitude:Math.atan2(point[0],point[2])*180/Math.PI});}
+ }
+ // The concrete spatial plan has no speculative fallback plots. An absent
+ // street wall changes the place itself, so a partial ledger is not emitted.
+ const missingPlans=plotOrder.filter(({plot})=>!objects.some(object=>object.id===`town-${plot.id}`));
+ if(missingPlans.length)throw Error(`Concrete town placements failed: ${missingPlans.map(({plot})=>plot.id).join(', ')}. Inspect the authoring report before changing the plan.`);
+ for(const place of plans){
+  places.push({id:place.id,name:place.name,nameZh:place.nameZh,center:place.center,intent:place.intent,objectIds:placedByPlace.get(place.id)!,
+   walk:place.walk.map(([x,z])=>townPlacePoint(place,radius,x,z))});
+ }
+ const worksites:NonNullable<PublicTown['worksites']>=[];
+ // Resident work objects stay in side pockets, leaving the authored walking
+ // line and a clothing-width standing space clear. No NPC acts as scenery.
+ for(const [id,placeId,x,z,turn,index]of [
+  ['nell-garden','orchard',-1,4.7,180,27],['ivo-repair','harbour',-3.5,1.5,0,28],
+  ['ada-shop','arcades',-2,2.7,180,29],
+ ] as [string,string,number,number,number,number][]){
+  const place=plans.find(p=>p.id===placeId)!;let accepted:PlacedObject|undefined;
+  for(const [dx,dz]of [[0,0],[.2,0],[-.2,0],[0,.2],[0,-.2]]){
+   const intended=townPlacePoint(place,radius,x+dx,z+dz),angle=turn*Math.PI/180,toward=townPlacePoint(place,radius,x+dx+Math.sin(angle)*.1,z+dz+Math.cos(angle)*.1);
+   const {position:point,rotation}=townAuthoredPose(`town-worksite-${id}`,intended,facing(intended,toward),radius);
+   const parts=PUBLIC_TOWN_BLUEPRINTS[index].parts,object:PlacedObject={id:`town-worksite-${id}`,kind:'structure',position:point,rotation,version:PUBLIC_TOWN_VERSION,blueprintHash:PUBLIC_TOWN_HASHES[index],...structureSize(parts)};
+   const problem=placementCheck(object,objects);
+   if(problem){report?.attempts.push({id:object.id,template:index,latitude:Math.asin(point[1])*180/Math.PI,longitude:Math.atan2(point[0],point[2])*180/Math.PI,problem});continue;}
+   accepted=object;break;
   }
+  if(accepted){objects.push(accepted);worksites.push({id,placeId,objectId:accepted.id,position:accepted.position});}
+  else{const point=townPlacePoint(place,radius,x,z);report?.unplaced.push({id:`town-worksite-${id}`,latitude:Math.asin(point[1])*180/Math.PI,longitude:Math.atan2(point[0],point[2])*180/Math.PI});}
  }
- routes.push(
-  {id:'public-post',width:2,points:[SPAWN,...polarRoute(135,micaLatitude),NPCS.mica.position]},
-  {id:'public-orchard',width:2,points:[SPAWN,...polarRoute(225,solLatitude),NPCS.sol.position]},
-  {id:'public-harbour',width:2,points:[SPAWN,...polarRoute(135,45),...Array.from({length:5},(_,i)=>townPoint(45,140+i*5)),townPoint(54,160),HUB_DOCK]},
- );
- const local=(point:Vec3,x:number,z:number)=>localToDir({dir:point,yaw:0},radius,[x,0,z]);
- const destinations=[
-  {id:'post',position:NPCS.mica.position,at:local(NPCS.mica.position,1,-4.3),template:4},
-  {id:'orchard',position:NPCS.sol.position,at:local(NPCS.sol.position,-3.5,-.6),template:1},
-  {id:'harbour',position:HUB_DOCK,at:local(HUB_DOCK,4.8,-.2),template:8},
- ];
- // These are durable quest/flight bearings, not new interaction portals.
- for(const destination of destinations){
-  let placed=addStructure(destination.id,destination.template,destination.at,facing(destination.at,destination.position));
-  for(const separation of [3.8,4.5,5.2,6])for(let i=0;i<16&&!placed;i++){
-   const at=local(destination.position,Math.sin(i*Math.PI/8)*separation,Math.cos(i*Math.PI/8)*separation);
-   for(const template of [destination.template,4,7])if(addStructure(destination.id,template,at,facing(at,destination.position))){placed=true;break;}
-  }
-  if(!placed)throw Error(`The authored ${destination.id} destination has no supported plot.`);
+ const postalPorch=objects.find(object=>object.id==='town-post-3');
+ if(postalPorch){
+  const entry=townEntrancePoints({objects:[postalPorch],blueprints,environment:PUBLIC_TOWN_ENVIRONMENT,radius})[0];
+  if(entry)worksites.push({id:'pax-courier',placeId:'post',objectId:postalPorch.id,position:entry.point});
  }
- let serial=0;
- for(const [latitude,count,offset] of [[-57,8,22.5],[-33,12,0],[-12,16,11.25],[12,16,11.25],[33,12,0],[57,8,22.5],[-72,4,0],[72,4,0]]){
-  const towardLatitude=Math.abs(latitude)>65?Math.sign(latitude)*90:Math.abs(latitude)>22?Math.sign(latitude)*45:0;
-  for(let i=0;i<count;i++){
-   const longitude=i*360/count+offset,position=townPoint(latitude,longitude),toward=townPoint(towardLatitude,longitude);
-   let first=(serial++ + Math.floor(longitude/90)*2)%9;
-   // This near-street lot needs the shorter entry platform; the survey
-   // balcony's foundation leaves no supported place for a paving stone.
-   if(latitude===-12&&i===13)first=4;
-   // A bounded authored choice tries a smaller real plot where a corner is
-   // tight. Nothing is scaled and a rejected lot never becomes hidden art.
-   for(const index of [first,4,7])if(addStructure(`building-${latitude}-${i}`,index,position,facing(position,toward)))break;
-  }
- }
- // Small courts fill the wider equatorial blocks; their open timber roofs
- // distinguish them from the residential rows and frame the garden paths.
- for(const latitude of [-23,23])for(const i of [0,1,3,4]){
-  const longitude=15+i*60;let placed=false;
-  for(const dy of [0,1,-1,2,-2])for(const dx of [0,2,-2,4,-4]){
-   if(placed)continue;
-   const position=townPoint(latitude+Math.sign(latitude)*dy,longitude+dx),id=`garden-pavilion-${latitude}-${i}`;
-   if(!addStructure(id,13,position,facing(position,townPoint(0,longitude+dx))))continue;
-   const route=entranceRoutes(objects,[`town-${id}`],roadObjects,blueprints,radius)[0],start=route?.points[0];
-   if(start&&!placementProblem('path',start,objects,undefined,undefined,radius,2,{rotation:facing(start,route.points.at(-1)!),blueprints,field}))placed=true;
-   else{objects.pop();buildings.pop();}
-  }
- }
- // Two close task doorways need one real ordinary landing each. Four
- // separately seated path stones cannot bridge the two adjacent terrain seats.
- for(const id of ['town-post','town-orchard']){
-  const route=entranceRoutes(objects,[id],roadObjects,blueprints,radius)[0];
-  const mid=new Vector3(...route.points[0]).add(new Vector3(...route.points.at(-1)!)).normalize().toArray() as Vec3;
-  const yaw=Math.round(facing(mid,route.points.at(-1)!)/(Math.PI/12))*Math.PI/12,position=id==='town-post'?localToDir({dir:mid,yaw},radius,[-.1,0,.2]):mid;
-  const landing:PlacedObject={id:`${id}-door-landing`,kind:'structure',position,rotation:yaw,version:PUBLIC_TOWN_VERSION,
-   blueprintHash:PUBLIC_TOWN_HASHES[16],...structureSize(PUBLIC_TOWN_BLUEPRINTS[16].parts)};
-  const problem=placementProblem('structure',position,objects,landing.id,landing.radius,radius,2,{rotation:yaw,blueprintHash:landing.blueprintHash,blueprints,field,structureCache})||objectSeat(field,landing,blueprints).problem;
-  if(problem)throw Error(`The ordinary ${id} doorway landing is invalid: ${problem}`);
-  objects.push(landing);roadObjects.push(landing.id);
- }
- let entrances=entranceRoutes(objects,buildings,roadObjects,blueprints,radius);
- const gardenPaths:PlacedObject[]=[];
- entrances=entrances.map(route=>{
-  if(!route.id.includes('garden-pavilion'))return route;
-  const walk=gardenWalk(route,[...objects,...gardenPaths],blueprints,radius);gardenPaths.push(...walk.objects);return walk.route;
- });
- const entranceSamples=entrances.flatMap(route=>route.points.slice(1).flatMap((point,index)=>{
-  const a=new Vector3(...route.points[index]),b=new Vector3(...point),count=Math.ceil(a.angleTo(b)*radius/.3);
-  return Array.from({length:count+1},(_,i)=>a.clone().lerp(b,i/Math.max(1,count)).normalize().toArray() as Vec3);
- }));
- let props=0;
- const addProp=(kind:BuildKind,position:Vec3,rotation:number)=>{
-  const object:PlacedObject={id:`town-${kind}-${props++}`,kind,assetVersion:2,position,rotation,version:PUBLIC_TOWN_VERSION};
-  if(distance(position,HUB_SHIP,radius)<3.6||objectSeat(field,object,blueprints).problem
-   ||entranceSamples.some(point=>distance(point,position,radius)<.9)
-   ||placementProblem(kind,position,objects,object.id,undefined,radius,2,{rotation,blueprints,field}))return;
-  objects.push(object);
- };
- for(const latitude of [-80,-65,-23,23,65,80])for(let i=0;i<16;i++){
-  const longitude=i*22.5+5,position=townPoint(latitude,longitude);
-  addProp(i%4===0?'lamp':i%4===1?'flowers':'tree',position,facing(position,townPoint(0,longitude)));
- }
- // Courtyard planting is now part of the editable garden plans. Keep a
- // distributed set of detached accents while reserving the ledger for every
- // entrance connection; never truncate the paths at the object ceiling.
- const accents=townDistricts().map(d=>objects.filter(o=>o.kind!=='structure'&&townDistrictFor(o.position)===d.id));
- const keep=new Set<string>();
- for(let row=0;keep.size<8&&accents.some(group=>group[row]);row++)for(const group of accents)if(group[row]&&keep.size<8)keep.add(group[row].id);
- for(let i=objects.length-1;i>=0;i--)if(objects[i].kind!=='structure'&&!keep.has(objects[i].id))objects.splice(i,1);
- objects.push(...gardenPaths);
- const pavedEntrances=entrances.filter(route=>!route.id.includes('garden-pavilion'));
- const yards=planRoutePaths({routes:pavedEntrances,radius,environment:PUBLIC_TOWN_ENVIRONMENT,objects,blueprints,
-  maxObjects:PUBLIC_TOWN_CAPACITY.objects,spacing:.74,idPrefix:'town-yard-path'});
- if(yards.budgetLimited)throw Error(`Town entrance paths exceed the public object budget (${yards.requested}/${yards.capacity}).`);
- objects.push(...yards.objects.map(object=>({...object,version:PUBLIC_TOWN_VERSION})));routes.push(...entrances);
- const coverage=entrances.map(route=>yards.coverage.find(item=>item.id===route.id)??{id:route.id,candidates:0,added:0,covered:0,blocked:0,budgetOmitted:0,gaps:[],maxGap:0,endDistance:Infinity,isolated:0,connected:false});
- let entranceCoverage=townEntranceCoverage({objects,blueprints,environment:PUBLIC_TOWN_ENVIRONMENT,radius},entrances,coverage);
- // A short approach can have two fixed endpoint stones whose intervening
- // interval is too small for the regular sampler. Fill only measured gaps
- // with ordinary legal stones, then measure the completed scene again.
- for(const item of entranceCoverage)for(const [index,gap]of item.gaps.entries()){
-  if(gap.length+.04<=.24||gap.length>.4)continue;
-  const position=new Vector3(...gap.from).add(new Vector3(...gap.to)).normalize().toArray() as Vec3;
-  const object:PlacedObject={id:`${item.id}-joint-${index}`,kind:'path',assetVersion:2,version:PUBLIC_TOWN_VERSION,position,rotation:facing(position,gap.to)};
-  if(placementProblem('path',position,objects,undefined,undefined,radius,2,{rotation:object.rotation,blueprints,field})||objectSeat(field,object,blueprints).problem)continue;
-  objects.push(object);
- }
- entranceCoverage=townEntranceCoverage({objects,blueprints,environment:PUBLIC_TOWN_ENVIRONMENT,radius},entrances,coverage);
+ // The reviewed entity stage keeps the actual three street surfaces and
+ // doorway paving. New cross-district routes remain explicit ground lanes;
+ // no unverified stone report is reused after changing their geometry.
+ // Pave only the three retained public destinations. Other door approaches
+ // are intentionally ground alleys and receive separate real-motion checks.
+ const entrances=entranceRoutes(objects,TOWN_ANCHOR_BUILDINGS.map(o=>o.id),roadObjects,blueprints,radius);
+ const yards=planRoutePaths({routes:entrances,radius,environment:PUBLIC_TOWN_ENVIRONMENT,objects,blueprints,
+  maxObjects:PUBLIC_TOWN_CAPACITY.objects,spacing:.74,idPrefix:'town-anchor-path'});
+ if(yards.budgetLimited)throw Error('Anchor paving exceeds the public construction budget.');
+ objects.push(...yards.objects.map(object=>({...object,version:PUBLIC_TOWN_VERSION})));
+ const entranceCoverage=townEntranceCoverage({objects,blueprints,environment:PUBLIC_TOWN_ENVIRONMENT,radius},entrances,yards.coverage);
+ const streets=townPlacePavingRoutes(radius);
+ const paving=planRoutePaths({routes:streets,radius,environment:PUBLIC_TOWN_ENVIRONMENT,objects,blueprints,
+  maxObjects:PUBLIC_TOWN_CAPACITY.objects,spacing:.67,idPrefix:'town-street-path'});
+ if(paving.budgetLimited)throw Error('Authored street paving exceeds the public construction budget.');
+ objects.push(...paving.objects.map(object=>({...object,version:PUBLIC_TOWN_VERSION})));
  const districts=townDistricts();
  for(const object of objects)districts.find(d=>d.id===townDistrictFor(object.position))!.objectIds.push(object.id);
+ // Includes pre-seeded task buildings, supports, work objects and paving.
+ // A valid candidate is not permission to freeze an invalid complete ledger.
+ for(const object of objects){const problem=placementCheck(object,objects);if(problem)throw Error(`Invalid public placement ${object.id}: ${problem}`);}
  assertTownCapacity(objects);
- const town:PublicTown={version:PUBLIC_TOWN_VERSION,radius,environment:PUBLIC_TOWN_ENVIRONMENT,objects,blueprints,routes,pavingRoutes:routes,
-  renderDistricts:districts,buildings,roadObjects,entranceCoverage,destinations:destinations.map(d=>({id:d.id,position:d.position,buildingId:`town-${d.id}`})),
-  landmarks:intersections.map(n=>({id:n.id,position:townPoint(n.latitude,n.longitude)}))};
- return town;
+ // Preserve the actual checked street graph and the independent SPAWN task
+ // routes. Paving is a separate surface ledger; no renderer draws ribbons.
+ const routes:HomeSurfaceRoute[]=[...new Map([
+  ...entrances.map(route=>({...route,points:[...route.points].reverse()})),
+  ...TOWN_LOCAL_STREETS.filter(route=>route.id!=='town-street-courts-exit'),
+  ...TOWN_STREET_NETWORK,...TOWN_ENTRY_CONNECTIONS,
+ ].map(route=>[route.id,route])).values()];
+ const navigationById=new Map(routes.map(route=>[route.id,route]));
+ // Yard furniture and planted edges are ordinary site structures, not rooms.
+ const actualBuildings=buildings.filter(id=>blueprints[objects.find(object=>object.id===id)!.blueprintHash!].some(part=>part.part.startsWith('roof.')));
+ const siteObjects=objects.filter(object=>object.kind==='structure'&&!actualBuildings.includes(object.id)&&!roadObjects.includes(object.id)).map(object=>object.id);
+ const sharedBoundaries:Record<string,string[]>={
+  'post-upper':['town-post-5','town-post-8','town-post-9'],
+  'garden-back-lane':['town-garden-steps-4','town-garden-steps-8','town-south-lane-12','town-court-to-porch-2'],
+  'orchard-back':['town-orchard-8','town-orchard-9','town-roof-to-arrival-1','town-north-steps-6'],
+  'court-to-porch':['town-courts-10','town-porches-12','town-porches-15'],
+  'work-to-home':['town-timber-yard-8'],
+ };
+ for(const place of places){
+  const route=navigationById.get(TOWN_PLACE_STREET[place.id]);
+  if(!route)throw Error(`No actual street for authored place ${place.id}`);
+  place.siteObjectIds=place.objectIds.filter(id=>siteObjects.includes(id));
+  place.objectIds=place.objectIds.filter(id=>actualBuildings.includes(id));
+  place.boundaryObjectIds=sharedBoundaries[place.id]??[];
+  place.streetIds=[route.id];
+  if(route.id==='town-south-network'){
+   // This continuous network returns through its side branches. Retain a
+   // contiguous local portion, not a new chord across the place centre.
+   const nearest=route.points.reduce((best,point,index)=>distance(point,place.center,radius)<distance(route.points[best],place.center,radius)?index:best,0);
+   place.walk=route.points.slice(Math.max(0,nearest-2),Math.min(route.points.length,nearest+3));
+  }else place.walk=route.points;
+ }
+
+ const connectedEntrances=entrances.filter((_,i)=>entranceCoverage[i].connected);
+ return {version:PUBLIC_TOWN_VERSION,radius,environment:PUBLIC_TOWN_ENVIRONMENT,objects,blueprints,routes,pavingRoutes:connectedEntrances,pavingPlans:[...entrances,...streets],pavingCoverage:[...entranceCoverage,...paving.coverage],stoneCoverage:[],
+  renderDistricts:districts,buildings:actualBuildings,roadObjects,siteObjects,entranceCoverage:entranceCoverage.filter(item=>item.connected),places,worksites,
+  destinations:[{id:'post',position:NPCS.mica.position,buildingId:'town-post'},{id:'orchard',position:NPCS.sol.position,buildingId:'town-orchard'},{id:'harbour',position:HUB_DOCK,buildingId:'town-harbour'}],
+  landmarks:[{id:'north-square',position:townPoint(90,0),kind:'navigation'},{id:'south-square',position:townPoint(-90,0),kind:'navigation'},
+   ...[['postal-stair','town-post-3'],['workshop-corner','town-craft-4'],['shared-court-wing','town-courts-5'],['harbour-working-front','town-harbour-3'],['garden-stair','town-garden-steps-3'],['polar-threshold','town-south-court-2']].flatMap(([id,objectId])=>{
+    const object=objects.find(candidate=>candidate.id===objectId);return object?[{id,objectId,position:object.position,kind:'structure' as const}]:[];
+   })]};
 }

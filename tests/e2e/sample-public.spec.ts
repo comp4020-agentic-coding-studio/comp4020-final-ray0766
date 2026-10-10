@@ -68,7 +68,11 @@ test('public sample Chrome desktop: original kit scene, keyboard routes, deliver
  try{
   await begin(page);await page.screenshot({path:`${evidence}/public-desktop-entry.png`});record.entryRender=await stats(page);
   await overview(page);await page.screenshot({path:`${evidence}/public-desktop-overview.png`});record.overviewRender=await stats(page);await overview(page);
-  const village=samplePublicVillage(),post=village.routes[0],orchard=village.routes[1],harbour=village.routes[2];
+  const village=samplePublicVillage();
+  const [post,orchard,harbour]=['public-post','public-orchard','public-harbour'].map(id=>{
+   const route=village.routes.find(route=>route.id===id);
+   expect(route,`Missing preserved task route ${id}`).toBeDefined();return route!;
+  });
   for(const p of post.points.slice(1))await walk(page,p,p===post.points.at(-1)?1.05:.32);
   await expect(page.locator('#interact')).toBeVisible();await page.screenshot({path:`${evidence}/public-desktop-post.png`});
   await page.locator('#interact').click();await expect.poll(async()=>(await read(page)).quest).toBe('carrying');

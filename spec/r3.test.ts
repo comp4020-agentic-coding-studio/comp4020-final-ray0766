@@ -2,7 +2,7 @@ import {expect,it,inject} from 'vitest';
 import * as T from 'three';
 import {rankFittings,PracticalLights} from '../src/assets/claude-geometry/style/practical.ts';
 import {disposeObject3D} from '../src/assets/claude-geometry/core/dispose.ts';
-import {buildBlueprintModel} from '../src/assets/claude-geometry/blueprint/model3d.ts';
+import {buildBlueprintModel} from '../src/shared/blueprint-model3d.ts';
 import {industrialCabin} from '../src/assets/claude-geometry/blueprint/samples.ts';
 import {StyleLibrary} from '../src/assets/claude-geometry/style/materials.ts';
 import {CLAUDE_ASSET_ROOT} from '../src/shared/asset-release.ts';

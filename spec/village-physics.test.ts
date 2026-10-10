@@ -1,14 +1,14 @@
 import {expect,it} from 'vitest';
 import {Vector3,Quaternion} from 'three';
 import type {Mesh} from 'three';
-import {PART_IDS,buildPart} from '../src/assets/claude-geometry/blueprint/parts/catalogue.ts';
+import {PART_IDS,buildPart} from '../src/shared/blueprint-parts.ts';
 import {buildProp} from '../src/assets/claude-geometry/props/index.ts';
 import {StyleLibrary} from '../src/assets/claude-geometry/style/materials.ts';
 import {disposeObject3D} from '../src/assets/claude-geometry/core/dispose.ts';
 import {anchorQuaternion,localToDir} from '../src/assets/claude-geometry/core/anchor.ts';
 import {defaultEnvironment,encodeEnvironment} from '../src/assets/claude-geometry/terrain/env.ts';
 import {DOOR_OPENING,LEAVES,leafX} from '../src/assets/claude-geometry/blueprint/parts/village/walls.ts';
-import type {PartPlacement} from '../src/assets/claude-geometry/blueprint/model.ts';
+import type {PartPlacement} from '../src/shared/blueprint-model.ts';
 import {homeDoorLeaves,homeDoorPanelX,homeDoorSweepContains,HOME_DOOR_SLIDING} from '../src/shared/home-door.ts';
 import {PART_COLLIDERS,SLOPE_BOUNDS} from '../src/shared/physics/parts.ts';
 import type {PartBox} from '../src/shared/physics/parts.ts';
@@ -65,7 +65,7 @@ it('uses measured all-LOD quick-prop extents and a separate versioned stone lant
 });
 
 it('pins six sliding leaves to the source model and leaves the old inward swing clear',()=>{
- expect([PHYSICS_VERSION,HUB_PHYSICS_VERSION]).toEqual([7,7]);
+ expect([PHYSICS_VERSION,HUB_PHYSICS_VERSION]).toEqual([7,8]);
  expect(HOME_DOOR_SLIDING.width).toBe(LEAVES.width);expect(HOME_DOOR_SLIDING.top).toBe(DOOR_OPENING.top);
  expect(HOME_DOOR_SLIDING.tracks).toEqual(LEAVES.tracks);
  for(const open of [false,true])for(const side of [-1,1])for(let i=0;i<3;i++)expect(homeDoorPanelX(side,i,open)).toBe(leafX(side,i,open));

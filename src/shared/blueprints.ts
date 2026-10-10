@@ -1,12 +1,12 @@
-import type { Blueprint, PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
-import { blueprintFootprint, partTransform, pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
+import type { Blueprint, PartPlacement } from './blueprint-model.ts';
+import { blueprintFootprint, partTransform, pivotOf } from './blueprint-model.ts';
 import { structureGroundFootprint } from './blueprint-ground-footprint.ts';
 import { seatedFit } from './ground-fit-cache.ts';
 import type { HeightField } from '../assets/claude-geometry/core/ground.ts';
 import { legacyHeightField } from '../assets/claude-geometry/core/ground.ts';
 import { STOREY } from '../assets/claude-geometry/blueprint/parts/kit.ts';
 import type { Vec3 } from './world.ts';
-import { PART_INFO } from '../assets/claude-geometry/blueprint/parts/info.ts';
+import { PART_INFO } from './blueprint-parts.ts';
 import { SLOPE_BOUNDS } from './physics/parts.ts';
 import { PRIVATE_CAPACITY } from './world-capacity.ts';
 

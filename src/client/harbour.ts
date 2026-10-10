@@ -17,7 +17,7 @@ import {makeShip} from './ship-model.ts';
 import {harbourMaterials} from './harbour-materials.ts';
 import {worldMaterials} from './shared-assets.ts';
 import {builtObject} from './build-art.ts';
-import {buildBlueprintModel} from '../assets/claude-geometry/blueprint/model3d.ts';
+import {buildBlueprintModel} from '../shared/blueprint-model3d.ts';
 import {placedTransform} from '../assets/claude-geometry/blueprint/placement.ts';
 import type {Obstacle} from './scene.ts';
 import {terrainModel} from './terrain-model.ts';

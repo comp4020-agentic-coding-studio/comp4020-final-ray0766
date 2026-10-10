@@ -1,0 +1,270 @@
+{
+  "schema": 1,
+  "status": "local-street-evidence-illustrations-not-a-cutover-verdict",
+  "createdAt": "2026-10-10T22:18:43.591775+00:00",
+  "scope": "Nine recommended original screenshots copied byte-for-byte. Illustrative selection only; full scope is bound through immutable reviews, not inferred from these nine images.",
+  "globalManifest": {
+    "file": "manifest.json",
+    "sha256": "a9715eb3ffdf2b63124748d16fdd53de19638ebf325e31db225135a294abf3d6",
+    "unchanged": true
+  },
+  "version": {
+    "label": "final-R3",
+    "sourceSha256": "8452a5167a94645613e2c43ebeabddbe8b391ed4c153f582fd3ca2e864517446",
+    "sourceInventoryEntries": 397,
+    "freeze": {
+      "path": ".data/v10-handoff-integration/final-source-freeze-r3.json",
+      "sha256": "76c952c37ac01c4fbb3ea899e0709a0d628f88deb17a4fe68b63d89758e2bcca"
+    },
+    "town": {
+      "path": ".data/v10-handoff-integration/final-candidate-r3-town.json",
+      "sha256": "c31c91f452a3cc207865e9a4c62e063204595eda8efc6790202aa0201a209adc"
+    },
+    "build": {
+      "path": ".data/v10-handoff-integration/build-final-candidate-r3",
+      "treeSha256": "e9fdaec040ba3f5489859b2a8776d269ce15dc4e28a0b8645145360751c6fadb",
+      "indexSha256": "599c7a3db0481f9423f6f73a2cf9b8333f601972bd24ed26c8491416079dfd7a",
+      "fileCount": 218,
+      "totalBytes": 37134633
+    }
+  },
+  "recommendation": {
+    "path": ".data/v10-handoff-final-visual/final-r3-local-evidence-image-recommendations-r1.json",
+    "sha256": "7b25b066c97c1b3b1ac35395a4633fbc1e10bbf7bac4d38d4c8a34b469f3616d"
+  },
+  "finalVisualAcceptance": {
+    "path": ".data/v10-handoff-final-visual/final-r3-visual-acceptance-r1.json",
+    "sha256": "4e85f8ee7904fd98748dbce016aa6ac7b420a40ee6ec728065e40363f50ceb03",
+    "status": "frozen-r3-defined-global-and-ground-visual-scope-accepted-with-documented-camera-limitations",
+    "coverage": {
+      "globalOriginals": 14,
+      "formalActionRows": 16,
+      "formalActionOriginals": 218,
+      "sixSiteOriginalsIncludingContinuations": 121,
+      "southlaneRecoveryOriginals": 9,
+      "groundOriginalsTotal": 348,
+      "allOriginalsTotal": 362
+    },
+    "remainingVisualBlockersWithinCoveredScope": 0,
+    "scopeLimit": "Defined global/street/court/recovery visual acceptance only; not save, performance, workshop or release approval."
+  },
+  "sixGroundSites": {
+    "path": ".data/v10-handoff-residents/final-ground-six-completion-r1.json",
+    "sha256": "9a630e5dcd7bc63f572ee25bd5bdf7c6e32d63dd9de70299e3411e4a97d1b6c9",
+    "status": "six-original-ground-site-routes-complete-independent-visual-review-separate",
+    "totalOriginalNamedStops": 220,
+    "allSixOriginalSequencesAndTargetsCompleted": true,
+    "workcourtAndMealCourtUseSeparateOrdinaryReloadContinuations": true
+  },
+  "southlaneRecovery": {
+    "capture": {
+      "path": "docs/evidence/village-world/v10-final-southlane-exit-r4/report.json",
+      "sha256": "47cc4f01cfbecafbdb26a30d3de33a8447e728d67986e5c95478011e87bafbb6",
+      "status": "routes-passed-visual-review-pending"
+    },
+    "visualReview": {
+      "path": ".data/v10-handoff-final-visual/southlane-touch390-exit-recovery-review-r1.json",
+      "sha256": "d0ec9ac3044c1d5d6c833e3aa255e8aaa226766ed1164034ede53621f19ef479"
+    },
+    "scope": "Actual turn-away and backtrack to original street node 338 supplies readable ground/courier recovery; original wall-facing view remains obscured."
+  },
+  "preservedFailures": [
+    {
+      "case": "workcourt",
+      "originalReview": {
+        "path": ".data/v10-handoff-final-visual/ground-six-r4-workcourt-partial-review.json",
+        "sha256": "9b63544609db26ac0363bc92b389d8b55ed4ba21db65d520c5a7f87c66c2edd1"
+      },
+      "continuationReview": {
+        "path": ".data/v10-handoff-final-visual/workcourt-two-segment-ground-review-r1.json",
+        "sha256": "cfe04f4e05cf25d20f4f3cd417555d5b6dfbfabf8f3f2f013cbec8489f628c65"
+      },
+      "originalFailureNotReclassified": true,
+      "scope": "Two recorded segments, not one uninterrupted successful run."
+    },
+    {
+      "case": "F3 meal court",
+      "originalReview": {
+        "path": ".data/v10-handoff-final-visual/f3-meal-court-partial-review-r1.json",
+        "sha256": "6bcba33f394827690bed43a4fddd500bc8461452e10d3282e21ba7ad32d9ca50"
+      },
+      "continuationReview": {
+        "path": ".data/v10-handoff-final-visual/f3-meal-court-two-segment-ground-review-r1.json",
+        "sha256": "31dcb4dae6f446229c11742f66322e2b1bbed8a3461e0ab15a2b758492a82d27"
+      },
+      "originalFailureNotReclassified": true,
+      "scope": "Two recorded segments, not one uninterrupted successful run."
+    }
+  ],
+  "cameraLimitations": [
+    {
+      "case": "Near-wall fallback",
+      "limitation": "Some close headings hide the player; some are still route-readable, whereas courts 90-degree and southlane original wall-facing views lose useful route visibility. Subsequent recovery is documented, not every heading clear."
+    },
+    {
+      "case": "Foreground roofs/parapets",
+      "limitation": "Reading forward/forward-return, selected streets, F2 90/finish and original F3 failure can obscure legs or near ground. Full-body recovery exists at named alternate headings/exits, but F2 final heading itself retains lower-body occlusion."
+    },
+    {
+      "case": "Nell conversation alignment",
+      "limitation": "Player hides most of Nell face/torso in ordinary EN/ZH conversation views. Dialogue UI stays readable. Desktop and 390 turn behavior differ; 390 90-degree view hides player and does not show two separated full bodies."
+    },
+    {
+      "case": "Still-frame limits",
+      "limitation": "No claim of every-angle third-person full-body visibility, continuous-video inspection, exact boot/mesh contact, or all 18 residents facing/behavior validation."
+    }
+  ],
+  "imageCount": 9,
+  "totalImageBytes": 2351670,
+  "images": [
+    {
+      "file": "court-work.png",
+      "subject": "workcourt",
+      "bytes": 225529,
+      "sha256": "37d6c10bd5c1f734387be0e10a132acf6867b1a1116df483091006e64c7cc84f",
+      "width": 1440,
+      "height": 1000,
+      "originalPath": "docs/evidence/village-world/v10-final-ground-six-r4/desktop-workcourt-ground-function-followup-workcourt-normal-camera-turn-reverse-settled.png",
+      "originalReview": {
+        "path": ".data/v10-handoff-final-visual/ground-six-r4-workcourt-partial-review.json",
+        "sha256": "9b63544609db26ac0363bc92b389d8b55ed4ba21db65d520c5a7f87c66c2edd1"
+      },
+      "reasonAndLimit": "Full player and paved work area with separately visible stacked crates and table. From the preserved first segment; exit acceptance is separately documented.",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "court-reading.png",
+      "subject": "reading court",
+      "bytes": 252666,
+      "sha256": "031934bda424f374df25b126d06a6f47ac8840d81dea795199b1950ff78a6b38",
+      "width": 1440,
+      "height": 1000,
+      "originalPath": "docs/evidence/village-world/v10-final-ground-six-r5/desktop-courts56-living-court-followup-reading-garden-feature-v10-reading-reading-table-turn-90.png",
+      "originalReview": {
+        "path": ".data/v10-handoff-final-visual/reading-court-ground-review-r1.json",
+        "sha256": "ff5621627d6241ee1b96abdf1b7ecde4c75ef472e137e75fa1fd766c7212283c"
+      },
+      "reasonAndLimit": "Full player, table, benches, flower boxes and readable stone path.",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "court-shared.png",
+      "subject": "shared court",
+      "bytes": 269984,
+      "sha256": "d8d09ef9409dd1ec60f56eaeb7cf684bc8a8254c85f7f3360c851fe94e89b11e",
+      "width": 1440,
+      "height": 1000,
+      "originalPath": "docs/evidence/village-world/v10-final-ground-six-r5/desktop-sharedcourt-ground-function-followup-shared-return-bench.png",
+      "originalReview": {
+        "path": ".data/v10-handoff-final-visual/shared-court-ground-review-r1.json",
+        "sha256": "b2a02668f4cd1faad14e25494ec513cd30c975c42925b01ad7f94e0988dc27d6"
+      },
+      "reasonAndLimit": "Full side player and bench on paved pad; bench near end cropped. Selected to show local sitting use as well as path.",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "court-tea.png",
+      "subject": "F1 tea court",
+      "bytes": 241505,
+      "sha256": "7b2c586a0950d80e17c32571229789def00be2e008c098073f901cc030720788",
+      "width": 1440,
+      "height": 1000,
+      "originalPath": "docs/evidence/village-world/v10-final-ground-six-r5/desktop-town-design-followup-1-f1-arrival-2.png",
+      "originalReview": {
+        "path": ".data/v10-handoff-final-visual/f1-tea-court-ground-review-r1.json",
+        "sha256": "9788591e9171be2706f226f36b67397d1e8cad47382c271ae51cfd0180dd1021"
+      },
+      "reasonAndLimit": "Full player and pavilion-side stone route with table/stools inside the shelter and planting beyond.",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "court-planted.png",
+      "subject": "F2 planting corridor",
+      "bytes": 352859,
+      "sha256": "45e5b9081fb6cc68b0717dcb192284da3a962386eb0326ee393fbd1aada6d983",
+      "width": 1440,
+      "height": 1000,
+      "originalPath": "docs/evidence/village-world/v10-final-ground-six-r5/desktop-town-design-followup-2-street-112.png",
+      "originalReview": {
+        "path": ".data/v10-handoff-final-visual/f2-planting-court-ground-review-r1.json",
+        "sha256": "eb7c2c8eae763eb9d8572a5f749f92e4855e806e31ab22db0f68560ad9846ae7"
+      },
+      "reasonAndLimit": "Full player on paved sitting corridor with bench, planted pot and timber frame plus onward stone connections.",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "court-meal.png",
+      "subject": "F3 meal court",
+      "bytes": 229695,
+      "sha256": "39041cd459fe8657657f6bd992a8358e0b80e465080a6215f254135c0482dff8",
+      "width": 1440,
+      "height": 1000,
+      "originalPath": "docs/evidence/village-world/v10-final-ground-six-r5/desktop-town-design-followup-3-street-87.png",
+      "originalReview": {
+        "path": ".data/v10-handoff-final-visual/f3-meal-court-partial-review-r1.json",
+        "sha256": "6bcba33f394827690bed43a4fddd500bc8461452e10d3282e21ba7ad32d9ca50"
+      },
+      "reasonAndLimit": "Full player beside table and two benches on paving. From preserved first segment; loop-13/14 exit acceptance comes from separate continuation.",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "nell-dialogue-en.png",
+      "subject": "Nell English dialogue",
+      "bytes": 349853,
+      "sha256": "b067056d36d5858c784999e680629c51378e9f9d19bbc1a95111b3f20755fca0",
+      "width": 1440,
+      "height": 1000,
+      "originalPath": "docs/evidence/village-world/v10-final-eight-r4/desktop-nell-orchard-conversation-and-turn-nell-ordinary-conversation-en.png",
+      "originalReview": {
+        "path": ".data/v10-handoff-final-visual/incremental-reviewed-r3-r4.json",
+        "sha256": "c6973ff27bcbf7b0206a67092748aa671b99e67763dd3dbc266e19223d232c8a"
+      },
+      "reasonAndLimit": "Readable English dialogue UI. Player substantially occludes Nell face/torso in the world scene; not selected as unobstructed two-character evidence.",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "nell-dialogue-zh.png",
+      "subject": "Nell Chinese dialogue",
+      "bytes": 351670,
+      "sha256": "fd26b51924a2589f0543ac25642866a109faec248d12215208be88623f67729b",
+      "width": 1440,
+      "height": 1000,
+      "originalPath": "docs/evidence/village-world/v10-final-eight-r4/desktop-nell-orchard-conversation-and-turn-nell-ordinary-conversation-zh.png",
+      "originalReview": {
+        "path": ".data/v10-handoff-final-visual/incremental-reviewed-r3-r4.json",
+        "sha256": "c6973ff27bcbf7b0206a67092748aa671b99e67763dd3dbc266e19223d232c8a"
+      },
+      "reasonAndLimit": "Readable Chinese dialogue UI. Same coaxial player/Nell occlusion remains.",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "southlane-recovery.png",
+      "subject": "390 southlane recovered backtrack",
+      "bytes": 77909,
+      "sha256": "7bbf05bfe4b763112f5bd579522469980bf37529475bc34eb2cbbc2564b68aab",
+      "width": 390,
+      "height": 844,
+      "originalPath": "docs/evidence/village-world/v10-final-southlane-exit-r4/touch-390-southlane-exit-turn-away-and-backtrack-backtracked-to-original-street-node-338.png",
+      "originalReview": {
+        "path": ".data/v10-handoff-final-visual/southlane-touch390-exit-recovery-review-r1.json",
+        "sha256": "d0ec9ac3044c1d5d6c833e3aa255e8aaa226766ed1164034ede53621f19ef479"
+      },
+      "reasonAndLimit": "Full frontal player and readable narrow lane after real backtracking. Original wall-facing limitation remains recorded separately.",
+      "copiedWithoutReencoding": true
+    }
+  ],
+  "privacy": {
+    "onlyAllowlistedPathsHashesDimensionsAndReviewFacts": true,
+    "privateReportsCopied": false,
+    "videosCopied": false,
+    "rawApiDocumentsCopied": false,
+    "identityOrCredentialValuesCopied": false,
+    "pngTextOrExifChunksPresent": false
+  },
+  "repositoryAction": {
+    "staged": false,
+    "committed": false,
+    "published": false
+  },
+  "deliveryVerdict": "not-assessed-by-this-image-package"
+}

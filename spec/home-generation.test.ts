@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { localToDir } from '../src/assets/claude-geometry/core/anchor.ts';
-import { layoutErrors, partTransform, pivotOf, placementProblem as partProblem } from '../src/assets/claude-geometry/blueprint/model.ts';
+import { layoutErrors, partTransform, pivotOf, placementProblem as partProblem } from '../src/shared/blueprint-model.ts';
 import { decodeEnvironment, defaultEnvironment, encodeEnvironment } from '../src/assets/claude-geometry/terrain/env.ts';
 import { structureFit, structureSize, MAX_STRUCTURES } from '../src/shared/blueprints.ts';
 import { HOME_DOOR_PART, HOME_VARIANTS, homeVariant } from '../src/shared/home-layout.ts';

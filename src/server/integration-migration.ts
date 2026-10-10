@@ -9,7 +9,7 @@ import { objectSeat } from '../shared/terrain.ts';
 import { GroundWorld, physicsVersionFor } from '../shared/physics/world.ts';
 import type { GroundPose } from '../shared/physics/world.ts';
 import { planetCenter, spaceDistance } from '../shared/flight.ts';
-import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
+import type { PartPlacement } from '../shared/blueprint-model.ts';
 import { normalizeHomeInterior } from '../shared/home.ts';
 import { SAMPLE_PUBLIC_VERSION } from '../shared/sample-public-village.ts';
 

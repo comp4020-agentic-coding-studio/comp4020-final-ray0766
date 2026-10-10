@@ -9,8 +9,8 @@ import { HOME_ENVIRONMENT, starterManifest } from '../src/shared/home-layout.ts'
 import { HOME_GENERATION_BUDGET, HOME_GENERATION_VERSION } from '../src/shared/home-generation.ts';
 import { SHORT_STREET_ENVIRONMENT } from '../src/shared/district-layout.ts';
 import { defaultHomeInterior, HOME_SAMPLE_RADIUS } from '../src/shared/home.ts';
-import { encodeBlueprint } from '../src/assets/claude-geometry/blueprint/codec.ts';
-import type { Blueprint } from '../src/assets/claude-geometry/blueprint/model.ts';
+import { encodeBlueprint } from '../src/shared/blueprint-codec.ts';
+import type { Blueprint } from '../src/shared/blueprint-model.ts';
 import { canonicalJson } from '../src/assets/claude-geometry/core/doc.ts';
 import { decodeSnapshot } from '../src/shared/timeline-codec.ts';
 

@@ -16,3 +16,4 @@
 #workshop .ws-private, #workshop #ws-save-state { font-size: 11px; }
 /* Keep the saved-blueprint notice and viewport hint legible on paper. */
 #workshop .ws-hint { color: var(--ui-muted); font-size: 11px !important; }
+.ws-part-info{display:flex;gap:10px;align-items:flex-start}.ws-part-info[hidden]{display:none}.ws-part-info img{flex:none;border-radius:5px;max-width:64px}.ws-part-info>div{min-width:0}.ws-part-info p{margin:0 0 5px!important}

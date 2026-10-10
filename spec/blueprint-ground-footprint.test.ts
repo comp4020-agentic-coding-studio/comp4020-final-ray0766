@@ -1,6 +1,6 @@
 import {expect,it} from 'vitest';
-import {blueprintGroundFootprint} from '../src/assets/claude-geometry/blueprint/model.ts';
-import type {PartPlacement} from '../src/assets/claude-geometry/blueprint/model.ts';
+import {blueprintGroundFootprint} from '../src/shared/blueprint-model.ts';
+import type {PartPlacement} from '../src/shared/blueprint-model.ts';
 import {structureGroundFootprint} from '../src/shared/blueprint-ground-footprint.ts';
 
 it('keeps exact dense support samples through in-place edits, replacement, rotation and deletion',()=>{

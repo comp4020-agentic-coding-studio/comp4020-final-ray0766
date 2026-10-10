@@ -1,8 +1,8 @@
 import {Vector3} from 'three';
 import type {HeightField} from '../assets/claude-geometry/core/ground.ts';
 import type {BlueprintId} from '../assets/claude-geometry/core/ids.ts';
-import type {Blueprint,PartPlacement,Rot} from '../assets/claude-geometry/blueprint/model.ts';
-import type {PartId} from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import type {Blueprint,PartPlacement,Rot} from './blueprint-model.ts';
+import type {PartId} from './blueprint-parts.ts';
 import {structureSize} from './blueprints.ts';
 import type {BlueprintContents} from './blueprints.ts';
 import {placementProblem} from './planets.ts';

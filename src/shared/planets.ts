@@ -36,6 +36,13 @@ export function placementProblem(kind: ObjectKind, position: unknown, objects: P
   const size = objectRadius({kind, radius,assetVersion:assetVersion===2?2:undefined});
   if (distance(point, SPAWN, worldRadius) < size + 1.0) return 'Leave a little space around the landing spot.';
   const candidate:PlacedObject={id:ignoreId??'placement-preview',kind,position:point,rotation:details?.rotation??0,version:1,radius,blueprintHash:details?.blueprintHash,...(assetVersion===2?{assetVersion:2 as const}:{})};
+  return placementGeometryProblem(candidate,objects,ignoreId,worldRadius,details);
+}
+/** Shared entity geometry only. Private placement above always checks its
+ * original landing circle first. The separate public authoring composition
+ * supplies fixed operation reservations before calling this narrow phase. */
+export function placementGeometryProblem(candidate:PlacedObject,objects:PlacedObject[],ignoreId:string|undefined,worldRadius:number,details?:PlacementDetails){
+  const {kind,position:point}=candidate,size=objectRadius(candidate);
   let check:ReturnType<typeof pathPlacementCheck>|undefined;
   const structureCache=details?.structureCache??new StructurePlacementCache();
   for (const item of objects) {

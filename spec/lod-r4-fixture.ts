@@ -1,8 +1,8 @@
 import * as T from 'three';
 import {StyleLibrary} from '../src/assets/claude-geometry/style/materials.ts';
 import {LOD_TIERS} from '../src/assets/claude-geometry/style/lod.ts';
-import {buildPart,PART_IDS,PARTS} from '../src/assets/claude-geometry/blueprint/parts/catalogue.ts';
-import {buildBlueprintModel} from '../src/assets/claude-geometry/blueprint/model3d.ts';
+import {buildPart,LEGACY_PART_IDS as PART_IDS,PARTS} from '../src/shared/blueprint-parts.ts';
+import {buildBlueprintModel} from '../src/shared/blueprint-model3d.ts';
 import {industrialCabin,surveyPost} from '../src/assets/claude-geometry/blueprint/samples.ts';
 import {createShipModel} from '../src/assets/claude-geometry/ship/factory.ts';
 import {STARTERS} from '../src/assets/claude-geometry/ship/design.ts';

@@ -1,3 +1,4 @@
+import { homeDoorCenterOffset } from '../shared/home-door.ts';
 import { initI18n, setAttribute, setHTML, setText } from './i18n.ts';
 import './i18n.css';
 import {SPRINT_SPEED,SPEED} from '../shared/world.ts';
@@ -11,6 +12,7 @@ import { worldMaterials } from './shared-assets.ts';
 import { textureFormat } from './resource-policy.ts';
 import { GroundWorld, groundPose, FIXED_STEP, MAX_PATH_STEPS, physicsVersionFor } from '../shared/physics/world.ts';
 import type { GroundPose, MotionStep } from '../shared/physics/world.ts';
+import {STEP_HEIGHT} from '../shared/physics/body.ts';
 import './presentation.css';
 import './style.css';
 import './colony.css';
@@ -43,6 +45,9 @@ import { createHomeDoor, placeHomeDoor } from './home-door.ts';
 import { createStateLoader } from './state-loader.ts';
 import { worldVisualSignature } from './world-visual-signature.ts';
 import { PhotoMode } from './photo-mode.ts';
+import {TownResidents} from './town-residents.ts';
+import {residentDialogue} from '../shared/town-residents.ts';
+import type {TownResidentDefinition} from '../shared/town-residents.ts';
 import {createVillageDrawing} from './village-drawing.ts';
 import {arrivalViewScore} from './arrival-camera.ts';
 import { HomeSetup } from './home-setup.ts';
@@ -77,16 +82,48 @@ let motionEpoch=0,physicsMismatch=false;
 function clearGroundMotion(){motionPending=[];physicsClock=0;motionEpoch++;}
 const lastSaved = new T.Vector3();
 let near: NpcId | null = null;let nearDock=false,guideDock=false;
+let residents:TownResidents|null=null,nearResident:TownResidentDefinition|null=null,speakingResident:TownResidentDefinition|null=null;
+let residentConversationKey='';
 let queue: Promise<unknown> = Promise.resolve();
 const courierDialog = $<HTMLDialogElement>('courier-dialog');
 const helpDialog = $<HTMLDialogElement>('help-dialog');
 const action = $<HTMLButtonElement>('interact');
 function status(message: string, error = false) { setText($('save-status'), message); $('save-status').classList.toggle('error', error); }
+function canTalkToTaskResident(id:NpcId){
+  const npc=world.npcs.find(n=>n.id===id);
+  if(!npc||!walker||!standing?.grounded||activePlanet!=='hub'||state.location?.kind==='interior')return false;
+  if(distance(walker.up.toArray() as Vec3,NPCS[id].position,groundRadius())>=INTERACT_DISTANCE-.12||Math.abs(standing.radius-npc.anchor.position.length())>.65)return false;
+  const head=walker.up.clone().multiplyScalar(standing.radius+1.35),eyes=npc.anchor.position.clone().addScaledVector(npc.anchor.position.clone().normalize(),1.3);
+  return !groundWorld||groundWorld.cameraDistance(head,eyes)+.03>=head.distanceTo(eyes);
+}
 function speak(id: NpcId, message: string) {
+  closeResidentConversation();
   setText($('speaker'), `${NPCS[id].name} · ${NPCS[id].place}`);
   setText($('dialogue-text'), message); $('conversation').hidden = false;
   conversationUntil = performance.now() + 7000;
   world.npcs.find(n => n.id === id)?.avatar.greet(elapsed);
+}
+function closeResidentConversation(){
+  if(speakingResident){$('conversation').hidden=true;conversationUntil=0;}
+  speakingResident=null;residentConversationKey='';delete $('conversation').dataset.resident;
+}
+function renderResidentConversation(){
+  if(!speakingResident)return;
+  const language=document.documentElement.lang.startsWith('zh')?'zh':'en';
+  const key=`${speakingResident.id}|${state.quest}|${language}`;if(key===residentConversationKey)return;residentConversationKey=key;
+  setText($('speaker'),`${speakingResident.name[language]} · ${speakingResident.role[language]} · ${language==='zh'?'小镇居民':'Village resident'}`,true);
+  setText($('dialogue-text'),residentDialogue(speakingResident.id,state.quest,language),true);
+}
+function talkToResident(){
+  if(!standing?.grounded)return;
+  // A menu can close and E can arrive before the next render frame. Refresh
+  // the live interaction state without advancing any resident or player.
+  residents?.update({dt:0,time:elapsed,viewer:walker.up.toArray() as Vec3,camera,reducedMotion:reduced,enabled:true});
+  const found=residents?.nearest(walker.up.toArray() as Vec3,standing?.radius);
+  if(!found||near||nearDock||homeControls?.canEnter)return;
+  if(speakingResident?.id===found.id&&!$('conversation').hidden)return;
+  clearInput();speakingResident=found;renderResidentConversation();$('conversation').dataset.resident=found.id;
+  $('conversation').hidden=false;conversationUntil=Infinity;residents?.greet(found.id,elapsed);
 }
 function notice(message: string, duration = 5000) { setText($('notice'), message); $('notice').hidden = false; noticeUntil = performance.now() + duration; }
 class ApiError extends Error { status: number; constructor(status: number, message: string) { super(message); this.status = status; } }
@@ -128,6 +165,7 @@ function accept(next: PlayerState) {
   const previousGround=state?.ground;
   const previousPlanet=state?.planetId;const previousMode=state?.flight.mode;
   const locationChanged=state?.location?.kind!==next.location?.kind||state?.location?.visitEpoch!==next.location?.visitEpoch;
+  if(previousPlanet!==next.planetId||previousMode!==next.flight.mode||locationChanged)closeResidentConversation();
   const justLanded=state?.flight.mode==='space'&&next.flight.mode==='ground'&&next.revision>=state.revision;
   if (!state || next.revision >= state.revision) state = next;
   if (state.planetId !== activePlanet||(state.environment??null)!==activeEnvironment||(state.worldRadius??10)!==activeRadius) {
@@ -240,7 +278,7 @@ function prepareSurface(planet:PlanetView){
   worldFeedback?.finish();const feedback=worldFeedback=beginSceneLoading('Preparing your world…');
   const current=()=>generation===worldGeneration&&!signal.aborted;
   void(async()=>{
-    let staged:ReturnType<typeof createWorld>|null=null,town:Awaited<ReturnType<typeof createPublicTownArtAsync>>|undefined,placed:Awaited<ReturnType<Colony['prepareObjects']>>|undefined,terrain:Awaited<ReturnType<typeof terrainModelAsync>>|undefined;
+    let staged:ReturnType<typeof createWorld>|null=null,stagedResidents:TownResidents|null=null,town:Awaited<ReturnType<typeof createPublicTownArtAsync>>|undefined,placed:Awaited<ReturnType<Colony['prepareObjects']>>|undefined,terrain:Awaited<ReturnType<typeof terrainModelAsync>>|undefined;
     const nextRoot=new T.Scene();let committed=false;
     try{
       await yieldSceneFrame(signal);await yieldSceneFrame(signal);
@@ -265,14 +303,23 @@ function prepareSurface(planet:PlanetView){
       }
       nextRoot.add(placed.root);
       feedback.update('Finishing the view…');await yieldSceneFrame(signal);
+      const physics=new GroundWorld(pendingPlanet!);
+      if(staged&&village){
+        for(const anchor of [...staged.npcs.map(n=>n.anchor),staged.dock]){
+          const point=anchor.position.clone().normalize().toArray() as Vec3;
+          anchor.position.setLength(physics.support(point,physics.radius(point)+STEP_HEIGHT).radius);
+        }
+      }
+      if(staged&&village)stagedResidents=new TownResidents(nextRoot,physics);
+      await yieldSceneFrame(signal);
       await renderer.compileAsync(nextRoot,camera,scene);
       if(!current())throw new DOMException('Loading cancelled.','AbortError');
       await yieldSceneFrame(signal);
-      const physics=new GroundWorld(pendingPlanet!);
       if(!current())throw new DOMException('Loading cancelled.','AbortError');
       // Commit complete geometry and collision together. The previous scene
       // and last displayed frame survive until this point, including failures.
       if(staged){
+        closeResidentConversation();nearResident=null;residents?.dispose();residents=stagedResidents;stagedResidents=null;
         world.dispose();world.parked.dispose();disposeGeometry(worldRoot);
         worldRoot=nextRoot;scene.add(worldRoot);world=staged;staged=null;
       }
@@ -285,7 +332,7 @@ function prepareSurface(planet:PlanetView){
       // targets/shadow programs, before accepting new movement or actions.
       await yieldSceneFrame(signal);await yieldSceneFrame(signal);feedback.finish();
     }catch(error){
-      if(!committed){placed?.dispose();staged?.dispose();staged?.parked.dispose();terrain?.dispose();disposeGeometry(nextRoot);town?.dispose();}
+      if(!committed){stagedResidents?.dispose();placed?.dispose();staged?.dispose();staged?.parked.dispose();terrain?.dispose();disposeGeometry(nextRoot);town?.dispose();}
       if(!current()){feedback.finish();return;}
       // Keep controls blocked and expose retry; never substitute incomplete
       // geometry or persist a guessed player position after a failed load.
@@ -345,14 +392,14 @@ joystick.addEventListener('pointerdown',e=>{joyPointer=e.pointerId;joystick.setP
 joystick.addEventListener('pointermove',e=>{if(joyPointer===e.pointerId)drag(e);});
 for(const name of ['pointerup','pointercancel','lostpointercapture']) joystick.addEventListener(name,()=>{joyPointer=null;joy.set(0,0);$('stick').style.transform='';});
 $('view-mode').onclick=()=>{menu.close();overview=!overview; setAttribute($('view-mode'), 'aria-label', overview?'Walking view':'View planet'); setHTML($('view-mode'), overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>'); };
-$('close-conversation').onclick=()=>{ $('conversation').hidden=true; conversationUntil=0; };
+$('close-conversation').onclick=()=>{closeResidentConversation();$('conversation').hidden=true;conversationUntil=0;};
 $('wardrobe').onclick=()=>{menu.close();clearInput();courierDialog.showModal();};
 $('help').onclick=()=>{menu.close();clearInput();helpDialog.showModal();};
 document.querySelectorAll<HTMLButtonElement>('dialog .close, .close-help').forEach(b=>b.onclick=()=>b.closest('dialog')?.close());
 const welcomeKey=(player:PlayerState)=>`little-worlds:welcomed:${player.home?.interiorId??'harbour'}`;
 $('begin').onclick=()=>{try{localStorage.setItem(welcomeKey(state),'1');}catch{/* A blocked preference store must not prevent starting. */}courierDialog.close();notice(state.home?'Walk to your home’s door, then choose Enter home.':'Follow the short path to SUNSEED · PORT.',6500);};
 const menu=$<HTMLDialogElement>('menu-dialog');
-$('open-menu').onclick=()=>{if(homeInterior?.active||homeTransition)return;clearInput();flight?.clear();menu.showModal();void savePosition(true);};
+$('open-menu').onclick=()=>{if(homeInterior?.active||homeTransition)return;closeResidentConversation();clearInput();flight?.clear();menu.showModal();void savePosition(true);};
 $('close-menu').onclick=$('resume').onclick=()=>menu.close();
 const terrainWorkshop=lazyPanel(async()=>{const {TerrainWorkshop}=await import('./terrain-workshop.ts');return new TerrainWorkshop({read:()=>request<Universe>('universe'),save:async body=>{await savePosition(true);const next=await serial(()=>request<Universe>('terrain/apply',body));colony?.accept(next);return next;},allowed:()=>!!colony?.universe?.currentPlanet.mine&&online&&state.flight.mode==='ground'});});
 $('open-terrain').onclick=()=>void openPanel($<HTMLButtonElement>('open-terrain'),terrainWorkshop,async panel=>{if(!colony?.universe?.currentPlanet.mine||state.flight.mode!=='ground'||!colony.stopBuilding())return;clearInput();await savePosition(true);menu.close();await panel.open();});
@@ -361,7 +408,7 @@ $('open-history').onclick=()=>void openPanel($<HTMLButtonElement>('open-history'
 const shipyard=lazyPanel(async()=>{const {Shipyard}=await import('./shipyard.ts');return new Shipyard({read:async()=>{const next=await serial(()=>request('state'));accept(next);return next.ship??defaultShip();},save:async body=>{const next=await serial(()=>request('ship/save',body));accept(next);return next.ship??defaultShip();},allowed:()=>!!state&&online&&state.flight.mode==='ground'});});
 $('open-shipyard').onclick=()=>{if(state?.flight.mode==='space'){notice('Land before changing your ship.');return;}void openPanel($<HTMLButtonElement>('open-shipyard'),shipyard,async panel=>{if(state.flight.mode==='space')return;clearInput();await savePosition(true);menu.close();await panel.open();});};
 $('guide-port').onclick=()=>{guideDock=true;menu.close();notice('Your parked ship is marked. Walk there to board.');};
-window.addEventListener('keydown',e=>{if(homeInterior?.active||homeTransition)return;if(e.key==='Escape'&&!document.querySelector('dialog[open]')){e.preventDefault();clearInput();flight?.clear();menu.showModal();void savePosition(true);}if(e.key.toLowerCase()==='m'&&!e.defaultPrevented&&!e.isComposing&&!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!(e.target instanceof Element&&e.target.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])'))&&!document.querySelector('dialog[open]')){$('open-map').click();}});
+window.addEventListener('keydown',e=>{if(homeInterior?.active||homeTransition)return;if(e.key==='Escape'&&speakingResident){e.preventDefault();closeResidentConversation();clearInput();return;}if(e.key==='Escape'&&!document.querySelector('dialog[open]')){e.preventDefault();clearInput();flight?.clear();menu.showModal();void savePosition(true);}if(e.key.toLowerCase()==='m'&&!e.defaultPrevented&&!e.isComposing&&!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!(e.target instanceof Element&&e.target.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])'))&&!document.querySelector('dialog[open]')){$('open-map').click();}});
 document.querySelectorAll<HTMLButtonElement>('[data-character]').forEach(button=>button.onclick=async()=>{
   if(busy || !state) return;
   busy=true;const old=state.character;player.setColor(button.dataset.character as Character);status('Saving coat…');
@@ -396,16 +443,20 @@ async function savePosition(force=false):Promise<void> {
   if(force&&motionPending.length&&online)await savePosition(true);
 }
 async function interact() {
-  if(sceneLoadingActive()||state?.location?.kind==='interior'||state?.flight.mode==='space' || !near || busy || !online) return;
+  if(sceneLoadingActive()||state?.location?.kind==='interior'||state?.flight.mode==='space'||photoPaused||homeTransition||document.querySelector('dialog[open]')||colony?.paused||busy||!online)return;
+  near=world.npcs.find(n=>canTalkToTaskResident(n.id))?.id??null;
+  if(!near){talkToResident();return;}
   if(state.quest==='delivered') {speak(near,near==='sol'?'A whole summer in one little packet. Thank you. Stay a while — the flowers are already finding the sun.':'Nothing else to carry today. There’s a lovely path past the orchard if you’re taking the long way home.');return;}
   if(near==='sol' && state.quest==='available') {speak('sol','Mica is keeping the sunseeds at the post office. Would you bring them over?');return;}
   if(near==='mica' && state.quest==='carrying') {speak('mica','Sol is just along the lane, at the glasshouse. Take your time; the seeds aren’t in a hurry.');return;}
   const requestedAction = near === 'mica' ? 'pickup' : 'deliver';
+  const requestedResident=near;
   busy=true;action.disabled=true;status('Saving delivery…');
   try {
     const p=walker.up.toArray() as Vec3;
     await savePosition(true);
-    const next=await serial(()=>request('interact',{action:requestedAction}));
+    const next=await serial(async()=>canTalkToTaskResident(requestedResident)?request('interact',{action:requestedAction}):null);
+    if(!next){status('Move closer to talk.');return;}
     lastSaved.fromArray(p);accept(next);
     speak(state.quest==='carrying'?'mica':'sol',state.quest==='carrying'?'Sunseeds, for Sol. A little sunshine for the glasshouse. Keep them close, won’t you?':'You made it! A whole summer in a little packet. Let’s grow something good.');
     player.greet(elapsed);
@@ -453,7 +504,8 @@ function animate(now:number) {
     if(t>=1){ship.position.copy(departure.base);world.parked.animate(0,false);departure=null;flight.presentation=false;flight.clear();document.body.classList.remove('departing');delete renderer.domElement.dataset.departure;}return;
   }
   if(flight?.active){$('boarding-prompt').hidden=true;$('dock-guide').hidden=true;flight.frame(dt,now,renderer);if(now>noticeUntil)$('notice').hidden=true;return;}
-  const paused=sceneLoadingActive()||homeTransition||!!document.querySelector('dialog[open]')||courierDialog.open||helpDialog.open||!!colony?.paused||!online||document.hidden||!!document.activeElement?.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])');
+  const scenePaused=sceneLoadingActive()||homeTransition||!!document.querySelector('dialog[open]')||courierDialog.open||helpDialog.open||!!colony?.paused||!online||document.hidden;
+  const paused=scenePaused||!!document.activeElement?.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])');
   homeControls?.frame(walker.up.toArray() as Vec3,groundRadius(),!paused);
   let x=joy.x+Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));
   let y=joy.y+Number(keys.has('w')||keys.has('arrowup'))-Number(keys.has('s')||keys.has('arrowdown'));
@@ -498,7 +550,7 @@ function animate(now:number) {
         if(d>2&&d<10)routePoints.push(surfacePoint(n,.15));}
     }
     const doorFrame=state.home?.door.frame,doorRotation=doorFrame?new T.Quaternion().fromArray(doorFrame.quaternion):null;
-    const doorCentre=doorFrame?new T.Vector3(...doorFrame.position).add(new T.Vector3(0,1,0).applyQuaternion(doorRotation!)):null;
+    const doorCentre=doorFrame?new T.Vector3(...doorFrame.position).add(new T.Vector3(homeDoorCenterOffset(state.home?.door.partId),1,0).applyQuaternion(doorRotation!)):null;
     const doorFront=doorRotation?new T.Vector3(0,0,1).applyQuaternion(doorRotation):null;
     const trial=camera.clone();let chosen:{obstruction:number;street:number}|null=null;
     for(const angle of [0,.28,-.28,.55,-.55,.85,-.85,1.1,-1.1,1.35,-1.35,1.6,-1.6,1.9,-1.9,2.2,-2.2]){
@@ -559,6 +611,7 @@ function animate(now:number) {
   fitGroundSunShadowDepth(sun);
   if('setSunDirection' in world)world.setSunDirection(sun.position.clone().sub(sun.target.position).normalize().toArray() as Vec3);
   world.animate(elapsed,reduced,camera.position,renderUp,overview);
+  residents?.update({dt,time:elapsed,viewer:walker.up.toArray() as Vec3,camera,reducedMotion:reduced,enabled:!scenePaused});
   world.npcs.forEach(n=>{n.avatar.animate(elapsed,0,reduced);if(near===n.id){const local=n.anchor.worldToLocal(player.root.position.clone());const yaw=Math.atan2(local.x,local.z);const diff=Math.atan2(Math.sin(yaw-n.avatar.root.rotation.y),Math.cos(yaw-n.avatar.root.rotation.y));n.avatar.root.rotation.y+=diff*(1-Math.exp(-4*dt));}n.beacon.position.y=2.0+(reduced?0:Math.sin(elapsed*2)*.06);n.beacon.visible=state.quest!=='delivered'&&n.id===(state.quest==='available'?'mica':'sol');});
   presence.frame(now,dt,walker.up,reduced);
   colony?.updateShadows(feet);
@@ -573,13 +626,15 @@ function animate(now:number) {
     renderer.domElement.dataset.drawCalls=String(renderer.info.render.calls);
     renderer.domElement.dataset.triangles=String(renderer.info.render.triangles);
     uiTick=0;near=null;
+    renderer.domElement.dataset.residents=JSON.stringify(residents?.diagnostics??null);
     const dockPoint=new T.Vector3(...portPoint(activePlanet)),displayDockDistance=surfaceNormal(walker.up).angleTo(surfaceNormal(dockPoint))*groundRadius(),dockDistance=walker.up.angleTo(dockPoint)*groundRadius();nearDock=!!standing?.grounded&&dockDistance<BOARD_RADIUS-.12;
     $('boarding-prompt').hidden=!nearDock||paused;setText($('dock-context'), activePlanet==='hub'?'STARPORT / BOARDING GATE':'PARKED SHIP / RETURN BEACON');
     $('dock-guide').hidden=!guideDock||nearDock||paused;const toward=dockPoint.projectOnPlane(walker.up).normalize();$('dock-arrow').style.transform=`rotate(${Math.atan2(toward.dot(walker.right()),toward.dot(walker.north))*180/Math.PI}deg)`;setText($('dock-guide-text'), `Parked ship · ${Math.round(displayDockDistance)} m`);
     renderer.domElement.dataset.portDistance=String(dockDistance);renderer.domElement.dataset.groundPosition=JSON.stringify(walker.up.toArray());
 
     for(const n of world.npcs){
-      const d=distance(walker.up.toArray() as Vec3,NPCS[n.id].position,groundRadius());if(d<INTERACT_DISTANCE-.12)near=n.id;
+      const d=distance(walker.up.toArray() as Vec3,NPCS[n.id].position,groundRadius());
+      if(canTalkToTaskResident(n.id))near=n.id;
       const p=n.anchor.position.clone().addScaledVector(n.anchor.position.clone().normalize(),2.12);
       const labelRay=new T.Ray(camera.position.clone(),p.clone().sub(camera.position).normalize());
       const groundHit=labelRay.intersectSphere(new T.Sphere(new T.Vector3(),groundRadius()-.10),new T.Vector3());
@@ -592,9 +647,24 @@ function animate(now:number) {
       label.style.left=`${Math.max(52,Math.min(innerWidth-52,(p.x*.5+.5)*innerWidth))}px`;
       label.style.top=`${Math.max(innerWidth<600?222:100,Math.min(innerHeight-210,(-p.y*.5+.5)*innerHeight))}px`;
     }
-    action.hidden=!near||paused||nearDock;
-    if(near){setHTML(action, (state.quest==='available'&&near==='mica'?'Collect the parcel':state.quest==='carrying'&&near==='sol'?'Deliver to Sol':`Talk to ${NPCS[near].name}`)+' <kbd>E</kbd>');setText($('nearby'), near==='mica'?'A little sunshine, ready to go.':'Something’s waiting to grow.');}
-    else setText($('nearby'), '');
+    // Language controls pause movement while the existing conversation remains
+    // readable and updates in place. Menus and scene transitions still close it.
+    nearResident=!scenePaused&&standing?.grounded&&!near&&!nearDock&&!homeControls?.canEnter?residents?.nearest(walker.up.toArray() as Vec3,standing.radius)??null:null;
+    renderer.domElement.dataset.nearResident=nearResident?.id??'';
+    if(speakingResident){if(scenePaused||nearResident?.id!==speakingResident.id)closeResidentConversation();else renderResidentConversation();}
+    action.hidden=(!near&&!nearResident)||paused||nearDock;
+    if(near){delete action.dataset.residentPrompt;setHTML(action, (state.quest==='available'&&near==='mica'?'Collect the parcel':state.quest==='carrying'&&near==='sol'?'Deliver to Sol':`Talk to ${NPCS[near].name}`)+' <kbd>E</kbd>');setText($('nearby'), near==='mica'?'A little sunshine, ready to go.':'Something’s waiting to grow.');}
+    else if(nearResident){
+      const language=document.documentElement.lang.startsWith('zh')?'zh':'en';
+      const promptKey=`${nearResident.id}|${language}`;
+      if(action.dataset.residentPrompt!==promptKey){
+        action.dataset.residentPrompt=promptKey;
+        setText(action,language==='zh'?`与${nearResident.name.zh}交谈`:`Talk to ${nearResident.name.en}`,true);
+        const hint=document.createElement('kbd');hint.textContent='E';action.append(hint);
+        setText($('nearby'),`${language==='zh'?'小镇居民':'Village resident'} · ${nearResident.role[language]} · ${nearResident.place[language]}`,true);
+      }
+    }
+    else{delete action.dataset.residentPrompt;setText($('nearby'), '');}
     if(state.quest!=='delivered') {
       const destination=new T.Vector3(...NPCS[state.quest==='available'?'mica':'sol'].position);
       setText($('distance'), near===(state.quest==='available'?'mica':'sol')?'You’re here · say hello':`${Math.round(surfaceNormal(walker.up).angleTo(surfaceNormal(destination))*groundRadius())} m away`);
@@ -647,7 +717,7 @@ function ensureColony() {
 photoMode=new PhotoMode({renderer,
   ready:()=>!sceneLoadingActive()&&!!walker&&online&&!homeTransition&&!departure&&!colony?.paused,
   flush:async()=>{if(homeInterior?.active){await homeInterior.flush();await homeInterior.flush();}else if(flight?.active)await flight.flush();else await savePosition(true);await queue;},
-  pause:active=>{photoPaused=active;clearInput();flight?.clear();homeInterior?.setPhotoMode(active);if(active)menu.close();else resize();},
+  pause:active=>{photoPaused=active;closeResidentConversation();clearInput();flight?.clear();homeInterior?.setPhotoMode(active);if(active)menu.close();else resize();},
   view:(mode,width,height):PhotoView=>{
     if(homeInterior?.active)return homeInterior.getPhotoView(width,height,mode);
     if(flight?.active){const view=flight.camera.clone();view.aspect=width/height;view.updateProjectionMatrix();return {scene:flight.scene,camera:view,target:view.position.clone().add(view.getWorldDirection(new T.Vector3()).multiplyScalar(30))};}
@@ -658,7 +728,7 @@ photoMode=new PhotoMode({renderer,
       const bearing=camera.position.clone().normalize();view.position.copy(bearing.multiplyScalar(distance));view.up.copy(walker.north);view.lookAt(target);
     }
     view.updateProjectionMatrix();view.updateMatrixWorld(true);
-    return {scene,camera:view,target,prepare:photo=>{updateGroundFog(scene,activePlanet,activeRadius,photo.position.length());world.animate(elapsed,true,photo.position,walker.up,mode==='overview');}};
+    return {scene,camera:view,target,prepare:photo=>{updateGroundFog(scene,activePlanet,activeRadius,photo.position.length());world.animate(elapsed,true,photo.position,walker.up,mode==='overview');residents?.update({dt:0,time:elapsed,viewer:walker.up.toArray() as Vec3,camera:photo,reducedMotion:reduced,enabled:false});}};
   },notice,
 });
 const photoButton=document.createElement('button');photoButton.id='open-photo';setText(photoButton,'Photo mode');

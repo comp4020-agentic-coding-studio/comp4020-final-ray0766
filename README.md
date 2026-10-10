@@ -12,17 +12,23 @@ records the bounded desktop/phone replay, deferred editors and measured first-sc
 geometry update, measured main-world frame counts and its sub-millimetre window-hood difference.
 [R7 village integration](docs/integration/r7-village.md) adds the shared cream, timber
 and terracotta presentation, village ship parts and compatible ground collision.
-[Compact worlds](docs/integration/compact-worlds.md) restores a 14 m public village,
-persisted 10–12 m new planets and protected old layouts.
+The earlier [compact-world milestone](docs/integration/compact-worlds.md) introduced
+a 14 m village and persisted 10–12 m new planets while protecting old layouts.
+The current default public world is the 21.6 m-radius v10 town described below.
 [Sprint and jump](docs/integration/sprint-jump.md) adds hold-Shift running and
 Space jumping with shared collision, server validation and saved airborne state.
 [Chinese / English interface](docs/integration/bilingual.md) adds an always-available
 language selector, browser-local preference and in-place translation without losing drafts.
-[Player-built public village](docs/integration/village-density.md) adds sixteen rooms in eight
-legal blueprint plots, with the same catalogue, dimensions and collisions used by players.
-[R8 workshop](docs/integration/r8-workshop.md) adds 24 parts (45 total), three editable
-examples, matching new quick props and furnished public rooms, with old saves preserved.
-The published Crit 8 release remains `09233d9`; these changes are not deployed.
+The earlier [player-built village](docs/integration/village-density.md) established
+sixteen rooms in eight legal blueprint plots using the player construction rules.
+[R8 workshop](docs/integration/r8-workshop.md) added 24 parts (45 at that milestone),
+three editable examples and matching quick props while preserving old saves.
+[Village world v10](docs/integration/village-world-v10.md) is the current local default:
+a varied continuous public town, 18 residents and 48 catalogue parts, including
+residential wide doors and continuous two-cell entry stairs shared with the workshop.
+The published Crit 8 release remains `09233d9`. This local branch defaults to v10;
+its delivery target is [localhost:8098](http://localhost:8098/). No public deployment
+is included.
 
 > Prepared with AI assistance from the student's recorded design decisions and
 > the implementation evidence.
@@ -35,14 +41,21 @@ An explicit choice stays in local storage; no account or database change is need
 Changing language keeps the current world, flight, editor draft and saved progress.
 Player-authored names and technical IDs remain unchanged.
 
-## Public village examples
+## Public town and workshop examples
 
-The local public village uses 8 ordinary blueprint structures and 56 quick-build
-props, within the existing limits. Its three reproducible documents are
-[Garden pair](/examples/village/garden.json), [Loft pair](/examples/village/loft.json)
-and [Port pair](/examples/village/port.json). These are standard blueprint JSON;
-the current workshop does not yet expose an import button. The part grid, saved
-library, placement and collision rules are the same as player construction.
+The default local v10 town has a 21.6 m radius, 273 counted objects
+(144 buildings, 106 road objects and 23 site objects)
+across 18 designed places. Its 18 residents comprise two existing task
+characters, four conversational residents and 12 ambient residents. Public buildings
+remain shells in the exterior world; only the existing private home has a separate
+interior. The 48-part catalogue, dimensions and collisions are shared with player
+construction. Private planets retain eight custom structures and 64 total objects,
+and blueprints retain the 5×5 footprint, three-storey and 120-part limits.
+
+The earlier reproducible [Garden pair](/examples/village/garden.json),
+[Loft pair](/examples/village/loft.json) and [Port pair](/examples/village/port.json)
+documents remain available as standard blueprint JSON. The workshop does not expose
+an import button. Saved libraries and existing construction remain compatible.
 
 The workshop's **Example → Load example** controls open a lived-in cottage, corner
 lane or pad-side stall as an editable draft. Save it to your library, then place it
@@ -109,8 +122,10 @@ Escape opens Pause, M opens the Atlas, and the harbour path leads to the two boa
 [Course Fly site](https://comp4020-final-ray0766.fly.dev/) ·
 [Source repository](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766) ·
 [Build and deploy status](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/actions/workflows/checks.yml).
-The release is deployed within the existing course allocation. Hosted checks cover
-walking, delivery, flight, building, visitor permissions and durable saved state.
+The hosted Crit 8 release `09233d9` remains within the existing course allocation.
+Its hosted checks cover walking, delivery, flight, building, visitor permissions
+and durable saved state. Source and local gameplay checks for this v10 branch are
+recorded in [the v10 integration evidence](docs/integration/village-world-v10.md).
 
 For local use, install Node 24 and pnpm 11, then run `pnpm install`, `pnpm build`
 and `pnpm start`. Open http://localhost:8080 and `/readme/`.

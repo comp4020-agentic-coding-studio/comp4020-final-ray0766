@@ -1,10 +1,12 @@
+import { WIDE_DOOR } from './wide-door.ts';
+import { isDoorPartId, isWideDoorPartId } from './blueprint-parts.ts';
 import { Box3, Matrix3, Matrix4, Quaternion, Vector3 } from 'three';
 import { OBB } from 'three/addons/math/OBB.js';
 import { anchorQuaternion } from '../assets/claude-geometry/core/anchor.ts';
 import type { HeightField } from '../assets/claude-geometry/core/ground.ts';
 import { MAX_FOUNDATION_DEPTH } from '../assets/claude-geometry/core/ground.ts';
-import { groundCells, partTransform, pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
-import type { PartPlacement } from '../assets/claude-geometry/blueprint/model.ts';
+import { groundCells, partTransform, pivotOf } from './blueprint-model.ts';
+import type { PartPlacement } from './blueprint-model.ts';
 import { VILLAGE_PART_BOUNDS } from './physics/village-bounds.ts';
 import { structureFit } from './blueprints.ts';
 import type { BlueprintContents } from './blueprints.ts';
@@ -31,9 +33,7 @@ function partSolids(part:PartPlacement['part']):PartBox[] {
   const bounds=VILLAGE_PART_BOUNDS[part];
   return [...PART_COLLIDERS[part](),envelope('appearance envelope',bounds.min,bounds.max)];
 }
-const doorSweeps=homeDoorSweepBoxes();
-const doorApproach:PartBox={tag:'door approach',center:[0,.025+STRUCTURE_DOOR_APPROACH.height/2,.16+STRUCTURE_DOOR_APPROACH.depth/2],half:[STRUCTURE_DOOR_APPROACH.width/2,STRUCTURE_DOOR_APPROACH.height/2,STRUCTURE_DOOR_APPROACH.depth/2]};
-const isDoor=(part:PartPlacement['part'])=>part==='wall.door.open'||part==='wall.door';
+const doorApproach=(part:PartPlacement['part']):PartBox=>({tag:'door approach',center:[isWideDoorPartId(part)?WIDE_DOOR.centerX:0,.025+STRUCTURE_DOOR_APPROACH.height/2,.16+STRUCTURE_DOOR_APPROACH.depth/2],half:[(isWideDoorPartId(part)?WIDE_DOOR.clearOpenWidth:STRUCTURE_DOOR_APPROACH.width)/2,STRUCTURE_DOOR_APPROACH.height/2,STRUCTURE_DOOR_APPROACH.depth/2]});
 const reachCache=new WeakMap<readonly PartPlacement[],{signature:string;radius:number}>();
 /** Query bound only: saved radii and movement collisions remain untouched.
  * Include adornments, full door motion/approach, and the largest permitted
@@ -45,7 +45,7 @@ export function structurePlacementRadius(object:PlacedObject,parts:readonly Part
   const pivot=pivotOf(parts);let radius=0;
   for(const part of parts){
     const t=partTransform(part,pivot),turn=new Quaternion().setFromAxisAngle(UP,t.yaw);
-    for(const box of [...partSolids(part.part),...(isDoor(part.part)?[...doorSweeps,doorApproach]:[])]){
+    for(const box of [...partSolids(part.part),...(isDoorPartId(part.part)?[...homeDoorSweepBoxes(part.part),doorApproach(part.part)]:[])]){
       const q=new Quaternion().setFromAxisAngle(UP,box.yaw??0).multiply(new Quaternion().setFromAxisAngle(RIGHT,box.pitch??0));
       for(const x of [-1,1])for(const y of [-1,1])for(const z of [-1,1]){
         const corner=new Vector3(x*box.half[0],y*box.half[1],z*box.half[2]).applyQuaternion(q).add(vec(box.center)).applyQuaternion(turn).add(vec(t.position));
@@ -93,9 +93,9 @@ export class StructurePlacementCache {
       // R8 publishes village appearance envelopes separately from colliders.
       // Include those envelopes; invisible air below an eave must not license
       // a neighbouring roof/beam to cut through the visible tile or verge.
-      if(isDoor(part.part)){
-        for(const box of doorSweeps)result.sweeps.push(shape(box,t.position,t.yaw));
-        result.approaches.push(shape(doorApproach,t.position,t.yaw));
+      if(isDoorPartId(part.part)){
+        for(const box of homeDoorSweepBoxes(part.part))result.sweeps.push(shape(box,t.position,t.yaw));
+        result.approaches.push(shape(doorApproach(part.part),t.position,t.yaw));
       }
     }
     // Identical to GroundWorld's foundation proxy and deep enough to contain

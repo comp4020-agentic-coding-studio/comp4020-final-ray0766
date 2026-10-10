@@ -1,7 +1,7 @@
 import { afterEach, expect, it } from 'vitest';
 import { Box3, Mesh } from 'three';
-import type { PartPlacement, Rot } from '../src/assets/claude-geometry/blueprint/model.ts';
-import { rotDir } from '../src/assets/claude-geometry/blueprint/model.ts';
+import type { PartPlacement, Rot } from '../src/shared/blueprint-model.ts';
+import { rotDir } from '../src/shared/blueprint-model.ts';
 import { StyleLibrary } from '../src/assets/claude-geometry/style/materials.ts';
 import { libraryMaterials, STOREY, WALL_H, WALL_T } from '../src/assets/claude-geometry/blueprint/parts/kit.ts';
 import { KOSHI, TOP_BAND } from '../src/assets/claude-geometry/blueprint/parts/village/walls.ts';

@@ -1,5 +1,5 @@
-import {blueprintGroundFootprint} from '../assets/claude-geometry/blueprint/model.ts';
-import type {PartPlacement} from '../assets/claude-geometry/blueprint/model.ts';
+import {blueprintGroundFootprint} from './blueprint-model.ts';
+import type {PartPlacement} from './blueprint-model.ts';
 import type {Footprint} from '../assets/claude-geometry/core/ground.ts';
 
 // Parts may be edited in place by a workshop. Identity alone is insufficient:

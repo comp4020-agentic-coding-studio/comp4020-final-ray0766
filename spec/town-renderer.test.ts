@@ -4,7 +4,7 @@ import { createTownRenderer, createTownRendererAsync, townSphereOccluded } from 
 import type { TownRenderDistrict, TownRenderModel } from '../src/client/town-renderer.ts';
 import type { PlacedObject } from '../src/shared/planets.ts';
 import type { Vec3 } from '../src/shared/world.ts';
-import { buildBlueprintModel } from '../src/assets/claude-geometry/blueprint/model3d.ts';
+import { buildBlueprintModel } from '../src/shared/blueprint-model3d.ts';
 import { villageCottage } from '../src/assets/claude-geometry/blueprint/samples.ts';
 import { StyleLibrary } from '../src/assets/claude-geometry/style/materials.ts';
 import { disposeObject3D } from '../src/assets/claude-geometry/core/dispose.ts';

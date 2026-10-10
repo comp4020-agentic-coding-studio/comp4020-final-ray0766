@@ -3,7 +3,7 @@ import { prewarmTerrainFits } from '../src/shared/terrain-prewarm.ts';
 import { fieldOf, objectSeat } from '../src/shared/terrain.ts';
 import { structureFit } from '../src/shared/blueprints.ts';
 import { defaultEnvironment, encodeEnvironment } from '../src/assets/claude-geometry/terrain/env.ts';
-import type { PartPlacement } from '../src/assets/claude-geometry/blueprint/model.ts';
+import type { PartPlacement } from '../src/shared/blueprint-model.ts';
 import type { PlacedObject } from '../src/shared/planets.ts';
 
 function scene(seed:number) {

@@ -1,11 +1,11 @@
 import { expect, it } from 'vitest';
 import { Mesh, Vector3 } from 'three';
 import { anchorFrame, anchorQuaternion, localToDir } from '../src/assets/claude-geometry/core/anchor.ts';
-import { PART_IDS } from '../src/assets/claude-geometry/blueprint/parts/catalogue.ts';
-import { buildBlueprintModel } from '../src/assets/claude-geometry/blueprint/model3d.ts';
+import { PART_IDS } from '../src/shared/blueprint-parts.ts';
+import { buildBlueprintModel } from '../src/shared/blueprint-model3d.ts';
 import { StyleLibrary } from '../src/assets/claude-geometry/style/materials.ts';
 import type { HeightField } from '../src/assets/claude-geometry/core/ground.ts';
-import type { PartPlacement } from '../src/assets/claude-geometry/blueprint/model.ts';
+import type { PartPlacement } from '../src/shared/blueprint-model.ts';
 import { structureFit, structureSize } from '../src/shared/blueprints.ts';
 import { placementProblem } from '../src/shared/planets.ts';
 import type { PlacedObject } from '../src/shared/planets.ts';

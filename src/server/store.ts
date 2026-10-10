@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { encodeBlueprint, hashInput } from '../assets/claude-geometry/blueprint/codec.ts';
+import { encodeBlueprint, hashInput } from '../shared/blueprint-codec.ts';
 import { canonicalJson } from '../assets/claude-geometry/core/doc.ts';
 import { MAX_BLUEPRINTS } from '../shared/blueprints.ts';
 import { homeStore, migrateHomes } from './home.ts';

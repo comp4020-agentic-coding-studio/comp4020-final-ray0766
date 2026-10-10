@@ -1,7 +1,10 @@
 import { Vector3 } from 'three';
 import { localToDir } from '../assets/claude-geometry/core/anchor.ts';
 import type { HeightField } from '../assets/claude-geometry/core/ground.ts';
-import { partTransform, pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
+import { partTransform, pivotOf } from './blueprint-model.ts';
+import { isOpenDoorPartId } from './blueprint-parts.ts';
+import { homeDoorCenterOffset } from './home-door.ts';
+import { WIDE_ENTRY_ID, WIDE_ENTRY } from './wide-entry.ts';
 import { decodeEnvironment } from '../assets/claude-geometry/terrain/env.ts';
 import { structureFit, structureSize } from './blueprints.ts';
 import type { BlueprintContents } from './blueprints.ts';
@@ -44,16 +47,17 @@ function siteRoute(site: HomeManifestSite, field: HeightField, id: string): Home
   const anchor = { dir: site.position, yaw: site.rotation };
   const base = structureFit(parts, site.position, site.rotation, field).baseRadius;
   const at = (x: number, z: number) => localToDir(anchor, base, [x, 0, z]);
-  const step = parts.find(part => part.part === 'step.entry');
+  const step = parts.find(part => part.part === 'step.entry' || part.part === WIDE_ENTRY_ID);
   let approach: Vec3, destination: Vec3;
   if (step) {
-    const t = partTransform(step, pivot), dx = Math.sin(t.yaw), dz = Math.cos(t.yaw);
-    approach = at(t.position[0] + dx * .92, t.position[2] + dz * .92);
-    const door = id === 'home' ? parts.find(part => part.n === HOME_DOOR_PART && part.part === 'wall.door.open') : undefined;
+    const t = partTransform(step, pivot), dx = Math.sin(t.yaw), dz = Math.cos(t.yaw),center=step.part===WIDE_ENTRY_ID?WIDE_ENTRY.centerX:0;
+    const x=t.position[0]+dz*center,z=t.position[2]-dx*center;
+    approach = at(x + dx * .92, z + dz * .92);
+    const door = id === 'home' ? parts.find(part => part.n === HOME_DOOR_PART && isOpenDoorPartId(part.part)) : undefined;
     if (door) {
-      const d = partTransform(door, pivot);
-      destination = at(d.position[0] + Math.sin(d.yaw) * .9, d.position[2] + Math.cos(d.yaw) * .9);
-    } else destination = at(t.position[0] - dx * .65, t.position[2] - dz * .65);
+      const d = partTransform(door, pivot),offset=homeDoorCenterOffset(door.part as import('./home-door.ts').HomeDoorPartId);
+      destination = at(d.position[0] + Math.cos(d.yaw)*offset + Math.sin(d.yaw) * .9, d.position[2] - Math.sin(d.yaw)*offset + Math.cos(d.yaw) * .9);
+    } else destination = at(x - dx * .65, z - dz * .65);
   } else {
     // The ordinary three-cell square has an open front and clear centre.
     approach = at(0, 1.95);
@@ -69,13 +73,14 @@ function pavingEndpoint(site: HomeManifestSite, field: HeightField): Vec3 {
   const parts = site.blueprint.parts, pivot = pivotOf(parts);
   const base = structureFit(parts, site.position, site.rotation, field).baseRadius;
   const at = (x: number, z: number) => localToDir({ dir: site.position, yaw: site.rotation }, base, [x, 0, z]);
-  const entry = parts.find(part => part.part === 'step.entry' || part.part === 'ramp.entry');
+  const entry = parts.find(part => part.part === 'step.entry' || part.part === 'ramp.entry' || part.part === WIDE_ENTRY_ID);
   if (entry) {
     const transform = partTransform(entry, pivot);
     const outer = Math.max(...PART_COLLIDERS[entry.part]().filter(box => box.support).map(box =>
       box.center[2] + Math.abs(Math.cos(box.pitch ?? 0)) * box.half[2] + Math.abs(Math.sin(box.pitch ?? 0)) * box.half[1]));
-    return at(transform.position[0] + Math.sin(transform.yaw) * (outer + .39),
-      transform.position[2] + Math.cos(transform.yaw) * (outer + .39));
+    const center=entry.part===WIDE_ENTRY_ID?WIDE_ENTRY.centerX:0;
+    return at(transform.position[0] + Math.cos(transform.yaw)*center + Math.sin(transform.yaw) * (outer + .39),
+      transform.position[2] - Math.sin(transform.yaw)*center + Math.cos(transform.yaw) * (outer + .39));
   }
   const front = Math.max(...parts.filter(part => part.level === 0).flatMap(part => {
     const transform = partTransform(part, pivot);

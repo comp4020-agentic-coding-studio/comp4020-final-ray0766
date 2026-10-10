@@ -1,7 +1,7 @@
 import {expect,it,vi} from 'vitest';
 import * as T from 'three';
 import {configureRenderer,configureGroundLighting,previewOptions,createWorldStyleLibrary,createWorldPracticalLights} from '../src/client/presentation.ts';
-import {buildBlueprintModel} from '../src/assets/claude-geometry/blueprint/model3d.ts';
+import {buildBlueprintModel} from '../src/shared/blueprint-model3d.ts';
 import {industrialCabin} from '../src/assets/claude-geometry/blueprint/samples.ts';
 import {ART_LIGHT} from '../src/client/art-profile.ts';
 

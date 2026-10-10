@@ -2,7 +2,7 @@ import {Vector3,Quaternion} from 'three';
 import type {Vec3} from './world.ts';
 import {HUB_DOCK} from './ports.ts';
 import {HUB_RADIUS} from './world-size.ts';
-import type {PartId} from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import type {PartId} from './blueprint-parts.ts';
 export interface CabinPart {part:PartId|'service.pipe';position:Vec3;yaw?:number}
 export const HABITAT_CABIN:readonly CabinPart[]=[
   {part:'floor.deck',position:[-.5,.10,0]},{part:'floor.deck',position:[.5,.10,0]},

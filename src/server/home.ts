@@ -1,9 +1,11 @@
+import { isOpenDoorPartId } from '../shared/blueprint-parts.ts';
+import type { HomeDoorPartId } from '../shared/home-door.ts';
 import { occupiedExteriorDoor } from './home-door-safety.ts';
-import { homeDoorSweepContains, homeIndoorDoorOrigin } from '../shared/home-door.ts';
+import { homeDoorSweepContains, homeIndoorDoorOrigin, homeDoorCenterOffset } from '../shared/home-door.ts';
 import { GroundWorld } from '../shared/physics/world.ts';
 import { createHash, randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
-import { defaultHomeInterior, HOME_BODY_RADIUS, homeEntry, homeNearDoor, normalizeHomeInterior, HOME_ITEM_KINDS, HOME_MATERIALS, HOME_MAX_ITEMS, HOME_MOVE_SPEED, homeItemBounds, homePathAllowed, homePositionAllowed } from '../shared/home.ts';
+import { defaultHomeInterior, HOME_BODY_RADIUS, homeEntry, homeNearDoor, normalizeHomeInterior, HOME_ITEM_KINDS, HOME_MATERIALS, HOME_MAX_ITEMS, HOME_MOVE_SPEED, homeItemBounds, homeDoorFurnitureAllowed, homePathAllowed, homePositionAllowed } from '../shared/home.ts';
 import type { HomeDescriptor, HomeInfrastructureManifest, HomeInterior, HomeItem, HomeLocation, HomeRoom } from '../shared/home.ts';
 import { distance } from '../shared/world.ts';
 import type { Vec3 } from '../shared/world.ts';
@@ -11,9 +13,9 @@ import { structureFit, structureSize } from '../shared/blueprints.ts';
 import { fieldOf } from '../shared/terrain.ts';
 import { anchorQuaternion, localToPlanet, localToDir } from '../assets/claude-geometry/core/anchor.ts';
 import { quatFromAxisAngle, quatMultiply } from '../assets/claude-geometry/core/vec.ts';
-import { partTransform, pivotOf } from '../assets/claude-geometry/blueprint/model.ts';
-import { encodeBlueprint, hashInput } from '../assets/claude-geometry/blueprint/codec.ts';
-import type { Blueprint } from '../assets/claude-geometry/blueprint/model.ts';
+import { partTransform, pivotOf } from '../shared/blueprint-model.ts';
+import { encodeBlueprint, hashInput } from '../shared/blueprint-codec.ts';
+import type { Blueprint } from '../shared/blueprint-model.ts';
 import { canonicalJson } from '../assets/claude-geometry/core/doc.ts';
 import { HOME_DOOR_PART, HOME_ENVIRONMENT, homeVariant } from '../shared/home-layout.ts';
 import { districtHome } from '../shared/district-layout.ts';
@@ -75,24 +77,25 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
     if(!o?.blueprintHash)throw new RequestError(409,'Your home exterior is unavailable; its contents are preserved.');
     const key=JSON.stringify([p.radius,p.environment,o.version,o.blueprintHash,o.position,o.rotation,h.door_part]);
     const cached=doorFrames.get(h.building_id);if(cached?.key===key)return structuredClone(cached.value);
-    const parts=blueprints.parts(o.blueprintHash),part=parts.find(p=>p.n===(h.door_part??HOME_DOOR_PART)&&p.part==='wall.door.open');
+    const parts=blueprints.parts(o.blueprintHash),part=parts.find(p=>p.n===(h.door_part??HOME_DOOR_PART)&&isOpenDoorPartId(p.part));
     if(!part)throw new RequestError(409,'The home entrance is unavailable; its contents are preserved.');
     const t=partTransform(part,pivotOf(parts)),fit=structureFit(parts,o.position,o.rotation,fieldOf(p.environment,p.radius));
-    const point:Vec3=[t.position[0]+Math.sin(t.yaw)*.9,t.position[1],t.position[2]+Math.cos(t.yaw)*.9];
+    const offset=homeDoorCenterOffset(part.part as HomeDoorPartId);
+    const point:Vec3=[t.position[0]+Math.cos(t.yaw)*offset+Math.sin(t.yaw)*.9,t.position[1],t.position[2]-Math.sin(t.yaw)*offset+Math.cos(t.yaw)*.9];
     const anchor={dir:o.position,yaw:o.rotation};
-    const value:HomeDescriptor['door']={position:localToDir(anchor,fit.baseRadius,point),yaw:(o.rotation+t.yaw)%(Math.PI*2),frame:{position:localToPlanet(anchor,fit.baseRadius,t.position),quaternion:quatMultiply(anchorQuaternion(anchor),quatFromAxisAngle([0,1,0],t.yaw))}};
+    const value:HomeDescriptor['door']={partId:part.part as HomeDoorPartId,position:localToDir(anchor,fit.baseRadius,point),yaw:(o.rotation+t.yaw)%(Math.PI*2),frame:{position:localToPlanet(anchor,fit.baseRadius,t.position),quaternion:quatMultiply(anchorQuaternion(anchor),quatFromAxisAngle([0,1,0],t.yaw))}};
     if(doorFrames.size>=64&&!doorFrames.has(h.building_id))doorFrames.delete(doorFrames.keys().next().value!);
     doorFrames.set(h.building_id,{key,value});return structuredClone(value);
   }
   /** Read every saved body, including disconnected visitors. Never recover or
    * relocate a person to make room for a door; reject the whole action instead. */
   function doorSweepOccupied(h:HomeRow,room:HomeInterior):boolean {
-    const origin=homeIndoorDoorOrigin(room.room);
+    const entry=door(h),origin=homeIndoorDoorOrigin(room.room,entry.partId);
     for(const row of db.prepare('SELECT document FROM home_locations').all()){
       const at=JSON.parse(String(row.document)) as HomeLocation;
-      if(at.kind==='interior'&&at.buildingId===h.building_id&&homeDoorSweepContains(at.position.map((n,i)=>n-origin[i]) as Vec3))return true;
+      if(at.kind==='interior'&&at.buildingId===h.building_id&&homeDoorSweepContains(at.position.map((n,i)=>n-origin[i]) as Vec3,[0,1,0],entry.partId))return true;
     }
-    return occupiedExteriorDoor(db,h.planet_id,door(h).frame!,()=>new GroundWorld(planets.view('',h.planet_id)));
+    return occupiedExteriorDoor(db,h.planet_id,entry.frame!,()=>new GroundWorld(planets.view('',h.planet_id)),entry.partId);
   }
   function descriptor(id:string,planetId=String(player(id).planet_id)):HomeDescriptor|null {
     const h=home(planetId);if(!h)return null;const p=planets.planet(planetId),o=planets.view(id,planetId).objects.find(o=>o.id===h.building_id)!;
@@ -140,7 +143,7 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
     });
   }
   const indoor=(id:string,body:Record<string,unknown>)=>{const loc=location(id);epoch(loc,body.visitEpoch);if(loc.kind!=='interior'||loc.buildingId!==body.buildingId)throw new RequestError(409,'This is not your current home visit.');return loc;};
-  function validateInterior(body:Record<string,unknown>,room:HomeRoom):Pick<HomeInterior,'material'|'items'> {
+  function validateInterior(body:Record<string,unknown>,room:HomeRoom,doorPartId:HomeDoorPartId='wall.door.open'):Pick<HomeInterior,'material'|'items'> {
     if(!HOME_MATERIALS.includes(body.material as never)||!Array.isArray(body.items)||body.items.length>HOME_MAX_ITEMS)throw new RequestError(400,'Choose a room finish and at most 12 furniture pieces.');
     const ids=new Set<string>();const items:HomeItem[]=body.items.map(raw=>{
       if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new RequestError(400,'Invalid furniture.');
@@ -149,7 +152,8 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
       ids.add(a.id);return {id:a.id,kind:a.kind as HomeItem['kind'],position:a.position,yaw:a.yaw};
     });
     for(let i=0;i<items.length;i++){const a=homeItemBounds(items[i]);if(a.minX< -room.width/2+.08||a.maxX>room.width/2-.08||a.minZ< -room.depth/2+.08||a.maxZ>room.depth/2-.08)throw new RequestError(400,'Keep furniture inside the room.');if(a.minX<.65&&a.maxX>-.65&&a.maxZ>.5)throw new RequestError(400,'Keep the route to the door clear.');for(let j=0;j<i;j++){const b=homeItemBounds(items[j]);if(a.minX<b.maxX+.04&&a.maxX>b.minX-.04&&a.minZ<b.maxZ+.04&&a.maxZ>b.minZ-.04)throw new RequestError(400,'Furniture overlaps another piece.');}}
-    if(!homePositionAllowed(homeEntry(room),items,HOME_BODY_RADIUS,room))throw new RequestError(400,'Keep the entry clear.');return {material:body.material as HomeInterior['material'],items};
+    if(!homeDoorFurnitureAllowed(items,room,doorPartId))throw new RequestError(400,'Keep both door leaves clear of furniture.');
+    if(!homePositionAllowed(homeEntry(room,doorPartId),items,HOME_BODY_RADIUS,room,true,doorPartId))throw new RequestError(400,'Keep the entry clear.');return {material:body.material as HomeInterior['material'],items};
   }
   return {
     enabled,location,descriptor,initialise,exterior,requireOutside,
@@ -162,7 +166,7 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
       if(loc.kind!=='exterior'||p.planet_id!==h.planet_id||body.planetId!==h.planet_id||JSON.parse(String(p.flight??'{"mode":"ground"}')).mode!=='ground')throw new RequestError(409,'Walk to this home first.');
       if(distance(JSON.parse(String(p.position)),door(h).position,planets.planet(h.planet_id).radius)>1.7)throw new RequestError(409,'Walk closer to the home door.');
       const room=interior(h);if(!room.doorOpen)throw new RequestError(409,'Open the door before entering.');
-      transaction(()=>{writeLocation(id,{kind:'interior',planetId:h.planet_id,buildingId:h.building_id,interiorId:h.interior_id,position:homeEntry(room.room),yaw:Math.PI,sequence:0,visitEpoch:loc.visitEpoch+1},now);db.prepare('UPDATE players SET revision=revision+1 WHERE id=?').run(id);});
+      transaction(()=>{writeLocation(id,{kind:'interior',planetId:h.planet_id,buildingId:h.building_id,interiorId:h.interior_id,position:homeEntry(room.room,door(h).partId),yaw:Math.PI,sequence:0,visitEpoch:loc.visitEpoch+1},now);db.prepare('UPDATE players SET revision=revision+1 WHERE id=?').run(id);});
     },
     move(id:string,body:Record<string,unknown>,now=Date.now()){
       strict(body,['buildingId','visitEpoch','sequence','position','yaw']);const loc=indoor(id,body),h=byBuilding(loc.buildingId);
@@ -171,12 +175,12 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
       if(body.sequence===loc.sequence&&saved.request_hash===hash)return;
       if(body.sequence!==loc.sequence+1)throw new RequestError(409,'A newer home position exists.');
       const elapsed=Math.min(1.5,Math.max(0,now-Number(saved.moved_at))/1000),d=Math.hypot(...body.position.map((n,i)=>n-loc.position[i]));
-      if(d>HOME_MOVE_SPEED*elapsed+.25||!homePathAllowed(loc.position,body.position,interior(h).items,interior(h).room,interior(h).doorOpen))throw new RequestError(409,'A wall or furniture blocks this home movement.');
+      if(d>HOME_MOVE_SPEED*elapsed+.25||!homePathAllowed(loc.position,body.position,interior(h).items,interior(h).room,interior(h).doorOpen,door(h).partId))throw new RequestError(409,'A wall or furniture blocks this home movement.');
       transaction(()=>{writeLocation(id,{...loc,position:body.position as Vec3,yaw:body.yaw as number,sequence:Number(body.sequence)},now,hash);db.prepare('UPDATE players SET revision=revision+1 WHERE id=?').run(id);});
     },
     exit(id:string,body:Record<string,unknown>,now=Date.now()){
       strict(body,['buildingId','visitEpoch']);const loc=indoor(id,body),h=byBuilding(loc.buildingId);
-      const room=interior(h);if(!homeNearDoor(loc.position,room.room))throw new RequestError(409,'Walk to the inside door to leave.');
+      const room=interior(h);if(!homeNearDoor(loc.position,room.room,door(h).partId))throw new RequestError(409,'Walk to the inside door to leave.');
       if(!room.doorOpen)throw new RequestError(409,'Open the door before going outside.');
       const point=door(h).position;
       transaction(()=>{db.prepare('UPDATE players SET position=?,moved_at=?,revision=revision+1 WHERE id=?').run(JSON.stringify(point),now,id);db.prepare('DELETE FROM ground_states WHERE player_id=?').run(id);writeLocation(id,{kind:'exterior',planetId:h.planet_id,visitEpoch:loc.visitEpoch+1},now);});
@@ -188,7 +192,7 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
       const loc=location(id),h=byBuilding(body.buildingId),p=player(id);epoch(loc,body.visitEpoch);
       const old=interior(h);
       if(loc.kind==='interior'){
-        if(loc.buildingId!==h.building_id||!homeNearDoor(loc.position,old.room))throw new RequestError(409,'Walk to this home door first.');
+        if(loc.buildingId!==h.building_id||!homeNearDoor(loc.position,old.room,door(h).partId))throw new RequestError(409,'Walk to this home door first.');
       }else if(p.planet_id!==h.planet_id||JSON.parse(String(p.flight??'{"mode":"ground"}')).mode!=='ground'||distance(JSON.parse(String(p.position)),door(h).position,planets.planet(h.planet_id).radius)>1.7)throw new RequestError(409,'Walk to this home door first.');
       if(body.expectedDoorVersion!==old.doorVersion)throw new RequestError(409,'The door changed in another tab.');
       if(body.open===old.doorOpen)return;
@@ -199,8 +203,8 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
     save(id:string,body:Record<string,unknown>){
       strict(body,['buildingId','expectedVersion','material','items']);const h=byBuilding(body.buildingId);if(planets.planet(h.planet_id).owner_id!==id)throw new RequestError(403,'Only the home owner can edit the room.');
       const loc=location(id);if(loc.kind!=='interior'||loc.buildingId!==h.building_id)throw new RequestError(409,'Enter your home before arranging it.');
-      const old=interior(h);if(body.expectedVersion!==old.version)throw new RequestError(409,'This room changed in another tab.');const next=validateInterior(body,old.room);
-      for(const r of db.prepare('SELECT document FROM home_locations').all()){const at=JSON.parse(String(r.document)) as HomeLocation;if(at.kind==='interior'&&at.buildingId===h.building_id&&!homePositionAllowed(at.position,next.items,HOME_BODY_RADIUS,old.room,old.doorOpen))throw new RequestError(409,'A visitor is standing there. Leave their space clear.');}
+      const old=interior(h);if(body.expectedVersion!==old.version)throw new RequestError(409,'This room changed in another tab.');const next=validateInterior(body,old.room,door(h).partId);
+      for(const r of db.prepare('SELECT document FROM home_locations').all()){const at=JSON.parse(String(r.document)) as HomeLocation;if(at.kind==='interior'&&at.buildingId===h.building_id&&!homePositionAllowed(at.position,next.items,HOME_BODY_RADIUS,old.room,old.doorOpen,door(h).partId))throw new RequestError(409,'A visitor is standing there. Leave their space clear.');}
       transaction(()=>{db.prepare('UPDATE home_interiors SET document=? WHERE planet_id=?').run(JSON.stringify({...old,...next,version:old.version+1}),h.planet_id);changed(h.planet_id);});
     },
     remodelBlueprint(variant:unknown,planetId:string):Blueprint {

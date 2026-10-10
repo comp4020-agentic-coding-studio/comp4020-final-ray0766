@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 import { Quaternion, Vector3 } from 'three';
 import { HOME_DOOR_PART, HOME_ENVIRONMENT, HOME_VARIANTS, homeVariant, starterManifest } from '../src/shared/home-layout.ts';
-import { layoutErrors, partTransform, pivotOf, placementProblem as partProblem } from '../src/assets/claude-geometry/blueprint/model.ts';
+import { layoutErrors, partTransform, pivotOf, placementProblem as partProblem } from '../src/shared/blueprint-model.ts';
 import { structureFit, structureSize } from '../src/shared/blueprints.ts';
 import type { BlueprintContents } from '../src/shared/blueprints.ts';
 import { MAX_OBJECTS, placementProblem } from '../src/shared/planets.ts';

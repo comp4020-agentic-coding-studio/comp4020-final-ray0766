@@ -1,7 +1,7 @@
 import {expect,it} from 'vitest';
 import {readFileSync} from 'node:fs';
 import * as T from 'three';
-import {buildPart,PART_IDS} from '../src/assets/claude-geometry/blueprint/parts/catalogue.ts';
+import {buildPart,LEGACY_PART_IDS as PART_IDS} from '../src/shared/blueprint-parts.ts';
 import {StyleLibrary} from '../src/assets/claude-geometry/style/materials.ts';
 import {handleFor} from '../src/assets/claude-geometry/core/dispose.ts';
 import {villagePartDiagnostic,villagePartLabel} from '../src/client/part-labels.ts';

@@ -5,7 +5,7 @@ import {VILLAGE} from '../src/assets/claude-geometry/style/look.ts';
 import {StyleLibrary} from '../src/assets/claude-geometry/style/materials.ts';
 import {libraryMaterials} from '../src/assets/claude-geometry/blueprint/parts/kit.ts';
 import {materialTextures} from '../src/assets/claude-geometry/core/dispose.ts';
-import {buildBlueprintModel} from '../src/assets/claude-geometry/blueprint/model3d.ts';
+import {buildBlueprintModel} from '../src/shared/blueprint-model3d.ts';
 import {homeVariant,HOME_ENVIRONMENT} from '../src/shared/home-layout.ts';
 import {configureHomeLighting,createWorldStyleLibrary} from '../src/client/presentation.ts';
 import {createHomeDoor} from '../src/client/home-door.ts';

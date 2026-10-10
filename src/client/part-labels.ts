@@ -1,5 +1,5 @@
-import {partLabel,PART_IDS,PARTS} from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
-import type {PartId} from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import {partLabel,PART_IDS,PARTS} from '../shared/blueprint-parts.ts';
+import type {PartId} from '../shared/blueprint-parts.ts';
 
 /** Source IDs remain stable; three source labels still describe older geometry. */
 const current:Partial<Record<PartId,string>>={

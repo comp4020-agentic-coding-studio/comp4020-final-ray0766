@@ -1,6 +1,6 @@
 import { presenceStore } from '../src/server/presence.ts';
 import { openStore } from '../src/server/store.ts';
-import { encodeBlueprint } from '../src/assets/claude-geometry/blueprint/codec.ts';
+import { encodeBlueprint } from '../src/shared/blueprint-codec.ts';
 import { randomUUID } from 'node:crypto';
 import { mkdtempSync,rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -15,7 +15,7 @@ import { anchorQuaternion,localToDir } from '../src/assets/claude-geometry/core/
 import { structureFit,structureSize } from '../src/shared/blueprints.ts';
 import { normalize } from '../src/shared/world.ts';
 import type { Vec3 } from '../src/shared/world.ts';
-import type { Blueprint,PartPlacement } from '../src/assets/claude-geometry/blueprint/model.ts';
+import type { Blueprint,PartPlacement } from '../src/shared/blueprint-model.ts';
 
 export function stairParts():PartPlacement[]{const parts:Omit<PartPlacement,'n'>[]=[
   ...[1,2,3].map(z=>({part:'floor.deck' as const,x:1,z,level:0,rot:0 as const})),
@@ -23,7 +23,7 @@ export function stairParts():PartPlacement[]{const parts:Omit<PartPlacement,'n'>
   {part:'structure.column',x:1,z:1,level:0,rot:2},
   {part:'floor.deck',x:1,z:1,level:1,rot:0},
 ];return parts.map((p,i)=>({...p,n:i+1}));}
-function fixture(parts=industrialCabin().parts,dir:Vec3=normalize([.55,1,.4]),yaw=0){
+function fixture(parts:PartPlacement[]=industrialCabin().parts,dir:Vec3=normalize([.55,1,.4]),yaw=0){
   const anchor={dir,yaw},base=structureFit(parts,dir,yaw).baseRadius;
   const inverse=new Quaternion().fromArray(anchorQuaternion(anchor)).invert();
   const world=new GroundWorld({id:'p',revision:1,blueprints:{kit:parts},objects:[{id:'o',kind:'structure',position:dir,rotation:yaw,version:1,blueprintHash:'kit',...structureSize(parts)}]});

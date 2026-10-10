@@ -7,7 +7,7 @@ import { visit,claimAndBuild,readUniverse,closeVisit,menuAction,openMenu } from 
 import { readFeet,frame,walk } from './physics-helper.ts';
 import { normalize } from '../../src/shared/world.ts';
 import { industrialCabin } from '../../src/assets/claude-geometry/blueprint/samples.ts';
-import { encodeBlueprint } from '../../src/assets/claude-geometry/blueprint/codec.ts';
+import { encodeBlueprint } from '../../src/shared/blueprint-codec.ts';
 const evidence=process.env.MULTIPLAYER_EVIDENCE??'docs/evidence/multiplayer-sync';
 test.use({trace:'off'});
 async function begin(page:Page){await page.goto('/');await page.getByRole('button',{name:'Let’s wander'}).click();await expect(page.locator('#scene-sync')).toContainText('Live');}

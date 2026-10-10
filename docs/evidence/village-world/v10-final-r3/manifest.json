@@ -1,0 +1,267 @@
+{
+  "schema": 1,
+  "status": "local-evidence-package-not-a-cutover-verdict",
+  "createdAt": "2026-10-10T22:04:03.226567+00:00",
+  "scope": "Fourteen already-reviewed real-game whole-globe Photo Mode PNG originals, copied byte-for-byte. This package is evidence provenance, not ground gameplay, save, budget, deployment or local cutover approval.",
+  "version": {
+    "label": "final-R3",
+    "sourceSha256": "8452a5167a94645613e2c43ebeabddbe8b391ed4c153f582fd3ca2e864517446",
+    "sourceInventoryEntries": 397,
+    "freeze": {
+      "path": ".data/v10-handoff-integration/final-source-freeze-r3.json",
+      "sha256": "76c952c37ac01c4fbb3ea899e0709a0d628f88deb17a4fe68b63d89758e2bcca"
+    },
+    "town": {
+      "path": ".data/v10-handoff-integration/final-candidate-r3-town.json",
+      "sha256": "c31c91f452a3cc207865e9a4c62e063204595eda8efc6790202aa0201a209adc"
+    },
+    "build": {
+      "path": ".data/v10-handoff-integration/build-final-candidate-r3",
+      "treeSha256": "e9fdaec040ba3f5489859b2a8776d269ce15dc4e28a0b8645145360751c6fadb",
+      "indexSha256": "599c7a3db0481f9423f6f73a2cf9b8333f601972bd24ed26c8491416079dfd7a",
+      "fileCount": 218,
+      "totalBytes": 37134633
+    }
+  },
+  "capture": {
+    "path": ".data/v10-handoff-integration/gameplay-global-final-r3/report.json",
+    "sha256": "cbb68c8e1321ea27fd0b74df0d87590a61339d852fbf24cb5b96e767f09346ad",
+    "kind": "real-game Photo Mode exports without HUD",
+    "originalPhotoCount": 14,
+    "reportCopied": false,
+    "photoPauseIsNotGroundPerformance": true
+  },
+  "wholeGlobeReviews": [
+    {
+      "role": "root",
+      "path": ".data/v10-handoff-integration/gameplay-global-final-r3/root-visual-review.json",
+      "sha256": "20ede97a7c6843d80c434972cd13b0a83de025dcf840f1f49bdc20eb44a93fc1",
+      "status": "root-global-visual-pass-ground-acceptance-pending"
+    },
+    {
+      "role": "independent",
+      "path": ".data/v10-handoff-final-visual/global-final-r3-visual-review.json",
+      "sha256": "e054ad37772472b370c8e4fc2197fe2209289fef93510b096d5375baf3676a07",
+      "status": "passed-global-visual-ground-acceptance-pending"
+    }
+  ],
+  "actualControlEvidence": {
+    "capture": {
+      "path": "docs/evidence/village-world/v10-final-eight-r4/report.json",
+      "sha256": "bae92ba4dafe23fe44e53c699e9e678f1a6d307f04cafe852b7674c03a16f608",
+      "status": "routes-passed-visual-review-pending",
+      "completedRows": 16,
+      "reportCopied": false
+    },
+    "independentKeyframeReview": {
+      "path": ".data/v10-handoff-final-visual/incremental-reviewed-r3-r8.json",
+      "sha256": "e98db7ff7063ddb2542940f5a2a2cac424da5635d4328aef15182088a2c23794",
+      "status": "sixteen-route-keyframe-reviews-complete-southlane-exit-and-six-courtyard-acceptance-pending",
+      "reviewedRows": 16,
+      "reviewedOriginalImages": 218,
+      "reportCopied": false
+    },
+    "limit": "Hashes bind completed action capture and keyframe review. Any gaps recorded by those reviews require separate later evidence; this package does not resolve them."
+  },
+  "performanceAssessment": {
+    "path": ".data/v10-handoff-release/performance-assessment-final-r3-r1.json",
+    "sha256": "d8742574aac330dc13a1a5c164f3e0f64059f5cdcd7f7338f1630555195c83b7",
+    "status": "assessment-complete-not-a-release-verdict",
+    "measurementValid": true,
+    "namedActionWindows": 16,
+    "qualifiedApproachWindows": 16,
+    "allAssessedWindowsMeetFixedLocalSchedulingTarget": true,
+    "legacyReference": {
+      "drawCalls": 250,
+      "triangles": 250000,
+      "allActionMaximaAboveEachReference": 32,
+      "maximumDrawCalls": 480,
+      "maximumTriangles": 722057
+    },
+    "limits": [
+      "rAF scheduling intervals are not GPU timing or guaranteed FPS.",
+      "Old draw/triangle references remain exceeded independently of the local scheduling target.",
+      "Sampled memory observations do not establish full process/GPU peaks; no physical phone verified."
+    ],
+    "reportCopied": false
+  },
+  "imageCount": 14,
+  "totalImageBytes": 19364576,
+  "images": [
+    {
+      "file": "ring-01.png",
+      "sha256": "7c1be47fb1e06d57467b9bbca1db94477bc7194f38a9b9ee3dac27b7dbe48d58",
+      "bytes": 1326766,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 0,
+      "pitchDegrees": 0,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/ring-01.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "ring-02.png",
+      "sha256": "3021c303a0eb8324724b476f65a65e1a3b7eaa3d7322ce5cb708b6be07b89d1e",
+      "bytes": 1404448,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 45,
+      "pitchDegrees": 0,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/ring-02.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "ring-03.png",
+      "sha256": "a39eebcd0303cc6091939432893dd762b641a2787675d3f6c4f9aef514abed1e",
+      "bytes": 1403602,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 90,
+      "pitchDegrees": 0,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/ring-03.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "ring-04.png",
+      "sha256": "fcaf92bacb9c0db9a490767395440ec783791c40575d21d9cb567c23e401b396",
+      "bytes": 1387298,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 135,
+      "pitchDegrees": 0,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/ring-04.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "ring-05.png",
+      "sha256": "0872fba28d6971a594fec5a0a2b3fb1f6c661b3dc95f095430c3bf778af4ae4a",
+      "bytes": 1381826,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 180,
+      "pitchDegrees": 0,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/ring-05.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "ring-06.png",
+      "sha256": "ad70d46d906ac42415f038da862ef3ee717c5ce1e209d28365c9224c1a4d467f",
+      "bytes": 1403475,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 225,
+      "pitchDegrees": 0,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/ring-06.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "ring-07.png",
+      "sha256": "1c86921ffd7dd9efdb3fd516414341a0ef79ede67fe671e26c71404bf8441679",
+      "bytes": 1412060,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 270,
+      "pitchDegrees": 0,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/ring-07.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "ring-08.png",
+      "sha256": "d55a03f6ae27d9f89f1b6279fff4664b9807daf51fef95d693fb61bdef17b913",
+      "bytes": 1344683,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 315,
+      "pitchDegrees": 0,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/ring-08.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "tilt-negative-1.png",
+      "sha256": "5f2ac12c69f5123be2f341f3803804b5ee24d229e8fea1040e5e6349c455ff24",
+      "bytes": 1436385,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 0,
+      "pitchDegrees": -55,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/tilt-negative-1.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "tilt-negative-2.png",
+      "sha256": "a9065680aa93bbc187ca58ba21ac0f596a2f7e6568c88dd3492c75df2c01092d",
+      "bytes": 1257642,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 120,
+      "pitchDegrees": -55,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/tilt-negative-2.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "tilt-negative-3.png",
+      "sha256": "5ca2863d45d338bfffd69d126579bc7ebc6841e85c86e63dd867ab91fa21e55d",
+      "bytes": 1416957,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 240,
+      "pitchDegrees": -55,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/tilt-negative-3.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "tilt-positive-1.png",
+      "sha256": "ce44bb9e7e35192cd80b9006dab70adf6b1d4dc82c45393920b046e16924537b",
+      "bytes": 1390805,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 0,
+      "pitchDegrees": 55,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/tilt-positive-1.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "tilt-positive-2.png",
+      "sha256": "bf84bec634e78ad961eecca7ca210f83ecf06474376377c6aa3668cd33f36b1e",
+      "bytes": 1395890,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 120,
+      "pitchDegrees": 55,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/tilt-positive-2.png",
+      "copiedWithoutReencoding": true
+    },
+    {
+      "file": "tilt-positive-3.png",
+      "sha256": "d44858fc8f1e71cc98b922ee628c808992438fc123600a32a0d592a3dc26bf50",
+      "bytes": 1402739,
+      "width": 2048,
+      "height": 1422,
+      "yawDegrees": 240,
+      "pitchDegrees": 55,
+      "originalPath": ".data/v10-handoff-integration/gameplay-global-final-r3/tilt-positive-3.png",
+      "copiedWithoutReencoding": true
+    }
+  ],
+  "lateEvidenceOutsideThisPackage": [
+    "remaining ground-site and exit-recovery supplements",
+    "special entry evidence",
+    "read-only workshop UI evidence",
+    "final commit and rebuilt-output binding",
+    "8098 cutover and post-cutover persistence/access"
+  ],
+  "privacy": {
+    "manifestFields": "Explicit allowlist: version hashes, safe relative paths, image dimensions/angles/bytes, review statuses and aggregate counts only.",
+    "privateReportsCopied": false,
+    "videosCopied": false,
+    "rawApiDocumentsCopied": false,
+    "identityOrCredentialValuesCopied": false,
+    "pngTextOrExifChunksPresent": false
+  },
+  "repositoryAction": {
+    "staged": false,
+    "committed": false,
+    "published": false
+  },
+  "deliveryVerdict": "pending-separate-root-acceptance"
+}

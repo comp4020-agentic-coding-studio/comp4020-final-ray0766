@@ -4,7 +4,7 @@ import {anchorQuaternion,localToDir} from '../../src/assets/claude-geometry/core
 import {fieldOf} from '../../src/shared/terrain.ts';
 import {structureFit} from '../../src/shared/blueprints.ts';
 import type {PlacedObject} from '../../src/shared/planets.ts';
-import type {PartPlacement} from '../../src/assets/claude-geometry/blueprint/model.ts';
+import type {PartPlacement} from '../../src/shared/blueprint-model.ts';
 import type {Vec3} from '../../src/shared/world.ts';
 export async function readFeet(page:Page){const d=await page.locator('#world canvas').evaluate(e=>({...((e as HTMLElement).dataset)}));return {position:JSON.parse(d.groundPosition!) as Vec3,radius:Number(d.feetRadius),north:new Vector3(...JSON.parse(d.cameraHeading!)),grounded:d.grounded==='true'};}
 export function frame(o:PlacedObject,parts:PartPlacement[],radius=10,environment:string|null=null){const anchor={dir:o.position,yaw:o.rotation},base=structureFit(parts,o.position,o.rotation,fieldOf(environment,radius)).baseRadius,inverse=new Quaternion().fromArray(anchorQuaternion(anchor)).invert();return {at:(x:number,z:number,y=0)=>localToDir(anchor,base,[x,y,z]),local:(p:{position:Vec3;radius:number})=>new Vector3(...p.position).multiplyScalar(p.radius).addScaledVector(new Vector3(...o.position),-base).applyQuaternion(inverse)};}

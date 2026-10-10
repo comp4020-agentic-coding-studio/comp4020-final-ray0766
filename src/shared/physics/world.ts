@@ -1,14 +1,15 @@
+import { isOpenDoorPartId } from '../blueprint-parts.ts';
 import { QUICK_PARTS } from '../quick-parts.ts';
 import {HUB_SHIP} from '../harbour-layout.ts';
 import {HUB_OBJECTS,PUBLIC_CONTENTS,publicField} from '../public-village.ts';
 import {isSamplePublicRadius,samplePublicVillage} from '../sample-public-village.ts';
 import { fieldOf,gradedField,objectSeat } from '../terrain.ts';
 import type { HeightField } from '../../assets/claude-geometry/core/ground.ts';
-import { Vector3, Quaternion } from 'three';
+import { Box3, Vector3, Quaternion } from 'three';
 import { anchorQuaternion } from '../../assets/claude-geometry/core/anchor.ts';
 import { legacyHeightField } from '../../assets/claude-geometry/core/ground.ts';
-import { partTransform, pivotOf, groundCells } from '../../assets/claude-geometry/blueprint/model.ts';
-import type { PartPlacement } from '../../assets/claude-geometry/blueprint/model.ts';
+import { partTransform, pivotOf, groundCells } from '../blueprint-model.ts';
+import type { PartPlacement } from '../blueprint-model.ts';
 import { structureFit } from '../blueprints.ts';
 import { objectHeight, objectRadius } from '../planets.ts';
 import type { PlanetView, PlacedObject } from '../planets.ts';
@@ -28,8 +29,8 @@ export const FIXED_STEP=1/60, MAX_PATH_STEPS=28;
 // Bump whenever static collision semantics change. Durable ground rows and
 // movement batches use this same value; a scene revision alone is not enough.
 export const PHYSICS_VERSION=7;
-// Shared radial-ascent fix and public layout are released together.
-export const HUB_PHYSICS_VERSION=7;
+// Fence clients carrying the previous bundled public collision layout.
+export const HUB_PHYSICS_VERSION=8;
 export const physicsVersionFor=(planetId:string)=>planetId==='hub'?HUB_PHYSICS_VERSION:PHYSICS_VERSION;
 const ground=legacyHeightField();
 export interface GroundPose { position:Vec3; radius:number; verticalSpeed:number; grounded:boolean; jumpHeld?:boolean }
@@ -37,7 +38,7 @@ export interface GroundState extends Omit<GroundPose,'position'> { sequence:numb
 export type MotionStep=[number,number,number,number]|[number,number,number,number,number];
 export interface GroundMotion { sequence:number; physicsVersion:number; steps:MotionStep[] }
 interface Collider { center:Vector3; half:Vector3; q:Quaternion; inverse:Quaternion; support:boolean; tag:string; objectId:string }
-interface Body { objectId:string; dir:Vector3; broad:number; colliders:Collider[]; round?:{radius:number;height:number;base:number} }
+interface Body { objectId:string; dir:Vector3; broad:number; colliders:Collider[]; cameraBounds?:Box3; round?:{radius:number;height:number;base:number} }
 const vec=(v:Vec3)=>new Vector3(...v);
 export const terrainRadius=(p:Vec3)=>RADIUS+ground.heightAt(p);
 export const groundPose=(p:Vec3,field:HeightField=ground):GroundPose=>({position:[...p],radius:RADIUS+field.heightAt(p),verticalSpeed:0,grounded:true});
@@ -88,15 +89,24 @@ export class GroundWorld {
     const center=vec(shape.center).applyQuaternion(anchor).addScaledVector(vec(dir),base);
     const q=anchor.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0,1,0),shape.yaw??0)).multiply(new Quaternion().setFromAxisAngle(new Vector3(1,0,0),shape.pitch??0));
     body.colliders.push({center,half:vec(shape.half),q,inverse:q.clone().invert(),support:!!shape.support,tag:shape.tag,objectId:body.objectId});
+    // Enclose the same padded OBBs used by cameraDistance, including roofs and
+    // deep foundations. A start-only ground query misses neighbours along the
+    // camera boom. Cache each body's world bounds once; movement stays unchanged.
+    const half=vec(shape.half).addScalar(.06),axes=[
+      new Vector3(half.x,0,0).applyQuaternion(q),new Vector3(0,half.y,0).applyQuaternion(q),new Vector3(0,0,half.z).applyQuaternion(q),
+    ];
+    const extent=new Vector3().fromArray((['x','y','z'] as const).map(axis=>axes.reduce((sum,v)=>sum+Math.abs(v[axis]),0)+1e-9));
+    body.cameraBounds??=new Box3();
+    body.cameraBounds.expandByPoint(center.clone().sub(extent)).expandByPoint(center.clone().add(extent));
   }
   private structure(o:PlacedObject,parts:PartPlacement[],homeDoor?:HomeDoorState){
     if(!parts.length)return;const fit=structureFit(parts,o.position,o.rotation,this.field),pivot=pivotOf(parts);
     const body:Body={objectId:o.id,dir:vec(o.position),broad:objectRadius(o)+1,colliders:[]};
     for(const part of parts){
       const t=partTransform(part,pivot),turn=new Quaternion().setFromAxisAngle(new Vector3(0,1,0),t.yaw);
-      const dynamic=homeDoor?.buildingId===o.id&&homeDoor.partNumber===part.n&&part.part==='wall.door.open';
+      const dynamic=homeDoor?.buildingId===o.id&&homeDoor.partNumber===part.n&&isOpenDoorPartId(part.part);
       const shapes=PART_COLLIDERS[part.part]();
-      const colliders=dynamic?[...shapes.filter(shape=>shape.tag!=='sliding leaf'),...homeDoorLeaves(homeDoor.open)]:shapes;
+      const colliders=dynamic?[...shapes.filter(shape=>shape.tag!=='sliding leaf'&&shape.tag!=='wide door leaf'),...homeDoorLeaves(homeDoor.open,part.part as import('../home-door.ts').HomeDoorPartId)]:shapes;
       for(const shape of colliders){
         const center=vec(shape.center).applyQuaternion(turn).add(vec(t.position));
         this.add(body,o.position,o.rotation,fit.baseRadius,{...shape,center:center.toArray() as Vec3,yaw:t.yaw+(shape.yaw??0)});
@@ -239,10 +249,14 @@ export class GroundWorld {
   cameraDistance(start:Vector3,end:Vector3){
     const delta=end.clone().sub(start),length=delta.length();let best=length;
     if(this.generated)for(let i=1;i<=32;i++){const p=start.clone().lerp(end,i/32),r=p.length();if(r<this.radius(p.normalize().toArray() as Vec3)+.12){best=Math.min(best,Math.max(.02,length*(i-1)/32));break;}}
-    for(const b of this.near(start.clone().normalize()))for(const c of b.colliders){
+    const sweep=new Box3().setFromPoints([start,end]);
+    for(const b of this.bodies){
+      if(b.cameraBounds&&!b.cameraBounds.intersectsBox(sweep))continue;
+      for(const c of b.colliders){
       const p=start.clone().sub(c.center).applyQuaternion(c.inverse),d=delta.clone().applyQuaternion(c.inverse);let min=0,max=1;
       for(const axis of ['x','y','z'] as const){const extent=c.half[axis]+.06;if(Math.abs(d[axis])<1e-8){if(Math.abs(p[axis])>extent){min=2;break;}}else{let a=(-extent-p[axis])/d[axis],z=(extent-p[axis])/d[axis];if(a>z)[a,z]=[z,a];min=Math.max(min,a);max=Math.min(max,z);}}
       if(min<=max&&min>=0&&min<1)best=Math.min(best,Math.max(0,min*length-.08));
+      }
     }
     return best;
   }

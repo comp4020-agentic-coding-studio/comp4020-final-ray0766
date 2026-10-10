@@ -1,6 +1,6 @@
 import * as T from 'three';
 import type { StyleLibrary } from '../assets/claude-geometry/style/materials.ts';
-import { buildBlueprintModel } from '../assets/claude-geometry/blueprint/model3d.ts';
+import { buildBlueprintModel } from '../shared/blueprint-model3d.ts';
 import { placedTransform } from '../assets/claude-geometry/blueprint/placement.ts';
 import { structureFit } from '../shared/blueprints.ts';
 import type { BlueprintContents } from '../shared/blueprints.ts';

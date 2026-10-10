@@ -1,6 +1,6 @@
 import type { BlueprintId } from '../assets/claude-geometry/core/ids.ts';
-import type { Blueprint, PartPlacement, Rot } from '../assets/claude-geometry/blueprint/model.ts';
-import { PARTS } from '../assets/claude-geometry/blueprint/parts/catalogue.ts';
+import type { Blueprint, PartPlacement, Rot } from './blueprint-model.ts';
+import { PARTS } from './blueprint-parts.ts';
 import { surveyPost } from '../assets/claude-geometry/blueprint/samples.ts';
 import { defaultEnvironment, encodeEnvironment } from '../assets/claude-geometry/terrain/env.ts';
 import { HOME_INFRASTRUCTURE, homeVariant } from './home-layout.ts';
@@ -21,7 +21,7 @@ export const SHORT_STREET_ENVIRONMENT = encodeEnvironment(shortStreetEnvironment
  * retain the original pivot and durable door; the base retains its house core.
  * `reflected` records which side of the authored street the home occupies. */
 export function districtHome(kind: HomeVariant = 'starter', reflected = false): Blueprint {
-  const blueprint = homeVariant(kind === 'extension' ? 'starter' : kind);
+  const blueprint: Blueprint = homeVariant(kind === 'extension' ? 'starter' : kind);
   blueprint.id = '874be419-4763-4c8f-a581-cd7f44df0400' as BlueprintId;
   blueprint.name = ({ starter: 'Home · short-street cottage', terrace: 'Home · short-street terrace',
     roof: 'Home · short-street courtyard roof', extension: 'Home · short-street reading room' })[kind];
