@@ -11,6 +11,14 @@ import { stationSites } from '../src/shared/teleport.ts';
 import { distance } from '../src/shared/world.ts';
 import { placementProblem } from '../src/shared/planets.ts';
 import { fieldOf } from '../src/shared/terrain.ts';
+import { planetStore } from '../src/server/planets.ts';
+import { starterManifest, HOME_ENVIRONMENT } from '../src/shared/home-layout.ts';
+import { HOME_SAMPLE_RADIUS } from '../src/shared/home.ts';
+import { encodeBlueprint } from '../src/shared/blueprint-codec.ts';
+import type { Blueprint } from '../src/shared/blueprint-model.ts';
+import { segmentDistance } from '../src/shared/planet-plan/sphere.ts';
+import type { V3 } from '../src/shared/planet-plan/sphere.ts';
+import { SPAWN } from '../src/shared/world.ts';
 import type { Vec3 } from '../src/shared/world.ts';
 
 type Store = ReturnType<typeof openStore>;
@@ -151,3 +159,21 @@ it('records why a full home has no gate and offers no site until there is room',
   expect(preview.sites).toEqual([]); expect(preview.reason).toContain('Remove one to make room');
 });
 
+
+it("keeps an older home's new station off the routes its paths have not been laid on yet", () => {
+  const s = openStore(':memory:', { homeSample: true }); stores.push(s);
+  const planet = String(s.db.prepare("SELECT id FROM planets WHERE kind='garden' AND owner_id IS NULL ORDER BY rowid LIMIT 1").get()!.id), plan = starterManifest(HOME_SAMPLE_RADIUS);
+  s.db.prepare('INSERT INTO players(id,position,moved_at,planet_id) VALUES(?,?,?,?)').run('owner', JSON.stringify(SPAWN), Date.now(), planet);
+  s.db.prepare('UPDATE planets SET owner_id=? WHERE id=?').run('owner', planet);
+  const layout = planetStore(s.db);
+  for (const site of [plan.home, ...plan.infrastructure]) {
+    const saved = s.saveBlueprint('owner', { document: JSON.parse(encodeBlueprint({ ...site.blueprint, id: randomUUID() as Blueprint['id'] })), expectedVersion: 0 });
+    layout.create('owner', { planetId: planet, objectId: randomUUID(), kind: 'structure', position: site.position, rotation: site.rotation, blueprintHash: saved.hash });
+  }
+  const manifest = { generator: 'home-neighbourhood', version: 2, seed: 1, radius: HOME_SAMPLE_RADIUS, environment: HOME_ENVIRONMENT, catalogueVersion: 'home-kit-v1', routes: plan.routes, homeBuildingId: '', objects: layout.view('owner', planet).objects };
+  s.db.prepare('INSERT INTO home_manifests(planet_id,version,document,hash) VALUES(?,2,?,?)').run(planet, JSON.stringify(manifest), 'x'.repeat(64));
+  const view = s.universe('owner').currentPlanet, gate = view.objects.find(o => stationSites({ ...view, objects: [o] }).length)!;
+  expect(gate).toBeDefined();
+  for (const route of plan.routes) for (let i = 1; i < route.points.length; i++)
+    expect(segmentDistance(gate.position as V3, route.points[i - 1] as V3, route.points[i] as V3, HOME_SAMPLE_RADIUS).distance).toBeGreaterThanOrEqual(gate.radius! + .8);
+});

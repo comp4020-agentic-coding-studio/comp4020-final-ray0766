@@ -25,15 +25,18 @@ function legacy() {
   store.db.prepare('INSERT INTO players(id,position,moved_at,planet_id) VALUES(?,?,?,?)').run('owner', JSON.stringify(SPAWN), Date.now(), planet);
   store.db.prepare('UPDATE planets SET owner_id=? WHERE id=?').run('owner', planet);
   let building = '';
+  // Lay the pre-station save out directly: an owner's universe read is what gives an older home
+  // its teleport station, and that happens once the whole old layout exists (as in a real save).
+  const layout = planetStore(store.db);
   for (const [index, site] of [plan.home, ...plan.infrastructure].entries()) {
     const blueprint: Blueprint = { ...site.blueprint, id: randomUUID() as Blueprint['id'], name: `My original building ${index}`, groups: [{ name: `My original part group ${index}`, members: site.blueprint.parts.slice(0, 2).map(part => part.n) }] };
     const saved = store.saveBlueprint('owner', { document: JSON.parse(encodeBlueprint(blueprint)), expectedVersion: 0 }), id = randomUUID();
-    store.createObject('owner', { planetId: planet, objectId: id, kind: 'structure', position: site.position, rotation: site.rotation, blueprintHash: saved.hash });
+    layout.create('owner', { planetId: planet, objectId: id, kind: 'structure', position: site.position, rotation: site.rotation, blueprintHash: saved.hash });
     if (index === 0) building = id;
   }
   const room = { ...defaultHomeInterior(), version: 7, material: 'sage' };
   store.db.prepare('INSERT INTO home_interiors(planet_id,building_id,interior_id,document) VALUES(?,?,?,?)').run(planet, building, randomUUID(), JSON.stringify(room));
-  const manifest = { generator: 'home-neighbourhood', version: 2, seed: 20261008, radius: HOME_SAMPLE_RADIUS, environment: HOME_ENVIRONMENT, catalogueVersion: 'home-kit-v1', routes: plan.routes, homeBuildingId: building, objects: store.universe('owner').currentPlanet.objects };
+  const manifest = { generator: 'home-neighbourhood', version: 2, seed: 20261008, radius: HOME_SAMPLE_RADIUS, environment: HOME_ENVIRONMENT, catalogueVersion: 'home-kit-v1', routes: plan.routes, homeBuildingId: building, objects: layout.view('owner', planet).objects };
   store.db.prepare('INSERT INTO home_manifests(planet_id,version,document,hash) VALUES(?,2,?,?)').run(planet, JSON.stringify(manifest), createHash('sha256').update(canonicalJson(manifest)).digest('hex'));
   store.universe('owner');
   return { store, planet, building };

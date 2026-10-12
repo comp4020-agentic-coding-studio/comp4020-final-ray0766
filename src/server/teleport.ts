@@ -6,7 +6,10 @@ import { UUID_PATTERN } from '../assets/claude-geometry/core/ids.ts';
 import { encodeBlueprint } from '../shared/blueprint-codec.ts';
 import type { Blueprint } from '../shared/blueprint-model.ts';
 import { MAX_BLUEPRINTS, MAX_STRUCTURES, structureFit, structureSize } from '../shared/blueprints.ts';
-import { heading, yawFacing } from '../shared/planet-plan/sphere.ts';
+import { heading, segmentDistance, yawFacing } from '../shared/planet-plan/sphere.ts';
+import type { V3 } from '../shared/planet-plan/sphere.ts';
+import { PathPlacementCache } from '../shared/path-structure-placement.ts';
+import { StructurePlacementCache } from '../shared/structure-placement.ts';
 import { TELEPORT_STATION } from '../shared/planet-plan/compositions.ts';
 import { MAX_OBJECTS, placementProblem } from '../shared/planets.ts';
 import type { PlanetView } from '../shared/planets.ts';
@@ -76,16 +79,22 @@ export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof plane
       return !location || JSON.parse(String(location.document)).kind !== 'interior';
     }).map(row => JSON.parse(String(row.position)) as Vec3);
     const contents = { ...planet.blueprints, [STATION_HASH]: parts }, found: { position: Vec3; rotation: number }[] = [];
+    // One search shares prepared neighbours, instead of re-fitting every saved building per candidate.
+    const structureCache = new StructurePlacementCache(), cache = new PathPlacementCache();
+    // A home's planned routes (path tiles may not be laid yet) stay clear of the station.
+    const routes = (planet.homeManifest?.routes ?? []).map(route => route.points as V3[]);
+    const onRoute = (position: Vec3) => routes.some(points => points.some((point, i) => i > 0 && segmentDistance(position as V3, points[i - 1], point, radius).distance < size.radius + .8));
     for (const position of candidates(radius)) {
       if (found.some(f => distance(f.position, position, radius) < 4)) continue;
       if (occupants.some(point => distance(point, position, radius) < size.radius + .4)) continue;
       // The parked craft hovers about 3.4 m up; keep its hull (≈2.9 m half-length for the default design) off the gate.
       if (distance(position, craft, radius) < size.radius + 3.6) continue;
       if (field.waterLevel !== null && field.heightAt(position) < field.waterLevel) continue;
+      if (onRoute(position)) continue;
       // Face the forecourt toward the landing pad first, then the other quarter turns.
       const facing = turn(yawFacing(position as never, heading(position as never, SPAWN as never)));
       for (const rotation of [0, 1, 2, 3].map(k => turn(facing + k * Math.PI / 2))) {
-        if (placementProblem('structure', position, planet.objects, undefined, size.radius, radius, 2, { rotation, blueprintHash: STATION_HASH, blueprints: contents, field, terrainSeating: !!planet.environment })) continue;
+        if (placementProblem('structure', position, planet.objects, undefined, size.radius, radius, 2, { rotation, blueprintHash: STATION_HASH, blueprints: contents, field, terrainSeating: !!planet.environment, structureCache, cache })) continue;
         if (planet.environment && objectSeat(field, { id: 'station-preview', kind: 'structure', position, rotation, version: 1, assetVersion: 2, blueprintHash: STATION_HASH, ...size }, { [STATION_HASH]: parts }).problem) continue;
         if (structureFit(parts, position, rotation, field).problem) continue;
         found.push({ position, rotation }); break;
