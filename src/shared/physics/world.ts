@@ -22,7 +22,7 @@ import type { PartBox } from './parts.ts';
 import { villageLampColliders } from './props.ts';
 import { BODY_RADIUS, BODY_HEIGHT, STEP_HEIGHT, GROUND_SKIN as SKIN, GROUND_SUBSTEP as SUBSTEP } from './body.ts';
 import { mainPlanetNetwork } from '../planet-plan/main-planet.ts';
-import { HUB_TERMINAL, HUB_TERMINAL_YAW, TERMINAL, TERMINAL_COLLIDERS } from '../starport-terminal.ts';
+import { CONSOLE_COLLIDERS, HOME_TERMINAL_COLLIDERS, HUB_CONSOLE, HUB_CONSOLE_YAW, HUB_TERMINAL, HUB_TERMINAL_YAW, HOME_TOWER, homeTerminal, TERMINAL, TERMINAL_COLLIDERS } from '../starport-terminal.ts';
 import { kerbRuns } from '../planet-plan/kerbs.ts';
 import { ROAD_PROFILES, SURFACE } from '../planet-plan/params.ts';
 export { BODY_RADIUS, BODY_HEIGHT, STEP_HEIGHT } from './body.ts';
@@ -32,7 +32,8 @@ export const SPRINT_FLAG=1, JUMP_FLAG=2;
 export const FIXED_STEP=1/60, MAX_PATH_STEPS=28;
 // Bump whenever static collision semantics change. Durable ground rows and
 // movement batches use this same value; a scene revision alone is not enough.
-export const PHYSICS_VERSION=7;
+// 8: home landing pads gain a starport terminal (planets above 20 m).
+export const PHYSICS_VERSION=8;
 // Fence clients carrying the previous bundled public collision layout.
 // 9: the planned main planet (v12 ledger) with continuous streets and kerbs.
 export const HUB_PHYSICS_VERSION=9;
@@ -71,7 +72,8 @@ export class GroundWorld {
     this.generated=!!(sample?.environment??planet.environment);this.ground=this.generated?gradedField(this.field,objects,blueprints):this.field;
     this.revision=planet.revision;this.planetId=planet.id;
     if(planet.id==='hub')this.harbour();
-    if(planet.id==='hub'&&sample){this.kerbs();this.terminal();}
+    if(planet.id==='hub'&&sample){this.kerbs();this.terminal();this.console();}
+    if(planet.id!=='hub'&&this.baseRadius>20)this.homeTerminal();
     for(const object of objects){
       if(object.kind==='structure')this.structure(object,blueprints?.[object.blueprintHash!]??[],planet.homeDoor);
       else if(object.assetVersion===2&&QUICK_PARTS[object.kind]){
@@ -106,6 +108,18 @@ export class GroundWorld {
   private terminal(){
     const base=this.radius(HUB_TERMINAL),body:Body={objectId:'hub-terminal',dir:vec(HUB_TERMINAL),broad:2.6,colliders:[],round:{radius:TERMINAL.plinth,height:TERMINAL.top,base}};
     for(const shape of TERMINAL_COLLIDERS)this.add(body,HUB_TERMINAL,HUB_TERMINAL_YAW,base,shape);
+    this.bodies.push(body);
+  }
+  /** The boarding console on the harbour gate's ring. */
+  private console(){
+    const base=this.radius(HUB_CONSOLE),body:Body={objectId:'hub-console',dir:vec(HUB_CONSOLE),broad:1,colliders:[]};
+    for(const shape of CONSOLE_COLLIDERS)this.add(body,HUB_CONSOLE,HUB_CONSOLE_YAW,base,shape);
+    this.bodies.push(body);
+  }
+  /** A home's slim tower inside the landing pad's clear disc; the pad centre stays free for landing. */
+  private homeTerminal(){
+    const at=homeTerminal(this.baseRadius),base=this.radius(at.dir),body:Body={objectId:'home-terminal',dir:vec(at.dir),broad:2.6,colliders:[],round:{radius:HOME_TOWER.plinth,height:TERMINAL.top,base}};
+    for(const shape of HOME_TERMINAL_COLLIDERS)this.add(body,at.dir,at.yaw,base,shape);
     this.bodies.push(body);
   }
   /** Low kerbs along the planned main streets: walkable 6 cm steps on the

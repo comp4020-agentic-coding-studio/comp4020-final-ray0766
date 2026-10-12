@@ -45,7 +45,7 @@ it('fences the released v7 public client without changing private ground, names,
   for(const key of ['position','radius','vertical_speed','grounded','jump_held','planet_id'])expect(groundBeforeRejected![key],key).toEqual(publicBefore[key]);
   for(const table of protectedTables.filter(table=>table!=='players'))expect(beforeRejected[table],table).toEqual(beforeUpgrade[table]);
   expect(beforeRejected.players.find(row=>row.id==='private')).toEqual(beforeUpgrade.players.find(row=>row.id==='private'));
-  expect(b.ground!.physicsVersion).toBe(HUB_PHYSICS_VERSION);expect(privateBefore!.physics_version).toBe(7);
+  expect(b.ground!.physicsVersion).toBe(HUB_PHYSICS_VERSION);expect(privateBefore!.physics_version).toBe(PHYSICS_VERSION);
   expect(()=>s.move('public',b.position,100,'hub',{sequence:b.ground!.sequence+1,physicsVersion:7,steps:[[...b.position,FIXED_STEP,0]]})).toThrow('The walking model was updated');
   expect(s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('public')).toEqual(groundBeforeRejected);
   s.state('private');expect(s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('private')).toEqual(privateBefore);

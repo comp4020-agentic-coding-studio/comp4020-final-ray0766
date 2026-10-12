@@ -56,7 +56,10 @@ it('uses identical terrain and collision bodies when the public objects are copi
  const terminal=publicWorld.bodies.find(body=>body.objectId==='hub-terminal')!;
  expect(terminal.round).toMatchObject({radius:TERMINAL.plinth,height:TERMINAL.top});
  expect(terminal.colliders.filter(c=>c.support).map(c=>c.tag)).toEqual(['terminal plinth','terminal step']);
- expect(publicWorld.bodies.filter(body=>!['hub-ship','hub-terminal'].includes(body.objectId)&&!body.objectId.startsWith('kerb:'))).toEqual(privateWorld.bodies);
+ // The boarding console is a solid travel fitting; a private planet this size has its own slim pad tower.
+ expect(publicWorld.bodies.find(body=>body.objectId==='hub-console')!.colliders.map(c=>[c.tag,c.support])).toEqual([['boarding console',false]]);
+ expect(privateWorld.bodies.filter(body=>body.objectId==='home-terminal')).toHaveLength(1);
+ expect(publicWorld.bodies.filter(body=>!['hub-ship','hub-terminal','hub-console'].includes(body.objectId)&&!body.objectId.startsWith('kerb:'))).toEqual(privateWorld.bodies.filter(body=>body.objectId!=='home-terminal'));
  for(const point of [SPAWN,NPCS.mica.position,NPCS.sol.position]){
   expect(publicWorld.pose(point)).toEqual(privateWorld.pose(point));
   expect(publicWorld.support(point,23)).toEqual(privateWorld.support(point,23));

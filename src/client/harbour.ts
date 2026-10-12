@@ -27,8 +27,8 @@ import {MAIN_PLANET_LEDGER,mainPlanetNetwork} from '../shared/planet-plan/main-p
 import {createPlanOverlay} from './plan-overlay.ts';
 import {isPlannedMainPlanet} from '../shared/planet-plan/paving-grade.ts';
 import {yawFacing,tangent} from '../shared/planet-plan/sphere.ts';
-import {HUB_TERMINAL,TERMINAL} from '../shared/starport-terminal.ts';
-import {starportTerminal} from './starport-terminal.ts';
+import {HUB_CONSOLE,HUB_CONSOLE_YAW,HUB_TERMINAL,HUB_TERMINAL_YAW,HUB_TOWER,TERMINAL} from '../shared/starport-terminal.ts';
+import {boardingConsoleModel,boardingRing,starportTerminal} from './starport-terminal.ts';
 import {landmarkBeam} from './landmark-beams.ts';
 import {stationSites} from '../shared/teleport.ts';
 import type {V3} from '../shared/planet-plan/sphere.ts';
@@ -72,9 +72,11 @@ export function createHarbour(scene:T.Scene,village:SamplePublicVillage|null=nul
  }
  const dock=anchor(scene,HUB_DOCK),parked=makeShip(),shipAnchor=anchor(scene,HUB_SHIP);shipAnchor.add(parked.root);parked.root.position.y=1.25;parked.animate(0,false);
  blocks.push({point:new T.Vector3(...HUB_SHIP),radius:2.1,height:2.5});
- // The planned harbour marks its boarding gate with a tall starport terminal.
- const terminal=village&&isPlannedMainPlanet(radius)?starportTerminal(scenery):null;
- if(terminal)blocks.push({point:new T.Vector3(...HUB_TERMINAL),radius:TERMINAL.plinth,height:TERMINAL.top});
+ // The planned harbour marks its boarding gate with a tall starport terminal, a lit ring and a console.
+ const planned=!!village&&isPlannedMainPlanet(radius);
+ const terminal=planned?starportTerminal(scenery,HUB_TERMINAL,HUB_TERMINAL_YAW,HUB_TOWER):null;
+ const gate=planned?[boardingConsoleModel(scenery,HUB_CONSOLE,HUB_CONSOLE_YAW),boardingRing(scenery,HUB_DOCK,.035)]:[];
+ if(terminal)blocks.push({point:new T.Vector3(...HUB_TERMINAL),radius:TERMINAL.plinth,height:TERMINAL.top},{point:new T.Vector3(...HUB_CONSOLE),radius:.4,height:1.3});
  // Light columns over the boarding terminal (warm) and the teleport portal (teal), seen from across the town.
  const portal=terminal?stationSites({id:'hub',radius,environment:null,objects:[],blueprints:{}})[0]:undefined;
  const beams=terminal?[landmarkBeam(scene,HUB_TERMINAL,TERMINAL.top,46,'#ffb347'),...(portal?[landmarkBeam(scene,portal.ring,portal.ringTop+.1,40,'#b98cff')]:[])]:[];
@@ -93,5 +95,5 @@ export function createHarbour(scene:T.Scene,village:SamplePublicVillage|null=nul
  // Baking frees source geometry but transfers its materials to the batches.
  // Keep model handles to release their private lamps and retained silhouettes;
  // the host's following scene cleanup owns the merged batch geometry.
- return {globe,scenery,blocks,flowers,npcs,dock,parked,setSunDirection(dir:Vec3){terrain?.setSunDirection(dir);},dispose(){terminal?.dispose();beams.forEach(beam=>beam.dispose());planOverlay?.userData.disposeOwned?.();planOverlay?.removeFromParent();town?.dispose();finishes.forEach(finish=>finish.dispose());models.forEach(model=>model.dispose());terrain?.dispose();},height:surfaceHeight,animate(t:number,_reduced:boolean,_eye?:T.Vector3,_up?:T.Vector3,overview=false){terrain?.tick(t);void _reduced;if(town&&_eye){const stats=town.update(_eye,_up?.clone().multiplyScalar(radius),{globalLow:overview});scenery.userData.townStats=stats;}}};
+ return {globe,scenery,blocks,flowers,npcs,dock,parked,setSunDirection(dir:Vec3){terrain?.setSunDirection(dir);},dispose(){terminal?.dispose();gate.forEach(item=>item.dispose());beams.forEach(beam=>beam.dispose());planOverlay?.userData.disposeOwned?.();planOverlay?.removeFromParent();town?.dispose();finishes.forEach(finish=>finish.dispose());models.forEach(model=>model.dispose());terrain?.dispose();},height:surfaceHeight,animate(t:number,_reduced:boolean,_eye?:T.Vector3,_up?:T.Vector3,overview=false){terrain?.tick(t);void _reduced;if(town&&_eye){const stats=town.update(_eye,_up?.clone().multiplyScalar(radius),{globalLow:overview});scenery.userData.townStats=stats;}}};
 }
