@@ -200,11 +200,13 @@ it('initialises one normal identity once, keeps one planet and interior, and exc
   expect(() => store.claim('new-normal', occupied)).toThrow('already');
   expect(rows(store, 'home_interiors')).toHaveLength(1);
   const claimed = store.claim('old-unowned', occupied);
-  expect(claimed.player.home).toBeNull(); expect(claimed.currentPlanet.objects).toEqual([]);
+  // Claiming makes it this identity's home: its one teleport station is placed, and nothing else.
+  const station = String(store.db.prepare("SELECT object_id FROM home_stations WHERE planet_id=? AND status='placed'").get(occupied)!.object_id);
+  expect(claimed.player.home).toBeNull(); expect(claimed.currentPlanet.objects.map(object => object.id)).toEqual([station]);
   const plan = store.previewHomeSetup('old-unowned', { planetId: occupied });
   const confirmed = store.confirmHomeSetup('old-unowned', { planetId: occupied, expectedRevision: plan.expectedRevision, hash: plan.hash, visitEpoch: claimed.player.location!.visitEpoch, mode: 'add' });
   expect(confirmed.player.home?.canEdit).toBe(true);
-  expect(confirmed.currentPlanet.objects).toHaveLength(1);
+  expect(confirmed.currentPlanet.objects).toHaveLength(2);
   expect(confirmed.currentPlanet.homeManifest).toBeUndefined();
   expect(rows(store, 'home_interiors')).toHaveLength(2);
 });

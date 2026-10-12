@@ -21,6 +21,7 @@ import { navigationStore } from './navigation.ts';
 import { homePathStore } from './home-paths.ts';
 import { homeSetupStore } from './home-setup.ts';
 import { INTEGRATED_RADIUS, migrateIntegrationSchema } from './integration-migration.ts';
+import { migrateTeleport, teleportStore } from './teleport.ts';
 export { RequestError } from './errors.ts';
 
 interface Row { character: Character; quest: Quest; position: string; deliveries: number; revision: number; moved_at: number; planet_id: string }
@@ -39,7 +40,7 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-  if (schema > 15) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  if (schema > 16) { db.close(); throw new Error('Database schema is newer than this application.'); }
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
@@ -48,7 +49,7 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
     );`);
   let migrationBackup: string | null = null;
-  if (schema < 15) {
+  if (schema < 16) {
     if (schema > 0 && path !== ':memory:') {
       migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
       // VACUUM INTO includes committed WAL data and produces a consistent restore point.
@@ -173,7 +174,8 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
         db.prepare('INSERT INTO integration_config(id,version,radius) VALUES(1,1,?)').run(INTEGRATED_RADIUS);
         db.prepare('UPDATE planets SET world_radius=?').run(INTEGRATED_RADIUS);
       }
-      db.exec('PRAGMA user_version=15; COMMIT;');
+      migrateTeleport(db);
+      db.exec('PRAGMA user_version=16; COMMIT;');
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
   const history = historyStore(db);
@@ -188,6 +190,7 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
   const homes=homeStore(db,planets,blueprints,history,homeEnabled);
   const homePaths=homePathStore(db,planets,homes,homeEnabled);
   const homeSetup=homeSetupStore(db,planets,blueprints,homes,homeEnabled);
+  const teleport=teleportStore(db,planets,blueprints,homes,ground,homeEnabled);
   const row = (id: string): Row => {
     const result = db.prepare('SELECT * FROM players WHERE id=?').get(id) as unknown as Row | undefined;
     if (!result) throw new RequestError(401, 'Your session has expired. Reload to start a new visit.');
@@ -200,9 +203,17 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
     const r = row(id);
     return { ...(homeEnabled?{location,home:homes.descriptor(id)}:{}), worldRadius:planets.planet(r.planet_id).radius, environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
   };
-  const universe = (id: string) => { const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) }; };
+  const universe = (id: string) => {
+    // A home from before teleport stations gets its one placement attempt while its owner stands there.
+    const owned=homeEnabled?planets.owned(id):null;
+    if(owned&&row(id).planet_id===owned&&navigation.flight(id).mode==='ground'&&homes.location(id).kind!=='interior')teleport.ensureHomeStation(owned);
+    const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId), teleportMarks: teleport.marks(id) };
+  };
   return {
     db, state, universe, migrationBackup, homeSample, integratedWorld,
+    teleport(id:string,body:Record<string,unknown>,now=Date.now()){teleport.teleport(id,body,now);return universe(id);},
+    previewStation(id:string,body:Record<string,unknown>){return teleport.preview(id,body);},
+    confirmStation(id:string,body:Record<string,unknown>){teleport.confirm(id,body);return universe(id);},
     previewHomeSetup(id:string,body:Record<string,unknown>){row(id);return homeSetup.preview(id,body);},
     confirmHomeSetup(id:string,body:Record<string,unknown>){row(id);homeSetup.confirm(id,body);return universe(id);},
     previewHomePaths(id:string,body:Record<string,unknown>){row(id);return homePaths.preview(id,body);},
@@ -222,7 +233,7 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
         db.prepare('INSERT INTO players (id,position,moved_at) VALUES (?,?,?)').run(id, JSON.stringify(SPAWN), now);
         if(homeEnabled){
           const available={id:planets.freshHomePlanet()};
-          planets.claim(id,available.id);homes.initialise(available.id);const door=homes.door(available.id);
+          planets.claim(id,available.id);homes.initialise(available.id);teleport.ensureHomeStation(available.id);const door=homes.door(available.id);
           if(!door)throw new RequestError(409,'The sample home could not be prepared.');
           db.prepare('UPDATE players SET planet_id=?,position=? WHERE id=?').run(available.id,JSON.stringify(door.position),id);
           homes.movedExterior(id);db.exec('COMMIT');
@@ -272,7 +283,7 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
       homes.movedExterior(id);return universe(id);
     },
     terrain(id:string,body:Record<string,unknown>){row(id);homes.requireOutside(id);planets.terrain(id,body);return universe(id);},
-    claim(id: string, planetId: unknown) { row(id); planets.claim(id, planetId); if(homeSample)homes.initialise(String(planetId)); return universe(id); },
+    claim(id: string, planetId: unknown) { row(id); planets.claim(id, planetId); if(homeSample){homes.initialise(String(planetId));teleport.ensureHomeStation(String(planetId));} return universe(id); },
     createObject(id: string, body: Record<string, unknown>) { row(id); homes.requireOutside(id); planets.create(id, body); return universe(id); },
     updateObject(id: string, body: Record<string, unknown>) { row(id); homes.requireOutside(id); planets.update(id, body); return universe(id); },
     removeObject(id: string, body: Record<string, unknown>) { row(id); homes.requireOutside(id); planets.remove(id, body); return universe(id); },

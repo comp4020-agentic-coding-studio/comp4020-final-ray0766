@@ -1,3 +1,4 @@
+import {STATION_HASH} from '../src/server/station-blueprint.ts';
 import {HOME_GENERATOR_VERSION} from '../src/shared/home-generation.ts';
 import { afterEach, expect, it } from 'vitest';
 import { mkdtempSync, rmSync, existsSync } from 'node:fs';
@@ -25,7 +26,8 @@ afterEach(()=>{for(const s of stores.splice(0)){try{s.close();}catch{ /* already
 
 it('starts an isolated sample at its sole home and never regenerates its persisted manifest',()=>{
   const s=sample(),u=s.universe('owner');expect(u.player.worldRadius).toBe(21.6);expect(u.planets.every(p=>p.radius===21.6)).toBe(true);
-  const structures=u.currentPlanet.objects.filter(o=>o.kind==='structure');
+  // The generated layout, not counting the teleport station placed beside it.
+  const structures=u.currentPlanet.objects.filter(o=>o.kind==='structure'&&o.blueprintHash!==STATION_HASH);
   expect(structures.length).toBeGreaterThanOrEqual(2);expect(structures.length).toBeLessThanOrEqual(4);
   expect(u.currentPlanet.homeManifest).toMatchObject({generator:'home-neighbourhood',version:HOME_GENERATOR_VERSION});
   expect(u.player.home).toMatchObject({canEdit:true,buildingVersion:1,variant:'custom',interior:{room:HOME_ROOM}});

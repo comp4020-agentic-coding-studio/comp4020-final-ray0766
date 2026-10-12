@@ -61,7 +61,7 @@ it('migrates version 10 without resizing owned, built or occupied worlds or rewr
   store.createObject('owner',{planetId:owned.id,objectId:randomUUID(),kind:'lamp',position:normalize([.6,1,-.3]),rotation:0});store.visit('visitor',planets[3].id);store.visit('visitor',occupied.id);
   store.db.exec("UPDATE planets SET radius=10;UPDATE ground_states SET physics_version=1;ALTER TABLE planets DROP COLUMN radius;PRAGMA user_version=10");
   const before=store.db.prepare('SELECT * FROM planet_objects').all(),history=store.db.prepare('SELECT * FROM history_events').all();store.db.close();store=openStore(path);
-  expect(store.migrationBackup).toContain('.v10-');expect(store.db.prepare('PRAGMA user_version').get()!.user_version).toBe(15);
+  expect(store.migrationBackup).toContain('.v10-');expect(store.db.prepare('PRAGMA user_version').get()!.user_version).toBe(16);
   expect(store.db.prepare('SELECT * FROM planet_objects').all()).toEqual(before);expect(store.db.prepare('SELECT * FROM history_events').all()).toEqual(history);
   const u=store.universe('owner');expect(u.currentPlanet.radius).toBe(10);expect(u.player.ground!.physicsVersion).toBe(PHYSICS_VERSION);
   expect(u.planets.find(p=>p.id===occupied.id)!.radius).toBe(10);expect(u.planets.find(p=>p.id===planets[3].id)!.radius).toBe(10);expect(u.planets.find(p=>p.id===blank.id)!.radius).toBe(11);expect(u.planets.find(p=>p.id==='hub')!.radius).toBe(14);

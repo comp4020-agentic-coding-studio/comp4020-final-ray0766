@@ -56,6 +56,8 @@ export function navigationStore(db:DatabaseSync,planets:ReturnType<typeof planet
         db.prepare('INSERT INTO visits (player_id,planet_id,position) VALUES (?,?,?) ON CONFLICT(player_id,planet_id) DO UPDATE SET position=excluded.position').run(id,r.planet_id,r.position);
         f.mode='ground';f.speed=0;f.targetId=p.id;
         db.prepare('UPDATE players SET planet_id=?,position=?,moved_at=?,flight=?,flight_at=?,revision=revision+1 WHERE id=?').run(p.id,JSON.stringify(portPoint(p.id)),now,JSON.stringify(f),now,id);
+        // Only a completed landing marks a planet for teleport stations; fly-bys and atlas bearings never do.
+        db.prepare("INSERT OR IGNORE INTO teleport_marks(player_id,planet_id,source,marked_at) VALUES(?,?,'landing',?)").run(id,p.id,now);
         db.exec('COMMIT');
       }catch(error){db.exec('ROLLBACK');throw error;}
     },

@@ -100,6 +100,9 @@ const server = createServer(async (req, res) => {
       else if (url.pathname === '/api/flight/takeoff') {const result=store.takeoff(id,body);presence.leave(id);send(200,result);}
       else if (url.pathname === '/api/flight/checkpoint') send(200,store.flight(id,body));
       else if (url.pathname === '/api/flight/land') {const result=store.land(id,body);presence.leave(id);send(200,result);}
+      else if (url.pathname === '/api/teleport') {const result=store.teleport(id,body);presence.leave(id);send(200,result);}
+      else if (url.pathname === '/api/teleport/station/preview') send(200,store.previewStation(id,body));
+      else if (url.pathname === '/api/teleport/station/confirm') send(200,store.confirmStation(id,body));
       else if (url.pathname === '/api/planets/visit') throw new RequestError(410,'Board your ship and fly to the planet before landing.');
       else if (url.pathname === '/api/planets/claim') {
         if (Object.keys(body).some(k => k !== 'planetId')) throw new RequestError(400, 'Unexpected planet field.');

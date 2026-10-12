@@ -3,6 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { STATION_HASH } from '../src/server/station-blueprint.ts';
 import { openStore } from '../src/server/store.ts';
 import { homeGenerationSeed } from '../src/server/home.ts';
 import { HOME_ENVIRONMENT, starterManifest } from '../src/shared/home-layout.ts';
@@ -30,12 +31,15 @@ it('stores one generated layout per owned planet with concrete IDs, hashes and e
     const u = s.universe(id), manifest = u.currentPlanet.homeManifest!;
     expect(manifest).toMatchObject({ generator: 'home-neighbourhood', version: HOME_GENERATION_VERSION, seed: homeGenerationSeed(u.ownedPlanetId!), radius: HOME_SAMPLE_RADIUS, environment: u.currentPlanet.environment, catalogueVersion: 'village-kit-v1' });
     expect(u.player.home!.variant).toBe('custom');
-    expect(manifest.objects).toEqual(u.currentPlanet.objects);
+    // The teleport station is placed beside the generated layout, recorded in its own receipt.
+    const station = String(s.db.prepare("SELECT object_id FROM home_stations WHERE planet_id=? AND status='placed'").get(u.ownedPlanetId!)!.object_id);
+    expect(u.currentPlanet.objects.find(object => object.id === station)?.blueprintHash).toBe(STATION_HASH);
+    expect(manifest.objects).toEqual(u.currentPlanet.objects.filter(object => object.id !== station));
     expect(manifest.routes.find(route => route.id === 'home')!.points.length).toBeGreaterThanOrEqual(2);
     expect(manifest.objects.length).toBeLessThanOrEqual(HOME_GENERATION_BUDGET.maxObjects);
-    const structures = u.currentPlanet.objects.filter(object => object.kind === 'structure');
-    expect(structures.length).toBeGreaterThanOrEqual(2);
-    expect(structures.length).toBeLessThanOrEqual(HOME_GENERATION_BUDGET.maxStructures);
+    const structures = u.currentPlanet.objects.filter(object => object.kind === 'structure'), generated = structures.filter(object => object.id !== station);
+    expect(generated.length).toBeGreaterThanOrEqual(2);
+    expect(generated.length).toBeLessThanOrEqual(HOME_GENERATION_BUDGET.maxStructures);
     expect(s.library(id)).toHaveLength(structures.length);
     for (const object of structures) expect(s.library(id).some(entry => entry.hash === object.blueprintHash)).toBe(true);
     expect(s.db.prepare('SELECT count(*) AS n FROM home_interiors WHERE planet_id=?').get(u.ownedPlanetId!)!.n).toBe(1);

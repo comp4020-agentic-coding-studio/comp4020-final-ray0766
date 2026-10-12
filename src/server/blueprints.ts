@@ -6,6 +6,7 @@ import type { PartPlacement } from '../shared/blueprint-model.ts';
 import { BLUEPRINT_BODY_LIMIT, MAX_BLUEPRINTS } from '../shared/blueprints.ts';
 import type { LibraryEntry } from '../shared/blueprints.ts';
 import { RequestError } from './errors.ts';
+import { STATION_HASH } from './station-blueprint.ts';
 
 interface LibraryRow { document: string; hash: string; version: number }
 const entry = (row: LibraryRow): LibraryEntry => {
@@ -25,6 +26,8 @@ export function blueprintStore(db: DatabaseSync) {
       return JSON.parse(r.content as string).parts;
     },
     owns(owner: string, hash: unknown) {
+      // The shared teleport station is a catalogue item: placing it needs no library slot.
+      if (hash === STATION_HASH) return;
       if (typeof hash !== 'string' || !db.prepare('SELECT 1 FROM blueprint_library WHERE owner_id=? AND hash=?').get(owner, hash)) throw new RequestError(403, 'Place a blueprint from your own saved library.');
     },
     save(owner: string, body: Record<string, unknown>): LibraryEntry {
