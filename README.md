@@ -14,7 +14,7 @@ geometry update, measured main-world frame counts and its sub-millimetre window-
 and terracotta presentation, village ship parts and compatible ground collision.
 The earlier [compact-world milestone](docs/integration/compact-worlds.md) introduced
 a 14 m village and persisted 10–12 m new planets while protecting old layouts.
-The current default public world is the 21.6 m-radius [planned main planet (v12)](docs/integration/planned-main-planet-v12.md): one authored plan drives continuous streets, 56 buildings from shared workshop compositions, gardens and plazas; the v10 town below is the previous layout. Ledger v14 adds the arrival-square [teleport portal](docs/integration/teleport-stations.md), which also stands on every home, and a starport terminal marks the boarding gate.
+The current default public world is the 21.6 m-radius [planned main planet (v12)](docs/integration/planned-main-planet-v12.md): one authored plan drives continuous streets, 56 buildings from shared workshop compositions, gardens and plazas; the v10 town below is the previous layout. Ledger v15 adds the arrival-square [teleport portal](docs/integration/teleport-stations.md), which also stands on every home, and starport terminals with lit boarding rings mark the harbour gate and every home pad.
 [Sprint and jump](docs/integration/sprint-jump.md) adds hold-Shift running and
 Space jumping with shared collision, server validation and saved airborne state.
 [Chinese / English interface](docs/integration/bilingual.md) adds an always-available

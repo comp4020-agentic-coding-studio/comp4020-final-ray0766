@@ -440,3 +440,25 @@ What went wrong along the way:
   way, and real Chrome screenshots caught it.
 
 No push, deployment or 8098 change.
+
+## Home terminals and visible trigger zones (12 October 2026)
+
+The user asked for a terminal on home pads too, and for a device at
+both kinds of interaction point, because nothing showed where to
+stand.
+
+- Every home above 20 m now has a slim tower in the pad's clear disc,
+  with collision. `PHYSICS_VERSION` rose to 8.
+- Lit rings show the boarding zone (1.5 m) and the portal pad (0.95 m).
+  The portal's server reach shrank from 1.65 m to 1.05 m to match its
+  pad.
+- The harbour gate and the portal each have a console.
+
+At first the home tower stood where the old return post was, west of
+the pad. The home generator then rejected every layout. Its route check
+also walks each route 0.14 m to either side, and the west edge clipped
+the tower base. All generated routes leave the pad northwards, so the
+tower now stands due south.
+
+A read-only copy of the 8098 database showed no saved object near any
+home tower and no player standing inside one.

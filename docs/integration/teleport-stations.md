@@ -46,8 +46,20 @@ It stays inside the per-part budget at every LOD:
 | medium | 1608 | 1800 |
 | high | 2616 | 4000 |
 
-The interaction point is 0.95 m in front of the ring. The arrival point is
-2 m in front, on the forecourt (`STATION_POINTS`).
+**Where to stand.** A lit ring 0.95 m in radius is set into the forecourt,
+centred 1.35 m in front of the ring. It is exactly the zone where the prompt
+appears:
+
+- the server accepts within 1.05 m of its centre (`STATION_REACH`);
+- the client prompts within 0.93 m.
+
+A waist-high console with a slanted lit screen stands beside the pad. The
+console is solid; the pad is a 2.5 cm walkable support. The arrival point is
+0.4 m behind the pad's centre, inside the ring, so a traveller who arrives
+already sees the prompt (`STATION_POINTS`).
+
+With the pad and console the part is 496 / 1736 / 2744 triangles (low /
+medium / high), still within budget.
 
 **Redefinition.** The earlier small moon gate used the same ID. It was
 redefined in place because it had never been saved:
@@ -74,11 +86,13 @@ between Market Street and Harbour Way.
 - The arrival point is 5.4 m from the spawn point.
 - At bearing 255° the larger portal displaced a Market Street frontage lot.
   Bearings 265° to 280° give no errors.
-- The main planet ledger is now v14: 57 structures and 153 objects, with
-  the same 17 plan warnings and no errors.
+- The main planet ledger has 57 structures and 153 objects, with the same
+  17 plan warnings and no errors.
 - One frontage lot beside it, `harbour-way-l1-1`, now takes a shop instead
   of a two-storey town house.
-- The hub scene revision becomes 1014. `HUB_PHYSICS_VERSION` stays 9.
+- The pad and console change the part's collision, and the harbour console
+  is new, so the ledger is v15 (hub scene revision 1015). The plan is
+  unchanged. `HUB_PHYSICS_VERSION` stays 9.
 
 ## Finding the boarding gate and the portal
 
@@ -122,9 +136,41 @@ collision and is not saved.
 From the spawn point the amber column shows above the post office. From
 Market Street and the quay the violet one marks the portal.
 
-Homes are unchanged here: their pad already has the hovering craft and the
-portal a few metres away. The garden beacon's existing note keeps light
-columns out of walking views.
+**Boarding ring and console.** Both kinds of boarding gate draw a lit ring
+1.5 m in radius on the ground. It matches where "Board your ship" appears
+(within `BOARD_RADIUS` − 0.12 = 1.53 m; the server allows 1.65 m). The ring
+is drawing only.
+
+At the harbour a boarding console stands on the ring's edge, 1.25 m from the
+gate on the terminal's side. Its screen reads "BOARD / 站进光圈登机" (stand in
+the ring to board), and it is solid.
+
+**Home terminal.** Every home planet above 20 m now has a slim version of the
+tower beside its landing pad:
+
+- a 0.3 m shaft;
+- the same cab and beacon at 14.6 m;
+- one STARPORT board facing the pad;
+- a lit boarding screen at chest height on the shaft.
+
+It stands 0.6 m due south of the pad centre, behind every generated route
+(they all leave the pad northwards). Saved objects keep 1 m from the pad, so
+the tower stays inside that clear disc and never needs a player's ground. The
+pad centre, where flights land, stays free.
+
+Checked on a read-only copy of the 8098 database, all 87 large gardens have:
+
+- no saved object near the tower (smallest gap 0.92 m, counting the plinth
+  as a square);
+- no saved player standing inside it.
+
+Small legacy gardens keep the low post. The old "RETURN / GATE" post and its
+board are gone from large homes.
+
+**Physics version.** The tower has collision, so `PHYSICS_VERSION` (every
+planet except the hub) is now 8. Ground rows saved at 7 or 8 are kept when
+still valid, as before. There are no light columns on homes. The garden
+beacon's existing note keeps them out of walking views.
 
 **Homes.** New homes get the station in the same transaction that creates
 the home.
