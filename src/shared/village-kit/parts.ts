@@ -1,7 +1,7 @@
 import type { Emit } from '../../assets/claude-geometry/blueprint/parts/kit.ts';
 import type { Box } from '../../assets/claude-geometry/blueprint/parts/info.ts';
 import { WALL_T } from '../../assets/claude-geometry/blueprint/parts/kit.ts';
-import { GATE, gardenFence, gardenGate, gardenHedge, gardenLawn, gardenWall, hoodedDoor, longFoot, longRoof, longVergeLeft, longVergeRight, roadApron, roadEdge, roadKerb, roadPaving, roadPavingCurve, roadPlaza, shopFront, stationGate, windowBox } from './geometry.ts';
+import { GATE, PORTAL_PAD, gardenFence, gardenGate, gardenHedge, gardenLawn, gardenWall, hoodedDoor, longFoot, longRoof, longVergeLeft, longVergeRight, roadApron, roadEdge, roadKerb, roadPaving, roadPavingCurve, roadPlaza, shopFront, stationGate, windowBox } from './geometry.ts';
 import { PAVING } from './style.ts';
 import type { Vec3 } from '../world.ts';
 
@@ -133,14 +133,16 @@ VILLAGE_KIT_PARTS_MUTABLE.push(
     walk: 'Not walkable.', connects: 'On the right (local +X) end of a long gable roof turned the same way.', emit: longVergeRight },
 );
 /** The station gate's interaction and arrival points, part-local metres (+Z is the approach). */
-export const STATION_POINTS = { interact: [GATE.x, 0, .95] as Vec3, arrival: [GATE.x, 0, 2] as Vec3 } as const;
+export const STATION_POINTS = { interact: [GATE.x, 0, PORTAL_PAD.z] as Vec3, arrival: [GATE.x, 0, PORTAL_PAD.z + .4] as Vec3 } as const;
 VILLAGE_KIT_PARTS_MUTABLE.push(
   { id: 'station.teleport', label: 'Teleport portal', blurb: 'Wormhole ring of an interstellar station', zh: { name: '星际传送门', blurb: '星际传送站的虫洞圆环' },
     category: 'Structure', mount: 'cell', role: 'equipment', span: 'side', cells: 5, tags: ['station', 'teleport', 'travel', 'gate', 'portal', 'wormhole'],
-    envelope: box([-.5, 0, -.5], [4.5, 5.3, .5]),
+    envelope: box([-.5, 0, -.5], [4.5, 5.3, PORTAL_PAD.z + PORTAL_PAD.radius + .1]),
     colliders: [collider('portal dais', [GATE.x - 2.45, 0, -.5], [GATE.x + 2.45, GATE.daisTop, .3], true), collider('portal step', [GATE.x - 1.5, 0, .3], [GATE.x + 1.5, .11, .5], true),
-      collider('portal ring', [GATE.x - GATE.chevron - .01, GATE.daisTop, -.27], [GATE.x + GATE.chevron + .01, GATE.centreY + GATE.chevron + .03, .27])],
-    walk: 'Step onto the 22 cm dais in front of the ring; the ring and its membrane are solid.', connects: 'Five cells along local +X on ground floors; keep the two rows in front (+Z) clear as the approach.', emit: stationGate },
+      collider('portal ring', [GATE.x - GATE.chevron - .01, GATE.daisTop, -.27], [GATE.x + GATE.chevron + .01, GATE.centreY + GATE.chevron + .03, .27]),
+      collider('portal pad', [GATE.x - PORTAL_PAD.radius - .06, 0, PORTAL_PAD.z - PORTAL_PAD.radius - .06], [GATE.x + PORTAL_PAD.radius + .06, .025, PORTAL_PAD.z + PORTAL_PAD.radius + .06], true),
+      collider('portal console', [GATE.x + PORTAL_PAD.console.x - .3, 0, PORTAL_PAD.z - .34], [GATE.x + PORTAL_PAD.console.x + .3, PORTAL_PAD.console.height + .08, PORTAL_PAD.z + .34])],
+    walk: 'Stand on the lit pad in front of the ring to use it; the dais is a 22 cm step, the ring, membrane and console are solid.', connects: 'Five cells along local +X on ground floors; keep the two rows in front (+Z) clear as the approach.', emit: stationGate },
 );
 export const VILLAGE_KIT_PARTS: readonly VillageKitPart[] = VILLAGE_KIT_PARTS_MUTABLE;
 export const VILLAGE_KIT_BY_ID: Readonly<Record<VillageKitId, VillageKitPart>> = Object.fromEntries(VILLAGE_KIT_PARTS.map(p => [p.id, p])) as Record<VillageKitId, VillageKitPart>;

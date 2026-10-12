@@ -221,7 +221,7 @@ const authoredTown = () => {
     expect(createHash('sha256').update(bytes).digest('hex')).toBe(expected);
     town = JSON.parse(bytes.toString()) as PublicTown;
   } else town = publicTown(21.6);
-  expect(town.version, 'These world anchors belong to the v14 planned main planet.').toBe(14);
+  expect(town.version, 'These world anchors belong to the v15 planned main planet.').toBe(15);
   const world = new GroundWorld({ ...town, id: 'resident-authored-test', revision: 0 });
   // Include the unchanged shared ship obstacle without auto-appending another
   // public village to this explicit, hash-bound object ledger.

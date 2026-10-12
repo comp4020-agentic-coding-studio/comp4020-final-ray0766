@@ -308,6 +308,8 @@ export const longVergeRight = (k: Kit) => longVerge(k, 1);
 
 /** The station's wormhole ring, in local metres: centre x = GATE.x, just behind z = 0, top above 5 m. */
 export const GATE = { x: 2, centreY: 2.75, outer: 2.35, inner: 1.88, depth: .4, daisTop: .22, chevron: 2.47 } as const;
+/** The lit standing pad in front of the ring (its ring is the trigger radius) and the console beside it. */
+export const PORTAL_PAD = { z: 1.35, radius: .95, band: .09, console: { x: 1.45, height: 1.18 } } as const;
 /** Ring band, rim lines, nine lit chevrons, a swirling membrane on a stone dais. */
 export function stationGate(k: Kit) {
   const { b } = k, g = GATE, segments = k.low ? 16 : k.fine ? 40 : 24, mid = (g.outer + g.inner) / 2, band = g.outer - g.inner;
@@ -361,5 +363,23 @@ export function stationGate(k: Kit) {
     const spiral = new BufferGeometry(); spiral.setAttribute('position', new Float32BufferAttribute(pos, 3)); spiral.computeVertexNormals();
     b.geometry(k.m('marking'), spiral);
   }
+  // Standing pad: a lit ring on the forecourt where the gate answers, with a small centre mark.
+  const pad = PORTAL_PAD, sides = k.low ? 16 : 32, ring: number[] = [], centre: number[] = [];
+  for (let i = 0; i < sides; i++) {
+    const a0 = i / sides * Math.PI * 2, a1 = (i + 1) / sides * Math.PI * 2, r0 = pad.radius - pad.band / 2, r1 = pad.radius + pad.band / 2, y = .018;
+    const p = (a: number, r: number) => [g.x + Math.cos(a) * r, y, pad.z + Math.sin(a) * r];
+    ring.push(...p(a0, r0), ...p(a1, r0), ...p(a0, r1), ...p(a1, r0), ...p(a1, r1), ...p(a0, r1));
+    if (i % 2 === 0) centre.push(g.x, y, pad.z, ...[g.x + Math.cos(a1 * 2) * .16, y, pad.z + Math.sin(a1 * 2) * .16], ...[g.x + Math.cos(a0 * 2) * .16, y, pad.z + Math.sin(a0 * 2) * .16]);
+  }
+  for (const [material, pos] of [['lamp', ring], ['marking', centre]] as const) {
+    const geometry = new BufferGeometry(); geometry.setAttribute('position', new Float32BufferAttribute(pos, 3)); geometry.computeVertexNormals();
+    b.geometry(k.m(material), geometry);
+  }
+  // Console beside the pad: stone foot, iron post and a slanted lit screen facing the pad.
+  const cx = g.x + pad.console.x;
+  b.box(k.m('concrete'), [.5, .08, .6], { position: [cx, .04, pad.z] }, 0);
+  b.box(k.m('steel'), [.16, .92, .16], { position: [cx + .03, .5, pad.z] }, 0);
+  b.box(k.m('concrete'), [.42, .1, .62], { position: [cx, 1.08, pad.z], rotation: [0, 0, .55] }, 0);
+  b.box(k.m('lamp'), [.28, .02, .5], { position: [cx - Math.sin(.55) * .06, 1.08 + Math.cos(.55) * .06, pad.z], rotation: [0, 0, .55] }, 0);
   b.emitter('pad', [g.x, g.daisTop + .05, .6], [0, 1, 0]);
 }

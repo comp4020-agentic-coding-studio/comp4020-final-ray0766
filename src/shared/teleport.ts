@@ -12,8 +12,8 @@ import type { Vec3 } from './world.ts';
 
 /** The workshop part that makes any structure a teleport station. */
 export const TELEPORT_PART = 'station.teleport';
-/** Server reach from a saved position to a gate's interaction point (metres on the surface). */
-export const STATION_REACH = 1.65;
+/** Server reach from a saved position to the centre of a gate's lit pad (metres on the surface); the client prompt uses 0.12 m less, inside the drawn ring. */
+export const STATION_REACH = 1.05;
 
 export interface StationSite {
   objectId: string; partNumber: number;
