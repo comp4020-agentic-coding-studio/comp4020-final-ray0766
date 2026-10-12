@@ -27,6 +27,15 @@ Everything else in `spec/` is yours to write. Any `spec/*.test.ts` runs with
 `pnpm check`, against the same running app. Some lines of a spec only a person
 can judge; those are left to the crit and the marker.
 
+The exception is the legacy HTTP suite listed in `vitest.config.ts`
+(`api`, `blueprints`, `planet-api`, `boarding-api`, `history`, `save-recovery`,
+`terrain`). Those specs check the original contract, where a new identity
+arrives without a home, which the deployed world no longer has. `pnpm check`
+runs them in a second project against their own legacy test world, started
+from this checkout on a free port with a throwaway database
+(`spec/legacy-world-setup.ts`). It runs one file at a time and refuses to start
+if the server is not the legacy world.
+
 At a crit, a green `check` job is half the shipped mark, but it's never the
 judgement of the work: your tutor checks what you deployed against the published
 spec.
