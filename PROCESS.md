@@ -413,3 +413,30 @@ candidate database is unchanged. I checked the round trip both ways,
 third-planet refusal and visitor refusal: each sentinel failed with
 its check removed, and real Chrome passed at both sizes. No push,
 deployment or 8098 change.
+
+## Larger teleport portal and a starport terminal (12 October 2026)
+
+The user could not find the boarding gate or the teleport station. The
+boarding gate was only an unmarked spot on the quay.
+
+- The station part is now a 4.7 m wormhole ring with lit chevrons and a
+  spiral membrane, spanning five cells. The multi-cell rule proxies now
+  cover any width.
+- A 14.6 m starport terminal stands beside the boarding gate. It is
+  travel-system scenery with matching server and client collision.
+
+Neither landmark could be seen from the spawn point. The tower hid behind
+the post office on this small planet, so I added amber and violet light
+columns over the two landmarks. They are drawing only.
+
+What went wrong along the way:
+
+- At its first bearing the larger portal displaced a Market Street lot.
+  I moved it to 270°.
+- One existing test compared every public collision body with the copied
+  objects. I excluded the terminal there, as it already excluded the craft,
+  and asserted the terminal on its own. Removing the terminal turns it red.
+- The spiral arms did not show at first. Their triangles faced the wrong
+  way, and real Chrome screenshots caught it.
+
+No push, deployment or 8098 change.
