@@ -61,3 +61,12 @@ The current `ColonyBridge` is exported for a future UI adapter. Its actual API,
 validation rules and unimplemented extensions are documented in
 `docs/integration/workshop-adapter.md`. No external module was integrated. These
 references did not add resource collection, survival, combat or an economy.
+
+## Update, 13 October 2026
+
+The heartbeat described above no longer runs once a second. Since `9c76e15`
+(sprint and jump) the client sends it every 250 ms (`PRESENCE_INTERVAL` in
+`src/shared/presence.ts`); the six-second expiry, the 256-entry bound and the
+16 nearest visitors are unchanged. Saved world changes still reach visitors
+through the one-second universe poll in `src/client/colony.ts`. Measured
+latencies for both are in `docs/evidence/crit9-realtime/verification.md`.
