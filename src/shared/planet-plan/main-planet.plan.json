@@ -73,7 +73,8 @@
     {"id":"lookout","district":"south","composition":"lookout","plaza":"lookout-terrace","at":100},
     {"id":"lookout-pavilion","district":"south","composition":"pavilion","plaza":"lookout-terrace","at":270},
     {"id":"tea-cottage","district":"tea","composition":"cottage-hedge","plaza":"tea-court","at":25},
-    {"id":"quay-store","district":"arrival","composition":"harbour-store","plaza":"harbour-quay","at":275}
+    {"id":"quay-store","district":"arrival","composition":"harbour-store","plaza":"harbour-quay","at":275},
+    {"id":"teleport-station","district":"arrival","composition":"teleport-station","plaza":"arrival-square","at":255}
   ],
   "frontages": [
     {"id":"harbour-way-l1","district":"arrival","road":"harbour-way","side":"left","from":4.6,"to":9.5,"compositions":["shop","townhouse-tall"]},

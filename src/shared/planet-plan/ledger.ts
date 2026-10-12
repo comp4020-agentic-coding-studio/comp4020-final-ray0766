@@ -5,7 +5,7 @@ import { PUBLIC_COMPOSITIONS } from './compositions.ts';
 import { mirrorParts } from './footprint.ts';
 
 /** Public main-planet layout version; the hub scene revision is 1000 + this. */
-export const MAIN_PLANET_VERSION = 12;
+export const MAIN_PLANET_VERSION = 13;
 /** The frozen output of `node scripts/planet-plan.ts build`. Loads with no siting work. */
 export interface MainPlanetLedger {
   format: 'little-worlds-main-planet-ledger'; version: number;

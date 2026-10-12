@@ -12,7 +12,7 @@ import {localToDir} from '../src/assets/claude-geometry/core/anchor.ts';
 
 const village=samplePublicVillage();
 it('retains the landing, delivery and harbour bearings within the whole-sphere public template',()=>{
- expect(village.version).toBe(SAMPLE_PUBLIC_VERSION);expect(SAMPLE_PUBLIC_VERSION).toBe(PUBLIC_TOWN_VERSION);expect(SAMPLE_PUBLIC_VERSION).toBe(12);
+ expect(village.version).toBe(SAMPLE_PUBLIC_VERSION);expect(SAMPLE_PUBLIC_VERSION).toBe(PUBLIC_TOWN_VERSION);expect(SAMPLE_PUBLIC_VERSION).toBe(13);
  expect(village.radius).toBe(21.6);expect(village.destinations.map(d=>d.id)).toEqual(['post','orchard','harbour']);
  expect(village.destinations.map(d=>d.position)).toEqual([NPCS.mica.position,NPCS.sol.position,HUB_DOCK]);
  for(const destination of village.destinations){
