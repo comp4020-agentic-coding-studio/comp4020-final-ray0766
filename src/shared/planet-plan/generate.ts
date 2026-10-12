@@ -9,7 +9,7 @@ import { CLEARANCE, PLAN_RADIUS, PLAZA, RESERVES, ROAD_PROFILES, STREET_PROPS, r
 import type { RoadClass } from './params.ts';
 import type { PlanetPlan, PlanLot } from './schema.ts';
 import { buildNetwork, doorPieces, plazaDistance, pointInPolygon, sampleAt, v2 } from './network.ts';
-import type { Network, Piece, Sample } from './network.ts';
+import type { Network, Piece } from './network.ts';
 import { PUBLIC_COMPOSITIONS } from './compositions.ts';
 import type { Composition } from './compositions.ts';
 import { compositionFootprint, mirrorParts } from './footprint.ts';
@@ -67,7 +67,6 @@ function polygonGap(a: V3[], b: V3[]): number {
   }
   return best;
 }
-const pieceLength = (piece: Piece) => piece.samples[piece.samples.length - 1].s - piece.samples[0].s;
 
 export interface PlanOptions { field: HeightField; radius?: number }
 
@@ -281,7 +280,6 @@ export function planTown(plan: PlanetPlan, options: PlanOptions): PlannedTown {
     }
   }
   for (const res of residents) {
-    if (onSurface(res.position, -10) && false) continue;
     if (blockers(res.position, .25) && !res.route) report('warning', 'resident', res.id, res.position, `${res.id} stands close to a building or prop.`);
   }
   const nearestCentre = (p: V3) => {

@@ -23,7 +23,9 @@ import type {Obstacle} from './scene.ts';
 import {terrainModel} from './terrain-model.ts';
 import {buildStructureFinish} from './structure-finish.ts';
 import {createPublicTownArt} from './public-town-art.ts';
-import {MAIN_PLANET_LEDGER} from '../shared/planet-plan/main-planet.ts';
+import {MAIN_PLANET_LEDGER,mainPlanetNetwork} from '../shared/planet-plan/main-planet.ts';
+import {createPlanOverlay} from './plan-overlay.ts';
+import {isPlannedMainPlanet} from '../shared/planet-plan/paving-grade.ts';
 import {yawFacing,tangent} from '../shared/planet-plan/sphere.ts';
 import type {V3} from '../shared/planet-plan/sphere.ts';
 /** The planned planet turns the two task characters towards their street. */
@@ -45,6 +47,10 @@ export function createHarbour(scene:T.Scene,village:SamplePublicVillage|null=nul
  const prototypes=new Map<BuildKind,T.Group>();
  const town=village?(preparedTown??createPublicTownArt(village,radius)):null;
  if(town)scenery.add(town.root);
+ // Planning debug view: ?plan=1 draws the plan's streets, setbacks, footprints, entrances and conflicts.
+ const planOverlay=village&&isPlannedMainPlanet(radius)&&typeof location!=='undefined'&&new URLSearchParams(location.search).get('plan')==='1'
+  ?createPlanOverlay(mainPlanetNetwork(),MAIN_PLANET_LEDGER,village.blueprints,fieldOf(village.environment,radius)):null;
+ if(planOverlay)scene.add(planOverlay);
  for(const o of objects){
   if(town){if(objectHeight(o)>.6)blocks.push({point:new T.Vector3(...o.position),radius:objectRadius(o),height:objectHeight(o)});continue;}
   if(o.kind==='structure'){
@@ -77,5 +83,5 @@ export function createHarbour(scene:T.Scene,village:SamplePublicVillage|null=nul
  // Baking frees source geometry but transfers its materials to the batches.
  // Keep model handles to release their private lamps and retained silhouettes;
  // the host's following scene cleanup owns the merged batch geometry.
- return {globe,scenery,blocks,flowers,npcs,dock,parked,setSunDirection(dir:Vec3){terrain?.setSunDirection(dir);},dispose(){town?.dispose();finishes.forEach(finish=>finish.dispose());models.forEach(model=>model.dispose());terrain?.dispose();},height:surfaceHeight,animate(t:number,_reduced:boolean,_eye?:T.Vector3,_up?:T.Vector3,overview=false){terrain?.tick(t);void _reduced;if(town&&_eye){const stats=town.update(_eye,_up?.clone().multiplyScalar(radius),{globalLow:overview});scenery.userData.townStats=stats;}}};
+ return {globe,scenery,blocks,flowers,npcs,dock,parked,setSunDirection(dir:Vec3){terrain?.setSunDirection(dir);},dispose(){planOverlay?.userData.disposeOwned?.();planOverlay?.removeFromParent();town?.dispose();finishes.forEach(finish=>finish.dispose());models.forEach(model=>model.dispose());terrain?.dispose();},height:surfaceHeight,animate(t:number,_reduced:boolean,_eye?:T.Vector3,_up?:T.Vector3,overview=false){terrain?.tick(t);void _reduced;if(town&&_eye){const stats=town.update(_eye,_up?.clone().multiplyScalar(radius),{globalLow:overview});scenery.userData.townStats=stats;}}};
 }

@@ -77,8 +77,8 @@ function filleted(vertices: Vertex[], cls: RoadClass, junctionNodes: ReadonlySet
     const limit = .45 * Math.min(arc(v.p, prev, R), arc(v.p, next, R));
     if (L > limit) { L = limit; radius = L * Math.tan(alpha / 2); }
     const T1 = v2.scale(a, L), T2 = v2.scale(b, L), m = v2.unit(v2.add(a, b)), C = v2.scale(m, radius / Math.sin(alpha / 2));
-    const t1 = Math.atan2(T1[1] - C[1], T1[0] - C[0]); let t2 = Math.atan2(T2[1] - C[1], T2[0] - C[0]);
-    let delta = t2 - t1; while (delta > Math.PI) delta -= 2 * Math.PI; while (delta < -Math.PI) delta += 2 * Math.PI; t2 = t1 + delta;
+    const t1 = Math.atan2(T1[1] - C[1], T1[0] - C[0]);
+    let delta = Math.atan2(T2[1] - C[1], T2[0] - C[0]) - t1; while (delta > Math.PI) delta -= 2 * Math.PI; while (delta < -Math.PI) delta += 2 * Math.PI;
     const count = Math.max(2, Math.ceil(Math.abs(delta) * radius / .2));
     for (let k = 0; k <= count; k++) {
       const th = t1 + delta * k / count;

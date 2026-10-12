@@ -19,7 +19,7 @@ export interface MainPlanetLedger {
   routes: { id: string; width: number; points: V3[] }[];
   residents: { id: string; place: string; position: V3; facing?: V3; route?: V3[] }[];
   npcFacing: { mica: V3; sol: V3 };
-  conflicts: { severity: 'error' | 'warning'; kind: string; id: string; message: string }[];
+  conflicts: { severity: 'error' | 'warning'; kind: string; id: string; message: string; at: V3 }[];
 }
 /** Parts for every blueprint hash a ledger places, rebuilt from the shared compositions. */
 export function ledgerBlueprints(ledger: Pick<MainPlanetLedger, 'blueprints'>): Record<string, PartPlacement[]> {

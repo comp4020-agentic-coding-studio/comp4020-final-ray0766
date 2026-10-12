@@ -21,6 +21,6 @@ export async function buildLedger(town: PlannedTown, planText: string): Promise<
     objects, blueprints,
     lots: town.lots.map(l => ({ id: l.id, objectId: `town-${l.id}`, district: l.district, composition: l.composition.id, entry: l.entry, road: l.frontRoad ?? null, plaza: l.frontPlaza ?? null })),
     doorPaths: town.doorPaths, routes: town.routes, residents: town.residents, npcFacing: town.npcFacing,
-    conflicts: town.conflicts.map(c => ({ severity: c.severity, kind: c.kind, id: c.id, message: c.message })),
+    conflicts: town.conflicts.map(c => ({ severity: c.severity, kind: c.kind, id: c.id, message: c.message, at: c.at })),
   };
 }
