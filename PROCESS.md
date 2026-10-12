@@ -398,3 +398,18 @@ response had already placed the station before the test measured the
 home, so I moved the baseline before takeoff and saw it fail. See
 [the teleport station record](docs/integration/teleport-stations.md).
 No push, deployment or 8098 change.
+
+## Teleport stations narrowed to home and harbour (12 October 2026)
+
+After review the stations now link only each player's own home and the
+harbour. The home gate offers "Go to the main planet". The harbour gate
+offers "Return to my home", chosen from the player's identity. A
+neighbour's gate offers visitors nothing. The server derives the single
+allowed destination and refuses any other planet ID.
+
+I removed the destination list, landing marks and the old-save
+back-fill. Schema 16 and its existing rows stay, so the migrated
+candidate database is unchanged. I checked the round trip both ways,
+third-planet refusal and visitor refusal: each sentinel failed with
+its check removed, and real Chrome passed at both sizes. No push,
+deployment or 8098 change.

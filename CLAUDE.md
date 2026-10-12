@@ -14,9 +14,9 @@ prototype. They do not claim to be the student's finished academic harness.
   Atlas selections mark bearings only; never restore a production teleport route.
   Server checks journey/sequence, bounded motion, collision clearance and near/slow
   landing. Preserve both ground and flight saves; freeze/rebase after failed saves.
-  Round 7 user request adds teleport stations (hub + every home): only from a
-  gate, only to the hub, one's own home, or a planet that identity has landed on.
-  Only a completed landing writes a mark; the atlas and /api/planets/visit stay as above.
+  Round 7 user request adds teleport stations (hub + every home) linking only one's
+  own home and the hub, from a gate; visitors cannot use another home's gate. No
+  landing marks or multi-destination list; the atlas and /api/planets/visit stay as above.
 - Back up existing SQLite before schema migration; preserve original coats, quest
   state and position. Enforce ownership on every write with server-derived identity
   and SQL constraints/transactions. Hidden UI and client owner IDs grant no rights.

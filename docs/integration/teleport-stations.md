@@ -1,14 +1,19 @@
 # Teleport stations
 
 A teleport station stands on the harbour's arrival square and on every home.
-Standing at its gate opens a list of destinations:
+It links exactly two places for each player:
 
-- your home and the harbour, always;
-- any other planet you have flown to and landed on.
+- at your own home's gate, the one action is **Go to the main planet**;
+- at the harbour's gate, the one action is **Return to my home**, to the
+  home the server finds for your identity.
 
-The server checks the gate, the mark and the destination before it moves anyone.
+A neighbour's gate shows visitors no action, and the server refuses it too.
 I built this on the planned-main-planet branch as a local candidate. The
 decision record is [ADR 0007](../adr/0007-teleport-stations.md).
+
+An earlier version this round listed other planets you had landed on, with
+marks written at landing and back-filled for old saves. The user withdrew it;
+see "Marks" below for what remains of it.
 
 ## The station
 
@@ -89,33 +94,21 @@ The station is an ordinary owner object:
 - it gets a library entry when the library has room;
 - it is the one blueprint that can be placed without a library slot.
 
-## Marks
+## Marks (withdrawn)
 
 Schema 16 adds three tables. Opening an older database makes the usual
 `VACUUM INTO` backup first.
 
 | Table | Holds |
 |---|---|
-| `teleport_marks` | player, planet, source, time |
+| `teleport_marks` | kept for compatibility; no longer written or read |
 | `teleport_requests` | each player's last request id |
 | `home_stations` | the placement receipt |
 
-A mark is written only by `navigation.land`, inside the landing transaction.
-Fly-bys, checkpoints near a planet, atlas bearings and known planet ids never
-write one. Teleports, and building or removing a station, never write one
-either.
-
-**Old saves.** The only reliable record of a landing is a player whose saved
-flight says `mode: ground`, `journey > 0` and `targetId` equal to the planet
-they stand on. Those players get one `history` mark.
-
-The `visits` table is not used:
-
-- it has no time or kind;
-- the retired atlas visit route also wrote it.
-
-On a read-only copy of the 8098 database, this added 7 history marks for
-207 players.
+Landing no longer writes a mark, and opening the database no longer
+back-fills one. The candidate database already reached schema 16 with 7
+back-filled rows. The schema is not rolled back, and those rows, `visits` and
+all player data stay as they are.
 
 ## The route
 
@@ -128,17 +121,20 @@ On a read-only copy of the 8098 database, this added 7 history marks for
 4. On the ground, not in flight.
 5. Grounded, with the saved position within 1.65 m of a gate's interaction
    point on the current planet.
-6. The destination exists ("That planet could not be found.").
-7. The destination is not the current planet.
-8. The destination is the hub, your own home, or marked ("Fly to this planet
-   and land there once before teleporting to it.").
+6. The current planet is the harbour or your own home ("This teleport
+   station belongs to another home. Only its owner can use it.").
+7. You have a home ("You have no home planet to return to yet.").
+8. `planetId` equals the one destination the server derives: the harbour
+   from your home, your home from the harbour. Anything else, including a
+   third planet, a missing ID or the current planet, is refused ("Teleport
+   stations only link your own home and the main planet.").
 
 A refusal changes nothing. The traveller stays where they stood.
 
 **Arrival point.**
 
-- The hub and your own home: their first gate's arrival point.
-- Any other planet: its landing pad.
+- The destination's first gate's arrival point.
+- The landing pad, if your home has no gate yet.
 
 The point goes through the ground world's `recover`, so it never starts
 inside a body or below the support.
@@ -157,14 +153,12 @@ do.
 **Client.**
 
 - The prompt is its own element, so it also shows on gardens, where the
-  resident prompt is hidden.
+  resident prompt is hidden. It appears only at your own home's gate or the
+  harbour's gate, with the one action for that place.
 - E checks in this order: home door, boarding gate, station, then residents.
-- The list highlights your home and the harbour. The current planet shows
-  "You are here", disabled.
-- Owners are labels: you, everyone, a neighbour, or nobody. The game has no
-  player names, and identities must not be exposed.
-- A click locks every button and Escape until the server answers.
-- After a network failure, a second click reuses the same request id.
+- An activation locks the button ("Opening the gate…") until the server
+  answers. After a network failure, the next activation reuses the same
+  request id.
 - The teleport uses the existing visit change, so presence fencing, the world
   reload and camera rebasing are those of landing.
 - The traveller arrives facing the gate they used. Facing away put the
@@ -176,63 +170,47 @@ do.
 
 - Older servers refuse schema 16. To roll back, serve the previous build
   with the `.v15-….backup.sqlite` written before migration.
-- Marks and receipts are additive tables. No existing row changes on open.
+- The station tables are additive. No existing row changes on open.
 - Stations on homes are ordinary objects. An owner can remove theirs, and a
   rollback leaves them in place as content.
 - Blueprints with `station.teleport` do not decode in older code.
 
 ## Checks run
 
-**Static checks**
+**First version (with marks).** Typecheck and build passed, and the related
+specs and two real-Chrome passes ran. That evidence is in the git history of
+this file.
 
-- `pnpm typecheck` passes.
-- `vite build` passes. It writes to a separate folder so the earlier 8140
+**This narrowing.** I ran only the three checks the user asked for:
+
+- `pnpm typecheck` passes, and ESLint is clean on every changed file.
+- `vite build` passes. It writes to a separate folder, so the earlier 8140
   preview keeps its files.
-- ESLint is clean on every file I added or changed. In `src/client/main.ts`,
-  the remaining errors are the imported camera lines.
+- `spec/teleport-station.test.ts`:
+  - home → harbour → home, and another player from the harbour to their own
+    home, each arriving beside the station;
+  - a submitted third planet refused from both gates, leaving the traveller
+    in place;
+  - a visitor refused at a neighbour's gate.
 
-**`spec/teleport-station.test.ts`** (9 tests). Each test was seen failing with
-its bug injected; ten injections in all. The tests cover:
-
-- landing unlock, and fly-by refusal;
-- refusing unmarked, missing and current destinations;
-- marks across a restart;
-- the round trip home → harbour → marked planet → home, with safe arrivals;
-- the repeated request;
-- dismantle and rebuild;
-- older-home placement only while the owner is there;
-- a full home's receipt;
-- old-save back-fill.
-
-**Related specs** (33 files):
-
-- They ran against an integrated test server. I updated tests whose stated
-  invariants changed:
-  - schema 16;
-  - 66 parts and 63 examples;
-  - ledger v13;
-  - generated homes now listed with their station;
-  - claiming a planet now places its station.
-- The two HTTP tests that need the legacy contract pass on a `TEST_LEGACY_WORLD`
-  server: 4 files, 24 tests.
-
-**Real Chrome 154 on an Apple M3, headless, against an isolated copy**
-
-- Two passes: desktop 1920×1080 in English, and phone 390×844 in Chinese.
-- The prompt appears at the home gate.
-- The list is correct.
-- Two quick activations send one request.
-- Arrival at the harbour and back home is exactly on the station arrival
-  point, standing on its paving.
-- A refused destination shows the translated reason and leaves the traveller
-  in place.
-- Removing the home gate brings the notice and the menu item. Previewing and
-  building a site restores it without adding marks.
+  Each of the three failed with its check removed (an injected bug). The
+  file's other four tests (repeat request, rebuild, older-home placement,
+  full home) are kept but were not re-run this round.
+- Real Chrome 154 on an Apple M3, headless, against an isolated database copy.
+  Two passes: desktop 1920×1080 in English, and phone 390×844 in Chinese.
+  - The home gate shows only "Go to the main planet".
+  - Two quick activations send one request.
+  - Arrival on the harbour is exactly on its station's arrival point, on
+    paving.
+  - The harbour gate shows only "Return to my home", and arrival is on the
+    player's own home station.
+  - At a neighbour's gate there is no prompt, and E sends nothing.
 
 ## Limits
 
-- An older home gets its gate the first time its owner is there. A visitor
-  who arrives earlier finds no gate on that planet and must fly.
+- An older home gets its gate the first time its owner is there. Until
+  then, the owner teleporting home from the harbour arrives at the landing
+  pad.
 - With several gates on one home, arrival uses the first.
 - There is no teleport animation or sound. Travel uses the existing scene
   loading overlay.
