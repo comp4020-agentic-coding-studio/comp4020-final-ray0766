@@ -110,3 +110,88 @@ Two 409 replies appeared around stalls, and later steps were unaffected:
 - The container ran no browser.
 - The container workload's presence requests were rejected (409) because the script left out the visit scope, so presence load is absent from the container figures.
 - These are small-concurrency figures, not a capacity claim.
+
+## After moving heavy work off the request thread (`50d8741`)
+
+### What changed
+
+- New homes, their station search and other planets' ground are prepared on one worker thread.
+- The server re-checks the saved planet and writes everything itself.
+- The harbour's ground is built at startup.
+
+### Scenario
+
+The same scenario ran before and after the change, with real controls:
+- A walks the whole time at their home.
+- B opens the app (a new home), teleports to the harbour, then teleports home.
+- Two more identities then arrive together.
+
+How it was measured:
+- Every A request is timed from the browser sending it to its response.
+- B's waits are timed from B's own action.
+
+Setup:
+- A Linux container with `--memory=256m`, no swap and half a CPU (`--cpus=0.5`).
+- A fresh copy of the live database for each run.
+
+| Event | A's slowest request, before | after | B's wait, before | after |
+| --- | --- | --- | --- | --- |
+| A walking alone | 30 ms | 29 ms | — | — |
+| B joins (new home) | 1769 ms | 71 ms | 3.5 s | 5.9 s |
+| B's first teleport to the harbour | 3978 ms | 22 ms | 6.7 s | 2.7 s |
+| B teleports home | 17 ms | 15 ms | 0.8 s | 0.8 s |
+| Two identities join together | 5010 ms | 268 ms | 2.5 / 5.4 s | 7.7 / 8.7 s |
+
+The person who starts the heavy work now waits longer when the worker has to start first. Everyone else is no longer held.
+
+### Main-thread stall per new player
+
+Setup: in-process on an Apple M3, measured with a 10 ms ticker on the server's thread, live database copy.
+
+| Path | Longest stall |
+| --- | --- |
+| Inline creation (before) | 530–1092 ms |
+| Worker | 12–19 ms |
+
+A run with only a single arrival at half a CPU left at most about 0.4 s of main-thread work. That work is:
+- writing the home's objects and history;
+- rebuilding the new home's ground after its station is placed.
+
+### Memory, 256 MB container
+
+Setup:
+- One CPU.
+- The fixed API workload, now with accepted presence requests (75 of 75 returned 200 per visitor).
+
+| Phase | Before, RSS / cgroup peak | After, RSS / cgroup peak |
+| --- | --- | --- |
+| Idle after start | 131 / 84 MB | 143 / 96 MB |
+| Two visitors arrive and poll | 155 / 112 MB | 256 / 215 MB |
+| Four identities arrive together | 167 / 125 MB | 248 / 208 MB |
+| 20 s idle | 167 / 126 MB | 222 / 181 MB; 140 MB cgroup at the end, after the worker stopped |
+
+**Why "after" is higher.** The worker is a second V8 isolate with its own heap and its own copy of the modules.
+- Loading TypeScript in a worker costs about 21 MB of RSS on its own: an empty `.ts` module adds 34 MB, an empty `.mjs` adds 13 MB.
+- The harbour ground built at startup accounts for about 12 MB of the idle difference. Before the change, it would have been built at the first harbour visit.
+
+**Bundled worker (experiment, not committed).** A copy with the worker bundled to plain JavaScript peaked at 177 MB cgroup with two visitors and 198 MB with four.
+
+**The worker heap cap is not a safety net.** A worker that runs out of its heap can stop the whole process.
+- 4 MB and 8 MB caps ended only the worker.
+- 1 MB, 2 MB and 16 MB caps ended the process with a fatal out-of-memory error.
+- The jobs measured here used at most about 35 MB of worker heap; the cap is 48 MB.
+
+No run was out-of-memory killed. That shows only that this limited load fits in 256 MB on this machine. It does not show that it fits on Fly, whose VM kernel also uses that memory.
+
+### Specs
+
+- `spec/heavy-work.test.ts` checks four things:
+  - prepared and inline arrivals produce identical objects, history and station;
+  - a broken worker still yields the same home and station;
+  - jobs are shared and the queue is bounded;
+  - `/healthz` stays under 250 ms while a new player arrives.
+- Each assertion was seen failing with its fault injected:
+  - a wrong seed in the worker;
+  - each fallback removed;
+  - the pre-change server, where `/healthz` waited 1216 ms.
+- 48 related spec files: 274 tests pass. The 8 failures are the same ones that fail on `82c6455`.
