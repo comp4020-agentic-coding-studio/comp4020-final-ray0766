@@ -4,7 +4,6 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { openStore } from '../src/server/store.ts';
-import { migrateTeleport } from '../src/server/teleport.ts';
 import { planetCenter } from '../src/shared/flight.ts';
 import { GroundWorld } from '../src/shared/physics/world.ts';
 import { portPoint } from '../src/shared/ports.ts';
@@ -20,7 +19,6 @@ afterEach(() => { for (const store of stores.splice(0)) store.close(); });
 const open = (path: string) => { const store = openStore(path, { integratedWorld: true }); stores.push(store); return store; };
 const fresh = () => join(mkdtempSync(join(tmpdir(), 'teleport-')), 'save.sqlite');
 const epoch = (s: Store, id: string) => s.state(id).location!.visitEpoch;
-const marks = (s: Store, id: string) => (s.universe(id).teleportMarks ?? []).map(m => m.planetId);
 /** Fixture: stand the player on a saved spot of their current planet; the ground store re-seats it. */
 const standAt = (s: Store, id: string, point: Vec3) => {
   s.db.prepare('UPDATE players SET position=? WHERE id=?').run(JSON.stringify(point), id);
@@ -49,61 +47,44 @@ function safelyAt(s: Store, id: string, expected: Vec3) {
   expect(Math.abs(world.support(state.position, pose.radius + .26).radius - pose.radius)).toBeLessThan(.025);
 }
 
-it('marks a planet only after a completed landing; a fly-by or a known id never unlocks it', () => {
+it('links your home and the harbour both ways, arriving beside each station', () => {
   const s = open(fresh()); s.create('ana'); s.create('ben');
-  const benHome = s.universe('ben').ownedPlanetId!;
-  expect(marks(s, 'ana')).toEqual([]);
-  atStation(s, 'ana');
-  const same = unchanged(s, 'ana');
-  expect(() => go(s, 'ana', benHome)).toThrow('Fly to this planet and land there once');
-  same();
-  // Too fast to land: the ship passes the planet and nothing is marked.
-  expect(() => flyAndLand(s, 'ana', benHome, 12)).toThrow('slow');
-  expect(marks(s, 'ana')).toEqual([]);
-  s.db.prepare("UPDATE players SET flight=json_set(flight,'$.speed',0) WHERE id=?").run('ana');
-  s.land('ana', { planetId: benHome, journey: s.state('ana').flight.journey, visitEpoch: epoch(s, 'ana') });
-  expect(s.universe('ana').teleportMarks).toEqual([expect.objectContaining({ planetId: benHome, source: 'landing' })]);
-});
+  const home = s.universe('ana').ownedPlanetId!, benHome = s.universe('ben').ownedPlanetId!;
+  atStation(s, 'ana'); go(s, 'ana', 'hub');
+  expect(s.state('ana').planetId).toBe('hub');
+  safelyAt(s, 'ana', stationSites(s.universe('ana').currentPlanet)[0].arrival);
+  atStation(s, 'ana'); go(s, 'ana', home);
+  expect(s.state('ana').planetId).toBe(home);
+  safelyAt(s, 'ana', stationSites(s.universe('ana').currentPlanet)[0].arrival);
+  expect(s.state('ana').location).toMatchObject({ kind: 'exterior', planetId: home });
+  // The harbour gate chooses each traveller's own home from their identity.
+  flyAndLand(s, 'ben', 'hub'); atStation(s, 'ben'); go(s, 'ben', benHome);
+  expect(s.state('ben').planetId).toBe(benHome);
+  safelyAt(s, 'ben', stationSites(s.universe('ben').currentPlanet)[0].arrival);
+}, 30_000);
 
-it('refuses unmarked, missing and current destinations and leaves the traveller where they stand', () => {
+it('refuses a submitted third planet and leaves the traveller where they stand', () => {
   const s = open(fresh()); s.create('ana'); s.create('ben');
   const home = s.universe('ana').ownedPlanetId!, benHome = s.universe('ben').ownedPlanetId!;
   const stay = unchanged(s, 'ana');
   expect(() => go(s, 'ana', 'hub')).toThrow('Walk up to a teleport station first.');
   stay();
-  atStation(s, 'ana'); const still = unchanged(s, 'ana');
-  expect(() => go(s, 'ana', benHome)).toThrow('Fly to this planet');
-  expect(() => go(s, 'ana', 'p-' + randomUUID())).toThrow('That planet could not be found.');
-  expect(() => go(s, 'ana', home)).toThrow('You are already on this planet.');
-  expect(() => s.teleport('ana', { planetId: 'hub', requestId: 'not-a-uuid', visitEpoch: epoch(s, 'ana') })).toThrow('request identifier');
-  expect(() => s.teleport('ana', { planetId: 'hub', requestId: randomUUID(), visitEpoch: epoch(s, 'ana'), ownerId: 'forged' })).toThrow('Unexpected teleport field.');
-  still();
-});
+  atStation(s, 'ana'); const atHome = unchanged(s, 'ana');
+  for (const planetId of [benHome, 'p-' + randomUUID(), home]) expect(() => go(s, 'ana', planetId)).toThrow('only link your own home and the main planet');
+  atHome();
+  go(s, 'ana', 'hub'); atStation(s, 'ana'); const atHub = unchanged(s, 'ana');
+  expect(() => go(s, 'ana', benHome)).toThrow('only link your own home and the main planet');
+  expect(() => go(s, 'ana', 'hub')).toThrow('only link your own home and the main planet');
+  atHub();
+}, 30_000);
 
-it('keeps marks across a restart and the same identity coming back', () => {
-  const path = fresh(); let s = open(path); s.create('ana'); s.create('ben');
-  const benHome = s.universe('ben').ownedPlanetId!;
-  flyAndLand(s, 'ana', benHome);
-  s.close(); stores.splice(stores.indexOf(s), 1);
-  s = open(path);
-  expect(marks(s, 'ana')).toEqual([benHome]);
-  expect(marks(s, 'ben')).toEqual([]);
-});
-
-it('travels home → harbour → marked planet → home, arriving beside stations or at the landing pad', () => {
+it("does not let a visitor use another home's station", () => {
   const s = open(fresh()); s.create('ana'); s.create('ben');
-  const home = s.universe('ana').ownedPlanetId!, benHome = s.universe('ben').ownedPlanetId!;
-  flyAndLand(s, 'ana', benHome); flyAndLand(s, 'ana', home);
-  atStation(s, 'ana'); go(s, 'ana', 'hub');
-  expect(s.state('ana').planetId).toBe('hub');
-  safelyAt(s, 'ana', stationSites(s.universe('ana').currentPlanet)[0].arrival);
-  atStation(s, 'ana'); go(s, 'ana', benHome);
-  expect(s.state('ana').planetId).toBe(benHome);
-  safelyAt(s, 'ana', portPoint(benHome));
-  atStation(s, 'ana'); go(s, 'ana', home);
-  expect(s.state('ana').planetId).toBe(home);
-  safelyAt(s, 'ana', stationSites(s.universe('ana').currentPlanet)[0].arrival);
-  expect(s.state('ana').location).toMatchObject({ kind: 'exterior', planetId: home });
+  const anaHome = s.universe('ana').ownedPlanetId!, benHome = s.universe('ben').ownedPlanetId!;
+  flyAndLand(s, 'ben', anaHome); atStation(s, 'ben');
+  const visiting = unchanged(s, 'ben');
+  for (const planetId of ['hub', benHome]) expect(() => go(s, 'ben', planetId)).toThrow('belongs to another home');
+  visiting();
 }, 30_000);
 
 it('travels once for a repeated request and refuses a second click that carries the old visit', () => {
@@ -117,7 +98,7 @@ it('travels once for a repeated request and refuses a second click that carries 
   expect(s.state('ana')).toEqual(arrived);
 });
 
-it('never adds a mark when a station is dismantled or rebuilt', () => {
+it('lets the owner rebuild a dismantled station through the siting preview', () => {
   const s = open(fresh()); s.create('ana');
   const home = s.universe('ana').currentPlanet, station = home.objects.find(o => stationSites({ ...home, objects: [o] }).length)!;
   s.removeObject('ana', { planetId: home.id, objectId: station.id, expectedVersion: station.version });
@@ -126,7 +107,6 @@ it('never adds a mark when a station is dismantled or rebuilt', () => {
   expect(preview.sites.length).toBeGreaterThan(0);
   s.confirmStation('ana', { planetId: home.id, expectedRevision: preview.expectedRevision, hash: preview.hash, visitEpoch: epoch(s, 'ana'), site: 0 });
   expect(stationSites(s.universe('ana').currentPlanet)).toHaveLength(1);
-  expect(marks(s, 'ana')).toEqual([]);
 }, 30_000);
 
 /** Fixture: make a home look as it was saved before this update — no gate and no station receipt. */
@@ -153,7 +133,6 @@ it('gives an older home one gate when its owner is there, clear of saved buildin
   expect(s.db.prepare('SELECT status,object_id FROM home_stations WHERE planet_id=?').get(home)).toMatchObject({ status: 'placed', object_id: gate.id });
   s.removeObject('ana', { planetId: home, objectId: gate.id, expectedVersion: gate.version });
   expect(stationSites(s.universe('ana').currentPlanet)).toEqual([]);
-  expect(marks(s, 'ana')).toEqual(['hub', home]);
 }, 30_000);
 
 it('records why a full home has no gate and offers no site until there is room', () => {
@@ -172,15 +151,3 @@ it('records why a full home has no gate and offers no site until there is room',
   expect(preview.sites).toEqual([]); expect(preview.reason).toContain('Remove one to make room');
 });
 
-it('back-fills old saves only from a completed flight landing on the current planet', () => {
-  const s = open(fresh()); s.create('ana'); s.create('ben'); s.create('cy');
-  const benHome = s.universe('ben').ownedPlanetId!, cyHome = s.universe('cy').ownedPlanetId!;
-  // ana last arrived on ben's planet by a flight landing; a visits row for cy's planet proves nothing.
-  s.db.prepare('UPDATE players SET planet_id=?,flight=? WHERE id=?').run(benHome, JSON.stringify({ mode: 'ground', journey: 3, position: [0, 0, 0], yaw: 0, pitch: 0, speed: 0, sequence: 0, targetId: benHome }), 'ana');
-  s.db.prepare('INSERT INTO visits(player_id,planet_id,position) VALUES(?,?,?)').run('ana', cyHome, JSON.stringify(portPoint(cyHome)));
-  // ben is on cy's planet with a bearing to it, but never flew (journey 0).
-  s.db.prepare('UPDATE players SET planet_id=?,flight=? WHERE id=?').run(cyHome, JSON.stringify({ mode: 'ground', journey: 0, position: [0, 0, 0], yaw: 0, pitch: 0, speed: 0, sequence: 0, targetId: cyHome }), 'ben');
-  s.db.exec('DELETE FROM teleport_marks');
-  migrateTeleport(s.db, 1);
-  expect(s.db.prepare('SELECT player_id,planet_id,source FROM teleport_marks ORDER BY player_id').all().map(r => ({ ...r }))).toEqual([{ player_id: 'ana', planet_id: benHome, source: 'history' }]);
-});

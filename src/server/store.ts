@@ -207,7 +207,7 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
     // A home from before teleport stations gets its one placement attempt while its owner stands there.
     const owned=homeEnabled?planets.owned(id):null;
     if(owned&&row(id).planet_id===owned&&navigation.flight(id).mode==='ground'&&homes.location(id).kind!=='interior')teleport.ensureHomeStation(owned);
-    const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId), teleportMarks: teleport.marks(id) };
+    const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) };
   };
   return {
     db, state, universe, migrationBackup, homeSample, integratedWorld,

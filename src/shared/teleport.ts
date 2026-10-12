@@ -18,11 +18,9 @@ export interface StationSite {
   objectId: string; partNumber: number;
   /** Unit directions on the planet. */
   interact: Vec3; arrival: Vec3;
-  /** Planet yaw of the gate's approach (+Z of the part), for facing a traveller away from the ring. */
+  /** Planet yaw of the gate's approach direction (+Z of the part). */
   yaw: number;
 }
-/** One saved teleport mark, as the server reports it to its own player. */
-export interface TeleportMark { planetId: string; source: 'landing' | 'history'; markedAt: number }
 export interface TeleportStationPreview {
   planetId: string; expectedRevision: number; hash: string;
   /** Up to three candidate sites, nearest to the landing pad first. */

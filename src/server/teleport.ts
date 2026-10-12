@@ -12,7 +12,7 @@ import { MAX_OBJECTS, placementProblem } from '../shared/planets.ts';
 import type { PlanetView } from '../shared/planets.ts';
 import { portPoint } from '../shared/ports.ts';
 import { STATION_REACH, stationSites } from '../shared/teleport.ts';
-import type { TeleportMark, TeleportStationPreview } from '../shared/teleport.ts';
+import type { TeleportStationPreview } from '../shared/teleport.ts';
 import { fieldOf, objectSeat } from '../shared/terrain.ts';
 import { distance, SPAWN } from '../shared/world.ts';
 import type { Vec3 } from '../shared/world.ts';
@@ -24,11 +24,10 @@ import type { homeStore } from './home.ts';
 import type { planetStore } from './planets.ts';
 
 
-/** Schema 16. Marks are per browser identity; only a completed landing adds one.
- * Old saves get a mark only for the planet a completed flight landing put them
- * on (flight.targetId === planet_id after a journey). `visits` rows are not used:
- * the retired atlas visit route also wrote them and they carry no time or kind. */
-export function migrateTeleport(db: DatabaseSync, now = Date.now()) {
+/** Schema 16. Stations link only a player's own home and the public harbour.
+ * `teleport_marks` stays for databases that already reached schema 16 with
+ * landing marks; nothing writes or reads it any more, and its rows are kept. */
+export function migrateTeleport(db: DatabaseSync) {
   db.exec(`CREATE TABLE IF NOT EXISTS teleport_marks (
       player_id TEXT NOT NULL REFERENCES players(id), planet_id TEXT NOT NULL REFERENCES planets(id),
       source TEXT NOT NULL CHECK(source IN ('landing','history')), marked_at INTEGER NOT NULL,
@@ -38,11 +37,6 @@ export function migrateTeleport(db: DatabaseSync, now = Date.now()) {
     CREATE TABLE IF NOT EXISTS home_stations (
       planet_id TEXT PRIMARY KEY REFERENCES planets(id), status TEXT NOT NULL CHECK(status IN ('placed','needs-site')),
       object_id TEXT, reason TEXT, at INTEGER NOT NULL);`);
-  for (const row of db.prepare('SELECT id,planet_id,flight FROM players WHERE flight IS NOT NULL').all()) {
-    const flight = JSON.parse(String(row.flight));
-    if (flight.mode === 'ground' && Number(flight.journey) > 0 && flight.targetId === row.planet_id)
-      db.prepare("INSERT OR IGNORE INTO teleport_marks(player_id,planet_id,source,marked_at) VALUES(?,?,'history',?)").run(row.id, row.planet_id, now);
-  }
 }
 
 /** Ground point under the parked craft that hovers beside a garden's landing pad (client scene.ts). */
@@ -72,8 +66,6 @@ export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof plane
     catch (error) { if (db.isTransaction) db.exec('ROLLBACK'); throw error; }
   };
   const sites = (planetId: string) => stationSites(planets.view('', planetId));
-  const marks = (id: string): TeleportMark[] => db.prepare('SELECT planet_id,source,marked_at FROM teleport_marks WHERE player_id=? ORDER BY marked_at,planet_id').all(id)
-    .map(r => ({ planetId: String(r.planet_id), source: r.source as TeleportMark['source'], markedAt: Number(r.marked_at) }));
 
   /** Up to `limit` free sites on a home, never over saved objects, saved bodies, the pad or the craft above it. */
   function siteSearch(planet: PlanetView, limit: number) {
@@ -156,7 +148,7 @@ export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof plane
   }
 
   return {
-    marks, sites, ensureHomeStation,
+    sites, ensureHomeStation,
     preview(id: string, body: Record<string, unknown>) {
       if (Object.keys(body).some(k => k !== 'planetId')) throw new RequestError(400, 'Unexpected station field.');
       return preview(id, body.planetId);
@@ -173,7 +165,7 @@ export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof plane
         place(id, plan.planetId, site);
       });
     },
-    /** Step through a gate to the hub, your own home, or a planet you have landed on. */
+    /** Your home's gate goes to the harbour; the harbour's gate goes back to your home. Nothing else. */
     teleport(id: string, body: Record<string, unknown>, now = Date.now()) {
       if (Object.keys(body).some(k => !['planetId', 'requestId', 'visitEpoch'].includes(k))) throw new RequestError(400, 'Unexpected teleport field.');
       if (typeof body.requestId !== 'string' || !UUID_PATTERN.test(body.requestId)) throw new RequestError(400, 'Include a teleport request identifier.');
@@ -183,18 +175,21 @@ export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof plane
       const last = db.prepare('SELECT request_id,planet_id FROM teleport_requests WHERE player_id=?').get(id);
       if (last?.request_id === body.requestId) {
         if (last.planet_id === player.planet_id) return;
-        throw new RequestError(409, 'This teleport was already used. Open the station again.');
+        throw new RequestError(409, 'This teleport was already used. Use the station again.');
       }
       homes.exterior(id, body.visitEpoch);
       if (JSON.parse(String(player.flight ?? '{"mode":"ground"}')).mode !== 'ground') throw new RequestError(409, 'Land before using a teleport station.');
       const here = String(player.planet_id), position = JSON.parse(String(player.position)) as Vec3, radius = planets.planet(here).radius;
       if (!ground.read(id).grounded || !sites(here).some(site => distance(position, site.interact, radius) <= STATION_REACH)) throw new RequestError(409, 'Walk up to a teleport station first.');
+      // The destination comes from server identity: a visitor's gate, or a submitted
+      // third planet, never moves anyone.
+      const home = planets.owned(id);
+      if (here !== 'hub' && here !== home) throw new RequestError(403, 'This teleport station belongs to another home. Only its owner can use it.');
+      if (!home) throw new RequestError(409, 'You have no home planet to return to yet.');
+      if (body.planetId !== (here === 'hub' ? home : 'hub')) throw new RequestError(403, 'Teleport stations only link your own home and the main planet.');
       const target = planets.planet(body.planetId);
-      if (target.id === here) throw new RequestError(409, 'You are already on this planet.');
-      const own = target.owner_id === id;
-      if (target.kind !== 'hub' && !own && !db.prepare('SELECT 1 FROM teleport_marks WHERE player_id=? AND planet_id=?').get(id, target.id)) throw new RequestError(403, 'Fly to this planet and land there once before teleporting to it.');
-      // Home and harbour arrive beside their station; anywhere else at the landing pad.
-      const station = target.kind === 'hub' || own ? sites(target.id)[0] : undefined;
+      // Arrive beside the destination's station, or at its landing pad if the home has none yet.
+      const station = sites(target.id)[0];
       const world = ground.world(target.id), start = world.pose(station?.arrival ?? portPoint(target.id)), safe = world.recover(start);
       transaction(() => {
         db.prepare('INSERT INTO visits (player_id,planet_id,position) VALUES (?,?,?) ON CONFLICT(player_id,planet_id) DO UPDATE SET position=excluded.position').run(id, here, String(player.position));

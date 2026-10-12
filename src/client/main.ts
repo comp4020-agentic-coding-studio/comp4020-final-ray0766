@@ -477,7 +477,7 @@ window.addEventListener('keydown',event=> {
   const key=event.key.toLowerCase();
   if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e','shift',' '].includes(key)) {
     event.preventDefault();if(key===' '&&event.repeat)return;if(key===' '&&!keys.has(key))jumpQueued=true;keys.add(key);target=null;
-    if(key==='e' && !event.repeat){if(homeControls?.canEnter)void homeControls.enter();else if(nearDock)flight?.openLaunch();else if(teleportStations?.canOpen){clearInput();teleportStations.open();}else void interact();}
+    if(key==='e' && !event.repeat){if(homeControls?.canEnter)void homeControls.enter();else if(nearDock)flight?.openLaunch();else if(teleportStations?.canUse){clearInput();void teleportStations.use();}else void interact();}
   }
 });
 window.addEventListener('keyup',event=>keys.delete(event.key.toLowerCase()));
@@ -864,10 +864,10 @@ function animate(now:number) {
     // Language controls pause movement while the existing conversation remains
     // readable and updates in place. Menus and scene transitions still close it.
     teleportStations?.frame(walker.up.toArray() as Vec3,groundRadius(),!scenePaused&&!paused&&!nearDock&&!!standing?.grounded&&online&&state.flight.mode==='ground'&&state.location?.kind!=='interior'&&!colony?.building&&!homeTransition);
-    nearResident=!scenePaused&&standing?.grounded&&!near&&!nearDock&&!homeControls?.canEnter&&!teleportStations?.canOpen?residents?.nearest(walker.up.toArray() as Vec3,standing.radius)??null:null;
+    nearResident=!scenePaused&&standing?.grounded&&!near&&!nearDock&&!homeControls?.canEnter&&!teleportStations?.canUse?residents?.nearest(walker.up.toArray() as Vec3,standing.radius)??null:null;
     renderer.domElement.dataset.nearResident=nearResident?.id??'';
     if(speakingResident){if(scenePaused||nearResident?.id!==speakingResident.id)closeResidentConversation();else renderResidentConversation();}
-    action.hidden=(!near&&!nearResident)||paused||nearDock||!!teleportStations?.canOpen;
+    action.hidden=(!near&&!nearResident)||paused||nearDock||!!teleportStations?.canUse;
     if(near){delete action.dataset.residentPrompt;setHTML(action, (state.quest==='available'&&near==='mica'?'Collect the parcel':state.quest==='carrying'&&near==='sol'?'Deliver to Sol':`Talk to ${NPCS[near].name}`)+' <kbd>E</kbd>');setText($('nearby'), near==='mica'?'A little sunshine, ready to go.':'Something’s waiting to grow.');}
     else if(nearResident){
       const language=document.documentElement.lang.startsWith('zh')?'zh':'en';
