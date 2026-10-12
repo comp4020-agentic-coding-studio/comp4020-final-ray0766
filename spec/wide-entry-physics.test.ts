@@ -26,8 +26,10 @@ it('samples both step cells for ordinary terrain fit while retaining only the tw
   const position:Vec3=[0,-1,0],object={id:'new-entry',kind:'structure' as const,position,rotation:.63,version:1,blueprintHash:'new-entry',...structureSize(p)};
   const world=new GroundWorld({id:'wide-entry-fit',radius:21.6,revision:0,objects:[object],blueprints:{'new-entry':p}});
   expect(structureFit(p,position,.63,fieldOf(null,21.6)).problem).toBeNull();
-  expect(world.bodies[0].colliders.filter(c=>c.tag==='foundation')).toHaveLength(2);
-  expect(world.bodies[0].colliders.filter(c=>c.tag==='wide entry tread'&&c.support)).toHaveLength(4);
+  // The fixture planet is above 20 m and not the harbour, so it also holds a home starport tower.
+  const entry=world.bodies.find(b=>b.objectId==='new-entry')!;
+  expect(entry.colliders.filter(c=>c.tag==='foundation')).toHaveLength(2);
+  expect(entry.colliders.filter(c=>c.tag==='wide entry tread'&&c.support)).toHaveLength(4);
  }
 });
 
