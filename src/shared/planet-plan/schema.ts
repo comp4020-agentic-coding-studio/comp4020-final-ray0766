@@ -34,6 +34,16 @@ export interface PlanLot {
   /** Skip the generated door path (the entrance meets a plaza or road directly). */
   noDoorPath?: boolean;
 }
+/** A run of frontage along one side of a road, filled in order with designed compositions. */
+export interface PlanFrontage {
+  id: string; district: string; road: string; side: 'left' | 'right';
+  /** Metres along the road centreline. */
+  from: number; to: number;
+  /** Compositions to choose from; picked with the plan seed, never repeating the previous pick. */
+  compositions: string[];
+  /** Extra clear gap between buildings beyond the minimum; extra setback. */
+  gap?: number; setback?: number;
+}
 export interface PlanArea extends PlanText {
   id: string; district: string; kind: 'garden' | 'court' | 'green' | 'orchard' | 'reserve';
   at: PlanPoint; radius: number;
@@ -41,17 +51,18 @@ export interface PlanArea extends PlanText {
   trees?: number; flowers?: number; benches?: number;
 }
 export interface PlanProp { id: string; kind: 'lamp' | 'tree' | 'bench' | 'flowers'; at: PlanPoint; facing?: number }
+/** A resident stands beside a lot's door path, on/next to a road (optionally walking along it), or near another resident. */
 export interface PlanResident {
-  id: string;
-  /** Standing point, and an optional short walk (each point a PlanPoint). */
-  at: PlanPoint; facing?: PlanPoint; route?: PlanPoint[]; place: string;
+  id: string; place: string;
+  lot?: string; road?: string; at?: number; to?: number; side?: 'left' | 'right';
+  near?: string; distance?: number;
 }
 export interface PlanLandmark { id: string; lot: string; name: string; nameZh: string }
 export interface PlanetPlan {
   format: 'little-worlds-planet-plan'; version: 1; planet: 'hub'; seed: number;
   nodes: Record<string, [number, number]>;
   districts: PlanDistrict[]; roads: PlanRoad[]; plazas: PlanPlaza[];
-  lots: PlanLot[]; areas: PlanArea[]; props: PlanProp[]; residents: PlanResident[];
+  lots: PlanLot[]; frontages?: PlanFrontage[]; areas: PlanArea[]; props: PlanProp[]; residents: PlanResident[];
   landmarks: PlanLandmark[];
   /** Lamps along roads: road id → spacing override, or 0 for none. */
   streetLamps?: Record<string, number>;
@@ -108,9 +119,21 @@ export function planErrors(plan: PlanetPlan, compositions: ReadonlySet<string>):
     if (lot.road && lot.side !== 'left' && lot.side !== 'right') errors.push(`lot ${lot.id}: side must be left or right`);
     if (!Number.isFinite(lot.at)) errors.push(`lot ${lot.id}: at`);
   }
+  ids([...plan.lots, ...(plan.frontages ?? [])], 'lot or frontage', errors);
+  for (const f of plan.frontages ?? []) {
+    if (!districts.has(f.district)) errors.push(`frontage ${f.id}: unknown district`);
+    if (!roads.has(f.road)) errors.push(`frontage ${f.id}: unknown road ${f.road}`);
+    if (f.side !== 'left' && f.side !== 'right') errors.push(`frontage ${f.id}: side must be left or right`);
+    if (!(f.to > f.from)) errors.push(`frontage ${f.id}: to must exceed from`);
+    if (!f.compositions?.length || f.compositions.some(c => !compositions.has(c))) errors.push(`frontage ${f.id}: unknown composition`);
+  }
   for (const a of plan.areas) { named(`area ${a.id}`, a); point(`area ${a.id}`, a.at); if (!districts.has(a.district)) errors.push(`area ${a.id}: unknown district`); }
   for (const p of plan.props) { point(`prop ${p.id}`, p.at); if (!['lamp', 'tree', 'bench', 'flowers'].includes(p.kind)) errors.push(`prop ${p.id}: kind`); }
-  for (const r of plan.residents) { point(`resident ${r.id}`, r.at); if (r.facing) point(`resident ${r.id} facing`, r.facing); r.route?.forEach((p, i) => point(`resident ${r.id} route ${i}`, p)); }
+  for (const r of plan.residents) {
+    if ([r.lot, r.road, r.near].filter(Boolean).length !== 1) errors.push(`resident ${r.id}: give exactly one of lot, road or near`);
+    if (r.road && (!roads.has(r.road) || !Number.isFinite(r.at))) errors.push(`resident ${r.id}: road and at`);
+    if (r.near && !plan.residents.some(o => o.id === r.near)) errors.push(`resident ${r.id}: unknown near ${r.near}`);
+  }
   for (const l of plan.landmarks) if (!plan.lots.some(lot => lot.id === l.lot)) errors.push(`landmark ${l.id}: unknown lot ${l.lot}`);
   for (const [road, spacing] of Object.entries(plan.streetLamps ?? {})) if (!roads.has(road) || !(spacing >= 0)) errors.push(`streetLamps ${road}`);
   return errors;
@@ -131,6 +154,6 @@ export function savePlan(plan: PlanetPlan): string {
   return `{\n  "format": ${line(plan.format)},\n  "version": ${plan.version},\n  "planet": ${line(plan.planet)},\n  "seed": ${plan.seed},\n`
     + `  "nodes": {\n${nodes}\n  },\n`
     + `  "districts": ${list(plan.districts)},\n  "roads": ${list(plan.roads)},\n  "plazas": ${list(plan.plazas)},\n`
-    + `  "lots": ${list(plan.lots)},\n  "areas": ${list(plan.areas)},\n  "props": ${list(plan.props)},\n`
+    + `  "lots": ${list(plan.lots)},\n  "frontages": ${list(plan.frontages ?? [])},\n  "areas": ${list(plan.areas)},\n  "props": ${list(plan.props)},\n`
     + `  "residents": ${list(plan.residents)},\n  "landmarks": ${list(plan.landmarks)},\n  "streetLamps": ${line(plan.streetLamps ?? {})}\n}\n`;
 }

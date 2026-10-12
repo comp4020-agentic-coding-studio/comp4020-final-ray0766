@@ -17,7 +17,7 @@ import {createPublicTownPlacementCheck} from './public-town-reservations.ts';
 import type {PlacedObject} from './planets.ts';
 import {fieldOf,objectSeat} from './terrain.ts';
 import {HUB_DOCK} from './ports.ts';
-import {NPCS,distance} from './world.ts';
+import {NPCS,SPAWN,distance} from './world.ts';
 import type {Vec3} from './world.ts';
 import {PUBLIC_TOWN_CAPACITY} from './world-capacity.ts';
 import {StructurePlacementCache,isRoadSurface} from './structure-placement.ts';
@@ -43,10 +43,14 @@ import {townConnectedFront,townClearEntryHome} from './town-connected-fronts.ts'
 import {townSpatialVariants} from './town-spatial-variants.ts';
 import {townAuthoredPose} from './town-authored-poses.ts';
 import {townPostHouse,townLongWorkshop,townSharedCourt,townHarbourLookout,townStreetGallery,townCourtEdge} from './town-place-blueprints.ts';
+import {MAIN_PLANET_VERSION,ledgerBlueprints} from './planet-plan/ledger.ts';
+import {MAIN_PLANET_LEDGER,MAIN_PLANET_PLAN,mainPlanetNetwork} from './planet-plan/main-planet.ts';
+import {arc as sphereArc} from './planet-plan/sphere.ts';
 
 /** The public town is an explicit larger template; no extra scenery sits
  * outside its object ledger. Private construction retains its own limits. */
-export const PUBLIC_TOWN_VERSION=11;
+/** v12: the planned main planet (src/shared/planet-plan). v11 remains below as the archived ledger. */
+export const PUBLIC_TOWN_VERSION=MAIN_PLANET_VERSION;
 export const PUBLIC_TOWN_LIMITS=PUBLIC_TOWN_CAPACITY;
 const environment=defaultEnvironment('temperate',20261009);
 Object.assign(environment.params,{relief:.3,roughness:.025,vegetation:.36,waterLevel:-.3,woodland:.05,outcrops:0});
@@ -79,6 +83,38 @@ const names=[
  ['Potters’ street','陶艺街'],['Tea house row','茶屋街'],['Courtyard homes','庭院住宅'],['Canal workshops','水渠工坊'],
  ['South orchard','南部果园'],['Quiet court','静庭'],['Hill cottages','坡地民居'],['Lookout gardens','望台花园'],
 ];
+/** The planned main planet: the frozen ledger of the authored plan. Roads are
+ * continuous surfaces (mainPlanetNetwork), not placed objects. */
+function plannedPublicTown(radius:number):PublicTown {
+ const ledger=MAIN_PLANET_LEDGER,plan=MAIN_PLANET_PLAN,blueprints=ledgerBlueprints(ledger);
+ const objects=structuredClone(ledger.objects),renderDistricts=townDistricts();
+ for(const object of objects)renderDistricts.find(d=>d.id===townDistrictFor(object.position))!.objectIds.push(object.id);
+ const roofed=(id:string)=>blueprints[objects.find(o=>o.id===id)!.blueprintHash!].some(p=>p.part.startsWith('roof.'));
+ const structures=objects.filter(o=>o.kind==='structure').map(o=>o.id);
+ const buildings=structures.filter(roofed),siteObjects=structures.filter(id=>!roofed(id));
+ const nearestLot=(point:Vec3,composition?:string)=>ledger.lots.filter(l=>!composition||l.composition===composition).reduce((best,l)=>{
+  const o=objects.find(x=>x.id===l.objectId)!;const d=sphereArc(o.position as [number,number,number],point as [number,number,number],radius);return d<best.d?{id:l.objectId,d}:best;},{id:'',d:Infinity}).id;
+ const network=mainPlanetNetwork();
+ const places=plan.districts.map(d=>{
+  const roads=plan.roads.filter(r=>r.district===d.id),first=network.roads.find(r=>r.id===roads[0]?.id);
+  return {id:d.id,name:d.name,nameZh:d.nameZh,center:townPoint(d.center[0],d.center[1]),intent:d.intent,
+   objectIds:ledger.lots.filter(l=>l.district===d.id&&buildings.includes(l.objectId)).map(l=>l.objectId),
+   siteObjectIds:ledger.lots.filter(l=>l.district===d.id&&siteObjects.includes(l.objectId)).map(l=>l.objectId),
+   streetIds:roads.map(r=>`street-${r.id}`),walk:first?first.line.filter((_,i)=>i%4===0).map(s=>s.p as Vec3):[]};
+ });
+ const lookout=network.plazas.find(p=>p.id==='lookout-terrace');
+ const town:PublicTown={version:PUBLIC_TOWN_VERSION,radius,environment:PUBLIC_TOWN_ENVIRONMENT,objects,blueprints,renderDistricts,
+  routes:ledger.routes.map(r=>({id:r.id,width:r.width,points:r.points.map(p=>[...p] as Vec3)})),pavingRoutes:[],
+  destinations:[{id:'post',position:NPCS.mica.position,buildingId:nearestLot(NPCS.mica.position,'post-office')},
+   {id:'orchard',position:NPCS.sol.position,buildingId:nearestLot(NPCS.sol.position,'glasshouse')},
+   {id:'harbour',position:HUB_DOCK,buildingId:nearestLot(HUB_DOCK,'harbour-store')}],
+  buildings,roadObjects:[],siteObjects,places,worksites:[],entranceCoverage:[],pavingCoverage:[],stoneCoverage:[],
+  landmarks:[{id:'north-square',position:SPAWN,kind:'navigation'},
+   ...(lookout?[{id:'south-square',position:lookout.centres[0] as Vec3,kind:'navigation' as const}]:[]),
+   ...['lookout','post-office','teahouse','glasshouse'].flatMap(id=>{const lot=ledger.lots.find(l=>l.id===id);return lot?[{id,objectId:lot.objectId,position:objects.find(o=>o.id===lot.objectId)!.position,kind:'structure' as const}]:[];})]};
+ assertTownCapacity(town.objects);
+ return town;
+}
 export function townDistricts():TownDistrict[] {
  return [55,0,-55].flatMap((latitude,row)=>Array.from({length:4},(_,column)=>({
   id:`town-${['north','middle','south'][row]}-${column}`,name:names[row*4+column][0],nameZh:names[row*4+column][1],
@@ -258,17 +294,21 @@ function assertTownCapacity(objects:PlacedObject[]){
 export function publicTown(radius=21.6):PublicTown {
  const previous=cache.get(radius);if(previous)return previous;
  if(Math.abs(radius-21.6)>1e-6)return generatePublicTown(radius);
+ const planned=plannedPublicTown(radius);cache.set(radius,planned);return planned;
+}
+/** The archived v11 ledger (wide street packs); kept for comparison and tests, never served. */
+export function publicTownV11(radius=21.6):PublicTown {
  const blueprints=Object.fromEntries(PUBLIC_TOWN_BLUEPRINTS.map((b,i)=>[PUBLIC_TOWN_HASHES[i],b.parts]));
  const objects=structuredClone(TOWN_WIDE_ROAD_OBJECTS);
  const renderDistricts=townDistricts();
  for(const object of objects)renderDistricts.find(d=>d.id===townDistrictFor(object.position))!.objectIds.push(object.id);
- const town:PublicTown={...PUBLIC_TOWN_DATA,version:PUBLIC_TOWN_VERSION,radius,environment:PUBLIC_TOWN_ENVIRONMENT,
+ const town:PublicTown={...PUBLIC_TOWN_DATA,radius,environment:PUBLIC_TOWN_ENVIRONMENT,
   objects,blueprints,renderDistricts,routes:structuredClone(TOWN_WIDE_ROAD_ROUTES),
   roadObjects:objects.filter(o=>isRoadSurface(blueprints[o.blueprintHash!])).map(o=>o.id),
   // Previous narrow-lane coverage is no longer evidence for this ledger.
-  pavingRoutes:[],entranceCoverage:[],pavingCoverage:[],stoneCoverage:[]};
+  pavingRoutes:[],entranceCoverage:[],pavingCoverage:[],stoneCoverage:[],version:11};
  assertTownCapacity(town.objects);
- cache.set(radius,town);return town;
+ return town;
 }
 /** Every door's real outward approach, independent of whether its street is
  * paved or ordinary walkable terrain. Authoring/navigation consumes these

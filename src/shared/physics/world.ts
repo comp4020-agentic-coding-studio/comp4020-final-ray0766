@@ -21,6 +21,9 @@ import { PART_COLLIDERS } from './parts.ts';
 import type { PartBox } from './parts.ts';
 import { villageLampColliders } from './props.ts';
 import { BODY_RADIUS, BODY_HEIGHT, STEP_HEIGHT, GROUND_SKIN as SKIN, GROUND_SUBSTEP as SUBSTEP } from './body.ts';
+import { mainPlanetNetwork } from '../planet-plan/main-planet.ts';
+import { kerbRuns } from '../planet-plan/kerbs.ts';
+import { ROAD_PROFILES, SURFACE } from '../planet-plan/params.ts';
 export { BODY_RADIUS, BODY_HEIGHT, STEP_HEIGHT } from './body.ts';
 
 export const GRAVITY=12, MAX_FALL_SPEED=10, JUMP_SPEED=5.2;
@@ -30,7 +33,8 @@ export const FIXED_STEP=1/60, MAX_PATH_STEPS=28;
 // movement batches use this same value; a scene revision alone is not enough.
 export const PHYSICS_VERSION=7;
 // Fence clients carrying the previous bundled public collision layout.
-export const HUB_PHYSICS_VERSION=8;
+// 9: the planned main planet (v12 ledger) with continuous streets and kerbs.
+export const HUB_PHYSICS_VERSION=9;
 export const physicsVersionFor=(planetId:string)=>planetId==='hub'?HUB_PHYSICS_VERSION:PHYSICS_VERSION;
 const ground=legacyHeightField();
 export interface GroundPose { position:Vec3; radius:number; verticalSpeed:number; grounded:boolean; jumpHeld?:boolean }
@@ -66,6 +70,7 @@ export class GroundWorld {
     this.generated=!!(sample?.environment??planet.environment);this.ground=this.generated?gradedField(this.field,objects,blueprints):this.field;
     this.revision=planet.revision;this.planetId=planet.id;
     if(planet.id==='hub')this.harbour();
+    if(planet.id==='hub'&&sample)this.kerbs();
     for(const object of objects){
       if(object.kind==='structure')this.structure(object,blueprints?.[object.blueprintHash!]??[],planet.homeDoor);
       else if(object.assetVersion===2&&QUICK_PARTS[object.kind]){
@@ -95,6 +100,25 @@ export class GroundWorld {
     // Craft is a travel-system object. All village construction below goes
     // through the exact same object/structure path as a player's colony.
     this.bodies.push({objectId:'hub-ship',dir:vec(HUB_SHIP),broad:3.2,colliders:[],round:{radius:2.1,height:2.5,base:this.radius(HUB_SHIP)}});
+  }
+  /** Low kerbs along the planned main streets: walkable 6 cm steps on the
+   * same centrelines the street meshes draw (src/shared/planet-plan/kerbs.ts). */
+  private kerbs(){
+    const P=ROAD_PROFILES.main,top=SURFACE.lift+P.kerbHeight,bottom=-.15;
+    for(const run of kerbRuns(mainPlanetNetwork()))for(let start=0;start<run.points.length-1;start+=6){
+      const chunk=run.points.slice(start,Math.min(run.points.length,start+7)),mid=chunk[Math.floor(chunk.length/2)];
+      const base=this.radius(mid),anchor=new Quaternion().fromArray(anchorQuaternion({dir:mid,yaw:0})),inverse=anchor.clone().invert(),origin=vec(mid).multiplyScalar(base);
+      const body:Body={objectId:`kerb:${run.id}:${start}`,dir:vec(mid),broad:0,colliders:[]};
+      for(let i=1;i<chunk.length;i++){
+        const a=vec(chunk[i-1]).multiplyScalar(this.radius(chunk[i-1])),b=vec(chunk[i]).multiplyScalar(this.radius(chunk[i]));
+        const centre=a.clone().add(b).multiplyScalar(.5).sub(origin).applyQuaternion(inverse),d=b.clone().sub(a).applyQuaternion(inverse),length=d.length();
+        if(length<1e-4)continue;
+        const yaw=Math.atan2(d.x,d.z),pitch=-Math.atan2(d.y,Math.hypot(d.x,d.z));
+        body.broad=Math.max(body.broad,centre.length()+length/2+.2);
+        this.add(body,mid,0,base,{tag:'kerb',center:[centre.x,centre.y+(top+bottom)/2,centre.z],half:[P.kerb/2,(top-bottom)/2,length/2+.01],yaw,pitch,support:true});
+      }
+      if(body.colliders.length)this.bodies.push(body);
+    }
   }
   private add(body:Body,dir:Vec3,yaw:number,base:number,shape:PartBox){
     const anchor=new Quaternion().fromArray(anchorQuaternion({dir,yaw}));

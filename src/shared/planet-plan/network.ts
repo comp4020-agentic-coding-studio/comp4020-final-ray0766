@@ -4,7 +4,7 @@ import { NPCS, SPAWN } from '../world.ts';
 import { PLAN_RADIUS, ROAD_PROFILES, roadHalfWidth } from './params.ts';
 import type { RoadClass } from './params.ts';
 import type { PlanetPlan, PlanPoint, PlanPlaza } from './schema.ts';
-import { angle, arc, cross, dirOf, dot, frameAt, fromLocal, heading, segmentDistance, slerp, tangent, toLocal, unit } from './sphere.ts';
+import { angle, arc, cross, dirOf, dot, frameAt, fromLocal, heading, segmentDistance, slerp, tangent, toLocal, unit, walk } from './sphere.ts';
 import type { V2, V3 } from './sphere.ts';
 
 /** A centreline sample: position, unit tangent, unit right (t × up), arclength. */
@@ -210,12 +210,14 @@ export function buildNetwork(plan: PlanetPlan, R = PLAN_RADIUS): Network {
       while (phi <= 0) phi += 2 * Math.PI;
       if (ends.length === 1) phi = 2 * Math.PI;
       const na = rot90(a.u), nb = rot90(b.u);
-      if (phi < Math.PI - .05) {
+      // Near-straight corners join with a straight taper: their edge lines are almost parallel.
+      if (phi < 2.45) {
         // a.u s + na wa = b.u t - nb wb
         const rhs = v2.sub(v2.scale(nb, -b.w), v2.scale(na, a.w)), det = a.u[0] * -b.u[1] - a.u[1] * -b.u[0];
         const s = (rhs[0] * -b.u[1] - rhs[1] * -b.u[0]) / det;
         const X = v2.add(v2.scale(a.u, s), v2.scale(na, a.w));
-        const rc = Math.min(ROAD_PROFILES[a.cls].corner, ROAD_PROFILES[b.cls].corner), k = rc / Math.tan(phi / 2);
+        // Sharp corners keep a short tangent: the fillet shrinks rather than eating the road.
+        const k = Math.min(Math.min(ROAD_PROFILES[a.cls].corner, ROAD_PROFILES[b.cls].corner) / Math.tan(phi / 2), 1.6), rc = k * Math.tan(phi / 2);
         const A = v2.add(X, v2.scale(a.u, k)), B = v2.add(X, v2.scale(b.u, k));
         const C = v2.add(X, v2.scale(v2.unit(v2.add(a.u, b.u)), rc / Math.sin(phi / 2)));
         const ta = Math.atan2(A[1] - C[1], A[0] - C[0]); let delta = Math.atan2(B[1] - C[1], B[0] - C[0]) - ta;
@@ -223,9 +225,10 @@ export function buildNetwork(plan: PlanetPlan, R = PLAN_RADIUS): Network {
         const n = Math.max(2, Math.ceil(Math.abs(delta) * rc / .15)), inner: V2[] = [];
         for (let k2 = 0; k2 <= n; k2++) { const th = ta + delta * k2 / n; inner.push([C[0] + Math.cos(th) * rc, C[1] + Math.sin(th) * rc]); }
         drafts2.push({ i, j, inner, sA: v2.dot(A, a.u), sB: v2.dot(B, b.u), reflex: false });
-      } else drafts2.push({ i, j, inner: [], sA: 0, sB: 0, reflex: phi > Math.PI + .05 });
+      } else drafts2.push({ i, j, inner: [], sA: 0, sB: 0, reflex: phi > Math.PI + .35 });
     }
     for (const c of drafts2) { ends[c.i].trim = Math.max(ends[c.i].trim, c.sA); ends[c.j].trim = Math.max(ends[c.j].trim, c.sB); }
+    if (typeof process !== 'undefined' && process.env.PLAN_DEBUG === node) console.log(node, ends.map(e => ({ road: e.d.id, at: e.atStart, deg: Math.atan2(e.u[1], e.u[0]) * 180 / Math.PI, w: e.w, trim: e.trim, from: e.d.from, to: e.d.to })), drafts2.map(c => ({ i: c.i, j: c.j, sA: c.sA, sB: c.sB, n: c.inner.length })));
     for (const e of ends) {
       e.trim = Math.max(e.trim, Math.min(e.w, .6), .25);
       if (e.atStart) e.d.from = Math.min(e.d.to, e.d.from + e.trim); else e.d.to = Math.max(e.d.from, e.d.to - e.trim);
@@ -310,4 +313,18 @@ export function pointInPolygon(p: V2, poly: readonly V2[]): boolean {
     if ((a[1] > p[1]) !== (b[1] > p[1]) && p[0] < (b[0] - a[0]) * (p[1] - a[1]) / (b[1] - a[1]) + a[0]) inside = !inside;
   }
   return inside;
+}
+
+/** Door paths as short 'door' pieces from an entrance to the paving it meets. */
+export function doorPieces(doorPaths: readonly { lot: string; from: V3; to: V3 }[], R = PLAN_RADIUS): Piece[] {
+  return doorPaths.map(raw => {
+    // Drawn on under the step foot or apron edge the entrance point stands clear of.
+    const d = { ...raw, from: walk(raw.from, heading(raw.from, raw.to), -.24, R) };
+    const count = Math.max(1, Math.ceil(arc(d.from, d.to, R) / ROAD_PROFILES.door.step)), samples: Sample[] = [];
+    for (let i = 0; i <= count; i++) {
+      const p = slerp(d.from, d.to, i / count), t = i === count ? heading(p, d.from).map(v => -v) as V3 : heading(p, d.to);
+      samples.push({ p, t, r: unit(cross(t, p)), s: arc(d.from, p, R) });
+    }
+    return { id: `door:${d.lot}`, road: `door:${d.lot}`, class: 'door' as const, samples, start: { kind: 'cap' as const }, end: { kind: 'join' as const, road: 'street' } };
+  });
 }
