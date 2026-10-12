@@ -1,3 +1,4 @@
+import {TERMINAL} from '../src/shared/starport-terminal.ts';
 import {expect,it} from 'vitest';
 import {samplePublicVillage,SAMPLE_PUBLIC_VERSION} from '../src/shared/sample-public-village.ts';
 import {PUBLIC_TOWN_VERSION} from '../src/shared/public-town-layout.ts';
@@ -51,7 +52,11 @@ it('uses identical terrain and collision bodies when the public objects are copi
  const kerbs=publicWorld.bodies.filter(body=>body.objectId.startsWith('kerb:'));
  expect(kerbs.length).toBeGreaterThan(20);
  for(const body of kerbs)for(const c of body.colliders){expect(c.support).toBe(true);expect(c.tag).toBe('kerb');expect(c.half.y*2).toBeLessThan(.26);}
- expect(publicWorld.bodies.filter(body=>body.objectId!=='hub-ship'&&!body.objectId.startsWith('kerb:'))).toEqual(privateWorld.bodies);
+ // The starport terminal is the harbour's own travel body, like the craft: tall, with a walkable plinth only.
+ const terminal=publicWorld.bodies.find(body=>body.objectId==='hub-terminal')!;
+ expect(terminal.round).toMatchObject({radius:TERMINAL.plinth,height:TERMINAL.top});
+ expect(terminal.colliders.filter(c=>c.support).map(c=>c.tag)).toEqual(['terminal plinth','terminal step']);
+ expect(publicWorld.bodies.filter(body=>!['hub-ship','hub-terminal'].includes(body.objectId)&&!body.objectId.startsWith('kerb:'))).toEqual(privateWorld.bodies);
  for(const point of [SPAWN,NPCS.mica.position,NPCS.sol.position]){
   expect(publicWorld.pose(point)).toEqual(privateWorld.pose(point));
   expect(publicWorld.support(point,23)).toEqual(privateWorld.support(point,23));

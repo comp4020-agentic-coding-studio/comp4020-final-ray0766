@@ -22,6 +22,7 @@ import type { PartBox } from './parts.ts';
 import { villageLampColliders } from './props.ts';
 import { BODY_RADIUS, BODY_HEIGHT, STEP_HEIGHT, GROUND_SKIN as SKIN, GROUND_SUBSTEP as SUBSTEP } from './body.ts';
 import { mainPlanetNetwork } from '../planet-plan/main-planet.ts';
+import { HUB_TERMINAL, HUB_TERMINAL_YAW, TERMINAL, TERMINAL_COLLIDERS } from '../starport-terminal.ts';
 import { kerbRuns } from '../planet-plan/kerbs.ts';
 import { ROAD_PROFILES, SURFACE } from '../planet-plan/params.ts';
 export { BODY_RADIUS, BODY_HEIGHT, STEP_HEIGHT } from './body.ts';
@@ -70,7 +71,7 @@ export class GroundWorld {
     this.generated=!!(sample?.environment??planet.environment);this.ground=this.generated?gradedField(this.field,objects,blueprints):this.field;
     this.revision=planet.revision;this.planetId=planet.id;
     if(planet.id==='hub')this.harbour();
-    if(planet.id==='hub'&&sample)this.kerbs();
+    if(planet.id==='hub'&&sample){this.kerbs();this.terminal();}
     for(const object of objects){
       if(object.kind==='structure')this.structure(object,blueprints?.[object.blueprintHash!]??[],planet.homeDoor);
       else if(object.assetVersion===2&&QUICK_PARTS[object.kind]){
@@ -100,6 +101,12 @@ export class GroundWorld {
     // Craft is a travel-system object. All village construction below goes
     // through the exact same object/structure path as a player's colony.
     this.bodies.push({objectId:'hub-ship',dir:vec(HUB_SHIP),broad:3.2,colliders:[],round:{radius:2.1,height:2.5,base:this.radius(HUB_SHIP)}});
+  }
+  /** The starport terminal beside the planned harbour's boarding gate: a round body for walking, boxes for the camera. */
+  private terminal(){
+    const base=this.radius(HUB_TERMINAL),body:Body={objectId:'hub-terminal',dir:vec(HUB_TERMINAL),broad:2.6,colliders:[],round:{radius:TERMINAL.plinth,height:TERMINAL.top,base}};
+    for(const shape of TERMINAL_COLLIDERS)this.add(body,HUB_TERMINAL,HUB_TERMINAL_YAW,base,shape);
+    this.bodies.push(body);
   }
   /** Low kerbs along the planned main streets: walkable 6 cm steps on the
    * same centrelines the street meshes draw (src/shared/planet-plan/kerbs.ts). */
