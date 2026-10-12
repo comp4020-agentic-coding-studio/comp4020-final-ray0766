@@ -462,3 +462,23 @@ tower now stands due south.
 
 A read-only copy of the 8098 database showed no saved object near any
 home tower and no player standing inside one.
+
+## Final candidate checks and handoff (13 October 2026)
+
+On candidate 8143 I drove these flows in real Chrome: room in and out,
+home ⇄ harbour teleport, and boarding at the harbour, then flying home
+and landing.
+
+My first autopilot attempts failed. It pressed keys while the space view
+was still loading, then flew straight into worlds in its path, so I
+routed it above the planet lattice. The game had not changed. The final
+run had no failed requests and no console errors.
+
+A dry run on a fresh copy of the live database moved no saved position.
+The handoff note records:
+
+- the commit range, including the imported 8134 baseline;
+- that the live database must stay in place;
+- where 207 (8098) and 220 (8134's preview) players come from.
+
+See [the handoff](docs/integration/candidate-handoff.md).
