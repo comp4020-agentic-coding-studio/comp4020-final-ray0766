@@ -1,7 +1,7 @@
 import type { Emit } from '../../assets/claude-geometry/blueprint/parts/kit.ts';
 import type { Box } from '../../assets/claude-geometry/blueprint/parts/info.ts';
 import { WALL_T } from '../../assets/claude-geometry/blueprint/parts/kit.ts';
-import { gardenFence, gardenGate, gardenHedge, gardenLawn, gardenWall, hoodedDoor, longFoot, longRoof, longVergeLeft, longVergeRight, roadApron, roadEdge, roadKerb, roadPaving, roadPavingCurve, roadPlaza, shopFront, windowBox } from './geometry.ts';
+import { GATE, gardenFence, gardenGate, gardenHedge, gardenLawn, gardenWall, hoodedDoor, longFoot, longRoof, longVergeLeft, longVergeRight, roadApron, roadEdge, roadKerb, roadPaving, roadPavingCurve, roadPlaza, shopFront, stationGate, windowBox } from './geometry.ts';
 import { PAVING } from './style.ts';
 import type { Vec3 } from '../world.ts';
 
@@ -11,6 +11,7 @@ export const VILLAGE_KIT_IDS = [
   'garden.wall', 'garden.gate', 'garden.fence', 'garden.hedge', 'garden.lawn',
   'road.paving', 'road.paving.curve', 'road.edge', 'road.kerb.low', 'road.apron', 'road.plaza',
   'roof.slope.long', 'roof.verge.long.left', 'roof.verge.long.right',
+  'station.teleport',
 ] as const;
 export type VillageKitId = typeof VILLAGE_KIT_IDS[number];
 export const isVillageKitId = (value: unknown): value is VillageKitId => typeof value === 'string' && (VILLAGE_KIT_IDS as readonly string[]).includes(value);
@@ -19,10 +20,10 @@ export const isVillageKitId = (value: unknown): value is VillageKitId => typeof 
 export interface KitCollider { tag: string; center: Vec3; half: Vec3; support?: boolean; pitch?: number }
 export interface VillageKitPart {
   id: VillageKitId; label: string; blurb: string; zh: { name: string; blurb: string };
-  category: 'Wall' | 'Street' | 'Garden' | 'Roof'; mount: 'cell' | 'edge'; role: 'wall' | 'guard' | 'deck' | 'slope' | 'trim';
+  category: 'Wall' | 'Street' | 'Garden' | 'Roof' | 'Structure'; mount: 'cell' | 'edge'; role: 'wall' | 'guard' | 'deck' | 'slope' | 'trim' | 'equipment';
   floor?: boolean; door?: boolean; roof?: boolean; trim?: { sides: number[]; on: 'slope' };
-  /** Two-cell parts: the second cell lies one cell behind, along local −Z. */
-  span?: 'back';
+  /** Two-cell parts: the second cell lies one cell behind (local −Z) or beside (local +X). */
+  span?: 'back' | 'side';
   tags: string[]; envelope: Box; colliders: KitCollider[];
   walk: string; connects: string; emit: Emit;
 }
@@ -128,6 +129,17 @@ VILLAGE_KIT_PARTS_MUTABLE.push(
     category: 'Roof', mount: 'cell', role: 'trim', trim: { sides: [1], on: 'slope' }, span: 'back', tags: ['roof', 'gable', 'verge', 'trim'],
     envelope: box([.5, -.26, -1.5], [.58, 1.27, .9622]), colliders: longVergeBoxes(1),
     walk: 'Not walkable.', connects: 'On the right (local +X) end of a long gable roof turned the same way.', emit: longVergeRight },
+);
+/** The station gate's interaction and arrival points, part-local metres (+Z is the approach). */
+export const STATION_POINTS = { interact: [GATE.x, 0, .55] as Vec3, arrival: [GATE.x, 0, 1.45] as Vec3 } as const;
+VILLAGE_KIT_PARTS_MUTABLE.push(
+  { id: 'station.teleport', label: 'Teleport gate', blurb: 'Moon gate of an interstellar station', zh: { name: '星际传送门', blurb: '星际传送站的月洞门' },
+    category: 'Structure', mount: 'cell', role: 'equipment', span: 'side', tags: ['station', 'teleport', 'travel', 'gate', 'portal'],
+    envelope: box([-.5, 0, -.5], [1.5, 2.3, .5]),
+    colliders: [collider('station dais', [GATE.x - .97, 0, -.5], [GATE.x + .97, GATE.daisTop, .4], true), collider('station tread', [GATE.x - .6, 0, .4], [GATE.x + .6, .06, .5], true),
+      collider('moon gate', [GATE.x - .99, 0, GATE.z - .13], [GATE.x + .99, 2.12, GATE.z + .13]),
+      collider('gate cap', [GATE.x - .99, 2.0, GATE.z - .31], [GATE.x + .99, 2.3, GATE.z + .31])],
+    walk: 'Step onto the 12 cm dais in front of the ring; the ring itself is solid.', connects: 'Two cells along local +X on ground floors; keep the cell in front (+Z) clear as the approach.', emit: stationGate },
 );
 export const VILLAGE_KIT_PARTS: readonly VillageKitPart[] = VILLAGE_KIT_PARTS_MUTABLE;
 export const VILLAGE_KIT_BY_ID: Readonly<Record<VillageKitId, VillageKitPart>> = Object.fromEntries(VILLAGE_KIT_PARTS.map(p => [p.id, p])) as Record<VillageKitId, VillageKitPart>;

@@ -68,9 +68,9 @@ export class Layout {
   }
   supportProblem(p: PartPlacement): string | null {
     if (isWideEntryPartId(p.part)) return ruleParts(p).every(proxy => !this.source.supportProblem(proxy)) ? null : 'Wide entrance steps need a ground-floor deck behind both cells.';
-    if (hostSecondCell(p.part) === 'back') {
+    if (hostSecondCell(p.part) === 'back' || (hostSecondCell(p.part) === 'side' && PARTS[p.part].role === 'equipment')) {
       const problem = ruleParts(p).map(proxy => this.source.supportProblem(proxy)).find(Boolean);
-      return problem ? `${problem.replace(/\.$/, '')} (both cells of this two-cell roof part).` : null;
+      return problem ? `${problem.replace(/\.$/, '')} (both cells of this two-cell part).` : null;
     }
     if (isWideDoorPartId(p.part)) {
       const floors = ruleParts(p).every(cell => {

@@ -18,8 +18,9 @@ export const HOST_PART_IDS = [...WIDE_DOOR_IDS, WIDE_ENTRY_ID, ...VILLAGE_KIT_ID
 export const isHostPartId = (value: unknown): value is HostPartId => typeof value === 'string' && (HOST_PART_IDS as readonly string[]).includes(value);
 export const isWideEntryPartId = (value: unknown): value is typeof WIDE_ENTRY_ID => value === WIDE_ENTRY_ID;
 const BACK_SPAN = new Set<string>(VILLAGE_KIT_PARTS.filter(p => p.span === 'back').map(p => p.id));
-/** Host parts with a second cell for rules: wide doors/steps along local +X, long roofs one cell behind (local −Z). */
-export const hostSecondCell = (value: unknown): 'side' | 'back' | null => value === WIDE_ENTRY_ID || (typeof value === 'string' && isWideDoor(value)) ? 'side' : typeof value === 'string' && BACK_SPAN.has(value) ? 'back' : null;
+const SIDE_SPAN = new Set<string>(VILLAGE_KIT_PARTS.filter(p => p.span === 'side').map(p => p.id));
+/** Host parts with a second cell for rules: wide doors/steps and the station gate along local +X, long roofs one cell behind (local −Z). */
+export const hostSecondCell = (value: unknown): 'side' | 'back' | null => value === WIDE_ENTRY_ID || (typeof value === 'string' && (isWideDoor(value) || SIDE_SPAN.has(value))) ? 'side' : typeof value === 'string' && BACK_SPAN.has(value) ? 'back' : null;
 export const isTwoCellHostPartId = (value: unknown) => hostSecondCell(value) !== null;
 export const LEGACY_PART_IDS = Object.freeze([...legacy.PART_IDS].filter(id => !isHostPartId(id)));
 export const isWideDoorPartId = (value: unknown): value is WideDoorId => typeof value === 'string' && isWideDoor(value);

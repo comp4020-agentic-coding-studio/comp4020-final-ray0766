@@ -303,3 +303,41 @@ function longVerge(k: Kit, side: -1 | 1) {
 }
 export const longVergeLeft = (k: Kit) => longVerge(k, -1);
 export const longVergeRight = (k: Kit) => longVerge(k, 1);
+
+// ---- Teleport station gate (two cells along local +X, gate centred between them) --
+
+/** Moon gate of the interstellar station: in local metres, the gate stands on x = GATE.x, just behind z = 0. */
+export const GATE = { x: .5, z: -.15, centreY: 1.02, outer: .9, inner: .66, depth: .2, daisTop: .12 } as const;
+/** Ring as plaster segments, a timber rim, a glowing membrane, two posts and a small tiled cap. */
+export function stationGate(k: Kit) {
+  const { b } = k, g = GATE, segments = k.low ? 12 : 24, mid = (g.outer + g.inner) / 2, band = g.outer - g.inner;
+  // Stone dais with a chamfered edge, and a low front tread.
+  b.box(k.m('concrete'), [1.94, g.daisTop, .9], { position: [g.x, g.daisTop / 2, -.05] }, k.low ? 0 : .02);
+  b.box(k.m('concrete'), [1.2, .06, .22], { position: [g.x, .03, .5 - .12] }, k.low ? 0 : .01);
+  for (let i = 0; i < segments; i++) {
+    const a = (i + .5) / segments * Math.PI * 2, len = 2 * Math.PI * mid / segments + .012;
+    const cx = g.x + Math.cos(a) * mid, cy = g.centreY + Math.sin(a) * mid;
+    b.box(k.m('skin'), [len, band, g.depth], { position: [cx, cy, g.z], rotation: [0, 0, a + Math.PI / 2] }, 0);
+    if (!k.low) {
+      const rx = g.x + Math.cos(a) * (g.outer + .02), ry = g.centreY + Math.sin(a) * (g.outer + .02);
+      b.box(k.m('post'), [2 * Math.PI * (g.outer + .02) / segments + .01, .04, g.depth + .03], { position: [rx, ry, g.z], rotation: [0, 0, a + Math.PI / 2] }, 0);
+    }
+  }
+  // The membrane: a faint glowing disc set back in the opening.
+  const disc = new BufferGeometry(), sides = k.low ? 16 : 32, pos: number[] = [];
+  for (let i = 0; i < sides; i++) {
+    const a0 = i / sides * Math.PI * 2, a1 = (i + 1) / sides * Math.PI * 2;
+    for (const z of [.008, -.008]) {
+      const p0 = [g.x + Math.cos(a0) * g.inner, g.centreY + Math.sin(a0) * g.inner, g.z + z], p1 = [g.x + Math.cos(a1) * g.inner, g.centreY + Math.sin(a1) * g.inner, g.z + z];
+      pos.push(...(z > 0 ? [g.x, g.centreY, g.z + z, ...p0, ...p1] : [g.x, g.centreY, g.z + z, ...p1, ...p0]));
+    }
+  }
+  disc.setAttribute('position', new Float32BufferAttribute(pos, 3)); disc.computeVertexNormals();
+  b.geometry(k.m('lamp'), disc);
+  // Posts each side carry the cap; their feet sit in the dais.
+  for (const s of [-1, 1]) b.box(k.m('post'), [.11, 2.1, .14], { position: [g.x + s * .935, 1.05, g.z] }, k.low ? 0 : .01);
+  b.box(k.m('post'), [1.98, .1, .16], { position: [g.x, 2.04, g.z] }, 0);
+  for (const s of [-1, 1]) b.box(k.m('corrugated'), [1.98, .035, .34], { position: [g.x, 2.18, g.z + s * .14], rotation: [s * .42, 0, 0] }, 0);
+  b.box(k.m('corrugated'), [1.98, .06, .08], { position: [g.x, 2.25, g.z] }, k.low ? 0 : .01);
+  b.emitter('pad', [g.x, g.daisTop + .02, .2], [0, 1, 0]);
+}

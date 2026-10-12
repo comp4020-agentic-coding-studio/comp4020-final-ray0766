@@ -29,8 +29,8 @@ describe('formal host catalogue and legacy contract', () => {
       expect(createHash('sha256').update(readFileSync(new URL('../src/assets/claude-geometry/blueprint/' + file, import.meta.url))).digest('hex')).toBe(digest);
   });
   it('appends three wide IDs, then the seventeen R12 village kit IDs, with names, geometry costs and bounds', () => {
-    expect(LEGACY_PART_IDS).toHaveLength(45); expect(PART_IDS).toHaveLength(65);
-    expect(PART_IDS.slice(0, 45)).toEqual(LEGACY_PART_IDS); expect(new Set(PART_IDS).size).toBe(65);
+    expect(LEGACY_PART_IDS).toHaveLength(45); expect(PART_IDS).toHaveLength(66);
+    expect(PART_IDS.slice(0, 45)).toEqual(LEGACY_PART_IDS); expect(new Set(PART_IDS).size).toBe(66);
     expect(HOST_PART_IDS.slice(0, 3)).toEqual(['wall.door-wide', 'wall.door-wide.open', 'step.entry-wide']);
     expect(PART_IDS.slice(45)).toEqual(HOST_PART_IDS); expect(HOST_PART_IDS.slice(3)).toEqual([...VILLAGE_KIT_IDS]);
     for (const id of VILLAGE_KIT_IDS) {
