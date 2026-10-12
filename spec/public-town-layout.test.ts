@@ -48,7 +48,7 @@ it('loads, validates and saves the plan losslessly, and names what is wrong with
 });
 
 it('uses ordinary editable blueprints of the shared catalogue within the public capacity',async()=>{
- expect(town.version).toBe(PUBLIC_TOWN_VERSION);expect(PUBLIC_TOWN_VERSION).toBe(13);expect(R).toBe(21.6);
+ expect(town.version).toBe(PUBLIC_TOWN_VERSION);expect(PUBLIC_TOWN_VERSION).toBe(14);expect(R).toBe(21.6);
  expect(town.objects.length).toBeLessThanOrEqual(PUBLIC_TOWN_CAPACITY.objects);
  expect(new Set(town.objects.map(o=>o.id)).size).toBe(town.objects.length);
  expect(town.objects.every(o=>o.version===PUBLIC_TOWN_VERSION)).toBe(true);
