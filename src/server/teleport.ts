@@ -1,27 +1,21 @@
 import { createHash, randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
-import { Quaternion, Vector3 } from 'three';
-import { localToDir } from '../assets/claude-geometry/core/anchor.ts';
 import { UUID_PATTERN } from '../assets/claude-geometry/core/ids.ts';
 import { encodeBlueprint } from '../shared/blueprint-codec.ts';
 import type { Blueprint } from '../shared/blueprint-model.ts';
-import { MAX_BLUEPRINTS, MAX_STRUCTURES, structureFit, structureSize } from '../shared/blueprints.ts';
-import { heading, segmentDistance, yawFacing } from '../shared/planet-plan/sphere.ts';
-import type { V3 } from '../shared/planet-plan/sphere.ts';
-import { PathPlacementCache } from '../shared/path-structure-placement.ts';
-import { StructurePlacementCache } from '../shared/structure-placement.ts';
+import { MAX_BLUEPRINTS, MAX_STRUCTURES } from '../shared/blueprints.ts';
 import { TELEPORT_STATION } from '../shared/planet-plan/compositions.ts';
-import { MAX_OBJECTS, placementProblem } from '../shared/planets.ts';
+import { MAX_OBJECTS } from '../shared/planets.ts';
 import type { PlanetView } from '../shared/planets.ts';
 import { portPoint } from '../shared/ports.ts';
 import { STATION_REACH, stationSites } from '../shared/teleport.ts';
 import type { TeleportStationPreview } from '../shared/teleport.ts';
-import { fieldOf, objectSeat } from '../shared/terrain.ts';
-import { distance, SPAWN } from '../shared/world.ts';
+import { distance } from '../shared/world.ts';
 import type { Vec3 } from '../shared/world.ts';
 import type { blueprintStore } from './blueprints.ts';
 import { RequestError } from './errors.ts';
 import { STATION_CONTENT, STATION_HASH } from './station-blueprint.ts';
+import { clearOfOccupants, searchStationSites } from './station-site.ts';
 import type { groundStore } from './ground.ts';
 import type { homeStore } from './home.ts';
 import type { planetStore } from './planets.ts';
@@ -42,25 +36,6 @@ export function migrateTeleport(db: DatabaseSync) {
       object_id TEXT, reason TEXT, at INTEGER NOT NULL);`);
 }
 
-/** Ground point under the parked craft that hovers beside a garden's landing pad (client scene.ts). */
-function craftGround(radius: number): Vec3 {
-  const up = new Vector3(...SPAWN), q = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), up);
-  return up.multiplyScalar(radius).add(new Vector3(radius > 20 ? 3.1 : 0, 0, radius > 20 ? 3.2 : -2.2).applyQuaternion(q)).normalize().toArray() as Vec3;
-}
-/** Deterministic candidates: rings round the landing pad first, then the whole sphere. */
-function* candidates(radius: number): Generator<Vec3> {
-  for (const reach of [4.5, 6, 7.5, 9, 11, 13.5]) for (let i = 0; i < 16; i++) {
-    const angle = i * Math.PI / 8;
-    yield localToDir({ dir: SPAWN, yaw: 0 }, radius, [Math.sin(angle) * reach, 0, Math.cos(angle) * reach]);
-  }
-  const count = 96, golden = Math.PI * (3 - Math.sqrt(5));
-  for (let i = 0; i < count; i++) {
-    const y = 1 - 2 * (i + .5) / count, ring = Math.sqrt(1 - y * y), angle = i * golden;
-    yield [Math.cos(angle) * ring, y, Math.sin(angle) * ring];
-  }
-}
-const turn = (yaw: number) => ((yaw % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-
 export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof planetStore>, blueprints: ReturnType<typeof blueprintStore>, homes: ReturnType<typeof homeStore>, ground: ReturnType<typeof groundStore>, homeEnabled: boolean) {
   const transaction = <T>(work: () => T): T => {
     if (db.isTransaction) return work();
@@ -70,39 +45,16 @@ export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof plane
   };
   const sites = (planetId: string) => stationSites(planets.view('', planetId));
 
-  /** Up to `limit` free sites on a home, never over saved objects, saved bodies, the pad or the craft above it. */
-  function siteSearch(planet: PlanetView, limit: number) {
-    const radius = planet.radius!, parts = TELEPORT_STATION.blueprint.parts, size = structureSize(parts), field = fieldOf(planet.environment, radius), craft = craftGround(radius);
-    const occupants = db.prepare('SELECT id,position,flight FROM players WHERE planet_id=?').all(planet.id).filter(row => {
+  /** Saved bodies standing outdoors on a planet: the station never lands on anyone. */
+  function occupantsOf(planetId: string, except?: string) {
+    return db.prepare('SELECT id,position,flight FROM players WHERE planet_id=?').all(planetId).filter(row => {
+      if (row.id === except) return false;
       if (JSON.parse(String(row.flight ?? '{"mode":"ground"}')).mode !== 'ground') return false;
       const location = db.prepare('SELECT document FROM home_locations WHERE player_id=?').get(row.id);
       return !location || JSON.parse(String(location.document)).kind !== 'interior';
     }).map(row => JSON.parse(String(row.position)) as Vec3);
-    const contents = { ...planet.blueprints, [STATION_HASH]: parts }, found: { position: Vec3; rotation: number }[] = [];
-    // One search shares prepared neighbours, instead of re-fitting every saved building per candidate.
-    const structureCache = new StructurePlacementCache(), cache = new PathPlacementCache();
-    // A home's planned routes (path tiles may not be laid yet) stay clear of the station.
-    const routes = (planet.homeManifest?.routes ?? []).map(route => route.points as V3[]);
-    const onRoute = (position: Vec3) => routes.some(points => points.some((point, i) => i > 0 && segmentDistance(position as V3, points[i - 1], point, radius).distance < size.radius + .8));
-    for (const position of candidates(radius)) {
-      if (found.some(f => distance(f.position, position, radius) < 4)) continue;
-      if (occupants.some(point => distance(point, position, radius) < size.radius + .4)) continue;
-      // The parked craft hovers about 3.4 m up; keep its hull (≈2.9 m half-length for the default design) off the gate.
-      if (distance(position, craft, radius) < size.radius + 3.6) continue;
-      if (field.waterLevel !== null && field.heightAt(position) < field.waterLevel) continue;
-      if (onRoute(position)) continue;
-      // Face the forecourt toward the landing pad first, then the other quarter turns.
-      const facing = turn(yawFacing(position as never, heading(position as never, SPAWN as never)));
-      for (const rotation of [0, 1, 2, 3].map(k => turn(facing + k * Math.PI / 2))) {
-        if (placementProblem('structure', position, planet.objects, undefined, size.radius, radius, 2, { rotation, blueprintHash: STATION_HASH, blueprints: contents, field, terrainSeating: !!planet.environment, structureCache, cache })) continue;
-        if (planet.environment && objectSeat(field, { id: 'station-preview', kind: 'structure', position, rotation, version: 1, assetVersion: 2, blueprintHash: STATION_HASH, ...size }, { [STATION_HASH]: parts }).problem) continue;
-        if (structureFit(parts, position, rotation, field).problem) continue;
-        found.push({ position, rotation }); break;
-      }
-      if (found.length >= limit) break;
-    }
-    return found;
   }
+  const siteSearch = (planet: PlanetView, limit: number, except?: string) => searchStationSites(planet, occupantsOf(planet.id, except), limit);
   function capacityProblem(planet: PlanetView) {
     if (planet.objects.length >= MAX_OBJECTS) return `This planet already has ${MAX_OBJECTS} objects. Remove one to make room for the teleport station.`;
     if (planet.objects.filter(o => o.kind === 'structure').length >= MAX_STRUCTURES) return `This planet already has ${MAX_STRUCTURES} structures. Remove one to make room for the teleport station.`;
@@ -111,9 +63,10 @@ export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof plane
   /** Place the shared station as an ordinary owner object, through the normal create path. */
   function place(owner: string, planetId: string, site: { position: Vec3; rotation: number }) {
     db.prepare('INSERT OR IGNORE INTO blueprint_contents(hash,content) VALUES(?,?)').run(STATION_HASH, STATION_CONTENT);
-    const library = blueprints.list(owner);
-    // Shown in the owner's workshop when there is room; never overwrites a library entry.
-    if (!library.some(entry => entry.hash === STATION_HASH) && library.length < MAX_BLUEPRINTS) {
+    // Shown in the owner's workshop when there is room; never overwrites a library entry. Only the
+    // hashes are needed: decoding every saved design here held other players' requests.
+    const library = db.prepare('SELECT hash FROM blueprint_library WHERE owner_id=?').all(owner);
+    if (!library.some(row => row.hash === STATION_HASH) && library.length < MAX_BLUEPRINTS) {
       const bp: Blueprint = { ...structuredClone(TELEPORT_STATION.blueprint), id: randomUUID() as Blueprint['id'], name: 'Teleport station' };
       db.prepare('INSERT INTO blueprint_library(owner_id,id,document,hash,version) VALUES(?,?,?,?,1)').run(owner, bp.id, encodeBlueprint(bp), STATION_HASH);
     }
@@ -123,18 +76,40 @@ export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof plane
     db.prepare('UPDATE players SET revision=revision+1 WHERE planet_id=?').run(planetId);
     return objectId;
   }
+  /** What one station search for this home reads (a snapshot for a worker thread),
+   * or null when the home already had its attempt or keeps a gate of its own. */
+  function stationSearchInput(planetId: string, except?: string) {
+    if (!homeEnabled || db.prepare('SELECT 1 FROM home_stations WHERE planet_id=?').get(planetId)) return null;
+    const row = db.prepare("SELECT owner_id,revision FROM planets WHERE id=? AND kind='garden'").get(planetId);
+    if (!row?.owner_id) return null;
+    const planet = planets.view(String(row.owner_id), planetId);
+    if (stationSites(planet).length || capacityProblem(planet)) return null;
+    return { revision: Number(row.revision), planet, occupants: occupantsOf(planetId, except) };
+  }
   /** One automatic attempt per home (at creation, or when its owner is first home after this update),
-   * recorded in a receipt so a dismantled station is never rebuilt behind its owner. */
-  function ensureHomeStation(planetId: string) {
-    if (!homeEnabled || db.prepare('SELECT 1 FROM home_stations WHERE planet_id=?').get(planetId)) return;
-    const row = db.prepare("SELECT owner_id FROM planets WHERE id=? AND kind='garden'").get(planetId);
-    if (!row?.owner_id) return;
-    transaction(() => {
+   * recorded in a receipt so a dismantled station is never rebuilt behind its owner. `prepared` is a
+   * search done elsewhere on a snapshot: it stands only while the planet keeps that revision and nobody
+   * now stands on the site, and the site still goes through the normal checked create path; when it
+   * no longer stands, nothing is written and the attempt is left for later. `except` is a new player
+   * placed on this home after its station, as `create` does. Returns whether the attempt was made. */
+  function ensureHomeStation(planetId: string, prepared?: { revision: number; occupants: Vec3[]; sites: { position: Vec3; rotation: number }[] }, except?: string): boolean {
+    if (!homeEnabled || db.prepare('SELECT 1 FROM home_stations WHERE planet_id=?').get(planetId)) return true;
+    const row = db.prepare("SELECT owner_id,revision FROM planets WHERE id=? AND kind='garden'").get(planetId);
+    if (!row?.owner_id) return true;
+    return transaction(() => {
       const planet = planets.view(String(row.owner_id), planetId);
-      if (stationSites(planet).length) { db.prepare("INSERT INTO home_stations(planet_id,status,object_id,reason,at) VALUES(?,'placed',NULL,'An existing structure already has a teleport gate.',?)").run(planetId, Date.now()); return; }
-      const problem = capacityProblem(planet), site = problem ? undefined : siteSearch(planet, 1)[0];
-      if (!site) { db.prepare("INSERT INTO home_stations(planet_id,status,object_id,reason,at) VALUES(?,'needs-site',NULL,?,?)").run(planetId, problem ?? 'No free, level ground fits the station without touching saved buildings.', Date.now()); return; }
+      if (stationSites(planet).length) { db.prepare("INSERT INTO home_stations(planet_id,status,object_id,reason,at) VALUES(?,'placed',NULL,'An existing structure already has a teleport gate.',?)").run(planetId, Date.now()); return true; }
+      const problem = capacityProblem(planet);
+      const occupants = occupantsOf(planetId, except);
+      // No site found is only final for the same people standing in the same places.
+      const usable = !problem && prepared && prepared.revision === Number(row.revision) && (prepared.sites.length
+        ? prepared.sites.every(site => clearOfOccupants(site.position, occupants, planet.radius!))
+        : JSON.stringify(prepared.occupants) === JSON.stringify(occupants));
+      if (prepared && !problem && !usable) return false;
+      const site = problem ? undefined : prepared ? prepared.sites[0] : siteSearch(planet, 1, except)[0];
+      if (!site) { db.prepare("INSERT INTO home_stations(planet_id,status,object_id,reason,at) VALUES(?,'needs-site',NULL,?,?)").run(planetId, problem ?? 'No free, level ground fits the station without touching saved buildings.', Date.now()); return true; }
       place(String(row.owner_id), planetId, site);
+      return true;
     });
   }
   function ownerPlanet(id: string, planetId: unknown) {
@@ -157,7 +132,7 @@ export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof plane
   }
 
   return {
-    sites, ensureHomeStation,
+    sites, ensureHomeStation, stationSearchInput,
     preview(id: string, body: Record<string, unknown>) {
       if (Object.keys(body).some(k => k !== 'planetId')) throw new RequestError(400, 'Unexpected station field.');
       return preview(id, body.planetId);

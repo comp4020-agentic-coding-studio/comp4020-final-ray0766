@@ -41,6 +41,8 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
   }
   return {
     world,
+    /** Whether `world(planetId)` would be ready without building the planet's ground now. */
+    warm(planetId:string){const w=cache.get(planetId);return !!w&&w.revision===planets.planet(planetId).revision;},
     read(id:string){return view(ensure(id));},
     reset(id:string){db.prepare('DELETE FROM ground_states WHERE player_id=?').run(id);},
     move(id:string,target:Vec3,now:number,motion?:unknown){

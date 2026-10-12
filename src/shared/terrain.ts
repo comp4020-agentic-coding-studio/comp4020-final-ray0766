@@ -11,6 +11,9 @@ import type { BlueprintContents } from './blueprints.ts';
 import { objectRadius, objectName } from './planets.ts';
 import type { PlacedObject } from './planets.ts';
 const legacy=legacyHeightField(),fields=new Map<string,HeightField>();
+/** Which environment and radius made a cached field, so another thread can find its own copy. */
+const identities=new WeakMap<HeightField,{environment:string|null;radius:number}>();
+export const fieldIdentity=(field:HeightField)=>identities.get(field)??null;
 interface FieldCameraBoundProof {
  heightAt: HeightField['heightAt']; ceiling: number; limits: readonly number[];
  source: TerrainField; sourceHeightAt: TerrainField['heightAt']; program: TerrainField['program']; programHeight: TerrainField['program']['height'];
@@ -75,7 +78,7 @@ export function trustedFieldRadiusUpperBound(field: HeightField): number | null 
 export function fieldOf(environment?:string|null,radius=10):HeightField{
  const key=radius+':'+(environment??'legacy');let field=fields.get(key);
  if(!field){let source:HeightField=legacy;let generated=false;if(environment){const r=decodeEnvironment(environment);if(!r.ok)throw Error('Invalid stored terrain.');source=createHeightField(r.value);generated=true;}
- field=cacheImmutableField(radialField(source,radius));
+ field=cacheImmutableField(radialField(source,radius));identities.set(field,{environment:environment??null,radius});
  if(generated && Number.isFinite(radius) && radius > 0 && mathCurrent()){
   const terrain = source as TerrainField, tight = temperateCameraBound(terrain);
   const limits=clampValues(),[floor,floorKnee,knee,ceiling]=limits;

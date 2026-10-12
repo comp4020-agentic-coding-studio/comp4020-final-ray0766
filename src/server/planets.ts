@@ -63,9 +63,13 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     return { id:p.id,name:p.name,kind:p.kind,claimed:p.owner_id!==null,mine:p.owner_id===id,revision:town?1000+SAMPLE_PUBLIC_VERSION:p.revision,
       objectCount:p.objectCount+(publicTown?.objects??0),slot:p.slot,radius,center:planetCenter(p.slot),environment:town?SAMPLE_PUBLIC_ENVIRONMENT:p.environment??null,...(publicTown?{publicTown}:{}) };
   };
-  const objects = (planetId: string): PlacedObject[] => {
+  const OBJECT_COLUMNS='id,kind,position,rotation,version,blueprint_hash,radius,height,(SELECT asset_version FROM object_assets a WHERE a.object_id=planet_objects.id) AS asset_version';
+  const objects = (planetId: string): PlacedObject[] => placedObjects(db.prepare(`SELECT ${OBJECT_COLUMNS} FROM planet_objects WHERE planet_id=? ORDER BY rowid`).all(planetId) as unknown as ObjectRow[]);
+  /** One saved object, exactly as `objects` reads it, without reading the rest of its planet. */
+  const object = (planetId: string, objectId: string): PlacedObject|undefined => placedObjects(db.prepare(`SELECT ${OBJECT_COLUMNS} FROM planet_objects WHERE planet_id=? AND id=?`).all(planetId, objectId) as unknown as ObjectRow[])[0];
+  const placedObjects = (rows: ObjectRow[]): PlacedObject[] => {
     const sizes=new Map<string,ReturnType<typeof structureSize>>();
-    return (db.prepare('SELECT id,kind,position,rotation,version,blueprint_hash,radius,height,(SELECT asset_version FROM object_assets a WHERE a.object_id=planet_objects.id) AS asset_version FROM planet_objects WHERE planet_id=? ORDER BY rowid').all(planetId) as unknown as ObjectRow[]).map(r=>{
+    return rows.map(r=>{
       if(r.blueprint_hash&&!sizes.has(r.blueprint_hash))sizes.set(r.blueprint_hash,structureSize(blueprints.parts(r.blueprint_hash)));
       const size=r.blueprint_hash?sizes.get(r.blueprint_hash):undefined;
       // Old structures stay exactly where they were saved. Effective extents
@@ -131,20 +135,22 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     bump(p.id);history.append(p.id,old,objects(p.id).find(o=>o.id===oid)!);
   };
   return {
-    freshHomePlanet(){return transaction(()=>{
-      const available=db.prepare(`SELECT id FROM planets p WHERE kind='garden' AND owner_id IS NULL
+    /** `reserved` planets are being prepared for another new player and are skipped. */
+    freshHomePlanet(reserved:ReadonlySet<string>=new Set()){return transaction(()=>{
+      const available=(db.prepare(`SELECT id FROM planets p WHERE kind='garden' AND owner_id IS NULL
         AND NOT EXISTS(SELECT 1 FROM planet_objects WHERE planet_id=p.id)
         AND NOT EXISTS(SELECT 1 FROM object_tombstones WHERE planet_id=p.id)
         AND COALESCE((SELECT seq FROM history_heads WHERE planet_id=p.id),0)=0
         AND NOT EXISTS(SELECT 1 FROM players WHERE planet_id=p.id)
         AND NOT EXISTS(SELECT 1 FROM visits WHERE planet_id=p.id)
-        AND NOT EXISTS(SELECT 1 FROM home_manifests WHERE planet_id=p.id) ORDER BY rowid LIMIT 1`).get();
+        AND NOT EXISTS(SELECT 1 FROM home_manifests WHERE planet_id=p.id) ORDER BY rowid LIMIT ?`).all(reserved.size+1)).find(row=>!reserved.has(String(row.id)));
       return String(available?.id??addBlankPlanet());
     });},
     replace(id:string,body:Record<string,unknown>,variant='custom'){return transaction(()=>replaceInner(id,body,variant));},
     undo(id:string,body:Record<string,unknown>){return transaction(()=>{strict(body,['planetId','objectId','expectedVersion']);owns(id,body.planetId);const row=db.prepare('SELECT * FROM object_replacements WHERE planet_id=? AND object_id=? AND undone=0 ORDER BY seq DESC LIMIT 1').get(body.planetId as string,body.objectId as string);if(!row)throw new RequestError(409,'There is no exterior change to undo.');replaceInner(id,{...body,blueprintHash:row.before_hash},String(row.before_variant),true);db.prepare('UPDATE object_replacements SET undone=1 WHERE seq=?').run(row.seq);});},
     planet,
     list(id: string) { return (db.prepare('SELECT *, (SELECT count(*) FROM planet_objects o WHERE o.planet_id=planets.id) AS objectCount FROM planets ORDER BY rowid').all() as unknown as PlanetRow[]).map(p => summary(p, id)); },
+    object,
     view(id: string, planetId: string): PlanetView {
       const placed = objects(planetId);
       const hashes = [...new Set(placed.flatMap(o => o.blueprintHash ? [o.blueprintHash] : []))];

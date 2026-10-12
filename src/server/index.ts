@@ -7,6 +7,7 @@ import { BLUEPRINT_BODY_LIMIT } from '../shared/blueprints.ts';
 import { presenceStore } from './presence.ts';
 import { openStore, RequestError } from './store.ts';
 import { integratedStartup } from './launch-options.ts';
+import { HeavyWork } from './heavy-work.ts';
 
 const homeSample=process.env.HOME_SAMPLE==='1';
 const samplePort=Number(process.env.HOME_SAMPLE_PORT??8126);
@@ -19,6 +20,11 @@ if(homeSample&&!store.homeSample){store.close();throw new Error('HOME_SAMPLE ref
 const cookieName=homeSample?(samplePort===8126?'little_home_sample':`little_home_sample_p${samplePort}`):'little_post';
 if (store.migrationBackup) console.log(`Before migration, saved a consistent backup: ${store.migrationBackup}`);
 const presence=presenceStore(store.state);
+// New homes, station searches and other planets' ground are prepared on a worker thread, so one
+// player's arrival never holds everyone else's movement and presence. The harbour is built now,
+// before the server takes requests.
+const heavy=new HeavyWork();store.useHeavyWork(heavy);
+try{store.warmGround('hub');}catch(error){console.error('The harbour ground could not be prepared at startup:',error instanceof Error?error.message:error);}
 const root = resolve('dist');
 const limits = new Map<string, { start: number; count: number }>();
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -37,9 +43,10 @@ const server = createServer(async (req, res) => {
       let id = cookie ? hash(cookie) : '';
       if (url.pathname === '/api/state' && req.method === 'GET') {
         if (!id || !store.has(id)) {
-          const token = randomBytes(32).toString('hex'); id = hash(token); store.create(id);
+          const token = randomBytes(32).toString('hex'); id = hash(token); const created = await store.createPrepared(id);
           const secure = req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : '';
           res.setHeader('Set-Cookie', `${cookieName}=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=31536000${secure}`);
+          send(200, created); return;
         }
         send(200, store.state(id)); return;
       }
@@ -99,8 +106,8 @@ const server = createServer(async (req, res) => {
       else if (url.pathname === '/api/interact') send(200, store.interact(id, body.action));
       else if (url.pathname === '/api/flight/takeoff') {const result=store.takeoff(id,body);presence.leave(id);send(200,result);}
       else if (url.pathname === '/api/flight/checkpoint') send(200,store.flight(id,body));
-      else if (url.pathname === '/api/flight/land') {const result=store.land(id,body);presence.leave(id);send(200,result);}
-      else if (url.pathname === '/api/teleport') {const result=store.teleport(id,body);presence.leave(id);send(200,result);}
+      else if (url.pathname === '/api/flight/land') {await store.prepareLanding(body.planetId);const result=store.land(id,body);presence.leave(id);send(200,result);}
+      else if (url.pathname === '/api/teleport') {await store.prepareTeleport(id);const result=store.teleport(id,body);presence.leave(id);send(200,result);}
       else if (url.pathname === '/api/teleport/station/preview') send(200,store.previewStation(id,body));
       else if (url.pathname === '/api/teleport/station/confirm') send(200,store.confirmStation(id,body));
       else if (url.pathname === '/api/planets/visit') throw new RequestError(410,'Board your ship and fly to the planet before landing.');
@@ -141,5 +148,5 @@ const server = createServer(async (req, res) => {
 });
 const port=homeSample?samplePort:Number(process.env.PORT??8080),host=homeSample?'127.0.0.1':process.env.HOST??'0.0.0.0';
 server.listen(port,host,()=>console.log(`Little Worlds is ready on http://${host}:${port}`));
-const stop = () => { server.close(() => { store.close(); process.exit(0); }); server.closeIdleConnections(); };
+const stop = () => { server.close(() => { void heavy.close(); store.close(); process.exit(0); }); server.closeIdleConnections(); };
 process.on('SIGTERM', stop); process.on('SIGINT', stop);

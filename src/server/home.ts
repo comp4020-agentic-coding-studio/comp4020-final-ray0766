@@ -20,6 +20,7 @@ import { canonicalJson } from '../assets/claude-geometry/core/doc.ts';
 import { HOME_DOOR_PART, HOME_ENVIRONMENT, homeVariant } from '../shared/home-layout.ts';
 import { districtHome } from '../shared/district-layout.ts';
 import { generateHomeManifest, HOME_GENERATION_VERSION } from '../shared/home-generation.ts';
+import type { GeneratedHomeManifest } from '../shared/home-generation.ts';
 import type { planetStore } from './planets.ts';
 import type { blueprintStore } from './blueprints.ts';
 import type { historyStore } from './history.ts';
@@ -56,6 +57,8 @@ const strict=(body:Record<string,unknown>,keys:string[])=>{if(Object.keys(body).
 const vec=(v:unknown):v is Vec3=>Array.isArray(v)&&v.length===3&&v.every(n=>typeof n==='number'&&Number.isFinite(n));
 const digest=(v:unknown)=>createHash('sha256').update(canonicalJson(v)).digest('hex');
 interface HomeRow { door_part:number;planet_id:string;building_id:string;interior_id:string;document:string;variant:HomeDescriptor['variant'] }
+/** Everything generateHomeManifest reads for one planet. */
+export interface HomeGenerationInputs { radius:number; seed:number; environment:string|null }
 /** Stable for this planet and generator version; independent of browser identity. */
 export const homeGenerationSeed=(planetId:string)=>createHash('sha256').update(`home-neighbourhood:${HOME_GENERATION_VERSION}:${planetId}`).digest().readUInt32BE(0);
 
@@ -102,19 +105,28 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
     return {planetId,buildingId:h.building_id,interiorId:h.interior_id,door:door(h),interior:interior(h),canEdit:p.owner_id===id,buildingVersion:o.version,variant:h.variant,canUndo:!!db.prepare('SELECT 1 FROM object_replacements WHERE object_id=? AND undone=0').get(o.id)};
   }
   function content(bp:Blueprint) {const value=canonicalJson(hashInput(bp.parts)),hash=createHash('sha256').update(value).digest('hex');db.prepare('INSERT OR IGNORE INTO blueprint_contents(hash,content) VALUES(?,?)').run(hash,value);return hash;}
-  function initialise(planetId:string) {
-    if(!enabled||home(planetId))return;
-    const p=planets.planet(planetId);if(p.kind!=='garden'||(p.sample_radius===null&&p.world_radius===null)||!p.owner_id)return;
-    // A manifest is a creation receipt, never an instruction to regenerate.
-    // Empty but previously edited worlds also remain untouched.
+  /** What generating this planet's home would read, or null when it must not get one: a manifest is a
+   * creation receipt, never an instruction to regenerate, and empty but previously edited worlds stay untouched. */
+  function generationInputs(planetId:string,owner?:string):HomeGenerationInputs|null {
+    if(!enabled||home(planetId))return null;
+    const p=planets.planet(planetId);if(p.kind!=='garden'||(p.sample_radius===null&&p.world_radius===null))return null;
+    const viewer=owner??(p.owner_id===null?null:String(p.owner_id));if(viewer===null)return null;
     if(db.prepare('SELECT 1 FROM home_manifests WHERE planet_id=?').get(planetId)||
-      planets.view(String(p.owner_id),planetId).objects.length||
+      planets.view(viewer,planetId).objects.length||
       db.prepare('SELECT 1 FROM object_tombstones WHERE planet_id=?').get(planetId)||
-      Number(db.prepare('SELECT seq FROM history_heads WHERE planet_id=?').get(planetId)?.seq??0)>0)return;
+      Number(db.prepare('SELECT seq FROM history_heads WHERE planet_id=?').get(planetId)?.seq??0)>0)return null;
+    // Only this never-edited, newly created home may adopt the new authored
+    // district ground. A supplied custom terrain remains an input constraint.
+    return {radius:p.radius,seed:homeGenerationSeed(planetId),environment:p.environment===HOME_ENVIRONMENT?null:(p.environment??null)};
+  }
+  /** `prepared` is a manifest generated elsewhere (a worker thread) from inputs read earlier. It is used
+   * only when those inputs still match this planet exactly; otherwise the home is generated here. */
+  function initialise(planetId:string,prepared?:{inputs:HomeGenerationInputs;manifest:GeneratedHomeManifest}) {
+    const p=planets.planet(planetId);if(!p.owner_id)return;
+    const inputs=generationInputs(planetId);if(!inputs)return;
     transaction(()=>{
-      // Only this never-edited, newly created home may adopt the new authored
-      // district ground. A supplied custom terrain remains an input constraint.
-      const manifest=generateHomeManifest(p.radius,homeGenerationSeed(planetId),p.environment===HOME_ENVIRONMENT?undefined:p.environment);
+      const same=prepared&&prepared.inputs.radius===inputs.radius&&prepared.inputs.seed===inputs.seed&&prepared.inputs.environment===inputs.environment;
+      const manifest=same?prepared.manifest:generateHomeManifest(inputs.radius,inputs.seed,inputs.environment??undefined);
       // Ground, rendering and every creation event read the accepted output
       // environment in the same transaction as its concrete saved objects.
       db.prepare('UPDATE planets SET environment=? WHERE id=?').run(manifest.environment,planetId);
@@ -126,11 +138,11 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
         // Fresh library ids never overwrite an existing name, group or draft.
         const bp={...spec.blueprint,id:randomUUID() as Blueprint['id']};
         db.prepare('INSERT INTO blueprint_library(owner_id,id,document,hash,version) VALUES(?,?,?,?,1)').run(p.owner_id,bp.id,encodeBlueprint(bp),hash);
-        history.append(planetId,null,planets.view('',planetId).objects.find(o=>o.id===id)!);return {id,hash};
+        history.append(planetId,null,planets.object(planetId,id)!);return {id,hash};
       };
       const building=insertStructure(manifest.home);
       for(const item of manifest.infrastructure??[])insertStructure(item);
-      for(const spec of manifest.objects){const id=randomUUID();db.prepare('INSERT INTO planet_objects(id,planet_id,kind,position,rotation) VALUES(?,?,?,?,?)').run(id,planetId,spec.kind,JSON.stringify(spec.position),spec.rotation);db.prepare('INSERT INTO object_assets(object_id,planet_id,asset_version) VALUES(?,?,2)').run(id,planetId);history.append(planetId,null,planets.view('',planetId).objects.find(o=>o.id===id)!);}
+      for(const spec of manifest.objects){const id=randomUUID();db.prepare('INSERT INTO planet_objects(id,planet_id,kind,position,rotation) VALUES(?,?,?,?,?)').run(id,planetId,spec.kind,JSON.stringify(spec.position),spec.rotation);db.prepare('INSERT INTO object_assets(object_id,planet_id,asset_version) VALUES(?,?,2)').run(id,planetId);history.append(planetId,null,planets.object(planetId,id)!);}
       // The compact district house is editable kit geometry, not the historical
       // full-court preset. Describe the actual saved design without relabelling
       // an existing home or implying a larger remodel has already been applied.
@@ -156,7 +168,7 @@ export function homeStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>
     if(!homePositionAllowed(homeEntry(room,doorPartId),items,HOME_BODY_RADIUS,room,true,doorPartId))throw new RequestError(400,'Keep the entry clear.');return {material:body.material as HomeInterior['material'],items};
   }
   return {
-    enabled,location,descriptor,initialise,exterior,requireOutside,
+    enabled,location,descriptor,initialise,generationInputs,exterior,requireOutside,
     door:(planetId:string)=>{const h=home(planetId);return h?door(h):null;},
     movedExterior(id:string){if(!enabled)return;const old=location(id);writeLocation(id,{kind:'exterior',planetId:String(player(id).planet_id),visitEpoch:old.visitEpoch+1});},
     enter(id:string,body:Record<string,unknown>,now=Date.now()){

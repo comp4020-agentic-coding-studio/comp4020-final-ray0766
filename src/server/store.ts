@@ -22,6 +22,9 @@ import { homePathStore } from './home-paths.ts';
 import { homeSetupStore } from './home-setup.ts';
 import { INTEGRATED_RADIUS, migrateIntegrationSchema } from './integration-migration.ts';
 import { migrateTeleport, teleportStore } from './teleport.ts';
+import type { HeavyWork } from './heavy-work.ts';
+import type { GeneratedHomeManifest } from '../shared/home-generation.ts';
+import type { Vec3 } from '../shared/world.ts';
 export { RequestError } from './errors.ts';
 
 interface Row { character: Character; quest: Quest; position: string; deliveries: number; revision: number; moved_at: number; planet_id: string }
@@ -203,10 +206,38 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
     const r = row(id);
     return { ...(homeEnabled?{location,home:homes.descriptor(id)}:{}), worldRadius:planets.planet(r.planet_id).radius, environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
   };
+  // Set by the HTTP server: terrain, collision and siting work then runs on a worker thread.
+  let heavy:HeavyWork|null=null;
+  // Fresh planets being prepared for a new player; nobody else is given them meanwhile.
+  const reservedHomes=new Set<string>();
+  /** Search for a home's station on the worker and place it here, re-checked. A search that no longer
+   * fits the saved planet writes nothing, so the attempt stays open for a later visit. */
+  async function prepareStation(work:HeavyWork,planetId:string,except?:string){
+    const input=teleport.stationSearchInput(planetId,except);if(!input)return;
+    let sites:{position:Vec3;rotation:number}[];
+    try{sites=await work.run('station',`station:${planetId}:${input.revision}`,{planet:input.planet,occupants:input.occupants});}
+    catch(error){
+      if(error instanceof RequestError)throw error;
+      // A failed worker must not leave homes without their station: search here instead.
+      console.error('Station preparation failed; searching here:',error instanceof Error?error.message:error);
+      teleport.ensureHomeStation(planetId,undefined,except);return;
+    }
+    teleport.ensureHomeStation(planetId,{revision:input.revision,occupants:input.occupants,sites},except);
+  }
+  /** Build a planet's ground on the worker when this server has not, so arriving there reuses its fits.
+   * The harbour is built at startup and stays in this thread. */
+  async function prepareWorld(work:HeavyWork,planetId:unknown){
+    if(typeof planetId!=='string'||planetId==='hub'||!db.prepare('SELECT 1 FROM planets WHERE id=?').get(planetId)||ground.warm(planetId))return;
+    try{await work.run('world',`world:${planetId}:${planets.planet(planetId).revision}`,{planet:planets.view('',planetId)});}
+    catch(error){if(error instanceof RequestError)throw error;console.error('Ground preparation failed; building it here:',error instanceof Error?error.message:error);}
+  }
   const universe = (id: string) => {
     // A home from before teleport stations gets its one placement attempt while its owner stands there.
     const owned=homeEnabled?planets.owned(id):null;
-    if(owned&&row(id).planet_id===owned&&navigation.flight(id).mode==='ground'&&homes.location(id).kind!=='interior')teleport.ensureHomeStation(owned);
+    if(owned&&row(id).planet_id===owned&&navigation.flight(id).mode==='ground'&&homes.location(id).kind!=='interior'){
+      if(heavy)void prepareStation(heavy,owned).catch(error=>console.error('Station preparation failed:',error));
+      else teleport.ensureHomeStation(owned);
+    }
     const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) };
   };
   return {
@@ -241,6 +272,43 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
       }catch(error){if(homeEnabled&&db.isTransaction)db.exec('ROLLBACK');throw error;}
       return state(id);
     },
+    /** The same arrival as `create`, with the home layout and its station search run on the worker so other
+     * players are answered meanwhile. Every write still happens here, after re-checking what was read: the
+     * home, its owner and the new player's place at the door in one transaction, then the station. */
+    async createPrepared(id: string, now = Date.now()) {
+      const work=heavy;if(!homeEnabled||!work)return this.create(id,now);
+      const planetId=planets.freshHomePlanet(reservedHomes);reservedHomes.add(planetId);
+      try{
+        const inputs=homes.generationInputs(planetId,id);
+        let manifest:GeneratedHomeManifest|undefined;
+        // A full queue is the player's to retry; a failed worker only means the home is generated here.
+        if(inputs)try{manifest=await work.run<GeneratedHomeManifest>('home',`home:${planetId}`,inputs);}
+        catch(error){if(error instanceof RequestError)throw error;console.error('Home preparation failed; generating it here:',error instanceof Error?error.message:error);}
+        db.exec('BEGIN IMMEDIATE');
+        try{
+          db.prepare('INSERT INTO players (id,position,moved_at) VALUES (?,?,?)').run(id, JSON.stringify(SPAWN), now);
+          planets.claim(id,planetId);homes.initialise(planetId,inputs&&manifest?{inputs,manifest}:undefined);
+          const door=homes.door(planetId);
+          if(!door)throw new RequestError(409,'The sample home could not be prepared.');
+          db.prepare('UPDATE players SET planet_id=?,position=? WHERE id=?').run(planetId,JSON.stringify(door.position),id);
+          homes.movedExterior(id);db.exec('COMMIT');
+        }catch(error){
+          if(db.isTransaction)db.exec('ROLLBACK');
+          // Rare: the reserved planet was claimed meanwhile. Arrive the original way instead.
+          if(error instanceof RequestError&&error.status===409&&!this.has(id))return this.create(id,now);
+          throw error;
+        }
+      }finally{reservedHomes.delete(planetId);}
+      // `create` sites the station before the player stands there; the search leaves them out to match.
+      try{await prepareStation(work,planetId,id);}catch(error){console.error('Station preparation failed:',error);}
+      return state(id);
+    },
+    useHeavyWork(work:HeavyWork|null){heavy=work;},
+    /** Before a teleport: the destination is the player's own home or the harbour (the server re-checks). */
+    async prepareTeleport(id:string){const work=heavy,r=db.prepare('SELECT planet_id FROM players WHERE id=?').get(id);if(!work||!r)return;await prepareWorld(work,r.planet_id==='hub'?planets.owned(id):'hub');},
+    async prepareLanding(planetId:unknown){if(heavy)await prepareWorld(heavy,planetId);},
+    /** Build a planet's ground now, before anyone is waiting (the harbour at startup). */
+    warmGround(planetId:string){ground.world(planetId);},
     character(id: string, value: unknown) {
       if (!CHARACTERS.includes(value as Character)) throw new RequestError(400, 'Choose one of the three couriers.');
       row(id);
