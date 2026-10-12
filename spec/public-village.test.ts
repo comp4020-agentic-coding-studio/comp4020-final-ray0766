@@ -54,7 +54,7 @@ it('fences the released v7 public client without changing private ground, names,
  }finally{s.close();}
 });
 
-it.each([7,8])('keeps a valid v%i public airborne pose when its collision revision is refreshed',version=>{
+it.each([7,8,9])('keeps a valid v%i public airborne pose when its collision revision is refreshed',version=>{
  const s=openStore(':memory:');try{
   s.create('public',0);
   s.db.prepare('UPDATE ground_states SET physics_version=?,scene_revision=-1,radius=radius+0.5,vertical_speed=2,grounded=0,jump_held=1 WHERE player_id=?').run(version,'public');
@@ -62,10 +62,10 @@ it.each([7,8])('keeps a valid v%i public airborne pose when its collision revisi
   const playerBefore=s.db.prepare('SELECT * FROM players WHERE id=?').get('public')!;
   const b=s.state('public'),after=s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('public')!;
   for(const key of ['position','radius','vertical_speed','grounded','jump_held','planet_id'])expect(after[key],key).toEqual(before[key]);
-  expect(after.physics_version).toBe(8);expect(after.sequence).toBe(Number(before.sequence)+1);
+  expect(after.physics_version).toBe(HUB_PHYSICS_VERSION);expect(after.sequence).toBe(Number(before.sequence)+1);
   expect(after.scene_revision).toBe(s.universe('public').currentPlanet.revision);
   const playerAfter=s.db.prepare('SELECT * FROM players WHERE id=?').get('public')!;
-  expect(playerAfter).toEqual({...playerBefore,revision:Number(playerBefore.revision)+(version===7?1:0)});
+  expect(playerAfter).toEqual({...playerBefore,revision:Number(playerBefore.revision)+(version===HUB_PHYSICS_VERSION?0:1)});
   expect(s.state('public')).toEqual(b);
  }finally{s.close();}
 });
@@ -75,7 +75,7 @@ it('does not preserve an unknown public physics version as compatible airborne m
   s.create('public',0);
   s.db.exec("UPDATE ground_states SET physics_version=99,radius=radius+0.5,vertical_speed=2,grounded=0,jump_held=1 WHERE player_id='public'");
   const b=s.state('public');
-  expect(b.ground).toMatchObject({physicsVersion:8,verticalSpeed:0,jumpHeld:false});
+  expect(b.ground).toMatchObject({physicsVersion:HUB_PHYSICS_VERSION,verticalSpeed:0,jumpHeld:false});
  }finally{s.close();}
 });
 

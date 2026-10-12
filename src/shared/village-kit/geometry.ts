@@ -232,7 +232,8 @@ export function shopFront(k: Kit) {
   b.box(k.m('skin'), [.5, .1, .012], { position: [0, 1.95, depth / 2 + .006] }, 0);
   b.box(k.m('concrete'), [.84, .02, depth], { position: [0, .01, 0] }, 0);
   // Noren: three cloth panels from the head, a pale crest on the middle one.
-  const panels = 3, pw = .84 / panels, top = 1.86, drop = .38;
+  // Above head height (the 1.6 m courier walks under it).
+  const panels = 3, pw = .84 / panels, top = 1.86, drop = .22;
   for (let i = 0; i < panels; i++) b.box(k.m('leaf'), [pw - .016, drop, .008], { position: [-.42 + pw * (i + .5), top - drop / 2, depth / 2 + .02] }, 0);
   if (!k.low) b.box(k.m('marking'), [.12, .12, .003], { position: [0, top - drop * .45, depth / 2 + .026] }, 0);
   shedHood(k, .98, .78, 2.18, 2.0);

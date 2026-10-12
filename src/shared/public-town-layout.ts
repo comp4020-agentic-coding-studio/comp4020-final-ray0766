@@ -183,14 +183,8 @@ for(const [hash,parts] of Object.entries(TOWN_AUTHORED_BLUEPRINTS)){
  PUBLIC_TOWN_BLUEPRINTS.push({id:(`51549d27-cabe-4d99-af34-a1${String(index).padStart(10,'0')}`) as BlueprintId,name:`Town · Authored block ${index}`,parts,groups:[]});
  PUBLIC_TOWN_HASHES.push(hash);
 }
-// Public street packs append to the registry; the first 43 workshop examples
-// and every existing building blueprint retain their identities and indices.
-for(const [hash,parts] of Object.entries(TOWN_WIDE_ROAD_BLUEPRINTS)){
- if(PUBLIC_TOWN_HASHES.includes(hash))continue;
- const index=PUBLIC_TOWN_BLUEPRINTS.length;
- PUBLIC_TOWN_BLUEPRINTS.push({id:(`51549d27-cabe-4d99-af34-a1${String(index).padStart(10,'0')}`) as BlueprintId,name:`Town · Street pack ${index}`,parts,groups:[]});
- PUBLIC_TOWN_HASHES.push(hash);
-}
+// v11 street packs (archived) are no longer registered: v12 streets are
+// continuous surfaces. publicTownV11 resolves them from their own table.
 function facing(point:Vec3,toward:Vec3):number {
  const up=new Vector3(...point),q=new Quaternion().setFromUnitVectors(new Vector3(0,1,0),up);
  const forward=new Vector3(...toward).projectOnPlane(up).normalize().applyQuaternion(q.invert());
@@ -298,7 +292,7 @@ export function publicTown(radius=21.6):PublicTown {
 }
 /** The archived v11 ledger (wide street packs); kept for comparison and tests, never served. */
 export function publicTownV11(radius=21.6):PublicTown {
- const blueprints=Object.fromEntries(PUBLIC_TOWN_BLUEPRINTS.map((b,i)=>[PUBLIC_TOWN_HASHES[i],b.parts]));
+ const blueprints={...Object.fromEntries(PUBLIC_TOWN_BLUEPRINTS.map((b,i)=>[PUBLIC_TOWN_HASHES[i],b.parts])),...TOWN_WIDE_ROAD_BLUEPRINTS};
  const objects=structuredClone(TOWN_WIDE_ROAD_OBJECTS);
  const renderDistricts=townDistricts();
  for(const object of objects)renderDistricts.find(d=>d.id===townDistrictFor(object.position))!.objectIds.push(object.id);

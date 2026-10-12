@@ -67,13 +67,13 @@
     {"id":"glasshouse","district":"tea","composition":"glasshouse","road":"glasshouse-lane","at":10.2,"side":"left","setback":1.2,"mirror":false},
     {"id":"market-shop-se","district":"market","composition":"stall","plaza":"market-square","at":140},
     {"id":"market-shop-sw","district":"market","composition":"stall","plaza":"market-square","at":238},
-    {"id":"work-shed","district":"works","composition":"workshop","plaza":"work-court","at":0},
     {"id":"work-store","district":"works","composition":"harbour-store","plaza":"work-court","at":180},
     {"id":"teahouse","district":"tea","composition":"teahouse","plaza":"tea-court","at":266},
     {"id":"tea-pavilion","district":"tea","composition":"pavilion","plaza":"tea-court","at":168},
     {"id":"lookout","district":"south","composition":"lookout","plaza":"lookout-terrace","at":100},
     {"id":"lookout-pavilion","district":"south","composition":"pavilion","plaza":"lookout-terrace","at":270},
-    {"id":"tea-cottage","district":"tea","composition":"cottage-hedge","plaza":"tea-court","at":25}
+    {"id":"tea-cottage","district":"tea","composition":"cottage-hedge","plaza":"tea-court","at":25},
+    {"id":"quay-store","district":"arrival","composition":"harbour-store","plaza":"harbour-quay","at":275}
   ],
   "frontages": [
     {"id":"harbour-way-l1","district":"arrival","road":"harbour-way","side":"left","from":4.6,"to":9.5,"compositions":["shop","townhouse-tall"]},
@@ -153,7 +153,7 @@
   "props": [],
   "residents": [
     {"id":"ada-shop","place":"market","lot":"market-e-1","side":"right"},
-    {"id":"ivo-repair","place":"works","lot":"work-shed","side":"left"},
+    {"id":"ivo-repair","place":"works","lot":"quay-store","side":"left"},
     {"id":"nell-garden","place":"tea","lot":"glasshouse","side":"left"},
     {"id":"pax-courier","place":"arrival","lot":"post-office","side":"left"},
     {"id":"market-basket","place":"market","road":"market-street","at":6,"to":13.5,"side":"right"},
@@ -162,7 +162,7 @@
     {"id":"repair-apprentice","place":"works","lot":"work-store","side":"right"},
     {"id":"harbour-porter","place":"arrival","road":"harbour-way","at":9,"to":14,"side":"left"},
     {"id":"garden-helper","place":"tea","lot":"tea-pavilion","side":"right"},
-    {"id":"garden-reader","place":"homes","road":"well-lane","at":13.4,"side":"right"},
+    {"id":"garden-reader","place":"homes","road":"green-lane","at":8,"side":"left"},
     {"id":"post-walker","place":"homes","road":"post-lane","at":30,"to":36,"side":"right"},
     {"id":"court-reader","place":"homes","lot":"garden-s1-2","side":"right"},
     {"id":"court-neighbour","place":"tea","lot":"teahouse","side":"left"},

@@ -221,7 +221,7 @@ const authoredTown = () => {
     expect(createHash('sha256').update(bytes).digest('hex')).toBe(expected);
     town = JSON.parse(bytes.toString()) as PublicTown;
   } else town = publicTown(21.6);
-  expect(town.version, 'These world anchors belong to the v10 public town.').toBe(10);
+  expect(town.version, 'These world anchors belong to the v12 planned main planet.').toBe(12);
   const world = new GroundWorld({ ...town, id: 'resident-authored-test', revision: 0 });
   // Include the unchanged shared ship obstacle without auto-appending another
   // public village to this explicit, hash-bound object ledger.
@@ -279,12 +279,8 @@ it('allows only a reachable small paving step under an advisory foot while still
   expect(residentClothClear(wall.world, besideWall), 'The support ceiling must never raise the probe onto a different storey.').toBe(false);
 });
 
-it('seats all eighteen residents beside their seven real worksites without embedding bodies or clothing in town solids', () => {
-  const { town, world } = authoredTown(), definitions = townResidents();
-  const fixtureIds = ['ada-shop', 'ivo-repair', 'nell-garden', 'pax-courier', 'repair-apprentice', 'garden-helper', 'south-maker'];
-  expect(town.objects.filter(object => object.id.startsWith('v10-resident-fixture-')).map(object => object.id).sort())
-    .toEqual(fixtureIds.map(id => `v10-resident-fixture-${id}`).sort());
-  expect(town.worksites?.map(site => site.id).sort()).toEqual(definitions.filter(d => d.conversational).map(d => d.id).sort());
+it('seats all eighteen residents beside their planned doorways and streets without embedding bodies or clothing in town solids', () => {
+  const { world } = authoredTown(), definitions = townResidents();
   const inhabitants = [...definitions, ...Object.entries(NPCS).map(([id, npc]) => ({ id, position: npc.position }))];
   expect(inhabitants).toHaveLength(18);
   const failures = inhabitants.flatMap(definition => {
@@ -329,59 +325,37 @@ it('gives each of the four authored speakers a real unobstructed walking approac
   } finally { crowd.dispose(); }
 });
 
-it('walks the orchard branch to Nell with a full facing camera while her real can still waters the existing bed', () => {
+it('walks the glasshouse door path to Nell with room for sleeves and an unobstructed facing camera', () => {
   const { town, world } = authoredTown(), nell = townResidents().find(d => d.id === 'nell-garden')!;
-  const fixture = town.objects.find(o => o.id === 'v10-resident-fixture-nell-garden')!;
-  const parts = town.blueprints[fixture.blueprintHash!], anchor = { dir: fixture.position, yaw: fixture.rotation };
-  expect(parts.filter(part => part.part === 'garden.bed')).toHaveLength(2);
-  const fit = structureFit(parts, fixture.position, fixture.rotation, fieldOf(town.environment, town.radius));
-  const direction = (x: number, z: number) => localToDir(anchor, fit.baseRadius, [x, 0, z]);
-  // The actual orchard street connects to the open side of the existing bed.
-  // Keep these designed bends: the shortest capsule path brushes the harbour wall.
-  const street = town.routes.find(route => route.id === 'north-dock-orchard')!;
-  const points = [street.points[3], direction(-1.25, 4.5), direction(-1.25, 2), direction(-1.8, 1.5)];
+  // v12: Nell stands beside the glasshouse's door path; the route runs street → path end → doorstep.
+  const route = town.routes.find(r => r.id === 'door-glasshouse')!;
+  const closest = route.points.slice(1).reduce((best, p) => distance(p, nell.position, town.radius) < distance(best, nell.position, town.radius) ? p : best);
+  const points = [route.points[0], closest];
   const crowd = new TownResidents(new Group(), world, [nell]);
   let pose = supportedPose(world, points[0]);
   try {
-    for (const targets of [points.slice(1), [...points].reverse().slice(1)]) {
-      for (const target of targets) {
-        for (let tick = 0; tick < 200 && distance(pose.position, target, town.radius) >= .02; tick++) {
-          const gap = distance(pose.position, target, town.radius), up = new Vector3(...pose.position);
-          const forward = new Vector3(...target).projectOnPlane(up).normalize(), angle = Math.min(.05, gap) / pose.radius;
-          const desired = up.clone().multiplyScalar(Math.cos(angle)).addScaledVector(forward, Math.sin(angle)).normalize().toArray() as Vec3;
-          pose = world.move(pose, desired, 1 / 60);
-          expect(pose.grounded).toBe(true); expect(world.blocked(pose)).toBe(false);
-          expect(residentClothClear(world, pose), 'The real branch needs room for sleeves and the carried parcel.').toBe(true);
-        }
-        expect(distance(pose.position, target, town.radius)).toBeLessThan(.02);
+    for (const target of points.slice(1)) {
+      for (let tick = 0; tick < 600 && distance(pose.position, target, town.radius) >= .02; tick++) {
+        const gap = distance(pose.position, target, town.radius), up = new Vector3(...pose.position);
+        const forward = new Vector3(...target).projectOnPlane(up).normalize(), angle = Math.min(.05, gap) / pose.radius;
+        const desired = up.clone().multiplyScalar(Math.cos(angle)).addScaledVector(forward, Math.sin(angle)).normalize().toArray() as Vec3;
+        pose = world.move(pose, desired, 1 / 60);
+        expect(pose.grounded).toBe(true); expect(world.blocked(pose)).toBe(false);
+        expect(residentClothClear(world, pose), 'The door path needs room for sleeves and the carried parcel.').toBe(true);
       }
-      if (targets[targets.length - 1] !== points[points.length - 1]) continue;
-      expect(crowd.nearest(pose.position, pose.radius)?.id).toBe(nell.id);
-      const up = new Vector3(...pose.position), toward = new Vector3(...nell.position).projectOnPlane(up).normalize();
-      for (const portrait of [false, true]) for (const sign of [1, -1]) {
-        const north = toward.clone().multiplyScalar(sign), walker = new SurfaceWalker(pose.position);
-        walker.north.copy(north); walker.facing.copy(north);
-        const normal = cameraPose(walker, portrait, false, town.radius);
-        normal.position.addScaledVector(up, pose.radius - town.radius);
-        const head = up.clone().multiplyScalar(pose.radius + 1.35);
-        expect(world.cameraDistance(head, normal.position), 'Nell must not require the hidden-player close camera when facing her or turning back to the street.').toBeGreaterThanOrEqual(2.5);
-      }
-      const walker = new SurfaceWalker(pose.position); walker.north.copy(toward); walker.facing.copy(toward);
-      const camera = new PerspectiveCamera(54, 1.44, .05, 100), normal = cameraPose(walker, false, false, town.radius);
-      camera.up.copy(up); camera.position.copy(normal.position).addScaledVector(up, pose.radius - town.radius); camera.lookAt(normal.target);
-      const origin = new Vector3(...fixture.position).multiplyScalar(fit.baseRadius), inverse = new Quaternion().fromArray(anchorQuaternion(anchor)).invert();
-      const rig = (crowd as unknown as { residents: { rig: { anchor: Group; wateringCan: Group; water: Group } }[] }).residents[0].rig;
-      for (const time of [0, 1.25, 3, 6]) {
-        crowd.update({ dt: .05, time, viewer: pose.position, camera }); rig.anchor.updateMatrixWorld(true);
-        const mouth = rig.wateringCan.localToWorld(new Vector3(.10, -.04, .33)).sub(origin).applyQuaternion(inverse);
-        const end = rig.water.localToWorld(new Vector3(0, .5, 0)).sub(origin).applyQuaternion(inverse);
-        for (const point of [mouth, end]) {
-          expect(Math.abs(point.x + .5), 'Water must still reach the first real bed.').toBeLessThan(.26);
-          expect(Math.abs(point.z)).toBeLessThan(.26);
-        }
-        expect(mouth.y).toBeGreaterThan(.6); expect(end.y).toBeGreaterThanOrEqual(.19); expect(end.y).toBeLessThanOrEqual(.265);
-      }
+      expect(distance(pose.position, target, town.radius)).toBeLessThan(.02);
     }
+    expect(crowd.nearest(pose.position, pose.radius)?.id).toBe(nell.id);
+    const up = new Vector3(...pose.position), toward = new Vector3(...nell.position).projectOnPlane(up).normalize();
+    for (const portrait of [false, true]) for (const sign of [1, -1]) {
+      const north = toward.clone().multiplyScalar(sign), walker = new SurfaceWalker(pose.position);
+      walker.north.copy(north); walker.facing.copy(north);
+      const normal = cameraPose(walker, portrait, false, town.radius);
+      normal.position.addScaledVector(up, pose.radius - town.radius);
+      const head = up.clone().multiplyScalar(pose.radius + 1.35);
+      expect(world.cameraDistance(head, normal.position), 'Nell must not require the hidden-player close camera when facing her or turning back to the street.').toBeGreaterThanOrEqual(2.5);
+    }
+    void PerspectiveCamera; void Quaternion; void anchorQuaternion; void localToDir; void structureFit; void fieldOf;
   } finally { crowd.dispose(); }
 }, 15000);
 

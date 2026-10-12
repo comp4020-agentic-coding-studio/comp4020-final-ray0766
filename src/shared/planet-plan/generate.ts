@@ -1,5 +1,6 @@
 import type { PartPlacement } from '../blueprint-model.ts';
-import { structureFit } from '../blueprints.ts';
+import { structureFit, structureSize } from '../blueprints.ts';
+import { objectRadius } from '../planets.ts';
 import type { HeightField } from '../../assets/claude-geometry/core/ground.ts';
 import { NPCS, SPAWN } from '../world.ts';
 import { HUB_DOCK } from '../ports.ts';
@@ -112,6 +113,8 @@ export function planTown(plan: PlanetPlan, options: PlanOptions): PlannedTown {
       if (arc(other.position, lot.position, R) > 9) continue;
       if (polygonGap(other.base, lot.base) < CLEARANCE.buildingGap + extraGap || polygonGap(other.canopy, lot.canopy) < .05) return `gap ${other.id}`;
     }
+    // The shared placement contract keeps every structure's circle 2.5 m off the parked craft.
+    if (arc(lot.position, HUB_SHIP as V3, R) < structureSize(lot.parts).radius + 2.5) return 'reserve ship landing';
     return null;
   };
   for (const f of plan.frontages ?? []) {
@@ -169,6 +172,7 @@ export function planTown(plan: PlanetPlan, options: PlanOptions): PlannedTown {
       const d = Math.min(...probe.map(p => arc(p, r.at, R)));
       if (d < r.radius) report('error', 'reserve', lot.id, r.at, `${lot.id} enters the ${r.id} reserve (${d.toFixed(2)} m of ${r.radius} m).`);
     }
+    if (arc(lot.position, HUB_SHIP as V3, R) < structureSize(lot.parts).radius + 2.5) report('error', 'reserve', lot.id, HUB_SHIP as V3, `${lot.id} is inside the craft's landing clearance.`);
   }
   for (let i = 0; i < lots.length; i++) for (let j = i + 1; j < lots.length; j++) {
     const a = lots[i], b = lots[j];
@@ -191,6 +195,11 @@ export function planTown(plan: PlanetPlan, options: PlanOptions): PlannedTown {
   }
   // ---- Props: street lamps, then planting and benches in areas.
   const props: PlannedProp[] = [];
+  const lotRadius = new Map(lots.map(l => [l.id, structureSize(l.parts).radius]));
+  const propRadius = (kind: PlannedProp['kind']) => objectRadius({ kind, assetVersion: 2 });
+  /** The ordinary placement contract's circle spacing (planets.ts placementGeometryProblem). */
+  const circleBlocked = (p: V3, kind: PlannedProp['kind']) => lots.some(l => arc(p, l.position, R) < lotRadius.get(l.id)! + propRadius(kind) + .08)
+    || props.some(o => arc(p, o.position, R) < propRadius(o.kind) + propRadius(kind) + .08);
   const blockers = (p: V3, clearance: number) => {
     for (const lot of lots) {
       if (arc(p, lot.position, R) > 8) continue;
@@ -217,7 +226,7 @@ export function planTown(plan: PlanetPlan, options: PlanOptions): PlannedTown {
       const sample = sampleAt(road.line, s);
       for (const side of k % 2 ? [1, -1] : [-1, 1]) {
         const p = walk(sample.p, scale(sample.r, side), offset, R);
-        if (onSurface(p, CLEARANCE.propToPaving) || blockers(p, .35)) continue;
+        if (onSurface(p, CLEARANCE.propToPaving) || blockers(p, .35) || circleBlocked(p, 'lamp')) continue;
         props.push({ id: `lamp-${lampIndex++}`, kind: 'lamp', position: p, rotation: yawFacing(p, scale(sample.r, -side)) });
         break;
       }
@@ -231,7 +240,7 @@ export function planTown(plan: PlanetPlan, options: PlanOptions): PlannedTown {
       for (let attempt = 0; attempt < 60 * count && made < count; attempt++) {
         const a = seeded(plan.seed, area.id, kind, attempt) * Math.PI * 2, r = Math.sqrt(seeded(plan.seed, area.id, kind, 'r', attempt)) * area.radius;
         const p = walk(centre, unit(madd(scale(f.east, Math.cos(a)), f.north, Math.sin(a))), r, R);
-        if (onSurface(p, kind === 'tree' ? .8 : CLEARANCE.propToPaving) || blockers(p, kind === 'tree' ? .5 : .3)) continue;
+        if (onSurface(p, kind === 'tree' ? .8 : CLEARANCE.propToPaving) || blockers(p, kind === 'tree' ? .5 : .3) || circleBlocked(p, kind)) continue;
         props.push({ id: `${area.id}-${kind}-${made}`, kind, position: p, rotation: seeded(plan.seed, area.id, kind, 'yaw', attempt) * Math.PI * 2, area: area.id });
         made++;
       }
@@ -362,9 +371,13 @@ function placeLot(lot: PlanLot, network: Network, roads: Map<string, Network['ro
     return { position: p, yaw: yawFacing(p, tangent(p, scale(n, -1))) };
   }
   const plaza = plazas.get(lot.plaza!); if (!plaza) return null;
-  const c = plaza.centres[0], fr = frameAt(c), b = lot.at * Math.PI / 180, u = unit(madd(scale(fr.east, Math.sin(b)), fr.north, Math.cos(b)));
-  const p = walk(c, u, plaza.radius + PLAZA.border + .6 + (lot.setback ?? 0) + f.base.maxZ, R);
-  return { position: p, yaw: yawFacing(p, heading(p, c)) };
+  // Bearing about a disc's centre, or a capsule's midpoint; the edge is found along that bearing.
+  const c = plaza.centres.length === 1 ? plaza.centres[0] : slerp(plaza.centres[0], plaza.centres[1], .5);
+  const fr = frameAt(c), b = lot.at * Math.PI / 180, u = unit(madd(scale(fr.east, Math.sin(b)), fr.north, Math.cos(b)));
+  let lo = 0, hi = plaza.radius + arc(plaza.centres[0], plaza.centres[plaza.centres.length - 1], R) + 1;
+  for (let k = 0; k < 30; k++) { const mid = (lo + hi) / 2; if (plazaDistance(plaza, walk(c, u, mid, R), R) < 0) lo = mid; else hi = mid; }
+  const p = walk(c, u, hi + PLAZA.border + .6 + (lot.setback ?? 0) + f.base.maxZ, R);
+  return { position: p, yaw: yawFacing(p, heading(p, walk(c, u, hi, R))) };
 }
 /** Street graph over the full centrelines; shared points (junction nodes, plaza centres) join roads. */
 function streetGraph(network: Network) {

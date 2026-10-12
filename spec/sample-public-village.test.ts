@@ -12,12 +12,13 @@ import {localToDir} from '../src/assets/claude-geometry/core/anchor.ts';
 
 const village=samplePublicVillage();
 it('retains the landing, delivery and harbour bearings within the whole-sphere public template',()=>{
- expect(village.version).toBe(SAMPLE_PUBLIC_VERSION);expect(SAMPLE_PUBLIC_VERSION).toBe(PUBLIC_TOWN_VERSION);expect(SAMPLE_PUBLIC_VERSION).toBe(10);
+ expect(village.version).toBe(SAMPLE_PUBLIC_VERSION);expect(SAMPLE_PUBLIC_VERSION).toBe(PUBLIC_TOWN_VERSION);expect(SAMPLE_PUBLIC_VERSION).toBe(12);
  expect(village.radius).toBe(21.6);expect(village.destinations.map(d=>d.id)).toEqual(['post','orchard','harbour']);
  expect(village.destinations.map(d=>d.position)).toEqual([NPCS.mica.position,NPCS.sol.position,HUB_DOCK]);
  for(const destination of village.destinations){
   const building=village.objects.find(o=>o.id===destination.buildingId)!;
-  expect(building).toBeDefined();expect(distance(building.position,destination.position,village.radius)).toBeLessThan(6.2);
+  // v12: the post office, glasshouse and harbour store face their destination across a short forecourt.
+  expect(building).toBeDefined();expect(distance(building.position,destination.position,village.radius)).toBeLessThan(7);
  }
  for(const id of ['public-post','public-orchard','public-harbour']){
   const route=village.routes.find(r=>r.id===id);
@@ -46,7 +47,11 @@ it('keeps old harbour geometry and private database rows separate from the curre
 it('uses identical terrain and collision bodies when the public objects are copied to an ordinary player scene',()=>{
  const publicWorld=new GroundWorld({id:'hub',radius:village.radius,revision:5,objects:[],environment:village.environment});
  const privateWorld=new GroundWorld({id:'ordinary-player-world',radius:village.radius,revision:5,objects:village.objects,environment:village.environment,blueprints:village.blueprints});
- expect(publicWorld.bodies.filter(body=>body.objectId!=='hub-ship')).toEqual(privateWorld.bodies);
+ // Street kerbs are the hub's own continuous surfaces, not placed objects: low walkable supports only.
+ const kerbs=publicWorld.bodies.filter(body=>body.objectId.startsWith('kerb:'));
+ expect(kerbs.length).toBeGreaterThan(20);
+ for(const body of kerbs)for(const c of body.colliders){expect(c.support).toBe(true);expect(c.tag).toBe('kerb');expect(c.half.y*2).toBeLessThan(.26);}
+ expect(publicWorld.bodies.filter(body=>body.objectId!=='hub-ship'&&!body.objectId.startsWith('kerb:'))).toEqual(privateWorld.bodies);
  for(const point of [SPAWN,NPCS.mica.position,NPCS.sol.position]){
   expect(publicWorld.pose(point)).toEqual(privateWorld.pose(point));
   expect(publicWorld.support(point,23)).toEqual(privateWorld.support(point,23));

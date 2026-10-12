@@ -9,6 +9,7 @@ import { blueprintHash, decodeBlueprint, encodeBlueprint, hashInput } from '../s
 import { blueprintTriangles, footprintCells, groundCells, Layout, layoutErrors, partTransform, pivotOf, placementProblem, rotDir, slotsOf, supportIssues } from '../src/shared/blueprint-model.ts';
 import type { Blueprint, PartPlacement, Rot } from '../src/shared/blueprint-model.ts';
 import { HOST_PART_IDS, LEGACY_PART_IDS, PART_IDS, PART_INFO, PARTS, partCost, partLabel } from '../src/shared/blueprint-parts.ts';
+import { VILLAGE_KIT_IDS } from '../src/shared/village-kit/parts.ts';
 import { WIDE_DOOR_IDS } from '../src/shared/wide-door.ts';
 import { wideDoorClearanceIssues } from '../src/shared/blueprint-wide-door-clearance.ts';
 import { buildBlueprintModel } from '../src/shared/blueprint-model3d.ts';
@@ -27,10 +28,16 @@ describe('formal host catalogue and legacy contract', () => {
     for (const [file, digest] of [['editor.ts', '9f84b0d3f72662e30dec6b47d51cdb6acfbc11a40a7e0a10bbdf89129fb63c90'], ['codec.ts', 'ddf2d5c619e9e0f173d301e36b97dd4bb45625023f6f4617cbc1fca90ea1114c']])
       expect(createHash('sha256').update(readFileSync(new URL('../src/assets/claude-geometry/blueprint/' + file, import.meta.url))).digest('hex')).toBe(digest);
   });
-  it('appends three distinct real IDs with names, geometry costs and bounds', () => {
-    expect(LEGACY_PART_IDS).toHaveLength(45); expect(PART_IDS).toHaveLength(48);
-    expect(PART_IDS.slice(0, 45)).toEqual(LEGACY_PART_IDS); expect(new Set(PART_IDS).size).toBe(48);
-    expect(HOST_PART_IDS).toEqual(['wall.door-wide', 'wall.door-wide.open', 'step.entry-wide']);
+  it('appends three wide IDs, then the seventeen R12 village kit IDs, with names, geometry costs and bounds', () => {
+    expect(LEGACY_PART_IDS).toHaveLength(45); expect(PART_IDS).toHaveLength(65);
+    expect(PART_IDS.slice(0, 45)).toEqual(LEGACY_PART_IDS); expect(new Set(PART_IDS).size).toBe(65);
+    expect(HOST_PART_IDS.slice(0, 3)).toEqual(['wall.door-wide', 'wall.door-wide.open', 'step.entry-wide']);
+    expect(PART_IDS.slice(45)).toEqual(HOST_PART_IDS); expect(HOST_PART_IDS.slice(3)).toEqual([...VILLAGE_KIT_IDS]);
+    for (const id of VILLAGE_KIT_IDS) {
+      expect(PART_INFO[id].zh.name.length, id).toBeGreaterThan(0);
+      expect(partCost(id, 'high').triangles, id).toBeGreaterThan(0);
+      expect(PART_INFO[id].envelope?.village, id).toBeDefined();
+    }
     for (const id of WIDE_DOOR_IDS) {
       expect(PARTS[id].mount).toBe('edge'); expect(partLabel(id, 'village')).toMatch(/wide double door/i);
       expect(PART_INFO[id].zh.name).toContain('宽门');
