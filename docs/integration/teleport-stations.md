@@ -192,7 +192,9 @@ A site is skipped if any of these hold:
 - it is within station radius + 0.4 m of any saved body, including
   disconnected ones;
 - it is within station radius + 3.6 m of the ground point under the
-  parked craft.
+  parked craft;
+- it is within station radius + 0.8 m of one of the home's planned routes,
+  whose path tiles an older home may not have laid yet.
 
 The forecourt is turned to face the pad.
 
