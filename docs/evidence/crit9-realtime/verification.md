@@ -195,3 +195,72 @@ No run was out-of-memory killed. That shows only that this limited load fits in 
   - each fallback removed;
   - the pre-change server, where `/healthz` waited 1216 ms.
 - 48 related spec files: 274 tests pass. The 8 failures are the same ones that fail on `82c6455`.
+
+## Bundled worker, failure handling and a continuous soak (13 October 2026)
+
+### Changes
+
+| Commit | Change |
+| --- | --- |
+| `df994aa` | The worker ships as one bundled JavaScript file and is used only while its recorded sources still match. |
+| `d898047` | A failed worker never falls back to the request thread: 503 with a doubling pause, nothing half-written, three limited first-visit retries. |
+| `006b556` | Landing prepares a planet only after the landing checks pass. |
+| `6bb6c42` | The image sets `MALLOC_ARENA_MAX=2`. |
+
+### Same scenario, final code
+
+Setup: 256 MB container, half a CPU.
+
+| Event | A's slowest request | B's wait |
+| --- | --- | --- |
+| A walking alone | 26 ms | — |
+| B joins | 91 ms | 6.2 s |
+| B's first teleport to the harbour | 29 ms | 3.4 s |
+| B teleports home | 21 ms | 0.8 s |
+| Two identities join together | 399 ms | 7.3 / 8.6 s |
+
+Memory peak in this scenario: 153 MB anon, 168 MB cgroup.
+
+### Continuous soak
+
+Setup:
+- 256 MB container, one CPU.
+- Two visitors send accepted presence and polls throughout (612–867 heartbeats per run, all 200).
+- Forty new players arrive:
+  - rounds 1–5: four each, back to back;
+  - rounds 6–10: four each, 8 s apart;
+  - then 30 s idle.
+
+Columns:
+- Anon memory is the cgroup's resident anonymous memory: both threads, no page cache.
+- "Range at round ends" covers rounds 1–10.
+
+| Version | Before the first arrival | Range at round ends | Peak | After 30 s idle | Arrival time, median |
+| --- | --- | --- | --- | --- | --- |
+| Before the worker (`82c6455`) | 79 MB | 108 → 146 MB, rising | 146 MB | 146 MB | 1.4 s |
+| Bundled worker | 91 MB | 178–197 MB, no trend | 202 MB | 162 MB | 1.9 s |
+| Bundled worker, `MALLOC_ARENA_MAX=2` | — | 161–182 MB, no trend | 187 MB | 132 MB | 1.9 s |
+
+What the soak shows:
+- With the worker, memory stays in a band across forty arrivals: the worker is replaced after eight jobs and stops when idle.
+- Before the worker, memory rose with every round. Its bounded caches were still filling.
+- The worker's peak is 40–55 MB above the version without it.
+
+### Headroom on Fly (not measured)
+
+- Fly does not publish how much of a 256 MB Machine is left after its kernel.
+- A community report gives 213–217 MB as the total such a Machine reports: https://community.fly.io/t/256mb-machine-oom-flys-hallpass-daemon/21416
+- If that holds, a 187 MB peak leaves little or no room.
+- Measuring it needs a deploy (`free -m` on the Machine), which was not done.
+
+### Specs
+
+- The legacy HTTP suite now runs against its own legacy world. 36/36 pass, five runs in a row.
+- `camera-collision` and `wide-entry-physics` read the fixture's own body. Both still fail with a real fault injected:
+  - a dropped foundation;
+  - a changed camera padding.
+- 53 related spec files: 300 tests pass. The one failure is `harbour-resources`, which needs a DOM and already failed at `298a440`.
+
+### Not done
+
+- The Docker image itself was not rebuilt here: that needs the `node:24-slim` base and packages from the network. The bundle and its manifest were checked by mounting them into the Crit 8 runtime image.
