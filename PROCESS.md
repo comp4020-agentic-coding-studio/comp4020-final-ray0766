@@ -367,3 +367,34 @@ the pre-loss value. Typecheck, build and 193 related tests pass. The
 full lint still fails on imported camera files I did not change. See
 [the v12 record](docs/integration/planned-main-planet-v12.md). No push,
 deployment or 8098 change.
+
+## Teleport stations: local candidate (12 October 2026)
+
+Added a teleport station to the harbour's arrival square and to every
+home. The station is a moon-gate workshop part inside one shared
+composition. The harbour and the homes use the same blueprint, and
+players can load it in the workshop.
+
+Only a completed flight landing marks a planet, inside the landing
+transaction. A station teleports only to the harbour, your own home or
+a marked planet. The server checks the gate and the mark, and replays
+a repeated request without travelling twice. For old saves, the only
+proof of a landing I could trust was a flight record that ended on the
+current planet; the `visits` table was also written by the retired
+atlas route.
+
+My first version placed stations on every existing home when the
+database opened. The related specs caught that: reopening must not
+change content, and the integration migration audit relies on that. I
+moved the one-time attempt to the owner's first visit home. A receipt
+stops it from ever repeating.
+
+The first real-Chrome pass hid the avatar on arrival. Facing away from
+the gate put the follow camera inside the ring, so travellers now
+arrive facing the gate. I did not change the camera code.
+
+One new sentinel stayed green under its injected bug. A landing
+response had already placed the station before the test measured the
+home, so I moved the baseline before takeoff and saw it fail. See
+[the teleport station record](docs/integration/teleport-stations.md).
+No push, deployment or 8098 change.
