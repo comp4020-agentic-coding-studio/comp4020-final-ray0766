@@ -45,12 +45,18 @@ export function navigationStore(db:DatabaseSync,planets:ReturnType<typeof planet
       if(firstCollision(old.position,next.position,bodies,RADIUS+2.65)!==null)throw new RequestError(409,'Keep your ship outside the planet.');
       save(id,next,now);
     },
-    land(id:string,body:Record<string,unknown>,now=Date.now()){
+    /** The checks a landing must pass, without writing: the planet it would land on, or null when
+     * this landing already happened. Lets the server prepare only a planet someone can reach. */
+    landingTarget(id:string,body:Record<string,unknown>):string|null{
       strict(body,['planetId','journey']);const r=row(id),f=read(r),p=planets.planet(body.planetId);
       if(body.journey!==f.journey)throw new RequestError(409,'This landing belongs to an earlier flight.');
-      if(f.mode==='ground'&&r.planet_id===p.id)return;
+      if(f.mode==='ground'&&r.planet_id===p.id)return null;
       if(f.mode!=='space')throw new RequestError(409,'Board your ship before travelling.');
       if(spaceDistance(f.position,planetCenter(p.slot))>landingRadius(p)||f.speed>LAND_SPEED)throw new RequestError(409,'Fly closer and slow below 6 before landing.');
+      return p.id;
+    },
+    land(id:string,body:Record<string,unknown>,now=Date.now()){
+      const r=row(id),f=read(r),target=this.landingTarget(id,body);if(target===null)return;const p=planets.planet(target);
       db.exec('BEGIN IMMEDIATE');
       try {
         db.prepare('INSERT INTO visits (player_id,planet_id,position) VALUES (?,?,?) ON CONFLICT(player_id,planet_id) DO UPDATE SET position=excluded.position').run(id,r.planet_id,r.position);

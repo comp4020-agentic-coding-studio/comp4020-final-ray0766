@@ -120,6 +120,16 @@ it('uses the bundled worker only while every source that went into it is unchang
   expect(workerScript(root)).toMatchObject({ bundled: false, reason: 'a source of the bundled worker is missing' });
 });
 
+it('prepares a planet for landing only when this flight could land there', async () => {
+  const [store] = twins(), w = new HeavyWork(); workers.push(w);
+  store.useHeavyWork(w);
+  const id = 'grounded-pilot', home = store.create(id).planetId;
+  const other = store.db.prepare("SELECT id FROM planets WHERE kind='garden' AND id<>? LIMIT 1").get(home)!.id as string;
+  // Standing at home, not flying: refused by the landing checks, and no planet is prepared.
+  await expect(store.prepareLanding(id, { planetId: other, journey: 0, visitEpoch: store.state(id).location!.visitEpoch })).rejects.toMatchObject({ status: 409 });
+  expect(w.starts).toBe(0);
+});
+
 it('shares one job between requests for the same key, reports worker failures and turns work away beyond its queue', async () => {
   const w = new HeavyWork({ limit: 2 }); workers.push(w);
   // No legal neighbourhood fits these inputs, so the worker reports the generator's own refusal.

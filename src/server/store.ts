@@ -308,7 +308,8 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
     useHeavyWork(work:HeavyWork|null){heavy=work;},
     /** Before a teleport: the destination is the player's own home or the harbour (the server re-checks). */
     async prepareTeleport(id:string){const work=heavy,r=db.prepare('SELECT planet_id FROM players WHERE id=?').get(id);if(!work||!r)return;await prepareWorld(work,r.planet_id==='hub'?planets.owned(id):'hub');},
-    async prepareLanding(planetId:unknown){if(heavy)await prepareWorld(heavy,planetId);},
+    /** Before a landing: only a planet this flight can actually land on is prepared, after the same checks. */
+    async prepareLanding(id:string,body:Record<string,unknown>){if(!heavy)return;homes.exterior(id,body.visitEpoch);const clean={...body};delete clean.visitEpoch;const target=navigation.landingTarget(id,clean);if(target)await prepareWorld(heavy,target);},
     /** Build a planet's ground now, before anyone is waiting (the harbour at startup). */
     warmGround(planetId:string){ground.world(planetId);},
     character(id: string, value: unknown) {
