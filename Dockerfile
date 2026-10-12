@@ -9,7 +9,9 @@ COPY . .
 RUN pnpm build && pnpm prune --prod
 FROM node:24-slim
 WORKDIR /app
-ENV NODE_ENV=production PORT=8080 DATABASE_PATH=/data/little-post.sqlite NODE_OPTIONS=--max-old-space-size=150
+# Two malloc arenas: with a worker thread, glibc's per-thread arenas otherwise
+# keep freed memory (measured 15-30 MB more resident under the same load).
+ENV NODE_ENV=production PORT=8080 DATABASE_PATH=/data/little-post.sqlite NODE_OPTIONS=--max-old-space-size=150 MALLOC_ARENA_MAX=2
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/build ./build
