@@ -16,7 +16,8 @@ entrances"). Its database is `final-workshop-v1/.data/little-post.sqlite`
 ## Commit range
 
 The candidate is branch `claude/little-worlds-planet-redesign-072c03`,
-`4f0d596..667bd24` (23 commits). `4f0d596` is an ancestor, so the branch
+`4f0d596..667bd24` (23 code commits; this note's commits after it change
+documents only). `4f0d596` is an ancestor, so the branch
 applies on top of what 8098 runs.
 
 `package.json`, `pnpm-lock.yaml`, the Dockerfile and `fly.toml` are
@@ -123,7 +124,8 @@ requests after a switch would:
    `sqlite3 <live> ".backup <live>.before-v15-<date>.sqlite"`. Check that it
    opens and has 207 or more players.
 2. In `final-workshop-v1`, fetch the branch from this repository's local
-   path. No push is needed. Check out `667bd24`.
+   path. No push is needed. Check out the branch head; its last code commit is
+   `667bd24`, and later commits only touch documents.
    - Leave the untracked `dist 2/`, `dist 3/` and
      `tests/e2e/crit8-update-live.spec.ts` alone.
 3. Run `pnpm build`.
