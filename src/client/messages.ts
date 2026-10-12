@@ -868,7 +868,7 @@ export const messages: Record<string, string> = {
   "arrow keys": "方向键",
   ". Hold": "行走。按住",
   "to run; press": "疾走；按",
-  "to jump once from the ground. You can also click the ground to walk there, or drag the thumbstick on a touch screen. In Sunseed Harbour, drag the open scene to look around and up at the buildings. Use Planet view to see a wider view.": "从地面起跳一次。也可以点击地面行走，或在触屏上拖动摇杆。在太阳籽港，拖动画面可环顾四周、抬头看建筑；“星球全景”能看到更广的视野。",
+  "to jump once from the ground. Drag left or right to turn your view and character; drag up or down to tilt the camera. W moves forward, S walks backward, and A / D step sideways. You can also click the ground to walk there, or drag the thumbstick on a touch screen. Use Planet view to see a wider view.": "从地面起跳一次。左右拖动会转动视角并带人物转身；上下拖动只调整镜头俯仰。W 前进，S 后退，A / D 左右侧移。也可以点击地面行走，或在触屏上拖动摇杆。“星球全景”能看到更广的视野。",
   "Follow the short central path to the SUNSEED · PORT gate. Near the boarding terminal, press E or tap Board your ship. On other planets, your temporary return beacon and parked ship stay at the landing point. Use Pause → Find my ship for an optional direction marker. Cyan foot rings mark other visitors on this planet. The Atlas (M) groups finite destinations into Harbour Belt, Lantern Reach and Outer Drift. In space, hold": "沿中央短路前往 SUNSEED · PORT 登船口。在终端附近按 E 或点击“登上飞船”。在其他星球，返航信标和飞船会留在降落点。“暂停 → 寻找我的飞船”可显示方向。青色脚环标记此星球上的其他访客。星图（M）将目的地分为港湾带、灯火星域和远方漂流带。飞行时，按住",
   "to thrust,": "推进，",
   "to turn,": "转向，",

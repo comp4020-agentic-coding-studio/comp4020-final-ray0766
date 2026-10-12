@@ -16,6 +16,8 @@ import {lazyPanel,openPanel} from './lazy-panel.ts';
 import type { LibraryEntry } from '../shared/blueprints.ts';
 import { structureFit, structureSize } from '../shared/blueprints.ts';
 import { buildBlueprintModel } from '../shared/blueprint-model3d.ts';
+import { buildCameraBlueprintModel, cameraBlueprintRegistry, cameraPartSlots } from './camera-blueprint-model.ts';
+import { TownCameraCutaway } from './camera-cutaway.ts';
 import { placedTransform } from '../assets/claude-geometry/blueprint/placement.ts';
 import type { Blueprint, PartPlacement } from '../shared/blueprint-model.ts';
 import { pivotOf } from '../shared/blueprint-model.ts';
@@ -37,6 +39,7 @@ export interface ColonyBridge {
   flush: () => Promise<void>; notice: (text:string) => void;
   /** The world host commits prepared models with its terrain and collision. */
   deferObjects?:boolean;
+  cameraCutaway?:boolean;
 }
 type Draft = Omit<PlacedObject,'position'|'version'> & {position:Vec3|null;version?:number};
 export class Colony {
@@ -45,6 +48,8 @@ export class Colony {
   private map = el<HTMLDialogElement>('star-map');
   private layer = new T.Group(); private ghost: T.Group | null = null;
   private pathPreview = new T.Group();
+  private cutawayController:TownCameraCutaway|undefined;
+  get cutaway(){return this.cutawayController;}
   private objects = new Map<string,T.Group>(); private draft: Draft | null = null;
   private shadows = new PlacedObjectShadows(PRESENTATION.ground.garden.shadowExtent * .75);
   private placing = false; private selected: string | null = null;
@@ -157,35 +162,41 @@ export class Colony {
     if(this.building&&(!next.currentPlanet.mine||next.player.flight.mode==='space'||next.player.location?.kind==='interior'))this.setBuilding(false,true);
     const key=worldVisualSignature(next.currentPlanet);
     if(this.painted!==key&&!this.bridge.deferObjects){
-      const objects=new Map<string,T.Group>();
-      for(const obj of next.currentPlanet.objects){const group=this.renderObject(obj);group.userData.objectId=obj.id;objects.set(obj.id,group);}
-      this.commitObjects(next.currentPlanet,objects);
+      const objects=new Map<string,T.Group>(),cutaway=this.createCutaway(next.currentPlanet);
+      try{
+        for(const obj of next.currentPlanet.objects){const group=this.renderSavedObject(obj,next.currentPlanet,cutaway);group.userData.objectId=obj.id;objects.set(obj.id,group);}
+        this.commitObjects(next.currentPlanet,objects,cutaway);
+      }catch(error){cutaway?.dispose();for(const group of objects.values())disposeGeometry(group);throw error;}
     }
     this.hud();this.editor();this.starMap();
   }
-  private commitObjects(planet:PlanetView,objects:Map<string,T.Group>){
+  private commitObjects(planet:PlanetView,objects:Map<string,T.Group>,cutaway?:TownCameraCutaway){
     this.previewPaths([]);this.painted=worldVisualSignature(planet);
     this.bridge.canvas.dataset.placedAssetKit=SHARED_ASSET_VERSION;this.bridge.canvas.dataset.placedAssetKinds=planet.objects.map(o=>o.kind).join(',');
+    // Restore source materials before the old model handles release their
+    // owned lamps/geometry. Shared library resources remain library-owned.
+    this.cutawayController?.dispose();this.cutawayController=undefined;
     this.shadows.clear();for(const child of [...this.layer.children])disposeGeometry(child);this.layer.clear();this.objects=objects;
     for(const group of objects.values())this.layer.add(group);this.shadows.replace(objects);
     const list=el<HTMLSelectElement>('built-list');list.replaceChildren(localizedOption('Select a saved object…', ''));
     planet.objects.forEach((o,i)=>list.add(localizedOption(`${objectName(o)} ${i+1}`,o.id)));list.value=this.selected??'';
     this.bridge.obstacles(planet.objects.filter(o=>o.kind!=='structure'&&objectHeight(o)>.6).map(o=>({point:new T.Vector3(...o.position),radius:objectRadius(o),height:objectHeight(o)})));
     if(this.selected&&!planet.objects.some(o=>o.id===this.selected))this.clearDraft();
+    this.cutawayController=cutaway;
   }
   async prepareObjects(planet:PlanetView,options:{signal:AbortSignal;yieldFrame:()=>Promise<void>;onProgress?:(done:number,total:number)=>void;budgetMs?:number}){
-    const root=new T.Group(),objects=new Map<string,T.Group>();let released=false;
-    const dispose=()=>{if(released)return;released=true;for(const group of objects.values())disposeGeometry(group);root.clear();root.removeFromParent();};
+    const root=new T.Group(),objects=new Map<string,T.Group>();let released=false,cutaway:TownCameraCutaway|undefined;
+    const dispose=()=>{if(released)return;released=true;cutaway?.dispose();for(const group of objects.values())disposeGeometry(group);root.clear();root.removeFromParent();};
     const check=()=>{if(options.signal.aborted)throw new DOMException('Loading cancelled.','AbortError');};
     try{
-      await options.yieldFrame();check();let started=performance.now();
+      await options.yieldFrame();check();cutaway=this.createCutaway(planet);let started=performance.now();
       options.onProgress?.(0,planet.objects.length);
       for(const object of planet.objects){
-        check();const group=this.renderObject(object,planet);group.userData.objectId=object.id;root.add(group);objects.set(object.id,group);
+        check();const group=this.renderSavedObject(object,planet,cutaway);group.userData.objectId=object.id;root.add(group);objects.set(object.id,group);
         options.onProgress?.(objects.size,planet.objects.length);
         if(performance.now()-started>=(options.budgetMs??6)){await options.yieldFrame();started=performance.now();}
       }
-      check();return {root,dispose,commit:()=>{if(released)return;check();this.commitObjects(planet,objects);released=true;root.removeFromParent();}};
+      check();return {root,cutaway,dispose,commit:()=>{if(released)return;check();this.commitObjects(planet,objects,cutaway);released=true;root.removeFromParent();}};
     }catch(error){dispose();throw error;}
   }
   previewHome(addition:HomeSetupAddition|undefined){
@@ -226,13 +237,36 @@ export class Colony {
     if(d.kind!=='structure')return null;
     return structureFit(this.parts(d.blueprintHash!),d.position,d.rotation,fieldOf(this.universe?.currentPlanet.environment,this.universe?.currentPlanet.radius)).message;
   }
-  private renderObject(obj:PlacedObject,planet=this.universe!.currentPlanet){
+  private createCutaway(planet:PlanetView){
+    if(!this.bridge.cameraCutaway||planet.id==='hub')return undefined;
+    const field=fieldOf(planet.environment,planet.radius),structures=planet.objects.filter(object=>object.kind==='structure');
+    const registry=structures.flatMap(object=>{
+      const parts=planet.blueprints?.[object.blueprintHash!]??this.localParts[object.blueprintHash!]??[];
+      return cameraBlueprintRegistry(object,parts,structureFit(parts,object.position,object.rotation,field),planet.homeDoor);
+    });
+    return new TownCameraCutaway(structures.map(object=>object.id),registry,planet.id);
+  }
+  /** Only saved models enter this path. Ghosts, path/home previews and the
+   * separately drawn exterior door keep their original factories/materials. */
+  private renderSavedObject(obj:PlacedObject,planet:PlanetView,cutaway?:TownCameraCutaway){
+    const group=this.renderObject(obj,planet,!!cutaway);
+    if(!cutaway||obj.kind!=='structure')return group;
+    try{
+      group.traverse(node=>{if(node instanceof T.Mesh){cutaway.writeOwnerAttribute(node.geometry,obj.id);cutaway.registerMesh(node, { staticGeometry: true });}});
+      return group;
+    }catch(error){
+      group.traverse(node=>{if(node instanceof T.Mesh)cutaway.unregisterMesh(node);});disposeGeometry(group);throw error;
+    }
+  }
+  private renderObject(obj:PlacedObject,planet=this.universe!.currentPlanet,cameraCutaway=false){
     if(obj.kind!=='structure'){const group=builtObject(obj.kind,obj.assetVersion??1);this.locate(group,obj.position,obj.rotation,planet);if(planet.environment)group.position.set(...obj.position).multiplyScalar(objectSeat(fieldOf(planet.environment,planet.radius),obj,planet.blueprints).baseRadius+.015);return group;}
     const parts=planet.blueprints?.[obj.blueprintHash!]??this.localParts[obj.blueprintHash!]??[],fit=structureFit(parts,obj.position,obj.rotation,fieldOf(planet.environment,planet.radius));
     const door=planet.homeDoor;
     const visibleParts=door?.buildingId===obj.id?parts.filter(part=>part.n!==door.partNumber):parts;
-    const model=buildBlueprintModel(visibleParts,worldMaterials(),'medium',{foundationDepth:fit.foundationDepth,pivot:pivotOf(parts)});
-    const finish=buildStructureFinish(parts,worldMaterials());model.object.add(finish.object);
+    const options={foundationDepth:fit.foundationDepth,pivot:pivotOf(parts)};
+    const model=cameraCutaway?buildCameraBlueprintModel(visibleParts,worldMaterials(),'medium',{...options,identityParts:parts})
+      :buildBlueprintModel(visibleParts,worldMaterials(),'medium',options);
+    const finish=buildStructureFinish(parts,worldMaterials(),cameraCutaway?{cameraPartSlots:cameraPartSlots(parts)}:{});model.object.add(finish.object);
     const transform=placedTransform({dir:obj.position,yaw:obj.rotation},fit);
     model.object.position.fromArray(transform.position);model.object.quaternion.fromArray(transform.quaternion);
     model.object.userData.disposeOwned=()=>{finish.dispose();model.dispose();};

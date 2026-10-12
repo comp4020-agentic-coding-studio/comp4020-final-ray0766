@@ -68,8 +68,10 @@ Drift; it can replenish blank plots up to a hard 256-world limit. Existing plane
 slots and coordinates never move. The Atlas shows regions and distances and only
 marks a bearing. Nearby hops remain short; outer routes take longer. The public
 hub presents a human-scale industrial district on a much gentler display curve,
-while preserving its original saved spherical coordinates. Drag the scene in the
-harbour to look around and up at the buildings. A short departure shot rises over
+while preserving its original saved spherical coordinates. Drag the ground scene left or right to turn the view and smoothly turn your
+character, including while standing still. Drag vertically to tilt only the camera.
+W/Up moves forward, S/Down walks backward, and A/D or Left/Right strafe in the
+horizontal view direction. The touch stick uses the same movement frame. A short departure shot rises over
 the same district before the existing orbital flight begins. Private worlds remain available for their owners’ construction.
 
 In space, hold W to thrust, A/D to turn, arrows up/down to climb or dive, and S or

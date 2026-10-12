@@ -1,4 +1,7 @@
-import { Group, Mesh } from 'three';
+import { BufferGeometry, Float32BufferAttribute, Group, Mesh, Uint16BufferAttribute } from 'three';
+import type { Material } from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { CAMERA_PART_ATTRIBUTE } from './camera-blueprint-model.ts';
 import type { PartPlacement } from '../shared/blueprint-model.ts';
 import { edgeKey, pivotOf, rotDir, slotsOf, vertexKey } from '../shared/blueprint-model.ts';
 import { PARTS } from '../shared/blueprint-parts.ts';
@@ -17,6 +20,21 @@ export interface FinishSegment {
   axis: 'x' | 'z';
   from: number; to: number; line: number; y: number;
   material: 'concrete' | 'post';
+  /** Existing solid walls on the lower/upper side of the joint's axis. */
+  wallNumbers?: readonly [number, number];
+}
+
+export interface CameraFinishBinding {
+  kind: 'existing-wall-joint';
+  partNumber: number; partSlot: number;
+  axis: 'x' | 'z'; from: number; to: number;
+  center: [number, number, number]; half: [number, number, number];
+}
+export interface StructureFinishOptions {
+  pivot?: { x: number; z: number };
+  /** Saved model only: derive from the complete identityParts, including a
+   * separately drawn home door. Missing identities remain protected. */
+  cameraPartSlots?: ReadonlyMap<number, number>;
 }
 
 const cell = (x: number, z: number, level: number) => `${x},${z},${level}`;
@@ -61,7 +79,8 @@ function wallJoints(parts: readonly PartPlacement[], pivot: { x: number; z: numb
     const line = axis === 'x' ? z - pivot.z + dz * (WALL_T / 2 + .022)
       : x - pivot.x + dx * (WALL_T / 2 + .022);
     result.push({ kind: 'existing-wall-joint', axis, from: along - .02, to: along + .02, line,
-      y: a.level * STOREY + (KOSHI + WALL_H - TOP_BAND) / 2, material: 'post' });
+      y: a.level * STOREY + (KOSHI + WALL_H - TOP_BAND) / 2, material: 'post',
+      wallNumbers: a[axis] < b[axis] ? [a.n, b.n] : [b.n, a.n] });
   }
   return result;
 }
@@ -92,7 +111,7 @@ function exteriorCells(parts: readonly PartPlacement[], occupied: ReadonlySet<st
 function mergeSegments(segments: FinishSegment[]) {
   const groups = new Map<string, FinishSegment[]>();
   for (const segment of segments) {
-    const key = JSON.stringify([segment.kind, segment.axis, segment.line, segment.y, segment.material]);
+    const key = JSON.stringify([segment.kind, segment.axis, segment.line, segment.y, segment.material, segment.wallNumbers]);
     const group = groups.get(key) ?? []; group.push(segment); groups.set(key, group);
   }
   const result: FinishSegment[] = [];
@@ -100,7 +119,7 @@ function mergeSegments(segments: FinishSegment[]) {
     for (const segment of groups.get(key)!.sort((a, b) => a.from - b.from)) {
       const prior = result.at(-1);
       if (prior && prior.kind === segment.kind && prior.axis === segment.axis && prior.line === segment.line &&
-        prior.y === segment.y && prior.material === segment.material && Math.abs(prior.to - segment.from) < 1e-8) prior.to = segment.to;
+        prior.y === segment.y && prior.material === segment.material && JSON.stringify(prior.wallNumbers) === JSON.stringify(segment.wallNumbers) && Math.abs(prior.to - segment.from) < 1e-8) prior.to = segment.to;
       else result.push({ ...segment });
     }
   }
@@ -162,27 +181,79 @@ export function planStructureFinish(parts: readonly PartPlacement[], pivot = piv
   return mergeSegments([...segments, ...wallJoints(parts, pivot, occupied, outside, protectedEdges, clearanceEdges, protectedVertices)]);
 }
 
+/** Remove only the new internal end face at the joint's middle. The external
+ * faces retain the original builder's world-metre UVs and flat normals. */
+function withoutSplitFace(geometry: BufferGeometry, axis: 'x' | 'z', direction: -1 | 1) {
+  const normal = geometry.getAttribute('normal'), kept: number[] = [];
+  const component = (index: number) => axis === 'x' ? normal.getX(index) : normal.getZ(index);
+  for (let i = 0; i < normal.count; i += 3) {
+    if ([i, i + 1, i + 2].every(index => Math.abs(component(index) - direction) < 1e-8)) continue;
+    kept.push(i, i + 1, i + 2);
+  }
+  const result = new BufferGeometry();
+  for (const [name, attribute] of Object.entries(geometry.attributes)) {
+    const values = kept.flatMap(index => Array.from({ length: attribute.itemSize }, (_, k) => attribute.array[index * attribute.itemSize + k]));
+    result.setAttribute(name, new Float32BufferAttribute(values, attribute.itemSize, attribute.normalized));
+  }
+  geometry.dispose(); return result;
+}
+
 /** Shared palette, at most two merged meshes. Caller attaches it to the existing model. */
-export function buildStructureFinish(parts: readonly PartPlacement[], lib: StyleLibrary = worldMaterials(), options: { pivot?: { x: number; z: number } } = {}) {
+export function buildStructureFinish(parts: readonly PartPlacement[], lib: StyleLibrary = worldMaterials(), options: StructureFinishOptions = {}) {
   // The frieze dimensions above are specific to the existing village geometry.
   const segments = lib.look === 'village' ? planStructureFinish(parts, options.pivot) : [];
   const builder = new PartBuilder(lib.lod), materials = libraryMaterials(lib);
-  for (const s of segments) {
-    const length = s.to - s.from, thickness = s.kind === 'slab-edge' ? .02 : .014;
+  const camera = options.cameraPartSlots, buckets = new Map<Material, BufferGeometry[]>(), cameraBindings: CameraFinishBinding[] = [];
+  const emit = (s: FinishSegment, from = s.from, to = s.to) => {
+    const length = to - from, thickness = s.kind === 'slab-edge' ? .02 : .014;
     const height = s.kind === 'slab-edge' ? .06 : s.kind === 'existing-wall-joint' ? WALL_H - TOP_BAND - KOSHI : .022;
-    const along = (s.from + s.to) / 2;
-    builder.box(materials.get(s.material), s.axis === 'x' ? [length, height, thickness] : [thickness, height, length],
-      { position: s.axis === 'x' ? [along, s.y, s.line] : [s.line, s.y, along] }, 0);
+    const along = (from + to) / 2;
+    const center: [number, number, number] = s.axis === 'x' ? [along, s.y, s.line] : [s.line, s.y, along];
+    const size: [number, number, number] = s.axis === 'x' ? [length, height, thickness] : [thickness, height, length];
+    builder.box(materials.get(s.material), size, { position: center }, 0);
+    return { center, half: size.map(value => value / 2) as [number, number, number] };
+  };
+  const flush = (slot: number, split?: { axis: 'x' | 'z'; direction: -1 | 1 }) => {
+    const drawn = builder.build('structure-finish-part');
+    for (const node of drawn.group.children) {
+      const mesh = node as Mesh<BufferGeometry, Material>;
+      const geometry = split ? withoutSplitFace(mesh.geometry, split.axis, split.direction) : mesh.geometry;
+      geometry.setAttribute(CAMERA_PART_ATTRIBUTE, new Uint16BufferAttribute(new Uint16Array(geometry.getAttribute('position').count).fill(slot), 1));
+      const bucket = buckets.get(mesh.material) ?? []; bucket.push(geometry); buckets.set(mesh.material, bucket);
+    }
+    drawn.group.clear();
+  };
+  for (const s of segments) {
+    if (camera && s.kind === 'existing-wall-joint' && s.wallNumbers) {
+      const middle = (s.from + s.to) / 2;
+      for (const side of [0, 1] as const) {
+        const partNumber = s.wallNumbers[side], partSlot = camera.get(partNumber) ?? 0;
+        const from = side === 0 ? s.from : middle, to = side === 0 ? middle : s.to;
+        const bounds = emit(s, from, to);
+        flush(partSlot, { axis: s.axis, direction: side === 0 ? 1 : -1 });
+        cameraBindings.push({ kind: s.kind, partNumber, partSlot, axis: s.axis, from, to, ...bounds });
+      }
+    } else { emit(s); if (camera) flush(0); }
   }
   // No ink shell: that would outline every thin strip as another black seam.
-  const built = segments.length ? builder.build('structure-finish') : { group: new Group(), triangles: 0, drawCalls: 0 };
+  const built = camera ? { group: new Group(), triangles: 0, drawCalls: 0 }
+    : segments.length ? builder.build('structure-finish') : { group: new Group(), triangles: 0, drawCalls: 0 };
+  try {
+    for (const [material, geometries] of buckets) {
+      const geometry = mergeGeometries(geometries, false);
+      if (!geometry) throw new Error('Camera structure finish material merge failed.');
+      geometry.computeBoundingBox(); geometry.computeBoundingSphere();
+      built.group.add(new Mesh(geometry, material)); built.triangles += geometry.getAttribute('position').count / 3; built.drawCalls++;
+    }
+  } catch (error) { disposeObject3D(built.group); throw error; }
+  finally { for (const geometries of buckets.values()) for (const geometry of geometries) geometry.dispose(); }
   const object = built.group, seed = finishSeed(parts);
   object.name = 'structure:finish';
-  object.userData = { decorative: true, collision: false, support: false, finishVersion: STRUCTURE_FINISH_VERSION, finishSeed: seed, maxProjection: STRUCTURE_FINISH_MAX_PROJECTION };
+  object.userData = { decorative: true, collision: false, support: false, finishVersion: STRUCTURE_FINISH_VERSION, finishSeed: seed, maxProjection: STRUCTURE_FINISH_MAX_PROJECTION, ...(camera ? { cameraBindings } : {}) };
   object.traverse(child => { if (child instanceof Mesh) { child.castShadow = false; child.receiveShadow = true; } });
   let disposed = false;
   const dispose = () => { if (disposed) return; disposed = true; disposeObject3D(object); };
   object.userData.disposeOwned = dispose;
-  return { object, segments, seed, version: STRUCTURE_FINISH_VERSION, triangles: built.triangles, drawCalls: built.drawCalls,
+  return { object, segments, cameraBindings, seed, version: STRUCTURE_FINISH_VERSION, triangles: built.triangles, drawCalls: built.drawCalls,
     get disposed() { return disposed; }, dispose };
 }

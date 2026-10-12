@@ -6,6 +6,7 @@ import {VILLAGE} from '../assets/claude-geometry/style/look.ts';
 import {buildBlueprintModel} from '../shared/blueprint-model3d.ts';
 import {placedTransform} from '../assets/claude-geometry/blueprint/placement.ts';
 import {structureFit} from '../shared/blueprints.ts';
+import {buildCameraBlueprintModel,cameraBlueprintRegistry,cameraPartSlots} from './camera-blueprint-model.ts';
 import {fieldOf,objectSeat} from '../shared/terrain.ts';
 import type {SamplePublicVillage} from '../shared/sample-public-village.ts';
 import {createTownRenderer,createTownRendererAsync} from './town-renderer.ts';
@@ -17,7 +18,7 @@ import type {GroundFit} from '../assets/claude-geometry/core/ground.ts';
 
 /** The public town and its orbital view build the same ordinary saved parts.
  * Only drawing detail varies; there are no stand-in towers or extra buildings. */
-type PublicTownOptions=Pick<TownRendererOptions,'maxChunkRadius'|'mediumCacheChunks'|'maxBuildsPerUpdate'>;
+type PublicTownOptions=Pick<TownRendererOptions,'maxChunkRadius'|'mediumCacheChunks'|'maxBuildsPerUpdate'|'cameraCutaway'>;
 // Fingerprint only the pinned village factory's two stateless shader patches.
 // This is not an equivalence test for arbitrary shader closures or materials.
 const staticGlowHooks=(()=>{
@@ -72,7 +73,9 @@ function prepareTownOptions(village:SamplePublicVillage,radius:number,options:Pu
     libraries.low.dispose();libraries.medium.dispose();
   }
   const occluderRadius=Math.min(radius-1.45,...[...fits.values()].map(f=>f.baseRadius-.01))-.02;
-  const configured:TownRendererOptions={objects:village.objects,planetRadius:radius,occluderRadius,maxChunkRadius:Infinity,
+  const cameraCutawayParts=options.cameraCutaway?village.objects.flatMap(object=>object.kind==='structure'
+    ?cameraBlueprintRegistry(object,village.blueprints[object.blueprintHash!],fits.get(object.id)!):[]):[];
+  const configured:TownRendererOptions={objects:village.objects,planetRadius:radius,occluderRadius,maxChunkRadius:Infinity,cameraCutawayParts,
     districts:'renderDistricts' in village?village.renderDistricts as {id:string;center:[number,number,number];objectIds:readonly string[]}[]:undefined,
     buildObject:(o,lod)=>{
       // Geometry can simplify with distance; the same saved surface must keep
@@ -83,11 +86,11 @@ function prepareTownOptions(village:SamplePublicVillage,radius:number,options:Pu
       const library=o.kind==='lamp'&&lod==='low'?libraries.low:libraries.medium;
       if(o.kind==='structure'){
         const parts=village.blueprints[o.blueprintHash!],fit=fits.get(o.id)!;
-        const model=buildBlueprintModel(parts,library,lod,{foundationDepth:fit.foundationDepth,sockets:false});
+        const model=(options.cameraCutaway?buildCameraBlueprintModel:buildBlueprintModel)(parts,library,lod,{foundationDepth:fit.foundationDepth,sockets:false});
         let finish:ReturnType<typeof buildStructureFinish>|undefined;
         try{
           shareStaticGlows(model.object);
-          finish=buildStructureFinish(parts,library);model.object.add(finish.object);
+          finish=buildStructureFinish(parts,library,options.cameraCutaway?{cameraPartSlots:cameraPartSlots(parts)}:{});model.object.add(finish.object);
           const transform=placedTransform({dir:o.position,yaw:o.rotation},fit);
           model.object.position.fromArray(transform.position);model.object.quaternion.fromArray(transform.quaternion);
           return {object:model.object,dispose(){finish!.dispose();model.dispose();}};

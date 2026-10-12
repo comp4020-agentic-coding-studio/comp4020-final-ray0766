@@ -22,7 +22,7 @@ describe('public display scale preserves saved navigation',()=>{
    if(i>40&&i<290)expect(delta/(1/60)).toBeCloseTo(SPEED,1);
    expect(Math.abs(surfaceTangent(w.up,w.north).dot(surfaceNormal(w.up)))).toBeLessThan(1e-6);
   }
-  expect(maxJump).toBeLessThan(.051);expect(w.facing.dot(w.north)).toBeLessThan(-.99);
+  expect(maxJump).toBeLessThan(.051);expect(w.facing.dot(w.north)).toBeGreaterThan(.99);expect(w.velocity.clone().normalize().dot(w.north)).toBeLessThan(-.99);
  });
  it('keeps moving near the south pole where logical angular speeds are very small',()=>{
   setGroundWorld(true);const w=new SurfaceWalker([0,-1,0]),start=surfacePoint(w.up);let previous=start.clone();

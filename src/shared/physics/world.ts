@@ -3,7 +3,7 @@ import { QUICK_PARTS } from '../quick-parts.ts';
 import {HUB_SHIP} from '../harbour-layout.ts';
 import {HUB_OBJECTS,PUBLIC_CONTENTS,publicField} from '../public-village.ts';
 import {isSamplePublicRadius,samplePublicVillage} from '../sample-public-village.ts';
-import { fieldOf,gradedField,objectSeat } from '../terrain.ts';
+import { fieldOf,gradedField,objectSeat, trustedFieldRadiusUpperBound } from '../terrain.ts';
 import type { HeightField } from '../../assets/claude-geometry/core/ground.ts';
 import { Box3, Vector3, Quaternion } from 'three';
 import { anchorQuaternion } from '../../assets/claude-geometry/core/anchor.ts';
@@ -44,6 +44,12 @@ export const terrainRadius=(p:Vec3)=>RADIUS+ground.heightAt(p);
 export const groundPose=(p:Vec3,field:HeightField=ground):GroundPose=>({position:[...p],radius:RADIUS+field.heightAt(p),verticalSpeed:0,grounded:true});
 
 /** Static planet collision world. No meshes, materials, renderer or DOM. */
+interface CameraTerrainBoundProof {
+ field: HeightField; fieldHeightAt: HeightField['heightAt']; ground: HeightField; groundHeightAt: HeightField['heightAt'];
+ baseRadius: number; ceiling: number;
+}
+const cameraTerrainBounds = new WeakMap<GroundWorld, CameraTerrainBoundProof>();
+
 export class GroundWorld {
   readonly bodies:Body[]=[];
   readonly revision:number;
@@ -78,6 +84,12 @@ export class GroundWorld {
         this.add(body,object.position,object.rotation,base,{tag:'legacy solid prop',center:[0,h/2,0],half:[radius,h/2,radius]});this.bodies.push(body);
       }
     }
+    // Only fieldOf's protected creation provenance can issue a bound. Taking
+    // the currently visible heightAt function as proof would trust a field
+    // monkeypatched before this world was constructed.
+    const ceiling = this.generated ? trustedFieldRadiusUpperBound(this.field) : null;
+    if (ceiling !== null) cameraTerrainBounds.set(this, { field: this.field, fieldHeightAt: this.field.heightAt,
+      ground: this.ground, groundHeightAt: this.ground.heightAt, baseRadius: this.baseRadius, ceiling });
   }
   private harbour(){
     // Craft is a travel-system object. All village construction below goes
@@ -245,19 +257,44 @@ export class GroundWorld {
     }
     return this.pose(SPAWN);
   }
-  /** Clip a camera boom against the same solid proxies (including ceilings). */
-  cameraDistance(start:Vector3,end:Vector3){
+  /** Clip a camera boom against solid proxies. Omitted radius preserves legacy sight queries. */
+  cameraDistance(start:Vector3,end:Vector3,probeRadius?:number){
+    const padding=probeRadius===undefined?.06:Math.max(0,Number.isFinite(probeRadius)?probeRadius:.06);
     const delta=end.clone().sub(start),length=delta.length();let best=length;
-    if(this.generated)for(let i=1;i<=32;i++){const p=start.clone().lerp(end,i/32),r=p.length();if(r<this.radius(p.normalize().toArray() as Vec3)+.12){best=Math.min(best,Math.max(.02,length*(i-1)/32));break;}}
-    const sweep=new Box3().setFromPoints([start,end]);
+    // Explicit camera probes also respect ordinary spherical worlds. The old
+    // two-argument sight query keeps its generated-terrain semantics unchanged.
+    if(this.generated||probeRadius!==undefined)for(let i=probeRadius===undefined?1:0;i<=32;i++){
+      const p=start.clone().lerp(end,i/32),r=p.length();
+      if(r<this.radius(p.normalize().toArray() as Vec3)+Math.max(.12,padding)){
+        best=Math.min(best,Math.max(probeRadius===undefined?.02:0,length*(i-1)/32));break;
+      }
+    }
+    // Cached bounds enclose OBBs padded by .06. A larger local padding can grow
+    // their world-axis extent by at most sqrt(3) times the difference.
+    const sweep=new Box3().setFromPoints([start,end]).expandByScalar(Math.max(0,padding-.06)*Math.sqrt(3));
     for(const b of this.bodies){
       if(b.cameraBounds&&!b.cameraBounds.intersectsBox(sweep))continue;
       for(const c of b.colliders){
       const p=start.clone().sub(c.center).applyQuaternion(c.inverse),d=delta.clone().applyQuaternion(c.inverse);let min=0,max=1;
-      for(const axis of ['x','y','z'] as const){const extent=c.half[axis]+.06;if(Math.abs(d[axis])<1e-8){if(Math.abs(p[axis])>extent){min=2;break;}}else{let a=(-extent-p[axis])/d[axis],z=(extent-p[axis])/d[axis];if(a>z)[a,z]=[z,a];min=Math.max(min,a);max=Math.min(max,z);}}
+      for(const axis of ['x','y','z'] as const){const extent=c.half[axis]+padding;if(Math.abs(d[axis])<1e-8){if(Math.abs(p[axis])>extent){min=2;break;}}else{let a=(-extent-p[axis])/d[axis],z=(extent-p[axis])/d[axis];if(a>z)[a,z]=[z,a];min=Math.max(min,a);max=Math.min(max,z);}}
       if(min<=max&&min>=0&&min<1)best=Math.min(best,Math.max(0,min*length-.08));
       }
     }
     return best;
   }
+}
+
+const originalGroundWorldRadius = GroundWorld.prototype.radius;
+/** Conservative camera-only shortcut metadata. Legacy/unknown/replaced fields
+ * retain exact radius queries. No height, physics, version or stored state is
+ * changed. The generated source is capped, radial rebasing adds a constant,
+ * and gradeFoundations can only lower that radial surface via Math.min. */
+export function cameraTerrainRadiusUpperBound(world: GroundWorld): number | null {
+ const proof = cameraTerrainBounds.get(world);
+ if (!proof || !world.generated || world.radius !== originalGroundWorldRadius
+   || world.field !== proof.field || world.ground !== proof.ground
+   || world.field.heightAt !== proof.fieldHeightAt || world.ground.heightAt !== proof.groundHeightAt
+   || !Object.is(world.baseRadius, proof.baseRadius)
+   || trustedFieldRadiusUpperBound(world.field) !== proof.ceiling) return null;
+ return proof.ceiling;
 }

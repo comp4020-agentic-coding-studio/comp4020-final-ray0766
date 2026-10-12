@@ -215,6 +215,7 @@ export class HomeInterior {
     const arriving = restoring || visit !== this.currentVisit;
     this.home = player.home;
     if (arriving) {
+      this.overview = false; this.lastViewport = '';
       this.currentVisit = visit; this.position = [...location.position]; this.yaw = location.yaw;
       this.editing = false; this.dirty = false; this.clearInput();
       this.draft = copy(player.home.interior); this.draftVersion = this.draft.version; this.selected = this.draft.items[0]?.id ?? '';

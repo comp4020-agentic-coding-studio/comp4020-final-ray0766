@@ -13,14 +13,19 @@ export class SurfaceWalker {
     this.facing.copy(this.north);
   }
   right() { return new Vector3().crossVectors(this.north, this.up).normalize(); }
+  turnView(yaw: number) {
+    if (!Number.isFinite(yaw)) return;
+    this.north.applyAxisAngle(this.up, yaw).projectOnPlane(this.up).normalize();
+  }
   step(x: number, y: number, delta: number, speedScale=1) {
     const dt = Math.min(0.05, Math.max(0, delta));
+    if (dt === 0) return;
     const desired = this.right().multiplyScalar(x).addScaledVector(this.north, y);
     if (desired.length() > 1) desired.normalize();
     desired.multiplyScalar(SPEED*speedScale);
     this.velocity.lerp(desired, 1 - Math.exp(-12 * dt)).clampLength(0,SPEED*speedScale);
     const speed = this.velocity.length();
-    if (speed < 0.002 * speedScale) { this.velocity.set(0, 0, 0); return; }
+    if (speed < 0.002 * speedScale) { this.velocity.set(0, 0, 0); this.updateFacing(dt); return; }
     const dir = this.velocity.clone().normalize();
     const axis = new Vector3().crossVectors(this.up, dir).normalize();
     const rotation = new Quaternion().setFromAxisAngle(axis, speed * dt / RADIUS);
@@ -28,9 +33,14 @@ export class SurfaceWalker {
     this.north.applyQuaternion(rotation).projectOnPlane(this.up).normalize();
     this.velocity.applyQuaternion(rotation).projectOnPlane(this.up);
     this.facing.applyQuaternion(rotation).projectOnPlane(this.up).normalize();
-    const heading = this.velocity.clone().normalize();
-    const turn = Math.atan2(this.up.dot(new Vector3().crossVectors(this.facing, heading)), this.facing.dot(heading));
-    this.facing.applyAxisAngle(this.up, turn * (1 - Math.exp(-14 * dt))).normalize();
+    this.updateFacing(dt);
+  }
+  private updateFacing(dt: number) {
+    const sine = this.up.dot(new Vector3().crossVectors(this.facing, this.north));
+    const cosine = this.facing.dot(this.north);
+    // A half-turn has no unique short arc; always use the positive local-up turn.
+    const turn = cosine < 0 && Math.abs(sine) < 1e-12 ? Math.PI : Math.atan2(sine, cosine);
+    this.facing.applyAxisAngle(this.up, turn * (1 - Math.exp(-14 * dt))).projectOnPlane(this.up).normalize();
   }
   orientation() {
     const right = new Vector3().crossVectors(this.up, this.facing).normalize();

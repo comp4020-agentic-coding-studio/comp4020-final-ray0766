@@ -26,6 +26,9 @@ three editable examples and matching quick props while preserving old saves.
 [Village world v10](docs/integration/village-world-v10.md) is the current local default:
 a varied continuous public town, 18 residents and 48 catalogue parts, including
 residential wide doors and continuous two-cell entry stairs shared with the workshop.
+[Ground camera v11](docs/integration/ground-camera-v11.md) records the local camera
+repair, independent tests and bounded desktop/touch control checks. Route, mode,
+performance and release verification remain pending in that record.
 The published Crit 8 release remains `09233d9`. This local branch defaults to v10;
 its delivery target is [localhost:8098](http://localhost:8098/). No public deployment
 is included.

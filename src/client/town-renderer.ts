@@ -2,6 +2,8 @@ import * as T from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { PlacedObject } from '../shared/planets.ts';
 import type { Vec3 } from '../shared/world.ts';
+import { TownCameraCutaway } from './camera-cutaway.ts';
+import type { CameraCutawayPart } from './camera-cutaway.ts';
 
 export interface TownRenderDistrict { id: string; center: Vec3; objectIds: readonly string[] }
 export interface TownRenderModel { object: T.Group; dispose(): void }
@@ -22,6 +24,9 @@ export interface TownRendererOptions {
   /** Ordinary models to generate per update, not entire multi-object chunks. */
   maxBuildsPerUpdate?: number;
   shadowRange?: number;
+  /** Isolated render-only camera prototype; ordinary builds retain their exact materials. */
+  cameraCutaway?: boolean;
+  cameraCutawayParts?: readonly CameraCutawayPart[];
 }
 export interface TownRenderStats {
   totalObjects: number; totalChunks: number; visibleObjects: number; visibleChunks: number;
@@ -121,6 +126,7 @@ function splitChunks(objects: readonly PlacedObject[], districts: readonly TownR
  * occlusion changes saved objects, authority, placement, supports or collision. */
 function townRendererState(options: TownRendererOptions) {
   const root = new T.Group(); root.name = 'town-renderer';
+  const cutaway = options.cameraCutaway ? new TownCameraCutaway(options.objects.filter(object => object.kind === 'structure').map(object => object.id), options.cameraCutawayParts) : undefined;
   const empty = new T.BufferGeometry(); empty.userData.sharedResource = true;
   const nearRange = options.nearRange ?? 12, cacheLimit = Math.max(0, Math.floor(options.mediumCacheChunks ?? 8));
   const buildLimit = Math.max(0, Math.floor(options.maxBuildsPerUpdate ?? 1));
@@ -134,7 +140,7 @@ function townRendererState(options: TownRendererOptions) {
   let disposed = false, clock = 0, initialBuildMs = 0, lastBuildMs = 0, pending = 0;
 
   function release(batch: Batch) {
-    for (const mesh of batch.meshes) mesh.geometry.dispose();
+    for (const mesh of batch.meshes) { cutaway?.unregisterMesh(mesh); mesh.geometry.dispose(); }
     for (const model of batch.models) model.dispose();
     batch.root.removeFromParent(); batch.root.clear();
   }
@@ -179,6 +185,7 @@ function townRendererState(options: TownRendererOptions) {
         const mesh = new T.Mesh(geometry, bucket.source.material);
         mesh.castShadow = bucket.source.castShadow; mesh.receiveShadow = bucket.source.receiveShadow; mesh.renderOrder = bucket.source.renderOrder;
         mesh.userData.townFaceRanges = bucket.ranges;
+        cutaway?.registerMesh(mesh, { staticGeometry: true });
         geometry.computeBoundingBox(); geometry.computeBoundingSphere();
         batch.bounds.union(geometry.boundingBox!); batch.bytes += geometryBytes(geometry); batch.triangles += bucket.faces;
         batch.meshes.push(mesh); batch.root.add(mesh);
@@ -210,6 +217,7 @@ function townRendererState(options: TownRendererOptions) {
           if (Array.isArray(node.material)) throw new Error(`Town mesh needs one material: ${object.id}`);
           const geometry = node.geometry.index ? node.geometry.toNonIndexed() : node.geometry.clone();
           scratch.push(geometry); geometry.applyMatrix4(node.matrixWorld);
+          cutaway?.writeOwnerAttribute(geometry, object.id);
           if (!geometry.getAttribute('normal')) geometry.computeVertexNormals();
           if (!geometry.getAttribute('uv')) geometry.setAttribute('uv', new T.Float32BufferAttribute(new Float32Array(geometry.attributes.position.count * 2), 2));
           const key = `${node.material.uuid}:${node.castShadow}:${node.receiveShadow}:${node.renderOrder}`;
@@ -240,6 +248,7 @@ function townRendererState(options: TownRendererOptions) {
         const mesh = new T.Mesh(geometry, bucket.material);
         mesh.castShadow = bucket.cast; mesh.receiveShadow = bucket.receive; mesh.renderOrder = bucket.order;
         mesh.userData.townCastsShadow = bucket.cast; mesh.userData.townFaceRanges = bucket.ranges;
+        cutaway?.registerMesh(mesh, { staticGeometry: true });
         geometry.computeBoundingBox(); geometry.computeBoundingSphere();
         batch.bounds.union(geometry.boundingBox!); batch.bytes += geometryBytes(geometry); batch.triangles += bucket.faces;
         batch.meshes.push(mesh); batch.root.add(mesh);
@@ -370,11 +379,11 @@ function townRendererState(options: TownRendererOptions) {
     if (globalLow) release(globalLow); globalLow = null;
     for (const model of stagedLow) model.dispose(); stagedLow = [];
     for (const chunk of chunks) { release(chunk.low); if (chunk.medium) release(chunk.medium); for (const model of chunk.staged ?? []) model.dispose(); }
-    chunks.length = 0; pending = 0; empty.dispose(); root.removeFromParent(); root.clear();
+    chunks.length = 0; pending = 0; cutaway?.dispose(); empty.dispose(); root.removeFromParent(); root.clear();
   }
   root.userData.disposeOwned = dispose;
   return {
-    renderer: { root, update, stats, pick, dispose }, prepareLowStep,
+    renderer: { root, update, stats, pick, dispose, cutaway }, prepareLowStep,
     ready: () => lowIndex >= queued.length,
     progress: (): TownRenderProgress => ({ readyObjects: builtLowObjects, totalObjects: options.objects.length, readyChunks: chunks.length, totalChunks: queued.length, lastBuildMs: lastLowBuildMs, totalBuildMs: initialBuildMs }),
   };

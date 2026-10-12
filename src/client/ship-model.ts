@@ -15,6 +15,7 @@ export function makeShip() {
   const animate = (power: number, brake: boolean) => handle.setThrust(brake ? Math.min(power, .04) : power);
   return { root, animate, dispose: () => root.userData.disposeOwned(),
     get document() { return key; },
+    get solidBounds() { return handle.bounds.clone(); },
     setDesign(next: ShipDesign) {
       const nextKey = encodeShipDesign(next); if (key === nextKey) return;
       const replacement = createShipModel(next, worldMaterials(), 'medium');

@@ -27,10 +27,11 @@ it('turning, diagonal input, stopping and large frame gaps keep speed bounded',(
   const pose=cameraPose(w,true);
   expect(new Vector3().crossVectors(pose.position.clone().sub(pose.target),w.up).length()).toBeGreaterThan(1);
 });
-it('turns the character through a full reversal instead of normalising back to the old heading',()=>{
+it('walks backward without turning the character away from the viewing heading',()=>{
   const w=new SurfaceWalker(SPAWN);
   for(let i=0;i<100;i++)w.step(0,1,1/60);
   for(let i=0;i<100;i++)w.step(0,-1,1/60);
-  expect(w.facing.dot(w.north)).toBeLessThan(-.99);
+  expect(w.facing.dot(w.north)).toBeGreaterThan(.99);
+  expect(w.velocity.clone().normalize().dot(w.facing)).toBeLessThan(-.99);
   expect(w.facing.length()).toBeCloseTo(1,9);
 });

@@ -20,8 +20,9 @@ import {HUB_DOCK} from './ports.ts';
 import {NPCS,distance} from './world.ts';
 import type {Vec3} from './world.ts';
 import {PUBLIC_TOWN_CAPACITY} from './world-capacity.ts';
-import {StructurePlacementCache} from './structure-placement.ts';
+import {StructurePlacementCache,isRoadSurface} from './structure-placement.ts';
 import {PUBLIC_TOWN_DATA} from './public-town-data.ts';
+import {TOWN_WIDE_ROAD_OBJECTS,TOWN_WIDE_ROAD_BLUEPRINTS,TOWN_WIDE_ROAD_ROUTES} from './town-wide-roads.ts';
 import {TOWN_AUTHORED_BLUEPRINTS} from './town-authored-blueprints.ts';
 import {planRoutePaths} from './path-layout.ts';
 import type {RoutePathCoverage} from './path-layout.ts';
@@ -45,7 +46,7 @@ import {townPostHouse,townLongWorkshop,townSharedCourt,townHarbourLookout,townSt
 
 /** The public town is an explicit larger template; no extra scenery sits
  * outside its object ledger. Private construction retains its own limits. */
-export const PUBLIC_TOWN_VERSION=10;
+export const PUBLIC_TOWN_VERSION=11;
 export const PUBLIC_TOWN_LIMITS=PUBLIC_TOWN_CAPACITY;
 const environment=defaultEnvironment('temperate',20261009);
 Object.assign(environment.params,{relief:.3,roughness:.025,vegetation:.36,waterLevel:-.3,woodland:.05,outcrops:0});
@@ -144,6 +145,14 @@ for(const [hash,parts] of Object.entries(TOWN_AUTHORED_BLUEPRINTS)){
  if(PUBLIC_TOWN_HASHES.includes(hash))throw Error('Duplicate authored blueprint hash');
  const index=PUBLIC_TOWN_BLUEPRINTS.length;
  PUBLIC_TOWN_BLUEPRINTS.push({id:(`51549d27-cabe-4d99-af34-a1${String(index).padStart(10,'0')}`) as BlueprintId,name:`Town · Authored block ${index}`,parts,groups:[]});
+ PUBLIC_TOWN_HASHES.push(hash);
+}
+// Public street packs append to the registry; the first 43 workshop examples
+// and every existing building blueprint retain their identities and indices.
+for(const [hash,parts] of Object.entries(TOWN_WIDE_ROAD_BLUEPRINTS)){
+ if(PUBLIC_TOWN_HASHES.includes(hash))continue;
+ const index=PUBLIC_TOWN_BLUEPRINTS.length;
+ PUBLIC_TOWN_BLUEPRINTS.push({id:(`51549d27-cabe-4d99-af34-a1${String(index).padStart(10,'0')}`) as BlueprintId,name:`Town · Street pack ${index}`,parts,groups:[]});
  PUBLIC_TOWN_HASHES.push(hash);
 }
 function facing(point:Vec3,toward:Vec3):number {
@@ -249,8 +258,15 @@ function assertTownCapacity(objects:PlacedObject[]){
 export function publicTown(radius=21.6):PublicTown {
  const previous=cache.get(radius);if(previous)return previous;
  if(Math.abs(radius-21.6)>1e-6)return generatePublicTown(radius);
+ const blueprints=Object.fromEntries(PUBLIC_TOWN_BLUEPRINTS.map((b,i)=>[PUBLIC_TOWN_HASHES[i],b.parts]));
+ const objects=structuredClone(TOWN_WIDE_ROAD_OBJECTS);
+ const renderDistricts=townDistricts();
+ for(const object of objects)renderDistricts.find(d=>d.id===townDistrictFor(object.position))!.objectIds.push(object.id);
  const town:PublicTown={...PUBLIC_TOWN_DATA,version:PUBLIC_TOWN_VERSION,radius,environment:PUBLIC_TOWN_ENVIRONMENT,
-  blueprints:Object.fromEntries(PUBLIC_TOWN_BLUEPRINTS.map((b,i)=>[PUBLIC_TOWN_HASHES[i],b.parts]))};
+  objects,blueprints,renderDistricts,routes:structuredClone(TOWN_WIDE_ROAD_ROUTES),
+  roadObjects:objects.filter(o=>isRoadSurface(blueprints[o.blueprintHash!])).map(o=>o.id),
+  // Previous narrow-lane coverage is no longer evidence for this ledger.
+  pavingRoutes:[],entranceCoverage:[],pavingCoverage:[],stoneCoverage:[]};
  assertTownCapacity(town.objects);
  cache.set(radius,town);return town;
 }
