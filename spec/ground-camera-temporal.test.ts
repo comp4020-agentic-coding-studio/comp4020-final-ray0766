@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as T from 'three';
-import { GroundCameraCutawayRig as R18, type GroundCameraCutawayDiagnostics } from '../src/client/ground-camera-cutaway.ts';
+import { GroundCameraCutawayRig as R18, type GroundCameraCutawayDiagnostics, type GroundCameraCutawayInput } from '../src/client/ground-camera-cutaway.ts';
 import { GroundCameraCutawayRig as R17 } from './ground-camera-cutaway-r17-reference.ts';
 import { certifyCameraFrame, type CameraFrameCertificate } from '../src/client/camera-frame-collision.ts';
 import { createPublicTownArt } from '../src/client/public-town-art.ts';
@@ -22,6 +22,10 @@ import {makeShip} from '../src/client/ship-model.ts';
 import {decodeShipDesign} from '../src/assets/claude-geometry/ship/design.ts';
 import {CameraShipCollision} from '../src/client/camera-ship-collision.ts';
 import shipDocument from './fixtures/ground-camera-ship-r18.json';
+/** A captured rig input: the fixture stores vectors as arrays; the test supplies probing, framing and commit hooks. */
+type CapturedRigInput = Omit<GroundCameraCutawayInput, 'feet' | 'up' | 'heading' | 'framingPoints' | 'diagnostics' | 'probe' | 'certifyFrame' | 'commitFrame'> & { feet: number[]; up: number[]; heading: number[] };
+/** One replayed frame's camera evidence; further captured fields ride along unchanged. */
+interface ReplayRow { seq: number; time: number; arm: number; height: number; [field: string]: unknown }
 const v=(a:readonly number[])=>new T.Vector3(a[0],a[1],a[2]);
 const framed=(feet:T.Vector3,up:T.Vector3,facing:T.Vector3)=>{
  const right=new T.Vector3().crossVectors(up,facing).normalize(),q=new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(right,up,facing));
@@ -47,7 +51,7 @@ function setup(Rig:typeof R18 | typeof R17, bootstrap=fixture.bootstrap){
  const initial=prepare({eye:v(bootstrap.eye),direction:v(bootstrap.forward),feet:v(bootstrap.feet),up:v(bootstrap.up),probeRadius:.2});
  if(!initial.accepted)throw Error('bootstrap '+initial.diagnostics.reasons.join(',')); controller.commitFrame(initial.plan);
  const rig=new Rig();Object.assign(rig,{eye:v(bootstrap.eye),view:v(bootstrap.forward),feet:v(bootstrap.feet),up:v(bootstrap.up),heading:v(bootstrap.smoothedHeading),pitch:bootstrap.smoothedPitch});
- const update=(input:any,targets:number[][],facing:number[],meshTransforms=transforms,capturedShip=ship)=>{
+ const update=(input:CapturedRigInput,targets:number[][],facing:number[],meshTransforms=transforms,capturedShip=ship)=>{
   transforms=meshTransforms;ship=capturedShip;refreshShip();
   dt=input.dt;boxes=targets;frameCertCalls=frameCertMs=0;const diagnostics:GroundCameraCutawayDiagnostics={schema:'ground-camera-attempt-v1',candidates:[]};
   lastDiagnostics=diagnostics;const result=rig.update({...input,feet:v(input.feet),up:v(input.up),heading:v(input.heading),framingPoints:framed(v(input.feet),v(input.up),v(facing)),diagnostics,
@@ -63,10 +67,10 @@ function setup(Rig:typeof R18 | typeof R17, bootstrap=fixture.bootstrap){
 }
 
 const replay=(Rig:typeof R18|typeof R17)=>{
- const s=setup(Rig),rows:any[]=[];let previous=fixture.bootstrap,maxNativeEyeDifference=0,maxAttempts=0,maxCertCalls=0,maxCertMs=0;
+ const s=setup(Rig),rows:ReplayRow[]=[];let previous=fixture.bootstrap,maxNativeEyeDifference=0,maxAttempts=0,maxCertCalls=0,maxCertMs=0;
  try {for(const f of fixture.frames){
   const input={feet:f.feet,up:f.up,heading:f.heading,pitch:f.pitch,radius:21.6,portrait:false,fov:f.fov,aspect:f.aspect,dt:(f.frameTime-previous.frameTime)/1000};
-  let result,diagnostics;try{({result,diagnostics}=s.update(input,f.avatarBounds.flatMap(b=>b.corners),f.facing,f.meshTransforms,f.ship));}catch(error){saveProof('replay-failure-exact.json',{frameSeq:f.frameSeq,diagnostics:s.lastDiagnostics});saveProof('replay-partial.json',{rig:Rig===R17?'r17':'r18',maxNativeEyeDifference,rows});throw Error('frame '+f.frameSeq+' '+String(error));}
+  let result,diagnostics;try{({result,diagnostics}=s.update(input,f.avatarBounds.flatMap(b=>b.corners),f.facing,f.meshTransforms,f.ship));}catch(error){saveProof('replay-failure-exact.json',{frameSeq:f.frameSeq,diagnostics:s.lastDiagnostics});saveProof('replay-partial.json',{rig:Rig===R17?'r17':'r18',maxNativeEyeDifference,rows});throw Error('frame '+f.frameSeq+' '+String(error),{cause:error});}
   maxAttempts=Math.max(maxAttempts,diagnostics.candidates.length);maxCertCalls=Math.max(maxCertCalls,s.frameCertCalls);maxCertMs=Math.max(maxCertMs,s.frameCertMs);expect(diagnostics.candidates.length).toBeLessThanOrEqual(201);const resolved=diagnostics.context!.resolved as {maximumStep:number;angleBudget:number;oldView:number[]};
   expect(result.position.distanceTo(v(previous.eye))).toBeLessThanOrEqual(resolved.maximumStep+1e-7);expect(result.direction.angleTo(v(resolved.oldView))).toBeLessThanOrEqual(resolved.angleBudget+1e-7);expect(result.frameCertificate!.diagnostics.reasons).toEqual([]);expect(result.frameCertificate!.plan.masks.length).toBeLessThanOrEqual(12);expect(new Set(result.frameCertificate!.plan.masks.map(m=>m.objectId)).size).toBeLessThanOrEqual(4);
   const fw=result.direction.clone().normalize(),right=new T.Vector3().crossVectors(fw,v(f.up)).normalize(),up=new T.Vector3().crossVectors(right,fw).normalize(),t=Math.tan(T.MathUtils.degToRad(f.fov)/2),ys=f.avatarBounds.flatMap(b=>b.corners).map(p=>{const d=v(p).sub(result.position);return d.dot(up)/d.dot(fw)/t;});
@@ -80,7 +84,7 @@ const replay=(Rig:typeof R18|typeof R17)=>{
  return{rows,maxNativeEyeDifference,maxAttempts,maxCertCalls,maxCertMs,settle:{synthetic:true,frames:180,seconds:3,armMin:settleArmMin,armMax:settleArmMax}};
  }finally{s.dispose();}
 };
-const metrics=(rows:any[],lo:number,hi:number)=>{
+const metrics=(rows:readonly ReplayRow[],lo:number,hi:number)=>{
  const f=rows.filter(x=>lo<=x.seq&&x.seq<=hi),arms=f.map(x=>x.arm),heights=f.map(x=>x.height);let reversals=0,last=0;
  for(let i=1;i<f.length;i++){const d=f[i]!.arm-f[i-1]!.arm,s=d>.001?1:d<-.001?-1:0;if(s&&last&&s!==last)reversals++;if(s)last=s;}
  return{frames:f.length,armMin:Math.min(...arms),armMax:Math.max(...arms),armVariation:f.slice(1).reduce((n,b,i)=>n+Math.abs(b.arm-f[i]!.arm),0),heightRatio:Math.max(...heights)/Math.min(...heights),reversals};

@@ -5,6 +5,9 @@ import {certifyCameraFrame} from '../src/client/camera-frame-collision.ts';
 import {registerCameraExactAvatarShadowGeometry} from '../src/client/camera-exact-avatar-shadow.ts';
 import {TownCameraCutaway} from '../src/client/camera-cutaway.ts';
 import {GroundWorld} from '../src/shared/physics/world.ts';
+/** One captured avatar mesh as the fixture stores it. */
+interface FixtureMesh { label: string; geometryId?: string; positions: number[]; indices?: number[]; drawRange: { start: number; count: number | 'all' }; groups: T.BufferGeometry['groups']; matrixWorld: number[] }
+import type {CameraCutawayPoint} from '../src/client/camera-cutaway-plan.ts';
 const data=JSON.parse(readFileSync(new URL('./fixtures/r12-protected-avatar-shadow.json',import.meta.url),'utf8'));
 // Isolated original collider + source-bound captured avatar geometry. The
 // genuine controller issues/authenticates this plan; this is not a full-town
@@ -14,12 +17,12 @@ function fixture(rayIndex?:number){
  const collider={objectId:'original-protected-jamb',tag:'structure.column',center:new T.Vector3(...data.collider.center),half:new T.Vector3(...data.collider.half),q:new T.Quaternion(...data.collider.q),inverse:new T.Quaternion(...data.collider.q).invert(),support:false};
  world.bodies.push({objectId:collider.objectId,dir:collider.center.clone().normalize(),broad:5,colliders:[collider],cameraBounds:new T.Box3().setFromPoints([-1,1].flatMap(x=>[-1,1].flatMap(y=>[-1,1].map(z=>new T.Vector3(x*collider.half.x,y*collider.half.y,z*collider.half.z).applyQuaternion(collider.q).add(collider.center)))))});
  const cut=new TownCameraCutaway([],[],world.planetId),bounds=structuredClone(data.bounds);
- const meshes=data.meshes.map((m:any)=>{const geometry=new T.BufferGeometry().setAttribute('position',new T.Float32BufferAttribute(m.positions,3));if(m.indices)geometry.setIndex(new T.Uint32BufferAttribute(m.indices,1));geometry.setDrawRange(m.drawRange.start,m.drawRange.count==='all'?Infinity:m.drawRange.count);geometry.groups=structuredClone(m.groups);registerCameraExactAvatarShadowGeometry(geometry);return{label:m.label,geometryId:m.geometryId,geometry,matrixWorld:new T.Matrix4().fromArray(m.matrixWorld)};});
+ const meshes=data.meshes.map((m:FixtureMesh)=>{const geometry=new T.BufferGeometry().setAttribute('position',new T.Float32BufferAttribute(m.positions,3));if(m.indices)geometry.setIndex(new T.Uint32BufferAttribute(m.indices,1));geometry.setDrawRange(m.drawRange.start,m.drawRange.count==='all'?Infinity:m.drawRange.count);geometry.groups=structuredClone(m.groups);registerCameraExactAvatarShadowGeometry(geometry);return{label:m.label,geometryId:m.geometryId,geometry,matrixWorld:new T.Matrix4().fromArray(m.matrixWorld)};});
  const proposal={eye:new T.Vector3(...data.pose.eye),direction:new T.Vector3(...data.pose.direction),up:new T.Vector3(...data.pose.up),feet:new T.Vector3(...data.pose.feet),probeRadius:.2};
  if(rayIndex!==undefined){const right=new T.Vector3().crossVectors(proposal.direction,proposal.up).normalize();const offset=rayIndex===4?.62:0;
   const target=proposal.feet.clone().addScaledVector(proposal.up,1.16).addScaledVector(right,offset);
   collider.center.copy(proposal.eye).lerp(target,.5);collider.half.set(.01,.01,.01);collider.q.identity();collider.inverse.identity();world.bodies[0].cameraBounds!.set(collider.center.clone().sub(collider.half),collider.center.clone().add(collider.half));}
- const plan=(previousEye?:T.Vector3)=>cut.planFrame({...proposal,previousEye,world,dt:.0147,cameraException:true,opticalTargetPoints:bounds.flatMap((b:any)=>b.corners)});
+ const plan=(previousEye?:T.Vector3)=>cut.planFrame({...proposal,previousEye,world,dt:.0147,cameraException:true,opticalTargetPoints:bounds.flatMap((b:{corners:CameraCutawayPoint[]})=>b.corners)});
  const certify=(selected:ReturnType<typeof plan>,actual:typeof meshes|null=meshes,current=true,policy:'strict-avatar'|'playable-central'='strict-avatar',diagnostics=true)=>certifyCameraFrame({...proposal,previousEye:selected.previousEye?new T.Vector3(...selected.previousEye):undefined},selected,{world,visibilityPolicy:policy,avatarGeometryDiagnostics:diagnostics,avatarBounds:bounds,avatarMeshes:actual??undefined,planCurrent:p=>current&&cut.validateFramePlan(p),probeParked:(a,b)=>a.distanceTo(b),probeParkedSafety:(a,b)=>a.distanceTo(b)});
  return{world,collider,cut,bounds,meshes,proposal,plan,certify,dispose(){cut.dispose();for(const m of meshes)m.geometry.dispose();}};
 }

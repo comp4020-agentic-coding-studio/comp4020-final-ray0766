@@ -1,11 +1,13 @@
 import {readFileSync} from 'node:fs';
 import {describe,expect,it} from 'vitest';
-import {BufferGeometry,Float32BufferAttribute,Uint32BufferAttribute,BoxGeometry,Matrix4,Quaternion,Vector3,Box3} from 'three';
+import {BufferGeometry,type BufferAttribute,Float32BufferAttribute,Uint32BufferAttribute,BoxGeometry,Matrix4,Quaternion,Vector3,Box3} from 'three';
 import {createCameraExactAvatarShadowTest,registerCameraExactAvatarShadowGeometry} from '../src/client/camera-exact-avatar-shadow.ts';
 import {createCameraAvatarShadowTest} from '../src/client/camera-avatar-shadow.ts';
+/** One captured avatar mesh as the fixture stores it. */
+interface FixtureMesh { label: string; geometryId?: string; positions: number[]; indices?: number[]; drawRange: { start: number; count: number | 'all' }; groups: BufferGeometry['groups']; matrixWorld: number[] }
 const fixture=JSON.parse(readFileSync(new URL('./fixtures/r11-protected-avatar-shadow.json',import.meta.url),'utf8'));
 function setup(){
- const meshes=fixture.meshes.map((m:any)=>{const geometry=new BufferGeometry().setAttribute('position',new Float32BufferAttribute(m.positions,3));if(m.indices)geometry.setIndex(new Uint32BufferAttribute(m.indices,1));geometry.setDrawRange(m.drawRange.start,m.drawRange.count==='all'?Infinity:m.drawRange.count);geometry.groups=m.groups;registerCameraExactAvatarShadowGeometry(geometry);return{label:m.label,geometryId:m.geometryId,geometry,matrixWorld:new Matrix4().fromArray(m.matrixWorld)};});
+ const meshes=fixture.meshes.map((m:FixtureMesh)=>{const geometry=new BufferGeometry().setAttribute('position',new Float32BufferAttribute(m.positions,3));if(m.indices)geometry.setIndex(new Uint32BufferAttribute(m.indices,1));geometry.setDrawRange(m.drawRange.start,m.drawRange.count==='all'?Infinity:m.drawRange.count);geometry.groups=m.groups;registerCameraExactAvatarShadowGeometry(geometry);return{label:m.label,geometryId:m.geometryId,geometry,matrixWorld:new Matrix4().fromArray(m.matrixWorld)};});
  return{meshes,bounds:structuredClone(fixture.bounds),pose:{eye:new Vector3(...fixture.pose.eye),direction:new Vector3(...fixture.pose.direction),up:new Vector3(...fixture.pose.up)},collider:{center:new Vector3(...fixture.collider.center),half:new Vector3(...fixture.collider.half),q:new Quaternion(...fixture.collider.q)}};
 }
 describe('strict real avatar shadow against complete protected OBB',()=>{
@@ -18,7 +20,7 @@ describe('strict real avatar shadow against complete protected OBB',()=>{
   // Independent scalar projection enumerates every raw local vertex and eye;
   // it does not trust the proof's cached hull, extrema, disjoint bit or gap.
   for(const witness of proof.meshWitnesses){
-   const raw=fixture.meshes.find((m:any)=>m.label===witness.label),matrix=new Matrix4().fromArray(raw.matrixWorld),axis=new Vector3(...witness.axis);
+   const raw=fixture.meshes.find((m:FixtureMesh)=>m.label===witness.label),matrix=new Matrix4().fromArray(raw.matrixWorld),axis=new Vector3(...witness.axis);
    expect(Math.abs(axis.length()-1)).toBeLessThan(1e-10);
    const projected=[s.pose.eye.dot(axis)];for(let i=0;i<raw.positions.length;i+=3)projected.push(new Vector3(raw.positions[i],raw.positions[i+1],raw.positions[i+2]).applyMatrix4(matrix).dot(axis));
    const other=blocker.map(p=>p.dot(axis)),gap=Math.max(Math.min(...other)-Math.max(...projected),Math.min(...projected)-Math.max(...other));
@@ -26,7 +28,7 @@ describe('strict real avatar shadow against complete protected OBB',()=>{
   }
  });
  it('retains a genuine opaque foreground OBB between eye and visor',()=>{
-  const s=setup(),visor=s.meshes[3],center=new Box3().setFromBufferAttribute(visor.geometry.getAttribute('position') as any).getCenter(new Vector3()).applyMatrix4(visor.matrixWorld);
+  const s=setup(),visor=s.meshes[3],center=new Box3().setFromBufferAttribute(visor.geometry.getAttribute('position') as BufferAttribute).getCenter(new Vector3()).applyMatrix4(visor.matrixWorld);
   s.collider.center.copy(s.pose.eye).lerp(center,.5);s.collider.half.set(.3,.3,.3);s.collider.q.identity();
   expect(createCameraExactAvatarShadowTest(s.pose,s.bounds,s.meshes,fixture.frameId)(s.collider).disjoint).toBe(false);
  });
@@ -54,7 +56,7 @@ describe('strict real avatar shadow against complete protected OBB',()=>{
  it('rejects changed position buffer identity, draw range and groups without rebuilding admission',()=>{const s=setup();const p=s.meshes[3].geometry.getAttribute('position') as Float32BufferAttribute;p.array=new Float32Array(p.array);expect(createCameraExactAvatarShadowTest(s.pose,s.bounds,s.meshes,fixture.frameId)(s.collider).disjoint).toBe(false);const d=setup();d.meshes[3].geometry.setDrawRange(0,3);expect(createCameraExactAvatarShadowTest(d.pose,d.bounds,d.meshes,fixture.frameId)(d.collider).disjoint).toBe(false);const g=setup();g.meshes[3].geometry.addGroup(0,3,0);expect(createCameraExactAvatarShadowTest(g.pose,g.bounds,g.meshes,fixture.frameId)(g.collider).disjoint).toBe(false);});
  it('refuses unregistered replacement geometry even with matching bounds',()=>{const s=setup();s.meshes[3].geometry=s.meshes[3].geometry.clone();expect(createCameraExactAvatarShadowTest(s.pose,s.bounds,s.meshes,fixture.frameId)(s.collider).disjoint).toBe(false);});
  it('retains strict subrounding separation as blocked',()=>{
-  const s=setup();s.collider.center.copy(new Box3().setFromBufferAttribute(s.meshes[3].geometry.getAttribute('position') as any).getCenter(new Vector3()).applyMatrix4(s.meshes[3].matrixWorld));s.collider.half.set(.001,.001,.001);
+  const s=setup();s.collider.center.copy(new Box3().setFromBufferAttribute(s.meshes[3].geometry.getAttribute('position') as BufferAttribute).getCenter(new Vector3()).applyMatrix4(s.meshes[3].matrixWorld));s.collider.half.set(.001,.001,.001);
   expect(createCameraExactAvatarShadowTest(s.pose,s.bounds,s.meshes,fixture.frameId)(s.collider).disjoint).toBe(false);
  });
 });

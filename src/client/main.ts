@@ -40,16 +40,12 @@ import { GroundCameraRig } from './ground-camera.ts';
 import { SimpleFollowCameraRig } from './simple-follow-camera.ts';
 import { IndoorFollowRooms } from './indoor-follow-room.ts';
 import { legacyOutdoorCameraPose, clipLegacyCameraBoom } from './legacy-ground-camera.ts';
-import { GroundCameraConflict, GroundCameraCutawayRig } from './ground-camera-cutaway.ts';
-import { createCourierUpperFramingEnvelope, projectCourierUpperFramingPoints } from './camera-courier-framing.ts';
-import type { GroundCameraCutawayDiagnostics, GroundCameraCutawayInput } from './ground-camera-cutaway.ts';
 import { TownCameraCutaway } from './camera-cutaway.ts';
 import type { CameraCutawayDiagnostics } from './camera-cutaway.ts';
-import { certifyCameraFrame } from './camera-frame-collision.ts';
 import type { CameraFrameCertificate } from './camera-frame-collision.ts';
 import type { CameraExactAvatarMesh } from './camera-exact-residual.ts';
 import { registerCameraExactAvatarShadowGeometry } from './camera-exact-avatar-shadow.ts';
-import type { CameraCutawayPoint, CameraCutawayFramePlan } from './camera-cutaway-plan.ts';
+import type { CameraCutawayPoint } from './camera-cutaway-plan.ts';
 import { CameraShipCollision } from './camera-ship-collision.ts';
 import { AvatarOcclusion } from './avatar-occlusion.ts';
 import { createWorld, courier } from './scene.ts';
@@ -85,7 +81,6 @@ let overview = false;let cameraPitch=0;let doorstepCameraPending=false;
 // The follow camera permits occlusion; preview flags cannot enable visual masks.
 const cameraCutawayB:boolean=false;
 const cameraLocalExceptionB=cameraCutawayB&&import.meta.env.VITE_CAMERA_LOCAL_EXCEPTION==='1';
-const cameraPlayableVisibilityB=cameraLocalExceptionB&&import.meta.env.VITE_CAMERA_PLAYABLE_VISIBILITY==='1';
 const createGroundCamera=()=>new SimpleFollowCameraRig();
 const indoorFollowRooms=new IndoorFollowRooms();
 const groundCamera=createGroundCamera();let cameraWasOverview=false;
@@ -95,7 +90,6 @@ const cameraConflictTotals={triggerCount:0,completedFrozenMs:0,rolledBackDistanc
 function endGroundCameraConflict(){if(groundCameraConflict)cameraConflictTotals.completedFrozenMs+=performance.now()-groundCameraConflict.startedAt;groundCameraConflict=null;}
 function rebaseGroundCamera(){endGroundCameraConflict();groundCamera.reset();activeTownCutaway?.reset();started=false;}
 const measureCamera=new URLSearchParams(location.search).get('measure')==='1';let cameraFrameSequence=0;
-const cameraAvatarForensics=new URLSearchParams(location.search).get('camera-avatar-forensics')==='1';
 let departure:{time:number;base:T.Vector3;start:T.Vector3;rotation:T.Quaternion}|null=null;
 let colony: Colony | undefined;
 let flight: SpaceFlight | undefined;
@@ -382,8 +376,6 @@ function prepareSurface(planet:PlanetView){
 }
 configureGround();
 const player = courier('clay');scene.add(player.root);
-const cameraUpperFramingEnvelope=cameraCutawayB?createCourierUpperFramingEnvelope(player):null;
-const cameraUpperFramingPoints:T.Vector3[]=[];
 // The same head/coat/shoulder/satchel/parcel set as the independent upper-body
 // framing contract. Bounds follow the actual current animation, including yaw.
 const cameraUpperMeshes:T.Mesh[]=[];
@@ -437,28 +429,6 @@ function cameraAvatarFrame(){
   return{bounds,meshes,exactMeshes:exactGeometryReady?exactMeshes:undefined,opticalTargetPoints:bounds.flatMap(bound=>bound.corners)};
 }
 type CameraRenderFrame=ReturnType<TownCameraCutaway['captureFrameRenderEvidence']>['frame']&{assetsRevision:number};
-const cameraKnownRenderGeometry=new Set<string>(),cameraRenderGeometryElements=new Map<string,string>();
-let cameraRenderAssetsRevision=0,cameraRenderRegistryOwner:TownCameraCutaway|null=null,cameraRenderRegistryRevision=-1;
-function captureCameraRenderEvidence(controller:TownCameraCutaway,plan:CameraCutawayFramePlan):CameraRenderFrame{
-  const {frame,geometryDelta,registryCatalog}=controller.captureFrameRenderEvidence(plan,cameraKnownRenderGeometry);
-  for(const asset of geometryDelta){
-    const element=document.createElement('script');element.type='application/json';
-    element.id=`v11-camera-render-geometry-${cameraRenderGeometryElements.size}`;
-    element.dataset.cameraGeometryId=asset.geometryId;
-    // Each immutable buffer payload is serialized once. Revision catalogues
-    // retain only references, rather than copying all earlier town geometry.
-    element.textContent=JSON.stringify(asset);document.body.appendChild(element);
-    cameraRenderGeometryElements.set(asset.geometryId,element.id);cameraKnownRenderGeometry.add(asset.geometryId);
-  }
-  if(geometryDelta.length||cameraRenderRegistryOwner!==controller||cameraRenderRegistryRevision!==registryCatalog.revision){
-    const assets={schema:'camera-cutaway-render-assets-v1',revision:cameraRenderAssetsRevision+1,
-      registryRevision:registryCatalog.revision,bindingVersion:registryCatalog.bindingVersion,registry:registryCatalog.registry,
-      geometryRefs:[...cameraRenderGeometryElements].map(([geometryId,elementId])=>({geometryId,elementId}))};
-    renderer.domElement.dataset.cameraRenderGeometryAssets=JSON.stringify(assets);
-    cameraRenderAssetsRevision=assets.revision;cameraRenderRegistryOwner=controller;cameraRenderRegistryRevision=registryCatalog.revision;
-  }
-  return{...frame,assetsRevision:cameraRenderAssetsRevision};
-}
 const avatarOcclusion=new AvatarOcclusion(player.root);
 const presence=new GroundPresence(scene,renderer.domElement);
 const silhouette = new T.Mesh(new T.CapsuleGeometry(.22, .90, 4, 8), new T.MeshBasicMaterial({color:'#ffdfa0',transparent:true,opacity:.24,depthTest:false,depthWrite:false}));
@@ -666,17 +636,6 @@ function animate(now:number) {
   }
   // A rejected isolated pose must not let unrendered motion reach the save
   // timer. Only this synchronous frame's new movement can be rolled back.
-  const cameraFrameStart={standing,pendingLength:motionPending.length,up:walker.up.clone(),north:walker.north.clone(),facing:walker.facing.clone()};
-  // Pure pre-physics evidence. Never use this snapshot to drive or restore motion.
-  const cameraFailureStart=measureCamera&&cameraCutawayB?{
-    frameTime:now,elapsed,dt,fixedStep:FIXED_STEP,physicsClock,pendingLength:motionPending.length,
-    standing:standing?{...standing,position:[...standing.position]}:null,
-    up:walker.up.toArray(),heading:walker.north.toArray(),facing:walker.facing.toArray(),velocity:walker.velocity.toArray(),
-    pitch:cameraPitch,jumpQueued,target:target?.toArray()??null,paused,
-    input:{keys:[...keys],joy:joy.toArray(),move:[x,y],sprinting:keys.has('shift')},
-    previousRendered:{eye:camera.position.toArray(),direction:new T.Vector3(0,0,-1).applyQuaternion(camera.quaternion).toArray(),
-      up:camera.up.toArray(),quaternion:camera.quaternion.toArray(),fov:camera.fov,aspect:camera.aspect,near:camera.near},
-  }:null;
   if(groundWorld&&standing){
     if(paused){clearInput();walker.velocity.set(0,0,0);physicsClock=0;}else{
       physicsClock=Math.min(.05,physicsClock+dt);
@@ -746,9 +705,9 @@ function animate(now:number) {
   const cameraAvatar=cameraLocalExceptionB&&!overview?cameraAvatarFrame():null;
   let resolvedCameraArm:Pick<ReturnType<GroundCameraRig['update']>,'distance'|'desiredDistance'|'probeRadius'|'centerDistance'|'shoulder'|'avoidanceYaw'|'avoidanceTargetYaw'|'framingLimited'|'warningDistance'|'opticalDistance'|'eyeClear'|'frameWidth'|'frameHeight'|'avatarClearance'|'framingPitch'>|null=null,avatarOpacity=1;
   let smoothedHeading=walker.north.toArray(),smoothedPitch=cameraPitch;
-  let committedCutawayFrame:CameraCutawayDiagnostics|null=null;
-  let frameCollision:CameraFrameCertificate['diagnostics']|null=null,rawEyeClear:boolean|null=null,exceptionsExplicit=false;
-  let frameRenderEvidence:CameraRenderFrame|null=null;
+  const committedCutawayFrame:CameraCutawayDiagnostics|null=null;
+  const frameCollision:CameraFrameCertificate['diagnostics']|null=null,rawEyeClear:boolean|null=null,exceptionsExplicit=false;
+  const frameRenderEvidence:CameraRenderFrame|null=null;
   if(overview){
     avatarOcclusion.restore();
     const pose=cameraPose(walker,phone,true,groundRadius());
@@ -798,8 +757,6 @@ function animate(now:number) {
   }
   started=true;
   updateGroundFog(scene,activePlanet,activeRadius,camera.position.length());
-  const sight=new T.Ray(camera.position.clone(),headPoint.clone().sub(camera.position).normalize());
-  const sightLength=camera.position.distanceTo(headPoint);
   silhouette.visible=false;
   /* Legacy occlusion silhouette is disabled with the follow camera.
   silhouette.visible=!overview&&!hub&&world.blocks.some(b=>{
