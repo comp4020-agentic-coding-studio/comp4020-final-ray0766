@@ -39,6 +39,51 @@ The range has two layers:
 - Switching 8098 to this branch also brings this camera work. If it is not
   accepted, it is a separate decision.
 
+**Camera audit of `298a440` (2026-10-13)**
+
+This audit read code and diffs only. No camera code was changed and no
+regression suite was run.
+
+What runs:
+
+- **Outdoors**: the 4f0d596 camera.
+  - `legacyOutdoorCameraPose` and `clipLegacyCameraBoom` in
+    `legacy-ground-camera.ts`.
+  - The same `cameraPose` offsets (unchanged in `motion.ts`).
+  - The same near-wall mode (closer than 2.5 m: 1.2 m behind the head) and
+    the same easing rates.
+  - The same check of the eased eye against collision and the parked craft.
+- **Near-wall upward fix**: a retracted eye keeps its view direction. In
+  4f0d596 the look-at target stayed fixed, so the view tilted. This applies
+  to the wall clip and to the harbour scenery and craft ray checks.
+- **Indoors**: `IndoorFollowRooms` with `SimpleFollowCameraRig`.
+  - A room is a floor with a roof or ceiling 1.75–4.2 m above.
+  - Switching in takes 0.12 s and switching out 0.25 s, with margins.
+  - The arm is 0.85 m back, the eye stays inside the room's floor, and
+    there is no opacity change or auto-orbit.
+
+What does not run:
+
+- The v11 `GroundCameraRig`.
+- `GroundCameraCutawayRig` and conflict freezing.
+- `TownCameraCutaway` wall masking, which `update` resets when disabled.
+- Frame certificates, exact residuals and courier framing.
+- The local-exception and playable-visibility B paths.
+
+They ship as code, but they are behind the constant `cameraCutawayB=false`
+or are never instantiated. A few diagnostics still run and are read-only:
+craft bounds, avatar geometry registration, and `?measure=1` snapshots.
+
+Behaviour that differs from 4f0d596 (needs the user's decision):
+
+- the translucent avatar silhouette shown behind obstacles is switched off;
+- compression may bring the eye to the head (minimum 0 m, was 0.02–0.55 m);
+- the courier turns to face the control heading instead of the walking
+  direction.
+
+This branch's later commits do not touch any camera file. Arrival after a
+teleport faces the gate through the same rig.
+
 **2. `c844e0b..667bd24`: this work (22 commits, 73 files)**
 
 The planned main planet:
