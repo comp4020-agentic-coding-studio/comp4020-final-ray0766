@@ -67,6 +67,7 @@ import type {TownResidentDefinition} from '../shared/town-residents.ts';
 import {createVillageDrawing} from './village-drawing.ts';
 import {arrivalViewScore} from './arrival-camera.ts';
 import { HomeSetup } from './home-setup.ts';
+import { TeleportStations } from './teleport-station.ts';
 import type {PhotoView} from './photo-mode.ts';
 
 initI18n();
@@ -103,6 +104,7 @@ let homeTransition=false;
 let photoMode:PhotoMode|undefined=undefined;let photoPaused=false;
 let homeControls: HomeControls | undefined;
 let homeSetup:HomeSetup|undefined;
+let teleportStations:TeleportStations|undefined;
 let activeRadius=14;let activePlanet = 'hub';let activeEnvironment:string|null=null;
 let worldPending=false,worldGeneration=0,requestedWorldKey='',renderedWorldKey='',renderedSurfaceKey='';
 let worldAbort:AbortController|null=null,worldFeedback:ReturnType<typeof beginSceneLoading>|null=null,pendingPlanet:PlanetView|null=null;
@@ -475,7 +477,7 @@ window.addEventListener('keydown',event=> {
   const key=event.key.toLowerCase();
   if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e','shift',' '].includes(key)) {
     event.preventDefault();if(key===' '&&event.repeat)return;if(key===' '&&!keys.has(key))jumpQueued=true;keys.add(key);target=null;
-    if(key==='e' && !event.repeat){if(homeControls?.canEnter)void homeControls.enter();else if(nearDock)flight?.openLaunch();else void interact();}
+    if(key==='e' && !event.repeat){if(homeControls?.canEnter)void homeControls.enter();else if(nearDock)flight?.openLaunch();else if(teleportStations?.canOpen){clearInput();teleportStations.open();}else void interact();}
   }
 });
 window.addEventListener('keyup',event=>keys.delete(event.key.toLowerCase()));
@@ -861,10 +863,11 @@ function animate(now:number) {
     }
     // Language controls pause movement while the existing conversation remains
     // readable and updates in place. Menus and scene transitions still close it.
-    nearResident=!scenePaused&&standing?.grounded&&!near&&!nearDock&&!homeControls?.canEnter?residents?.nearest(walker.up.toArray() as Vec3,standing.radius)??null:null;
+    teleportStations?.frame(walker.up.toArray() as Vec3,groundRadius(),!scenePaused&&!paused&&!nearDock&&!!standing?.grounded&&online&&state.flight.mode==='ground'&&state.location?.kind!=='interior'&&!colony?.building&&!homeTransition);
+    nearResident=!scenePaused&&standing?.grounded&&!near&&!nearDock&&!homeControls?.canEnter&&!teleportStations?.canOpen?residents?.nearest(walker.up.toArray() as Vec3,standing.radius)??null:null;
     renderer.domElement.dataset.nearResident=nearResident?.id??'';
     if(speakingResident){if(scenePaused||nearResident?.id!==speakingResident.id)closeResidentConversation();else renderResidentConversation();}
-    action.hidden=(!near&&!nearResident)||paused||nearDock;
+    action.hidden=(!near&&!nearResident)||paused||nearDock||!!teleportStations?.canOpen;
     if(near){delete action.dataset.residentPrompt;setHTML(action, (state.quest==='available'&&near==='mica'?'Collect the parcel':state.quest==='carrying'&&near==='sol'?'Deliver to Sol':`Talk to ${NPCS[near].name}`)+' <kbd>E</kbd>');setText($('nearby'), near==='mica'?'A little sunshine, ready to go.':'Something’s waiting to grow.');}
     else if(nearResident){
       const language=document.documentElement.lang.startsWith('zh')?'zh':'en';
@@ -913,11 +916,28 @@ function ensureColony() {
     }finally{homeTransition=false;}
   },apply:next=>{if(colony?.universe!==next)colony?.accept(next);},workshop:async()=>{await colony?.openHomeWorkshop();},pathPreview:planetId=>serial(()=>request<import('../shared/home-paths.ts').HomePathPreview>('home/paths/preview',{planetId})),previewPaths:objects=>{colony?.previewPaths(objects);if(objects.length){overview=true;setAttribute($('view-mode'),'aria-label','Walking view');setHTML($('view-mode'),'↗ <span>Walking view</span>');}},notice});
   homeSetup=new HomeSetup({preview:planetId=>serial(()=>request<import('../shared/home-setup.ts').HomeSetupPreview>('home/setup/preview',{planetId})),confirm:body=>serial(()=>request<Universe>('home/setup/confirm',body)),apply:next=>colony?.accept(next),ghost:addition=>{colony?.previewHome(addition);if(addition){overview=true;setAttribute($('view-mode'),'aria-label','Walking view');setHTML($('view-mode'),'↗ <span>Walking view</span>');}},notice});
+  teleportStations=new TeleportStations({
+    teleport:async(planetId,requestId)=>{
+      // Same ordering as entering a home: every walked step is saved before the gate is used.
+      homeTransition=true;
+      try{
+        await savePosition(true);if(!online)throw new Error('Offline · retrying');clearInput();clearGroundMotion();
+        const next=await changeVisit('teleport',{planetId,requestId,visitEpoch:state.location?.visitEpoch??0});
+        // Arrive facing the gate just used: the follow camera then sits over the open forecourt, not inside the ring.
+        const site=next.player.flight.mode==='ground'?teleportStations?.arrivalSite(next.player.position,activeRadius):null;
+        if(site&&walker){walker.north.set(...site.interact).sub(new T.Vector3(...site.arrival)).projectOnPlane(walker.up).normalize();walker.facing.copy(walker.north);started=false;}
+        guideDock=false;return next;
+      }finally{homeTransition=false;}
+    },
+    preview:planetId=>serial(()=>request<import('../shared/teleport.ts').TeleportStationPreview>('teleport/station/preview',{planetId})),
+    confirm:body=>serial(()=>request<Universe>('teleport/station/confirm',body)),
+    ghost:addition=>{colony?.previewHome(addition);if(addition){overview=true;setAttribute($('view-mode'),'aria-label','Walking view');setHTML($('view-mode'),'↗ <span>Walking view</span>');}},
+    apply:next=>{if(colony?.universe!==next)colony?.accept(next);},notice});
   flight=new SpaceFlight({canvas:renderer.domElement,renderer,online:()=>online,player:()=>state,checkpoint:body=>serial(()=>request('flight/checkpoint',body)),command:changeVisit,apply:accept,applyUniverse:u=>{if(colony?.universe!==u)colony?.accept(u);},flushGround:async()=>{await savePosition(true);await queue;},clearGround:()=>{clearInput();colony?.stopBuilding();},canBoard:()=>!sceneLoadingActive()&&!homeTransition&&state.location?.kind!=='interior'&&!!walker&&!!standing?.grounded&&!colony?.building&&distance(walker.up.toArray() as Vec3,portPoint(activePlanet),groundRadius())<BOARD_RADIUS-.12,failed,notice});
   flight.setDesign((state.ship??defaultShip()).design);flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=groundPresentation(activePlanet,activeRadius).environmentIntensity;
   colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,deferObjects:true,cameraCutaway:cameraCutawayB,
     applyPlayer:accept,
-    universe:u=>{homeSetup?.receive(u);homeControls?.receive(u);flight?.universe(u);prepareSurface(u.currentPlanet);},bearing:id=>flight?.mark(id),
+    universe:u=>{homeSetup?.receive(u);teleportStations?.receive(u);homeControls?.receive(u);flight?.universe(u);prepareSurface(u.currentPlanet);},bearing:id=>flight?.mark(id),
     obstacles:blocks=>{placedObstacles=blocks;if(activePlanet!=='hub')world.blocks.splice(0,world.blocks.length,...blocks);},
     pause:building=>{clearInput();overview=building;setAttribute($('view-mode'), 'aria-label', overview?'Walking view':'View planet');setHTML($('view-mode'), overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>');},
     libraryRead:()=>request<import('../shared/blueprints.ts').LibraryEntry[]>('blueprints'),librarySave:body=>serial(()=>request<import('../shared/blueprints.ts').LibraryEntry>('blueprints/save',body)),

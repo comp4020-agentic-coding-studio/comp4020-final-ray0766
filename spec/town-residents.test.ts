@@ -138,7 +138,7 @@ it('responds to E immediately after a menu closes before the next resident frame
     state: { quest: 'available', location: { kind: 'exterior' }, flight: { mode: 'ground' } },
     speakingResident: null, residentConversationKey: '', conversationUntil: 0,
     standing, walker: { up: new Vector3(...player) }, residents: crowd, camera, reduced: true, elapsed: 1,
-    near: null, nearDock: false, homeControls: null, homeInterior: null, homeTransition: false, photoPaused: false,
+    near: null, nearDock: false, homeControls: null, teleportStations: null, homeInterior: null, homeTransition: false, photoPaused: false,
     flight: null, colony: null, busy: false, online: true, world: { npcs: [] },
     sceneLoadingActive: () => false, keys, target: null, jumpQueued: false, residentDialogue,
     clearInput: () => keys.clear(),

@@ -1,0 +1,29 @@
+/* Teleport station: gate prompt, destination list and the owner's siting bar. */
+.teleport-prompt{bottom:92px}
+#teleport-dialog{width:min(620px,92vw);max-width:none;padding:32px 32px 22px}
+#teleport-dialog h2{font-size:32px;margin:8px 0 6px}
+#teleport-dialog>p{font-size:12px;margin:0 0 8px}
+.teleport-status{min-height:18px;font:12px/1.5 system-ui}
+.teleport-status.error{color:var(--ui-danger,#a23b2a);font-weight:600}
+.teleport-list{grid-template-columns:1fr;max-height:56vh}
+.teleport-option{grid-template-columns:52px 1fr auto}
+.teleport-option button{grid-column:auto;min-height:44px;min-width:118px;padding:8px 14px}
+.teleport-option.is-home,.teleport-option.is-hub{border-width:2px}
+.teleport-option.is-home{border-color:#6d8e71;background:#e2ead9}
+.teleport-option.is-hub{border-color:#b9975c;background:#efe7d6}
+.teleport-option.is-here{opacity:.72}
+.teleport-option p+p{margin-top:2px}
+#station-setup-dialog{max-width:430px}#station-setup-dialog button{margin:6px 6px 0 0;min-height:44px}
+.station-setup-bar{position:fixed;z-index:26;left:50%;bottom:28px;transform:translateX(-50%);width:min(560px,calc(100% - 32px));box-sizing:border-box;padding:16px 20px;border-radius:16px;background:#f4eddcef;color:#294b43;box-shadow:0 8px 30px #203d3028}
+.station-setup-bar p{font-size:13px;line-height:1.5}
+.station-setup-bar button{min-height:44px;margin:5px;border:1px solid #b9c3ae;border-radius:8px;padding:8px 12px;cursor:pointer}
+body.home-interior-active #teleport-prompt,.building #teleport-prompt,.in-space #teleport-prompt{display:none!important}
+@media(max-width:700px){
+  .teleport-prompt{left:auto;right:19px;bottom:101px;transform:none;align-items:flex-end;max-width:205px}
+  .teleport-prompt .primary{min-width:0;padding:15px 16px;font-size:11px}
+  .teleport-prompt kbd{display:none}
+  #teleport-dialog{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:24px 16px 14px}
+  #teleport-dialog h2{font-size:26px}
+  .teleport-option{grid-template-columns:40px 1fr;padding:12px}
+  .teleport-option button{grid-column:1/-1;min-width:0}
+}
