@@ -233,3 +233,42 @@ These are recorded in `teleport-stations.md` and
 - There is no teleport animation or sound.
 - Physical-phone performance, walk feel and camera review are the user's
   hand test.
+
+## Switched locally (2026-10-13)
+
+8098 serves this branch from `8020/final-workshop-v1`. Branch
+`final/workshop-v1` was fast-forwarded from `4f0d596` to `6a1142d`, then to
+the commit that adds this record, which changes documents only. Nothing is
+pushed or deployed.
+
+**Database**
+
+- Routine backup first: `.data/little-post.before-v15-20261013T025530.sqlite`
+  (integrity ok, schema 15).
+- The new server opened the existing `.data/little-post.sqlite` and migrated
+  it to schema 16.
+- It also wrote its own backup:
+  `.data/little-post.sqlite.v15-2026-10-12T15-56-48-617Z.backup.sqlite`.
+
+**Start**
+
+- Same directory, `DATABASE_PATH`, `HOST=127.0.0.1`, `PORT=8098` and
+  `NODE_ENV=production`, plus the plist's `NODE_OPTIONS=--max-old-space-size=150`.
+- Started in the background like the process it replaced.
+- The launchd job `local.little-worlds.preview-8098` was not running before
+  the switch and is unchanged.
+
+**Smoke test**
+
+Real Chrome, real input, no database edits.
+
+- Desktop:
+  - room in and out;
+  - workshop lists the portal part and the station example;
+  - walk to the home portal pad, teleport to the harbour and back;
+  - walk to the boarding ring, fly to the harbour and land in its ring.
+- Phone (Chinese):
+  - room in and out;
+  - walk to the pad, teleport both ways.
+- No failed request, no console error and no server error-log entry.
+- The server's resident memory was 221 MB after the smoke.

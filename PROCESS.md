@@ -482,3 +482,22 @@ The handoff note records:
 - where 207 (8098) and 220 (8134's preview) players come from.
 
 See [the handoff](docs/integration/candidate-handoff.md).
+
+## Local 8098 switched to the candidate (13 October 2026)
+
+With approval for a local switch only, I backed up the live database and
+fast-forwarded `final-workshop-v1` (a worktree of this repository). I then
+rebuilt it and restarted 8098 on the same database, which migrated to
+schema 16. I fetched nothing from outside. A stray iCloud duplicate ref
+blocked `git fetch` and `git bundle`; I went around it without touching
+it.
+
+A brief desktop and phone smoke with real controls passed:
+
+- room;
+- workshop;
+- home ⇄ harbour teleport;
+- boarding and flight.
+
+My walking script first stalled on a bench in a home square; I taught it
+to sidestep. No push or deployment.
