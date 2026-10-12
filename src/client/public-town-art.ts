@@ -15,6 +15,9 @@ import type {TownRendererOptions,TownRenderPreparation} from './town-renderer.ts
 import {builtObject,disposeGeometry} from './build-art.ts';
 import {buildStructureFinish} from './structure-finish.ts';
 import type {GroundFit} from '../assets/claude-geometry/core/ground.ts';
+import {createTownRoadSurfaces} from './town-road-surfaces.ts';
+import {mainPlanetNetwork} from '../shared/planet-plan/main-planet.ts';
+import {isPlannedMainPlanet} from '../shared/planet-plan/paving-grade.ts';
 
 /** The public town and its orbital view build the same ordinary saved parts.
  * Only drawing detail varies; there are no stand-in towers or extra buildings. */
@@ -72,6 +75,8 @@ function prepareTownOptions(village:SamplePublicVillage,radius:number,options:Pu
     for(const material of glows.values())material.dispose();glows.clear();
     libraries.low.dispose();libraries.medium.dispose();
   }
+  // Continuous streets of the planned main planet share the town's medium palette.
+  const roads=isPlannedMainPlanet(radius)?createTownRoadSurfaces({network:mainPlanetNetwork(),field,library:libraries.medium,lod:options.mediumCacheChunks===0?'low':'medium'}):null;
   const occluderRadius=Math.min(radius-1.45,...[...fits.values()].map(f=>f.baseRadius-.01))-.02;
   const cameraCutawayParts=options.cameraCutaway?village.objects.flatMap(object=>object.kind==='structure'
     ?cameraBlueprintRegistry(object,village.blueprints[object.blueprintHash!],fits.get(object.id)!):[]):[];
@@ -101,19 +106,21 @@ function prepareTownOptions(village:SamplePublicVillage,radius:number,options:Pu
       object.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),normal);object.rotateY(o.rotation);
       return {object,dispose(){disposeGeometry(object);}};
     },...options};
-  return {configured,disposeResources,initialFitMs};
+  return {configured,disposeResources,initialFitMs,roads};
 }
 function ownTown(town:ReturnType<typeof createTownRenderer>,prepared:ReturnType<typeof prepareTownOptions>){
-  const {disposeResources,initialFitMs}=prepared;
+  const {disposeResources,initialFitMs,roads}=prepared;
+  if(roads)town.root.add(roads.object);
+  const roadStats=roads?{roadTriangles:roads.triangles,roadDrawCalls:roads.drawCalls}:{};
   let disposed=false;
-  const result={...town,stats:()=>({...town.stats(),initialFitMs}),
-    update:(...args:Parameters<typeof town.update>)=>({...town.update(...args),initialFitMs}),dispose(){if(disposed)return;disposed=true;town.dispose();disposeResources();}};
+  const result={...town,stats:()=>({...town.stats(),initialFitMs,...roadStats}),
+    update:(...args:Parameters<typeof town.update>)=>({...town.update(...args),initialFitMs,...roadStats}),dispose(){if(disposed)return;disposed=true;roads?.object.removeFromParent();roads?.dispose();town.dispose();disposeResources();}};
   result.root.userData.disposeOwned=result.dispose;return result;
 }
 export function createPublicTownArt(village:SamplePublicVillage,radius:number,options:PublicTownOptions={}){
   const prepared=prepareTownOptions(village,radius,options);
   try{return ownTown(createTownRenderer(prepared.configured),prepared);}
-  catch(error){prepared.disposeResources();throw error;}
+  catch(error){prepared.roads?.dispose();prepared.disposeResources();throw error;}
 }
 export async function createPublicTownArtAsync(village:SamplePublicVillage,radius:number,options:PublicTownOptions={},preparation:TownRenderPreparation & {onGroundProgress?:(done:number,total:number)=>void}={}){
   const yieldFrame=preparation.yieldFrame??(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>resolve())));
@@ -123,5 +130,5 @@ export async function createPublicTownArtAsync(village:SamplePublicVillage,radiu
   // this Map used to repeat all blueprint footprints in one synchronous task.
   const prepared=prepareTownOptions(village,radius,options,warm.fits);
   try{return ownTown(await createTownRendererAsync(prepared.configured,{...preparation,yieldFrame}),prepared);}
-  catch(error){prepared.disposeResources();throw error;}
+  catch(error){prepared.roads?.dispose();prepared.disposeResources();throw error;}
 }

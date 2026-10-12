@@ -16,6 +16,11 @@ import {icosphere} from '../assets/claude-geometry/terrain/icosphere.ts';
 import {floraModel,floraTriangles} from '../assets/claude-geometry/terrain/flora.ts';
 import { PRESENTATION } from './presentation.ts';
 import { objectRadius } from '../shared/planets.ts';
+import { isPlannedMainPlanet, pavingGrade } from '../shared/planet-plan/paving-grade.ts';
+import { mainPlanetNetwork } from '../shared/planet-plan/main-planet.ts';
+import { PUBLIC_TOWN_ENVIRONMENT } from '../shared/public-town-layout.ts';
+/** The planned main planet's streets: drawn ground graded under them, flora kept off (render only). */
+const paving=(environment:string,radius:number,field:TerrainField)=>isPlannedMainPlanet(radius)&&environment===PUBLIC_TOWN_ENVIRONMENT?pavingGrade(mainPlanetNetwork(),field):null;
 interface PreparedTerrain {field:TerrainField;kit:TerrainKit;foundations:ReturnType<typeof foundations>}
 export interface TerrainModelPreparation {
  signal?:AbortSignal;yieldFrame:()=>Promise<void>;budgetMs?:number;onProgress?:(done:number,total:number)=>void;
@@ -25,8 +30,9 @@ export function terrainModel(environment:string,objects:readonly PlacedObject[]=
  const field=prepared?.field??fieldOf(environment,radius) as TerrainField,kit=prepared?.kit??new TerrainKit(lod,{look:PRESENTATION.materials.look});
  // v1/v2 route documents remain readable historical/navigation metadata. Only
  // actual placed objects can clear flora or grade terrain, just as in Colony.
- const clearings=objects.map(o=>({dir:o.position,radius:objectRadius(o)+.2}));
- const model=buildPlanet(field.env,null,lod,{kit,field,foundations:prepared?.foundations??foundations(field,objects,blueprints),clearings});
+ const streets=paving(environment,radius,fieldOf(environment,radius) as TerrainField);
+ const clearings=[...objects.map(o=>({dir:o.position,radius:objectRadius(o)+.2})),...(streets?.clearings??[])];
+ const model=buildPlanet(field.env,null,lod,{kit,field,foundations:[...(prepared?.foundations??foundations(field,objects,blueprints)),...(streets?.foundations??[])],clearings});
  try{
  const adaptedAt=performance.now();
  if(radius!==10){

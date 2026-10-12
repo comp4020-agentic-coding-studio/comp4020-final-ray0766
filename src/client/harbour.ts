@@ -23,6 +23,11 @@ import type {Obstacle} from './scene.ts';
 import {terrainModel} from './terrain-model.ts';
 import {buildStructureFinish} from './structure-finish.ts';
 import {createPublicTownArt} from './public-town-art.ts';
+import {MAIN_PLANET_LEDGER} from '../shared/planet-plan/main-planet.ts';
+import {yawFacing,tangent} from '../shared/planet-plan/sphere.ts';
+import type {V3} from '../shared/planet-plan/sphere.ts';
+/** The planned planet turns the two task characters towards their street. */
+function npcFacingYaw(id:NpcId):number{const at=NPCS[id].position as V3,toward=MAIN_PLANET_LEDGER.npcFacing[id] as V3;return yawFacing(at,tangent(at,[toward[0]-at[0],toward[1]-at[1],toward[2]-at[2]]));}
 
 export function createHarbour(scene:T.Scene,village:SamplePublicVillage|null=null,preparedTown?:ReturnType<typeof createPublicTownArt>,preparedTerrain?:ReturnType<typeof terrainModel>){
  const radius=groundRadius(),p=harbourMaterials(),scenery=new T.Group(),blocks:Obstacle[]=[];scene.add(scenery);
@@ -58,7 +63,7 @@ export function createHarbour(scene:T.Scene,village:SamplePublicVillage|null=nul
  const dock=anchor(scene,HUB_DOCK),parked=makeShip(),shipAnchor=anchor(scene,HUB_SHIP);shipAnchor.add(parked.root);parked.root.position.y=1.25;parked.animate(0,false);
  blocks.push({point:new T.Vector3(...HUB_SHIP),radius:2.1,height:2.5});
  const flowers=new T.Group();scene.add(flowers);
- const npcs=(Object.keys(NPCS) as NpcId[]).map(id=>{const a=anchor(scene,NPCS[id].position),avatar=courier(id);a.add(avatar.root);avatar.root.rotation.y=id==='mica'?-Math.PI/2:Math.PI/2;const beacon=mesh(a,new T.BoxGeometry(.18,.13,.035),p.pale,[0,1.9,0],false);return{id,anchor:a,avatar,beacon};});
+ const npcs=(Object.keys(NPCS) as NpcId[]).map(id=>{const facing=village?npcFacingYaw(id):null,a=anchor(scene,NPCS[id].position,facing??0),avatar=courier(id);a.add(avatar.root);avatar.root.rotation.y=facing!==null?0:id==='mica'?-Math.PI/2:Math.PI/2;const beacon=mesh(a,new T.BoxGeometry(.18,.13,.035),p.pale,[0,1.9,0],false);return{id,anchor:a,avatar,beacon};});
   // Preserve the established static material batching, without model ink callbacks.
   function bake(root:T.Group){
     const freed=new Set<T.BufferGeometry>(),ink:T.Object3D[]=[];root.traverse(o=>{if((o.name==='ink-shell'||o.name==='ink-lines')&&!o.userData.publicSilhouette)ink.push(o);});

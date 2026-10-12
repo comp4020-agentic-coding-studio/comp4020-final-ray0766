@@ -27,7 +27,7 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
     // Keep valid poses through door changes and physics upgrades, including airborne saves.
     // Public furnishings may invalidate a spot; removed supports must fall.
     const support=w.support(start.position,start.radius+.26);
-    const preserve=old&&([3,4,5,6,7].includes(old.physics_version)||(r.planet_id==='hub'&&old.physics_version===8))&&old.planet_id===r.planet_id&&old.position===r.position&&!w.blocked(start)&&(!start.grounded||Math.abs(support.radius-start.radius)<.025);
+    const preserve=old&&([3,4,5,6,7].includes(old.physics_version)||(r.planet_id==='hub'&&[8,9].includes(old.physics_version)))&&old.planet_id===r.planet_id&&old.position===r.position&&!w.blocked(start)&&(!start.grounded||Math.abs(support.radius-start.radius)<.025);
     const safe=preserve?start:w.recover(start),changed=distance(safe.position,JSON.parse(r.position))>.00001;
     db.exec('BEGIN IMMEDIATE');try{
       write(id,safe,(old?.sequence??-1)+1,w.revision,.1,null,r.planet_id);

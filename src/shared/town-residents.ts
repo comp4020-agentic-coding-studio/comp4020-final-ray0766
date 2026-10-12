@@ -1,5 +1,5 @@
 import type { Quest, Vec3 } from './world.ts';
-import { townPlacePlans } from './town-place-layout.ts';
+import { MAIN_PLANET_LEDGER, MAIN_PLANET_PLAN } from './planet-plan/main-planet.ts';
 
 export type ResidentLanguage = 'en' | 'zh';
 export interface ResidentText { en: string; zh: string }
@@ -18,80 +18,12 @@ export const RESIDENT_INTERACT_DISTANCE = 2.2;
 export const RESIDENT_INTERACT_HEIGHT = .65;
 const text = (en: string, zh: string): ResidentText => ({ en, zh });
 export interface TownResidentSite extends TownResidentAnchor { place: string }
-/** Version 10 inhabitants are authored in the same world directions as their
- * street fronts and ordinary worksite fixtures. Keep these exact anchors when
- * registering the public ledger; projecting the former place-local coordinates
- * into the new blocks embeds residents in walls and breaks their short routes. */
-export const TOWN_RESIDENT_SITES: Readonly<Record<string, TownResidentSite>> = {
-  'ada-shop': { place: 'arcades',
-    position: [0.2479390364492368, 0.1721058588641231, -0.9533655162366983],
-    facing: [0.24729755115928417, 0.20841480831923032, -0.946259577950934],
-  },
-  'ivo-repair': { place: 'harbour',
-    position: [-0.1634733064816717, 0.6835558940809874, -0.7113563226225598],
-    facing: [-0.16205685493349833, 0.658997932030108, -0.7344789318619726],
-  },
-  'nell-garden': { place: 'orchard',
-    position: [-0.12393017560107933, 0.9455121644601071, -0.30107816000741205],
-    facing: [-0.1674137842095854, 0.9391922505660744, -0.29981751338649093],
-  },
-  'pax-courier': { place: 'post',
-    position: [0.1838807612850638, 0.9780734501299652, -0.09777623320670485],
-    facing: [0.18358453580557924, 0.9746792531430093, -0.12765998474712317],
-  },
-  'market-basket': { place: 'arcades',
-    position: [0.3737294256295344, -0.29459908057913076, -0.8795099192962801],
-    facing: [0.4536057859045378, -0.30489686166012475, -0.8374244412146885],
-    route: [[0.3737294256295344, -0.29459908057913076, -0.8795099192962801], [0.4536057859045378, -0.30489686166012475, -0.8374244412146885], [0.5145095829976322, -0.3125877608287295, -0.7984790421693506]],
-  },
-  'market-chat-a': { place: 'arcades',
-    position: [0.7930793226860644, 0.10279202889103559, -0.6003823670997325],
-    facing: [0.8281673071904531, 0.09720491351097599, -0.5519874238515201],
-  },
-  'market-chat-b': { place: 'arcades',
-    position: [0.8281673071904531, 0.09720491351097599, -0.5519874238515201],
-    facing: [0.7930793226860644, 0.10279202889103559, -0.6003823670997325],
-  },
-  'repair-apprentice': { place: 'craft',
-    position: [0.5386474237821101, 0.19795043796725473, 0.8189472369826201],
-    facing: [0.533772910616922, 0.23085975845744702, 0.8135049181268104],
-  },
-  'harbour-porter': { place: 'harbour',
-    position: [-0.014879428023003988, 0.4352112690743509, -0.9002053953917413],
-    facing: [0.07428542339372284, 0.4319072124610249, -0.8988536230640461],
-    route: [[-0.014879428023003988, 0.4352112690743509, -0.9002053953917413], [0.07428542339372284, 0.4319072124610249, -0.8988536230640461]],
-  },
-  'garden-helper': { place: 'garden-steps',
-    position: [-0.6507169617675816, -0.7352559647759174, -0.1896473093123203],
-    facing: [-0.6832136071388427, -0.705744454691985, -0.18746714830029224],
-  },
-  'garden-reader': { place: 'orchard',
-    position: [-0.3551400282823416, 0.8776622000984252, -0.32184565063087206],
-    facing: [-0.29517114988964804, 0.8987445370820921, -0.3242410358636285],
-  },
-  'post-walker': { place: 'post',
-    position: [0.7721238762672893, 0.42372946990051186, -0.47358004184700075],
-    facing: [0.8216675135853841, 0.40444998616291866, -0.4016001815378418],
-    route: [[0.7721238762672893, 0.42372946990051186, -0.47358004184700075], [0.8216675135853841, 0.40444998616291866, -0.4016001815378418]],
-  },
-  'court-reader': { place: 'courts',
-    position: [-0.6543700968645082, 0.2669800731308285, -0.7074753825261993],
-    facing: [-0.5955708169246164, 0.26621813717296955, -0.7579071878982937],
-  },
-  'court-neighbour': { place: 'wash-court',
-    position: [0.558098519103941, -0.5953206345742699, 0.5780306090719389],
-    facing: [0.5136423773980164, -0.6114394578410335, 0.6019246610133004],
-  },
-  'south-walker': { place: 'south-lane',
-    position: [-0.12039450220583602, -0.7893885353891533, 0.6019725110291801],
-    facing: [-0.11732946172727586, -0.720909520294057, 0.6830250807694989],
-    route: [[-0.12039450220583602, -0.7893885353891533, 0.6019725110291801], [-0.11732946172727586, -0.720909520294057, 0.6830250807694989]],
-  },
-  'south-maker': { place: 'timber-yard',
-    position: [0.34165920087191937, -0.6072902891431428, -0.7172638950707052],
-    facing: [0.34462204714778755, -0.580618032862566, -0.7376437788895616],
-  },
-};
+/** v12 inhabitants stand where the planned main planet places them
+ * (src/shared/planet-plan/main-planet.plan.json residents): beside a lot's door
+ * path, at a street edge, or walking a short stretch of paving. */
+export const TOWN_RESIDENT_SITES: Readonly<Record<string, TownResidentSite>> = Object.fromEntries(MAIN_PLANET_LEDGER.residents.map(r => [r.id, {
+  place: r.place, position: r.position as Vec3, facing: r.facing as Vec3 | undefined, route: r.route as Vec3[] | undefined,
+}]));
 export function townResidentAnchors(): Record<string, TownResidentAnchor> {
   return Object.fromEntries(Object.entries(TOWN_RESIDENT_SITES).map(([id, site]) => [id, {
     position: [...site.position] as Vec3,
@@ -122,7 +54,7 @@ const profiles: readonly ResidentProfile[] = [
 ];
 
 export function townResidents(anchors: Readonly<Record<string, TownResidentAnchor>> = TOWN_RESIDENT_ANCHORS): TownResidentDefinition[] {
-  const places = new Map(townPlacePlans().map(place => [place.id, place]));
+  const places = new Map(MAIN_PLANET_PLAN.districts.map(place => [place.id, place]));
   return profiles.flatMap((profile, index) => {
     const anchor = anchors[profile.id];
     const place = places.get(TOWN_RESIDENT_SITES[profile.id]?.place);
