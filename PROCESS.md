@@ -339,3 +339,31 @@ previously reproduced on an unchanged baseline. Two obsolete catalogue/lighting
 assertions were updated without weakening production behavior. Typecheck, lint,
 build and evidence checks passed. See [the R8 record](docs/integration/r8-workshop.md).
 No student reflection, independent source-workspace edits or public deployment.
+
+## Planned main planet v12: local redesign (12 October 2026)
+
+Reworked the public hub from one plan. The v11 town had density but no
+street hierarchy. Its roads were 271 flat deck packs that rose 15 cm at
+their edges on the sphere, and buildings crowded the walking width. The
+plan now holds streets, plazas, lots, frontage runs, planting and
+residents. A generator places buildings by measured footprint and eave
+setbacks, joins each entrance to the paving and reports conflicts by
+position. The game loads the frozen ledger. Streets are continuous
+draped meshes with kerbs on the main streets, and the ground is graded
+under them for drawing only. Seventeen appended workshop parts include a
+two-cell long gable roof, which gives four-deep houses a ridge. Nineteen
+public compositions became workshop examples.
+
+The first browser pass showed grass covering the main street lane. A
+string replacement in the terrain adapter had silently failed, so the
+render grading never reached the mesh. I fixed it and rechecked in a
+street-only debug page and in Chrome. The kit collider coverage test
+failed for six new parts. I fitted the colliders to the meshes and
+raised the shop noren above head height instead of exempting the
+parts. While I was injecting sentinel bugs, a `git checkout` restore
+also discarded uncommitted collider and plan edits. I reapplied them
+from the session record and confirmed the plan's content hash matched
+the pre-loss value. Typecheck, build and 193 related tests pass. The
+full lint still fails on imported camera files I did not change. See
+[the v12 record](docs/integration/planned-main-planet-v12.md). No push,
+deployment or 8098 change.
