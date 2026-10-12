@@ -1,10 +1,13 @@
 import { afterEach, expect, inject, it } from 'vitest';
-import { copyFileSync, mkdtempSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { HeavyWork, PAUSED } from '../src/server/heavy-work.ts';
 import { openStore } from '../src/server/store.ts';
+import { workerScript } from '../src/server/worker-script.ts';
 
 // One player's arrival must not hold everyone else's movement and presence:
 // new homes and station searches run on a worker thread, and the server
@@ -84,6 +87,37 @@ parentPort.on('message', ({ id, kind, input }) => { if (kind !== 'home') process
   const hash = stationHash(inline, a.planetId);
   expect(saved(prepared, b.planetId)).toEqual(saved(inline, a.planetId).filter(o => o.hash !== hash));
   expect(prepared.db.prepare('SELECT 1 FROM home_stations WHERE planet_id=?').get(b.planetId)).toBeUndefined();
+});
+
+it('prepares exactly the same arrival with the bundled JavaScript worker', async () => {
+  // The bundle is built here, so this does not depend on a prior pnpm build.
+  const out = relative(process.cwd(), mkdtempSync(join(tmpdir(), 'worker-bundle-')));
+  execFileSync(process.execPath, ['scripts/build-worker.ts', out], { stdio: 'ignore' });
+  const script = workerScript(process.cwd(), out);
+  expect(script.bundled).toBe(true);
+  const [inline, prepared] = twins(), id = 'bundled-arrival';
+  const a = inline.create(id);
+  const bundled = new HeavyWork({ script: script.url }); workers.push(bundled);
+  prepared.useHeavyWork(bundled);
+  const b = await prepared.createPrepared(id);
+  expect(b.position).toEqual(a.position);
+  expect(saved(prepared, b.planetId)).toEqual(saved(inline, a.planetId));
+  expect(history(prepared, b.planetId)).toEqual(history(inline, a.planetId));
+  expect(station(prepared, b.planetId)).toEqual(station(inline, a.planetId));
+}, 60_000);
+
+it('uses the bundled worker only while every source that went into it is unchanged', () => {
+  const root = mkdtempSync(join(tmpdir(), 'worker-root-')), source = join(root, 'src', 'a.ts');
+  mkdirSync(join(root, 'src')); mkdirSync(join(root, 'build', 'worker'), { recursive: true });
+  expect(workerScript(root)).toMatchObject({ bundled: false, reason: 'no bundled worker was built' });
+  writeFileSync(source, 'export const a = 1;');
+  const hash = createHash('sha256').update('src/a.ts').update('\0').update(readFileSync(source)).update('\0').digest('hex');
+  writeFileSync(join(root, 'build', 'worker', 'heavy-worker.json'), JSON.stringify({ entry: 'heavy-worker.mjs', inputs: ['src/a.ts'], hash }));
+  expect(workerScript(root).bundled).toBe(true);
+  writeFileSync(source, 'export const a = 2;');
+  expect(workerScript(root)).toMatchObject({ bundled: false, reason: 'the bundled worker is older than its sources' });
+  rmSync(source);
+  expect(workerScript(root)).toMatchObject({ bundled: false, reason: 'a source of the bundled worker is missing' });
 });
 
 it('shares one job between requests for the same key, reports worker failures and turns work away beyond its queue', async () => {

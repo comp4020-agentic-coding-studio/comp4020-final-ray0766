@@ -12,6 +12,7 @@ WORKDIR /app
 ENV NODE_ENV=production PORT=8080 DATABASE_PATH=/data/little-post.sqlite NODE_OPTIONS=--max-old-space-size=150
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/build ./build
 COPY --from=build /app/src/server ./src/server
 COPY --from=build /app/src/shared ./src/shared
 COPY --from=build /app/src/assets ./src/assets

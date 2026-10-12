@@ -4,6 +4,7 @@
 .git
 node_modules
 dist
+build
 *.log
 .env
 .env.*

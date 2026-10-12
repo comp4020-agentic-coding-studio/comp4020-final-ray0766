@@ -10,7 +10,7 @@
     "test": "vitest run",
     "dev": "vite",
     "dev:server": "node --watch src/server/index.ts",
-    "build": "vite build",
+    "build": "vite build && node scripts/build-worker.ts",
     "start": "node src/server/index.ts",
     "lint": "eslint .",
     "test:browser": "playwright test"

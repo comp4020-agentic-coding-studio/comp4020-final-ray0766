@@ -1,6 +1,7 @@
 node_modules
 node_modules [0-9]*
 dist/
+build/
 *.log
 
 # editor and OS junk

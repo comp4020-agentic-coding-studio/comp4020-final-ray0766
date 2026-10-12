@@ -8,6 +8,7 @@ import { presenceStore } from './presence.ts';
 import { openStore, RequestError } from './store.ts';
 import { integratedStartup } from './launch-options.ts';
 import { HeavyWork } from './heavy-work.ts';
+import { workerScript } from './worker-script.ts';
 
 const homeSample=process.env.HOME_SAMPLE==='1';
 const samplePort=Number(process.env.HOME_SAMPLE_PORT??8126);
@@ -23,7 +24,9 @@ const presence=presenceStore(store.state);
 // New homes, station searches and other planets' ground are prepared on a worker thread, so one
 // player's arrival never holds everyone else's movement and presence. The harbour is built now,
 // before the server takes requests.
-const heavy=new HeavyWork();store.useHeavyWork(heavy);
+const worker=workerScript();
+if(!worker.bundled)console.warn(`Preparing worlds with the TypeScript worker: ${worker.reason}. Run pnpm build for the bundled one.`);
+const heavy=new HeavyWork({script:worker.url});store.useHeavyWork(heavy);
 try{store.warmGround('hub');}catch(error){console.error('The harbour ground could not be prepared at startup:',error instanceof Error?error.message:error);}
 const root = resolve('dist');
 const limits = new Map<string, { start: number; count: number }>();
