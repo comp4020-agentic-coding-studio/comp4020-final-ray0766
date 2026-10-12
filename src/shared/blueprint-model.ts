@@ -1,4 +1,4 @@
-import { isHostPartId, isWideDoorPartId, isWideEntryPartId, PARTS } from './blueprint-parts.ts';
+import { hostSecondCell, isHostPartId, isWideDoorPartId, isWideEntryPartId, PARTS } from './blueprint-parts.ts';
 import type { PartId } from './blueprint-parts.ts';
 import * as legacy from '../assets/claude-geometry/blueprint/model.ts';
 import { wideDoorClearanceIssues } from './blueprint-wide-door-clearance.ts';
@@ -11,11 +11,13 @@ export const toVendorPart = (part: PartPlacement) => part as legacy.PartPlacemen
 export const toVendorParts = (parts: readonly PartPlacement[]) => parts as readonly legacy.PartPlacement[];
 export const toVendorBlueprint = (blueprint: Blueprint) => blueprint as legacy.Blueprint;
 
-/** Second edge lies along local +X. Proxies are confined to rule evaluation:
+/** Second cell along local +X (wide doors/steps) or behind along local −Z (long
+ * roofs and their verges). Proxies are confined to rule evaluation:
  * never in documents, geometry, counts, budgets, hashes or saved groups. */
 function ruleParts(part: PartPlacement): legacy.PartPlacement[] {
-  if (!isHostPartId(part.part)) return [toVendorPart(part)];
-  const [dx, dz] = legacy.rotDir(part.rot + 1);
+  const second = hostSecondCell(part.part);
+  if (!second) return [toVendorPart(part)];
+  const [dx, dz] = legacy.rotDir(part.rot + (second === 'side' ? 1 : 2));
   return [toVendorPart(part), { ...toVendorPart(part), n: -part.n, x: part.x + dx, z: part.z + dz }];
 }
 const projected = (parts: readonly PartPlacement[]) => parts.flatMap(ruleParts);
@@ -66,6 +68,10 @@ export class Layout {
   }
   supportProblem(p: PartPlacement): string | null {
     if (isWideEntryPartId(p.part)) return ruleParts(p).every(proxy => !this.source.supportProblem(proxy)) ? null : 'Wide entrance steps need a ground-floor deck behind both cells.';
+    if (hostSecondCell(p.part) === 'back') {
+      const problem = ruleParts(p).map(proxy => this.source.supportProblem(proxy)).find(Boolean);
+      return problem ? `${problem.replace(/\.$/, '')} (both cells of this two-cell roof part).` : null;
+    }
     if (isWideDoorPartId(p.part)) {
       const floors = ruleParts(p).every(cell => {
         const floor = this.at(`deck ${cell.x},${cell.z} L${cell.level}`);

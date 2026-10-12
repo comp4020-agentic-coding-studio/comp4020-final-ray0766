@@ -2,6 +2,7 @@ import type {PartId} from '../blueprint-parts.ts';
 import { wideDoorEnvelope } from '../wide-door.ts';
 import { wideEntryEnvelope } from '../wide-entry.ts';
 import type {Vec3} from '../world.ts';
+import {VILLAGE_KIT_PARTS} from '../village-kit/parts.ts';
 
 /** Source 14e244f, union of actual high/medium/low village geometry, rounded
  * outward to 0.1 mm. Appearance/placement bounds, never walking surfaces.
@@ -55,4 +56,5 @@ export const VILLAGE_PART_BOUNDS:Record<PartId,{min:Vec3;max:Vec3}>={
   'sign.blank': {min:[-0.03,1.62,-0.48],max:[0.03,1.91,-0.09]},
   'sign.mail': {min:[-0.03,1.62,-0.48],max:[0.03,1.91,-0.09]},
   'sign.cup': {min:[-0.03,1.62,-0.48],max:[0.03,1.91,-0.09]},
+  ...Object.fromEntries(VILLAGE_KIT_PARTS.map(p=>[p.id,{min:[...p.envelope.min] as Vec3,max:[...p.envelope.max] as Vec3}])) as Record<import('../village-kit/parts.ts').VillageKitId,{min:Vec3;max:Vec3}>,
 };

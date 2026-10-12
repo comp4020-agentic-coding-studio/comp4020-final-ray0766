@@ -4,6 +4,7 @@ import { wideDoorFrame, wideDoorLeaves } from '../wide-door.ts';
 import { wideEntryBoxes } from '../wide-entry.ts';
 import { homeDoorLeaves } from '../home-door.ts';
 import { VILLAGE_PART_BOUNDS } from './village-bounds.ts';
+import { VILLAGE_KIT_PARTS } from '../village-kit/parts.ts';
 import type { Vec3 } from '../world.ts';
 
 /** Physics 7: authored village proxies in metres, +Y up, +Z exterior.
@@ -78,6 +79,9 @@ function verge(side:number):PartBox[]{
   return between('roof verge',[side<0?-.58:.5,-.226,z],[side<0?-.5:.58,z<-.35?.675:top,z+step]);});
 }
 const added=Object.fromEntries(PART_IDS.slice(21).map(id=>[id,()=>suggested(id)])) as Record<PartId,()=>PartBox[]>;
+// R12 village kit: authored proxies; a hooded door keeps the open door's own frame and leaves.
+for(const kit of VILLAGE_KIT_PARTS)added[kit.id]=()=>kit.colliders.map(c=>({tag:c.tag,center:[...c.center] as Vec3,half:[...c.half] as Vec3,support:!!c.support,...(c.pitch?{pitch:c.pitch}:{})}));
+added['wall.door.hooded']=()=>[...door(true),...VILLAGE_KIT_PARTS.find(p=>p.id==='wall.door.hooded')!.colliders.map(c=>({tag:c.tag,center:[...c.center] as Vec3,half:[...c.half] as Vec3,support:false}))];
 added['roof.slope.hip']=()=>cornerRoof(true);added['roof.slope.valley']=()=>cornerRoof(false);
 added['roof.verge.left']=()=>verge(-1);added['roof.verge.right']=()=>verge(1);
 // Furniture no longer keeps the old high chair backs/table top as air walls.
