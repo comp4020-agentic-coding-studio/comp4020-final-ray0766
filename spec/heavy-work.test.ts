@@ -1,8 +1,9 @@
 import { afterEach, expect, inject, it } from 'vitest';
 import { copyFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { HeavyWork } from '../src/server/heavy-work.ts';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { HeavyWork, PAUSED } from '../src/server/heavy-work.ts';
 import { openStore } from '../src/server/store.ts';
 
 // One player's arrival must not hold everyone else's movement and presence:
@@ -42,15 +43,47 @@ it('prepares a new home and its station on the worker with exactly the result of
   expect(station(prepared, b.planetId).status).toBe('placed');
 });
 
-it('still welcomes a new player, home and station included, when the worker cannot run', async () => {
-  const [inline, prepared] = twins(), id = 'arrival-without-worker';
-  const a = inline.create(id);
-  const broken = new HeavyWork({ script: new URL('data:text/javascript,throw new Error("The worker could not start.")') }); workers.push(broken);
+it('turns a new player away with a 503 and writes nothing when the worker fails, then pauses instead of retrying it', async () => {
+  const [inline, prepared] = twins(), free = inline.create('reference').planetId;
+  const broken = new HeavyWork({ pauseMs: 300, script: new URL('data:text/javascript,throw new Error("The worker could not start.")') }); workers.push(broken);
   prepared.useHeavyWork(broken);
+  await expect(prepared.createPrepared('turned-away')).rejects.toMatchObject({ status: 503 });
+  // Nothing half-made: no player, the planet still unclaimed and untouched.
+  expect(prepared.has('turned-away')).toBe(false);
+  expect(prepared.db.prepare('SELECT owner_id FROM planets WHERE id=?').get(free)!.owner_id).toBeNull();
+  expect(saved(prepared, free)).toEqual([]);
+  expect(broken.starts).toBe(1);
+  // Retrying at once is refused without starting the worker again.
+  await expect(prepared.createPrepared('turned-away')).rejects.toMatchObject({ status: 503, message: PAUSED });
+  expect(broken.starts).toBe(1);
+  // After the pause (300 ms) the worker is tried once more; the next pause is twice as long.
+  await new Promise(resolve => setTimeout(resolve, 350));
+  await expect(prepared.createPrepared('turned-away')).rejects.toMatchObject({ status: 503 });
+  expect(broken.starts).toBe(2);
+  await new Promise(resolve => setTimeout(resolve, 350));
+  await expect(prepared.createPrepared('turned-away')).rejects.toMatchObject({ status: 503, message: PAUSED });
+  expect(broken.starts).toBe(2);
+  expect(prepared.has('turned-away')).toBe(false);
+});
+
+it('keeps a new home complete when only its station search fails, and leaves the station for a later visit', async () => {
+  const [inline, prepared] = twins(), id = 'station-later';
+  const a = inline.create(id);
+  // A worker that makes homes but stops on any station search.
+  const generator = pathToFileURL(resolve('src/shared/home-generation.ts')).href;
+  const script = new URL('data:text/javascript,' + encodeURIComponent(`import { parentPort } from 'node:worker_threads';
+const { generateHomeManifest } = await import(${JSON.stringify(generator)});
+parentPort.on('message', ({ id, kind, input }) => { if (kind !== 'home') process.exit(3); parentPort.postMessage({ id, value: generateHomeManifest(input.radius, input.seed, input.environment ?? undefined), fits: [] }); });`));
+  const halfway = new HeavyWork({ script }); workers.push(halfway);
+  prepared.useHeavyWork(halfway);
   const b = await prepared.createPrepared(id);
-  expect(b.planetId).toBe(a.planetId);
-  expect(saved(prepared, b.planetId)).toEqual(saved(inline, a.planetId));
-  expect(station(prepared, b.planetId)).toEqual(station(inline, a.planetId));
+  expect(b.home).toBeTruthy();
+  expect(b.position).toEqual(a.position);
+  // Every home object is there; only the station, and its receipt, are not yet.
+  const stationHash = (s: Store, planetId: string) => s.db.prepare('SELECT o.blueprint_hash AS hash FROM home_stations h JOIN planet_objects o ON o.id=h.object_id WHERE h.planet_id=?').get(planetId)!.hash;
+  const hash = stationHash(inline, a.planetId);
+  expect(saved(prepared, b.planetId)).toEqual(saved(inline, a.planetId).filter(o => o.hash !== hash));
+  expect(prepared.db.prepare('SELECT 1 FROM home_stations WHERE planet_id=?').get(b.planetId)).toBeUndefined();
 });
 
 it('shares one job between requests for the same key, reports worker failures and turns work away beyond its queue', async () => {

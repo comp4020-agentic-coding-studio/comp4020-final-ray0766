@@ -24,6 +24,7 @@ import { GroundPresence } from './presence.ts';
 import { PresenceVisitGate } from './presence-visit.ts';
 import { canAcceptPlayer, isDoorOnlyRevision } from './sync.ts';
 import { PRESENCE_INTERVAL } from '../shared/presence.ts';
+import { arrivalRetryDelay } from './arrival-retry.ts';
 import type { PresenceSnapshot } from '../shared/presence.ts';
 import { SpaceFlight } from './flight.ts';
 import { Colony } from './colony.ts';
@@ -583,12 +584,22 @@ setInterval(async()=>{
     if(snapshot&&activePlanet===planetId&&state.flight.mode==='ground'&&(state.location?.visitEpoch??0)===epoch){if(interior)homeInterior?.receivePresence(snapshot);else presence.receive(snapshot,performance.now(),ticket);}}
   catch{/* Presence is ephemeral; a failed heartbeat must not alter durable saves. */}
 },PRESENCE_INTERVAL);
+// A first visit the server could not prepare yet is retried a few times, then left to the player.
+const arrival={failures:0,next:0,stopped:false};
+function arrivalRefused(error:unknown){
+  if(state||!(error instanceof ApiError)||error.status!==503)return false;
+  const wait=arrivalRetryDelay(++arrival.failures);
+  if(wait===null){arrival.stopped=true;status('Could not prepare your world',true);notice('Your world could not be prepared just now. Reload the page to try again.',600000);}
+  else arrival.next=Date.now()+wait;
+  return true;
+}
 setInterval(async()=>{
   if(online || busy || physicsMismatch || stateLoader.pending) return;
+  if(!state&&(arrival.stopped||Date.now()<arrival.next))return;
   try {
     const next=await serial(()=>stateLoader.read());if(!accept(next))return;
     walker=new SurfaceWalker(next.position);lastSaved.copy(walker.up);clearInput();rebaseGroundCamera();ensureColony();notice('Back at your last saved spot. Welcome home.');
-  }catch{status('Offline · retrying',true);}
+  }catch(error){if(!arrivalRefused(error))status('Offline · retrying',true);else if(!arrival.stopped)notice(error instanceof Error?error.message:'Please try again.');}
 },2500);
 window.addEventListener('online',()=>notice('Reconnecting to your worlds…'));
 window.addEventListener('offline',()=>{presence.clear();online=false;homeInterior?.setOnline(false);clearGroundMotion();clearInput();flight?.clear();status('Offline · retrying',true);});
@@ -930,4 +941,4 @@ try {
   if(initial.home)setText(courierDialog.querySelector('p')!, 'Your home is ready. Choose a suit, enter through its door, then make the room and garden yours.');
   let welcomed=false;try{welcomed=localStorage.getItem(welcomeKey(initial))==='1';}catch{/* Storage can be unavailable in private browsing. */}
   if(initial.revision===0&&!welcomed)courierDialog.showModal();else notice('A familiar little planet. Welcome back.');
-} catch(error){failed(error);}
+} catch(error){failed(error);arrivalRefused(error);}

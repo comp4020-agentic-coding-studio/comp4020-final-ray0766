@@ -22,6 +22,7 @@ import { homePathStore } from './home-paths.ts';
 import { homeSetupStore } from './home-setup.ts';
 import { INTEGRATED_RADIUS, migrateIntegrationSchema } from './integration-migration.ts';
 import { migrateTeleport, teleportStore } from './teleport.ts';
+import { BUSY } from './heavy-work.ts';
 import type { HeavyWork } from './heavy-work.ts';
 import type { GeneratedHomeManifest } from '../shared/home-generation.ts';
 import type { Vec3 } from '../shared/world.ts';
@@ -212,30 +213,29 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
   const reservedHomes=new Set<string>();
   /** Search for a home's station on the worker and place it here, re-checked. A search that no longer
    * fits the saved planet writes nothing, so the attempt stays open for a later visit. */
+  // Station searches that failed, per home, in this run. The home stays complete without its station;
+  // the attempt is retried on the owner's later visits, at most three times, never on this thread.
+  const stationFailures=new Map<string,number>();
   async function prepareStation(work:HeavyWork,planetId:string,except?:string){
+    if((stationFailures.get(planetId)??0)>=3)return;
     const input=teleport.stationSearchInput(planetId,except);if(!input)return;
     let sites:{position:Vec3;rotation:number}[];
     try{sites=await work.run('station',`station:${planetId}:${input.revision}`,{planet:input.planet,occupants:input.occupants});}
-    catch(error){
-      if(error instanceof RequestError)throw error;
-      // A failed worker must not leave homes without their station: search here instead.
-      console.error('Station preparation failed; searching here:',error instanceof Error?error.message:error);
-      teleport.ensureHomeStation(planetId,undefined,except);return;
-    }
-    teleport.ensureHomeStation(planetId,{revision:input.revision,occupants:input.occupants,sites},except);
+    catch(error){stationFailures.set(planetId,(stationFailures.get(planetId)??0)+1);throw error;}
+    if(teleport.ensureHomeStation(planetId,{revision:input.revision,occupants:input.occupants,sites},except))stationFailures.delete(planetId);
   }
   /** Build a planet's ground on the worker when this server has not, so arriving there reuses its fits.
    * The harbour is built at startup and stays in this thread. */
   async function prepareWorld(work:HeavyWork,planetId:unknown){
     if(typeof planetId!=='string'||planetId==='hub'||!db.prepare('SELECT 1 FROM planets WHERE id=?').get(planetId)||ground.warm(planetId))return;
-    try{await work.run('world',`world:${planetId}:${planets.planet(planetId).revision}`,{planet:planets.view('',planetId)});}
-    catch(error){if(error instanceof RequestError)throw error;console.error('Ground preparation failed; building it here:',error instanceof Error?error.message:error);}
+    // A 503 here leaves the traveller where they are, to try again; the ground is never built on this thread.
+    await work.run('world',`world:${planetId}:${planets.planet(planetId).revision}`,{planet:planets.view('',planetId)});
   }
   const universe = (id: string) => {
     // A home from before teleport stations gets its one placement attempt while its owner stands there.
     const owned=homeEnabled?planets.owned(id):null;
     if(owned&&row(id).planet_id===owned&&navigation.flight(id).mode==='ground'&&homes.location(id).kind!=='interior'){
-      if(heavy)void prepareStation(heavy,owned).catch(error=>console.error('Station preparation failed:',error));
+      if(heavy)void prepareStation(heavy,owned).catch(error=>console.error('Station preparation deferred:',error instanceof Error?error.message:error));
       else teleport.ensureHomeStation(owned);
     }
     const player = state(id); return { player, planets: planets.list(id), ownedPlanetId: planets.owned(id), currentPlanet: planets.view(id, player.planetId) };
@@ -275,15 +275,13 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
     /** The same arrival as `create`, with the home layout and its station search run on the worker so other
      * players are answered meanwhile. Every write still happens here, after re-checking what was read: the
      * home, its owner and the new player's place at the door in one transaction, then the station. */
-    async createPrepared(id: string, now = Date.now()) {
+    async createPrepared(id: string, now = Date.now(), attempt = 0): Promise<PlayerState> {
       const work=heavy;if(!homeEnabled||!work)return this.create(id,now);
       const planetId=planets.freshHomePlanet(reservedHomes);reservedHomes.add(planetId);
       try{
         const inputs=homes.generationInputs(planetId,id);
-        let manifest:GeneratedHomeManifest|undefined;
-        // A full queue is the player's to retry; a failed worker only means the home is generated here.
-        if(inputs)try{manifest=await work.run<GeneratedHomeManifest>('home',`home:${planetId}`,inputs);}
-        catch(error){if(error instanceof RequestError)throw error;console.error('Home preparation failed; generating it here:',error instanceof Error?error.message:error);}
+        // Never generated on this thread: a 503 asks the player to retry, and nothing has been written yet.
+        const manifest=inputs?await work.run<GeneratedHomeManifest>('home',`home:${planetId}`,inputs):undefined;
         db.exec('BEGIN IMMEDIATE');
         try{
           db.prepare('INSERT INTO players (id,position,moved_at) VALUES (?,?,?)').run(id, JSON.stringify(SPAWN), now);
@@ -294,13 +292,17 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
           homes.movedExterior(id);db.exec('COMMIT');
         }catch(error){
           if(db.isTransaction)db.exec('ROLLBACK');
-          // Rare: the reserved planet was claimed meanwhile. Arrive the original way instead.
-          if(error instanceof RequestError&&error.status===409&&!this.has(id))return this.create(id,now);
+          // Rare: the reserved planet was claimed meanwhile. Prepare another one, twice at most.
+          if(error instanceof RequestError&&error.status===409&&!this.has(id)){
+            if(attempt<2)return this.createPrepared(id,now,attempt+1);
+            throw new RequestError(503,BUSY);
+          }
           throw error;
         }
       }finally{reservedHomes.delete(planetId);}
       // `create` sites the station before the player stands there; the search leaves them out to match.
-      try{await prepareStation(work,planetId,id);}catch(error){console.error('Station preparation failed:',error);}
+      // The home is already complete: if the search cannot run now, the station follows on a later visit.
+      try{await prepareStation(work,planetId,id);}catch(error){console.error('Station preparation deferred:',error instanceof Error?error.message:error);}
       return state(id);
     },
     useHeavyWork(work:HeavyWork|null){heavy=work;},
