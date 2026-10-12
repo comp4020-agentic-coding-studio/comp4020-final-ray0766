@@ -22,8 +22,10 @@ export interface VillageKitPart {
   id: VillageKitId; label: string; blurb: string; zh: { name: string; blurb: string };
   category: 'Wall' | 'Street' | 'Garden' | 'Roof' | 'Structure'; mount: 'cell' | 'edge'; role: 'wall' | 'guard' | 'deck' | 'slope' | 'trim' | 'equipment';
   floor?: boolean; door?: boolean; roof?: boolean; trim?: { sides: number[]; on: 'slope' };
-  /** Two-cell parts: the second cell lies one cell behind (local −Z) or beside (local +X). */
+  /** Multi-cell parts: the second cell lies one cell behind (local −Z), or further cells beside (local +X). */
   span?: 'back' | 'side';
+  /** Cells covered along local +X by a 'side' span (default 2). */
+  cells?: number;
   tags: string[]; envelope: Box; colliders: KitCollider[];
   walk: string; connects: string; emit: Emit;
 }
@@ -131,15 +133,14 @@ VILLAGE_KIT_PARTS_MUTABLE.push(
     walk: 'Not walkable.', connects: 'On the right (local +X) end of a long gable roof turned the same way.', emit: longVergeRight },
 );
 /** The station gate's interaction and arrival points, part-local metres (+Z is the approach). */
-export const STATION_POINTS = { interact: [GATE.x, 0, .55] as Vec3, arrival: [GATE.x, 0, 1.45] as Vec3 } as const;
+export const STATION_POINTS = { interact: [GATE.x, 0, .95] as Vec3, arrival: [GATE.x, 0, 2] as Vec3 } as const;
 VILLAGE_KIT_PARTS_MUTABLE.push(
-  { id: 'station.teleport', label: 'Teleport gate', blurb: 'Moon gate of an interstellar station', zh: { name: '星际传送门', blurb: '星际传送站的月洞门' },
-    category: 'Structure', mount: 'cell', role: 'equipment', span: 'side', tags: ['station', 'teleport', 'travel', 'gate', 'portal'],
-    envelope: box([-.5, 0, -.5], [1.5, 2.3, .5]),
-    colliders: [collider('station dais', [GATE.x - .97, 0, -.5], [GATE.x + .97, GATE.daisTop, .4], true), collider('station tread', [GATE.x - .6, 0, .4], [GATE.x + .6, .06, .5], true),
-      collider('moon gate', [GATE.x - .99, 0, GATE.z - .13], [GATE.x + .99, 2.12, GATE.z + .13]),
-      collider('gate cap', [GATE.x - .99, 2.0, GATE.z - .31], [GATE.x + .99, 2.3, GATE.z + .31])],
-    walk: 'Step onto the 12 cm dais in front of the ring; the ring itself is solid.', connects: 'Two cells along local +X on ground floors; keep the cell in front (+Z) clear as the approach.', emit: stationGate },
+  { id: 'station.teleport', label: 'Teleport portal', blurb: 'Wormhole ring of an interstellar station', zh: { name: '星际传送门', blurb: '星际传送站的虫洞圆环' },
+    category: 'Structure', mount: 'cell', role: 'equipment', span: 'side', cells: 5, tags: ['station', 'teleport', 'travel', 'gate', 'portal', 'wormhole'],
+    envelope: box([-.5, 0, -.5], [4.5, 5.3, .5]),
+    colliders: [collider('portal dais', [GATE.x - 2.45, 0, -.5], [GATE.x + 2.45, GATE.daisTop, .3], true), collider('portal step', [GATE.x - 1.5, 0, .3], [GATE.x + 1.5, .11, .5], true),
+      collider('portal ring', [GATE.x - GATE.chevron - .01, GATE.daisTop, -.27], [GATE.x + GATE.chevron + .01, GATE.centreY + GATE.chevron + .03, .27])],
+    walk: 'Step onto the 22 cm dais in front of the ring; the ring and its membrane are solid.', connects: 'Five cells along local +X on ground floors; keep the two rows in front (+Z) clear as the approach.', emit: stationGate },
 );
 export const VILLAGE_KIT_PARTS: readonly VillageKitPart[] = VILLAGE_KIT_PARTS_MUTABLE;
 export const VILLAGE_KIT_BY_ID: Readonly<Record<VillageKitId, VillageKitPart>> = Object.fromEntries(VILLAGE_KIT_PARTS.map(p => [p.id, p])) as Record<VillageKitId, VillageKitPart>;

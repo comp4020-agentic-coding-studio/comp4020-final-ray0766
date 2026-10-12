@@ -304,40 +304,62 @@ function longVerge(k: Kit, side: -1 | 1) {
 export const longVergeLeft = (k: Kit) => longVerge(k, -1);
 export const longVergeRight = (k: Kit) => longVerge(k, 1);
 
-// ---- Teleport station gate (two cells along local +X, gate centred between them) --
+// ---- Teleport portal (five cells along local +X, ring centred on the middle cell) --
 
-/** Moon gate of the interstellar station: in local metres, the gate stands on x = GATE.x, just behind z = 0. */
-export const GATE = { x: .5, z: -.15, centreY: 1.02, outer: .9, inner: .66, depth: .2, daisTop: .12 } as const;
-/** Ring as plaster segments, a timber rim, a glowing membrane, two posts and a small tiled cap. */
+/** The station's wormhole ring, in local metres: centre x = GATE.x, just behind z = 0, top above 5 m. */
+export const GATE = { x: 2, centreY: 2.75, outer: 2.35, inner: 1.88, depth: .4, daisTop: .22, chevron: 2.47 } as const;
+/** Ring band, rim lines, nine lit chevrons, a swirling membrane on a stone dais. */
 export function stationGate(k: Kit) {
-  const { b } = k, g = GATE, segments = k.low ? 12 : 24, mid = (g.outer + g.inner) / 2, band = g.outer - g.inner;
-  // Stone dais with a chamfered edge, and a low front tread.
-  b.box(k.m('concrete'), [1.94, g.daisTop, .9], { position: [g.x, g.daisTop / 2, -.05] }, k.low ? 0 : .02);
-  b.box(k.m('concrete'), [1.2, .06, .22], { position: [g.x, .03, .5 - .12] }, k.low ? 0 : .01);
+  const { b } = k, g = GATE, segments = k.low ? 16 : k.fine ? 40 : 24, mid = (g.outer + g.inner) / 2, band = g.outer - g.inner;
+  const at = (a: number, r: number, y = g.centreY): [number, number] => [g.x + Math.cos(a) * r, y + Math.sin(a) * r];
+  // Dais, front step and the cradle the ring stands in.
+  b.box(k.m('concrete'), [4.9, g.daisTop, .8], { position: [g.x, g.daisTop / 2, -.1] }, k.low ? 0 : .03);
+  b.box(k.m('concrete'), [3, .11, .2], { position: [g.x, .055, .4] }, k.low ? 0 : .015);
+  b.box(k.m('steel'), [1.8, .36, .5], { position: [g.x, g.daisTop + .18, 0] }, k.low ? 0 : .02);
   for (let i = 0; i < segments; i++) {
-    const a = (i + .5) / segments * Math.PI * 2, len = 2 * Math.PI * mid / segments + .012;
-    const cx = g.x + Math.cos(a) * mid, cy = g.centreY + Math.sin(a) * mid;
-    b.box(k.m('skin'), [len, band, g.depth], { position: [cx, cy, g.z], rotation: [0, 0, a + Math.PI / 2] }, 0);
-    if (!k.low) {
-      const rx = g.x + Math.cos(a) * (g.outer + .02), ry = g.centreY + Math.sin(a) * (g.outer + .02);
-      b.box(k.m('post'), [2 * Math.PI * (g.outer + .02) / segments + .01, .04, g.depth + .03], { position: [rx, ry, g.z], rotation: [0, 0, a + Math.PI / 2] }, 0);
-    }
+    const a = (i + .5) / segments * Math.PI * 2, [x, y] = at(a, mid);
+    b.box(k.m('steel'), [2 * Math.PI * mid / segments + .02, band, g.depth], { position: [x, y, 0], rotation: [0, 0, a + Math.PI / 2] }, 0);
+    if (k.low) continue;
+    const [ox, oy] = at(a, g.outer - .06), [ix, iy] = at(a, g.inner + .025);
+    if (k.fine) b.box(k.m('concrete'), [2 * Math.PI * (g.outer - .06) / segments + .02, .12, g.depth + .06], { position: [ox, oy, 0], rotation: [0, 0, a + Math.PI / 2] }, 0);
+    b.box(k.m('marking'), [2 * Math.PI * (g.inner + .025) / segments + .01, .05, g.depth + .04], { position: [ix, iy, 0], rotation: [0, 0, a + Math.PI / 2] }, 0);
   }
-  // The membrane: a faint glowing disc set back in the opening.
-  const disc = new BufferGeometry(), sides = k.low ? 16 : 32, pos: number[] = [];
-  for (let i = 0; i < sides; i++) {
-    const a0 = i / sides * Math.PI * 2, a1 = (i + 1) / sides * Math.PI * 2;
-    for (const z of [.008, -.008]) {
-      const p0 = [g.x + Math.cos(a0) * g.inner, g.centreY + Math.sin(a0) * g.inner, g.z + z], p1 = [g.x + Math.cos(a1) * g.inner, g.centreY + Math.sin(a1) * g.inner, g.z + z];
-      pos.push(...(z > 0 ? [g.x, g.centreY, g.z + z, ...p0, ...p1] : [g.x, g.centreY, g.z + z, ...p1, ...p0]));
-    }
+  // Nine chevrons, one at the top: a stone housing with a lamp on both faces.
+  for (let c = 0; c < 9; c++) {
+    const a = Math.PI / 2 + c * Math.PI * 2 / 9, [x, y] = at(a, g.chevron - .17);
+    b.box(k.m('concrete'), [.42, .34, .52], { position: [x, y, 0], rotation: [0, 0, a + Math.PI / 2] }, k.low ? 0 : .02);
+    // At low detail only the top chevron keeps its lamps.
+    if (!k.low || c === 0) for (const z of [.255, -.255]) b.box(k.m('lamp'), [.24, .16, .02], { position: [x, y, z], rotation: [0, 0, a + Math.PI / 2] }, 0);
   }
-  disc.setAttribute('position', new Float32BufferAttribute(pos, 3)); disc.computeVertexNormals();
-  b.geometry(k.m('lamp'), disc);
-  // Posts each side carry the cap; their feet sit in the dais.
-  for (const s of [-1, 1]) b.box(k.m('post'), [.11, 2.1, .14], { position: [g.x + s * .935, 1.05, g.z] }, k.low ? 0 : .01);
-  b.box(k.m('post'), [1.98, .1, .16], { position: [g.x, 2.04, g.z] }, 0);
-  for (const s of [-1, 1]) b.box(k.m('corrugated'), [1.98, .035, .34], { position: [g.x, 2.18, g.z + s * .14], rotation: [s * .42, 0, 0] }, 0);
-  b.box(k.m('corrugated'), [1.98, .06, .08], { position: [g.x, 2.25, g.z] }, k.low ? 0 : .01);
-  b.emitter('pad', [g.x, g.daisTop + .02, .2], [0, 1, 0]);
+  // The membrane: a teal disc, white spiral arms and a glowing core, both faces.
+  const fan = (radius: number, z: number, sides: number) => {
+    const pos: number[] = [];
+    for (let i = 0; i < sides; i++) {
+      const a0 = i / sides * Math.PI * 2, a1 = (i + 1) / sides * Math.PI * 2;
+      for (const f of [1, -1]) {
+        const p0 = [g.x + Math.cos(a0) * radius, g.centreY + Math.sin(a0) * radius, z * f], p1 = [g.x + Math.cos(a1) * radius, g.centreY + Math.sin(a1) * radius, z * f];
+        pos.push(...(f > 0 ? [g.x, g.centreY, z, ...p0, ...p1] : [g.x, g.centreY, -z, ...p1, ...p0]));
+      }
+    }
+    const geometry = new BufferGeometry(); geometry.setAttribute('position', new Float32BufferAttribute(pos, 3)); geometry.computeVertexNormals(); return geometry;
+  };
+  b.geometry(k.m('leaf'), fan(g.inner + .01, .006, k.low ? 16 : 32));
+  b.geometry(k.m('lamp'), fan(.42, .014, k.low ? 8 : 16));
+  if (!k.low) {
+    const arms = 3, steps = k.fine ? 28 : 16, pos: number[] = [];
+    for (let arm = 0; arm < arms; arm++) for (let i = 0; i < steps; i++) {
+      const t0 = i / steps, t1 = (i + 1) / steps, w0 = .05 + .13 * t0, w1 = .05 + .13 * t1;
+      const point = (t: number, w: number) => { const r = .45 + t * (g.inner - .55), a = arm * Math.PI * 2 / arms + t * Math.PI * 1.6; return [g.x + Math.cos(a) * (r + w), g.centreY + Math.sin(a) * (r + w), g.x + Math.cos(a) * (r - w), g.centreY + Math.sin(a) * (r - w)]; };
+      const [ax, ay, bx, by] = point(t0, w0), [cx, cy, dx, dy] = point(t1, w1);
+      for (const z of [.01, -.01]) {
+        const quad = [ax, ay, z, bx, by, z, cx, cy, z, bx, by, z, dx, dy, z, cx, cy, z];
+        // As listed the quad faces −Z; turn the +Z copy so each face of the membrane shows its arms.
+        if (z > 0) for (let q = 0; q < quad.length; q += 9) { const [x1, y1, z1] = quad.slice(q + 3, q + 6); quad.splice(q + 3, 3, ...quad.slice(q + 6, q + 9)); quad.splice(q + 6, 3, x1, y1, z1); }
+        pos.push(...quad);
+      }
+    }
+    const spiral = new BufferGeometry(); spiral.setAttribute('position', new Float32BufferAttribute(pos, 3)); spiral.computeVertexNormals();
+    b.geometry(k.m('marking'), spiral);
+  }
+  b.emitter('pad', [g.x, g.daisTop + .05, .6], [0, 1, 0]);
 }

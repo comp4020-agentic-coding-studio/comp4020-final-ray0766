@@ -22,6 +22,9 @@ const SIDE_SPAN = new Set<string>(VILLAGE_KIT_PARTS.filter(p => p.span === 'side
 /** Host parts with a second cell for rules: wide doors/steps and the station gate along local +X, long roofs one cell behind (local −Z). */
 export const hostSecondCell = (value: unknown): 'side' | 'back' | null => value === WIDE_ENTRY_ID || (typeof value === 'string' && (isWideDoor(value) || SIDE_SPAN.has(value))) ? 'side' : typeof value === 'string' && BACK_SPAN.has(value) ? 'back' : null;
 export const isTwoCellHostPartId = (value: unknown) => hostSecondCell(value) !== null;
+const SIDE_CELLS = new Map<string, number>(VILLAGE_KIT_PARTS.filter(p => p.span === 'side' && p.cells).map(p => [p.id, p.cells!]));
+/** Cells a 'side' host part covers along local +X: two for wide doors and steps, more for the teleport portal. */
+export const hostSideCells = (value: unknown): number => typeof value === 'string' ? SIDE_CELLS.get(value) ?? 2 : 2;
 export const LEGACY_PART_IDS = Object.freeze([...legacy.PART_IDS].filter(id => !isHostPartId(id)));
 export const isWideDoorPartId = (value: unknown): value is WideDoorId => typeof value === 'string' && isWideDoor(value);
 export const isDoorPartId = (value: unknown): value is 'wall.door' | 'wall.door.open' | WideDoorId =>

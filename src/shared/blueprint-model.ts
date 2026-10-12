@@ -1,4 +1,4 @@
-import { hostSecondCell, isHostPartId, isWideDoorPartId, isWideEntryPartId, PARTS } from './blueprint-parts.ts';
+import { hostSecondCell, hostSideCells, isHostPartId, isWideDoorPartId, isWideEntryPartId, PARTS } from './blueprint-parts.ts';
 import type { PartId } from './blueprint-parts.ts';
 import * as legacy from '../assets/claude-geometry/blueprint/model.ts';
 import { wideDoorClearanceIssues } from './blueprint-wide-door-clearance.ts';
@@ -11,14 +11,14 @@ export const toVendorPart = (part: PartPlacement) => part as legacy.PartPlacemen
 export const toVendorParts = (parts: readonly PartPlacement[]) => parts as readonly legacy.PartPlacement[];
 export const toVendorBlueprint = (blueprint: Blueprint) => blueprint as legacy.Blueprint;
 
-/** Second cell along local +X (wide doors/steps) or behind along local −Z (long
+/** Further cells along local +X (wide doors/steps, the teleport portal) or behind along local −Z (long
  * roofs and their verges). Proxies are confined to rule evaluation:
  * never in documents, geometry, counts, budgets, hashes or saved groups. */
 function ruleParts(part: PartPlacement): legacy.PartPlacement[] {
   const second = hostSecondCell(part.part);
   if (!second) return [toVendorPart(part)];
-  const [dx, dz] = legacy.rotDir(part.rot + (second === 'side' ? 1 : 2));
-  return [toVendorPart(part), { ...toVendorPart(part), n: -part.n, x: part.x + dx, z: part.z + dz }];
+  const [dx, dz] = legacy.rotDir(part.rot + (second === 'side' ? 1 : 2)), cells = second === 'side' ? hostSideCells(part.part) : 2;
+  return [toVendorPart(part), ...Array.from({ length: cells - 1 }, (_, i) => ({ ...toVendorPart(part), n: -part.n, x: part.x + dx * (i + 1), z: part.z + dz * (i + 1) }))];
 }
 const projected = (parts: readonly PartPlacement[]) => parts.flatMap(ruleParts);
 const owner = (parts: readonly PartPlacement[], proxy: legacy.PartPlacement) => parts.find(p => p.n === Math.abs(proxy.n))!;
@@ -70,7 +70,7 @@ export class Layout {
     if (isWideEntryPartId(p.part)) return ruleParts(p).every(proxy => !this.source.supportProblem(proxy)) ? null : 'Wide entrance steps need a ground-floor deck behind both cells.';
     if (hostSecondCell(p.part) === 'back' || (hostSecondCell(p.part) === 'side' && PARTS[p.part].role === 'equipment')) {
       const problem = ruleParts(p).map(proxy => this.source.supportProblem(proxy)).find(Boolean);
-      return problem ? `${problem.replace(/\.$/, '')} (both cells of this two-cell part).` : null;
+      return problem ? `${problem.replace(/\.$/, '')} (every cell of this multi-cell part).` : null;
     }
     if (isWideDoorPartId(p.part)) {
       const floors = ruleParts(p).every(cell => {

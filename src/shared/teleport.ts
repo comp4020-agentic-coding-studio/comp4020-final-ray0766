@@ -7,6 +7,7 @@ import type { PlacedObject, PlanetView } from './planets.ts';
 import { isSamplePublicRadius, samplePublicVillage } from './sample-public-village.ts';
 import { fieldOf } from './terrain.ts';
 import { STATION_POINTS } from './village-kit/parts.ts';
+import { GATE } from './village-kit/geometry.ts';
 import type { Vec3 } from './world.ts';
 
 /** The workshop part that makes any structure a teleport station. */
@@ -20,6 +21,8 @@ export interface StationSite {
   interact: Vec3; arrival: Vec3;
   /** Planet yaw of the gate's approach direction (+Z of the part). */
   yaw: number;
+  /** Ground direction under the ring's centre, and the ring top's height above that part's floor. */
+  ring: Vec3; ringTop: number;
 }
 export interface TeleportStationPreview {
   planetId: string; expectedRevision: number; hash: string;
@@ -49,7 +52,7 @@ export function stationSites(planet: Pick<PlanetView, 'id' | 'radius' | 'environ
     for (const part of parts.filter(p => p.part === TELEPORT_PART && p.level === 0)) {
       const t = partTransform(part, pivot);
       const local = ([x, , z]: Vec3): Vec3 => [t.position[0] + Math.cos(t.yaw) * x + Math.sin(t.yaw) * z, t.position[1], t.position[2] - Math.sin(t.yaw) * x + Math.cos(t.yaw) * z];
-      sites.push({ objectId: o.id, partNumber: part.n, interact: localToDir(anchor, base, local(STATION_POINTS.interact)), arrival: localToDir(anchor, base, local(STATION_POINTS.arrival)), yaw: (o.rotation + t.yaw) % (Math.PI * 2) });
+      sites.push({ objectId: o.id, partNumber: part.n, interact: localToDir(anchor, base, local(STATION_POINTS.interact)), arrival: localToDir(anchor, base, local(STATION_POINTS.arrival)), yaw: (o.rotation + t.yaw) % (Math.PI * 2), ring: localToDir(anchor, base, local([GATE.x, 0, 0])), ringTop: t.position[1] + GATE.centreY + GATE.chevron });
     }
   }
   if (cache.size > 64) cache.delete(cache.keys().next().value!);

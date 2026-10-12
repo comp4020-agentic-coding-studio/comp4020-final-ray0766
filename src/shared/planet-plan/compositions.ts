@@ -249,13 +249,13 @@ function harbourStore(): Sketch {
   s.add('step.entry-wide', 1, 2); s.add('road.apron', 0, 2); s.add('road.apron', 3, 2);
   return s;
 }
-/** Teleport station: the moon gate on a 2 × 1 dais, a paved forecourt in front and flower pots at its sides.
+/** Teleport station: the wormhole portal on its dais, two paved rows in front and flower pots at the front corners.
  * The same blueprint stands on the harbour square and on every home. */
 function teleportStation(): Sketch {
   const s = new Sketch();
-  for (const [x, z] of [[0, 0], [1, 0], [0, 1], [1, 1]]) s.add('road.paving', x, z);
+  for (let z = 0; z < 3; z++) for (let x = 0; x < 5; x++) s.add('road.paving', x, z);
   s.add('station.teleport', 0, 0, 0);
-  s.add('garden.pot', 0, 1, 3); s.add('garden.pot', 1, 1, 1);
+  s.add('garden.pot', 0, 2, 3); s.add('garden.pot', 4, 2, 1);
   return s;
 }
 
@@ -279,7 +279,7 @@ export const PUBLIC_COMPOSITIONS: readonly Composition[] = [
   { id: 'pavilion', name: 'Garden pavilion', nameZh: '庭园凉亭', kind: 'garden', blueprint: blueprint(17, 'Town · Garden pavilion', pavilion()), entry: { x: 0, z: 2 } },
   { id: 'lookout', name: 'Lookout tower', nameZh: '望楼', kind: 'landmark', blueprint: blueprint(18, 'Town · Lookout tower', lookout()), entry: { x: 1, z: 3 } },
   { id: 'harbour-store', name: 'Harbour store', nameZh: '港口仓房', kind: 'work', blueprint: blueprint(19, 'Town · Harbour store', harbourStore()), entry: { x: 1, z: 3 } },
-  { id: 'teleport-station', name: 'Teleport station', nameZh: '星际传送站', kind: 'civic', blueprint: blueprint(20, 'Town · Teleport station', teleportStation()), entry: { x: 0, z: 2 } },
+  { id: 'teleport-station', name: 'Teleport station', nameZh: '星际传送站', kind: 'civic', blueprint: blueprint(20, 'Town · Teleport station', teleportStation()), entry: { x: 2, z: 3 } },
 ];
 export const TELEPORT_STATION = PUBLIC_COMPOSITIONS.find(c => c.id === 'teleport-station')!;
 export const COMPOSITION_IDS: ReadonlySet<string> = new Set(PUBLIC_COMPOSITIONS.map(c => c.id));
