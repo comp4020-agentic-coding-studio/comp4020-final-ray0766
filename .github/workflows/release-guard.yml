@@ -1,0 +1,33 @@
+name: Put back an unfinished release
+# Runs after every checks run on main that did not succeed, independently of
+# that run's deploy job: a job cancelled at its time limit runs no further
+# step, so its own rollback may never have started. settle.mjs decides from
+# the machine and its volume alone and leaves a confirmed release, a machine
+# on another image, or a run that never reached the cutover untouched.
+on:
+  workflow_run:
+    workflows: [checks]
+    types: [completed]
+    branches: [main]
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+jobs:
+  settle:
+    if: ${{ github.event.workflow_run.conclusion != 'success' && !github.event.repository.private && !github.event.repository.is_template }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      APP_URL: https://${{ github.event.repository.name }}.fly.dev
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      RUN_ID: ${{ github.event.workflow_run.id }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # 1.6
+      - name: Put the previous release back if that run left one unfinished
+        run: |
+          tag="${HEAD_SHA::12}-${RUN_ID}"
+          node scripts/release/settle.mjs "$tag" "registry.fly.io/${{ github.event.repository.name }}:release-$tag"

@@ -99,22 +99,31 @@ jobs:
       FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       APP_URL: https://${{ github.event.repository.name }}.fly.dev
     steps:
+      - name: Start the deploy clock
+        # The job is cancelled at its 20-minute limit and then runs nothing
+        # more, so every release step below plans against this deadline.
+        run: echo "JOB_DEADLINE=$(( $(date +%s) + 19 * 60 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v7
       - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # 1.6
       - name: Back up live SQLite
         run: node scripts/release/preflight.mjs
       - name: Build the release image without deploying it
         # --remote-only builds the Dockerfile on Fly's builders; the machine
-        # keeps serving the old image until the next two steps.
+        # keeps serving the old image until the next steps.
         run: |
           label="release-${GITHUB_SHA::12}-${GITHUB_RUN_ID}"
           flyctl deploy --build-only --push --remote-only --image-label "$label" -a ${{ github.event.repository.name }}
           echo "RELEASE_IMAGE=registry.fly.io/${{ github.event.repository.name }}:$label" >> "$GITHUB_ENV"
+          echo "RELEASE_TAG=${GITHUB_SHA::12}-${GITHUB_RUN_ID}" >> "$GITHUB_ENV"
       - name: Integrate the stopped live database if it is not integrated yet
-        # Puts the original image and the stopped database back on failure.
+        id: cutover
+        # Starts the new image itself when it integrates the database; hands
+        # any failure after the stop to settle.mjs.
         run: node scripts/release/cutover.mjs "$RELEASE_IMAGE"
       - name: Deploy
-        # --ha=false keeps the app at one machine and one volume.
+        # Only when no cutover ran. --ha=false keeps the app at one machine
+        # and one volume.
+        if: ${{ steps.cutover.outputs.ran != 'true' }}
         run: flyctl deploy --image "$RELEASE_IMAGE" --ha=false -a ${{ github.event.repository.name }}
       - name: Verify the deployed site is online
         run: |
@@ -126,4 +135,13 @@ jobs:
           done
           echo "site did not return 200"; exit 1
       - name: Verify the server runs the integrated world
-        run: curl -fsS "$APP_URL/healthz" | grep '"profile":"integrated"'
+        run: curl -fsS -m 15 "$APP_URL/healthz" | grep '"profile":"integrated"'
+      - name: Confirm the release
+        # Until this marker exists on the volume, settle.mjs treats the
+        # release as unfinished and puts the previous one back.
+        run: node scripts/release/settle.mjs "$RELEASE_TAG" "$RELEASE_IMAGE" --confirm
+      - name: Put the previous release back if this one did not finish
+        # release-guard.yml repeats this once the run has ended, for a job
+        # cut off at its limit, which runs no further step.
+        if: ${{ failure() || cancelled() }}
+        run: node scripts/release/settle.mjs "${GITHUB_SHA::12}-${GITHUB_RUN_ID}" "registry.fly.io/${{ github.event.repository.name }}:release-${GITHUB_SHA::12}-${GITHUB_RUN_ID}"
