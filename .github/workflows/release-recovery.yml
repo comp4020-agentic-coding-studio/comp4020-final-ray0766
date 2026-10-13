@@ -7,13 +7,13 @@ on:
         required: false
         type: string
       mode:
-        description: Branch-only diagnosis (diagnose) or one guarded start (start)
+        description: Branch-only diagnosis (diagnose), one guarded start (start) or the approved config restore (restore-config)
         required: false
         default: diagnose
         type: choice
-        options: [diagnose, start]
+        options: [diagnose, start, restore-config]
       expect_image:
-        description: For start, the known-good image the machine must already be configured for
+        description: The known-good image (start, restore-config; restore-config needs its digest)
         required: false
         type: string
 concurrency:

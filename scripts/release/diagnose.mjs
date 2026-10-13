@@ -2,7 +2,8 @@ import {spawnSync} from 'node:child_process';
 // Operator diagnosis of the app machine, dispatched from a branch (release-recovery.yml, job "diagnose"). It prints
 // chosen fields only: never the environment, metadata, tokens or request bodies. MODE=start starts the machine once,
 // and only when it is configured for EXPECT_IMAGE (the known-good image) with the server command, then waits for it to
-// run and asks the site once. It never updates the machine's configuration and never touches the volume.
+// run and asks the site once. MODE=restore-config is the approved minimal recovery described below. Neither writes
+// to the volume.
 const app='comp4020-final-ray0766',mode=process.env.MODE||'diagnose',expect=process.env.EXPECT_IMAGE||'',server=['node','src/server/index.ts'];
 const redact=s=>String(s).replace(/fo1_[A-Za-z0-9_-]+|FlyV1 \S+|Bearer \S+/g,'[redacted]').replace(/^.*(token|secret|password|authorization|cookie).*$/gim,'[line redacted]');
 function run(args,timeout=90_000){const p=spawnSync('flyctl',args,{encoding:'utf8',maxBuffer:16*1024*1024,timeout});if(p.error||p.status!==0)throw Error(`flyctl ${args.slice(0,2).join(' ')} failed: `+redact(p.error?.message??p.stderr).slice(-1200));return p.stdout;}
@@ -16,6 +17,30 @@ const sameImage=(a,b)=>{const [tagA,digestA]=String(a).split('@'),[tagB,digestB]
 const machines=list();console.log('MACHINES '+JSON.stringify(machines.map(summary),null,1));
 try{console.log('VOLUMES '+JSON.stringify(JSON.parse(run(['volumes','list','-a',app,'--json'])).map(v=>({id:v.id,state:v.state,size_gb:v.size_gb,region:v.region,attached_machine_id:v.attached_machine_id})),null,1));}catch(e){console.log('VOLUMES unavailable: '+e.message);}
 try{console.log('LOGS (last 150 lines, redacted)\n'+redact(run(['logs','-a',app,'--no-tail'],60_000)).trim().split('\n').slice(-150).join('\n'));}catch(e){console.log('LOGS unavailable: '+e.message);}
+if(mode==='restore-config'){
+ // Approved minimal recovery after run 38465565129: the machine was autostopped by Fly 12 s before the cutover's
+ // update, and Fly leaves a stopped machine stopped through any update. Put back the known-good image (exact digest)
+ // with the server command and the original start/stop settings as configuration only, check what Fly reports, start
+ // once, wait for started, ask the site, and read the database without writing.
+ if(machines.length!==1)throw Error('Expected exactly one machine');
+ const m=machines[0];
+ if(m.state!=='stopped')throw Error('Refusing: the machine is '+m.state+', not stopped as diagnosed');
+ if(!/@sha256:[0-9a-f]{64}$/.test(expect))throw Error('Refusing: give the known-good image with its full digest');
+ run(['machine','update',m.id,'-a',app,'--image',expect,'--command',server.join(' '),'--autostart=true','--autostop=stop','--skip-start','--yes'],150_000);
+ const c=list()[0],services=(c.config?.services??[]).map(s=>({autostart:s.autostart,autostop:s.autostop}));
+ console.log('CONFIG '+JSON.stringify({state:c.state,image:c.config?.image,cmd:c.config?.init?.cmd??null,services}));
+ if(c.config?.image!==expect&&!(String(c.config?.image).split('@')[1]===expect.split('@')[1]&&sameImage(c.config?.image,expect)))throw Error('Stopping: the image is '+c.config?.image+', not '+expect);
+ if(JSON.stringify(c.config?.init?.cmd??null)!==JSON.stringify(server))throw Error('Stopping: the init command is '+JSON.stringify(c.config?.init?.cmd??null));
+ if(!services.length||!services.every(s=>s.autostart===true&&(s.autostop==='stop'||s.autostop===true)))throw Error('Stopping: the services start/stop settings are '+JSON.stringify(services));
+ console.log('START '+c.id+' from state '+c.state);run(['machine','start',c.id,'-a',app],120_000);
+ const until=Date.now()+180_000;let state='';while(Date.now()<until){state=list()[0].state;if(state==='started')break;await new Promise(r=>setTimeout(r,5000));}
+ console.log('STATE '+state);if(state!=='started')throw Error('The machine did not reach started within three minutes');
+ let ok=false;for(let i=0;i<8&&!ok;i++){const r=await globalThis.fetch(`https://${app}.fly.dev/healthz`,{signal:globalThis.AbortSignal.timeout(20_000)}).catch(()=>null);const body=r?await r.text().catch(()=>''):'';console.log(`HEALTHZ ${r?.status??'no answer'} ${body.slice(0,120)}`);ok=!!r?.ok;if(!ok)await new Promise(res=>setTimeout(res,10_000));}
+ const code="const {DatabaseSync}=await import('node:sqlite');const db=new DatabaseSync('/data/little-post.sqlite',{readOnly:true});const marked=!!db.prepare(\"SELECT 1 FROM sqlite_master WHERE type='table' AND name='integration_config'\").get();console.log(JSON.stringify({schema:db.prepare('PRAGMA user_version').get().user_version,integrity:db.prepare('PRAGMA integrity_check').get().integrity_check,foreignKeys:db.prepare('PRAGMA foreign_key_check').all().length,players:db.prepare('SELECT count(*) n FROM players').get().n,integrated:marked}));db.close();";
+ const out=JSON.parse(run(['machine','exec',c.id,'node --input-type=module -e "await import(\'data:text/javascript;base64,'+Buffer.from(code).toString('base64')+'\')"','-a',app,'--json','--timeout','50'],70_000));
+ console.log('DATABASE '+String(out.stdout??'').trim()+(out.exit_code?' exit '+out.exit_code:''));
+ if(!ok)throw Error('The machine runs the known-good configuration but the site did not answer');
+}
 if(mode==='start'){
  if(machines.length!==1)throw Error('Expected exactly one machine');
  const m=machines[0],cmd=m.config?.init?.cmd??null;
