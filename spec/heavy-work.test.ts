@@ -30,6 +30,8 @@ const saved = (s: Store, planetId: string) => s.db.prepare('SELECT kind,position
 const history = (s: Store, planetId: string) => s.db.prepare('SELECT document FROM history_events WHERE planet_id=? ORDER BY seq').all(planetId).map(row => { const { event } = JSON.parse(String(row.document)); return [event.seq, event.type, event.spec, event.anchor, event.objectVersion]; });
 const station = (s: Store, planetId: string) => ({ ...s.db.prepare("SELECT o.position,o.rotation,h.status FROM home_stations h LEFT JOIN planet_objects o ON o.id=h.object_id WHERE h.planet_id=?").get(planetId) });
 
+// Creates the same home twice, inline in a cold process and on a newly started worker: about 3.5 s here beside the
+// full suite, and past the default 5 s on the x86-64 CI runner (run 38434626581), which is about twice as slow.
 it('prepares a new home and its station on the worker with exactly the result of creating them inline', async () => {
   const [inline, prepared] = twins(), id = 'arrival-identity';
   const a = inline.create(id);
@@ -44,7 +46,7 @@ it('prepares a new home and its station on the worker with exactly the result of
   expect(history(prepared, b.planetId).length).toBeGreaterThan(20);
   expect(station(prepared, b.planetId)).toEqual(station(inline, a.planetId));
   expect(station(prepared, b.planetId).status).toBe('placed');
-});
+}, 20_000);
 
 it('turns a new player away with a 503 and writes nothing when the worker fails, then pauses instead of retrying it', async () => {
   const [inline, prepared] = twins(), free = inline.create('reference').planetId;

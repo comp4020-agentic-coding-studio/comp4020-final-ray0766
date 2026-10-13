@@ -15,6 +15,8 @@ it('keeps every registered town plan translated and made only from the ordinary 
  }
 });
 
+// Loads and saves all 63 examples through the jsdom editor, whose selector engine dominates: about 3.7 s here beside
+// the full suite, and past the default 5 s on the x86-64 CI runner (run 38434626581), which is about twice as slow.
 it('keeps the existing 43 workshop examples, appends the 19 planned-town compositions and saves each as an independent editable copy',async()=>{
  document.body.innerHTML='';setLanguage('en');
  const originals=JSON.stringify(SAMPLE_PUBLIC_BLUEPRINTS),documents:Blueprint[]=[];
@@ -45,4 +47,4 @@ it('keeps the existing 43 workshop examples, appends the 19 planned-town composi
  }
  expect(new Set(documents.map(document=>document.id)).size).toBe(plans.length);
  expect(JSON.stringify(SAMPLE_PUBLIC_BLUEPRINTS)).toBe(originals);
-});
+},20_000);

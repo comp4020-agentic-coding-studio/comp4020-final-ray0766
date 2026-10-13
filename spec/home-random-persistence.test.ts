@@ -23,6 +23,8 @@ const receipt = (s: ReturnType<typeof openStore>, planet: string) => s.db.prepar
 const enter = (s: ReturnType<typeof openStore>, id: string) => { const p = s.state(id); return s.enterHome(id, { planetId: p.planetId, buildingId: p.home!.buildingId, visitEpoch: p.location!.visitEpoch }); };
 afterEach(() => { for (const s of stores.splice(0)) { try { s.close(); } catch { /* Closed before persistence checks. */ } } for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true }); });
 
+// Generates six full homes, each walking its routes under real collision: about 8.4 s here beside the full suite,
+// and past 15 s on the x86-64 CI runner (run 38434626581), which is about twice as slow.
 it('stores one generated layout per owned planet with concrete IDs, hashes and enough editing budget', () => {
   const s = sample(), seeds = new Set<number>();
   for (let i = 0; i < 6; i++) {
@@ -51,7 +53,7 @@ it('stores one generated layout per owned planet with concrete IDs, hashes and e
   expect(seeds.size).toBe(6);
   expect(s.universe('owner-0').planets.every(planet => planet.radius === HOME_SAMPLE_RADIUS)).toBe(true);
   expect(() => s.claim('owner-0', s.universe('owner-1').ownedPlanetId)).toThrow();
-}, 15_000);
+}, 45_000);
 
 it('reopens edited infrastructure and room contents without rerolling or replacing their creation receipt', () => {
   const path = databasePath(), s = sample(path);
