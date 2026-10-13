@@ -67,7 +67,7 @@ jobs:
             --include-detectors=CustomRegex --results=unverified
             --no-verification
 
-  # Dispatch on a release branch to verify the live DB before changing main.
+  # Dispatch on a release branch to back up and check the live DB before changing main.
   preflight:
     if: ${{ github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main' }}
     runs-on: ubuntu-latest
@@ -79,7 +79,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1
-      - name: Back up live SQLite and rehearse migration on a private copy
+      - name: Back up live SQLite
         run: node scripts/release/preflight.mjs
 
   deploy:
@@ -101,7 +101,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # 1.6
-      - name: Back up live SQLite and rehearse migration on a private copy
+      - name: Back up live SQLite
         run: node scripts/release/preflight.mjs
       - name: Build the release image without deploying it
         # --remote-only builds the Dockerfile on Fly's builders; the machine
