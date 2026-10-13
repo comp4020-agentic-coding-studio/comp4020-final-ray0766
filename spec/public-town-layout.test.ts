@@ -28,10 +28,23 @@ import {anchorPoint,dirOf} from '../src/shared/planet-plan/sphere.ts';
 const town=publicTown(),R=town.radius,field=fieldOf(town.environment,R),network=mainPlanetNetwork();
 const PLAN_TEXT=readFileSync(new URL('../src/shared/planet-plan/main-planet.plan.json',import.meta.url),'utf8');
 
-it('serves the frozen ledger of the current plan, regenerated identically with its seeded variation and no plan errors',async()=>{
+// Every key, string, flag and count must match; numbers may differ only in floating-point rounding. The frozen
+// ledger was built on arm64, and the x86-64 CI runner regenerated 329 of its numbers up to 1e-15 apart (run
+// 38434626581): V8's sine and square-root code is compiled per CPU and need not agree in the last bit.
+function ledgerDifferences(actual:unknown,expected:unknown,path='ledger'):string[]{
+ if(typeof actual==='number'&&typeof expected==='number')return Math.abs(actual-expected)<=1e-12?[]:[`${path}: ${actual} instead of ${expected}`];
+ if(Array.isArray(actual)&&Array.isArray(expected))return actual.length!==expected.length?[`${path}: ${actual.length} entries instead of ${expected.length}`]:actual.flatMap((v,i)=>ledgerDifferences(v,expected[i],`${path}[${i}]`));
+ if(actual&&expected&&typeof actual==='object'&&typeof expected==='object'&&!Array.isArray(actual)&&!Array.isArray(expected)){
+  const keys=Object.keys(expected);if(JSON.stringify(Object.keys(actual))!==JSON.stringify(keys))return [`${path}: keys ${Object.keys(actual).join(',')} instead of ${keys.join(',')}`];
+  return keys.flatMap(k=>ledgerDifferences((actual as Record<string,unknown>)[k],(expected as Record<string,unknown>)[k],`${path}.${k}`));
+ }
+ return Object.is(actual,expected)?[]:[`${path}: ${JSON.stringify(actual)} instead of ${JSON.stringify(expected)}`];
+}
+
+it('serves the frozen ledger of the current plan, regenerated to within floating-point rounding with its seeded variation and no plan errors',async()=>{
  expect(MAIN_PLANET_LEDGER.planHash,'Run node scripts/planet-plan.ts build after editing the plan.').toBe(await contentHash(PLAN_TEXT));
  const regenerated=await buildLedger(planTown(MAIN_PLANET_PLAN,{field}),PLAN_TEXT);
- expect(regenerated).toEqual(MAIN_PLANET_LEDGER);
+ expect(ledgerDifferences(regenerated,MAIN_PLANET_LEDGER)).toEqual([]);
  expect(MAIN_PLANET_LEDGER.conflicts.filter(c=>c.severity==='error')).toEqual([]);
 },120000);
 
