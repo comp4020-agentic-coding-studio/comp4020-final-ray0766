@@ -4,7 +4,17 @@ on:
     inputs:
       backup_id:
         description: Exact release-backups directory ID; restores its data point and original image
-        required: true
+        required: false
+        type: string
+      mode:
+        description: Branch-only diagnosis (diagnose) or one guarded start (start)
+        required: false
+        default: diagnose
+        type: choice
+        options: [diagnose, start]
+      expect_image:
+        description: For start, the known-good image the machine must already be configured for
+        required: false
         type: string
 concurrency:
   group: deploy
@@ -24,3 +34,22 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1
       - name: Restore existing machine without adding resources
         run: node scripts/release/restore.mjs "$BACKUP_ID"
+  # Dispatched from a branch only (this job does not exist on main): reads the machine, and with mode=start starts
+  # it once when its configuration is the known-good image and the server command. No push to main is involved,
+  # so checks and the release guard do not run.
+  diagnose:
+    if: ${{ github.ref != 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      MODE: ${{ inputs.mode }}
+      EXPECT_IMAGE: ${{ inputs.expect_image }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1
+      - name: Read the machine and, if asked and safe, start it once
+        run: node scripts/release/diagnose.mjs
+
