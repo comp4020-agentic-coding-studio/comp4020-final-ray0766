@@ -264,3 +264,14 @@ What the soak shows:
 ### Not done
 
 - The Docker image itself was not rebuilt here: that needs the `node:24-slim` base and packages from the network. The bundle and its manifest were checked by mounting them into the Crit 8 runtime image.
+
+## Spec files still failing (recorded, not fixed)
+
+These were classified during this check. They are left as they are for now: none involves the code changed here.
+
+| Spec files | What fails | Since |
+| --- | --- | --- |
+| `ground-camera`, `ground-camera-avoidance`, `ground-camera-temporal`, `ground-camera-atomic` | Tests of the v11 camera rig, which does not run (`cameraCutawayB=false`) | Already failing at the imported baseline `298a440` |
+| `ground-camera-protected-central`, `-physical`, `-tangent`, `ground-camera-cutaway-ranking`, `ground-camera-cutaway-ranking-r8-support` | The same unused rig. These replay traps captured in the old town, which the planned main planet's colliders no longer reproduce | Passing at `298a440`, failing after the main-planet work |
+| `harbour-resources` | `document is not defined`: the test needs a DOM environment | Already failing at `298a440` |
+| `home-paths` | One test takes about 8 s on both old and new code, close to the 10 s timeout, and times out under parallel load. The timeout was not raised. | Since before this check |
