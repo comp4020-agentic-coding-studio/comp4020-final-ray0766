@@ -26,6 +26,11 @@ vi.mock('../src/client/terrain-model.ts', async () => {
   return {object,ground,tick(){},setSunDirection(){},dispose(){if(disposed)return;disposed=true;ground.geometry.dispose();ground.material.dispose();object.removeFromParent();}};
  }};
 });
+// The starport terminal letters its signs on a canvas. Node has no DOM, so give
+// it a canvas whose 2D context accepts drawing and records nothing; the real
+// terminal, its textures and its teardown still run.
+const canvas=()=>({width:0,height:0,getContext:()=>new Proxy({},{get:(target:Record<string|symbol,unknown>,key)=>key in target?target[key]:()=>({width:0}),set:(target,key,value)=>{target[key]=value;return true;}})});
+vi.stubGlobal('document',{createElement:(tag:string)=>{if(tag!=='canvas')throw Error('Only canvas is provided here: '+tag);return canvas();}});
 afterEach(()=>{setGroundWorld(true);vi.restoreAllMocks();});
 
 it.each([false,true])('frees model and town-owned resources once while retaining application palettes (sample=%s)', sample=>{
