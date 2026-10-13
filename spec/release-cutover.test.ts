@@ -3,6 +3,7 @@ import {existsSync,mkdirSync,mkdtempSync,readFileSync,rmSync,writeFileSync} from
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
 import {openStore} from '../src/server/store.ts';
 const sha=(path:string)=>createHash('sha256').update(readFileSync(path)).digest('hex');
 // A stopped, unintegrated main database with two players, and the release directory a preflight left.
@@ -34,5 +35,14 @@ it('leaves the main database in place when the probe fails, with the stopped cop
   expect(()=>cutover(main,release)).toThrow('stays in place');
   expect(sha(main)).toBe(before);expect(existsSync(join(release,'displaced'))).toBe(false);
   expect(JSON.parse(readFileSync(join(release,'metadata.json'),'utf8')).backup).toBe(join(release,'at-stop.sqlite'));
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+it('exits non-zero from the command line and writes no result when the cutover fails',()=>{
+ const {dir,main,release}=stopped();
+ try{
+  writeFileSync(join(release,'at-stop.sqlite.integrated.sqlite'),'left by an earlier attempt');
+  const run=spawnSync(process.execPath,['scripts/release/cutover-copy.mjs',main,release],{encoding:'utf8'});
+  expect(run.status).not.toBe(0);expect(run.stderr).toContain('stays in place');
+  expect(existsSync(join(release,'cutover-result.json'))).toBe(false);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });

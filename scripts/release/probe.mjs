@@ -22,7 +22,7 @@ let tool='not needed: already integrated';
 if(marked)copyFileSync(original,integrated);
 else{
  const run=spawnSync(process.execPath,[fileURLToPath(new URL('../integration-migrate-copy.ts',import.meta.url)),'--source',original,'--destination',integrated,'--report',report,'--apply'],{encoding:'utf8',env:{...process.env,NODE_OPTIONS:'--max-old-space-size=80'}});
- if(run.status!==0)throw Error('Integration tool '+(run.status===2?'found risks':'failed')+': '+String(run.stderr).split('\n').filter(l=>/Error/.test(l)).slice(-2).join(' '));
+ if(run.status!==0)throw Error('Integration tool '+(run.status===2?'found risks':'failed')+': '+String(run.stderr).split('\n').filter(l=>/^[A-Za-z]*Error:/.test(l)).slice(-2).join(' '));
  const r=JSON.parse(readFileSync(report,'utf8'));
  assert.equal(r.status,'applied-to-isolated-copy');assert.equal(r.preview.risks.length,0);
  assert.ok(r.sourceUnchanged&&r.restoreMatchesAllOriginalTables&&r.reopenEqual&&r.savedPoseReadsStable);

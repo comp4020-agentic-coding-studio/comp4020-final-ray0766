@@ -17,7 +17,7 @@ export function cutover(main,dir){
  copyFileSync(dir+'/metadata.json',dir+'/metadata-preflight.json');
  writeFileSync(dir+'/metadata.json.next',JSON.stringify({...record,backup:point,schema:stopped.schema,sha256}),{mode:0o600});renameSync(dir+'/metadata.json.next',dir+'/metadata.json');
  const probe=spawnSync(process.execPath,['--max-old-space-size=80',fileURLToPath(new URL('./probe.mjs',import.meta.url)),point],{encoding:'utf8'});
- if(probe.status!==0)throw Error('The probe failed on the stopped database, which stays in place: '+String(probe.stderr).split('\n').filter(l=>/Error/.test(l)).slice(-2).join(' '));
+ if(probe.status!==0)throw Error('The probe failed on the stopped database, which stays in place: '+String(probe.stderr).split('\n').filter(l=>/^[A-Za-z]*Error:/.test(l)).slice(-2).join(' '));
  const result=JSON.parse(readFileSync(point+'.probe-result.json','utf8')),integrated=point+'.integrated.sqlite';
  if(result.status!=='passed'||result.sourceSha256!==sha256||hash(readFileSync(integrated))!==result.integratedSha256)throw Error('The probe result does not match the stopped database');
  const displaced=dir+'/displaced';mkdirSync(displaced,{recursive:true,mode:0o700});
