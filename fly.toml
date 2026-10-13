@@ -20,6 +20,13 @@
 
 primary_region = "syd"
 
+# Swap on the machine's own disk; the machine size and the volume stay as set
+# below. The 256 MB machine reports 207 MB of memory, and the server idles at
+# about 128 MB there; a second new player arriving while the first one's home
+# was prepared ran the swapless VM out of memory, and it stalled instead of
+# failing (2026-10-14). Swap absorbs those short peaks at the cost of speed.
+swap_size_mb = 512
+
 [build]
 dockerfile = "Dockerfile"
 
