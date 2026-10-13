@@ -38,9 +38,11 @@ for(let attempt=1;;attempt++){
  catch(error){if(attempt>=10||!/failed to get manifest|MANIFEST_UNKNOWN/.test(error.message))throw error;console.log(`IMAGE_NOT_READY attempt ${attempt}; the machine is unchanged, retrying in 20 s`);await sleep(20_000);}
 }
 output('ran','true');
-const stopped=Date.now();
+const stopped=Date.now();let pinned=image;
 try{
- expectConfig({image,cmd:['sleep','infinity'],mounts:config.mounts});
+ // Fly answers with the tag and the digest it resolved (tag@sha256:...). From here on the release is that exact image:
+ // the server starts from it and every later check compares the digest too, not only the tag.
+ pinned=expectConfig({image,cmd:['sleep','infinity'],mounts:config.mounts}).image;console.log('RELEASE_IMAGE '+pinned);
  // Fly's exec gives up on a request after about a minute (HTTP 408), so the cutover runs detached and is polled.
  const pid=exec(`const fs=await import('node:fs');const {spawn}=await import('node:child_process');for(const f of ['at-stop.sqlite','cutover.exit','cutover-result.json'])if(fs.existsSync(${JSON.stringify(backup)}+'/'+f))throw Error('A cutover already ran for this release: '+f);for(const pid of fs.readdirSync('/proc').filter(n=>/^\\d+$/.test(n))){let cmd='';try{cmd=fs.readFileSync('/proc/'+pid+'/cmdline','utf8');}catch{}if(cmd.includes('src/server/index.ts'))throw Error('Application writer is still running');}const child=spawn('sh',['-c','node /app/scripts/release/cutover-copy.mjs /data/little-post.sqlite '+${JSON.stringify(backup)}+' > '+${JSON.stringify(backup+'/cutover.log')}+' 2>&1; echo $? > '+${JSON.stringify(backup+'/cutover.exit')}],{detached:true,stdio:'ignore'});child.unref();console.log(child.pid);`).trim();
  if(!/^\d+$/.test(pid))throw Error('The detached cutover did not start');
@@ -54,8 +56,8 @@ try{
  if(!proof.marked||proof.schema!==result.to||proof.integrity!=='ok'||proof.foreignKeys!==0||proof.main!==result.integratedSha256||proof.restorePoint!==backup+'/at-stop.sqlite'||proof.restorePoint!==result.restorePoint||proof.restoreSha256!==result.restoreSha256||proof.restoreFile!==result.restoreSha256)throw Error('The live files do not match the cutover result: '+JSON.stringify(proof));
  console.log('CUTOVER '+JSON.stringify(result));
  // The init command is named explicitly: without --command the merged configuration kept `sleep infinity`.
- run('flyctl',['machine','update',id,'-a',APP,'--machine-config',saved,'--image',image,'--command',SERVER.join(' '),'--autostart=true','--autostop=stop','--yes'],START);
- expectConfig({image,cmd:SERVER,mounts:config.mounts});
+ run('flyctl',['machine','update',id,'-a',APP,'--machine-config',saved,'--image',pinned,'--command',SERVER.join(' '),'--autostart=true','--autostop=stop','--yes'],START);
+ expectConfig({image:pinned,cmd:SERVER,mounts:config.mounts});
  const health=await waitIntegrated(site,Math.min(Date.now()+HEALTH,deadline-SETTLE-AFTER));
  if(health?.profile!=='integrated')throw Error('The new server did not report the integrated world in time: '+JSON.stringify(health));
  console.log('CUTOVER_HEALTH '+JSON.stringify({...health,secondsStopped:Math.round((Date.now()-stopped)/1000)}));
