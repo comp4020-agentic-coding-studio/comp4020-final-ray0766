@@ -36,11 +36,13 @@ from this checkout on a free port with a throwaway database
 (`spec/legacy-world-setup.ts`). It runs one file at a time and refuses to start
 if the server is not the legacy world.
 
-Nine specs of camera code the game does not run are kept but left out of
-`pnpm check`: the v11 ground camera rig, the cutaway rig and frame
-certification (listed in `vitest.config.ts`). The game builds neither rig and
-never certifies a frame, and several of these specs replay captures from a town
-the main planet replaced. `pnpm test:disabled-camera` runs them.
+Twenty specs whose subject is camera code the game does not run are kept but
+left out of `pnpm check`: the v11 ground camera rig, the cutaway rig, frame
+certification and town cutaways (listed in `vitest.config.ts`). The game builds
+neither rig, never certifies a frame and leaves the cutaway switch off; several
+of these specs replay captures from a town the main planet replaced, and one
+replays pole travel for over twenty minutes. `pnpm test:disabled-camera` runs
+them.
 
 At a crit, a green `check` job is half the shipped mark, but it's never the
 judgement of the work: your tutor checks what you deployed against the published
