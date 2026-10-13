@@ -1,4 +1,4 @@
-import {expect,it} from 'vitest';
+import {vi,expect,it} from 'vitest';
 import {readFileSync} from 'node:fs';
 import * as T from 'three';
 import {geometrySnapshot} from './lod-r4-fixture.ts';
@@ -10,6 +10,16 @@ import {buildPart} from '../src/shared/blueprint-parts.ts';
 import {disposeObject3D,ResourceTracker} from '../src/assets/claude-geometry/core/dispose.ts';
 import {createShipModel} from '../src/assets/claude-geometry/ship/factory.ts';
 import {STARTERS} from '../src/assets/claude-geometry/ship/design.ts';
+// The geometry contracts below never read texture pixels. Generating the
+// procedural pattern maps (vendored code, about 2 s of this file's 2.5 s) only
+// made it slow enough to time out while the whole check runs in parallel. Each
+// pattern gets a 1x1 pair instead: every material keeps its maps, names and
+// sharing, and every bound, triangle and draw call is still compared.
+vi.mock('../src/assets/claude-geometry/style/textures.ts',async importOriginal=>{
+ const actual=await importOriginal<typeof import('../src/assets/claude-geometry/style/textures.ts')>(),{DataTexture,RGBAFormat,SRGBColorSpace}=await import('three');
+ const tiny=(srgb:boolean)=>{const texture=new DataTexture(new Uint8Array([128,128,255,255]),1,1,RGBAFormat);if(srgb)texture.colorSpace=SRGBColorSpace;texture.needsUpdate=true;return texture;};
+ return {...actual,patternTextures:()=>({normal:tiny(false),albedo:tiny(true)})};
+});
 it('retains pre-R4 contracts across 78 fixtures, accounting for the measured rotated window hood corner',()=>{
  const before=JSON.parse(readFileSync('docs/evidence/lod-r4/before-geometry.json','utf8')) as ReturnType<typeof geometrySnapshot>,current=geometrySnapshot(),after={...current,entries:current.entries.filter(row=>before.entries.some(old=>old.id===row.id&&old.lod===row.lod))};
  expect(after.parts).toMatchObject(before.parts);expect(after.entries.length).toBe(78);
