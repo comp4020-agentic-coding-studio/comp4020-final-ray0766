@@ -25,5 +25,7 @@ const result=exec(`const fs=await import('node:fs');for(const pid of fs.readdirS
 // The original image restarts only on a confirmed restore; otherwise the machine stays stopped with no writer.
 const restored=JSON.parse(result);if(restored.status!=='restored')throw Error('The database was not restored; the machine stays stopped');console.log(JSON.stringify(restored));run(['machine','update',id,'-a',app,'--machine-config',saved,'--image',record.config.image,'--command','node src/server/index.ts','--autostart=true','--autostop=stop','--yes']);
 // --machine-config merges into the current configuration, so check what Fly now reports rather than what was sent.
-const now=JSON.parse(run(['machine','list','-a',app,'--json']))[0].config;if(now.image!==record.config.image||JSON.stringify(now.init?.cmd??null)!==JSON.stringify(['node','src/server/index.ts']))throw Error('The machine was not left on the original image and server command: '+JSON.stringify({image:now.image,cmd:now.init?.cmd??null}));
+// Fly may add the digest to the recorded tag, as in run 38459447827; the tag and any digest both carry must match.
+const sameImage=(a,b)=>{const [tagA,digestA]=String(a).split('@'),[tagB,digestB]=String(b).split('@');return tagA===tagB&&(!digestA||!digestB||digestA===digestB);};
+const now=JSON.parse(run(['machine','list','-a',app,'--json']))[0].config;if(!sameImage(now.image,record.config.image)||JSON.stringify(now.init?.cmd??null)!==JSON.stringify(['node','src/server/index.ts']))throw Error('The machine was not left on the original image and server command: '+JSON.stringify({image:now.image,cmd:now.init?.cmd??null}));
 console.log('Original image and matched database restored on the same machine. Verify public routes before resuming traffic.');

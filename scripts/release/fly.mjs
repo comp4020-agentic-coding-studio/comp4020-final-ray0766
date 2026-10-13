@@ -5,6 +5,9 @@ export const APP='comp4020-final-ray0766',SERVER=['node','src/server/index.ts'];
 export const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 export function run(cmd,args,timeout){const p=spawnSync(cmd,args,{encoding:'utf8',maxBuffer:8*1024*1024,timeout});if(p.error)throw Error(cmd+' failed: '+p.error.message);if(p.status!==0)throw Error(cmd+' failed: '+p.stderr.slice(-2500));return p.stdout;}
 export function machine(){const machines=JSON.parse(run('flyctl',['machine','list','-a',APP,'--json']));if(machines.length!==1)throw Error('Expected exactly one existing app machine');return machines[0];}
+/** Fly records an image by tag and digest (`...:release-x@sha256:...`) even when an update named only the tag (run
+ * 38459447827), so two references name the same image when their tags match and, where both carry one, their digests. */
+export function sameImage(a,b){const [tagA,digestA]=String(a).split('@'),[tagB,digestB]=String(b).split('@');return tagA===tagB&&(!digestA||!digestB||digestA===digestB);}
 export function allocationProblem(config){return config.guest?.memory_mb!==256||config.guest?.cpus!==1||config.guest?.cpu_kind!=='shared'||config.mounts?.length!==1?'Unexpected machine allocation':null;}
 // Fly omits a zero exit status and empty output, and drops a command it will not run without saying so, so every
 // remote step prints something and an empty answer counts as a step that did not run.
@@ -17,7 +20,7 @@ export function remote(id){
  * whatever an earlier update set (the init command stayed `sleep infinity` in run 38439968624). */
 export function expectConfig(want){
  const {config}=machine(),cmd=config.init?.cmd??null,problems=[];
- if(config.image!==want.image)problems.push(`image ${config.image} instead of ${want.image}`);
+ if(!sameImage(config.image,want.image))problems.push(`image ${config.image} instead of ${want.image}`);
  if(JSON.stringify(cmd)!==JSON.stringify(want.cmd))problems.push(`command ${JSON.stringify(cmd)} instead of ${JSON.stringify(want.cmd)}`);
  const allocation=allocationProblem(config);if(allocation)problems.push(allocation);
  if(want.mounts&&JSON.stringify(config.mounts)!==JSON.stringify(want.mounts))problems.push('volume mounts changed');
