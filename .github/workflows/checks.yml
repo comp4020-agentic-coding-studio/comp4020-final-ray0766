@@ -103,10 +103,19 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # 1.6
       - name: Back up live SQLite and rehearse migration on a private copy
         run: node scripts/release/preflight.mjs
+      - name: Build the release image without deploying it
+        # --remote-only builds the Dockerfile on Fly's builders; the machine
+        # keeps serving the old image until the next two steps.
+        run: |
+          label="release-${GITHUB_SHA::12}-${GITHUB_RUN_ID}"
+          flyctl deploy --build-only --push --remote-only --image-label "$label" -a ${{ github.event.repository.name }}
+          echo "RELEASE_IMAGE=registry.fly.io/${{ github.event.repository.name }}:$label" >> "$GITHUB_ENV"
+      - name: Integrate the stopped live database if it is not integrated yet
+        # Puts the original image and the stopped database back on failure.
+        run: node scripts/release/cutover.mjs "$RELEASE_IMAGE"
       - name: Deploy
-        # --remote-only builds the Dockerfile on Fly's builders; --ha=false
-        # keeps the app at one machine and one volume.
-        run: flyctl deploy --remote-only --ha=false -a ${{ github.event.repository.name }}
+        # --ha=false keeps the app at one machine and one volume.
+        run: flyctl deploy --image "$RELEASE_IMAGE" --ha=false -a ${{ github.event.repository.name }}
       - name: Verify the deployed site is online
         run: |
           for i in 1 2 3 4 5; do
@@ -116,3 +125,5 @@ jobs:
             sleep 10
           done
           echo "site did not return 200"; exit 1
+      - name: Verify the server runs the integrated world
+        run: curl -fsS "$APP_URL/healthz" | grep '"profile":"integrated"'
