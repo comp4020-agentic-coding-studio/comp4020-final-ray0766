@@ -261,9 +261,23 @@ What the soak shows:
   - a changed camera padding.
 - 53 related spec files: 300 tests pass. The one failure is `harbour-resources`, which needs a DOM and already failed at `298a440`.
 
-### Not done
+### Image build (added after the soak)
 
-- The Docker image itself was not rebuilt here: that needs the `node:24-slim` base and packages from the network. The bundle and its manifest were checked by mounting them into the Crit 8 runtime image.
+The image was then built from this Dockerfile (`docker build`, local only, not pushed).
+- `pnpm build` inside it produced the worker bundle from 124 source files, and the runtime stage copied `build/`.
+
+It was started the way CI starts it: a throwaway `/data`, `--memory=256m` and no swap.
+
+| Check | Result |
+| --- | --- |
+| Startup | Clean |
+| Worker | The server chose the bundled worker: the source hash still matches after `pnpm prune --prod`. |
+| `MALLOC_ARENA_MAX` | 2 |
+| `/` and `/readme/` | 200 |
+| `spec/invariants.test.ts` | Passes |
+| The `heavy-work` "keeps answering" check | Passes |
+| Four new players | Each got a home in 0.6–1.0 s |
+| cgroup memory after those arrivals | 159 MB |
 
 ## Spec files still failing (recorded, not fixed)
 
