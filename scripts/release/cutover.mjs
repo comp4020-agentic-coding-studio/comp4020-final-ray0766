@@ -20,7 +20,13 @@ if(live.marked){console.log('CUTOVER not needed: the live database is already in
 if(!live.preflight)throw Error('This release has no preflight backup');
 const saved=join(local,'original-config.json');writeFileSync(saved,JSON.stringify(config),{mode:0o600});
 const start=img=>run('flyctl',['machine','update',id,'-a',app,'--machine-config',saved,'--image',img,'--yes']);
-run('flyctl',['machine','update',id,'-a',app,'--machine-config',saved,'--image',image,'--command','sleep infinity','--autostart=false','--autostop=off','--yes','--skip-health-checks']);
+// Fly's registry can answer 404 for an image pushed seconds earlier (run 38438023060: "failed to get manifest" six
+// seconds after the push; Fly staff on community.fly.io describe this race and a retry after about a minute). The
+// machine is unchanged when that happens, so only that error is retried, for up to three minutes.
+for(let attempt=1;;attempt++){
+ try{run('flyctl',['machine','update',id,'-a',app,'--machine-config',saved,'--image',image,'--command','sleep infinity','--autostart=false','--autostop=off','--yes','--skip-health-checks']);break;}
+ catch(error){if(attempt>=10||!/failed to get manifest|MANIFEST_UNKNOWN/.test(error.message))throw error;console.log(`IMAGE_NOT_READY attempt ${attempt}; the machine is unchanged, retrying in 20 s`);await new Promise(r=>setTimeout(r,20_000));}
+}
 let swapped=false,pid='';
 try{
  // Fly's exec gives up on a request after about a minute (HTTP 408), and on a throttled shared CPU the probe alone
