@@ -2,7 +2,9 @@ import { isDoorPartId } from './blueprint-parts.ts';
 import { Matrix3, Matrix4, Quaternion, Vector3 } from 'three';
 import { OBB } from 'three/addons/math/OBB.js';
 import { anchorQuaternion } from '../assets/claude-geometry/core/anchor.ts';
-import { fitGround, groundRadius } from '../assets/claude-geometry/core/ground.ts';
+import { groundRadius } from '../assets/claude-geometry/core/ground.ts';
+import type { fitGround } from '../assets/claude-geometry/core/ground.ts';
+import { seatedFit } from './ground-fit-cache.ts';
 import { chord2 } from '../assets/claude-geometry/terrain/styles/program.ts';
 import type { HeightField } from '../assets/claude-geometry/core/ground.ts';
 import { groundCells, partTransform, pivotOf } from './blueprint-model.ts';
@@ -38,7 +40,9 @@ export class PathPlacementCache {
     const old=this.objects.get(object);
     if(old&&old.field===field&&old.parts===parts&&old.signature===signature)return old;
     const footing=surfaceFooting(parts,radius),anchor={dir:object.position,yaw:object.rotation};
-    const fit=fitGround(field,anchor,footing.footprint);
+    // The shared exact-key fit cache: the same anchor and footprint on the same immutable field
+    // give the same fit, so placing one more object no longer refits every neighbour.
+    const fit=seatedFit(field,anchor,footing.footprint);
     const result:PreparedObject={field,parts,signature,fit,foundation:{anchor,baseRadius:fit.baseRadius,radius:footing.footprint.radius,covers:footing.covers}};
     this.objects.set(object,result);return result;
   }
