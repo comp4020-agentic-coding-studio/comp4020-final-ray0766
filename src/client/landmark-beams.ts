@@ -13,5 +13,6 @@ export function landmarkBeam(parent: T.Object3D, dir: Vec3, from: number, length
   beam.name = 'landmark-beam'; beam.renderOrder = 5; beam.raycast = () => {};
   beam.position.copy(surfacePoint(up)); beam.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), up);
   parent.add(beam);
-  return { beam, dispose() { beam.removeFromParent(); geometry.dispose(); material.dispose(); } };
+  let disposed = false;
+  return { beam, dispose() { if (disposed) return; disposed = true; beam.removeFromParent(); geometry.dispose(); material.dispose(); } };
 }

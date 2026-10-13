@@ -35,7 +35,7 @@ function placed(parent: T.Object3D, dir: Vec3, yaw: number, emit: (k: Kit) => vo
   return { root, built };
 }
 
-/** A starport terminal tower with its STARPORT boards. */
+/** A starport terminal tower with its STARPORT boards. Each handle frees its resources once, however often a planet switch asks. */
 export function starportTerminal(parent: T.Object3D, dir: Vec3, yaw: number, spec: TowerSpec) {
   const { root, built } = placed(parent, dir, yaw, k => terminalTower(k, spec), 'starport-terminal');
   const sign = board(['STARPORT', '登机口 · BOARDING'], spec.signWidth, TERMINAL.sign.height);
@@ -43,7 +43,8 @@ export function starportTerminal(parent: T.Object3D, dir: Vec3, yaw: number, spe
     const mesh = new T.Mesh(sign.geometry, sign.material);
     mesh.position.set(0, TERMINAL.sign.y, face * (spec.shaft + .06)); mesh.rotation.y = face > 0 ? 0 : Math.PI; root.add(mesh);
   }
-  return { root, dispose() { root.removeFromParent(); sign.dispose(); disposeObject3D(built.group); } };
+  let disposed = false;
+  return { root, dispose() { if (disposed) return; disposed = true; root.removeFromParent(); sign.dispose(); disposeObject3D(built.group); } };
 }
 
 /** The boarding console: a lit slanted screen reading BOARD / 登机, facing +Z. */
@@ -51,7 +52,8 @@ export function boardingConsoleModel(parent: T.Object3D, dir: Vec3, yaw: number)
   const { root, built } = placed(parent, dir, yaw, boardingConsole, 'boarding-console');
   const label = board(['BOARD', '站进光圈登机'], .46, .27), s = CONSOLE.screen, mesh = new T.Mesh(label.geometry, label.material);
   mesh.position.set(0, s.y + Math.cos(s.tilt) * .075, Math.sin(s.tilt) * .075); mesh.rotation.x = s.tilt - Math.PI / 2; root.add(mesh);
-  return { root, dispose() { root.removeFromParent(); label.dispose(); disposeObject3D(built.group); } };
+  let disposed = false;
+  return { root, dispose() { if (disposed) return; disposed = true; root.removeFromParent(); label.dispose(); disposeObject3D(built.group); } };
 }
 
 /** The lit ring that shows where boarding works (drawing only; it carries no collision). */
@@ -64,5 +66,6 @@ export function boardingRing(parent: T.Object3D, dir: Vec3, lift = .03) {
   root.position.copy(surfacePoint(up)).addScaledVector(up, lift); root.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), up);
   for (const g of [geometry, inner]) { const mesh = new T.Mesh(g, material); mesh.renderOrder = 4; mesh.raycast = () => {}; root.add(mesh); }
   parent.add(root);
-  return { root, dispose() { root.removeFromParent(); geometry.dispose(); inner.dispose(); material.dispose(); } };
+  let disposed = false;
+  return { root, dispose() { if (disposed) return; disposed = true; root.removeFromParent(); geometry.dispose(); inner.dispose(); material.dispose(); } };
 }
