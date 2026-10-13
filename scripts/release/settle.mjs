@@ -2,7 +2,7 @@ import {spawnSync} from 'node:child_process';
 import {mkdtempSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {APP,SERVER,expectConfig,health,machine,remote,run,sameImage,sleep,waitIntegrated} from './fly.mjs';
+import {APP,SERVER,ensureStarted,expectConfig,health,machine,remote,run,sameImage,serviceFlags,sleep,waitIntegrated} from './fly.mjs';
 // Confirms a finished release, or puts the previous one back when a release did not finish. It needs nothing from
 // the job that started the release: the deploy job runs it after a failure or cancellation, the release-guard
 // workflow runs it again once the whole run has ended (also when the job was cut off at its limit, which runs no
@@ -35,6 +35,7 @@ let state=null;for(let attempt=0;attempt<3&&!state;attempt++){try{state=read();}
 if(state?.released)await leave('this release was confirmed');
 // Whatever runs on the release image (a half-started server, a detached cutover) stops before anything is decided.
 run('flyctl',['machine','update',id,'-a',APP,'--command','sleep infinity','--autostart=false','--autostop=off','--yes','--skip-health-checks'],120_000);
+await ensureStarted(id);
 expectConfig({image,cmd:['sleep','infinity']});
 state=read();
 if(state.recorded){
@@ -43,7 +44,8 @@ if(state.recorded){
 }else{
  if(!state.original)throw Error('This release recorded no original machine configuration; run the release-recovery workflow with '+tag);
  const saved=join(mkdtempSync(join(tmpdir(),'settle-')),'original-config.json');writeFileSync(saved,JSON.stringify(state.original),{mode:0o600});
- run('flyctl',['machine','update',id,'-a',APP,'--machine-config',saved,'--image',state.original.image,'--command',SERVER.join(' '),'--autostart=true','--autostop=stop','--yes'],120_000);
+ run('flyctl',['machine','update',id,'-a',APP,'--machine-config',saved,'--image',state.original.image,'--command',SERVER.join(' '),...serviceFlags(state.original),'--yes'],120_000);
+ await ensureStarted(id);
  expectConfig({image:state.original.image,cmd:SERVER,mounts:state.original.mounts});
 }
 // The previous release may predate the integrated world, so any healthy answer counts here.

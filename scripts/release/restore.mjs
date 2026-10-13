@@ -2,6 +2,7 @@ import {spawnSync} from 'node:child_process';
 import {mkdtempSync,readFileSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {ensureStarted,serviceFlags} from './fly.mjs';
 // Operator recovery, and the deploy job's rollback of a failed cutover (cutover.mjs). It restores the point the
 // release's metadata.json names: the preflight backup, or the stopped database once a cutover recorded it.
 const app='comp4020-final-ray0766',tag=process.argv[2];if(!/^[a-f0-9]{12}-[0-9]+$/.test(tag??''))throw Error('Provide the exact recorded backup directory identifier');
@@ -14,16 +15,20 @@ function exec(code){const command='node --input-type=module -e "await import(\'d
 // Stop the current image's server first: a release whose server cannot start is the case to recover from,
 // and a machine has to be running before anything can be read from its volume.
 run(['machine','update',id,'-a',app,'--command','sleep infinity','--autostart=false','--autostop=off','--yes','--skip-health-checks']);
+// An update leaves a stopped machine stopped; nothing can be read from the volume until it runs.
+await ensureStarted(id);
 const record=JSON.parse(exec(`const fs=await import('node:fs');console.log(JSON.stringify({config:JSON.parse(fs.readFileSync('${backup}/machine-config.json','utf8')),metadata:JSON.parse(fs.readFileSync('${backup}/metadata.json','utf8'))}));`));if(record.metadata.machine!==id)throw Error('Backup belongs to a different machine');
 const point=record.metadata.backup;if(typeof point!=='string'||!point.startsWith(backup+'/')||point.includes('..'))throw Error('The backup record points outside its directory');
 const saved=join(local,'original-config.json');writeFileSync(saved,JSON.stringify(record.config),{mode:0o600});
 // No app process runs while its DB and WAL files are swapped. Keep the same VM,
 // volume and original image; recovery does not create or resize resources.
 run(['machine','update',id,'-a',app,'--machine-config',saved,'--image',record.config.image,'--command','sleep infinity','--autostart=false','--autostop=off','--yes','--skip-health-checks']);
+await ensureStarted(id);
 const checker=readFileSync('scripts/release/sqlite-check.mjs','utf8'),restore=readFileSync('scripts/release/restore-copy.mjs','utf8');
 const result=exec(`const fs=await import('node:fs');for(const pid of fs.readdirSync('/proc').filter(n=>/^\\d+$/.test(n))){let cmd='';try{cmd=fs.readFileSync('/proc/'+pid+'/cmdline','utf8');}catch{}if(cmd.includes('src/server/index.ts'))throw Error('Application writer is still running');}fs.writeFileSync('${backup}/sqlite-check.mjs',${JSON.stringify(checker)},{mode:0o600});fs.writeFileSync('${backup}/restore-copy.mjs',${JSON.stringify(restore)},{mode:0o600});const {restoreCopy}=await import('file://${backup}/restore-copy.mjs');console.log(JSON.stringify(restoreCopy('/data/little-post.sqlite',${JSON.stringify(point)},'${record.metadata.sha256}')));`);
 // The original image restarts only on a confirmed restore; otherwise the machine stays stopped with no writer.
-const restored=JSON.parse(result);if(restored.status!=='restored')throw Error('The database was not restored; the machine stays stopped');console.log(JSON.stringify(restored));run(['machine','update',id,'-a',app,'--machine-config',saved,'--image',record.config.image,'--command','node src/server/index.ts','--autostart=true','--autostop=stop','--yes']);
+const restored=JSON.parse(result);if(restored.status!=='restored')throw Error('The database was not restored; the machine stays stopped');console.log(JSON.stringify(restored));run(['machine','update',id,'-a',app,'--machine-config',saved,'--image',record.config.image,'--command','node src/server/index.ts',...serviceFlags(record.config),'--yes']);
+await ensureStarted(id);
 // --machine-config merges into the current configuration, so check what Fly now reports rather than what was sent.
 // Fly may add the digest to the recorded tag, as in run 38459447827; the tag and any digest both carry must match.
 const sameImage=(a,b)=>{const [tagA,digestA]=String(a).split('@'),[tagB,digestB]=String(b).split('@');return tagA===tagB&&(!digestA||!digestB||digestA===digestB);};

@@ -2,7 +2,7 @@ import {spawnSync} from 'node:child_process';
 import {appendFileSync,mkdtempSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {APP,SERVER,allocationProblem,expectConfig,machine,remote,run,sleep,waitIntegrated} from './fly.mjs';
+import {APP,SERVER,allocationProblem,ensureStarted,expectConfig,machine,remote,run,serviceFlags,sleep,waitIntegrated} from './fly.mjs';
 // Runs in the deploy job after preflight.mjs, with the image the job built but has not deployed. Production refuses
 // an unintegrated database, so before the first integrated release the live one is integrated while no app process
 // runs: the machine switches to the new image without starting its server, cutover-copy.mjs backs up the stopped
@@ -21,6 +21,8 @@ const left=()=>deadline-Date.now(),output=(key,value)=>{if(process.env.GITHUB_OU
 const backup='/data/release-backups/'+tag,local=mkdtempSync(join(tmpdir(),'cutover-'));
 const {id,config}=machine(),allocation=allocationProblem(config);if(allocation)throw Error(allocation);
 const {command,exec}=remote(id);
+// The machine may have been autostopped since the preflight woke it; reading its database needs it running.
+await ensureStarted(id);
 const live=JSON.parse(exec(`const {DatabaseSync}=await import('node:sqlite');const fs=await import('node:fs');const db=new DatabaseSync('/data/little-post.sqlite',{readOnly:true});const marked=!!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='integration_config'").get()&&Number(db.prepare('SELECT version FROM integration_config WHERE id=1').get()?.version??0)>=1;db.close();console.log(JSON.stringify({marked,preflight:fs.existsSync(${JSON.stringify(backup+'/metadata.json')})}));`));
 if(!live.preflight)throw Error('This release has no preflight backup');
 if(live.marked){
@@ -38,8 +40,10 @@ for(let attempt=1;;attempt++){
  catch(error){if(attempt>=10||!/failed to get manifest|MANIFEST_UNKNOWN/.test(error.message))throw error;console.log(`IMAGE_NOT_READY attempt ${attempt}; the machine is unchanged, retrying in 20 s`);await sleep(20_000);}
 }
 output('ran','true');
-const stopped=Date.now();let pinned=image;
+const stopped=Date.now();let pinned;
 try{
+ // The update leaves a machine that was stopped meanwhile stopped; autostop stays off until the release ends.
+ await ensureStarted(id,START);
  // Fly answers with the tag and the digest it resolved (tag@sha256:...). From here on the release is that exact image:
  // the server starts from it and every later check compares the digest too, not only the tag.
  pinned=expectConfig({image,cmd:['sleep','infinity'],mounts:config.mounts}).image;console.log('RELEASE_IMAGE '+pinned);
@@ -56,7 +60,9 @@ try{
  if(!proof.marked||proof.schema!==result.to||proof.integrity!=='ok'||proof.foreignKeys!==0||proof.main!==result.integratedSha256||proof.restorePoint!==backup+'/at-stop.sqlite'||proof.restorePoint!==result.restorePoint||proof.restoreSha256!==result.restoreSha256||proof.restoreFile!==result.restoreSha256)throw Error('The live files do not match the cutover result: '+JSON.stringify(proof));
  console.log('CUTOVER '+JSON.stringify(result));
  // The init command is named explicitly: without --command the merged configuration kept `sleep infinity`.
- run('flyctl',['machine','update',id,'-a',APP,'--machine-config',saved,'--image',pinned,'--command',SERVER.join(' '),'--autostart=true','--autostop=stop','--yes'],START);
+ // The service settings go back to what this release found when it started.
+ run('flyctl',['machine','update',id,'-a',APP,'--machine-config',saved,'--image',pinned,'--command',SERVER.join(' '),...serviceFlags(config),'--yes'],START);
+ await ensureStarted(id,START);
  expectConfig({image:pinned,cmd:SERVER,mounts:config.mounts});
  const health=await waitIntegrated(site,Math.min(Date.now()+HEALTH,deadline-SETTLE-AFTER));
  if(health?.profile!=='integrated')throw Error('The new server did not report the integrated world in time: '+JSON.stringify(health));

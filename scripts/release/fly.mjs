@@ -27,6 +27,17 @@ export function expectConfig(want){
  if(problems.length)throw Error('The machine configuration is not what the update set: '+problems.join('; '));
  return config;
 }
+/** Fly leaves a stopped machine stopped through an update ("machine was in a non-started state prior to the update so
+ * leaving the new version stopped", run 38465565129), and its proxy autostops an idle one. A step that needs the
+ * machine running checks its state, starts it when it is not running, and waits until Fly reports it started. */
+export async function ensureStarted(id,timeout=120_000){
+ let state=machine().state;const until=Date.now()+timeout;
+ if(state!=='started'){console.log(`MACHINE ${state}; starting it`);if(['stopped','suspended','created','failed'].includes(state))run('flyctl',['machine','start',id,'-a',APP],timeout);}
+ while(state!=='started'&&Date.now()<until){await sleep(3000);state=machine().state;}
+ if(state!=='started')throw Error(`The machine is ${state}, not started, after ${Math.round(timeout/1000)} s`);
+}
+/** The service start/stop settings a release found, as flags that put them back when it ends. */
+export function serviceFlags(config){const s=config.services?.[0]??{},stop=s.autostop===false||s.autostop==='off'?'off':s.autostop===true||s.autostop==null?'stop':String(s.autostop);return [`--autostart=${s.autostart!==false}`,`--autostop=${stop}`];}
 /** One health request, given up after `timeout` ms; null when nothing answered in time. */
 export async function health(site,timeout=10_000){try{const response=await globalThis.fetch(site+'/healthz',{signal:globalThis.AbortSignal.timeout(timeout)});return response.ok?await response.json():null;}catch{return null;}}
 /** Polls until the server reports the integrated world or `until` (epoch ms) passes. */
