@@ -1,7 +1,7 @@
 import {DatabaseSync} from 'node:sqlite';
 import {copyFileSync,existsSync,mkdirSync,readFileSync,renameSync,writeFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {hash,health} from './sqlite-check.mjs';
 // Caller must stop the application writer first. The stopped database becomes this release's restore point:
 // metadata.json, which restore.mjs reads, names it from here on, and the preflight's record stays beside it as
@@ -27,3 +27,5 @@ export function cutover(main,dir){
  if(hash(readFileSync(main))!==result.integratedSha256||now.integrity.join()!=='ok'||now.foreignKeys!==0||now.schema!==result.to)throw Error('The swapped database does not match the verified copy');
  return {status:'integrated',restorePoint:point,restoreSha256:sha256,from:result.from,to:result.to,players:result.players,playersRead:result.playersRead,tool:result.tool,integratedSha256:result.integratedSha256,displaced};
 }
+// cutover.mjs runs this file detached on the machine and reads the result file, as Fly's exec gives up after a minute.
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){const [main,dir]=process.argv.slice(2),result=cutover(main,dir);writeFileSync(dir+'/cutover-result.json',JSON.stringify(result),{mode:0o600});console.log(JSON.stringify(result));}

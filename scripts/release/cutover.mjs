@@ -13,7 +13,8 @@ const backup='/data/release-backups/'+tag,local=mkdtempSync(join(tmpdir(),'cutov
 function run(cmd,args){const p=spawnSync(cmd,args,{encoding:'utf8',maxBuffer:8*1024*1024});if(p.status!==0)throw Error(cmd+' failed: '+p.stderr.slice(-2500));return p.stdout;}
 const machines=JSON.parse(run('flyctl',['machine','list','-a',app,'--json']));if(machines.length!==1)throw Error('Expected exactly one existing app machine');const {id,config}=machines[0];
 if(config.guest?.memory_mb!==256||config.guest?.cpus!==1||config.guest?.cpu_kind!=='shared'||config.mounts?.length!==1)throw Error('Unexpected machine allocation');
-function exec(code){const command='node --input-type=module -e "await import(\'data:text/javascript;base64,'+Buffer.from(code).toString('base64')+'\')"';const result=JSON.parse(run('flyctl',['machine','exec',id,command,'-a',app,'--json','--timeout','120']));if(Number(result.exit_code??result.exitCode??0)!==0)throw Error('Remote operation failed: '+(result.stderr??'').split('\n').filter(l=>/^[A-Za-z]*Error:/.test(l)).slice(-2).join(' '));if(result.stdout!==undefined&&typeof result.stdout!=='string')throw Error('Invalid remote stdout');const out=result.stdout??'';if(!out.trim())throw Error('Fly returned nothing for a remote step, so it did not run');return out;}
+function command(line){const result=JSON.parse(run('flyctl',['machine','exec',id,line,'-a',app,'--json','--timeout','120']));if(Number(result.exit_code??result.exitCode??0)!==0)throw Error('Remote operation failed: '+(result.stderr??'').split('\n').filter(l=>/^[A-Za-z]*Error:/.test(l)).slice(-2).join(' '));if(result.stdout!==undefined&&typeof result.stdout!=='string')throw Error('Invalid remote stdout');const out=result.stdout??'';if(!out.trim())throw Error('Fly returned nothing for a remote step, so it did not run');return out;}
+const exec=code=>command('node --input-type=module -e "await import(\'data:text/javascript;base64,'+Buffer.from(code).toString('base64')+'\')"');
 const live=JSON.parse(exec(`const {DatabaseSync}=await import('node:sqlite');const fs=await import('node:fs');const db=new DatabaseSync('/data/little-post.sqlite',{readOnly:true});const marked=!!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='integration_config'").get()&&Number(db.prepare('SELECT version FROM integration_config WHERE id=1').get()?.version??0)>=1;db.close();console.log(JSON.stringify({marked,preflight:JSON.parse(fs.readFileSync(${JSON.stringify(backup+'/probe-result.json')},'utf8')).status}));`));
 if(live.marked){console.log('CUTOVER not needed: the live database is already integrated');process.exit(0);}
 if(live.preflight!=='passed')throw Error('This release has no passing preflight probe');
@@ -22,11 +23,19 @@ const start=img=>run('flyctl',['machine','update',id,'-a',app,'--machine-config'
 run('flyctl',['machine','update',id,'-a',app,'--machine-config',saved,'--image',image,'--command','sleep infinity','--autostart=false','--autostop=off','--yes','--skip-health-checks']);
 let swapped=false;
 try{
- const result=JSON.parse(exec(`const fs=await import('node:fs');for(const pid of fs.readdirSync('/proc').filter(n=>/^\\d+$/.test(n))){let cmd='';try{cmd=fs.readFileSync('/proc/'+pid+'/cmdline','utf8');}catch{}if(cmd.includes('src/server/index.ts'))throw Error('Application writer is still running');}const {cutover}=await import('file:///app/scripts/release/cutover-copy.mjs');console.log(JSON.stringify(cutover('/data/little-post.sqlite',${JSON.stringify(backup)})));`));
+ // Fly's exec gives up on a request after about a minute (HTTP 408), and on a throttled shared CPU the probe alone
+ // took 68 s at a quarter core and 371 s at a sixteenth locally. So the cutover runs detached and is polled.
+ const pid=exec(`const fs=await import('node:fs');const {spawn}=await import('node:child_process');for(const pid of fs.readdirSync('/proc').filter(n=>/^\\d+$/.test(n))){let cmd='';try{cmd=fs.readFileSync('/proc/'+pid+'/cmdline','utf8');}catch{}if(cmd.includes('src/server/index.ts'))throw Error('Application writer is still running');}const child=spawn('sh',['-c','node /app/scripts/release/cutover-copy.mjs /data/little-post.sqlite '+${JSON.stringify(backup)}+' > '+${JSON.stringify(backup+'/cutover.log')}+' 2>&1; echo $? > '+${JSON.stringify(backup+'/cutover.exit')}],{detached:true,stdio:'ignore'});child.unref();console.log(child.pid);`).trim();
+ if(!/^\d+$/.test(pid))throw Error('The detached cutover did not start');
+ let state='running';const began=Date.now();
+ while(state==='running'&&Date.now()-began<10*60_000){await new Promise(r=>setTimeout(r,10_000));state=command(`sh -c "cat ${backup}/cutover.exit 2>/dev/null || (test -d /proc/${pid} && echo running) || echo gone"`).trim();}
+ if(state!=='0')throw Error('The cutover '+(state==='running'?'was still running after ten minutes':state==='gone'?'stopped without an exit status':'exited with '+state)+': '+exec(`const fs=await import('node:fs');console.log(JSON.stringify(fs.existsSync(${JSON.stringify(backup+'/cutover.log')})?fs.readFileSync(${JSON.stringify(backup+'/cutover.log')},'utf8').split('\\n').filter(l=>/^[A-Za-z]*Error:/.test(l)).slice(-2).join(' '):'no log'))`).trim());
+ const result=JSON.parse(exec(`console.log((await import('node:fs')).readFileSync(${JSON.stringify(backup+'/cutover-result.json')},'utf8'))`));
  if(result.status!=='integrated')throw Error('The cutover did not report an integrated database');
  swapped=true;console.log('CUTOVER '+JSON.stringify(result));
  start(image);
- let health=null;for(let i=0;i<40&&health?.profile!=='integrated';i++){try{health=await (await globalThis.fetch(site+'/healthz')).json();}catch{/* starting */}if(health?.profile!=='integrated')await new Promise(r=>setTimeout(r,3000));}
+ // The new server took 25 s to answer at a quarter core and 121 s at a sixteenth locally; wait up to five minutes.
+ let health=null;for(let i=0;i<100&&health?.profile!=='integrated';i++){try{health=await (await globalThis.fetch(site+'/healthz')).json();}catch{/* starting */}if(health?.profile!=='integrated')await new Promise(r=>setTimeout(r,3000));}
  if(health?.profile!=='integrated')throw Error('The new server did not report the integrated world: '+JSON.stringify(health));
  console.log('CUTOVER_HEALTH '+JSON.stringify(health));
 }catch(error){
