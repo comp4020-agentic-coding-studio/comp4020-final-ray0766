@@ -229,6 +229,7 @@ describe('versioned, constrained home neighbourhoods', () => {
     }
   });
 
+  // Up to 3.0 s on the x86-64 CI runner across runs 38434626581-38454559718, against the default 5 s.
   it('falls back deterministically from a malformed terrain document to a fully checked meadow', () => {
     const fallback = generateHomeManifest(radius, 8, '{bad-json');
     expect(fallback).toMatchObject({ environment: SHORT_STREET_ENVIRONMENT, fallback: true, fallbackReason: 'invalid-environment', seed: 8 });
@@ -237,7 +238,7 @@ describe('versioned, constrained home neighbourhoods', () => {
     const { fallback: regular, ...expected } = fixtures.get(8)!;
     expect(regular).toBe(false); expect(result).toEqual(expected);
     expect(homeRoutesWalkable(worldOf(fallback), fallback.routes)).toBe(true);
-  });
+  }, 10_000);
 
   it.each(['ocean', 'temperate'] as const)('refuses unsafe %s terrain and returns an ordinary legal fallback', style => {
     const terrain = defaultEnvironment(style, 1);
@@ -250,6 +251,7 @@ describe('versioned, constrained home neighbourhoods', () => {
     expect(homeRoutesWalkable(worldOf(fallback), fallback.routes)).toBe(true);
   }, 10000);
 
+  // Up to 3.6 s on the x86-64 CI runner across runs 38434626581-38454559718, against the default 5 s.
   it('falls back from dry but uneven terrain without weakening the foundation or walk rules', () => {
     const terrain = defaultEnvironment('temperate', 1);
     Object.assign(terrain.params, { relief: 1.4, roughness: 1, waterLevel: null, outcrops: 1 });
@@ -260,7 +262,7 @@ describe('versioned, constrained home neighbourhoods', () => {
     const fallback = generateHomeManifest(radius, 8, document);
     expect(fallback).toMatchObject({ environment: SHORT_STREET_ENVIRONMENT, fallback: true, fallbackReason: 'unsafe-environment' });
     expect(homeRoutesWalkable(worldOf(fallback), fallback.routes)).toBe(true);
-  });
+  }, 15_000);
 
   it('accepts an explicitly supplied legal terrain and rejects invalid inputs without producing a plan', () => {
     const decoded = decodeEnvironment(SHORT_STREET_ENVIRONMENT);

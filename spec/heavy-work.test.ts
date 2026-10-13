@@ -48,6 +48,7 @@ it('prepares a new home and its station on the worker with exactly the result of
   expect(station(prepared, b.planetId).status).toBe('placed');
 }, 20_000);
 
+// Up to 3.5 s on the x86-64 CI runner across runs 38434626581-38454559718, against the default 5 s.
 it('turns a new player away with a 503 and writes nothing when the worker fails, then pauses instead of retrying it', async () => {
   const [inline, prepared] = twins(), free = inline.create('reference').planetId;
   const broken = new HeavyWork({ pauseMs: 300, script: new URL('data:text/javascript,throw new Error("The worker could not start.")') }); workers.push(broken);
@@ -69,8 +70,9 @@ it('turns a new player away with a 503 and writes nothing when the worker fails,
   await expect(prepared.createPrepared('turned-away')).rejects.toMatchObject({ status: 503, message: PAUSED });
   expect(broken.starts).toBe(2);
   expect(prepared.has('turned-away')).toBe(false);
-});
+}, 15_000);
 
+// Up to 4.5 s on the x86-64 CI runner across runs 38434626581-38454559718, against the default 5 s.
 it('keeps a new home complete when only its station search fails, and leaves the station for a later visit', async () => {
   const [inline, prepared] = twins(), id = 'station-later';
   const a = inline.create(id);
@@ -89,7 +91,7 @@ parentPort.on('message', ({ id, kind, input }) => { if (kind !== 'home') process
   const hash = stationHash(inline, a.planetId);
   expect(saved(prepared, b.planetId)).toEqual(saved(inline, a.planetId).filter(o => o.hash !== hash));
   expect(prepared.db.prepare('SELECT 1 FROM home_stations WHERE planet_id=?').get(b.planetId)).toBeUndefined();
-});
+}, 15_000);
 
 it('prepares exactly the same arrival with the bundled JavaScript worker', async () => {
   // The bundle is built here, so this does not depend on a prior pnpm build.

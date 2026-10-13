@@ -7,6 +7,7 @@ const stores: ReturnType<typeof openStore>[] = [];
 const sample = () => { const s = openStore(':memory:', { homeSample: true }); stores.push(s); s.create('owner'); return s; };
 afterEach(() => { for (const s of stores.splice(0)) s.close(); });
 
+// Up to 3.1 s on the x86-64 CI runner across runs 38434626581-38454559718, against the default 5 s.
 it('projects legacy rooms to three times the area without moving or rewriting belongings', () => {
   const s = sample(), h = s.state('owner').home!;
   const legacy = { version: 7, room: { width: 5, depth: 4, height: 2.6 }, material: 'sage', items: [{ id: 'my_old_shelf', kind: 'shelf', position: [1.7, 0, -1.5], yaw: .2 }] };
@@ -20,7 +21,7 @@ it('projects legacy rooms to three times the area without moving or rewriting be
   expect(s.db.prepare('SELECT document FROM home_interiors WHERE building_id=?').get(h.buildingId)!.document).toBe(original);
   expect(homePositionAllowed([3.6, 0, 0], projected.interior.items, undefined, projected.interior.room)).toBe(true);
   expect(homePositionAllowed([4.6, 0, 0], projected.interior.items, undefined, projected.interior.room)).toBe(false);
-});
+},10_000);
 
 it('persists a separate door version, rejects stale or distant actions and never moves a person on close', () => {
   const s = sample(), before = s.state('owner'), h = before.home!;
@@ -47,6 +48,7 @@ it('persists a separate door version, rejects stale or distant actions and never
   expect(homeNearDoor(position)).toBe(false); expect(homeNearDoor(HOME_ENTRY)).toBe(true);
 });
 
+// Up to 3.9 s on the x86-64 CI runner across runs 38434626581-38454559718, against the default 5 s.
 it('lets a visitor open the same door while furniture stays owner-only', () => {
   const s=sample(),owner=s.state('owner'),h=owner.home!;
   s.setHomeDoor('owner',{buildingId:h.buildingId,visitEpoch:owner.location!.visitEpoch,expectedDoorVersion:0,open:false});
@@ -60,7 +62,7 @@ it('lets a visitor open the same door while furniture stays owner-only', () => {
   expect(()=>s.saveHome('visitor',{buildingId:h.buildingId,expectedVersion:1,material:'blue',items:[]})).toThrow('Only');
   const serialized=s.db.prepare('SELECT document FROM home_interiors WHERE building_id=?').get(h.buildingId)!.document;
   expect(JSON.parse(String(serialized))).toMatchObject({doorOpen:true,doorVersion:2});
-});
+},15_000);
 
 it('applies the same immediate door pose for ordinary and reduced motion', () => {
   const view=createHomeDoor(),position=[...HOME_ENTRY] as [number,number,number],room=defaultHomeInterior();

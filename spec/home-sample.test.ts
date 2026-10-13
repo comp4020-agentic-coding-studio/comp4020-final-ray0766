@@ -24,6 +24,7 @@ function legacyVisitorInside(s:ReturnType<typeof openStore>,id='visitor'){
 }
 afterEach(()=>{for(const s of stores.splice(0)){try{s.close();}catch{ /* already closed to test reopening */ }}for(const d of dirs.splice(0))rmSync(d,{recursive:true,force:true});});
 
+// Up to 3.2 s on the x86-64 CI runner across runs 38434626581-38454559718, against the default 5 s.
 it('starts an isolated sample at its sole home and never regenerates its persisted manifest',()=>{
   const s=sample(),u=s.universe('owner');expect(u.player.worldRadius).toBe(21.6);expect(u.planets.every(p=>p.radius===21.6)).toBe(true);
   // The generated layout, not counting the teleport station placed beside it.
@@ -34,7 +35,7 @@ it('starts an isolated sample at its sole home and never regenerates its persist
   const before=s.db.prepare('SELECT document,hash FROM home_manifests').all();s.claim('owner',u.ownedPlanetId);expect(s.db.prepare('SELECT document,hash FROM home_manifests').all()).toEqual(before);
   expect(()=>s.claim('owner',u.planets.find(p=>p.kind==='garden'&&!p.mine)!.id)).toThrow('already');
   expect(s.state('owner').position).toEqual(s.state('owner').home!.door.position);
-});
+},10_000);
 
 it('requires the paired entrance and persists flat positions across reopen without touching exterior position',()=>{
   const dir=mkdtempSync(join(tmpdir(),'home-save-'));dirs.push(dir);const path=join(dir,'sample.sqlite');
@@ -72,6 +73,7 @@ it('rejects every exterior editing route indoors before any persistent write',()
   expect(s.universe('owner')).toEqual(snapshot);
 });
 
+// Up to 2.9 s on the x86-64 CI runner across runs 38434626581-38454559718, against the default 5 s.
 it('keeps visitors read-only, validates furniture clearances and scopes presence to the same home',()=>{
   const s=sample();s.create('visitor');const owner=s.state('owner'),h=owner.home!,presence=presenceStore(s.state);s.visit('visitor',owner.planetId);
   s.db.prepare('UPDATE players SET position=? WHERE id=?').run(JSON.stringify(owner.position),'visitor');enter(s);legacyVisitorInside(s);
@@ -85,8 +87,9 @@ it('keeps visitors read-only, validates furniture clearances and scopes presence
   presence.heartbeat('owner',beat(inside));const snapshot=presence.heartbeat('visitor',beat(visitor));expect(snapshot.scope).toBe('home:'+h.buildingId);expect(snapshot.visitors).toHaveLength(1);expect(snapshot.visitors[0].position).toEqual(inside.location!.kind==='interior'?inside.location!.position:[]);
   s.exitHome('visitor',{buildingId:h.buildingId,visitEpoch:visitor.location!.visitEpoch});expect(presence.heartbeat('owner',beat(inside)).visitors).toHaveLength(0);
   expect(()=>presence.heartbeat('owner',{planetId:inside.planetId,facing:[0,0,-1],scope:'exterior',visitEpoch:inside.location!.visitEpoch})).toThrow('scope');
-});
+},10_000);
 
+// Up to 3.1 s on the x86-64 CI runner across runs 38434626581-38454559718, against the default 5 s.
 it('replaces and undoes exterior content under one building id, replays hashes, preserves belongings and exits at the moved door',()=>{
   const s=sample(),old=s.state('owner'),h=old.home!;
   const changed=s.remodelHome('owner',{buildingId:h.buildingId,expectedVersion:1,variant:'terrace'}),updated=changed.player.home!;
@@ -123,7 +126,7 @@ it('reuses preset content without overwriting user library names, groups or edit
   expect(rows().slice(0,customized.length)).toEqual(customized);
   expect(rows()).toHaveLength(customized.length+1);
   expect(rows().at(-1)!.id).not.toBe(preset.blueprint.id);
-});
+},10_000);
 
 it('checks the exterior version before touching the library and rolls back a preset append if replacement fails',()=>{
   const s=sample(),h=s.state('owner').home!,body={buildingId:h.buildingId,expectedVersion:1,variant:'extended'};

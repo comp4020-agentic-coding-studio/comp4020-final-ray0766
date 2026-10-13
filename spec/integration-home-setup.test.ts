@@ -178,6 +178,7 @@ it('refuses an unbuildable synthetic surface without changing its terrain or sav
   expect(tables(store)).toEqual(before); expect(changes(store)).toBe(count);
 });
 
+// Up to 3.9 s on the x86-64 CI runner across runs 38434626581-38454559718, against the default 5 s.
 it('initialises one normal identity once, keeps one planet and interior, and excludes previously occupied unclaimed worlds', () => {
   const store = openStore(':memory:', { integratedWorld: true }); stores.push(store);
   const occupied = String(store.db.prepare("SELECT id FROM planets WHERE kind='garden' AND owner_id IS NULL ORDER BY rowid LIMIT 1").get()!.id);
@@ -209,4 +210,4 @@ it('initialises one normal identity once, keeps one planet and interior, and exc
   expect(confirmed.currentPlanet.objects).toHaveLength(2);
   expect(confirmed.currentPlanet.homeManifest).toBeUndefined();
   expect(rows(store, 'home_interiors')).toHaveLength(2);
-});
+},15_000);

@@ -48,13 +48,14 @@ it('uses the unchanged model envelope inside existing flight clearance and relea
  try{for(const design of STARTERS){const ship=createShipModel(design,lib,'medium');const tracked=new ResourceTracker().track(ship.object);expect(envelopeProblems(ship,SHIP_ENVELOPE)).toEqual([]);expect(ship.radius).toBeLessThan(SAFE_RADIUS-RADIUS);ship.setThrust(1);expect(ship.effects.plumeMesh?.visible).toBe(true);ship.setThrust(0);expect(ship.effects.plumeMesh?.visible).toBe(false);ship.dispose();ship.dispose();expect(ship.disposed).toBe(true);expect(tracked.counts().geometries).toBe(0);}}
  finally{lib.dispose();}
 });
+// Up to 4.1 s on the x86-64 CI runner across runs 38434626581-38454559718, against the default 5 s.
 it('derives the ship owner from the HTTP cookie and rejects unauthenticated, foreign-origin and oversized writes',async()=>{
  const base=inject('baseUrl');const session=async()=>{const r=await fetch(base+'/api/state');return r.headers.get('set-cookie')!.split(';')[0];};const a=await session(),b=await session();
  const save=(cookie:string,content:unknown,origin?:string)=>fetch(base+'/api/ship/save',{method:'POST',headers:{cookie,'content-type':'application/json',...(origin?{origin}:{})},body:JSON.stringify(content)});
  expect((await save(a,body())).status).toBe(200);expect((await save('',body())).status).toBe(401);expect((await save(a,body(),'https://untrusted.invalid')).status).toBe(403);
  expect((await save(b,{...body(),playerId:a})).status).toBe(400);expect((await save(b,{...body(),document:'x'.repeat(3000)})).status).toBe(413);
  const state=await(await fetch(base+'/api/state',{headers:{cookie:b}})).json();expect(state.ship).toEqual(defaultShip());
-});
+},15_000);
 it('replacing the parked/flight adapter preserves its transform and releases each old model and paint lease',async()=>{
  const {makeShip}=await import('../src/client/ship-model.ts');const {worldMaterials}=await import('../src/client/shared-assets.ts');
  const ship=makeShip();ship.root.position.set(3,4,5);ship.root.rotation.set(.1,.2,.3);const matrix=ship.root.matrix.clone();ship.root.updateMatrix();matrix.copy(ship.root.matrix);
