@@ -272,3 +272,34 @@ Real Chrome, real input, no database edits.
   - walk to the pad, teleport both ways.
 - No failed request, no console error and no server error-log entry.
 - The server's resident memory was 221 MB after the smoke.
+
+## Local 8098 updated to the worker version (13 October 2026)
+
+`final-workshop-v1` was fast-forwarded from `82c6455` to `a5ee304`, rebuilt and restarted. The environment is unchanged. The new parts:
+- New homes, station searches and arrival ground are prepared on the bundled worker thread.
+- The legacy HTTP specs run in their own project.
+
+**Database**
+
+- Routine backup first: `.data/little-post.before-worker-20261013T195737.sqlite` (integrity ok).
+- No schema change.
+
+**Worker**
+
+- The server started the bundled `build/worker/heavy-worker.mjs`.
+- It logged no fallback to the TypeScript worker.
+
+**Smoke**
+
+Real Chrome, real input, new identities.
+- Desktop:
+  - arrival at home;
+  - room in and out;
+  - workshop;
+  - teleport to the harbour and back;
+  - boarding, a 27 s flight to the harbour and landing in its ring.
+- Phone, Chinese:
+  - arrival;
+  - room in and out;
+  - teleport both ways.
+- No failed request, no console error and no server error-log entry.
