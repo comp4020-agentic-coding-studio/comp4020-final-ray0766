@@ -1,0 +1,1 @@
+export function cutover(main:string,dir:string): {status:'integrated';restorePoint:string;restoreSha256:string;from:number;to:number;players:number;playersRead:number;tool:unknown;integratedSha256:string;displaced:string};

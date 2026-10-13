@@ -18,6 +18,9 @@ COPY --from=build /app/build ./build
 COPY --from=build /app/src/server ./src/server
 COPY --from=build /app/src/shared ./src/shared
 COPY --from=build /app/src/assets ./src/assets
+# The release cutover integrates a stopped database inside this image (scripts/release/cutover.mjs).
+COPY --from=build /app/scripts/integration-migrate-copy.ts ./scripts/
+COPY --from=build /app/scripts/release/cutover-copy.mjs /app/scripts/release/probe.mjs /app/scripts/release/sqlite-check.mjs ./scripts/release/
 COPY package.json README.md ASSET-CREDITS.md ./
 EXPOSE 8080
 CMD ["node", "src/server/index.ts"]
