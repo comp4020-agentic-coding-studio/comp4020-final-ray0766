@@ -17,6 +17,26 @@ const sameImage=(a,b)=>{const [tagA,digestA]=String(a).split('@'),[tagB,digestB]
 const machines=list();console.log('MACHINES '+JSON.stringify(machines.map(summary),null,1));
 try{console.log('VOLUMES '+JSON.stringify(JSON.parse(run(['volumes','list','-a',app,'--json'])).map(v=>({id:v.id,state:v.state,size_gb:v.size_gb,region:v.region,attached_machine_id:v.attached_machine_id})),null,1));}catch(e){console.log('VOLUMES unavailable: '+e.message);}
 try{console.log('LOGS (last 150 lines, redacted)\n'+redact(run(['logs','-a',app,'--no-tail'],60_000)).trim().split('\n').slice(-150).join('\n'));}catch(e){console.log('LOGS unavailable: '+e.message);}
+if(mode==='probe'){
+ // Read-only evidence from the running machine, taken twice 3 s apart: load, memory and pressure stall information,
+ // every thread of every node process with its CPU time and kernel wait channel (the main thread's id is the pid),
+ // and one /healthz asked from inside the machine. Nothing is changed or restarted.
+ if(machines.length!==1)throw Error('Expected exactly one machine');
+ const code=`const fs=await import('node:fs');const {execFileSync}=await import('node:child_process');const read=f=>{try{return fs.readFileSync(f,'utf8').trim();}catch{return null;}};
+ const sample=()=>{const procs=[];for(const pid of fs.readdirSync('/proc').filter(n=>/^\\d+$/.test(n))){const cmd=(read('/proc/'+pid+'/cmdline')??'').split('\\0').join(' ').trim();if(!/node/.test(cmd))continue;const st=read('/proc/'+pid+'/status')??'';const pick=k=>(new RegExp('^'+k+':\\\\s*(.*)$','m').exec(st)??[])[1];
+  const threads=[];for(const tid of fs.readdirSync('/proc/'+pid+'/task')){const t=(read('/proc/'+pid+'/task/'+tid+'/stat')??'').split(') ').pop().split(' ');threads.push({tid:+tid,main:tid===pid,name:read('/proc/'+pid+'/task/'+tid+'/comm'),state:t[0],utime:+t[11],stime:+t[12],wchan:read('/proc/'+pid+'/task/'+tid+'/wchan')});}
+  procs.push({pid:+pid,cmd:cmd.slice(0,80),rssKb:pick('VmRSS'),hwmKb:pick('VmHWM'),threads});}
+  return {at:new Date().toISOString(),loadavg:read('/proc/loadavg'),mem:(read('/proc/meminfo')??'').split('\\n').filter(l=>/^(MemTotal|MemAvailable|MemFree|Cached|SwapTotal|SwapFree|Dirty|AnonPages)/.test(l)).join('; '),pressure:{cpu:read('/proc/pressure/cpu'),memory:read('/proc/pressure/memory'),io:read('/proc/pressure/io')},procs};};
+ const a=sample();await new Promise(r=>setTimeout(r,3000));const b=sample();
+ let local='';try{local=execFileSync('node',['-e',"fetch('http://127.0.0.1:8080/healthz',{signal:AbortSignal.timeout(8000)}).then(r=>r.text()).then(t=>console.log('answered '+t)).catch(e=>console.log('no answer: '+e.name))"],{encoding:'utf8',timeout:15000}).trim();}catch(e){local='probe failed: '+e.message.slice(0,80);}
+ console.log(JSON.stringify({first:a,second:b,localHealthz:local}));`;
+ let out;try{out=JSON.parse(run(['machine','exec',machines[0].id,'node --input-type=module -e "await import(\'data:text/javascript;base64,'+Buffer.from(code).toString('base64')+'\')"','-a',app,'--json','--timeout','50'],80_000));}catch(e){console.log('PROBE exec failed: '+e.message);out=null;}
+ if(out){const raw=String(out.stdout??'').trim();console.log('PROBE_RAW '+raw);
+  try{const p=JSON.parse(raw),hz=100;console.log('PROBE_SUMMARY '+JSON.stringify({loadavg:[p.first.loadavg,p.second.loadavg],mem:p.second.mem,pressure:p.second.pressure,localHealthz:p.localHealthz,
+   threadsBusyIn3s:p.second.procs.flatMap(pr=>pr.threads.map(t=>{const was=p.first.procs.find(x=>x.pid===pr.pid)?.threads.find(x=>x.tid===t.tid);return {pid:pr.pid,tid:t.tid,main:t.main,name:t.name,state:t.state,wchan:t.wchan,cpuSecondsIn3s:was?((t.utime+t.stime)-(was.utime+was.stime))/hz:null,cpuSecondsTotal:(t.utime+t.stime)/hz};})).filter(t=>t.main||t.cpuSecondsIn3s>0.05||t.cpuSecondsTotal>5),
+   processes:p.second.procs.map(pr=>({pid:pr.pid,cmd:pr.cmd,rssKb:pr.rssKb,hwmKb:pr.hwmKb,threads:pr.threads.length}))},null,1));}catch(e){console.log('PROBE parse failed: '+e.message);}
+  if(out.stderr)console.log('PROBE_STDERR '+redact(out.stderr).slice(0,600));}
+}
 if(mode==='restore-config'){
  // Approved minimal recovery after run 38465565129: the machine was autostopped by Fly 12 s before the cutover's
  // update, and Fly leaves a stopped machine stopped through any update. Put back the known-good image (exact digest)

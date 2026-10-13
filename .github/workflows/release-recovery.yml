@@ -11,7 +11,7 @@ on:
         required: false
         default: diagnose
         type: choice
-        options: [diagnose, start, restore-config]
+        options: [diagnose, probe, start, restore-config]
       expect_image:
         description: The known-good image (start, restore-config; restore-config needs its digest)
         required: false
