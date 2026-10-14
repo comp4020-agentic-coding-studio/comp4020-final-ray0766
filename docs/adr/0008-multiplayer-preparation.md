@@ -1,6 +1,6 @@
 # C9 Multiplayer Decision: Keep Other Players Responsive While the Initiator Waits
 
-**Status:** Approved; implemented locally, not deployed.
+**Status:** Approved; implemented and deployed to Fly on 14 October 2026.
 
 ## Context
 
@@ -40,7 +40,7 @@ Earlier two-browser movement tests recorded a 421 ms median across 30 samples, w
 
 With effective presence maintained, a local 256 MB, one-CPU container handled two online test clients and 40 joins with anonymous resident memory at 161–182 MB between rounds, peaking at 187 MB without sustained growth. This is not a Fly guarantee. The latest local smoke test used the repaired Dockerfile's actual build/start path at 256 MB without swap. Worker hash validity, invariants, and nonblocking checks passed; four joins took 0.6–1 seconds at roughly 159 MB. That smaller run does not replace the earlier peak-load result.
 
-See [the verification record](../evidence/crit9-realtime/verification.md), [local handoff](../integration/candidate-handoff.md), and [heavy-work tests](../../spec/heavy-work.test.ts). Existing related DOM failures and disabled camera tests remain outside this change; camera behaviour is unchanged. There has been no live Fly verification, and these tests establish no one-second SLA.
+See [the verification record](../evidence/crit9-realtime/verification.md), [local handoff](../integration/candidate-handoff.md), and [heavy-work tests](../../spec/heavy-work.test.ts). Disabled camera tests remain outside this change; camera behaviour is unchanged. On Fly the machine reports 207 MB, and without swap a second new player's arrival stalled it; with 512 MB of swap, one live check of two independent browser sessions passed. The second player entered in about three seconds and saw the first walk within about half a second. These tests establish no one-second SLA.
 
 ## When to Reconsider
 

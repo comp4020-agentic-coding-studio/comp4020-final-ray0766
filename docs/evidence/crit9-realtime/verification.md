@@ -289,3 +289,37 @@ These were classified during this check. They are left as they are for now: none
 | `ground-camera-protected-central`, `-physical`, `-tangent`, `ground-camera-cutaway-ranking`, `ground-camera-cutaway-ranking-r8-support` | The same unused rig. These replay traps captured in the old town, which the planned main planet's colliders no longer reproduce | Passing at `298a440`, failing after the main-planet work |
 | `harbour-resources` | `document is not defined`: the test needs a DOM environment | Already failing at `298a440` |
 | `home-paths` | One test takes about 8 s on both old and new code, close to the 10 s timeout, and times out under parallel load. The timeout was not raised. | Since before this check |
+
+## Public release (13 October UTC, 14 October in Canberra)
+
+The integrated version replaced Crit 8 on Fly through the normal CI deploy job. Times are UTC.
+
+| Run | Commit | Outcome |
+| --- | --- | --- |
+| 38421371307 | `a7bc468` | Preflight rehearsed the migration beside the live server; Fly's exec timed out and the site answered in 4–24 s for over ten minutes. The preflight became backup-only. |
+| 38439968624 | `f4160de` | Cutover integrated the database, but the new server never started (`sleep infinity` kept by a merged machine config); down 17:41–18:05, restored by the recovery workflow. |
+| 38459447827 | `ff0cd01` | Image check compared `tag` with `tag@sha256:…`; down about 3 minutes, restored by the recovery workflow. |
+| 38465565129 | `a31381a` | Fly autostopped the idle machine 12 s before the cutover's update and kept it stopped; down 20:53–21:56, restored by a branch-only config restore. |
+| 38480089623 | `d807bcf` | Released: database 4 → 16 with all 13 players read, 24 s stopped, release confirmed. |
+| 38485952022 | `8193418` | 512 MB swap (below). |
+
+Each release ran the full `pnpm check` in CI first; for `8193418` that was 112 spec files and 722 tests, all passing. `harbour-resources` passes again since `7cf5325`, and `home-paths` passes there. The disabled camera specs stay outside the check, as listed above.
+
+After `d807bcf`, a second new player's arrival stalled the machine. Fly reports 207 MB of memory; the server idled at 128 MB there and each arrival's worker added about 50–60 MB. With no swap the VM thrashed rather than failing: requests, shutdown signals and Fly's own exec timed out, with no out-of-memory kill. `8193418` adds `swap_size_mb = 512`; the machine size and volume are unchanged.
+
+### Live check after the swap
+
+Two independent browser contexts (Chrome, real controls), against the deployed site:
+
+| Check | Result |
+| --- | --- |
+| Version | The live page loads the bundle of the target build (`index-DPrJefyh.js`) |
+| New player | Landed at a new home in 2.9 s, rendered |
+| Second new player | Entered in 3.1 s |
+| Both took their gate to the harbour | 22 s and 25 s, walking included |
+| Walking seen by the other session | 0.49 s after the key went down, final position 0.05 s after it was released |
+| Coat change seen by the other session | 0.11 s after the click |
+| Reloads, page errors | None |
+| Memory during the second arrival | 42 MB available, about 15 MB swapped, low memory pressure |
+
+These are single runs, not a capacity measurement.
