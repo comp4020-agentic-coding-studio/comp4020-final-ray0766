@@ -124,6 +124,24 @@ function saved(name:string):LibraryEntry{const blueprint=industrialCabin();bluep
 function button(id:string){return document.getElementById(id) as HTMLButtonElement;}
 
 describe('home preparation lifecycle',()=>{
+  it('guards unsaved room layouts on refresh through failed and pending saves, then releases the guard',async()=>{
+    const{home,options}=interior();home.receive(player());await advanceUntil(()=>!home.preparing);
+    const unload=()=>{const event=new Event('beforeunload',{cancelable:true});window.dispatchEvent(event);return event.defaultPrevented;};
+    expect(unload()).toBe(false);
+    button('home-arrange').click();button('home-material-sage').click();
+    expect(unload()).toBe(true);expect(options.save).not.toHaveBeenCalled();
+    options.save.mockRejectedValueOnce(new Error('Save unavailable'));
+    button('home-save').click();await settle();expect(unload()).toBe(true);
+    const pending=deferred<Universe>();options.save.mockReturnValueOnce(pending.promise);
+    button('home-save').click();await settle();expect(unload()).toBe(true);
+    const saved=player(2);saved.home!.interior.material='sage';pending.resolve(universe(saved));
+    await settle();await advanceUntil(()=>!home.preparing);expect(unload()).toBe(false);
+    button('home-arrange').click();button('home-material-blue').click();expect(unload()).toBe(true);
+    button('home-cancel').click();expect(unload()).toBe(false);
+    button('home-arrange').click();button('home-material-warm').click();expect(unload()).toBe(true);
+    home.dispose();homes.splice(homes.indexOf(home),1);expect(unload()).toBe(false);
+  });
+
   it('yields before geometry, blocks input and actions, then presents the prepared room',async()=>{
     const{home,renderer,options}=interior(),state=player();home.receive(state);
     const photo=vi.fn();window.addEventListener('open-photo-mode',photo,{once:true});

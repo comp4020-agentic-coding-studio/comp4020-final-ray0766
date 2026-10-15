@@ -157,3 +157,10 @@ prototype. They do not claim to be the student's finished academic harness.
   route at the harbour gate in both languages; do not silently claim or reset their identity.
 - Movement save feedback must track pending work and acknowledgements of captured batches.
   An older response cannot mark newer movement saved; recovery retires old save tickets.
+
+- A room layout is an explicit-save draft, like a blueprint or ship design. Protect
+  browser leave/reload while it is dirty, including failed or pending saves; release
+  the listener on dispose and the guard only after acknowledgement or explicit discard.
+- Keep historical failures tied to their commit, module and evidence. Do not treat
+  disabled v11 camera specs as defects in the accepted runtime camera, or alter
+  production contracts to make a faulty fixture or driver pass. See docs/BUG-SUMMARY.zh-CN.md.

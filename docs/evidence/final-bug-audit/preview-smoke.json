@@ -1,0 +1,34 @@
+{
+  "url": "http://127.0.0.1:8143",
+  "http": {
+    "/healthz": 200,
+    "/": 200,
+    "/readme/": 200,
+    "/assets/index-Srmta34n.js": 200,
+    "/assets/three.core-B-WbRUxf.js": 200,
+    "/assets/sky-DwCWwWfw.js": 200,
+    "/assets/codec-Dvqc964a.js": 200,
+    "/assets/factory-Kihxb2wL.js": 200,
+    "/assets/placement-L6xH_Uol.js": 200,
+    "/assets/loading-state-CmWZoTQc.js": 200,
+    "/assets/loading-state-B4k25HRD.css": 200,
+    "/assets/index-Ca871JiU.css": 200,
+    "/private/candidate.sqlite": 404,
+    "/private/candidate.sqlite.business-key": 404,
+    "/private/candidate.sqlite.business.jsonl": 404
+  },
+  "entryAssets": [
+    "/assets/index-Srmta34n.js",
+    "/assets/three.core-B-WbRUxf.js",
+    "/assets/sky-DwCWwWfw.js",
+    "/assets/codec-Dvqc964a.js",
+    "/assets/factory-Kihxb2wL.js",
+    "/assets/placement-L6xH_Uol.js",
+    "/assets/loading-state-CmWZoTQc.js",
+    "/assets/loading-state-B4k25HRD.css",
+    "/assets/index-Ca871JiU.css"
+  ],
+  "oldAssetsRetained": true,
+  "privateDataExposed": false,
+  "browserVisualAcceptance": false
+}

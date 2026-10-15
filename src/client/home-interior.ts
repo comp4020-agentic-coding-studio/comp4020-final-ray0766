@@ -166,6 +166,7 @@ export class HomeInterior {
     window.addEventListener('keydown', this.keyDown, { capture: true, signal: this.abort.signal });
     window.addEventListener('keyup', this.keyUp, { capture: true, signal: this.abort.signal });
     window.addEventListener('blur', () => this.clearInput(), { signal: this.abort.signal });
+    window.addEventListener('beforeunload', event => { if (this.active && this.dirty) event.preventDefault(); }, { signal: this.abort.signal });
     document.addEventListener('visibilitychange', () => { if (document.hidden) { this.clearInput(); if(!this.photoMode)void this.flush(); } }, { signal: this.abort.signal });
     const joystick = this.get('home-joystick');
     const drag = (e: PointerEvent) => { const rect = joystick.getBoundingClientRect(); this.stick.set((e.clientX - rect.left - rect.width / 2) / 34, (e.clientY - rect.top - rect.height / 2) / 34).clampLength(0, 1); this.get('home-stick').style.transform = `translate(${this.stick.x * 25}px,${this.stick.y * 25}px)`; };

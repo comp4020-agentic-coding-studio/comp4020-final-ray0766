@@ -1,0 +1,19 @@
+{
+  "method": "Temporary isolated identity restored onto worlds 12 and 13; real Chrome DOM checks, not a flown journey or visual acceptance",
+  "results": [
+    {
+      "expected": "Little world 12",
+      "current": "Little world 12",
+      "chip": "LITTLE WORLD 12",
+      "menu": "Little world 12",
+      "drawCalls": 34
+    },
+    {
+      "expected": "Little world 13",
+      "current": "Little world 13",
+      "chip": "LITTLE WORLD 13",
+      "menu": "Little world 13",
+      "drawCalls": 34
+    }
+  ]
+}

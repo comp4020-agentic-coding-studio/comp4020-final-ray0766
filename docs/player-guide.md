@@ -1,4 +1,62 @@
-# Little Worlds — player and implementation guide
+# Little Worlds — current player guide
+
+This section describes the current integrated app and the local Final candidate.
+The dated evidence and the older implementation account below remain historical
+records. Release status is in the root [README](../README.md); the current bug
+inventory and its limits are in the [Chinese bug summary](BUG-SUMMARY.zh-CN.md).
+
+## Start with the identity you have
+
+- A new browser identity receives its own home and begins outside its door.
+  Choose a suit if asked. Open the door and enter your room, or use Pause →
+  Build on my planet / Open workshop outdoors. Keep this browser's cookies.
+- An old identity without a home keeps its saved location and progress. At the
+  harbour gate the bilingual message explains why it cannot return home yet.
+  Use Find my ship, board near the boarding ring, mark a Blank · unclaimed world
+  in Atlas, fly there and land, then Pause → Make this my planet → Build on my planet.
+  Marking a bearing does not move you. Landing range depends on the planet's
+  radius; slow below 6 m/s and wait for the landing action.
+- An existing owner whose home has no gate is a different case. Return by ship;
+  station preparation can follow on the owner's visit. If there is no suitable
+  site, use Pause → Place a teleport station. Saved buildings are not moved to
+  make room. A dismantled station is not automatically rebuilt.
+- Owning a planet and having an enterable room are separate. An older owner
+  without a room can use Set up my home to bind a doorway or confirm a cottage.
+
+## Save, travel and visit
+
+Walk with WASD/arrows, hold Shift to sprint, Space to jump, and E or a nearby
+button to interact. Drag to turn the view; phones have touch controls. Only your
+own home gate and the public gate form a return pair. Other exploration uses
+flight. Board beside the saved port position and brake near a world to land.
+
+Ground and flight movement save periodically. The status distinguishes pending,
+saving and acknowledged movement; a refresh restores the last acknowledged
+checkpoint, including flight mode. A slow or interrupted request can leave later
+movement unsaved. Blueprint library saves, placement/apply, ship designs and room
+layouts each require their own explicit action. Save blueprint does not place it.
+
+Only the owner may build, edit furniture, enter the private room or read private
+history. A nearby visitor can operate the shared exterior door, which does not
+permit room entry. Open the door before entering or leaving. Unsaved room layouts
+now request the browser's native leave/reload confirmation, including while a
+save is pending or has failed. Save successfully or explicitly cancel to clear
+that guard; it is not automatic draft persistence after a browser crash.
+
+The local Final candidate records business actions using observation-only aliases,
+with bounded journals beside SQLite and stdout, as described in [ADR 0009](adr/0009-business-observation.md).
+This does not create accounts or cross-device recovery. Two classmates' URL-only
+Crit 10 session and user judgement of the visuals remain separate from automated checks.
+
+---
+
+## Earlier implementation account — historical snapshot
+
+The rest of this file preserves earlier prototype directions, first-visit flow,
+local ports and verification limits. Its statements about an industrial harbour,
+empty new homes, fixed landing distances, running 8098 and unfinished C10 logging
+are historical, not current instructions or new evidence of a regression.
+
 
 A constellation made together: fly to a blank planet, make it your home, and shape
 it with a small building kit. Everyone can visit every planet, while only its
@@ -7,7 +65,7 @@ with a walkable arrival street, service buildings, a boarding apron and an optio
 courier delivery. Existing coats, delivery progress and locations survive the move
 to this multi-planet prototype.
 
-## First visit: a home, one object, then back to your ship
+### First visit: a home, one object, then back to your ship
 
 1. At Sunseed Harbour, close the suit chooser and walk along the street to
    **STARPORT / 01**. **Pause → Find my ship** shows a walking direction. At the
@@ -44,7 +102,7 @@ blueprints; saving a blueprint to the library is separate from placing its
 structure on your planet. The ready-made kit is available directly through
 **Build on my planet**.
 
-## Current design brief
+### Current design brief
 
 The user authorised an original direction beyond the Messenger learning
 prototype: many worlds, one home per browser identity, and shared exploration
@@ -98,7 +156,7 @@ This guide describes the implemented interaction and its limits. The current
 quality argument and release status are in the root README. The Crit 8 writing
 records the student's decisions with AI assistance; release evidence is separate.
 
-## Ownership, persistence and visitors
+### Ownership, persistence and visitors
 
 A random HttpOnly, SameSite browser cookie identifies a server session. SQLite
 stores ownership, object transforms, task state, current walking position, visit records and
@@ -134,7 +192,7 @@ new identities. Clearing cookies loses access to the owned planet, which remains
 visitable. There is no login, cross-device identity or recovery flow. The Atlas
 explains this before claiming. These limits need revisiting before public release.
 
-## Original work and references
+### Original work and references
 
 [Messenger by abeto](https://messenger.abeto.co/) informed spherical movement and
 camera exploration; its [authors’ interview](https://www.commarts.com/webpicks/messenger)
@@ -146,7 +204,7 @@ Orbital surfaces also use NASA SVS public-domain lunar maps; [asset credits](/cr
 record their sources and terms. No game assets or source were extracted. Rendering uses
 [Three.js](https://threejs.org/docs/), with Node’s SQLite for persistence.
 
-## Run and verify
+### Run and verify
 
 Use Node 24 and pnpm 11: `pnpm install`, `pnpm build`, then `pnpm start`.
 Open http://localhost:8080 or `/readme/`. With the server running, use `pnpm lint`,
