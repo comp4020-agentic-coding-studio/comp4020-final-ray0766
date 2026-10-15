@@ -75,3 +75,16 @@ Crit 10: two classmates still need to use only the URL in separate profiles whil
 the author explains their actions from logs without driving their UI. The author
 must supply the real Crit 10 reflection. Research-note authorship and visual or
 control acceptance remain with the user.
+
+## Crit10 source audit clarification (2026-10-16)
+
+The current contract and limits are traced in
+[the permission matrix](../crit10/permissions.zh-CN.md). Nearby visitors can operate
+a shared exterior door; they cannot newly enter or edit another owner's room.
+“Private room” above means owner-only entry and layout editing, not confidential
+layout data: the current home descriptor includes the interior for visitors too.
+The matrix reports that visibility boundary and a generic room-save refusal reason
+without silently changing either policy or implementation. The
+[rehearsal pack](../crit10/README.md) separates host notes, URL-only participants,
+blank observations and safe evidence export. It records preparation, not a completed
+rehearsal or a claim that the current hosted release contains this logging feature.
