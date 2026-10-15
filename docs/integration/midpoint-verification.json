@@ -1,0 +1,70 @@
+{
+  "http": [
+    {
+      "path": "/healthz",
+      "status": 200
+    },
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/readme",
+      "status": 200
+    },
+    {
+      "path": "/.data/midpoint/config.json",
+      "status": 404
+    },
+    {
+      "path": "/assets/index-Srmta34n.js",
+      "status": 200
+    }
+  ],
+  "databaseTables": 24,
+  "allTableDigestsUnchanged": true,
+  "integrity": "ok",
+  "checkedAtUtc": "2026-10-15T18:47:21.178044+00:00",
+  "baseline": "73b679e",
+  "branch": "integration/midpoint",
+  "applicationSourceChanged": false,
+  "typecheck": "passed",
+  "eslint": "passed (historical .claude worktrees excluded; src/test rules unchanged)",
+  "focusedTests": {
+    "files": 1,
+    "passed": 3,
+    "command": "APP_URL=http://127.0.0.1:8098 EXPECT_WORLD_PROFILE=integrated node node_modules/vitest/vitest.mjs run spec/local-preview.test.ts --project app --maxWorkers=2 --configLoader runner",
+    "setupCorrection": "Initial default localhost:8080 probe timed out before tests; rerun explicitly targeted 8098 and all 3 tests passed."
+  },
+  "build": {
+    "client": "passed",
+    "workerInputs": 124,
+    "warning": "Existing client chunk-size warning; no build errors"
+  },
+  "checkEvidence": "passed",
+  "provenance": {
+    "sourceFiles": 114,
+    "assets": 124,
+    "allHashesMatch": true
+  },
+  "service": {
+    "port": 8098,
+    "profile": "integrated",
+    "pid": 80139,
+    "owned": true,
+    "repeatStart": "same process; no second release built",
+    "old8143": "verified PID77898, exact cwd, wrapper and listen port; SIGTERM; files retained"
+  },
+  "inheritedFullSuite": {
+    "commit": "73b679e",
+    "files": 117,
+    "tests": 733,
+    "rerunThisRound": false
+  },
+  "boundaries": [
+    "No identity API calls or browser account changes",
+    "No push or deploy",
+    "Old v11 git inspection timed out; directory untouched",
+    "Visual acceptance and original topbar-number reproduction remain user checks"
+  ]
+}

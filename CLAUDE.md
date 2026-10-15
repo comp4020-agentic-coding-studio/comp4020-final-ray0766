@@ -164,3 +164,11 @@ prototype. They do not claim to be the student's finished academic harness.
 - Keep historical failures tied to their commit, module and evidence. Do not treat
   disabled v11 camera specs as defects in the accepted runtime camera, or alter
   production contracts to make a faulty fixture or driver pass. See docs/BUG-SUMMARY.zh-CN.md.
+
+- Canonical local development entry (2026-10-16): use this repository root
+  `/Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766` on
+  `integration/midpoint`. Read MIDPOINT.md and docs/integration/midpoint-sources.zh-CN.md.
+  Use `node scripts/local-preview.ts` for local8098; preserve its private
+  `.data/midpoint` configuration and database. Older worktrees are retained history,
+  not active development entries. Never silently substitute an empty/sample database.
+  Existing production start/build/deploy contracts remain independent.

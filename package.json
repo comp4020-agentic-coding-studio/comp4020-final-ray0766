@@ -14,7 +14,8 @@
     "build": "vite build && node scripts/build-worker.ts",
     "start": "node src/server/index.ts",
     "lint": "eslint .",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "local": "node scripts/local-preview.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
