@@ -9,6 +9,7 @@ import { openStore, RequestError } from './store.ts';
 import { integratedStartup } from './launch-options.ts';
 import { HeavyWork } from './heavy-work.ts';
 import { workerScript } from './worker-script.ts';
+import { businessLog } from './business-log.ts';
 
 const homeSample=process.env.HOME_SAMPLE==='1';
 const samplePort=Number(process.env.HOME_SAMPLE_PORT??8126);
@@ -20,6 +21,7 @@ if(homeSample&&!store.homeSample){store.close();throw new Error('HOME_SAMPLE ref
 // Local previews may coexist on one host. Cookies otherwise ignore the port.
 const cookieName=homeSample?(samplePort===8126?'little_home_sample':`little_home_sample_p${samplePort}`):'little_post';
 if (store.migrationBackup) console.log(`Before migration, saved a consistent backup: ${store.migrationBackup}`);
+const audit=businessLog(databasePath);
 const presence=presenceStore(store.state);
 // New homes, station searches and other planets' ground are prepared on a worker thread, so one
 // player's arrival never holds everyone else's movement and presence. The harbour is built now,
@@ -32,7 +34,10 @@ const root = resolve('dist');
 const limits = new Map<string, { start: number; count: number }>();
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const server = createServer(async (req, res) => {
+  let auditRoute: string | undefined, auditIdentity: string | undefined, auditCreated=false;
+  let auditContext: Record<string, unknown> = {};
   const send = (status: number, body: unknown) => {
+    if(auditRoute!==undefined)audit.record({route:auditRoute,identity:auditIdentity,created:auditCreated,status,context:auditContext,response:body});
     res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     res.end(JSON.stringify(body));
   };
@@ -42,11 +47,15 @@ const server = createServer(async (req, res) => {
     const url = new URL(req.url ?? '/', 'http://localhost');
     if (url.pathname === '/healthz') { send(200, { ok: true, profile:homeSample?'home-sample':store.integratedWorld?'integrated':'legacy-test' }); return; }
     if (url.pathname.startsWith('/api/')) {
+      auditRoute=url.pathname.slice(5);
+      auditContext={planetId:url.searchParams.get('planetId')};
       const cookie = new RegExp('(?:^|;\\s*)'+cookieName+'=([a-f0-9]{64})(?:;|$)').exec(req.headers.cookie ?? '')?.[1];
       let id = cookie ? hash(cookie) : '';
+      if(id&&store.has(id))auditIdentity=id;
       if (url.pathname === '/api/state' && req.method === 'GET') {
         if (!id || !store.has(id)) {
           const token = randomBytes(32).toString('hex'); id = hash(token); const created = await store.createPrepared(id);
+          auditIdentity=id;auditCreated=true;
           const secure = req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : '';
           res.setHeader('Set-Cookie', `${cookieName}=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=31536000${secure}`);
           send(200, created); return;
@@ -84,6 +93,7 @@ const server = createServer(async (req, res) => {
       let body: Record<string, unknown>;
       try { body = JSON.parse(text); } catch { throw new RequestError(400, 'Invalid JSON.'); }
       if (!body || Array.isArray(body) || typeof body !== 'object') throw new RequestError(400, 'Expected an object.');
+      auditContext=body;
       if (url.pathname === '/api/blueprints/save') send(200, store.saveBlueprint(id, body));
       else if(url.pathname==='/api/home/setup/preview')send(200,store.previewHomeSetup(id,body));
       else if(url.pathname==='/api/home/setup/confirm')send(200,store.confirmHomeSetup(id,body));

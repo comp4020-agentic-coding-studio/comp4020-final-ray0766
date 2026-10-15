@@ -1,6 +1,9 @@
 // Host-owned UI translations. English source strings are the stable fallback.
 // Saved names, IDs, resource snapshots and server payloads are not translated.
 export const messages: Record<string, string> = {
+  "Saving movement…": "正在保存移动…",
+  "Unsaved movement · saving shortly": "移动尚未保存 · 即将保存",
+  "This gate returns to your own home. You have not claimed one yet. Find your ship, mark a Blank · unclaimed world in Atlas, fly there and land. Then Pause → Make this my planet → Build on my planet.": "这座门通往你自己的家园，但你还没有认领家园。先找到飞船，在星图标记“空白 · 未认领”的星球，飞过去并降落。然后打开暂停菜单 → 将这里作为我的星球 → 在我的星球上建造。",
   "Teleport gate": "星际传送门",
   "Go to the main planet": "前往主星球",
   "Return to my home": "返回我的家园",

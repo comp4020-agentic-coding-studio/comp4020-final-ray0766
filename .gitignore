@@ -25,5 +25,7 @@ mise.local.toml
 
 # Local state and generated browser reports
 .data/
+*.business-key
+*.business.jsonl*
 test-results/
 playwright-report/

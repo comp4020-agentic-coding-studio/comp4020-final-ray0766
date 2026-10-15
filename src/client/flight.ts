@@ -14,8 +14,10 @@ import { RADIUS } from '../shared/world.ts';
 import {createVillageDrawing} from './village-drawing.ts';
 import {applyArtMaterial} from './art-profile.ts';
 import { needsFlightDetour } from './flight-guidance.ts';
+import type { SaveProgress } from './save-progress.ts';
 const el=<E extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as E;
 interface Bridge {
+  progress?: SaveProgress;
   canvas:HTMLCanvasElement; renderer:T.WebGLRenderer; online:()=>boolean; player:()=>PlayerState|undefined;
   checkpoint:(body:unknown)=>Promise<PlayerState>; command:(route:string,body:unknown)=>Promise<Universe>;
   apply:(p:PlayerState)=>void; applyUniverse:(u:Universe)=>void; flushGround:()=>Promise<void>;
@@ -62,9 +64,9 @@ export class SpaceFlight {
   clear(){this.keys.clear();this.stick.set(0,0);this.held.thrust=false;this.held.brake=false;this.steering.set(0,0);el('flight-knob').style.transform='';}
   receive(f:FlightState,force=false){
     if(f.mode!=='space'&&this.detailPreparation){this.detailPreparation.controller.abort();this.detailPreparation.feedback.finish();this.detailPreparation=null;}
-    if(!this.pilot||force||f.mode!==this.pilot.mode||f.journey!==this.pilot.journey){this.pilot=structuredClone(f);this.ack=structuredClone(f);this.cameraStarted=false;this.clear();}
+    if(!this.pilot||force||f.mode!==this.pilot.mode||f.journey!==this.pilot.journey){this.bridge.progress?.reset('flight');this.pilot=structuredClone(f);this.ack=structuredClone(f);this.cameraStarted=false;this.clear();}
     document.body.classList.toggle('in-space',!!this.active);el('flight-hud').hidden=!this.active;el('flight-labels').hidden=!this.active;
-    if(this.pendingTarget&&this.active){this.pilot!.targetId=this.pendingTarget;this.pendingTarget=null;}
+    if(this.pendingTarget&&this.active){this.pilot!.targetId=this.pendingTarget;this.pendingTarget=null;this.bridge.progress?.dirty('flight');}
   }
   universe(u:Universe){
     this.planets=u.planets;
@@ -129,7 +131,7 @@ export class SpaceFlight {
   }
 
   mark(id:string){
-    if(this.active)this.pilot!.targetId=id;else this.pendingTarget=id;
+    if(this.active){if(this.pilot!.targetId!==id){this.pilot!.targetId=id;this.bridge.progress?.dirty('flight');}}else this.pendingTarget=id;
     this.clear();this.bridge.notice(this.active?'Bearing marked. Turn toward the diamond and fly.':'Bearing marked. Board your ship when you are ready.');
   }
   setDesign(design: ShipDesign) {
@@ -153,16 +155,21 @@ export class SpaceFlight {
     if(this.saving){await this.saving;return this.flush();}
     if(!this.active||!this.bridge.online()||!this.pilot||!this.ack)return;
     const f={...structuredClone(this.pilot),sequence:this.ack.sequence+1};
-    if(JSON.stringify({...f,sequence:0})===JSON.stringify({...this.ack,sequence:0}))return;
+    if(JSON.stringify({...f,sequence:0})===JSON.stringify({...this.ack,sequence:0})){this.bridge.progress?.reset('flight');return;}
     this.saveAt=performance.now();
-    this.saving=(async()=>{try{const {mode: _mode,...body}=f;void _mode;const saved=await this.bridge.checkpoint(body);this.ack=structuredClone(saved.flight);if(this.pilot)this.pilot.sequence=saved.flight.sequence;this.bridge.apply(saved);}catch(error){this.clear();this.bridge.failed(error);}finally{this.saving=null;}})();await this.saving;
+    const ticket=this.bridge.progress?.begin('flight');
+    this.saving=(async()=>{try{const {mode: _mode,...body}=f;void _mode;const saved=await this.bridge.checkpoint(body);this.ack=structuredClone(saved.flight);if(ticket)this.bridge.progress?.acknowledge(ticket);if(this.pilot)this.pilot.sequence=saved.flight.sequence;this.bridge.apply(saved);}catch(error){this.clear();this.bridge.failed(error);}finally{this.saving=null;}})();await this.saving;
   }
   frame(dt:number,now:number,renderer:T.WebGLRenderer){
     if(!this.pilot)return;
     const paused=this.paused||(this.saving!==null&&now-this.saveAt>1100);
     const input={thrust:this.held.thrust||this.keys.has('w'),brake:this.held.brake||this.keys.has('s')||this.keys.has(' '),turn:this.stick.x+Number(this.keys.has('d')||this.keys.has('arrowright'))-Number(this.keys.has('a')||this.keys.has('arrowleft')),pitch:this.stick.y+Number(this.keys.has('arrowup'))-Number(this.keys.has('arrowdown'))};
     this.steering.lerp(new T.Vector2(input.turn,input.pitch),1-Math.exp(-10*dt));
-    if(!paused)this.pilot=flightStep(this.pilot,{...input,turn:this.steering.x,pitch:this.steering.y},dt,this.planets);
+    if(!paused){
+      const before=this.pilot,next=flightStep(before,{...input,turn:this.steering.x,pitch:this.steering.y},dt,this.planets);
+      this.pilot=next;
+      if(next.position.some((v,i)=>v!==before.position[i])||next.yaw!==before.yaw||next.pitch!==before.pitch||next.speed!==before.speed)this.bridge.progress?.dirty('flight');
+    }
     const f=this.pilot,pos=new T.Vector3(...f.position),front=new T.Vector3(...forward(f.yaw,f.pitch));
     const right=new T.Vector3().crossVectors(front,new T.Vector3(0,1,0)).normalize(),up=new T.Vector3().crossVectors(right,front).normalize();
     this.turn.setFromRotationMatrix(new T.Matrix4().makeBasis(right,up,front.clone().negate()));this.ship.root.position.copy(pos);this.ship.root.quaternion.copy(this.turn);this.bank+=(this.steering.x*-.28-this.bank)*(1-Math.exp(-5*dt));this.ship.root.rotateZ(this.bank);

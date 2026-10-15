@@ -147,3 +147,13 @@ prototype. They do not claim to be the student's finished academic harness.
   practical-light budget stays two point and two spot slots, with no light shadows.
   Use isolated browser saves and back up/compare every original SQLite table
   before updating local8098. No published release, source workspace or reflection edits.
+
+- Final readiness: server business logs use stable observation-only aliases, never cookies,
+  tokens, internal identity/session hashes, names, designs or complete request bodies.
+  Keep the two-file journal bounded beside SQLite and retain stdout events after Crit10;
+  sample movement/presence and repeated refusals. Permission checks remain authoritative.
+  See docs/adr/0009-business-observation.md for visibility, retention and test boundaries.
+- Old identities without a home keep their saved state. Explain the existing flight/claim/build
+  route at the harbour gate in both languages; do not silently claim or reset their identity.
+- Movement save feedback must track pending work and acknowledgements of captured batches.
+  An older response cannot mark newer movement saved; recovery retires old save tickets.

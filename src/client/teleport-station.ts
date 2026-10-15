@@ -23,6 +23,8 @@ interface TeleportBridge {
 export class TeleportStations {
   private prompt = document.createElement('div');
   private action = document.createElement('button');
+  private homeHelp = document.createElement('p');
+  private findShip = document.createElement('button');
   private setupButton = document.createElement('button');
   private setupDialog = document.createElement('dialog');
   private universe: Universe | null = null;
@@ -40,6 +42,11 @@ export class TeleportStations {
     this.prompt.id = 'teleport-prompt'; this.prompt.className = 'boarding-prompt teleport-prompt'; this.prompt.hidden = true;
     setHTML(this.prompt, '<small id="teleport-context">TELEPORT STATION</small>');
     this.action.id = 'teleport-go'; this.action.className = 'primary'; this.prompt.append(this.action);
+    this.homeHelp.id='teleport-home-help';this.homeHelp.hidden=true;
+    setText(this.homeHelp,'This gate returns to your own home. You have not claimed one yet. Find your ship, mark a Blank · unclaimed world in Atlas, fly there and land. Then Pause → Make this my planet → Build on my planet.');
+    this.findShip.id='teleport-find-ship';this.findShip.className='primary';this.findShip.hidden=true;setText(this.findShip,'Find my ship');
+    this.findShip.onclick=()=>document.getElementById('guide-port')?.click();
+    this.prompt.append(this.homeHelp,this.findShip);
     (document.getElementById('boarding-prompt') ?? document.body.lastElementChild)!.after(this.prompt);
     this.action.onclick = () => void this.use();
     this.setupButton.id = 'station-setup'; this.setupButton.hidden = true; setText(this.setupButton, 'Place a teleport station');
@@ -73,8 +80,11 @@ export class TeleportStations {
   /** Called from the UI tick with the walker's surface position. */
   frame(position: Vec3, radius: number, enabled: boolean) {
     const target = this.destination();
-    this.near = enabled && !!target && this.sites.some(site => distance(position, site.interact, radius) < STATION_REACH - .12);
-    this.prompt.hidden = !this.near && !this.busy;
+    const nearStation=enabled&&this.sites.some(site=>distance(position,site.interact,radius)<STATION_REACH-.12);
+    const needsHome=nearStation&&this.universe?.currentPlanet.kind==='hub'&&!this.universe.ownedPlanetId&&!this.busy;
+    this.near=nearStation&&!!target;
+    this.homeHelp.hidden=this.findShip.hidden=!needsHome;this.action.hidden=!!needsHome;
+    this.prompt.hidden = !this.near && !this.busy && !needsHome;
     this.action.disabled = this.busy;
     const label = this.busy ? 'Opening the gate…' : target === 'hub' ? 'Go to the main planet' : 'Return to my home';
     const key = `${label}|${document.documentElement.lang}`;

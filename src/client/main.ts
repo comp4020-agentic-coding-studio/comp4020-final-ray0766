@@ -65,6 +65,7 @@ import {createVillageDrawing} from './village-drawing.ts';
 import {arrivalViewScore} from './arrival-camera.ts';
 import { HomeSetup } from './home-setup.ts';
 import { TeleportStations } from './teleport-station.ts';
+import { SaveProgress } from './save-progress.ts';
 import type {PhotoView} from './photo-mode.ts';
 
 initI18n();
@@ -107,7 +108,7 @@ let placedObstacles:import('./scene.ts').Obstacle[]=[];
 let groundWorld:GroundWorld|null=null,standing:GroundPose|null=null,physicsClock=0;
 let motionPending:MotionStep[]=[];
 let motionEpoch=0,physicsMismatch=false;
-function clearGroundMotion(){motionPending=[];physicsClock=0;motionEpoch++;}
+function clearGroundMotion(){motionPending=[];physicsClock=0;motionEpoch++;saveProgress.reset('ground');}
 const lastSaved = new T.Vector3();
 let near: NpcId | null = null;let nearDock=false,guideDock=false;
 let residents:TownResidents|null=null,nearResident:TownResidentDefinition|null=null,speakingResident:TownResidentDefinition|null=null;
@@ -117,6 +118,11 @@ const courierDialog = $<HTMLDialogElement>('courier-dialog');
 const helpDialog = $<HTMLDialogElement>('help-dialog');
 const action = $<HTMLButtonElement>('interact');
 function status(message: string, error = false) { setText($('save-status'), message); $('save-status').classList.toggle('error', error); }
+function renderSaveProgress(){
+  if(!state||physicsMismatch)return;
+  status(!online?'Offline · retrying':saveProgress.phase==='saving'?'Saving movement…':saveProgress.phase==='pending'?'Unsaved movement · saving shortly':'Progress saved',!online);
+}
+const saveProgress=new SaveProgress(renderSaveProgress);
 function canTalkToTaskResident(id:NpcId){
   const npc=world.npcs.find(n=>n.id===id);
   if(!npc||!walker||!standing?.grounded||activePlanet!=='hub'||state.location?.kind==='interior')return false;
@@ -235,7 +241,7 @@ function accept(next: PlayerState) {
   const design=(state.ship??defaultShip()).design;world.parked.setDesign(design);flight?.setDesign(design);renderer.domElement.dataset.shipDesign=world.parked.document;
   flight?.receive(state.flight,reconnecting);
   if(previousMode==='ground'&&state.flight.mode==='space'&&activePlanet==='hub'&&!reduced&&flight){departure={time:0,base:world.parked.root.position.clone(),start:camera.position.clone(),rotation:camera.quaternion.clone()};flight.presentation=true;document.body.classList.add('departing');notice('Departure clearance granted · Sunseed Harbour',4200);}
-  physicsMismatch=false;online = navigator.onLine; status(online?'Progress saved':'Offline · retrying',!online); renderTask();
+  physicsMismatch=false;online = navigator.onLine; renderSaveProgress(); renderTask();
   homeInterior?.receive(state);homeInterior?.setOnline(online);homeControls?.receivePlayer(state);
   placeHomeDoor(exteriorHomeDoor,state.flight.mode==='ground'?state.home:null);
   return true;
@@ -533,7 +539,7 @@ async function savePosition(force=false):Promise<void> {
   if(worldPending||!walker||!state||state.location?.kind==='interior'||state.flight.mode==='space'||!online)return;
   if(!motionPending.length)return;
   const steps=motionPending.splice(0,MAX_PATH_STEPS),p=steps.at(-1)!.slice(0,3) as Vec3,planetId=state.planetId;
-  const epoch=motionEpoch;
+  const epoch=motionEpoch,ticket=saveProgress.begin('ground');
   saving=(async()=>{
     try{
       // A refresh/recovery can happen while this save waits in the mutation
@@ -546,6 +552,7 @@ async function savePosition(force=false):Promise<void> {
         const motion={sequence:(state.ground?.sequence??0)+1,physicsVersion:physicsVersionFor(planetId),steps};
         const next=await request('move',{position:p,planetId,motion});
         if(epoch!==motionEpoch)return;
+        saveProgress.acknowledge(ticket);
         if(accept(next))lastSaved.fromArray(next.position);
       });
     }
@@ -658,8 +665,10 @@ function animate(now:number) {
         const correction=new T.Quaternion().setFromUnitVectors(walker.up,normal);
         walker.up.copy(normal);walker.north.applyQuaternion(correction).projectOnPlane(normal).normalize();walker.facing.applyQuaternion(correction).projectOnPlane(normal).normalize();walker.velocity.applyQuaternion(correction).projectOnPlane(normal);
         standing=resolved;
-        if(distance(before.position,resolved.position)>.000001||Math.abs(before.radius-resolved.radius)>.000001||before.grounded!==resolved.grounded||before.verticalSpeed!==resolved.verticalSpeed||!!before.jumpHeld!==!!resolved.jumpHeld)
+        if(distance(before.position,resolved.position)>.000001||Math.abs(before.radius-resolved.radius)>.000001||before.grounded!==resolved.grounded||before.verticalSpeed!==resolved.verticalSpeed||!!before.jumpHeld!==!!resolved.jumpHeld){
           motionPending.push([...resolved.position.map(v=>Number(v.toFixed(7))),Number(FIXED_STEP.toFixed(7)),flags] as MotionStep);
+          saveProgress.dirty('ground');
+        }
       }
     }
   }
@@ -901,7 +910,7 @@ function ensureColony() {
     confirm:body=>serial(()=>request<Universe>('teleport/station/confirm',body)),
     ghost:addition=>{colony?.previewHome(addition);if(addition){overview=true;setAttribute($('view-mode'),'aria-label','Walking view');setHTML($('view-mode'),'↗ <span>Walking view</span>');}},
     apply:next=>{if(colony?.universe!==next)colony?.accept(next);},notice});
-  flight=new SpaceFlight({canvas:renderer.domElement,renderer,online:()=>online,player:()=>state,checkpoint:body=>serial(()=>request('flight/checkpoint',body)),command:changeVisit,apply:accept,applyUniverse:u=>{if(colony?.universe!==u)colony?.accept(u);},flushGround:async()=>{await savePosition(true);await queue;},clearGround:()=>{clearInput();colony?.stopBuilding();},canBoard:()=>!sceneLoadingActive()&&!homeTransition&&state.location?.kind!=='interior'&&!!walker&&!!standing?.grounded&&!colony?.building&&distance(walker.up.toArray() as Vec3,portPoint(activePlanet),groundRadius())<BOARD_RADIUS-.12,failed,notice});
+  flight=new SpaceFlight({progress:saveProgress,canvas:renderer.domElement,renderer,online:()=>online,player:()=>state,checkpoint:body=>serial(()=>request('flight/checkpoint',body)),command:changeVisit,apply:accept,applyUniverse:u=>{if(colony?.universe!==u)colony?.accept(u);},flushGround:async()=>{await savePosition(true);await queue;},clearGround:()=>{clearInput();colony?.stopBuilding();},canBoard:()=>!sceneLoadingActive()&&!homeTransition&&state.location?.kind!=='interior'&&!!walker&&!!standing?.grounded&&!colony?.building&&distance(walker.up.toArray() as Vec3,portPoint(activePlanet),groundRadius())<BOARD_RADIUS-.12,failed,notice});
   flight.setDesign((state.ship??defaultShip()).design);flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=groundPresentation(activePlanet,activeRadius).environmentIntensity;
   colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,deferObjects:true,cameraCutaway:cameraCutawayB,
     applyPlayer:accept,
