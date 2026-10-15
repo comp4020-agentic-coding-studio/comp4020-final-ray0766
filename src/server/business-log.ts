@@ -27,7 +27,7 @@ const objectId = (value: unknown): value is string => typeof value === 'string' 
 const reasons: Record<string, string> = {
   'Only this planet’s owner can build here.': 'planet_owner_required',
   'Only the home owner can enter the room.': 'home_owner_required',
-  'Only the home owner can edit this room.': 'home_owner_required',
+  'Only the home owner can edit the room.': 'home_owner_required',
   'Only the planet owner can read its history.': 'history_owner_required',
   'This teleport station belongs to another home. Only its owner can use it.': 'gate_owner_required',
   'You have no home planet to return to yet.': 'home_required',
@@ -83,10 +83,17 @@ export function businessLog(databasePath: string, options: LogOptions = {}) {
       const object = objectId(context.objectId) ? context.objectId : objectId(context.buildingId) ? context.buildingId : undefined;
       const detail = input.route === 'character' && typeof context.character === 'string' && ['clay', 'fern', 'sky'].includes(context.character) ? context.character
         : input.route === 'interact' && typeof context.action === 'string' && ['pickup', 'deliver'].includes(context.action) ? context.action : undefined;
+      // Door intent can be refused or superseded. Record only the authoritative
+      // post-action snapshot for the requested building, never context.open.
+      const currentPlanet = response.currentPlanet && typeof response.currentPlanet === 'object' ? response.currentPlanet as Record<string, unknown> : {};
+      const homeDoor = currentPlanet.homeDoor && typeof currentPlanet.homeDoor === 'object' ? currentPlanet.homeDoor as Record<string, unknown> : {};
+      const door = input.route === 'home/door' && input.status >= 200 && input.status < 300 && objectId(context.buildingId)
+        && homeDoor.buildingId === context.buildingId && typeof homeDoor.open === 'boolean' && Number.isSafeInteger(homeDoor.version) && Number(homeDoor.version) >= 0
+        ? { doorOpen: homeDoor.open, doorVersion: homeDoor.version as number } : {};
       const reason = input.status >= 400 ? (typeof response.error === 'string' ? (Object.hasOwn(reasons,response.error) ? reasons[response.error] : undefined) : undefined) ?? statusReason[input.status] ?? 'server_error' : undefined;
       // Deliberate allowlist: no URLs/queries, body dumps, names, designs, error text,
       // cookie, token, internal player ID or session hash can enter this record.
-      const line = JSON.stringify({ v: 1, at: new Date(time).toISOString(), actor, action, planet, object, detail,
+      const line = JSON.stringify({ v: 1, at: new Date(time).toISOString(), actor, action, planet, object, detail, ...door,
         result: input.status < 400 ? 'accepted' : input.status < 500 ? 'refused' : 'failed', status: input.status, reason }) + '\n';
       try { output(line.trimEnd()); } catch { /* Diagnostics must never turn an acknowledged save into a failure. */ }
       try {

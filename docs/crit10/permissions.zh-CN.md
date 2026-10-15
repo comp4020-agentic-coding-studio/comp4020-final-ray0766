@@ -17,10 +17,10 @@
 | 移动/飞行/换装/任务 | 只操作服务端当前身份；服务器验证路径、序号、旅程、速度/邻近和任务状态。不能通过presence授予编辑权。 | [navigation](../../src/server/navigation.ts)、[ground](../../src/server/ground.ts)、[store](../../src/server/store.ts#L315)；[presence](../../spec/presence.test.ts) |
 | presence可见性 | 只返回同星球、同室外/室内scope的地面附近身份；位置重读权威状态，公开随机ID是短期presence标识，与日志别名不同；不是全部在线人或远程飞船列表。 | [presence.ts](../../src/server/presence.ts#L14)；[presence-visit](../../spec/presence-visit.test.ts) |
 
-## 本轮发现与最小建议（均未改功能）
+## 2eaf52e 源码核对发现与后续状态
 
 1. **已证实可见性边界，是否属缺陷需明确承诺**：`home.ts:105`无所有权过滤返回完整interior，store.state将其带入响应；home-door测试明确覆盖此行为。因此“房间主人专属”目前只适用于进入/编辑。若产品要承诺布局内容保密，最小方案是区分公共door/外观描述与主人室内数据，并调整响应类型/客户端及该测试，补访客读隔离检查；不能只加canEdit或隐藏按钮。此次不将政策选择擅自当修复实施。
-2. **已证实日志细分原因遗漏**：`home.save`实际错误为`Only the home owner can edit the room.`，而[business-log原因表](../../src/server/business-log.ts#L32)匹配`edit this room.`。仍记录403/refused/`permission_refused`，权限未绕过，动作`home.saved`仍可辨认。最小改动是补准确固定字符串映射和一条回归；不能凭日志泛化码断言具体拒绝原因。
-3. **已证实动作细节不足**：`home.door`记录动作、actor、building，但没有open/close或doorVersion；`home.saved`不记家具/材料，建筑移动不记变换。可解释“某人请求门操作”，不能只据该行判断开还是关或改了什么颜色。若主持解释确实需要，最小建议是给门动作增加校验后的布尔open（必要时版本）与隐私回归；先明确需求，不能加入完整body。
+2. **日志原因遗漏已最小修复**：2eaf52e时`home.save`实际错误`Only the home owner can edit the room.`未匹配`edit this room.`；现在已匹配实际固定字符串，403/refused分类为`home_owner_required`。服务器拒绝逻辑、状态码和错误响应不变；[定向日志单元检查](../../spec/business-log.test.ts)与[隔离HTTP检查](../../spec/business-log-api.test.ts)覆盖，不输出错误全文。
+3. **门结果细节已最小修复**：成功的`home.door`现在可附`doorOpen`布尔值与`doorVersion`安全整数，只取成功响应`currentPlanet.homeDoor`，并核对请求目标buildingId。拒绝、失败、快照缺失/格式不合法/目标不同均不附状态，也不从请求open推测结果。无变化重试会记录相同结果版本，不能算新一次开关。材料/家具/坐标仍不记，不加入完整body。见[补修验证](log-fix-verification.md)。
 
 未发现新的写权限绕过证据；这不是全系统安全证明。源码未保证的限制不写成已实现：例如claim没有落地前置条件、房间描述非保密、旧室内访客保留位置。任何后续收紧都应单独评估兼容性，不能借Crit10文档改真实存档。

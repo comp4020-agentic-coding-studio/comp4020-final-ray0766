@@ -45,3 +45,36 @@ it('does not copy arbitrary error text, unknown fields, or coercible objects int
   expect(JSON.parse(lines[0])).toMatchObject({ actor: 'anonymous', reason: 'invalid_request' });
   expect(lines[0]).not.toContain('SECRET');
 });
+
+it('classifies the actual room-edit refusal without logging its error text', () => {
+  const lines: string[] = [], log = businessLog(fixture(), { output: line => lines.push(line) });
+  log.record({ route: 'home/save', identity: 'guest', status: 403, response: { error: 'Only the home owner can edit the room.' } });
+  expect(JSON.parse(lines[0])).toMatchObject({ action: 'home.saved', status: 403, result: 'refused', reason: 'home_owner_required' });
+  expect(lines[0]).not.toContain('Only the home owner');
+});
+it('records only the matching acknowledged door state, never the requested state or private room contents', () => {
+  const buildingId = randomUUID(), lines: string[] = [], log = businessLog(fixture(), { output: line => lines.push(line) });
+  for (const open of [false, true]) {
+    log.record({ route: 'home/door', identity: 'owner', status: 200,
+      context: { buildingId, open: !open, expectedDoorVersion: 900, private: 'REQUEST SECRET' },
+      response: { currentPlanet: { homeDoor: { buildingId, open, version: 2, private: 'RESPONSE SECRET' } }, player: { home: { interior: { items: ['PRIVATE FURNITURE'] } } } } });
+    expect(JSON.parse(lines.at(-1)!)).toMatchObject({ action: 'home.door', object: buildingId, doorOpen: open, doorVersion: 2 });
+  }
+  const cases = [
+    { route: 'home/door', status: 403, door: { buildingId, open: true, version: 3 } },
+    { route: 'home/door', status: 409, door: { buildingId, open: true, version: 3 } },
+    { route: 'home/door', status: 500, door: { buildingId, open: true, version: 3 } },
+    { route: 'character', status: 200, door: { buildingId, open: true, version: 3 } },
+    { route: 'home/door', status: 200, door: { buildingId: randomUUID(), open: true, version: 3 } },
+    { route: 'home/door', status: 200, door: { buildingId, open: 'true', version: 3 } },
+    { route: 'home/door', status: 200, door: { buildingId, open: true, version: -1 } },
+    { route: 'home/door', status: 200, door: { buildingId, open: true, version: 1.5 } },
+    { route: 'home/door', status: 200, door: undefined },
+  ];
+  for (const [index, item] of cases.entries()) {
+    log.record({ route: item.route, identity: 'case-' + index, status: item.status, context: { buildingId, open: true }, response: { currentPlanet: { homeDoor: item.door } } });
+    expect(JSON.parse(lines.at(-1)!)).not.toHaveProperty('doorOpen');
+    expect(JSON.parse(lines.at(-1)!)).not.toHaveProperty('doorVersion');
+  }
+  for (const secret of ['REQUEST SECRET', 'RESPONSE SECRET', 'PRIVATE FURNITURE', 'expectedDoorVersion']) expect(lines.join('\n')).not.toContain(secret);
+});

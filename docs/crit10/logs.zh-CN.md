@@ -22,12 +22,12 @@ tail -F .data/midpoint/server.log
 | 记录/缺口 | 演练解释边界 |
 | --- | --- |
 | `actor=visitor-…` | 用独立key对内部身份HMAC生成，20位hex；同cookie/key下稳定，仅表示浏览器身份。不是姓名、跨设备账号、presence随机ID或权限凭据。未识别身份写anonymous，不能把所有anonymous当一个人。 |
-| `action, planet, object, status, result, reason` | planet/object只接受限定技术ID，可能缺失；不记录昵称、设计、坐标、完整body、URL查询、cookie、token、内部session hash。一次动作可能有预览/确认多行，也可能幂等重试未改状态。 |
+| `action, planet, object, status, result, reason`；门成功结果可附`doorOpen, doorVersion` | planet/object只接受限定技术ID，可能缺失；不记录昵称、设计、坐标、完整body、URL查询、cookie、token、内部session hash。一次动作可能有预览/确认多行，也可能幂等重试未改状态。 |
 | 地面/室内移动、飞行checkpoint、presence | 每actor/action/status最多每5秒一行；不能算帧数、精确路径、在线人数或精确操作次数。 |
 | 重复拒绝/失败 | 同样按actor/action/status五秒采样，原因/目标不在采样键里；窗口内不同目标或原因也可能被省略。 |
 | universe和blueprint成功读取 | 刻意不记；首次state创建记session.created，后续state读取记session.resumed。没有world.read成功事件不代表没看到世界。 |
 | 认领、换装、保存、旅行等离散成功事件 | 不按上述五秒限频；仍不表示每一次真实输入都有事件或持久变化。character只记clay/fern/sky，interact只记pickup/deliver。 |
-| UI输入、面板打开、Atlas选择、草稿、语言、刷新意图、渲染/延迟 | 无对应业务事件。门开/关、室内颜色/家具、移动坐标也未细记；参见[发现](permissions.zh-CN.md)。不能凭没有日志声称用户没点，或凭accepted声称对方已看见。 |
+| UI输入、面板打开、Atlas选择、草稿、语言、刷新意图、渲染/延迟 | 无对应业务事件。室内颜色/家具、移动坐标未细记；门操作仅在成功响应目标匹配且格式合法时附实际`doorOpen/doorVersion`，拒绝不附、不会采用请求意图；参见[发现](permissions.zh-CN.md)。不能凭没有日志声称用户没点，或凭accepted声称对方已看见。 |
 | 网络中断、进程被杀、未到达服务器、响应丢失 | 不一定有完成日志。无匹配事件只说明未找到证据，不证明是权限拒绝或没有写入。已持久化但响应丢失也可能出现。 |
 | 文件写入失败 | 尽量继续stdout并报告storage unavailable；本地stdout也受诊断轮转限制。若业务日志与诊断都无记录，标证据缺失，不把故障抹成成功。 |
 
@@ -89,6 +89,8 @@ for time, e in sorted(rows, key=lambda item: item[0]):
     if isinstance(obj, str) and re.fullmatch(uuid, obj, re.I): row['object'] = label(objects, obj, 'O')
     if e.get('detail') in ('clay', 'fern', 'sky', 'pickup', 'deliver'): row['detail'] = e['detail']
     if isinstance(e.get('reason'), str) and e.get('reason') in REASONS: row['reason'] = e['reason']
+    if row['action'] == 'home.door' and 200 <= row['status'] < 300 and row['result'] == 'accepted' and 'object' in row and type(e.get('doorOpen')) is bool and type(e.get('doorVersion')) is int and 0 <= e['doorVersion'] <= 9007199254740991:
+        row['doorOpen'], row['doorVersion'] = e['doorOpen'], e['doorVersion']
     out.append(json.dumps(row, ensure_ascii=False))
 with (base / 'events.anonymized.jsonl').open('x') as file:
     file.write(''.join(line + '\n' for line in out))

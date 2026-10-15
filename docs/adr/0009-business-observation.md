@@ -83,8 +83,20 @@ The current contract and limits are traced in
 a shared exterior door; they cannot newly enter or edit another owner's room.
 “Private room” above means owner-only entry and layout editing, not confidential
 layout data: the current home descriptor includes the interior for visitors too.
-The matrix reports that visibility boundary and a generic room-save refusal reason
-without silently changing either policy or implementation. The
+The initial matrix recorded that visibility boundary and a generic room-save refusal
+reason; subsequent logging corrections are recorded below, with permissions unchanged. The
 [rehearsal pack](../crit10/README.md) separates host notes, URL-only participants,
 blank observations and safe evidence export. It records preparation, not a completed
 rehearsal or a claim that the current hosted release contains this logging feature.
+
+## Minimal logging corrections (2026-10-16)
+
+The actual room-edit refusal now maps to `home_owner_required`. A successful
+`home.door` may additionally include `doorOpen` and `doorVersion`, read only from
+the authoritative post-action `currentPlanet.homeDoor` snapshot for the matching
+requested building. Refusals, failed actions and absent/invalid/mismatched snapshots
+never emit door state; request intent cannot supply it. An accepted no-op may repeat
+the same version and is not evidence of another transition. No room contents,
+coordinates or additional body data are logged. The [focused verification](../crit10/log-fix-verification.md)
+uses temporary isolated servers; no permission or visibility policy changes,
+human rehearsal or hosted deployment are implied.
