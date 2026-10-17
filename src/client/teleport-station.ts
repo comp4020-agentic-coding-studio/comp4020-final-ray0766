@@ -73,7 +73,7 @@ export class TeleportStations {
   }
   /** Your home's gate leads to the harbour, the harbour's gate back to your home; a neighbour's gate offers nothing. */
   private destination(): string | null {
-    const u = this.universe; if (!u?.ownedPlanetId) return null;
+    const u = this.universe; if (!u?.ownedPlanetId || (u.currentPlanet.kind === 'hub' && u.player.arrival && u.player.arrival.homePreparation !== 'ready')) return null;
     if (u.currentPlanet.kind === 'hub') return u.ownedPlanetId;
     return u.currentPlanet.id === u.ownedPlanetId ? u.planets.find(p => p.kind === 'hub')?.id ?? null : null;
   }
@@ -81,9 +81,13 @@ export class TeleportStations {
   frame(position: Vec3, radius: number, enabled: boolean) {
     const target = this.destination();
     const nearStation=enabled&&this.sites.some(site=>distance(position,site.interact,radius)<STATION_REACH-.12);
-    const needsHome=nearStation&&this.universe?.currentPlanet.kind==='hub'&&!this.universe.ownedPlanetId&&!this.busy;
+    const arrival=this.universe?.player.arrival,preparing=!!arrival&&arrival.homePreparation!=='ready';
+    const needsHome=nearStation&&this.universe?.currentPlanet.kind==='hub'&&(!this.universe.ownedPlanetId||preparing)&&!this.busy;
     this.near=nearStation&&!!target;
-    this.homeHelp.hidden=this.findShip.hidden=!needsHome;this.action.hidden=!!needsHome;
+    this.homeHelp.hidden=!needsHome;this.findShip.hidden=!needsHome||preparing;this.action.hidden=!!needsHome;
+    if(needsHome)setText(this.homeHelp,preparing
+      ? arrival?.homePreparation==='retry'?'Your home preparation paused. Open the village guide to retry. You can keep exploring here.':'Your home is being prepared. You can explore the village while this gate gets ready.'
+      : 'This gate returns to your own home. You have not claimed one yet. Find your ship, mark a Blank · unclaimed world in Atlas, fly there and land. Then Pause → Make this my planet → Build on my planet.');
     this.prompt.hidden = !this.near && !this.busy && !needsHome;
     this.action.disabled = this.busy;
     const label = this.busy ? 'Opening the gate…' : target === 'hub' ? 'Go to the main planet' : 'Return to my home';

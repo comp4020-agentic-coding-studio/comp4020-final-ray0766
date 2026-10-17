@@ -1,0 +1,26 @@
+.core-tutorial{position:fixed;z-index:6;left:20px;top:76px;width:306px;max-width:calc(100vw - 40px);padding:13px 15px;color:var(--ui-dialog-text,#293c38);background:var(--ui-dialog-surface,#fbf5e7);border:1px solid var(--ui-dialog-border,#bcc9ad);border-left:4px solid #3aab92;border-radius:14px;box-shadow:0 5px 18px #173b281a;pointer-events:auto;text-align:left}
+.core-tutorial[hidden]{display:none}
+.tutorial-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:1;background:var(--ui-dialog-surface,#fbf5e7);padding-bottom:4px}
+.tutorial-eyebrow,.tutorial-progress{font-size:10px;font-weight:700;letter-spacing:.04em}
+.tutorial-progress{margin:8px 0 4px;color:#557261}
+.core-tutorial h2{font:700 16px/1.35 system-ui,sans-serif;margin:4px 0 7px}
+.core-tutorial .tutorial-copy{font:12px/1.55 system-ui,sans-serif;margin:0}
+.tutorial-controls,.tutorial-home-state{font:10px/1.5 system-ui,sans-serif;margin:9px 0 0;color:#536359}
+.tutorial-feedback{font:700 11px/1.4 system-ui,sans-serif;margin:8px 0 0;color:#24785f}
+.tutorial-route-status{font:600 11px/1.5 system-ui,sans-serif;margin:8px 0 0;color:#2e6a59}
+.core-tutorial[data-route-state="unavailable"] .tutorial-route-status{color:#735536}
+.core-tutorial button{font:600 11px/1.3 system-ui,sans-serif;min-height:44px;padding:7px 9px;color:var(--ui-dialog-text,#293c38);background:var(--ui-ground-paper,#f6f2e7);border:1px solid var(--ui-dialog-border,#bcc9ad);border-radius:8px;cursor:pointer}
+.core-tutorial button:focus-visible{outline:3px solid var(--ui-preview-focus,#3aab92);outline-offset:2px}
+.tutorial-retry{margin-top:9px;width:100%}
+.core-tutorial button:disabled{opacity:.55;cursor:default}
+.tutorial-active #first-visit-tip{display:none}
+@media(max-width:700px){.core-tutorial{left:12px;top:62px;width:270px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 245px);overflow:auto;padding:10px 12px}.core-tutorial h2{font-size:14px}.core-tutorial .tutorial-copy{font-size:11px}.tutorial-controls{font-size:10px;max-width:245px}}
+@media(max-height:560px){.core-tutorial{top:62px;width:255px;max-height:calc(100dvh - 245px);overflow:auto}.tutorial-controls{display:none}}
+@media(prefers-reduced-motion:reduce){.core-tutorial *{animation:none!important;transition:none!important}}
+
+/* Completion remains below the room header and its door controls. */
+body.home-interior-active .core-tutorial{top:142px;max-height:calc(100dvh - 340px);overflow:auto}
+
+/* The owner card occupies at most 210px above the 210px touch band. Keep
+   directions above it, with a sticky, always available 44px Skip control. */
+@media(max-width:699px){body.tutorial-active:has(#home-controls:not([hidden])) .core-tutorial{max-height:max(82px,calc(100dvh - 494px));overflow:auto}}

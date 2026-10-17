@@ -19,6 +19,11 @@ import './colony.css';
 import './flight.css';
 import './immersive.css';
 import { mountOnboarding } from './onboarding.ts';
+import { mountTutorial } from './tutorial.ts';
+import type {TutorialRouteFeedback} from './tutorial.ts';
+import { createTutorialRoute } from './tutorial-route.ts';
+import { canWalkTutorialConnector,tutorialStationApproaches } from '../shared/tutorial-navigation.ts';
+import { createVillagePolish } from './village-polish.ts';
 import { BOARD_RADIUS, portPoint } from '../shared/ports.ts';
 import { GroundPresence } from './presence.ts';
 import { PresenceVisitGate } from './presence-visit.ts';
@@ -83,7 +88,7 @@ const welcomeQuality=mountQualitySettings(welcomeQualityHost,{compact:true});
 const welcome=mountWelcome({qualityControl:welcomeQualityHost,onRetry:()=>void startInitialVisit(),onStart:()=>{
   try{localStorage.setItem(welcomeKey(state),'1');}catch{/* Optional preference, never an identity reset. */}
   welcomeQuality.dispose();
-  notice(state.home?'Walk to your home’s door, then choose Enter home.':'Follow the short path to SUNSEED · PORT.',6500);
+  notice(state.arrival&&state.quest!=='delivered'?'Follow the village guide to meet Mica. You can skip it at any time.':'A familiar little planet. Welcome back.',6500);
 }});
 function readyWelcome(){if(initialStateReady&&!welcomeCommitted){welcomeCommitted=true;welcome.ready({firstVisit:welcomeFirstVisit});}}
 let walker: SurfaceWalker;
@@ -105,6 +110,9 @@ function rebaseGroundCamera(){endGroundCameraConflict();groundCamera.reset();act
 const measureCamera=new URLSearchParams(location.search).get('measure')==='1';let cameraFrameSequence=0;
 let departure:{time:number;base:T.Vector3;start:T.Vector3;rotation:T.Quaternion}|null=null;
 let colony: Colony | undefined;
+let tutorial:ReturnType<typeof mountTutorial>|undefined;
+let guideRouteFeedback:TutorialRouteFeedback|undefined;
+let guideStationApproaches:ReturnType<typeof tutorialStationApproaches>=[];
 let flight: SpaceFlight | undefined;
 let homeInterior: HomeInterior | undefined;
 let homeTransition=false;
@@ -306,6 +314,33 @@ const exteriorHomeDoor=createHomeDoor();scene.add(exteriorHomeDoor.root);exterio
 const practical=createWorldPracticalLights();scene.add(practical.group);
 const camera = new T.PerspectiveCamera(52, innerWidth / innerHeight, .08, 2400);
 const drawing=createVillageDrawing(renderer,scene,camera,true);
+const tutorialRoute=createTutorialRoute(scene,{surfacePoint:(normal,offset=0)=>{
+  const point=surfacePoint(normal,offset),direction=normal.toArray() as Vec3;
+  if(groundWorld){const support=groundWorld.support(direction,groundWorld.radius(direction)+STEP_HEIGHT);point.setLength(Math.max(point.length(),support.radius+offset));}
+  return point;
+}});
+const villagePolish=createVillagePolish(scene,{surfacePoint});
+function tutorialContext(){
+  const u=colony?.universe;if(!u||!state||u.currentPlanet.id!==state.planetId)return null;
+  return {universe:u.player===state?u:{...u,player:state},online:online&&colony!.syncing,
+    ready:initialStateReady&&!worldPending&&!sceneLoadingActive()&&!homeInterior?.preparing&&!homeTransition&&!graphicsLost,
+    paused:photoPaused||!!colony?.paused||!!document.querySelector('dialog[open]'),touch:matchMedia('(pointer: coarse)').matches||navigator.maxTouchPoints>0,route:guideRouteFeedback};
+}
+function frameVillageGuide(){
+  tutorial?.frame(tutorialContext());
+  const visible=!!walker&&!worldPending&&!homeTransition&&!homeInterior?.preparing&&!homeInterior?.active&&!flight?.active;
+  if(visible){villagePolish.frame({planetId:activePlanet,radius:activeRadius,quality:getQualityProfile().id,home:state.home,visible:true,reducedMotion:reduced,time:elapsed});}
+  else villagePolish.root.visible=false;
+  const context=tutorialContext(),planet=colony?.universe?.currentPlanet,guideTarget=tutorial?.target??null;
+  tutorialRoute.frame({position:walker?walker.up.toArray() as Vec3:SPAWN,target:guideTarget,planetId:activePlanet,radius:activeRadius,
+    visible:visible&&!!context?.ready,paused:photoPaused||!!context?.paused,reducedMotion:reduced,time:elapsed,
+    homeRoutes:planet?.homeManifest?.routes,routeRevision:planet?.revision,stationApproaches:guideStationApproaches,
+    canConnect:(from,to)=>!!groundWorld&&canWalkTutorialConnector(groundWorld,from,to)});
+  guideRouteFeedback=guideTarget?{state:tutorialRoute.diagnostics.connected?'ready':tutorialRoute.diagnostics.reason==='checking'?'checking':'unavailable',planetId:activePlanet,targetKind:guideTarget.kind,arrived:tutorialRoute.diagnostics.reason==='arrived'}:undefined;
+  renderer.domElement.dataset.tutorialStep=tutorial?.step?.kind??'';
+  renderer.domElement.dataset.tutorialRoute=JSON.stringify(tutorialRoute.diagnostics);
+  renderer.domElement.dataset.villagePolish=JSON.stringify(villagePolish.diagnostics);
+}
 const fill = new T.AmbientLight(); scene.add(fill);
 const sun = new T.DirectionalLight(); sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048); sun.shadow.normalBias=.09;sun.shadow.bias=-.0003;
@@ -536,10 +571,12 @@ $('close-conversation').onclick=()=>{closeResidentConversation();$('conversation
 $('wardrobe').onclick=()=>{menu.close();clearInput();courierDialog.showModal();};
 $('help').onclick=()=>{menu.close();clearInput();helpDialog.showModal();};
 document.querySelectorAll<HTMLButtonElement>('dialog .close, .close-help').forEach(b=>b.onclick=()=>b.closest('dialog')?.close());
-const welcomeKey=(player:PlayerState)=>`little-worlds:welcomed:${player.home?.interiorId??'harbour'}`;
+const welcomeKey=(player:PlayerState)=>`little-worlds:welcomed:${player.arrival?'arrival-v1':player.home?.interiorId??'harbour'}`;
 $('begin').onclick=()=>{try{localStorage.setItem(welcomeKey(state),'1');}catch{/* A blocked preference store must not prevent starting. */}courierDialog.close();notice(state.home?'Walk to your home’s door, then choose Enter home.':'Follow the short path to SUNSEED · PORT.',6500);};
 const menu=$<HTMLDialogElement>('menu-dialog');
 const menuQualityHost=document.createElement('div');menu.querySelector('.menu-note')!.before(menuQualityHost);mountQualitySettings(menuQualityHost);
+const replayGuide=document.createElement('button');replayGuide.id='open-village-guide';setText(replayGuide,'Village guide');
+$('help').after(replayGuide);replayGuide.onclick=()=>{menu.close();clearInput();tutorial?.replay();};
 $('open-menu').onclick=()=>{if(homeInterior?.active||homeTransition)return;closeResidentConversation();clearInput();flight?.clear();menu.showModal();void savePosition(true);};
 $('close-menu').onclick=$('resume').onclick=()=>menu.close();
 const terrainWorkshop=lazyPanel(async()=>{const {TerrainWorkshop}=await import('./terrain-workshop.ts');return new TerrainWorkshop({read:()=>request<Universe>('universe'),save:async body=>{await savePosition(true);const next=await serial(()=>request<Universe>('terrain/apply',body));colony?.accept(next);return next;},allowed:()=>!!colony?.universe?.currentPlanet.mine&&online&&state.flight.mode==='ground'});});
@@ -651,6 +688,7 @@ function animate(now:number) {
     const recordedAt=performance.now(),activeFrozenMs=groundCameraConflict?recordedAt-groundCameraConflict.startedAt:0;
     renderer.domElement.dataset.cameraConflictMetrics=JSON.stringify({schema:'camera-conflict-metrics-v1',triggerCount:cameraConflictTotals.triggerCount,totalFrozenMs:cameraConflictTotals.completedFrozenMs+activeFrozenMs,activeFrozenMs,active:!!groundCameraConflict,rolledBackDistanceMetres:cameraConflictTotals.rolledBackDistanceMetres,recordedAt});
   }
+  frameVillageGuide();
   if(worldPending||homeInterior?.preparing)return;
   if(photoPaused){photoMode?.frame();return;}
   exteriorHomeDoor.frame(dt,reduced);
@@ -940,13 +978,14 @@ function ensureColony() {
   flight.setDesign((state.ship??defaultShip()).design);flight.receive(state.flight);scene.environment=flight.scene.environment;scene.environmentIntensity=groundPresentation(activePlanet,activeRadius).environmentIntensity;
   colony = new Colony({canvas:renderer.domElement,camera,scene,ground:()=>world.globe,deferObjects:true,cameraCutaway:cameraCutawayB,
     applyPlayer:accept,
-    universe:u=>{homeSetup?.receive(u);teleportStations?.receive(u);homeControls?.receive(u);flight?.universe(u);prepareSurface(u.currentPlanet);},bearing:id=>flight?.mark(id),
+    universe:u=>{guideStationApproaches=tutorialStationApproaches(u.currentPlanet);homeSetup?.receive(u);teleportStations?.receive(u);homeControls?.receive(u);flight?.universe(u);tutorial?.receive(u);prepareSurface(u.currentPlanet);},bearing:id=>flight?.mark(id),
     obstacles:blocks=>{placedObstacles=blocks;if(activePlanet!=='hub')world.blocks.splice(0,world.blocks.length,...blocks);},
     pause:building=>{clearInput();overview=building;setAttribute($('view-mode'), 'aria-label', overview?'Walking view':'View planet');setHTML($('view-mode'), overview?'↗ <span>Walking view</span>':'◉ <span>Planet view</span>');},
     libraryRead:()=>request<import('../shared/blueprints.ts').LibraryEntry[]>('blueprints'),librarySave:body=>serial(()=>request<import('../shared/blueprints.ts').LibraryEntry>('blueprints/save',body)),
     read:()=>request<Universe>('universe'),write:(route,body)=>serial(()=>request<Universe>(route,body)),flush:async()=>{await savePosition(true);await queue;},notice,
   });
   mountOnboarding({read:()=>colony?.universe?{universe:colony.universe,mode:state.flight.mode,building:colony.building,nearDock,online:online&&colony.syncing}:null});
+  tutorial=mountTutorial({read:tutorialContext,retryHome:async()=>{const next=await serial(()=>request<PlayerState>('arrival/retry',{}));accept(next);tutorial?.frame(tutorialContext());}});
   $('delivery-toggle').onclick=()=>{menu.close();document.body.classList.toggle('delivery-open');setText($('delivery-toggle'), document.body.classList.contains('delivery-open')?'Hide delivery':'Try a delivery');};
 }
 photoMode=new PhotoMode({renderer,
@@ -977,7 +1016,7 @@ async function startInitialVisit(){
     let welcomed=false;try{welcomed=localStorage.getItem(welcomeKey(initial))==='1';}catch{/* Optional local preference. */}
     // Existing progress/airborne/interior visits enter automatically. The small
     // first-visit choice never changes a server save or browser identity.
-    welcomeFirstVisit=!welcomed&&initial.revision<=1&&initial.flight.mode==='ground'&&initial.location?.kind!=='interior';
+    welcomeFirstVisit=!welcomed&&!!initial.arrival&&initial.revision<=1&&initial.flight.mode==='ground'&&initial.location?.kind!=='interior';
     state=initial;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);initialStateReady=true;welcome.stage('preparing');accept(initial);
     ensureColony();
     if(initial.home)setText(courierDialog.querySelector('p')!, 'Your home is ready. Choose a suit, enter through its door, then make the room and garden yours.');

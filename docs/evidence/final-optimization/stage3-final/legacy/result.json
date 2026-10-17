@@ -1,0 +1,23 @@
+{
+  "browser": "155.0.8059.80",
+  "cases": [
+    {
+      "kind": "ground",
+      "arrivalAbsent": true,
+      "coatAndQuestPreserved": true,
+      "groundOrFlightPosePreserved": true,
+      "refreshPreserved": true,
+      "journey": 0
+    },
+    {
+      "kind": "flight",
+      "arrivalAbsent": true,
+      "coatAndQuestPreserved": true,
+      "groundOrFlightPosePreserved": true,
+      "refreshPreserved": true,
+      "journey": 4
+    }
+  ],
+  "errors": [],
+  "passed": true
+}

@@ -7,7 +7,7 @@ import { HOME_SAMPLE_RADIUS } from '../shared/home.ts';
 import { planetCenter, spaceDistance } from '../shared/flight.ts';
 import { HUB_RADIUS } from '../shared/world-size.ts';
 import { DatabaseSync } from 'node:sqlite';
-import { existsSync, mkdirSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { CHARACTERS, distance, INTERACT_DISTANCE, NPCS, normalize, SPAWN, validPosition } from '../shared/world.ts';
 import type { Character, PlayerState, Quest } from '../shared/world.ts';
@@ -23,7 +23,8 @@ import { homeSetupStore } from './home-setup.ts';
 import { INTEGRATED_RADIUS, migrateIntegrationSchema } from './integration-migration.ts';
 import { migrateTeleport, teleportStore } from './teleport.ts';
 import { BUSY } from './heavy-work.ts';
-import type { HeavyWork } from './heavy-work.ts';
+import {ArrivalHomes,ArrivalReservationChanged,migrateArrivalHomes,STORE_SCHEMA} from './arrival-homes.ts';
+import type {ArrivalWork} from './arrival-homes.ts';
 import type { GeneratedHomeManifest } from '../shared/home-generation.ts';
 import type { Vec3 } from '../shared/world.ts';
 export { RequestError } from './errors.ts';
@@ -44,7 +45,7 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   const schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-  if (schema > 16) { db.close(); throw new Error('Database schema is newer than this application.'); }
+  if (schema > STORE_SCHEMA) { db.close(); throw new Error('Database schema is newer than this application.'); }
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY, character TEXT NOT NULL DEFAULT 'clay' CHECK(character IN ('clay','fern','sky')),
@@ -53,11 +54,11 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
       revision INTEGER NOT NULL DEFAULT 0, moved_at INTEGER NOT NULL
     );`);
   let migrationBackup: string | null = null;
-  if (schema < 16) {
+  if (schema < STORE_SCHEMA) {
     if (schema > 0 && path !== ':memory:') {
       migrationBackup = `${path}.v${schema}-${new Date().toISOString().replace(/[:.]/g, '-')}.backup.sqlite`;
       // VACUUM INTO includes committed WAL data and produces a consistent restore point.
-      db.prepare('VACUUM INTO ?').run(migrationBackup);
+      db.prepare('VACUUM INTO ?').run(migrationBackup);chmodSync(migrationBackup,0o600);
     }
     db.exec('BEGIN IMMEDIATE');
     try {
@@ -179,7 +180,8 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
         db.prepare('UPDATE planets SET world_radius=?').run(INTEGRATED_RADIUS);
       }
       migrateTeleport(db);
-      db.exec('PRAGMA user_version=16; COMMIT;');
+      migrateArrivalHomes(db);
+      db.exec('PRAGMA user_version=17; COMMIT;');
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
   const history = historyStore(db);
@@ -204,11 +206,11 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
     row(id);const flight=navigation.flight(id);
     const location=homeEnabled?homes.location(id):undefined;
     const standing=flight.mode==='ground'&&location?.kind!=='interior'?ground.read(id):undefined;
-    const r = row(id);
-    return { ...(homeEnabled?{location,home:homes.descriptor(id)}:{}), worldRadius:planets.planet(r.planet_id).radius, environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
+    const r = row(id),arrival=arrivalHomes.read(id);
+    return { ...(arrival?{arrival}:{}), ...(homeEnabled?{location,home:homes.descriptor(id)}:{}), worldRadius:planets.planet(r.planet_id).radius, environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
   };
   // Set by the HTTP server: terrain, collision and siting work then runs on a worker thread.
-  let heavy:HeavyWork|null=null;
+  let heavy:ArrivalWork|null=null;
   // Fresh planets being prepared for a new player; nobody else is given them meanwhile.
   const reservedHomes=new Set<string>();
   /** Search for a home's station on the worker and place it here, re-checked. A search that no longer
@@ -216,7 +218,7 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
   // Station searches that failed, per home, in this run. The home stays complete without its station;
   // the attempt is retried on the owner's later visits, at most three times, never on this thread.
   const stationFailures=new Map<string,number>();
-  async function prepareStation(work:HeavyWork,planetId:string,except?:string){
+  async function prepareStation(work:ArrivalWork,planetId:string,except?:string){
     if((stationFailures.get(planetId)??0)>=3)return;
     const input=teleport.stationSearchInput(planetId,except);if(!input)return;
     let sites:{position:Vec3;rotation:number}[];
@@ -226,11 +228,55 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
   }
   /** Build a planet's ground on the worker when this server has not, so arriving there reuses its fits.
    * The harbour is built at startup and stays in this thread. */
-  async function prepareWorld(work:HeavyWork,planetId:unknown){
+  async function prepareWorld(work:ArrivalWork,planetId:unknown){
     if(typeof planetId!=='string'||planetId==='hub'||!db.prepare('SELECT 1 FROM planets WHERE id=?').get(planetId)||ground.warm(planetId))return;
     // A 503 here leaves the traveller where they are, to try again; the ground is never built on this thread.
     await work.run('world',`world:${planetId}:${planets.planet(planetId).revision}`,{planet:planets.view('',planetId)});
   }
+  const arrivalHomes=new ArrivalHomes(db,{
+    owned:id=>planets.owned(id),
+    ready:(id,planetId)=>planets.owned(id)===planetId&&!!homes.descriptor(id,planetId)&&teleport.sites(planetId).length>0,
+    reserve:()=>planets.freshHomePlanet(reservedHomes),
+    async prepare(id,planetId,work,active){
+      // A manual choice wins over a background suggestion. Never claim a second home.
+      const owned=planets.owned(id);if(owned&&owned!==planetId)return 'manual';
+      let p=planets.planet(planetId);
+      if(p.owner_id&&p.owner_id!==id)throw new ArrivalReservationChanged();
+      if(!db.prepare('SELECT 1 FROM home_manifests WHERE planet_id=?').get(planetId)){
+        const inputs=homes.generationInputs(planetId,id);
+        if(!inputs)throw new ArrivalReservationChanged();
+        const manifest=await work.run<GeneratedHomeManifest>('home',`arrival-home:${planetId}`,inputs);
+        if(!active())return 'manual';
+        db.exec('BEGIN IMMEDIATE');
+        try{
+          const current=homes.generationInputs(planetId,id);p=planets.planet(planetId);
+          const chosen=planets.owned(id);
+          if(chosen&&chosen!==planetId){db.exec('ROLLBACK');return 'manual';}
+          if((p.owner_id&&p.owner_id!==id)||JSON.stringify(current)!==JSON.stringify(inputs)||
+            db.prepare('SELECT 1 FROM players WHERE planet_id=?').get(planetId)||
+            db.prepare('SELECT 1 FROM visits WHERE planet_id=?').get(planetId))throw new ArrivalReservationChanged();
+          planets.claim(id,planetId);homes.initialise(planetId,{inputs,manifest});
+          if(!homes.descriptor(id,planetId))throw new Error('The prepared home has no saved entrance.');
+          db.exec('COMMIT');
+        }catch(error){if(db.isTransaction)db.exec('ROLLBACK');throw error;}
+      }
+      if(!active())return 'manual';
+      // The house may already be committed after an interrupted/failed station search.
+      // Retrying only the station never recreates a home, blueprint or history event.
+      if(!teleport.sites(planetId).length){
+        db.prepare("DELETE FROM home_stations WHERE planet_id=? AND status='needs-site'").run(planetId);
+        const input=teleport.stationSearchInput(planetId);
+        if(input){
+          const sites=await work.run<{position:Vec3;rotation:number}[]>('station',`station:${planetId}:${input.revision}`,{planet:input.planet,occupants:input.occupants});
+          if(!active())return 'manual';
+          teleport.ensureHomeStation(planetId,{revision:input.revision,occupants:input.occupants,sites});
+        }
+      }
+      if(!active())return 'manual';
+      if(!homes.descriptor(id,planetId)||!teleport.sites(planetId).length)throw new Error('The home station must be prepared before arrival is ready.');
+      return 'ready';
+    },
+  });
   const universe = (id: string) => {
     // A home from before teleport stations gets its one placement attempt while its owner stands there.
     const owned=homeEnabled?planets.owned(id):null;
@@ -258,6 +304,21 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
     flight(id:string,body:Record<string,unknown>,now=Date.now()){homes.exterior(id,body.visitEpoch);const clean={...body};delete clean.visitEpoch;navigation.checkpoint(id,clean,now);return state(id);},
     land(id:string,body:Record<string,unknown>,now=Date.now()){homes.exterior(id,body.visitEpoch);const clean={...body};delete clean.visitEpoch;navigation.land(id,clean,now);homes.movedExterior(id);return universe(id);},
     has: (id: string) => Boolean(db.prepare('SELECT id FROM players WHERE id=?').get(id)),
+    /** Establish identity and Hub spawn before any expensive home generation. */
+    createArrival(id:string,now=Date.now()){
+      if(this.has(id))return state(id);
+      if(!integratedWorld)return this.create(id,now);
+      db.exec('BEGIN IMMEDIATE');
+      try{
+        db.prepare('INSERT INTO players(id,position,moved_at) VALUES(?,?,?)').run(id,JSON.stringify(SPAWN),now);
+        arrivalHomes.enroll(id,now);db.exec('COMMIT');
+      }catch(error){if(db.isTransaction)db.exec('ROLLBACK');throw error;}
+      return state(id);
+    },
+    retryArrivalHome(id:string,body:Record<string,unknown>={}){
+      row(id);if(Object.keys(body).length)throw new RequestError(400,'Unexpected arrival field.');
+      arrivalHomes.retry(id);return state(id);
+    },
     create(id: string, now = Date.now()) {
       if(homeEnabled)db.exec('BEGIN IMMEDIATE');
       try{
@@ -305,7 +366,7 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
       try{await prepareStation(work,planetId,id);}catch(error){console.error('Station preparation deferred:',error instanceof Error?error.message:error);}
       return state(id);
     },
-    useHeavyWork(work:HeavyWork|null){heavy=work;},
+    useHeavyWork(work:ArrivalWork|null){heavy=work;arrivalHomes.use(work);},
     /** Before a teleport: the destination is the player's own home or the harbour (the server re-checks). */
     async prepareTeleport(id:string){const work=heavy,r=db.prepare('SELECT planet_id FROM players WHERE id=?').get(id);if(!work||!r)return;await prepareWorld(work,r.planet_id==='hub'?planets.owned(id):'hub');},
     /** Before a landing: only a planet this flight can actually land on is prepared, after the same checks. */
@@ -393,6 +454,6 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
       return universe(id);
     },
     undoHome(id:string,body:Record<string,unknown>){row(id);homes.requireOutside(id);if(Object.keys(body).some(k=>!['buildingId','expectedVersion'].includes(k)))throw new RequestError(400,'Unexpected home field.');const h=homes.descriptor(id);if(!h||h.buildingId!==body.buildingId||!h.canEdit)throw new RequestError(403,'Only the home owner can remodel.');planets.undo(id,{planetId:h.planetId,objectId:h.buildingId,expectedVersion:body.expectedVersion});return universe(id);},
-    close() { db.close(); },
+    close() { arrivalHomes.close();db.close(); },
   };
 }

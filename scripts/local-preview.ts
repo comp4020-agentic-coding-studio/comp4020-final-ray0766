@@ -63,7 +63,7 @@ async function start(restart: boolean) {
   if (!existsSync(settings.database)) throw Error('Preserved midpoint database is missing; refusing to create an empty world.');
   const db = new DatabaseSync(settings.database, { readOnly: true });
   try {
-    if (db.prepare('PRAGMA user_version').get()!.user_version !== 16 || !(Number(db.prepare('SELECT version FROM integration_config WHERE id=1').get()?.version) >= 1) || Number(db.prepare('SELECT enabled FROM home_sample_config WHERE id=1').get()?.enabled) !== 0) throw Error('The midpoint requires the preserved integrated database, not a sample or legacy database.');
+    if (![16,17].includes(Number(db.prepare('PRAGMA user_version').get()!.user_version)) || !(Number(db.prepare('SELECT version FROM integration_config WHERE id=1').get()?.version) >= 1) || Number(db.prepare('SELECT enabled FROM home_sample_config WHERE id=1').get()?.enabled) !== 0) throw Error('The midpoint requires the preserved integrated database, not a sample or legacy database.');
   } finally { db.close(); }
   const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
   const release = resolve(base, 'releases', Date.now() + '-' + commit.slice(0, 7)); mkdirSync(release, { recursive: true });

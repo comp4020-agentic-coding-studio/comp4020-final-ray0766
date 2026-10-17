@@ -1,0 +1,93 @@
+{
+  "kind": "isolated HTTP / SQLite / real SIGKILL recovery",
+  "browserValidation": false,
+  "realMidpointTouched": false,
+  "port": 8136,
+  "startedAt": "2026-10-17T04:30:22Z",
+  "phases": [
+    {
+      "phase": "injected worker failure",
+      "status": "retry",
+      "attempts": 1,
+      "retryBurstRequests": 8,
+      "cooldownUnchanged": true,
+      "foreignBodyStatus": 400,
+      "unauthenticatedStatus": 401
+    },
+    {
+      "phase": "worker held before commit",
+      "status": "preparing",
+      "attempts": 2,
+      "homeUnclaimed": true,
+      "manifestCount": 0,
+      "processOwnershipVerified": true
+    },
+    {
+      "phase": "same-cookie restart recovery",
+      "observedStatuses": [
+        "preparing",
+        "ready"
+      ],
+      "finalStatus": "ready",
+      "attempts": 3,
+      "singleSavedHome": {
+        "ownedHomes": 1,
+        "interiors": 1,
+        "manifests": 1,
+        "placedStationReceipts": 1
+      },
+      "sameReservedHomeResumed": true,
+      "personalTravelRowsUnchanged": true,
+      "repeatedRetryRequests": 8,
+      "subsequentReads": 4,
+      "historyObjectsAndLibraryUnchanged": true,
+      "attemptCountUnchangedAfterReady": true
+    }
+  ],
+  "oldRowsBefore": {
+    "players": 212,
+    "ground_states": 13,
+    "home_locations": 6,
+    "player_ships": 14,
+    "visits": 70
+  },
+  "initialResponse": {
+    "status": 200,
+    "latencyMs": 3.31,
+    "planet": "hub",
+    "homePreparation": "pending",
+    "cookieIssued": true
+  },
+  "crash": {
+    "signal": "SIGKILL",
+    "pid": 31699,
+    "onlyVerifiedFixtureKilled": true,
+    "databaseAndWalRetained": true,
+    "durableStatusAfterCrash": "preparing"
+  },
+  "preservation": {
+    "allPreExistingPersonalRowsEqual": true,
+    "tables": [
+      "players",
+      "ground_states",
+      "home_locations",
+      "player_ships",
+      "visits"
+    ],
+    "oldPlayerCount": 212,
+    "onlyOneNewIdentity": true,
+    "newIdentityPersonalRowsEqualAcrossCrash": true,
+    "integrity": "ok",
+    "foreignKeyProblems": 0,
+    "consistentRecoveryBackupVerified": true
+  },
+  "healthLatencyMs": {
+    "samples": 17,
+    "min": 0.29,
+    "median": 0.44,
+    "max": 19.38,
+    "context": "isolated HTTP fixture while parent performs separate browser acceptance; not a device-wide performance guarantee"
+  },
+  "finishedAt": "2026-10-17T04:30:28Z",
+  "passed": true
+}

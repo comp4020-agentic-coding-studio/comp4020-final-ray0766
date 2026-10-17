@@ -1,0 +1,231 @@
+{
+  "passed": true,
+  "kind": "latest-source migration on a new private copy only",
+  "createdAt": "2026-10-17T04:42:21.281Z",
+  "realMidpointOpened": false,
+  "servicesStartedOrStopped": false,
+  "browserValidation": false,
+  "sourceSchema": 16,
+  "targetSchema": 17,
+  "originalBusinessTables": 24,
+  "newTables": [
+    "home_preparations"
+  ],
+  "newArrivalTasks": 0,
+  "originalPlayerCount": 212,
+  "tables": {
+    "blueprint_contents": {
+      "rowsBefore": 12,
+      "rowsAfter": 12,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "blueprint_library": {
+      "rowsBefore": 52,
+      "rowsAfter": 52,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "ground_states": {
+      "rowsBefore": 13,
+      "rowsAfter": 13,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "history_events": {
+      "rowsBefore": 262,
+      "rowsAfter": 262,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "history_heads": {
+      "rowsBefore": 92,
+      "rowsAfter": 92,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "history_snapshots": {
+      "rowsBefore": 104,
+      "rowsAfter": 104,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "home_interiors": {
+      "rowsBefore": 6,
+      "rowsAfter": 6,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "home_locations": {
+      "rowsBefore": 6,
+      "rowsAfter": 6,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "home_manifests": {
+      "rowsBefore": 6,
+      "rowsAfter": 6,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "home_sample_config": {
+      "rowsBefore": 1,
+      "rowsAfter": 1,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "home_stations": {
+      "rowsBefore": 5,
+      "rowsAfter": 5,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "integration_config": {
+      "rowsBefore": 1,
+      "rowsAfter": 1,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "integration_migrations": {
+      "rowsBefore": 1,
+      "rowsAfter": 1,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "object_assets": {
+      "rowsBefore": 217,
+      "rowsAfter": 217,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "object_replacements": {
+      "rowsBefore": 0,
+      "rowsAfter": 0,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "object_tombstones": {
+      "rowsBefore": 10,
+      "rowsAfter": 10,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "planet_objects": {
+      "rowsBefore": 282,
+      "rowsAfter": 282,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "planet_radius_epochs": {
+      "rowsBefore": 174,
+      "rowsAfter": 174,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "planets": {
+      "rowsBefore": 93,
+      "rowsAfter": 93,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "player_ships": {
+      "rowsBefore": 14,
+      "rowsAfter": 14,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "players": {
+      "rowsBefore": 212,
+      "rowsAfter": 212,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "teleport_marks": {
+      "rowsBefore": 0,
+      "rowsAfter": 0,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "teleport_requests": {
+      "rowsBefore": 4,
+      "rowsAfter": 4,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    },
+    "visits": {
+      "rowsBefore": 70,
+      "rowsAfter": 70,
+      "columnsUnchanged": true,
+      "allFieldsEqual": true,
+      "summaryMatches": true,
+      "backupMatchesOriginal": true
+    }
+  },
+  "backup": {
+    "automaticPreMigrationBackup": true,
+    "sourceSchema": 16,
+    "integrity": "ok",
+    "foreignKeyProblems": 0,
+    "allOriginalTablesMatch": true,
+    "restoreRehearsalExact": true
+  },
+  "secondOpen": {
+    "schema": 17,
+    "noAdditionalBackup": true,
+    "allTablesUnchanged": true
+  },
+  "privacy": {
+    "directoryMode": "0700",
+    "databaseBackupKeyModes": "0600",
+    "keyRetainedByteIdentical": true,
+    "noIdentityOrSavedContentInReport": true
+  },
+  "sourcesStableDuringCheck": true,
+  "sourceBackupUnmodified": true
+}

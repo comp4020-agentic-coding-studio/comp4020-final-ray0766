@@ -1,0 +1,9 @@
+{
+  "realDatabaseReadOnly": true,
+  "schema": 16,
+  "tableCount": 24,
+  "allCountsAndDigestsMatchOptimizationBackup": true,
+  "mismatchedTables": [],
+  "integrity": "ok",
+  "midpointTagCommit": "a0a9c6f5c76524ab592df63b9fcc76191634ff00"
+}

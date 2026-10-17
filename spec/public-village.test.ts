@@ -50,7 +50,7 @@ it('fences the released v7 public client without changing private ground, names,
   expect(s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('public')).toEqual(groundBeforeRejected);
   s.state('private');expect(s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('private')).toEqual(privateBefore);
   expect(snapshot()).toEqual(beforeRejected);expect(s.library('private')[0].blueprint).toEqual(blueprint);
-  expect(s.db.prepare('PRAGMA user_version').get()!.user_version).toBe(16);
+  expect(s.db.prepare('PRAGMA user_version').get()!.user_version).toBe(17);
  }finally{s.close();}
 });
 

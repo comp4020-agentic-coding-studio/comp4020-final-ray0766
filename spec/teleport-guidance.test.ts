@@ -35,3 +35,17 @@ it('keeps an owner’s existing gate action and keeps a neighbour’s gate unava
   const visitor = fixture('p-home', 'p-neighbour'); expect(visitor.gate.canUse).toBe(false);
   expect(document.getElementById('teleport-prompt')!.hidden).toBe(true);
 });
+
+it('shows background preparation rather than the old claim instructions, then enables only a ready home gate', () => {
+  const {gate,bridge}=fixture('p-home');
+  const universe={ownedPlanetId:'p-home',currentPlanet:{id:'hub',kind:'hub',revision:0},planets:[{id:'hub',kind:'hub'}],player:{flight:{mode:'ground'},arrival:{version:1,homePreparation:'preparing',homePlanetId:'p-home'}}} as Universe;
+  gate.receive(universe);gate.frame([0,1,0],10,true);
+  expect(gate.canUse).toBe(false);expect(document.getElementById('teleport-go')!.hidden).toBe(true);
+  expect(document.getElementById('teleport-find-ship')!.hidden).toBe(true);
+  expect(document.getElementById('teleport-home-help')!.textContent).toContain('being prepared');
+  setLanguage('zh');expect(document.getElementById('teleport-home-help')!.textContent).toContain('正在准备');
+  gate.receive({...universe,player:{...universe.player,arrival:{...universe.player.arrival!,homePreparation:'retry'}}});gate.frame([0,1,0],10,true);
+  expect(document.getElementById('teleport-home-help')!.textContent).toContain('重试');expect(bridge.teleport).not.toHaveBeenCalled();
+  gate.receive({...universe,player:{...universe.player,arrival:{...universe.player.arrival!,homePreparation:'ready'}}});gate.frame([0,1,0],10,true);
+  expect(gate.canUse).toBe(true);expect(document.getElementById('teleport-home-help')!.hidden).toBe(true);
+});

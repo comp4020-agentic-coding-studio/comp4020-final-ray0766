@@ -1,0 +1,102 @@
+{
+  "scope": "Self-created phone fixture; Node v24.19.0, in-memory actual GroundWorld, no database writes. Concurrent root integration may affect timing. Runtime budget is not a hard limit on individual synchronous proof duration.",
+  "tests": {
+    "files": 2,
+    "passed": 11,
+    "durationSeconds": 3.64
+  },
+  "rows": [
+    {
+      "label": "saved-position",
+      "rounds": [
+        {
+          "connected": false,
+          "reason": "checking",
+          "frameMs": 13.839,
+          "newProofs": 2
+        },
+        {
+          "connected": false,
+          "reason": "checking",
+          "frameMs": 4.767,
+          "newProofs": 1
+        },
+        {
+          "connected": false,
+          "reason": "checking",
+          "frameMs": 2.873,
+          "newProofs": 6
+        },
+        {
+          "connected": true,
+          "reason": "route",
+          "frameMs": 5.473,
+          "newProofs": 4
+        }
+      ],
+      "connected": true,
+      "maxProofMs": 5.101,
+      "maxReplanMs": 8.839,
+      "geometry": {
+        "width": 0.5924,
+        "height": 0.14,
+        "yMin": -0.01,
+        "yMax": 0.13,
+        "trianglesEach": 44,
+        "instances": 15,
+        "fadeNear": 0.998,
+        "fadeFar": 0.779,
+        "maxDrawCalls": 3
+      }
+    },
+    {
+      "label": "station-arrival",
+      "rounds": [
+        {
+          "connected": false,
+          "reason": "checking",
+          "frameMs": 9.437,
+          "newProofs": 2
+        },
+        {
+          "connected": false,
+          "reason": "checking",
+          "frameMs": 4.314,
+          "newProofs": 1
+        },
+        {
+          "connected": false,
+          "reason": "checking",
+          "frameMs": 5.916,
+          "newProofs": 3
+        },
+        {
+          "connected": false,
+          "reason": "checking",
+          "frameMs": 6.477,
+          "newProofs": 2
+        },
+        {
+          "connected": true,
+          "reason": "route",
+          "frameMs": 6.692,
+          "newProofs": 2
+        }
+      ],
+      "connected": true,
+      "maxProofMs": 4.36,
+      "maxReplanMs": 6.659,
+      "geometry": {
+        "width": 0.5924,
+        "height": 0.14,
+        "yMin": -0.01,
+        "yMax": 0.13,
+        "trianglesEach": 44,
+        "instances": 18,
+        "fadeNear": 0.998,
+        "fadeFar": 0.715,
+        "maxDrawCalls": 3
+      }
+    }
+  ]
+}

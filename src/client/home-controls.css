@@ -14,3 +14,6 @@ body.home-transition #open-menu,body.home-transition #open-map,body.home-transit
 .home-entry-actions{display:flex;gap:6px}.home-entry-actions #home-enter{flex:1;margin-bottom:0!important}.home-entry-actions #home-door-toggle{flex:0 0 auto}#home-door-hint{margin:5px 0 8px!important;color:#70573b;opacity:1!important}
 
 #home-setup-dialog{max-width:430px}#home-setup-dialog select{width:100%;margin:10px 0;min-height:44px}#home-setup-dialog button{margin:6px 6px 0 0;min-height:44px}#home-setup-preview-bar{position:fixed;z-index:26;left:50%;bottom:28px;transform:translateX(-50%);width:min(560px,calc(100% - 32px));box-sizing:border-box;padding:16px 20px;border-radius:16px;background:#f4eddceF;color:#294b43;box-shadow:0 8px 30px #203d3028}#home-setup-preview-bar p{font-size:13px;line-height:1.5}#home-setup-preview-bar button{min-height:44px;margin:5px;border:1px solid #b9c3ae;border-radius:8px;padding:8px 12px;cursor:pointer}
+
+/* During the short guide, the home card keeps clear of the goal and touch band. */
+@media(max-width:699px){body.tutorial-active #home-controls{top:auto;bottom:210px;max-height:210px;overflow:auto}body.tutorial-active:has(#home-controls:not([hidden])) #notice{bottom:440px}}

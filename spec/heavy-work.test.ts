@@ -147,19 +147,12 @@ it('shares one job between requests for the same key, reports worker failures an
   expect(w.pending).toBe(0);
 });
 
-it('keeps answering other requests while a new player arrives', async () => {
-  const base = inject('baseUrl');
-  const arrival = fetch(base + '/api/state').then(response => response.json());
-  let arrived = false; void arrival.then(() => { arrived = true; });
-  const waits: number[] = [];
-  while (!arrived) {
-    const sent = performance.now();
-    await fetch(base + '/healthz');
-    waits.push(performance.now() - sent);
-    await new Promise(resolve => setTimeout(resolve, 40));
-  }
-  expect((await arrival).home).toBeTruthy();
-  expect(Math.max(...waits)).toBeLessThan(250);
-  // Only meaningful when the arrival took long enough to probe during it.
-  expect(waits.length).toBeGreaterThan(3);
-}, 30_000);
+it('acknowledges a new integrated identity at the Hub before its background home is ready',async()=>{
+  const base=inject('baseUrl'),response=await fetch(base+'/api/state'),cookie=response.headers.get('set-cookie')?.split(';')[0];
+  expect(response.status).toBe(200);expect(cookie).toBeTruthy();
+  const arrival=await response.json();expect(arrival).toMatchObject({planetId:'hub',arrival:{version:1}});
+  expect(arrival.home).toBeNull();
+  const again=await fetch(base+'/api/state',{headers:{cookie:cookie!}}).then(r=>r.json());
+  expect(again.planetId).toBe('hub');expect(again.arrival).toMatchObject({version:1});
+  expect((await fetch(base+'/healthz')).status).toBe(200);
+},15_000);

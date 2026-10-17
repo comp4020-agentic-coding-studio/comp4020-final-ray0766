@@ -7,9 +7,14 @@ inventory and its limits are in the [Chinese bug summary](BUG-SUMMARY.zh-CN.md).
 
 ## Start with the identity you have
 
-- A new browser identity receives its own home and begins outside its door.
-  Choose a suit if asked. Open the door and enter your room, or use Pause →
-  Build on my planet / Open workshop outdoors. Keep this browser's cookies.
+- In the new local integrated candidate, a new browser identity begins at the
+  main village while its own home is prepared in the background. The welcome
+  card offers picture quality; the optional guide follows Mica → Sol → the
+  village gate → your front door. Confirm the nearby action at each step.
+  Home preparation failures offer Retry and resume after a server restart.
+  Skip the guide or reopen Pause → Village guide without resetting progress.
+  After owning a planet, Pause → Build on my planet / Open workshop is optional.
+  Keep this browser's cookies. Published Crit9 retains its recorded release flow.
 - An old identity without a home keeps its saved location and progress. At the
   harbour gate the bilingual message explains why it cannot return home yet.
   Use Find my ship, board near the boarding ring, mark a Blank · unclaimed world

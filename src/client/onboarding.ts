@@ -117,6 +117,11 @@ export function mountOnboarding({ read }: { read: () => OnboardingContext | null
     const context = read();
     const hide = () => { card.hidden = true; };
     if (!context || !context.online || document.hidden) return hide();
+    // The core guide owns every newly prepared arrival, even after Skip. These
+    // old flight/claim tips remain available for older identities only.
+    const coreArrival=!!context.universe.player&&'arrival' in context.universe.player&&!!context.universe.player.arrival;
+    reopen.hidden=coreArrival||document.body.classList.contains('tutorial-active');
+    if(reopen.hidden)return hide();
     if (context.universe.player?.home) return hide();
     if (preference === null) remember(hasBuiltHome(context) ? 'done' : 'active');
     if (preference === 'hidden' || preference === 'done') return hide();

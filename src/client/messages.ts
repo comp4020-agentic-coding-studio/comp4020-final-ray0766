@@ -1,6 +1,10 @@
 // Host-owned UI translations. English source strings are the stable fallback.
 // Saved names, IDs, resource snapshots and server payloads are not translated.
 export const messages: Record<string, string> = {
+  "Follow the village guide to meet Mica. You can skip it at any time.": "跟随村庄引导去认识 Mica，也可以随时跳过。",
+  "Village guide": "村庄引导",
+  "Your home is being prepared. You can explore the village while this gate gets ready.": "你的家园正在准备。可以先逛逛村庄，等这座门准备就绪。",
+  "Your home preparation paused. Open the village guide to retry. You can keep exploring here.": "家园准备暂时停下了。可在村庄引导中重试；现在仍可继续探索这里。",
   "Saving movement…": "正在保存移动…",
   "Unsaved movement · saving shortly": "移动尚未保存 · 即将保存",
   "This gate returns to your own home. You have not claimed one yet. Find your ship, mark a Blank · unclaimed world in Atlas, fly there and land. Then Pause → Make this my planet → Build on my planet.": "这座门通往你自己的家园，但你还没有认领家园。先找到飞船，在星图标记“空白 · 未认领”的星球，飞过去并降落。然后打开暂停菜单 → 将这里作为我的星球 → 在我的星球上建造。",

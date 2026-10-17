@@ -1,0 +1,17 @@
+{
+  "fixturePort": 8136,
+  "realDataTouched": false,
+  "errors": [],
+  "clicks": [
+    {
+      "route": "/api/arrival/retry",
+      "status": 200
+    }
+  ],
+  "journeyUnchanged": true,
+  "preparation": {
+    "before": "retry",
+    "after": "ready"
+  },
+  "passed": true
+}

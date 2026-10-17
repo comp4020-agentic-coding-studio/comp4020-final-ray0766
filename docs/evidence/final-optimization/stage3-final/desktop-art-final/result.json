@@ -1,0 +1,244 @@
+{
+  "captureMethod": "Chrome browser viewport screenshot, fromSurface:false; native image dimensions may differ from CSS viewport. Default WebGL attributes, no capture override. After DPR1 line-target sizing repair.",
+  "cssViewport": [
+    1440,
+    900
+  ],
+  "browser": "155.0.8059.80",
+  "physicalPhone": false,
+  "touch": false,
+  "steps": [
+    {
+      "step": "walk-public-post-view",
+      "durationMs": 3928,
+      "waypoints": 23,
+      "maxPlanMs": 3.2999999970197678
+    }
+  ],
+  "errors": [],
+  "consoleErrors": [],
+  "apiWrites": [
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    }
+  ],
+  "firstResponse": {
+    "planetId": "p-b8730182-9387-4cd1-8e2d-c68ec5dba5cc",
+    "quest": "delivered",
+    "arrival": {
+      "version": 1,
+      "homePreparation": "ready",
+      "homePlanetId": "p-b8730182-9387-4cd1-8e2d-c68ec5dba5cc"
+    },
+    "atSpawn": false
+  },
+  "art": [
+    {
+      "scene": "home-door",
+      "tier": "standard",
+      "diagnostics": {
+        "sites": 1,
+        "triangles": 126,
+        "detailTriangles": 160,
+        "drawCalls": 2,
+        "collision": false,
+        "animation": false
+      }
+    },
+    {
+      "scene": "home-door",
+      "tier": "smooth",
+      "diagnostics": {
+        "sites": 1,
+        "triangles": 126,
+        "detailTriangles": 160,
+        "drawCalls": 2,
+        "collision": false,
+        "animation": false
+      }
+    },
+    {
+      "scene": "home-door",
+      "tier": "beautiful",
+      "diagnostics": {
+        "sites": 1,
+        "triangles": 126,
+        "detailTriangles": 160,
+        "drawCalls": 3,
+        "collision": false,
+        "animation": true
+      }
+    },
+    {
+      "scene": "public-post",
+      "tier": "standard",
+      "diagnostics": {
+        "sites": 3,
+        "triangles": 810,
+        "detailTriangles": 912,
+        "drawCalls": 2,
+        "collision": false,
+        "animation": false
+      }
+    },
+    {
+      "scene": "public-post",
+      "tier": "smooth",
+      "diagnostics": {
+        "sites": 3,
+        "triangles": 810,
+        "detailTriangles": 912,
+        "drawCalls": 2,
+        "collision": false,
+        "animation": false
+      }
+    },
+    {
+      "scene": "public-post",
+      "tier": "beautiful",
+      "diagnostics": {
+        "sites": 3,
+        "triangles": 810,
+        "detailTriangles": 912,
+        "drawCalls": 3,
+        "collision": false,
+        "animation": true
+      }
+    }
+  ],
+  "shortPerformance": [
+    {
+      "tier": "standard",
+      "rAFp95": 18.199999999999818,
+      "renderCpuP95": 1.883,
+      "drawCallsP95": 448,
+      "trianglesP95": 311169,
+      "framesOver50": 0
+    },
+    {
+      "tier": "smooth",
+      "rAFp95": 18,
+      "renderCpuP95": 4.403,
+      "drawCallsP95": 253,
+      "trianglesP95": 178310,
+      "framesOver50": 0
+    },
+    {
+      "tier": "beautiful",
+      "rAFp95": 18.19999999999891,
+      "renderCpuP95": 1.767,
+      "drawCallsP95": 449,
+      "trianglesP95": 312081,
+      "framesOver50": 0
+    }
+  ],
+  "memory": [
+    {
+      "cycle": 0,
+      "heapUsed": 43047252,
+      "renderer": {
+        "geometries": 343,
+        "textures": 22,
+        "programs": 80
+      }
+    },
+    {
+      "cycle": 1,
+      "heapUsed": 43061676,
+      "renderer": {
+        "geometries": 343,
+        "textures": 22,
+        "programs": 80
+      }
+    },
+    {
+      "cycle": 2,
+      "heapUsed": 43050940,
+      "renderer": {
+        "geometries": 343,
+        "textures": 22,
+        "programs": 80
+      }
+    },
+    {
+      "cycle": 3,
+      "heapUsed": 43056352,
+      "renderer": {
+        "geometries": 343,
+        "textures": 22,
+        "programs": 80
+      }
+    },
+    {
+      "cycle": 4,
+      "heapUsed": 43224252,
+      "renderer": {
+        "geometries": 343,
+        "textures": 22,
+        "programs": 80
+      }
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,21 @@
+{
+  "aggregateBeforeFinalDrawingFix": {
+    "files": 126,
+    "tests": 790,
+    "passed": true,
+    "durationSeconds": 54.37
+  },
+  "afterFinalDrawingFix": {
+    "affectedFiles": 3,
+    "tests": 11,
+    "passed": true,
+    "newRegressionFailedBeforeFix": "expected size call count 1 to equal drawer count 2",
+    "typecheck": true,
+    "lint": true,
+    "clientBuild": true
+  },
+  "fullAggregateNotRepeated": true,
+  "fixedMidpointTag": "a0a9c6f5c76524ab592df63b9fcc76191634ff00",
+  "noPushOrDeploy": true,
+  "libraryUpload": "Rejected before process start; no file uploaded; local paths supplied as authorized fallback"
+}

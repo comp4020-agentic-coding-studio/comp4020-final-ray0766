@@ -10,7 +10,10 @@ export const INTERACT_DISTANCE = 1.65;
 export const CHARACTERS = ['clay', 'fern', 'sky'] as const;
 export type Character = typeof CHARACTERS[number];
 export type Quest = 'available' | 'carrying' | 'delivered';
+export interface ArrivalState { version:1; homePreparation:'pending'|'preparing'|'retry'|'ready'; homePlanetId:string|null }
 export interface PlayerState {
+  /** Present only for identities enrolled in the new integrated arrival flow. */
+  arrival?:ArrivalState;
   character: Character;
   quest: Quest;
   position: Vec3;

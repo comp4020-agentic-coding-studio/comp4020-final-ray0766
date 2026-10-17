@@ -54,6 +54,9 @@ export function createVillageDrawing(renderer:T.WebGLRenderer,scene:T.Scene,came
     if(!getQualityProfile().screenLines){releaseLines();return;}
     if(drawer)return;
     drawer=new LineDrawer(renderer,scene,camera as T.PerspectiveCamera,VILLAGE.edges!);
+    // Smooth may have cached these same viewport values after release. A new
+    // composer starts at 1x1 and must receive its first real size at DPR1 too.
+    width=0;height=0;ratio=0;scale=0;
     if(camera instanceof T.OrthographicCamera){
       const compositor=drawer.pass.lines as unknown as {normalQuad:{material:T.ShaderMaterial};lineQuad:{material:T.ShaderMaterial}};
       for(const quad of [compositor.normalQuad,compositor.lineQuad]){

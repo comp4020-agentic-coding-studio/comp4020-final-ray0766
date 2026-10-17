@@ -1,0 +1,9 @@
+
+ RUN  v5.0.1 /Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766
+
+Preparing worlds with the TypeScript worker: no bundled worker was built. Run pnpm build for the bundled one.
+
+ Test Files  126 passed (126)
+      Tests  790 passed (790)
+   Start at  15:35:12
+   Duration  54.37s (tests 87%, import 6%, transform 4%, environment 3%)

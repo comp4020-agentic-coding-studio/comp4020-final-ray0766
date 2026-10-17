@@ -1,0 +1,402 @@
+{
+  "captureMethod": "Chrome browser viewport screenshot, fromSurface:false; native image dimensions may differ from CSS viewport. Default WebGL attributes, no capture override. After DPR1 line-target sizing repair.",
+  "cssViewport": [
+    390,
+    844
+  ],
+  "browser": "155.0.8059.80",
+  "physicalPhone": false,
+  "touch": true,
+  "steps": [
+    {
+      "step": "walk-home-art-view",
+      "durationMs": 5665,
+      "waypoints": 9,
+      "maxPlanMs": 0
+    },
+    {
+      "step": "walk-public-post-view",
+      "durationMs": 6474,
+      "waypoints": 23,
+      "maxPlanMs": 3.3000000044703484
+    }
+  ],
+  "errors": [],
+  "consoleErrors": [],
+  "apiWrites": [
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    }
+  ],
+  "firstResponse": {
+    "planetId": "p-386dae93-d34b-4cb9-a15d-844394b37f17",
+    "quest": "delivered",
+    "arrival": {
+      "version": 1,
+      "homePreparation": "ready",
+      "homePlanetId": "p-386dae93-d34b-4cb9-a15d-844394b37f17"
+    },
+    "atSpawn": false
+  },
+  "art": [
+    {
+      "scene": "home-door",
+      "tier": "standard",
+      "diagnostics": {
+        "sites": 1,
+        "triangles": 126,
+        "detailTriangles": 160,
+        "drawCalls": 2,
+        "collision": false,
+        "animation": false
+      }
+    },
+    {
+      "scene": "home-door",
+      "tier": "smooth",
+      "diagnostics": {
+        "sites": 1,
+        "triangles": 126,
+        "detailTriangles": 160,
+        "drawCalls": 2,
+        "collision": false,
+        "animation": false
+      }
+    },
+    {
+      "scene": "home-door",
+      "tier": "beautiful",
+      "diagnostics": {
+        "sites": 1,
+        "triangles": 126,
+        "detailTriangles": 160,
+        "drawCalls": 3,
+        "collision": false,
+        "animation": true
+      }
+    },
+    {
+      "scene": "public-post",
+      "tier": "standard",
+      "diagnostics": {
+        "sites": 3,
+        "triangles": 810,
+        "detailTriangles": 912,
+        "drawCalls": 2,
+        "collision": false,
+        "animation": false
+      }
+    },
+    {
+      "scene": "public-post",
+      "tier": "smooth",
+      "diagnostics": {
+        "sites": 3,
+        "triangles": 810,
+        "detailTriangles": 912,
+        "drawCalls": 2,
+        "collision": false,
+        "animation": false
+      }
+    },
+    {
+      "scene": "public-post",
+      "tier": "beautiful",
+      "diagnostics": {
+        "sites": 3,
+        "triangles": 810,
+        "detailTriangles": 912,
+        "drawCalls": 3,
+        "collision": false,
+        "animation": true
+      }
+    }
+  ],
+  "shortPerformance": [
+    {
+      "tier": "standard",
+      "rAFp95": 17.600000000000364,
+      "renderCpuP95": 1.303,
+      "drawCallsP95": 367,
+      "trianglesP95": 261033,
+      "framesOver50": 0
+    },
+    {
+      "tier": "smooth",
+      "rAFp95": 17.5,
+      "renderCpuP95": 4.29,
+      "drawCallsP95": 172,
+      "trianglesP95": 129926,
+      "framesOver50": 0
+    },
+    {
+      "tier": "beautiful",
+      "rAFp95": 17.899999999999636,
+      "renderCpuP95": 2.08,
+      "drawCallsP95": 368,
+      "trianglesP95": 261945,
+      "framesOver50": 0
+    }
+  ],
+  "memory": [
+    {
+      "cycle": 0,
+      "heapUsed": 43567968,
+      "renderer": {
+        "geometries": 286,
+        "textures": 22,
+        "programs": 80
+      }
+    },
+    {
+      "cycle": 1,
+      "heapUsed": 43609932,
+      "renderer": {
+        "geometries": 286,
+        "textures": 22,
+        "programs": 80
+      }
+    },
+    {
+      "cycle": 2,
+      "heapUsed": 43625276,
+      "renderer": {
+        "geometries": 286,
+        "textures": 22,
+        "programs": 80
+      }
+    },
+    {
+      "cycle": 3,
+      "heapUsed": 43686584,
+      "renderer": {
+        "geometries": 286,
+        "textures": 22,
+        "programs": 80
+      }
+    },
+    {
+      "cycle": 4,
+      "heapUsed": 43604832,
+      "renderer": {
+        "geometries": 286,
+        "textures": 22,
+        "programs": 80
+      }
+    }
+  ],
+  "passed": true
+}

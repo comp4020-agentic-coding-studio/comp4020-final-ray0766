@@ -1,0 +1,1575 @@
+{
+  "browser": "155.0.8059.80",
+  "physicalPhone": false,
+  "touch": false,
+  "steps": [
+    {
+      "step": "ready-hub",
+      "durationMs": 3431
+    },
+    {
+      "step": "idle-poll-stability",
+      "replansBefore": 1,
+      "replansAfter": 1
+    },
+    {
+      "step": "physics-proved-plan-mica",
+      "reason": "route",
+      "segments": 30,
+      "proofs": 0
+    },
+    {
+      "step": "walk-mica",
+      "durationMs": 5847,
+      "waypoints": 31,
+      "maxPlanMs": 3.100000001490116
+    },
+    {
+      "step": "physics-proved-plan-sol",
+      "reason": "route",
+      "segments": 89,
+      "proofs": 1
+    },
+    {
+      "step": "walk-sol",
+      "durationMs": 16709,
+      "waypoints": 90,
+      "maxPlanMs": 5.700000002980232
+    },
+    {
+      "step": "physics-proved-plan-gate",
+      "reason": "route",
+      "segments": 63,
+      "proofs": 3
+    },
+    {
+      "step": "walk-gate",
+      "durationMs": 15252,
+      "waypoints": 64,
+      "maxPlanMs": 4.800000004470348
+    },
+    {
+      "step": "physics-proved-plan-home",
+      "reason": "route",
+      "segments": 7,
+      "proofs": 36
+    },
+    {
+      "step": "walk-home",
+      "durationMs": 5273,
+      "waypoints": 8,
+      "maxPlanMs": 12.899999998509884
+    },
+    {
+      "step": "complete-and-interior-restored",
+      "elapsedMs": 59005,
+      "deliveries": 1,
+      "preparation": "ready"
+    }
+  ],
+  "errors": [],
+  "consoleErrors": [],
+  "apiWrites": [
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/interact",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/interact",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/teleport",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/enter",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    }
+  ],
+  "firstResponse": {
+    "planetId": "hub",
+    "quest": "available",
+    "arrival": {
+      "version": 1,
+      "homePreparation": "pending",
+      "homePlanetId": null
+    },
+    "atSpawn": true
+  },
+  "homeUi": {
+    "tutorial": {
+      "x": 20,
+      "y": 76,
+      "width": 306,
+      "height": 271.375,
+      "hidden": false
+    },
+    "homeControls": {
+      "x": 1170,
+      "y": 82,
+      "width": 246,
+      "height": 81.5,
+      "hidden": false
+    },
+    "overlap": false
+  },
+  "uninterruptedLoop": {
+    "cleanLoop": true,
+    "elapsedMs": 58042,
+    "underFiveMinutes": true
+  },
+  "passed": true
+}

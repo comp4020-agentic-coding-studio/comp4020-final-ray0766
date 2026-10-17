@@ -1,0 +1,258 @@
+{
+  "browser": "155.0.8059.80",
+  "physicalPhone": false,
+  "touch": true,
+  "steps": [
+    {
+      "step": "resume-same-failed-phone-home",
+      "priorTrial": "phone/result.json"
+    },
+    {
+      "step": "physics-proved-plan-home",
+      "reason": "route",
+      "segments": 7,
+      "proofs": 13
+    },
+    {
+      "step": "walk-home",
+      "durationMs": 4987,
+      "waypoints": 8,
+      "maxPlanMs": 6.5
+    },
+    {
+      "step": "complete-and-interior-restored",
+      "elapsedMs": 8068,
+      "deliveries": 1,
+      "preparation": "ready"
+    }
+  ],
+  "errors": [],
+  "consoleErrors": [],
+  "apiWrites": [
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/home/enter",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    }
+  ],
+  "firstResponse": {
+    "planetId": "p-19d8584c-22e6-4c1a-85a4-73e64f6a1e57",
+    "quest": "delivered",
+    "arrival": {
+      "version": 1,
+      "homePreparation": "ready",
+      "homePlanetId": "p-19d8584c-22e6-4c1a-85a4-73e64f6a1e57"
+    },
+    "atSpawn": false
+  },
+  "homeUi": {
+    "tutorial": {
+      "x": 12,
+      "y": 62,
+      "width": 270,
+      "height": 273.0390625,
+      "hidden": false
+    },
+    "homeControls": {
+      "x": 193,
+      "y": 563,
+      "width": 185,
+      "height": 71,
+      "hidden": false
+    },
+    "overlap": false
+  },
+  "uninterruptedLoop": {
+    "cleanLoop": false,
+    "elapsedMs": 7157,
+    "underFiveMinutes": true
+  },
+  "passed": true
+}

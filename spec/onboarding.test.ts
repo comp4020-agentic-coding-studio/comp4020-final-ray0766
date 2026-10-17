@@ -55,6 +55,16 @@ describe('acknowledged first-visit steps', () => {
 });
 
 describe('context card without changing game controls', () => {
+  test('new pending arrivals never see old claim/flight tips, including after the core guide was skipped', () => {
+    const state = context();
+    state.universe.player = {arrival:{version:1,homePreparation:'pending',homePlanetId:null}} as unknown as Universe['player'];
+    mount(() => state);
+    expect(document.querySelector('#first-visit-tip')).toBeNull();
+    expect(el('show-first-visit-tips').hidden).toBe(true);
+    // Background completion cannot opt the new arrival into the historical guide.
+    Object.assign(state.universe.player,{arrival:{version:1,homePreparation:'ready',homePlanetId:'own'}});
+    mounted!.refresh();expect(document.querySelector('#first-visit-tip')).toBeNull();
+  });
   test('builder card follows all controls; skip leaves building and returns focus to Done', () => {
     const state = context('garden', true); state.building = true;
     el('builder').hidden = false;

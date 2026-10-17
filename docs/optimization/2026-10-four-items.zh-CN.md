@@ -1,6 +1,6 @@
 # 四项优化：备份、前测与分阶段验收
 
-阶段状态：**恢复点与代表场景前测已完成，画质/欢迎加载已形成第二阶段本地检查点；尚未最终验收，不是最终交付。** 最新匹配比较及阶段三未验收实现见[阶段三进度](2026-10-stage3-progress.zh-CN.md)；[第二阶段检查点](2026-10-stage2-checkpoint.zh-CN.md)保留历史试跑边界。 用户授权本地四项优化与测试；未获再次批准不得push/部署。唯一开发目录仍为comp4020-final-ray0766，分支integration/midpoint；起点45584f8，固定midpoint-integrated-v1仍指向a0a9c6f。其他旧目录不能当新基线，权限隐私和research-note取舍不在本轮范围。
+阶段状态：实现与最终隔离验收完成，结果与限制见[最终交付证据](2026-10-final-delivery.zh-CN.md)。旧检查点保留历史边界。 用户授权本地四项优化与测试；未获再次批准不得push/部署。唯一开发目录仍为comp4020-final-ray0766，分支integration/midpoint；起点45584f8，固定midpoint-integrated-v1仍指向a0a9c6f。其他旧目录不能当新基线，权限隐私和research-note取舍不在本轮范围。
 
 ## 私有恢复点
 

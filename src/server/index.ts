@@ -54,7 +54,7 @@ const server = createServer(async (req, res) => {
       if(id&&store.has(id))auditIdentity=id;
       if (url.pathname === '/api/state' && req.method === 'GET') {
         if (!id || !store.has(id)) {
-          const token = randomBytes(32).toString('hex'); id = hash(token); const created = await store.createPrepared(id);
+          const token = randomBytes(32).toString('hex'); id = hash(token); const created = store.integratedWorld?store.createArrival(id):await store.createPrepared(id);
           auditIdentity=id;auditCreated=true;
           const secure = req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : '';
           res.setHeader('Set-Cookie', `${cookieName}=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=31536000${secure}`);
@@ -94,7 +94,8 @@ const server = createServer(async (req, res) => {
       try { body = JSON.parse(text); } catch { throw new RequestError(400, 'Invalid JSON.'); }
       if (!body || Array.isArray(body) || typeof body !== 'object') throw new RequestError(400, 'Expected an object.');
       auditContext=body;
-      if (url.pathname === '/api/blueprints/save') send(200, store.saveBlueprint(id, body));
+      if (url.pathname === '/api/arrival/retry') send(200,store.retryArrivalHome(id,body));
+      else if (url.pathname === '/api/blueprints/save') send(200, store.saveBlueprint(id, body));
       else if(url.pathname==='/api/home/setup/preview')send(200,store.previewHomeSetup(id,body));
       else if(url.pathname==='/api/home/setup/confirm')send(200,store.confirmHomeSetup(id,body));
       else if(url.pathname==='/api/home/enter'){const result=store.enterHome(id,body);presence.leave(id);send(200,result);}

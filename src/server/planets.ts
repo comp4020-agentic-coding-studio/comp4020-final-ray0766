@@ -143,7 +143,8 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
         AND COALESCE((SELECT seq FROM history_heads WHERE planet_id=p.id),0)=0
         AND NOT EXISTS(SELECT 1 FROM players WHERE planet_id=p.id)
         AND NOT EXISTS(SELECT 1 FROM visits WHERE planet_id=p.id)
-        AND NOT EXISTS(SELECT 1 FROM home_manifests WHERE planet_id=p.id) ORDER BY rowid LIMIT ?`).all(reserved.size+1)).find(row=>!reserved.has(String(row.id)));
+        AND NOT EXISTS(SELECT 1 FROM home_manifests WHERE planet_id=p.id)
+        AND NOT EXISTS(SELECT 1 FROM home_preparations WHERE planet_id=p.id AND status IN ('pending','preparing','retry')) ORDER BY rowid LIMIT ?`).all(reserved.size+1)).find(row=>!reserved.has(String(row.id)));
       return String(available?.id??addBlankPlanet());
     });},
     replace(id:string,body:Record<string,unknown>,variant='custom'){return transaction(()=>replaceInner(id,body,variant));},

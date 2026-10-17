@@ -106,7 +106,7 @@ for (const write of writes) {
       write.save(s, request); expect(rows(s)).toEqual(saved);
       s.close(); s = openStore(path);
       expect(rows(s)).toEqual(saved);
-      expect(s.db.prepare('PRAGMA user_version').get()!.user_version).toBe(16);
+      expect(s.db.prepare('PRAGMA user_version').get()!.user_version).toBe(17);
       expect(s.db.prepare('PRAGMA integrity_check').get()!.integrity_check).toBe('ok');
     } finally { s.close(); rmSync(dir, { recursive: true, force: true }); }
   });
