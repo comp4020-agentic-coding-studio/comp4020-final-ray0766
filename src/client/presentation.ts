@@ -6,6 +6,8 @@ import { VILLAGE } from '../assets/claude-geometry/style/look.ts';
 import { textureFormat } from './resource-policy.ts';
 import {HOME_SAMPLE_RADIUS} from '../shared/home.ts';
 import {adaptArtLibrary,ART_LIGHT,ART_PALETTE} from './art-profile.ts';
+import {getQualityProfile} from './quality.ts';
+import type {QualityProfile} from './quality.ts';
 
 // Every host scene opts into the same village look; library defaults stay industrial.
 // Do not import the Stage implementation here: its postprocessing stays lazy.
@@ -51,6 +53,18 @@ export const createWorldPracticalLights = () => {
   return pool;
 };
 export const groundPresentation = (planetId: string,radius=0) => Math.abs(radius-HOME_SAMPLE_RADIUS)<1e-6?PRESENTATION.ground.sample:PRESENTATION.ground[planetId === 'hub' ? 'hub' : 'garden'];
+
+/** Only render resources change. Light direction, camera and collision stay put. */
+export function configureQualityShadow(sun:T.DirectionalLight,profile:QualityProfile=getQualityProfile()){
+ const enabled=profile.shadowSize>0;
+ sun.castShadow=enabled;
+ if(!enabled||sun.shadow.mapSize.x!==profile.shadowSize){
+  sun.shadow.map?.dispose();sun.shadow.map=null;
+  sun.shadow.mapPass?.dispose();sun.shadow.mapPass=null;
+  if(enabled)sun.shadow.mapSize.set(profile.shadowSize,profile.shadowSize);
+  sun.shadow.needsUpdate=true;
+ }
+}
 
 /** Follow the actual camera through the overview transition, including its
  * return to walking. The mode flag changes before the camera finishes moving. */
@@ -100,4 +114,5 @@ export function configureHomeLighting(scene:T.Scene,fill:T.HemisphereLight,sun:T
  sun.shadow.camera.updateProjectionMatrix();sun.shadow.radius=ART_LIGHT.shadowRadius;sun.shadow.intensity=ART_LIGHT.shadowIntensity;
  sun.shadow.normalBias=.018;sun.shadow.bias=-.00012;sun.shadow.mapSize.set(1024,1024);
  scene.environmentIntensity=ART_LIGHT.environmentIntensity;
+ configureQualityShadow(sun);
 }

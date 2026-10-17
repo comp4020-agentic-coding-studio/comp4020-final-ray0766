@@ -3,7 +3,8 @@ import * as T from 'three';
 import {createVillageDrawing} from './village-drawing.ts';
 import { courier } from './character.ts';
 import { disposeGeometry } from './build-art.ts';
-import { createWorldStyleLibrary,configureHomeLighting } from './presentation.ts';
+import { createWorldStyleLibrary,configureHomeLighting,configureQualityShadow } from './presentation.ts';
+import {onQualityChange} from './quality.ts';
 import {ART_PALETTE,HOME_ART_THEMES} from './art-profile.ts';
 import { PartBuilder } from '../assets/claude-geometry/style/geometry.ts';
 import { libraryMaterials, makeKit } from '../assets/claude-geometry/blueprint/parts/kit.ts';
@@ -137,6 +138,7 @@ export class HomeInterior {
     this.scene.add(this.room, this.furniture, this.avatar.root, this.selection, this.doorView.root);
     this.selection.rotation.x = -Math.PI / 2; this.selection.visible = false;
     configureHomeLighting(this.scene,this.fill,this.sun,HOME_ROOM.width,HOME_ROOM.depth,HOME_ROOM.height);
+    onQualityChange(()=>configureQualityShadow(this.sun),{signal:this.abort.signal});
     this.scene.add(this.fill,this.sun,this.sun.target);
     this.library.attachRenderer(options.renderer);
     this.ui.className = 'home-interior-ui'; this.ui.hidden = true;

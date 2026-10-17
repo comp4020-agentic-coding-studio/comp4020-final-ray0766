@@ -11,8 +11,10 @@ export function yieldSceneFrame(signal?:AbortSignal):Promise<void>{
   });
 }
 
-interface LoadingTask {title:string;label:string;done?:number;total?:number;error?:string;retry?:()=>void;onCancel?:()=>void}
+export interface LoadingTask {title:string;label:string;done?:number;total?:number;error?:string;retry?:()=>void;onCancel?:()=>void}
 const tasks=new Map<symbol,LoadingTask>();
+const observers=new Set<(task:Readonly<LoadingTask>|null)=>void>();
+let embeddedHost:HTMLElement|null=null;
 let root:HTMLDialogElement|null=null;
 const zh:Record<string,string>={
   'Preparing your world…':'正在准备你的星球…','Preparing nearby worlds…':'正在准备附近的星球…',
@@ -23,8 +25,16 @@ const zh:Record<string,string>={
   'Controls return when the view is ready.':'画面准备完成后即可继续操作。',
   'Could not finish loading. Your saved world is unchanged.':'加载未完成，已保存的星球没有改变。','Try again':'重试','Cancel':'取消',
 };
-const label=(text:string)=>document.documentElement.lang.startsWith('zh')?zh[text]??text:text;
+export const sceneLoadingLabel=(text:string)=>document.documentElement.lang.startsWith('zh')?zh[text]??text:text;
+const label=sceneLoadingLabel;
 export const sceneLoadingActive=()=>tasks.size>0;
+/** A welcome panel can present the same real counts without a second modal.
+ * Loading still blocks world input; controls inside its host remain usable. */
+export function embedSceneLoading(host:HTMLElement,observe:(task:Readonly<LoadingTask>|null)=>void){
+  if(embeddedHost&&embeddedHost!==host)throw new Error('A loading host is already active.');
+  embeddedHost=host;observers.add(observe);paint();
+  return ()=>{observers.delete(observe);if(embeddedHost===host)embeddedHost=null;paint();};
+}
 function paint(){
   if(!root){
     root=document.createElement('dialog');root.className='scene-loading-overlay';root.setAttribute('role','status');root.setAttribute('aria-live','polite');
@@ -34,14 +44,16 @@ function paint(){
     // Release events must reach existing handlers to clear held keys/sticks.
     for(const name of ['pointerdown','click','wheel','keydown'] as const)window.addEventListener(name,event=>{
       if(!tasks.size)return;
-      if(event.target instanceof Node&&root!.contains(event.target)){
+      if(event.target instanceof Node&&(root!.contains(event.target)||embeddedHost?.contains(event.target))){
         if(name==='keydown')event.stopImmediatePropagation();
         return;
       }
       event.preventDefault();event.stopImmediatePropagation();
     },{capture:true,passive:false});
   }
-  const task=[...tasks.values()].at(-1);root.hidden=!task;document.body.classList.toggle('scene-loading',!!task);
+  const task=[...tasks.values()].at(-1);root.hidden=!task||!!embeddedHost;document.body.classList.toggle('scene-loading',!!task);
+  for(const observe of observers)observe(task?{...task}:null);
+  if(embeddedHost){if(root.open)root.close();return;}
   if(!task){if(root.open)root.close();return;}
   if(!root.open)root.showModal();
   root.querySelector('strong')!.textContent=label(task.title);

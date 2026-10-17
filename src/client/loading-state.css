@@ -7,3 +7,9 @@
 .scene-loading-help{font-size:13px;line-height:1.5;opacity:.8;margin:16px 0 0}
 .scene-loading-card button{margin-top:16px;min-height:44px;padding:8px 20px;background:#537a62;color:#fff;border:0;border-radius:8px}
 .scene-loading-card .scene-loading-cancel{margin-left:8px;background:transparent;color:#2f4a43;border:1px solid currentColor}
+/* Share the welcome surface's village palette without adding scene geometry. */
+.scene-loading-card{border-color:#b9c6ae;border-radius:20px;background:#fffdf4;color:#304e40;box-shadow:0 12px 40px #304e4014;font-family:system-ui,sans-serif}
+.scene-loading-card::before{content:'✉';display:block;color:#b7654d;font-size:32px;line-height:1;margin-bottom:14px}
+.scene-loading-card progress{accent-color:#668659}.scene-loading-card button{border-radius:12px;background:#496c51}
+.scene-loading-card button:focus-visible{outline:3px solid #c47c3e;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.scene-loading-overlay *{animation:none!important;transition:none!important}}

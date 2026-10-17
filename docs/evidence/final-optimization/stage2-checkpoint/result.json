@@ -1,0 +1,19 @@
+{
+  "chrome": "155.0.8059.80",
+  "physicalPhone": false,
+  "viewport": [
+    390,
+    844
+  ],
+  "errors": [],
+  "smooth": {
+    "calls": "136",
+    "triangles": "108810",
+    "profile": "smooth",
+    "pipeline": "direct",
+    "memory": "{\"geometries\":163,\"textures\":9,\"programs\":52}",
+    "passes": "0"
+  },
+  "actualContextLostRecovery": true,
+  "preferenceAfterReload": "smooth"
+}
