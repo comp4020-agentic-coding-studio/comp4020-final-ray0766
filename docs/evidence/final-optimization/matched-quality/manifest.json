@@ -1,0 +1,114 @@
+{
+  "after-beautiful/desktop-flight.png": {
+    "bytes": 219679,
+    "sha256": "8aed5b18f9d87a8148adc48e0e71265b6f21e74cbdd698556230515d9d5f329b"
+  },
+  "after-beautiful/desktop-hub.png": {
+    "bytes": 352054,
+    "sha256": "2c23eb77f777cf9d31985f77aee24af20cd073f0f63f2524d0663dc81ca9fb39"
+  },
+  "after-beautiful/desktop-room.png": {
+    "bytes": 278087,
+    "sha256": "92c258eb9c59e322ed6f8c51d97d11d86ba587def31209d55e223ac5fb69adb4"
+  },
+  "after-beautiful/phone-flight.png": {
+    "bytes": 65854,
+    "sha256": "ab8130258cbdd12a672d3b5f278402ed07ecf9bc77e5ac58b9581d37d6fe42c3"
+  },
+  "after-beautiful/phone-hub.png": {
+    "bytes": 71575,
+    "sha256": "4208a795a57feed3ef316f158f8e8a9e24cb9b9000b4ac950e9f2c8d3c3da8a6"
+  },
+  "after-beautiful/phone-room.png": {
+    "bytes": 93533,
+    "sha256": "cfbf6bae4fcb12f135f393bb5fb0a7c652c9f3736aeb2b4691ecd8899bc5c280"
+  },
+  "after-beautiful/result.json": {
+    "bytes": 77499,
+    "sha256": "983f3732aeafb2ed01b3450245884bf87bae903472e3f05a08ec034c8d67a7b8"
+  },
+  "after-smooth/desktop-flight.png": {
+    "bytes": 196346,
+    "sha256": "5cbd9d8f2c2576c2bd2fe47f9b1df73c9189dc4d8337e0a857e845a75b8d736c"
+  },
+  "after-smooth/desktop-hub.png": {
+    "bytes": 256960,
+    "sha256": "3a3065978f6a16970ecdea8b37f051cce4d9942d5a210b7a3b9b6d81fe9be2c3"
+  },
+  "after-smooth/desktop-room.png": {
+    "bytes": 141361,
+    "sha256": "ec0c2eaae6c46e1eb0e5bcd082134cc29b2c5bb190eef6b70a684ddfc21dc204"
+  },
+  "after-smooth/phone-flight.png": {
+    "bytes": 62423,
+    "sha256": "38edc1c68bee502d5a85153ab9fc1675d08ff978d0054ba519ca95c72d18974d"
+  },
+  "after-smooth/phone-hub.png": {
+    "bytes": 53089,
+    "sha256": "8f8fc0526910d7e5f3a718f2bef70c0322bb01b1ac118ff9cab08518f70228df"
+  },
+  "after-smooth/phone-room.png": {
+    "bytes": 63939,
+    "sha256": "0cec2e2b713dead3b9147dd39de2a70048d93a1fd5368437bf25e3cd8a01ac35"
+  },
+  "after-smooth/result.json": {
+    "bytes": 77619,
+    "sha256": "7ba0492b73174e68b4d7b3aa0d0fb5ab5dea62d5b5502228a070cba97a11d655"
+  },
+  "after-standard/desktop-flight.png": {
+    "bytes": 219679,
+    "sha256": "8aed5b18f9d87a8148adc48e0e71265b6f21e74cbdd698556230515d9d5f329b"
+  },
+  "after-standard/desktop-hub.png": {
+    "bytes": 378485,
+    "sha256": "ec045e6ade4438be34823544feb2f75ef037c60136c9a440820a07b6c9da7ce5"
+  },
+  "after-standard/desktop-room.png": {
+    "bytes": 343275,
+    "sha256": "a6d11eaadc2b90818a2cdb9dcbed70d8c2e3ad140b8bfa32b84c3bf66b83433a"
+  },
+  "after-standard/phone-flight.png": {
+    "bytes": 65854,
+    "sha256": "ab8130258cbdd12a672d3b5f278402ed07ecf9bc77e5ac58b9581d37d6fe42c3"
+  },
+  "after-standard/phone-hub.png": {
+    "bytes": 76074,
+    "sha256": "71a0b36d68a122e0969c7832b47f659eda305e62177f1975619573d9ab1b8090"
+  },
+  "after-standard/phone-room.png": {
+    "bytes": 101450,
+    "sha256": "0263dc99fca5a37f60b795b21781d2aba24532e70c2b7b3b15b60a38ef8ad50b"
+  },
+  "after-standard/result.json": {
+    "bytes": 80926,
+    "sha256": "7cd345ca5ab7ac0c36fee8643971029fb83dd4bfc9c1b823bf9e103bf08c9cee"
+  },
+  "before-standard/desktop-flight.png": {
+    "bytes": 219679,
+    "sha256": "8aed5b18f9d87a8148adc48e0e71265b6f21e74cbdd698556230515d9d5f329b"
+  },
+  "before-standard/desktop-hub.png": {
+    "bytes": 352053,
+    "sha256": "9345df3001cdb28c213e4d766c38b3712442fb790105eab097b90e9608974cc3"
+  },
+  "before-standard/desktop-room.png": {
+    "bytes": 343266,
+    "sha256": "393d8f913c327ecabf0b9ce490dba8361fb49c3015d34f835c35ee231a6c14b0"
+  },
+  "before-standard/phone-flight.png": {
+    "bytes": 65854,
+    "sha256": "ab8130258cbdd12a672d3b5f278402ed07ecf9bc77e5ac58b9581d37d6fe42c3"
+  },
+  "before-standard/phone-hub.png": {
+    "bytes": 76080,
+    "sha256": "ece8e969d0a8d25e7814c27de4a87a2dbb9f773b894b76c149904fad32355175"
+  },
+  "before-standard/phone-room.png": {
+    "bytes": 101452,
+    "sha256": "f9fe0545c14f59ceca1fd57f2c66407075c569542e075f61bbd41381a957872a"
+  },
+  "before-standard/result.json": {
+    "bytes": 78427,
+    "sha256": "c788abc3e6e77145838ce6c4f3720ab5ad5a57613df1ea42234565381c3d6741"
+  }
+}

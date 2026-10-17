@@ -1,0 +1,2911 @@
+{
+  "phase": "after",
+  "tier": "smooth",
+  "baseCommit": "12d1bc1+stage2-working",
+  "browser": "155.0.8059.80",
+  "headless": false,
+  "dpr": 1,
+  "physicalPhone": false,
+  "cachePolicy": "Cold=Network.setCacheDisabled(true) in a fresh context; warm=cache enabled and one primed reload; OS and driver caches not cleared.",
+  "fixture": "Same saved isolated identity/home; explicit fixture pose reset before each scenario only. No production database or cookie touched.",
+  "scenes": [
+    {
+      "kind": "hub",
+      "touch": false,
+      "renderer": {
+        "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+        "buffer": [
+          1920,
+          1080
+        ],
+        "viewport": [
+          1920,
+          1080
+        ],
+        "quality": "smooth",
+        "passes": "0",
+        "pipeline": "direct",
+        "profile": "smooth",
+        "memory": {
+          "geometries": 354,
+          "textures": 14,
+          "programs": 42
+        }
+      },
+      "coldReadyMs": 3084,
+      "warmReadyMs": 2562,
+      "samples": [
+        {
+          "label": "steady-0",
+          "rAFms": {
+            "n": 149,
+            "p50": 16.699999999999818,
+            "p95": 16.800000000000182,
+            "p99": 18.400000000000546,
+            "max": 18.699999999999818
+          },
+          "cpuSubmissionMs": {
+            "n": 150,
+            "p50": 1.763,
+            "p95": 1.793,
+            "p99": 1.793,
+            "max": 1.793
+          },
+          "drawCalls": {
+            "n": 150,
+            "p50": 288,
+            "p95": 288,
+            "p99": 288,
+            "max": 288
+          },
+          "triangles": {
+            "n": 150,
+            "p50": 216910,
+            "p95": 219082,
+            "p99": 219082,
+            "max": 219082
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-1",
+          "rAFms": {
+            "n": 149,
+            "p50": 16.699999999999818,
+            "p95": 17.799999999999272,
+            "p99": 18.600000000000364,
+            "max": 18.600000000000364
+          },
+          "cpuSubmissionMs": {
+            "n": 150,
+            "p50": 1.807,
+            "p95": 1.837,
+            "p99": 1.837,
+            "max": 1.837
+          },
+          "drawCalls": {
+            "n": 150,
+            "p50": 288,
+            "p95": 288,
+            "p99": 288,
+            "max": 288
+          },
+          "triangles": {
+            "n": 150,
+            "p50": 216910,
+            "p95": 216910,
+            "p99": 216910,
+            "max": 216910
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-2",
+          "rAFms": {
+            "n": 149,
+            "p50": 16.69999999999891,
+            "p95": 16.80000000000109,
+            "p99": 18.700000000000728,
+            "max": 18.700000000000728
+          },
+          "cpuSubmissionMs": {
+            "n": 150,
+            "p50": 0.78,
+            "p95": 1.547,
+            "p99": 1.547,
+            "max": 1.547
+          },
+          "drawCalls": {
+            "n": 150,
+            "p50": 288,
+            "p95": 288,
+            "p99": 288,
+            "max": 288
+          },
+          "triangles": {
+            "n": 150,
+            "p50": 216490,
+            "p95": 216490,
+            "p99": 216490,
+            "max": 216490
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        }
+      ],
+      "memory": {
+        "metrics": [
+          {
+            "name": "Documents",
+            "value": 1
+          },
+          {
+            "name": "Nodes",
+            "value": 2476
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 41035316
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 43909120
+          }
+        ],
+        "gl": {
+          "buffers": 1345,
+          "textures": 18,
+          "framebuffers": 3,
+          "renderbuffers": 0,
+          "programs": 42
+        }
+      },
+      "load": {
+        "navigation": {
+          "name": "http://127.0.0.1:8134/?measure=render",
+          "entryType": "navigation",
+          "startTime": 0,
+          "duration": 64.60000000149012,
+          "navigationId": 951,
+          "initiatorType": "navigation",
+          "deliveryType": "cache",
+          "nextHopProtocol": "",
+          "renderBlockingStatus": "non-blocking",
+          "contentType": "text/html",
+          "contentEncoding": "",
+          "workerStart": 0,
+          "workerRouterEvaluationStart": 0,
+          "workerCacheLookupStart": 0,
+          "workerMatchedSourceType": "",
+          "workerFinalSourceType": "",
+          "redirectStart": 0,
+          "redirectEnd": 0,
+          "fetchStart": 0.6000000014901161,
+          "domainLookupStart": 0.6000000014901161,
+          "domainLookupEnd": 0.6000000014901161,
+          "connectStart": 0.6000000014901161,
+          "secureConnectionStart": 0,
+          "connectEnd": 0.6000000014901161,
+          "requestStart": 0.8999999985098839,
+          "responseStart": 1.6000000014901161,
+          "firstInterimResponseStart": 0,
+          "finalResponseHeadersStart": 1.6000000014901161,
+          "responseEnd": 1.7000000029802322,
+          "transferSize": 300,
+          "encodedBodySize": 17243,
+          "decodedBodySize": 17243,
+          "responseStatus": 200,
+          "serverTiming": [],
+          "unloadEventStart": 3.399999998509884,
+          "unloadEventEnd": 3.399999998509884,
+          "domInteractive": 19.200000002980232,
+          "domContentLoadedEventStart": 63.70000000298023,
+          "domContentLoadedEventEnd": 63.80000000447035,
+          "domComplete": 64.60000000149012,
+          "loadEventStart": 64.60000000149012,
+          "loadEventEnd": 64.60000000149012,
+          "type": "reload",
+          "redirectCount": 0,
+          "activationStart": 0,
+          "criticalCHRestart": 0,
+          "notRestoredReasons": null,
+          "confidence": {
+            "randomizedTriggerRate": 0.4994798,
+            "value": "high"
+          }
+        },
+        "resources": [
+          {
+            "path": "/assets/index-CtDQZCUg.js",
+            "transfer": 300,
+            "duration": 5.899999998509884
+          },
+          {
+            "path": "/assets/factory-BZEl6dAm.js",
+            "transfer": 300,
+            "duration": 5.199999995529652
+          },
+          {
+            "path": "/assets/three.core-B-WbRUxf.js",
+            "transfer": 300,
+            "duration": 5.399999998509884
+          },
+          {
+            "path": "/assets/sky-i7i1aHNe.js",
+            "transfer": 300,
+            "duration": 6.5
+          },
+          {
+            "path": "/assets/codec-vfFwD_Tt.js",
+            "transfer": 300,
+            "duration": 9.299999997019768
+          },
+          {
+            "path": "/assets/placement-CkgSR87F.js",
+            "transfer": 300,
+            "duration": 6.9000000059604645
+          },
+          {
+            "path": "/assets/loading-state-BDYFeMTs.css",
+            "transfer": 300,
+            "duration": 9.300000004470348
+          },
+          {
+            "path": "/assets/sky-0OLuluEU.css",
+            "transfer": 300,
+            "duration": 9.399999998509884
+          },
+          {
+            "path": "/assets/index-DPKtpc2z.css",
+            "transfer": 300,
+            "duration": 9.700000002980232
+          },
+          {
+            "path": "/assets/loading-state-41O3X0VF.js",
+            "transfer": 300,
+            "duration": 9.600000001490116
+          },
+          {
+            "path": "/api/state",
+            "transfer": 1433,
+            "duration": 1.6000000014901161
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.1000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.1000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.2000000029802322
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 1.1000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.1000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.6999999955296516
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 1.3999999985098839
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.1000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.2999999970197678
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 1.2999999970197678
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.1000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.1999999955296516
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.1999999955296516
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 3
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.8999999985098839
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.8000000044703484
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.7000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.8999999985098839
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.8999999985098839
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.899999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.2999999970197678
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.399999998509884
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.7000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.6000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.2999999970197678
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.2999999970197678
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 1.3999999985098839
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.1000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.6000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.2000000029802322
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 1.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.3000000044703484
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.1000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.1000000014901161
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 1.3000000044703484
+          }
+        ]
+      }
+    },
+    {
+      "kind": "room",
+      "touch": false,
+      "renderer": {
+        "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+        "buffer": [
+          1920,
+          1080
+        ],
+        "viewport": [
+          1920,
+          1080
+        ],
+        "passes": "0",
+        "pipeline": "direct",
+        "profile": "smooth",
+        "memory": {
+          "geometries": 90,
+          "textures": 3,
+          "programs": 24
+        }
+      },
+      "coldReadyMs": 1719,
+      "warmReadyMs": 883,
+      "samples": [
+        {
+          "label": "steady-0",
+          "rAFms": {
+            "n": 149,
+            "p50": 16.699999999999818,
+            "p95": 18.59999999999991,
+            "p99": 18.700000000000273,
+            "max": 18.700000000000273
+          },
+          "cpuSubmissionMs": {
+            "n": 150,
+            "p50": 0.683,
+            "p95": 1.08,
+            "p99": 1.08,
+            "max": 1.08
+          },
+          "drawCalls": {
+            "n": 150,
+            "p50": 90,
+            "p95": 90,
+            "p99": 90,
+            "max": 90
+          },
+          "triangles": {
+            "n": 150,
+            "p50": 10391,
+            "p95": 10391,
+            "p99": 10391,
+            "max": 10391
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-1",
+          "rAFms": {
+            "n": 150,
+            "p50": 16.699999999999818,
+            "p95": 18.600000000000364,
+            "p99": 18.699999999999818,
+            "max": 18.699999999999818
+          },
+          "cpuSubmissionMs": {
+            "n": 151,
+            "p50": 0.32,
+            "p95": 0.337,
+            "p99": 0.707,
+            "max": 0.707
+          },
+          "drawCalls": {
+            "n": 151,
+            "p50": 90,
+            "p95": 90,
+            "p99": 90,
+            "max": 90
+          },
+          "triangles": {
+            "n": 151,
+            "p50": 10391,
+            "p95": 10391,
+            "p99": 10391,
+            "max": 10391
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-2",
+          "rAFms": {
+            "n": 150,
+            "p50": 16.699999999999818,
+            "p95": 18.600000000000364,
+            "p99": 18.699999999999818,
+            "max": 18.700000000000728
+          },
+          "cpuSubmissionMs": {
+            "n": 151,
+            "p50": 0.847,
+            "p95": 1.013,
+            "p99": 1.013,
+            "max": 1.013
+          },
+          "drawCalls": {
+            "n": 151,
+            "p50": 90,
+            "p95": 90,
+            "p99": 90,
+            "max": 90
+          },
+          "triangles": {
+            "n": 151,
+            "p50": 10391,
+            "p95": 10391,
+            "p99": 10391,
+            "max": 10391
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        }
+      ],
+      "memory": {
+        "metrics": [
+          {
+            "name": "Documents",
+            "value": 1
+          },
+          {
+            "name": "Nodes",
+            "value": 2784
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 17143352
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 19005440
+          }
+        ],
+        "gl": {
+          "buffers": 299,
+          "textures": 7,
+          "framebuffers": 3,
+          "renderbuffers": 0,
+          "programs": 24
+        }
+      },
+      "load": {
+        "navigation": {
+          "name": "http://127.0.0.1:8134/?measure=render",
+          "entryType": "navigation",
+          "startTime": 0,
+          "duration": 68.09999999403954,
+          "navigationId": 8309,
+          "initiatorType": "navigation",
+          "deliveryType": "cache",
+          "nextHopProtocol": "",
+          "renderBlockingStatus": "non-blocking",
+          "contentType": "text/html",
+          "contentEncoding": "",
+          "workerStart": 0,
+          "workerRouterEvaluationStart": 0,
+          "workerCacheLookupStart": 0,
+          "workerMatchedSourceType": "",
+          "workerFinalSourceType": "",
+          "redirectStart": 0,
+          "redirectEnd": 0,
+          "fetchStart": 0.6999999955296516,
+          "domainLookupStart": 0.6999999955296516,
+          "domainLookupEnd": 0.6999999955296516,
+          "connectStart": 0.6999999955296516,
+          "secureConnectionStart": 0,
+          "connectEnd": 0.6999999955296516,
+          "requestStart": 1.0999999940395355,
+          "responseStart": 1.7999999970197678,
+          "firstInterimResponseStart": 0,
+          "finalResponseHeadersStart": 1.7999999970197678,
+          "responseEnd": 1.8999999985098839,
+          "transferSize": 300,
+          "encodedBodySize": 17243,
+          "decodedBodySize": 17243,
+          "responseStatus": 200,
+          "serverTiming": [],
+          "unloadEventStart": 3.1999999955296516,
+          "unloadEventEnd": 3.1999999955296516,
+          "domInteractive": 19.399999998509884,
+          "domContentLoadedEventStart": 67.09999999403954,
+          "domContentLoadedEventEnd": 67.19999999552965,
+          "domComplete": 68.09999999403954,
+          "loadEventStart": 68.09999999403954,
+          "loadEventEnd": 68.09999999403954,
+          "type": "reload",
+          "redirectCount": 0,
+          "activationStart": 0,
+          "criticalCHRestart": 0,
+          "notRestoredReasons": null,
+          "confidence": {
+            "randomizedTriggerRate": 0.4994798,
+            "value": "high"
+          }
+        },
+        "resources": [
+          {
+            "path": "/assets/index-CtDQZCUg.js",
+            "transfer": 300,
+            "duration": 3.2000000029802322
+          },
+          {
+            "path": "/assets/three.core-B-WbRUxf.js",
+            "transfer": 300,
+            "duration": 4.299999997019768
+          },
+          {
+            "path": "/assets/sky-i7i1aHNe.js",
+            "transfer": 300,
+            "duration": 6.600000001490116
+          },
+          {
+            "path": "/assets/loading-state-41O3X0VF.js",
+            "transfer": 300,
+            "duration": 8.299999997019768
+          },
+          {
+            "path": "/assets/factory-BZEl6dAm.js",
+            "transfer": 300,
+            "duration": 8.100000001490116
+          },
+          {
+            "path": "/assets/placement-CkgSR87F.js",
+            "transfer": 300,
+            "duration": 8.699999995529652
+          },
+          {
+            "path": "/assets/codec-vfFwD_Tt.js",
+            "transfer": 300,
+            "duration": 9.799999997019768
+          },
+          {
+            "path": "/assets/loading-state-BDYFeMTs.css",
+            "transfer": 300,
+            "duration": 9.899999998509884
+          },
+          {
+            "path": "/assets/sky-0OLuluEU.css",
+            "transfer": 300,
+            "duration": 10.299999997019768
+          },
+          {
+            "path": "/assets/index-DPKtpc2z.css",
+            "transfer": 300,
+            "duration": 10.699999995529652
+          },
+          {
+            "path": "/api/state",
+            "transfer": 3058,
+            "duration": 7.100000001490116
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 4.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 3.2999999970197678
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.7999999970197678
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4.299999997019768
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 5.299999997019768
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.200000002980232
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4.299999997019768
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4.200000002980232
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 5.899999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.399999998509884
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 2.9000000059604645
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.5
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 3.6999999955296516
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.2999999970197678
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.399999998509884
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 2.7999999970197678
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.100000001490116
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 3.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 3
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 6.4000000059604645
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.300000004470348
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 6.199999995529652
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.800000004470348
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 6.700000002980232
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.200000002980232
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 6.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.600000001490116
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 6.300000004470348
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.800000004470348
+          }
+        ]
+      }
+    },
+    {
+      "kind": "flight",
+      "touch": false,
+      "renderer": {
+        "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+        "buffer": [
+          1920,
+          1080
+        ],
+        "viewport": [
+          1920,
+          1080
+        ],
+        "passes": "0",
+        "pipeline": "direct",
+        "profile": "smooth",
+        "memory": {
+          "geometries": 16,
+          "textures": 4,
+          "programs": 39
+        }
+      },
+      "coldReadyMs": 10501,
+      "warmReadyMs": 3950,
+      "samples": [
+        {
+          "label": "steady-0",
+          "rAFms": {
+            "n": 149,
+            "p50": 16.699999999999818,
+            "p95": 18.599999999999454,
+            "p99": 18.699999999999818,
+            "max": 18.699999999999818
+          },
+          "cpuSubmissionMs": {
+            "n": 150,
+            "p50": 0.99,
+            "p95": 1.14,
+            "p99": 1.14,
+            "max": 1.14
+          },
+          "drawCalls": {
+            "n": 150,
+            "p50": 21,
+            "p95": 21,
+            "p99": 21,
+            "max": 21
+          },
+          "triangles": {
+            "n": 150,
+            "p50": 8598,
+            "p95": 8598,
+            "p99": 8598,
+            "max": 8598
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-1",
+          "rAFms": {
+            "n": 150,
+            "p50": 16.699999999999818,
+            "p95": 18.600000000000364,
+            "p99": 18.700000000000728,
+            "max": 18.700000000000728
+          },
+          "cpuSubmissionMs": {
+            "n": 151,
+            "p50": 0.9,
+            "p95": 1.2,
+            "p99": 1.2,
+            "max": 1.2
+          },
+          "drawCalls": {
+            "n": 151,
+            "p50": 21,
+            "p95": 21,
+            "p99": 21,
+            "max": 21
+          },
+          "triangles": {
+            "n": 151,
+            "p50": 8598,
+            "p95": 8598,
+            "p99": 8598,
+            "max": 8598
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-2",
+          "rAFms": {
+            "n": 149,
+            "p50": 16.700000000000728,
+            "p95": 18.600000000000364,
+            "p99": 18.69999999999891,
+            "max": 18.700000000000728
+          },
+          "cpuSubmissionMs": {
+            "n": 150,
+            "p50": 0.987,
+            "p95": 1.083,
+            "p99": 1.13,
+            "max": 1.13
+          },
+          "drawCalls": {
+            "n": 150,
+            "p50": 21,
+            "p95": 21,
+            "p99": 21,
+            "max": 21
+          },
+          "triangles": {
+            "n": 150,
+            "p50": 8598,
+            "p95": 8598,
+            "p99": 8598,
+            "max": 8598
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        }
+      ],
+      "memory": {
+        "metrics": [
+          {
+            "name": "Documents",
+            "value": 1
+          },
+          {
+            "name": "Nodes",
+            "value": 2476
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 47970672
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 50053120
+          }
+        ],
+        "gl": {
+          "buffers": 51,
+          "textures": 8,
+          "framebuffers": 3,
+          "renderbuffers": 0,
+          "programs": 39
+        }
+      },
+      "load": {
+        "navigation": {
+          "name": "http://127.0.0.1:8134/?measure=render",
+          "entryType": "navigation",
+          "startTime": 0,
+          "duration": 79.29999999701977,
+          "navigationId": 4776,
+          "initiatorType": "navigation",
+          "deliveryType": "cache",
+          "nextHopProtocol": "",
+          "renderBlockingStatus": "non-blocking",
+          "contentType": "text/html",
+          "contentEncoding": "",
+          "workerStart": 0,
+          "workerRouterEvaluationStart": 0,
+          "workerCacheLookupStart": 0,
+          "workerMatchedSourceType": "",
+          "workerFinalSourceType": "",
+          "redirectStart": 0,
+          "redirectEnd": 0,
+          "fetchStart": 1,
+          "domainLookupStart": 1,
+          "domainLookupEnd": 1,
+          "connectStart": 1,
+          "secureConnectionStart": 0,
+          "connectEnd": 1,
+          "requestStart": 1.3999999985098839,
+          "responseStart": 2.5999999940395355,
+          "firstInterimResponseStart": 0,
+          "finalResponseHeadersStart": 2.5999999940395355,
+          "responseEnd": 2.899999998509884,
+          "transferSize": 300,
+          "encodedBodySize": 17243,
+          "decodedBodySize": 17243,
+          "responseStatus": 200,
+          "serverTiming": [],
+          "unloadEventStart": 6,
+          "unloadEventEnd": 6,
+          "domInteractive": 15.799999997019768,
+          "domContentLoadedEventStart": 78.29999999701977,
+          "domContentLoadedEventEnd": 78.29999999701977,
+          "domComplete": 79.29999999701977,
+          "loadEventStart": 79.29999999701977,
+          "loadEventEnd": 79.29999999701977,
+          "type": "reload",
+          "redirectCount": 0,
+          "activationStart": 0,
+          "criticalCHRestart": 0,
+          "notRestoredReasons": null,
+          "confidence": {
+            "randomizedTriggerRate": 0.4994798,
+            "value": "high"
+          }
+        },
+        "resources": [
+          {
+            "path": "/assets/index-CtDQZCUg.js",
+            "transfer": 300,
+            "duration": 3.600000001490116
+          },
+          {
+            "path": "/assets/three.core-B-WbRUxf.js",
+            "transfer": 300,
+            "duration": 3.2000000029802322
+          },
+          {
+            "path": "/assets/sky-i7i1aHNe.js",
+            "transfer": 300,
+            "duration": 4
+          },
+          {
+            "path": "/assets/codec-vfFwD_Tt.js",
+            "transfer": 300,
+            "duration": 4.399999998509884
+          },
+          {
+            "path": "/assets/loading-state-41O3X0VF.js",
+            "transfer": 300,
+            "duration": 5
+          },
+          {
+            "path": "/assets/placement-CkgSR87F.js",
+            "transfer": 300,
+            "duration": 4.700000002980232
+          },
+          {
+            "path": "/assets/factory-BZEl6dAm.js",
+            "transfer": 300,
+            "duration": 4.600000001490116
+          },
+          {
+            "path": "/assets/sky-0OLuluEU.css",
+            "transfer": 300,
+            "duration": 4.799999997019768
+          },
+          {
+            "path": "/assets/loading-state-BDYFeMTs.css",
+            "transfer": 300,
+            "duration": 4.799999997019768
+          },
+          {
+            "path": "/assets/index-DPKtpc2z.css",
+            "transfer": 300,
+            "duration": 5
+          },
+          {
+            "path": "/api/state",
+            "transfer": 1378,
+            "duration": 2.2000000029802322
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 5.399999998509884
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 1.2999999970197678
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 1.3999999985098839
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 1.3999999985098839
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 2.899999998509884
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 3.100000001490116
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 3
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 1.6000000014901161
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 3.2999999970197678
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 2.7000000029802322
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 3.9000000059604645
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 2.899999998509884
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 2.9000000059604645
+          }
+        ]
+      }
+    },
+    {
+      "kind": "hub",
+      "touch": true,
+      "renderer": {
+        "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+        "buffer": [
+          390,
+          844
+        ],
+        "viewport": [
+          390,
+          844
+        ],
+        "quality": "smooth",
+        "passes": "0",
+        "pipeline": "direct",
+        "profile": "smooth",
+        "memory": {
+          "geometries": 164,
+          "textures": 14,
+          "programs": 42
+        }
+      },
+      "coldReadyMs": 2702,
+      "warmReadyMs": 2516,
+      "samples": [
+        {
+          "label": "steady-0",
+          "rAFms": {
+            "n": 149,
+            "p50": 16.699999999999818,
+            "p95": 17.800000000000182,
+            "p99": 18.5,
+            "max": 18.600000000000364
+          },
+          "cpuSubmissionMs": {
+            "n": 150,
+            "p50": 1.38,
+            "p95": 1.45,
+            "p99": 1.45,
+            "max": 1.45
+          },
+          "drawCalls": {
+            "n": 150,
+            "p50": 136,
+            "p95": 136,
+            "p99": 136,
+            "max": 136
+          },
+          "triangles": {
+            "n": 150,
+            "p50": 131128,
+            "p95": 131128,
+            "p99": 131128,
+            "max": 131128
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-1",
+          "rAFms": {
+            "n": 149,
+            "p50": 16.699999999999818,
+            "p95": 18.5,
+            "p99": 18.600000000000364,
+            "max": 18.699999999999818
+          },
+          "cpuSubmissionMs": {
+            "n": 150,
+            "p50": 1.333,
+            "p95": 1.437,
+            "p99": 1.437,
+            "max": 1.437
+          },
+          "drawCalls": {
+            "n": 150,
+            "p50": 136,
+            "p95": 136,
+            "p99": 136,
+            "max": 136
+          },
+          "triangles": {
+            "n": 150,
+            "p50": 128956,
+            "p95": 128956,
+            "p99": 128956,
+            "max": 128956
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-2",
+          "rAFms": {
+            "n": 150,
+            "p50": 16.69999999999891,
+            "p95": 18.5,
+            "p99": 18.600000000000364,
+            "max": 18.600000000000364
+          },
+          "cpuSubmissionMs": {
+            "n": 151,
+            "p50": 1.283,
+            "p95": 1.44,
+            "p99": 1.44,
+            "max": 1.44
+          },
+          "drawCalls": {
+            "n": 151,
+            "p50": 133,
+            "p95": 133,
+            "p99": 133,
+            "max": 133
+          },
+          "triangles": {
+            "n": 151,
+            "p50": 126784,
+            "p95": 126784,
+            "p99": 126784,
+            "max": 126784
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        }
+      ],
+      "memory": {
+        "metrics": [
+          {
+            "name": "Documents",
+            "value": 1
+          },
+          {
+            "name": "Nodes",
+            "value": 2476
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 40787204
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 43384832
+          }
+        ],
+        "gl": {
+          "buffers": 615,
+          "textures": 18,
+          "framebuffers": 3,
+          "renderbuffers": 0,
+          "programs": 42
+        }
+      },
+      "load": {
+        "navigation": {
+          "name": "http://127.0.0.1:8134/?measure=render",
+          "entryType": "navigation",
+          "startTime": 0,
+          "duration": 65.5,
+          "navigationId": 9515,
+          "initiatorType": "navigation",
+          "deliveryType": "cache",
+          "nextHopProtocol": "",
+          "renderBlockingStatus": "non-blocking",
+          "contentType": "text/html",
+          "contentEncoding": "",
+          "workerStart": 0,
+          "workerRouterEvaluationStart": 0,
+          "workerCacheLookupStart": 0,
+          "workerMatchedSourceType": "",
+          "workerFinalSourceType": "",
+          "redirectStart": 0,
+          "redirectEnd": 0,
+          "fetchStart": 0.7000000029802322,
+          "domainLookupStart": 0.7000000029802322,
+          "domainLookupEnd": 0.7000000029802322,
+          "connectStart": 0.7000000029802322,
+          "secureConnectionStart": 0,
+          "connectEnd": 0.7000000029802322,
+          "requestStart": 1,
+          "responseStart": 1.8999999985098839,
+          "firstInterimResponseStart": 0,
+          "finalResponseHeadersStart": 1.8999999985098839,
+          "responseEnd": 2.2999999970197678,
+          "transferSize": 300,
+          "encodedBodySize": 17243,
+          "decodedBodySize": 17243,
+          "responseStatus": 200,
+          "serverTiming": [],
+          "unloadEventStart": 7.100000001490116,
+          "unloadEventEnd": 7.100000001490116,
+          "domInteractive": 18.200000002980232,
+          "domContentLoadedEventStart": 64.89999999850988,
+          "domContentLoadedEventEnd": 64.89999999850988,
+          "domComplete": 65.5,
+          "loadEventStart": 65.5,
+          "loadEventEnd": 65.5,
+          "type": "reload",
+          "redirectCount": 0,
+          "activationStart": 0,
+          "criticalCHRestart": 0,
+          "notRestoredReasons": null,
+          "confidence": {
+            "randomizedTriggerRate": 0.4994798,
+            "value": "high"
+          }
+        },
+        "resources": [
+          {
+            "path": "/assets/index-CtDQZCUg.js",
+            "transfer": 300,
+            "duration": 1.3999999985098839
+          },
+          {
+            "path": "/assets/loading-state-41O3X0VF.js",
+            "transfer": 300,
+            "duration": 4.199999995529652
+          },
+          {
+            "path": "/assets/factory-BZEl6dAm.js",
+            "transfer": 300,
+            "duration": 2.1999999955296516
+          },
+          {
+            "path": "/assets/placement-CkgSR87F.js",
+            "transfer": 300,
+            "duration": 2.1999999955296516
+          },
+          {
+            "path": "/assets/three.core-B-WbRUxf.js",
+            "transfer": 300,
+            "duration": 1.5
+          },
+          {
+            "path": "/assets/sky-i7i1aHNe.js",
+            "transfer": 300,
+            "duration": 1.8999999985098839
+          },
+          {
+            "path": "/assets/codec-vfFwD_Tt.js",
+            "transfer": 300,
+            "duration": 2.5999999940395355
+          },
+          {
+            "path": "/assets/sky-0OLuluEU.css",
+            "transfer": 300,
+            "duration": 3.3000000044703484
+          },
+          {
+            "path": "/assets/loading-state-BDYFeMTs.css",
+            "transfer": 300,
+            "duration": 3.5
+          },
+          {
+            "path": "/assets/index-DPKtpc2z.css",
+            "transfer": 300,
+            "duration": 3.9000000059604645
+          },
+          {
+            "path": "/api/state",
+            "transfer": 1433,
+            "duration": 2.5
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 1.3999999985098839
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.1000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.6000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.3000000044703484
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 1.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.6999999955296516
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.8000000044703484
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.5
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 1
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.3000000044703484
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.2999999970197678
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.2000000029802322
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 1.5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 4.0999999940395355
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.100000001490116
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 5.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.2000000029802322
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.7999999970197678
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.899999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.9000000059604645
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.4000000059604645
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.7000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.100000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.6999999955296516
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.9000000059604645
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 59.80000000447035
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 1.6000000014901161
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.2999999970197678
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.100000001490116
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.7000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 4.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.6999999955296516
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.7000000029802322
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.7999999970197678
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 3.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2.899999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 444,
+            "duration": 2
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28691,
+            "duration": 2.600000001490116
+          }
+        ]
+      }
+    },
+    {
+      "kind": "room",
+      "touch": true,
+      "renderer": {
+        "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+        "buffer": [
+          390,
+          844
+        ],
+        "viewport": [
+          390,
+          844
+        ],
+        "passes": "0",
+        "pipeline": "direct",
+        "profile": "smooth",
+        "memory": {
+          "geometries": 79,
+          "textures": 3,
+          "programs": 24
+        }
+      },
+      "coldReadyMs": 1490,
+      "warmReadyMs": 847,
+      "samples": [
+        {
+          "label": "steady-0",
+          "rAFms": {
+            "n": 149,
+            "p50": 16.699999999999818,
+            "p95": 18.59999999999991,
+            "p99": 18.600000000000364,
+            "max": 18.600000000000364
+          },
+          "cpuSubmissionMs": {
+            "n": 150,
+            "p50": 0.853,
+            "p95": 1.063,
+            "p99": 1.063,
+            "max": 1.063
+          },
+          "drawCalls": {
+            "n": 150,
+            "p50": 79,
+            "p95": 79,
+            "p99": 79,
+            "max": 79
+          },
+          "triangles": {
+            "n": 150,
+            "p50": 9505,
+            "p95": 9505,
+            "p99": 9505,
+            "max": 9505
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-1",
+          "rAFms": {
+            "n": 150,
+            "p50": 16.699999999999818,
+            "p95": 18.600000000000364,
+            "p99": 18.600000000000364,
+            "max": 18.600000000000364
+          },
+          "cpuSubmissionMs": {
+            "n": 151,
+            "p50": 0.85,
+            "p95": 1.013,
+            "p99": 1.013,
+            "max": 1.013
+          },
+          "drawCalls": {
+            "n": 151,
+            "p50": 79,
+            "p95": 79,
+            "p99": 79,
+            "max": 79
+          },
+          "triangles": {
+            "n": 151,
+            "p50": 9505,
+            "p95": 9505,
+            "p99": 9505,
+            "max": 9505
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-2",
+          "rAFms": {
+            "n": 149,
+            "p50": 16.69999999999891,
+            "p95": 18.5,
+            "p99": 18.600000000000364,
+            "max": 18.600000000000364
+          },
+          "cpuSubmissionMs": {
+            "n": 150,
+            "p50": 0.91,
+            "p95": 0.97,
+            "p99": 0.97,
+            "max": 0.97
+          },
+          "drawCalls": {
+            "n": 150,
+            "p50": 79,
+            "p95": 79,
+            "p99": 79,
+            "max": 79
+          },
+          "triangles": {
+            "n": 150,
+            "p50": 9505,
+            "p95": 9505,
+            "p99": 9505,
+            "max": 9505
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        }
+      ],
+      "memory": {
+        "metrics": [
+          {
+            "name": "Documents",
+            "value": 1
+          },
+          {
+            "name": "Nodes",
+            "value": 2784
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 17125988
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 19791872
+          }
+        ],
+        "gl": {
+          "buffers": 266,
+          "textures": 7,
+          "framebuffers": 3,
+          "renderbuffers": 0,
+          "programs": 24
+        }
+      },
+      "load": {
+        "navigation": {
+          "name": "http://127.0.0.1:8134/?measure=render",
+          "entryType": "navigation",
+          "startTime": 0,
+          "duration": 53.30000000447035,
+          "navigationId": 6654,
+          "initiatorType": "navigation",
+          "deliveryType": "cache",
+          "nextHopProtocol": "",
+          "renderBlockingStatus": "non-blocking",
+          "contentType": "text/html",
+          "contentEncoding": "",
+          "workerStart": 0,
+          "workerRouterEvaluationStart": 0,
+          "workerCacheLookupStart": 0,
+          "workerMatchedSourceType": "",
+          "workerFinalSourceType": "",
+          "redirectStart": 0,
+          "redirectEnd": 0,
+          "fetchStart": 0.5,
+          "domainLookupStart": 0.5,
+          "domainLookupEnd": 0.5,
+          "connectStart": 0.5,
+          "secureConnectionStart": 0,
+          "connectEnd": 0.5,
+          "requestStart": 0.9000000059604645,
+          "responseStart": 1.7000000029802322,
+          "firstInterimResponseStart": 0,
+          "finalResponseHeadersStart": 1.7000000029802322,
+          "responseEnd": 1.8000000044703484,
+          "transferSize": 300,
+          "encodedBodySize": 17243,
+          "decodedBodySize": 17243,
+          "responseStatus": 200,
+          "serverTiming": [],
+          "unloadEventStart": 3,
+          "unloadEventEnd": 3,
+          "domInteractive": 14.800000004470348,
+          "domContentLoadedEventStart": 52.600000001490116,
+          "domContentLoadedEventEnd": 52.600000001490116,
+          "domComplete": 53.30000000447035,
+          "loadEventStart": 53.30000000447035,
+          "loadEventEnd": 53.30000000447035,
+          "type": "reload",
+          "redirectCount": 0,
+          "activationStart": 0,
+          "criticalCHRestart": 0,
+          "notRestoredReasons": null,
+          "confidence": {
+            "randomizedTriggerRate": 0.4994798,
+            "value": "high"
+          }
+        },
+        "resources": [
+          {
+            "path": "/assets/index-CtDQZCUg.js",
+            "transfer": 300,
+            "duration": 2.4000000059604645
+          },
+          {
+            "path": "/assets/three.core-B-WbRUxf.js",
+            "transfer": 300,
+            "duration": 2.600000001490116
+          },
+          {
+            "path": "/assets/sky-i7i1aHNe.js",
+            "transfer": 300,
+            "duration": 3.3000000044703484
+          },
+          {
+            "path": "/assets/placement-CkgSR87F.js",
+            "transfer": 300,
+            "duration": 2.8000000044703484
+          },
+          {
+            "path": "/assets/factory-BZEl6dAm.js",
+            "transfer": 300,
+            "duration": 3.600000001490116
+          },
+          {
+            "path": "/assets/codec-vfFwD_Tt.js",
+            "transfer": 300,
+            "duration": 4.399999998509884
+          },
+          {
+            "path": "/assets/sky-0OLuluEU.css",
+            "transfer": 300,
+            "duration": 4.700000002980232
+          },
+          {
+            "path": "/assets/loading-state-41O3X0VF.js",
+            "transfer": 300,
+            "duration": 5.300000004470348
+          },
+          {
+            "path": "/assets/loading-state-BDYFeMTs.css",
+            "transfer": 300,
+            "duration": 4.799999997019768
+          },
+          {
+            "path": "/assets/index-DPKtpc2z.css",
+            "transfer": 300,
+            "duration": 5.100000001490116
+          },
+          {
+            "path": "/api/state",
+            "transfer": 3058,
+            "duration": 9.399999998509884
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 8
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.6999999955296516
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 2.2000000029802322
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.700000002980232
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 6.5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 6
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.200000002980232
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4.299999997019768
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 3.5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 6
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4.899999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.5
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 6.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4.799999997019768
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.5999999940395355
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4.800000004470348
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 6.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.299999997019768
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.700000002980232
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.9000000059604645
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.300000004470348
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 6.200000002980232
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4.200000002980232
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.300000004470348
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 6.5999999940395355
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.600000001490116
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 6.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.799999997019768
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.300000004470348
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 5.799999997019768
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.700000002980232
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.5
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4.799999997019768
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 4.799999997019768
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 6.5999999940395355
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 6
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.200000002980232
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.799999997019768
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.199999995529652
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 57581,
+            "duration": 6.399999998509884
+          },
+          {
+            "path": "/api/presence",
+            "transfer": 512,
+            "duration": 5.200000002980232
+          }
+        ]
+      }
+    },
+    {
+      "kind": "flight",
+      "touch": true,
+      "renderer": {
+        "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+        "buffer": [
+          390,
+          844
+        ],
+        "viewport": [
+          390,
+          844
+        ],
+        "passes": "0",
+        "pipeline": "direct",
+        "profile": "smooth",
+        "memory": {
+          "geometries": 14,
+          "textures": 4,
+          "programs": 39
+        }
+      },
+      "coldReadyMs": 10492,
+      "warmReadyMs": 3917,
+      "samples": [
+        {
+          "label": "steady-0",
+          "rAFms": {
+            "n": 150,
+            "p50": 16.699999999999818,
+            "p95": 18.300000000000182,
+            "p99": 18.5,
+            "max": 18.600000000000364
+          },
+          "cpuSubmissionMs": {
+            "n": 151,
+            "p50": 0.86,
+            "p95": 1.023,
+            "p99": 1.023,
+            "max": 1.023
+          },
+          "drawCalls": {
+            "n": 151,
+            "p50": 16,
+            "p95": 16,
+            "p99": 16,
+            "max": 16
+          },
+          "triangles": {
+            "n": 151,
+            "p50": 7058,
+            "p95": 7058,
+            "p99": 7058,
+            "max": 7058
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-1",
+          "rAFms": {
+            "n": 150,
+            "p50": 16.69999999999891,
+            "p95": 18.19999999999891,
+            "p99": 18.400000000001455,
+            "max": 18.5
+          },
+          "cpuSubmissionMs": {
+            "n": 151,
+            "p50": 0.927,
+            "p95": 0.98,
+            "p99": 1.077,
+            "max": 1.077
+          },
+          "drawCalls": {
+            "n": 151,
+            "p50": 16,
+            "p95": 16,
+            "p99": 16,
+            "max": 16
+          },
+          "triangles": {
+            "n": 151,
+            "p50": 7058,
+            "p95": 7058,
+            "p99": 7058,
+            "max": 7058
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        },
+        {
+          "label": "steady-2",
+          "rAFms": {
+            "n": 150,
+            "p50": 16.69999999999891,
+            "p95": 17.69999999999891,
+            "p99": 18.5,
+            "max": 18.600000000000364
+          },
+          "cpuSubmissionMs": {
+            "n": 151,
+            "p50": 0.92,
+            "p95": 1.077,
+            "p99": 1.077,
+            "max": 1.077
+          },
+          "drawCalls": {
+            "n": 151,
+            "p50": 16,
+            "p95": 16,
+            "p99": 16,
+            "max": 16
+          },
+          "triangles": {
+            "n": 151,
+            "p50": 7058,
+            "p95": 7058,
+            "p99": 7058,
+            "max": 7058
+          },
+          "longTasks": {
+            "n": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "framesOver50": 0,
+          "framesOver100": 0,
+          "foreground": true
+        }
+      ],
+      "memory": {
+        "metrics": [
+          {
+            "name": "Documents",
+            "value": 1
+          },
+          {
+            "name": "Nodes",
+            "value": 2476
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 47970996
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 51363840
+          }
+        ],
+        "gl": {
+          "buffers": 43,
+          "textures": 8,
+          "framebuffers": 3,
+          "renderbuffers": 0,
+          "programs": 39
+        }
+      },
+      "load": {
+        "navigation": {
+          "name": "http://127.0.0.1:8134/?measure=render",
+          "entryType": "navigation",
+          "startTime": 0,
+          "duration": 75.79999999701977,
+          "navigationId": 4482,
+          "initiatorType": "navigation",
+          "deliveryType": "cache",
+          "nextHopProtocol": "",
+          "renderBlockingStatus": "non-blocking",
+          "contentType": "text/html",
+          "contentEncoding": "",
+          "workerStart": 0,
+          "workerRouterEvaluationStart": 0,
+          "workerCacheLookupStart": 0,
+          "workerMatchedSourceType": "",
+          "workerFinalSourceType": "",
+          "redirectStart": 0,
+          "redirectEnd": 0,
+          "fetchStart": 0.8999999985098839,
+          "domainLookupStart": 0.8999999985098839,
+          "domainLookupEnd": 0.8999999985098839,
+          "connectStart": 0.8999999985098839,
+          "secureConnectionStart": 0,
+          "connectEnd": 0.8999999985098839,
+          "requestStart": 1.3999999985098839,
+          "responseStart": 2.2999999970197678,
+          "firstInterimResponseStart": 0,
+          "finalResponseHeadersStart": 2.2999999970197678,
+          "responseEnd": 2.7999999970197678,
+          "transferSize": 300,
+          "encodedBodySize": 17243,
+          "decodedBodySize": 17243,
+          "responseStatus": 200,
+          "serverTiming": [],
+          "unloadEventStart": 6.199999995529652,
+          "unloadEventEnd": 6.199999995529652,
+          "domInteractive": 16.799999997019768,
+          "domContentLoadedEventStart": 75.09999999403954,
+          "domContentLoadedEventEnd": 75.09999999403954,
+          "domComplete": 75.79999999701977,
+          "loadEventStart": 75.79999999701977,
+          "loadEventEnd": 75.79999999701977,
+          "type": "reload",
+          "redirectCount": 0,
+          "activationStart": 0,
+          "criticalCHRestart": 0,
+          "notRestoredReasons": null,
+          "confidence": {
+            "randomizedTriggerRate": 0.4994798,
+            "value": "low"
+          }
+        },
+        "resources": [
+          {
+            "path": "/assets/index-CtDQZCUg.js",
+            "transfer": 300,
+            "duration": 2.600000001490116
+          },
+          {
+            "path": "/assets/three.core-B-WbRUxf.js",
+            "transfer": 300,
+            "duration": 1.8999999985098839
+          },
+          {
+            "path": "/assets/sky-0OLuluEU.css",
+            "transfer": 300,
+            "duration": 3.600000001490116
+          },
+          {
+            "path": "/assets/loading-state-41O3X0VF.js",
+            "transfer": 300,
+            "duration": 4.200000002980232
+          },
+          {
+            "path": "/assets/placement-CkgSR87F.js",
+            "transfer": 300,
+            "duration": 2.100000001490116
+          },
+          {
+            "path": "/assets/factory-BZEl6dAm.js",
+            "transfer": 300,
+            "duration": 2.2000000029802322
+          },
+          {
+            "path": "/assets/sky-i7i1aHNe.js",
+            "transfer": 300,
+            "duration": 2.7999999970197678
+          },
+          {
+            "path": "/assets/codec-vfFwD_Tt.js",
+            "transfer": 300,
+            "duration": 3.5
+          },
+          {
+            "path": "/assets/loading-state-BDYFeMTs.css",
+            "transfer": 300,
+            "duration": 3.6999999955296516
+          },
+          {
+            "path": "/assets/index-DPKtpc2z.css",
+            "transfer": 300,
+            "duration": 4
+          },
+          {
+            "path": "/api/state",
+            "transfer": 1378,
+            "duration": 2
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 2.5
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 1.2999999970197678
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 2.8000000044703484
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 1.2999999970197678
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 3.1999999955296516
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 2.899999998509884
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 3.100000001490116
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 2.899999998509884
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 3
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 2.8000000044703484
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 3.899999998509884
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 3.7999999970197678
+          },
+          {
+            "path": "/api/universe",
+            "transfer": 28636,
+            "duration": 3
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "driver": "Corrected readiness: actual body loading + welcome + flight HUD position and departure finished"
+}
