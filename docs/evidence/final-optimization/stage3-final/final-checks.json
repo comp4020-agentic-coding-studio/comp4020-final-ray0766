@@ -17,5 +17,18 @@
   "fullAggregateNotRepeated": true,
   "fixedMidpointTag": "a0a9c6f5c76524ab592df63b9fcc76191634ff00",
   "noPushOrDeploy": true,
-  "libraryUpload": "Rejected before process start; no file uploaded; local paths supplied as authorized fallback"
+  "libraryUpload": "Rejected before process start; no file uploaded; local paths supplied as authorized fallback",
+  "localDelivery": {
+    "completed": true,
+    "url": "http://127.0.0.1:8098",
+    "runtimeCommit": "e4d96a5",
+    "implementationCommit": "04e688f",
+    "schema": 17,
+    "original24TablesPreserved": true,
+    "oldPlayers": 212,
+    "newTasks": 0,
+    "candidate8135Stopped": true,
+    "tag": "final-local-delivered-20261017",
+    "noFullTestRepeat": true
+  }
 }

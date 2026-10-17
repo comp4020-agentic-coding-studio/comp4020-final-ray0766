@@ -1,5 +1,7 @@
 # 本地中期整合入口
 
+最新本地交付见[四项优化交付记录](docs/optimization/2026-10-final-delivery.zh-CN.md)：2026-10-17获明确授权后，现用库原地升级schema17，原24表/212玩家保持，8098运行e4d96a5（实现04e688f），完成tag为final-local-delivered-20261017。旧schema16来源与历史恢复点继续保留。
+
 后续开发统一使用：
 
 - 目录：`/Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766`

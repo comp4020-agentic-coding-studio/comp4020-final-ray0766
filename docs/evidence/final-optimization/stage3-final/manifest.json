@@ -1,4 +1,8 @@
 {
+  "8098-handover-completed.json": {
+    "bytes": 3038,
+    "sha256": "8646089ca20c0a7a6624c6f48b26a5e2553ba6f68ddf6931ccc694cd46f85de1"
+  },
   "COMP8020-Final-desktop-three-tiers.png": {
     "bytes": 574322,
     "sha256": "174c206744b3675e157cdd0d999f88cd76ee60561edaa176fd645a7504d2df88"
@@ -108,8 +112,12 @@
     "sha256": "b8bec7f4c90415851b2d3368f468efa159ab666649b9093085859e6a48ea4e2c"
   },
   "final-checks.json": {
-    "bytes": 623,
-    "sha256": "a62aaed22e6d7b30015d87aa1ed653b5a92dd2fefbf0797d8da8eabc7af62415"
+    "bytes": 986,
+    "sha256": "39c505b4d7990650ec2cc6b236c95bdc09ee99a07604aadefe0de840ba6c170b"
+  },
+  "handover-authorization-recheck.json": {
+    "bytes": 411,
+    "sha256": "2a756619dc13dd8f96b41cb428cf47c687706e323e30b2c2d648da12c0443f27"
   },
   "legacy/flight-restored.png": {
     "bytes": 60824,
