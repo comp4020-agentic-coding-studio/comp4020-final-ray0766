@@ -131,6 +131,10 @@
     "bytes": 477,
     "sha256": "43e11d2c1c1073b25c1adacca1a4a5566f3967296ff89cf57bf95c658c4bd112"
   },
+  "local-handover-result.json": {
+    "bytes": 2613,
+    "sha256": "5bfeff66d579133d33f0adf0ed59cbef9bc7025eefe37237a0cb4ec335e10d06"
+  },
   "migration.json": {
     "bytes": 5921,
     "sha256": "9ece09a0d9c152f893e929141459c77d391d91cd455c42990c1d00f85ca20129"

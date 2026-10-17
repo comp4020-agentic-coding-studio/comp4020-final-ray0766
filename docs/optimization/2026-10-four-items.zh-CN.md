@@ -1,6 +1,6 @@
 # 四项优化：备份、前测与分阶段验收
 
-阶段状态：实现与最终隔离验收完成，结果与限制见[最终交付证据](2026-10-final-delivery.zh-CN.md)。旧检查点保留历史边界。 用户授权本地四项优化与测试；未获再次批准不得push/部署。唯一开发目录仍为comp4020-final-ray0766，分支integration/midpoint；起点45584f8，固定midpoint-integrated-v1仍指向a0a9c6f。其他旧目录不能当新基线，权限隐私和research-note取舍不在本轮范围。
+阶段状态：实现与最终隔离验收完成；8098真实库切换受自动审批阻碍、仍待完成，结果与限制见[最终交付证据](2026-10-final-delivery.zh-CN.md)。旧检查点保留历史边界。 用户授权本地四项优化与测试；未获再次批准不得push/部署。唯一开发目录仍为comp4020-final-ray0766，分支integration/midpoint；起点45584f8，固定midpoint-integrated-v1仍指向a0a9c6f。其他旧目录不能当新基线，权限隐私和research-note取舍不在本轮范围。
 
 ## 私有恢复点
 

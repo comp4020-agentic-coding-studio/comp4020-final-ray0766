@@ -1,0 +1,87 @@
+{
+  "real8098Switch": "blocked by automatic approval before process start",
+  "realDatabaseMigrated": false,
+  "stopped": [
+    {
+      "port": 8130,
+      "pid": 26744,
+      "ownershipVerified": true,
+      "signal": "SIGTERM",
+      "portClosed": true
+    },
+    {
+      "port": 8134,
+      "pid": 27983,
+      "ownershipVerified": true,
+      "signal": "SIGTERM",
+      "portClosed": true
+    },
+    {
+      "port": 8136,
+      "pid": 32077,
+      "ownershipVerified": true,
+      "signal": "SIGTERM",
+      "portClosed": true
+    }
+  ],
+  "retainedCandidatePort": 8135,
+  "candidateSmoke": {
+    "health": {
+      "ok": true,
+      "profile": "integrated"
+    },
+    "staticIndexExact": true,
+    "assets": [
+      {
+        "path": "/assets/index-CaPubzNE.js",
+        "sha256": "d6efaf1dc63e20ea55898c9c997160257f1af0d84e8592ec1e2a4815aa7c9ad8"
+      },
+      {
+        "path": "/assets/three.core-DBKAEyM5.js",
+        "sha256": "c89396eb59939723a3c6b6346befc1ae50825b7a63004ec0eed0e966b0c31467"
+      },
+      {
+        "path": "/assets/sky-m1_wd2AY.js",
+        "sha256": "0b7c9920525a98dbb076b397d3a8da679daa2adbb52d9c5b8581bd49b8d04601"
+      },
+      {
+        "path": "/assets/codec-RKvBR5S0.js",
+        "sha256": "edd981dd5bb827f1d85568aac10d8dfc67c31bb0064e671dd4c818742180f1e6"
+      },
+      {
+        "path": "/assets/factory-DsEQhb-G.js",
+        "sha256": "cfbff1e38c9b32ae42b31b3958a3894c1f248d37cb155a2aa1eeab4c6522be3e"
+      },
+      {
+        "path": "/assets/placement-Bqluo8eB.js",
+        "sha256": "ca5584ae7f4762f7cf68e8cba6df59b584c9e4bc65b210e8da7c4a0ed3f0247c"
+      },
+      {
+        "path": "/assets/loading-state-41O3X0VF.js",
+        "sha256": "e449b084c5f8a13aeed33241179f0869bdc5fcf58da648ae94899829b81c6816"
+      },
+      {
+        "path": "/assets/sky-0OLuluEU.css",
+        "sha256": "7185804db80c712095dee9293a23c98dd19ffe4a99b2e1dd4eb91c139b9dfeeb"
+      },
+      {
+        "path": "/assets/loading-state-BDYFeMTs.css",
+        "sha256": "47125f9c33037ff4a07925a48533d132052ee781263578bc81f0a5a854fcdbe0"
+      },
+      {
+        "path": "/assets/index-yFl8t5qG.css",
+        "sha256": "460d090dd23e1e7264cd3e7dcecfae0cf5e9cdaed6bc9fd16c5ca887021a2a9d"
+      }
+    ],
+    "sourceCommit": "04e688f",
+    "runtimeSourceCanonical": true,
+    "noApiStateOrIdentityWrites": true
+  },
+  "actualDatabaseAfterRejectedSwitch": {
+    "schema": 16,
+    "originalTables": 24,
+    "allRowsMatchFreshBackup": true,
+    "players": 212
+  },
+  "freshBackup": "/Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766/.data/midpoint/backups/final-handover-20261017T045628Z"
+}
