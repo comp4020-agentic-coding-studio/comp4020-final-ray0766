@@ -1,0 +1,826 @@
+{
+  "phase": "before",
+  "commit": "45584f8",
+  "cpu": "Apple M3",
+  "memoryGiB": 16,
+  "os": "27.0.0",
+  "chrome": "155.0.8059.80",
+  "headless": false,
+  "physicalPhone": false,
+  "results": [
+    {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "touch": false,
+      "readyMs": 5522,
+      "planet": "garden",
+      "renderer": {
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "buffer": [
+          1920,
+          1080
+        ],
+        "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+      },
+      "load": {
+        "navigation": {
+          "name": "http://127.0.0.1:8130/?measure=render",
+          "entryType": "navigation",
+          "startTime": 0,
+          "duration": 1180,
+          "navigationId": 7923,
+          "initiatorType": "navigation",
+          "deliveryType": "",
+          "nextHopProtocol": "http/1.1",
+          "renderBlockingStatus": "non-blocking",
+          "contentType": "text/html",
+          "contentEncoding": "",
+          "workerStart": 0,
+          "workerRouterEvaluationStart": 0,
+          "workerCacheLookupStart": 0,
+          "workerMatchedSourceType": "",
+          "workerFinalSourceType": "",
+          "redirectStart": 0,
+          "redirectEnd": 0,
+          "fetchStart": 0.19999999552965164,
+          "domainLookupStart": 0.19999999552965164,
+          "domainLookupEnd": 0.19999999552965164,
+          "connectStart": 0.19999999552965164,
+          "secureConnectionStart": 0,
+          "connectEnd": 0.19999999552965164,
+          "requestStart": 1.6000000014901161,
+          "responseStart": 5.100000001490116,
+          "firstInterimResponseStart": 0,
+          "finalResponseHeadersStart": 5.100000001490116,
+          "responseEnd": 5.699999995529652,
+          "transferSize": 13374,
+          "encodedBodySize": 13074,
+          "decodedBodySize": 13074,
+          "responseStatus": 200,
+          "serverTiming": [],
+          "unloadEventStart": 0,
+          "unloadEventEnd": 0,
+          "domInteractive": 167.29999999701977,
+          "domContentLoadedEventStart": 1178.1000000014901,
+          "domContentLoadedEventEnd": 1178.5,
+          "domComplete": 1179.8999999985099,
+          "loadEventStart": 1180,
+          "loadEventEnd": 1180,
+          "type": "navigate",
+          "redirectCount": 0,
+          "activationStart": 0,
+          "criticalCHRestart": 0,
+          "notRestoredReasons": null,
+          "confidence": {
+            "randomizedTriggerRate": 0.4994798,
+            "value": "low"
+          }
+        },
+        "paint": [
+          {
+            "name": "first-paint",
+            "entryType": "paint",
+            "startTime": 1464,
+            "duration": 0,
+            "navigationId": 7923,
+            "paintTime": 1215.3999999985099,
+            "presentationTime": 1464
+          },
+          {
+            "name": "first-contentful-paint",
+            "entryType": "paint",
+            "startTime": 1464,
+            "duration": 0,
+            "navigationId": 7923,
+            "paintTime": 1215.3999999985099,
+            "presentationTime": 1464
+          }
+        ],
+        "resources": [
+          {
+            "name": "/assets/index-Srmta34n.js",
+            "duration": 12.900000005960464,
+            "transfer": 275622,
+            "decoded": 275322
+          },
+          {
+            "name": "/assets/three.core-B-WbRUxf.js",
+            "duration": 20.69999999552965,
+            "transfer": 254269,
+            "decoded": 253969
+          },
+          {
+            "name": "/assets/sky-DwCWwWfw.js",
+            "duration": 26,
+            "transfer": 522452,
+            "decoded": 522152
+          },
+          {
+            "name": "/assets/codec-Dvqc964a.js",
+            "duration": 31.69999999552965,
+            "transfer": 773214,
+            "decoded": 772914
+          },
+          {
+            "name": "/assets/factory-Kihxb2wL.js",
+            "duration": 32,
+            "transfer": 79095,
+            "decoded": 78795
+          },
+          {
+            "name": "/assets/placement-L6xH_Uol.js",
+            "duration": 32.70000000298023,
+            "transfer": 87236,
+            "decoded": 86936
+          },
+          {
+            "name": "/assets/loading-state-B4k25HRD.css",
+            "duration": 37.20000000298023,
+            "transfer": 1376,
+            "decoded": 1076
+          },
+          {
+            "name": "/assets/loading-state-CmWZoTQc.js",
+            "duration": 37.899999998509884,
+            "transfer": 3390,
+            "decoded": 3090
+          },
+          {
+            "name": "/assets/index-Ca871JiU.css",
+            "duration": 37.19999999552965,
+            "transfer": 61246,
+            "decoded": 60946
+          },
+          {
+            "name": "/api/state",
+            "duration": 1185.3999999985099,
+            "transfer": 3033,
+            "decoded": 2733
+          },
+          {
+            "name": "/api/universe",
+            "duration": 5.299999997019768,
+            "transfer": 56536,
+            "decoded": 56236
+          },
+          {
+            "name": "/api/presence",
+            "duration": 5.600000001490116,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/presence",
+            "duration": 2.5999999940395355,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/presence",
+            "duration": 4.5,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/presence",
+            "duration": 2.8000000044703484,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/universe",
+            "duration": 4.799999997019768,
+            "transfer": 56536,
+            "decoded": 56236
+          },
+          {
+            "name": "/api/presence",
+            "duration": 2.899999998509884,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/presence",
+            "duration": 5.600000001490116,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/presence",
+            "duration": 2.7000000029802322,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/presence",
+            "duration": 6.200000002980232,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/universe",
+            "duration": 10.099999994039536,
+            "transfer": 56536,
+            "decoded": 56236
+          }
+        ]
+      },
+      "samples": [
+        {
+          "label": "home-idle-0",
+          "frameIntervalsMs": {
+            "samples": 204,
+            "p50": 16.699999999999818,
+            "p95": 16.800000000000182,
+            "p99": 18.5,
+            "max": 100.09999999999945
+          },
+          "longFrames50": 1,
+          "longFrames100": 1,
+          "renderCpuSubmissionMs": {
+            "samples": 205,
+            "p50": 1.54,
+            "p95": 49.73,
+            "p99": 49.73,
+            "max": 49.73
+          },
+          "calls": {
+            "samples": 205,
+            "p50": 312,
+            "p95": 312,
+            "p99": 312,
+            "max": 312
+          },
+          "triangles": {
+            "samples": 205,
+            "p50": 219721,
+            "p95": 219721,
+            "p99": 219721,
+            "max": 219721
+          },
+          "longTasksMs": {
+            "samples": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "foreground": true
+        },
+        {
+          "label": "home-idle-1",
+          "frameIntervalsMs": {
+            "samples": 210,
+            "p50": 16.69999999999891,
+            "p95": 17.099999999998545,
+            "p99": 18.5,
+            "max": 18.600000000000364
+          },
+          "longFrames50": 0,
+          "longFrames100": 0,
+          "renderCpuSubmissionMs": {
+            "samples": 211,
+            "p50": 1.233,
+            "p95": 1.33,
+            "p99": 1.33,
+            "max": 1.33
+          },
+          "calls": {
+            "samples": 211,
+            "p50": 312,
+            "p95": 312,
+            "p99": 312,
+            "max": 312
+          },
+          "triangles": {
+            "samples": 211,
+            "p50": 219721,
+            "p95": 219721,
+            "p99": 219721,
+            "max": 219721
+          },
+          "longTasksMs": {
+            "samples": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "foreground": true
+        },
+        {
+          "label": "home-idle-2",
+          "frameIntervalsMs": {
+            "samples": 209,
+            "p50": 16.69999999999891,
+            "p95": 17.5,
+            "p99": 18.399999999999636,
+            "max": 18.600000000000364
+          },
+          "longFrames50": 0,
+          "longFrames100": 0,
+          "renderCpuSubmissionMs": {
+            "samples": 210,
+            "p50": 1.01,
+            "p95": 1.943,
+            "p99": 1.943,
+            "max": 1.943
+          },
+          "calls": {
+            "samples": 210,
+            "p50": 312,
+            "p95": 312,
+            "p99": 312,
+            "max": 312
+          },
+          "triangles": {
+            "samples": 210,
+            "p50": 219721,
+            "p95": 219721,
+            "p99": 219721,
+            "max": 219721
+          },
+          "longTasksMs": {
+            "samples": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "foreground": true
+        },
+        {
+          "label": "home-walk",
+          "frameIntervalsMs": {
+            "samples": 173,
+            "p50": 16.69999999999709,
+            "p95": 17.700000000000728,
+            "p99": 18.599999999998545,
+            "max": 18.599999999998545
+          },
+          "longFrames50": 0,
+          "longFrames100": 0,
+          "renderCpuSubmissionMs": {
+            "samples": 174,
+            "p50": 1.707,
+            "p95": 1.8,
+            "p99": 1.8,
+            "max": 1.8
+          },
+          "calls": {
+            "samples": 174,
+            "p50": 298,
+            "p95": 311,
+            "p99": 312,
+            "max": 312
+          },
+          "triangles": {
+            "samples": 174,
+            "p50": 216201,
+            "p95": 219501,
+            "p99": 219721,
+            "max": 219721
+          },
+          "longTasksMs": {
+            "samples": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "foreground": true
+        }
+      ],
+      "heap": [
+        {
+          "name": "Documents",
+          "value": 1
+        },
+        {
+          "name": "Nodes",
+          "value": 4149
+        },
+        {
+          "name": "LayoutCount",
+          "value": 27
+        },
+        {
+          "name": "TaskDuration",
+          "value": 2.10821
+        },
+        {
+          "name": "JSHeapUsedSize",
+          "value": 48999672
+        },
+        {
+          "name": "JSHeapTotalSize",
+          "value": 87932928
+        }
+      ]
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "touch": true,
+      "readyMs": 2334,
+      "planet": "garden",
+      "renderer": {
+        "viewport": [
+          390,
+          844
+        ],
+        "dpr": 1,
+        "buffer": [
+          390,
+          844
+        ],
+        "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+      },
+      "load": {
+        "navigation": {
+          "name": "http://127.0.0.1:8130/?measure=render",
+          "entryType": "navigation",
+          "startTime": 0,
+          "duration": 117.29999999701977,
+          "navigationId": 8604,
+          "initiatorType": "navigation",
+          "deliveryType": "",
+          "nextHopProtocol": "http/1.1",
+          "renderBlockingStatus": "non-blocking",
+          "contentType": "text/html",
+          "contentEncoding": "",
+          "workerStart": 0,
+          "workerRouterEvaluationStart": 0,
+          "workerCacheLookupStart": 0,
+          "workerMatchedSourceType": "",
+          "workerFinalSourceType": "",
+          "redirectStart": 0,
+          "redirectEnd": 0,
+          "fetchStart": 0.20000000298023224,
+          "domainLookupStart": 0.20000000298023224,
+          "domainLookupEnd": 0.20000000298023224,
+          "connectStart": 0.20000000298023224,
+          "secureConnectionStart": 0,
+          "connectEnd": 0.20000000298023224,
+          "requestStart": 0.8999999985098839,
+          "responseStart": 1.8999999985098839,
+          "firstInterimResponseStart": 0,
+          "finalResponseHeadersStart": 1.8999999985098839,
+          "responseEnd": 2.2999999970197678,
+          "transferSize": 13374,
+          "encodedBodySize": 13074,
+          "decodedBodySize": 13074,
+          "responseStatus": 200,
+          "serverTiming": [],
+          "unloadEventStart": 0,
+          "unloadEventEnd": 0,
+          "domInteractive": 8.899999998509884,
+          "domContentLoadedEventStart": 116.5,
+          "domContentLoadedEventEnd": 116.5,
+          "domComplete": 117.29999999701977,
+          "loadEventStart": 117.29999999701977,
+          "loadEventEnd": 117.29999999701977,
+          "type": "navigate",
+          "redirectCount": 0,
+          "activationStart": 0,
+          "criticalCHRestart": 0,
+          "notRestoredReasons": null,
+          "confidence": {
+            "randomizedTriggerRate": 0.4994798,
+            "value": "high"
+          }
+        },
+        "paint": [
+          {
+            "name": "first-paint",
+            "entryType": "paint",
+            "startTime": 84,
+            "duration": 0,
+            "navigationId": 8604,
+            "paintTime": 38.399999998509884,
+            "presentationTime": 84
+          },
+          {
+            "name": "first-contentful-paint",
+            "entryType": "paint",
+            "startTime": 84,
+            "duration": 0,
+            "navigationId": 8604,
+            "paintTime": 38.399999998509884,
+            "presentationTime": 84
+          }
+        ],
+        "resources": [
+          {
+            "name": "/assets/three.core-B-WbRUxf.js",
+            "duration": 9.799999997019768,
+            "transfer": 254269,
+            "decoded": 253969
+          },
+          {
+            "name": "/assets/index-Srmta34n.js",
+            "duration": 10,
+            "transfer": 275622,
+            "decoded": 275322
+          },
+          {
+            "name": "/assets/factory-Kihxb2wL.js",
+            "duration": 10.300000004470348,
+            "transfer": 79095,
+            "decoded": 78795
+          },
+          {
+            "name": "/assets/loading-state-B4k25HRD.css",
+            "duration": 15.300000004470348,
+            "transfer": 1376,
+            "decoded": 1076
+          },
+          {
+            "name": "/assets/index-Ca871JiU.css",
+            "duration": 16,
+            "transfer": 61246,
+            "decoded": 60946
+          },
+          {
+            "name": "/assets/placement-L6xH_Uol.js",
+            "duration": 14.5,
+            "transfer": 87236,
+            "decoded": 86936
+          },
+          {
+            "name": "/assets/loading-state-CmWZoTQc.js",
+            "duration": 16.600000001490116,
+            "transfer": 3390,
+            "decoded": 3090
+          },
+          {
+            "name": "/assets/sky-DwCWwWfw.js",
+            "duration": 8.200000002980232,
+            "transfer": 522452,
+            "decoded": 522152
+          },
+          {
+            "name": "/assets/codec-Dvqc964a.js",
+            "duration": 13.800000004470348,
+            "transfer": 773214,
+            "decoded": 772914
+          },
+          {
+            "name": "/api/state",
+            "duration": 1006.8000000044703,
+            "transfer": 3030,
+            "decoded": 2730
+          },
+          {
+            "name": "/api/universe",
+            "duration": 8.799999997019768,
+            "transfer": 57043,
+            "decoded": 56743
+          },
+          {
+            "name": "/api/presence",
+            "duration": 2.6999999955296516,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/presence",
+            "duration": 2.399999998509884,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/presence",
+            "duration": 3.3000000044703484,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/presence",
+            "duration": 3.1999999955296516,
+            "transfer": 478,
+            "decoded": 178
+          },
+          {
+            "name": "/api/universe",
+            "duration": 4,
+            "transfer": 57043,
+            "decoded": 56743
+          }
+        ]
+      },
+      "samples": [
+        {
+          "label": "home-idle-0",
+          "frameIntervalsMs": {
+            "samples": 210,
+            "p50": 16.699999999999818,
+            "p95": 18.399999999999636,
+            "p99": 18.700000000000273,
+            "max": 18.700000000000273
+          },
+          "longFrames50": 0,
+          "longFrames100": 0,
+          "renderCpuSubmissionMs": {
+            "samples": 211,
+            "p50": 1.8,
+            "p95": 4.717,
+            "p99": 4.717,
+            "max": 4.717
+          },
+          "calls": {
+            "samples": 211,
+            "p50": 291,
+            "p95": 291,
+            "p99": 291,
+            "max": 291
+          },
+          "triangles": {
+            "samples": 211,
+            "p50": 217143,
+            "p95": 217143,
+            "p99": 217143,
+            "max": 217143
+          },
+          "longTasksMs": {
+            "samples": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "foreground": true
+        },
+        {
+          "label": "home-idle-1",
+          "frameIntervalsMs": {
+            "samples": 210,
+            "p50": 16.699999999999818,
+            "p95": 18.299999999999272,
+            "p99": 18.700000000000728,
+            "max": 18.700000000000728
+          },
+          "longFrames50": 0,
+          "longFrames100": 0,
+          "renderCpuSubmissionMs": {
+            "samples": 211,
+            "p50": 1.753,
+            "p95": 1.847,
+            "p99": 1.847,
+            "max": 1.847
+          },
+          "calls": {
+            "samples": 211,
+            "p50": 291,
+            "p95": 291,
+            "p99": 291,
+            "max": 291
+          },
+          "triangles": {
+            "samples": 211,
+            "p50": 217143,
+            "p95": 217143,
+            "p99": 217143,
+            "max": 217143
+          },
+          "longTasksMs": {
+            "samples": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "foreground": true
+        },
+        {
+          "label": "home-idle-2",
+          "frameIntervalsMs": {
+            "samples": 210,
+            "p50": 16.69999999999891,
+            "p95": 18.200000000000728,
+            "p99": 18.700000000000728,
+            "max": 18.700000000000728
+          },
+          "longFrames50": 0,
+          "longFrames100": 0,
+          "renderCpuSubmissionMs": {
+            "samples": 211,
+            "p50": 1.677,
+            "p95": 1.807,
+            "p99": 1.807,
+            "max": 1.807
+          },
+          "calls": {
+            "samples": 211,
+            "p50": 291,
+            "p95": 291,
+            "p99": 291,
+            "max": 291
+          },
+          "triangles": {
+            "samples": 211,
+            "p50": 217143,
+            "p95": 217143,
+            "p99": 217143,
+            "max": 217143
+          },
+          "longTasksMs": {
+            "samples": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "foreground": true
+        },
+        {
+          "label": "home-walk",
+          "frameIntervalsMs": {
+            "samples": 124,
+            "p50": 16.69999999999891,
+            "p95": 18.099999999998545,
+            "p99": 18.599999999998545,
+            "max": 18.599999999998545
+          },
+          "longFrames50": 0,
+          "longFrames100": 0,
+          "renderCpuSubmissionMs": {
+            "samples": 125,
+            "p50": 1.307,
+            "p95": 1.69,
+            "p99": 1.69,
+            "max": 1.69
+          },
+          "calls": {
+            "samples": 125,
+            "p50": 283,
+            "p95": 293,
+            "p99": 293,
+            "max": 293
+          },
+          "triangles": {
+            "samples": 125,
+            "p50": 215945,
+            "p95": 217239,
+            "p99": 217239,
+            "max": 217239
+          },
+          "longTasksMs": {
+            "samples": 0,
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null
+          },
+          "foreground": true
+        }
+      ],
+      "heap": [
+        {
+          "name": "Documents",
+          "value": 1
+        },
+        {
+          "name": "Nodes",
+          "value": 3964
+        },
+        {
+          "name": "LayoutCount",
+          "value": 22
+        },
+        {
+          "name": "TaskDuration",
+          "value": 2.30727
+        },
+        {
+          "name": "JSHeapUsedSize",
+          "value": 53710788
+        },
+        {
+          "name": "JSHeapTotalSize",
+          "value": 87146496
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "server": {
+    "healthLocalRoundtripMs": {
+      "p50": 1.8364170000058948,
+      "p95": 3.420332999994571,
+      "max": 18.87933399999747
+    },
+    "process": "26744 185920   2.2   0:05.16",
+    "meaning": "Local loopback HTTP and process RSS/CPU snapshot; not remote latency or maximum concurrency capacity."
+  }
+}
