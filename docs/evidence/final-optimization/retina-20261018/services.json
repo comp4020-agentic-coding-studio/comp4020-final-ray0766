@@ -1,0 +1,14 @@
+{
+  "candidate": {
+    "port": 8137,
+    "status": 200,
+    "servedIndexMatchesRecordedBuild": true,
+    "indexSha256": "d357c5abb8aa63715ef6e4f6a53f833aa7ae3a1a0fdf80d07cc274c5cf34f9b7"
+  },
+  "real8098": {
+    "port": 8098,
+    "status": 200,
+    "servedIndexMatchesRecordedBuild": true,
+    "indexSha256": "afe9443db107b76973a57e009f86073956d59d604ac43d7f5bb48f46ca185df2"
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "implementationCommit": "a443c5ed6e587d0f7c62731b72f5f81acd04140d",
+  "host": "retina-candidate.localhost",
+  "browser": "155.0.8059.80",
+  "isolatedIdentity": true,
+  "physicalPhone": false,
+  "diagnosticBuild": false,
+  "returningIdentityReadyMs": 2824,
+  "passed": true,
+  "errors": [],
+  "consoleErrors": [],
+  "apiFailures": [],
+  "steps": [
+    {
+      "name": "retina-standard",
+      "css": [
+        2560,
+        1230
+      ],
+      "buffer": [
+        1766,
+        848
+      ],
+      "profile": "standard",
+      "pipeline": "village-lines",
+      "passes": 3,
+      "calls": 494,
+      "triangles": 361287,
+      "ratio": 2,
+      "route": {
+        "connected": true,
+        "reason": "route",
+        "replans": 2
+      }
+    },
+    {
+      "name": "retina-beautiful",
+      "css": [
+        2560,
+        1230
+      ],
+      "buffer": [
+        2580,
+        1239
+      ],
+      "profile": "beautiful",
+      "pipeline": "village-lines",
+      "passes": 3,
+      "calls": 495,
+      "triangles": 362199,
+      "ratio": 2,
+      "route": {
+        "connected": true,
+        "reason": "route",
+        "replans": 3
+      }
+    },
+    {
+      "name": "retina-smooth",
+      "css": [
+        2560,
+        1230
+      ],
+      "buffer": [
+        1766,
+        848
+      ],
+      "profile": "smooth",
+      "pipeline": "direct",
+      "passes": 0,
+      "calls": 298,
+      "triangles": 218088,
+      "ratio": 2,
+      "route": {
+        "connected": true,
+        "reason": "route",
+        "replans": 4
+      }
+    },
+    {
+      "name": "retina-beautiful-rebuild",
+      "css": [
+        2560,
+        1230
+      ],
+      "buffer": [
+        2580,
+        1239
+      ],
+      "profile": "beautiful",
+      "pipeline": "village-lines",
+      "passes": 3,
+      "calls": 495,
+      "triangles": 362199,
+      "ratio": 2,
+      "route": {
+        "connected": true,
+        "reason": "route",
+        "replans": 5
+      }
+    },
+    {
+      "name": "keyboard-walk",
+      "moved": true
+    },
+    {
+      "name": "atlas-close",
+      "css": [
+        2560,
+        1230
+      ],
+      "buffer": [
+        2580,
+        1239
+      ],
+      "profile": "beautiful",
+      "pipeline": "village-lines",
+      "passes": 3,
+      "calls": 489,
+      "triangles": 347359,
+      "ratio": 2,
+      "route": {
+        "connected": true,
+        "reason": "route",
+        "replans": 8
+      }
+    },
+    {
+      "name": "bilingual-quality",
+      "en": "Village lines and larger shadows. Large Retina windows trade some 3D sharpness for responsiveness.",
+      "zh": "保留村庄描线与较大阴影；大型Retina窗口降低部分3D锐度以保持响应。"
+    },
+    {
+      "name": "resize-desktop",
+      "css": [
+        1440,
+        900
+      ],
+      "buffer": [
+        2262,
+        1414
+      ],
+      "profile": "beautiful",
+      "pipeline": "village-lines",
+      "passes": 3,
+      "calls": 469,
+      "triangles": 331839,
+      "ratio": 2,
+      "route": {
+        "connected": true,
+        "reason": "route",
+        "replans": 9
+      }
+    },
+    {
+      "name": "resize-phone-width",
+      "css": [
+        390,
+        844
+      ],
+      "buffer": [
+        702,
+        1519
+      ],
+      "profile": "beautiful",
+      "pipeline": "village-lines",
+      "passes": 3,
+      "calls": 337,
+      "triangles": 275593,
+      "ratio": 2,
+      "route": {
+        "connected": true,
+        "reason": "route",
+        "replans": 9
+      }
+    },
+    {
+      "name": "manual-survives-refresh",
+      "css": [
+        390,
+        844
+      ],
+      "buffer": [
+        702,
+        1519
+      ],
+      "profile": "beautiful",
+      "pipeline": "village-lines",
+      "passes": 3,
+      "calls": 337,
+      "triangles": 275593,
+      "ratio": 2,
+      "route": {
+        "connected": true,
+        "reason": "route",
+        "replans": 1
+      }
+    },
+    {
+      "name": "saved-pose-refresh",
+      "unchanged": true
+    },
+    {
+      "name": "restore-retina",
+      "css": [
+        2560,
+        1230
+      ],
+      "buffer": [
+        1766,
+        848
+      ],
+      "profile": "standard",
+      "pipeline": "village-lines",
+      "passes": 3,
+      "calls": 488,
+      "triangles": 346447,
+      "ratio": 2,
+      "route": {
+        "connected": true,
+        "reason": "route",
+        "replans": 2
+      }
+    },
+    {
+      "name": "auto-default",
+      "css": [
+        2560,
+        1230
+      ],
+      "buffer": [
+        1766,
+        848
+      ],
+      "profile": "standard",
+      "pipeline": "village-lines",
+      "passes": 3,
+      "calls": 488,
+      "triangles": 346447,
+      "ratio": 2,
+      "route": {
+        "connected": true,
+        "reason": "route",
+        "replans": 3
+      }
+    }
+  ]
+}

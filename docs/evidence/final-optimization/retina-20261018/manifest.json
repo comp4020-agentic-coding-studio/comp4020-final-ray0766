@@ -1,0 +1,35 @@
+{
+  "implementationCommit": "a443c5ed6e587d0f7c62731b72f5f81acd04140d",
+  "sourceSha256": {
+    "src/client/quality.ts": "164f6d223764eaea1b06d9d916151052444e7efd6275a9817ac878588b7f22c1",
+    "src/client/village-drawing.ts": "11feec824bc52824fc7409b03abddc52f70bd156d3e385c1632da53fa484e230",
+    "spec/quality.test.ts": "6ad362deb2ddf19e7f0b97bb922ff7378cfdd8f2b5f51f17886115d3887d54ce",
+    "spec/quality-drawing-lifecycle.test.ts": "bcbed9883d7f066e327eb7fcc15d34d4d368ace5251bbd066206e381402196b3"
+  },
+  "privateRunRelativeRoot": ".data/retina-performance/20261018T041510Z",
+  "privateRawSha256": {
+    "final-baseline-matched/result.json": "e8c0257bce344966bcdbdf1186b4137a53863b93f8f7e3053ca6278a971f725f",
+    "final-baseline-matched/full-plain-raw.json": "f670f355c18f00315f60a7a84a27a43d0ca360e0662ae52a3e7b1ad322232f31",
+    "final-baseline-matched/full-timer-readback-raw.json": "f703b9b70aa9c4c93219e0d089c6bf16c363b2d7ff82c143e0d001c980cdf253",
+    "final-baseline-matched/full-trace.json": "91d2b6f8788da755050219e1cd352a5035aae584fc4b7779815e5ecb8809810a",
+    "final-baseline-matched/full.png": "79bf26cadd1f4395941c3a5d17b3b5b81272df406547cc81feeb6e087c9883c5",
+    "final-candidate-3mp/result.json": "1587dd2b7375a5fbb16423f54aa59a68a65bd6198e3b1483e123593010f0c431",
+    "final-candidate-3mp/full-plain-raw.json": "cfabcab0b039ba6db5596dfd71bdb7e3fd1b0b812a5f49cfb34427a4de9e2861",
+    "final-candidate-3mp/full-timer-readback-raw.json": "8f6bedfe6b2e6feb0a1482a0ba772f068c81a147ecab000c883177356d9ae55f",
+    "final-candidate-3mp/full-trace.json": "59c9b1ddc7c90382084253186febe16bda494c17e6798d5bd604f10871dbd034",
+    "final-candidate-3mp/full.png": "44cdb3b14e8d22a64b6133aa22258e8455741913bd8025407f7fd0320dcd32b8",
+    "pure-smoke-final/result.json": "40e93d5a1c4cf424614d31bb81eead949ff7e3c7eb346227b987150cce23d6f7"
+  },
+  "checks": {
+    "targetedTestFiles": 4,
+    "targetedTestsPassed": 20,
+    "typecheck": "passed",
+    "changedFileEslint": "passed",
+    "clientBuildModules": 317,
+    "fullSuiteRepeated": false,
+    "diagnosticMarkersAbsentFromPureBuild": true,
+    "vendorSourceUnchanged": true,
+    "courseEvidenceCheck": "passed"
+  },
+  "imageMethod": "full screenshots are actual headless Chrome surface captures. css-comparison downsamples both DPR2 captures to 2560x1230 CSS dimensions with Lanczos, then crops [1080,300,1780,900] without image synthesis."
+}

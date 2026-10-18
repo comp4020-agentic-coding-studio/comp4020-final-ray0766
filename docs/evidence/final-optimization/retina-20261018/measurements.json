@@ -1,0 +1,190 @@
+{
+  "implementationCommit": "a443c5ed6e587d0f7c62731b72f5f81acd04140d",
+  "baselineCommit": "5ed138da77084de51e978e1407981c0029ac1907",
+  "conditions": {
+    "cssViewport": [
+      2560,
+      1230
+    ],
+    "devicePixelRatio": 2,
+    "hardware": "Apple M3, 10 GPU cores, 16GB",
+    "backend": "ANGLE Metal Apple M3",
+    "headless": true,
+    "physicalDisplay144HzProven": false,
+    "oneOwnBrowserAtATime": true,
+    "noConcurrentTestsOrBuilds": true,
+    "poseHashesMatch": true
+  },
+  "results": [
+    {
+      "label": "final-baseline-matched",
+      "swapCount": 35,
+      "swapFps": 19.799178101169048,
+      "swapIntervalMedianMs": 50.46199999935925,
+      "swapIntervalP95Ms": 52.85200000181794,
+      "poseSha256": "c10f1f0a7006edcecadfa65674552ed004d863473301bd05a5817ff4a68f3b07",
+      "samples": [
+        {
+          "mode": "plain",
+          "frames": 89,
+          "throughputFps": 19.605222118248626,
+          "rAFms": {
+            "n": 88,
+            "p50": 50,
+            "p95": 66.69999999999982
+          },
+          "cpuMs": {
+            "n": 89,
+            "p50": 4.300000000745058,
+            "p95": 4.900000002235174
+          },
+          "completedCallbackMs": {
+            "n": 89,
+            "p50": 4.300000000745058,
+            "p95": 4.900000002235174
+          },
+          "gpuElapsedMs": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "queryAvailableDelayMs": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "disjoint": 0,
+          "buffer": [
+            4608,
+            2214
+          ],
+          "calls": "495",
+          "pipeline": "village-lines"
+        },
+        {
+          "mode": "timer-readback",
+          "frames": 37,
+          "throughputFps": 16.737957969121968,
+          "rAFms": {
+            "n": 36,
+            "p50": 50,
+            "p95": 66.70000000000073
+          },
+          "cpuMs": {
+            "n": 37,
+            "p50": 2.599999997764826,
+            "p95": 3.2000000029802322
+          },
+          "completedCallbackMs": {
+            "n": 37,
+            "p50": 53.400000002235174,
+            "p95": 68.60000000149012
+          },
+          "gpuElapsedMs": {
+            "n": 12,
+            "p50": 45.761,
+            "p95": 48.744625
+          },
+          "queryAvailableDelayMs": {
+            "n": 12,
+            "p50": 53.599999997764826,
+            "p95": 56.400000002235174
+          },
+          "disjoint": 0,
+          "buffer": [
+            4608,
+            2214
+          ],
+          "calls": "495",
+          "pipeline": "village-lines"
+        }
+      ],
+      "traceSha256": "91d2b6f8788da755050219e1cd352a5035aae584fc4b7779815e5ecb8809810a"
+    },
+    {
+      "label": "final-candidate-3mp",
+      "swapCount": 108,
+      "swapFps": 60.03994058851888,
+      "swapIntervalMedianMs": 16.680999998003244,
+      "swapIntervalP95Ms": 17.367000002413988,
+      "poseSha256": "c10f1f0a7006edcecadfa65674552ed004d863473301bd05a5817ff4a68f3b07",
+      "samples": [
+        {
+          "mode": "plain",
+          "frames": 270,
+          "throughputFps": 60.004461298237786,
+          "rAFms": {
+            "n": 269,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728
+          },
+          "cpuMs": {
+            "n": 270,
+            "p50": 2.099999997764826,
+            "p95": 2.800000000745058
+          },
+          "completedCallbackMs": {
+            "n": 270,
+            "p50": 2.099999997764826,
+            "p95": 2.800000000745058
+          },
+          "gpuElapsedMs": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "queryAvailableDelayMs": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "disjoint": 0,
+          "buffer": [
+            2580,
+            1239
+          ],
+          "calls": "495",
+          "pipeline": "village-lines"
+        },
+        {
+          "mode": "timer-readback",
+          "frames": 132,
+          "throughputFps": 60.01466006961485,
+          "rAFms": {
+            "n": 131,
+            "p50": 16.69999999999891,
+            "p95": 16.700000000000728
+          },
+          "cpuMs": {
+            "n": 132,
+            "p50": 2,
+            "p95": 2.699999999254942
+          },
+          "completedCallbackMs": {
+            "n": 132,
+            "p50": 13.100000001490116,
+            "p95": 16.5
+          },
+          "gpuElapsedMs": {
+            "n": 44,
+            "p50": 8.889333,
+            "p95": 11.504583
+          },
+          "queryAvailableDelayMs": {
+            "n": 44,
+            "p50": 16.600000001490116,
+            "p95": 17.300000000745058
+          },
+          "disjoint": 0,
+          "buffer": [
+            2580,
+            1239
+          ],
+          "calls": "495",
+          "pipeline": "village-lines"
+        }
+      ],
+      "traceSha256": "59c9b1ddc7c90382084253186febe16bda494c17e6798d5bd604f10871dbd034"
+    }
+  ]
+}
