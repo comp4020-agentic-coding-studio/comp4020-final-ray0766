@@ -54,6 +54,10 @@ export function createVillageDrawing(renderer:T.WebGLRenderer,scene:T.Scene,came
     if(!getQualityProfile().screenLines){releaseLines();return;}
     if(drawer)return;
     drawer=new LineDrawer(renderer,scene,camera as T.PerspectiveCamera,VILLAGE.edges!);
+    // The source defaults both half-float ping-pong targets to 4x MSAA.
+    // Disabling it reduces storage/bandwidth but trades some scene-edge AA.
+    // Keep the source immutable; this is an explicit host rendering budget.
+    drawer.composer.renderTarget1.samples=0;drawer.composer.renderTarget2.samples=0;
     // Smooth may have cached these same viewport values after release. A new
     // composer starts at 1x1 and must receive its first real size at DPR1 too.
     width=0;height=0;ratio=0;scale=0;

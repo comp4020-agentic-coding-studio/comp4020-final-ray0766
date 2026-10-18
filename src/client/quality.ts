@@ -5,13 +5,15 @@ export type QualityPreference = 'auto' | QualityTier;
 export interface QualityProfile {
   readonly id: QualityTier;
   readonly pixelRatioCap: number;
+  /** Bound 3D work by actual pixels too; DPR alone is unbounded on 5K windows. */
+  readonly maxRenderPixels: number;
   readonly shadowSize: number;
   readonly screenLines: boolean;
 }
 export const QUALITY_PROFILES: Readonly<Record<QualityTier, QualityProfile>> = {
-  smooth: { id: 'smooth', pixelRatioCap: 1, shadowSize: 0, screenLines: false },
-  standard: { id: 'standard', pixelRatioCap: 1.35, shadowSize: 1024, screenLines: true },
-  beautiful: { id: 'beautiful', pixelRatioCap: 1.8, shadowSize: 2048, screenLines: true },
+  smooth: { id: 'smooth', pixelRatioCap: 1, maxRenderPixels: 1_500_000, shadowSize: 0, screenLines: false },
+  standard: { id: 'standard', pixelRatioCap: 1.35, maxRenderPixels: 1_500_000, shadowSize: 1024, screenLines: true },
+  beautiful: { id: 'beautiful', pixelRatioCap: 1.8, maxRenderPixels: 3_200_000, shadowSize: 2048, screenLines: true },
 };
 export const QUALITY_KEY = 'little-worlds:quality:v1';
 export interface QualityCapabilities {
@@ -57,9 +59,18 @@ let recommended = recommendQuality(capabilities), reason: QualityReason = recomm
 const listeners = new Set<(state: QualityState) => void>();
 export const getQualityProfile = (): QualityProfile => QUALITY_PROFILES[preference === 'auto' ? recommended : preference];
 export const getQualityState = (): QualityState => ({ preference, profile: getQualityProfile(), recommended, reason, capabilities: {...capabilities} });
-export function qualityPixelRatio(dpr = typeof devicePixelRatio === 'number' ? devicePixelRatio : 1): number {
-  return Math.min(Number.isFinite(dpr) && dpr > 0 ? dpr : 1, getQualityProfile().pixelRatioCap);
+export function qualityPixelRatio(
+  dpr = typeof devicePixelRatio === 'number' ? devicePixelRatio : 1,
+  width = typeof innerWidth === 'number' ? innerWidth : 0,
+  height = typeof innerHeight === 'number' ? innerHeight : 0,
+): number {
+  const profile = getQualityProfile();
+  const density = Math.min(Number.isFinite(dpr) && dpr > 0 ? dpr : 1, profile.pixelRatioCap);
+  if (!(Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0)) return density;
+  // This scales only the world canvas, never CSS/DOM controls or saved poses.
+  return Math.min(density, Math.sqrt(profile.maxRenderPixels / (width * height)));
 }
+
 const emit = () => { const state = getQualityState(); for (const listener of listeners) listener(state); };
 let warmFrames = 0, samples: number[] = [], assessedWindows = 0;
 const resetWindow = () => { warmFrames = 0; samples = []; };
@@ -112,13 +123,13 @@ export function observeQualityFrame(frameMs: number, context: QualityFrameContex
 const words = {
   en: {
     heading: 'Picture quality', auto: 'Auto · recommended', smooth: 'Smooth', standard: 'Standard', beautiful: 'Beautiful',
-    smoothDetail: 'Fewer screen effects, the same little world.', standardDetail: 'Village lines and soft shadows.', beautifulDetail: 'Sharper village lines and larger shadows.',
+    smoothDetail: 'Fewer screen effects, the same little world.', standardDetail: 'Village lines and soft shadows. Large windows favour responsiveness.', beautifulDetail: 'Village lines and larger shadows. Large Retina windows trade some 3D sharpness for responsiveness.',
     recommendation: 'Recommended', current: 'Using', manual: 'Your choice stays on this browser.', automatic: 'Auto can lower effects after measuring a ready scene.',
     measured: 'Adjusted after observing slower frames.', hinted: 'Starts gently using available device hints.',
   },
   zh: {
     heading: '画面质量', auto: '自动 · 推荐', smooth: '流畅', standard: '标准', beautiful: '精美',
-    smoothDetail: '减少屏幕特效，小世界与玩法完整保留。', standardDetail: '村庄描线与柔和阴影。', beautifulDetail: '更清晰的村庄描线与更大的阴影贴图。',
+    smoothDetail: '减少屏幕特效，小世界与玩法完整保留。', standardDetail: '村庄描线与柔和阴影，大型窗口优先保持操作响应。', beautifulDetail: '保留村庄描线与较大阴影；大型Retina窗口降低部分3D锐度以保持响应。',
     recommendation: '推荐', current: '当前', manual: '你的选择保存在当前浏览器。', automatic: '自动档会在场景准备完成后测量，必要时降低特效。',
     measured: '根据实际较慢的帧间隔调整。', hinted: '根据可用设备提示，从较轻的画质开始。',
   },

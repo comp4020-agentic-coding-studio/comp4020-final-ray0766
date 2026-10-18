@@ -10,7 +10,7 @@ vi.mock('../src/assets/claude-geometry/style/lines.ts',()=>({
     constructor(){
       const shader='perspectiveDepthToViewZ( d ) d / -d.z * z ( 1.0 / za + 1.0 / zb - 2.0 * iz ) / iz';
       this.pass={lines:{normalQuad:{material:{fragmentShader:shader,needsUpdate:false}},lineQuad:{material:{fragmentShader:shader,needsUpdate:false}},setFade:vi.fn(),setPenCell:vi.fn()}};
-      this.composer={passes:[this.pass,{dispose:this.extraDispose}]};drawerMocks.instances.push(this);
+      this.composer={renderTarget1:{samples:4},renderTarget2:{samples:4},passes:[this.pass,{dispose:this.extraDispose}]};drawerMocks.instances.push(this);
     }
   },
 }));
@@ -31,7 +31,7 @@ it('offers three rendering budgets without using missing hints as a compatibilit
   expect(q.recommendQuality({webgl:true,maxTextureSize:4096})).toBe('smooth');
   expect(q.getQualityState().capabilities.webgl).toBeNull();
   q.setQualityPreference('smooth');expect(q.qualityPixelRatio(3)).toBe(1);expect(q.getQualityProfile().screenLines).toBe(false);
-  q.setQualityPreference('beautiful');expect(q.qualityPixelRatio(3)).toBe(1.8);expect(q.getQualityProfile().shadowSize).toBe(2048);
+  q.setQualityPreference('beautiful');expect(q.qualityPixelRatio(3,390,844)).toBe(1.8);expect(q.getQualityProfile().shadowSize).toBe(2048);
   expect(q.qualityPixelRatio(Number.NaN)).toBe(1);expect(q.qualityPixelRatio(.9)).toBe(.9);
 });
 
@@ -129,4 +129,25 @@ it('releases old shadow targets on budget changes without moving the light or it
   configureQualityShadow(sun,q.QUALITY_PROFILES.standard);expect(sun.castShadow).toBe(true);expect(sun.shadow.mapSize.toArray()).toEqual([1024,1024]);
   configureQualityShadow(sun,q.QUALITY_PROFILES.beautiful);expect(sun.shadow.mapSize.toArray()).toEqual([2048,2048]);
   expect(sun.position.toArray()).toEqual([3,9,2]);expect(sun.shadow.camera.left).toBe(-8);sun.shadow.dispose();
+});
+
+
+it('bounds Retina and wide-window canvas pixels while retaining density on a phone',async()=>{
+  const q=await load();
+  for(const tier of ['smooth','standard','beautiful'] as const){
+    q.setQualityPreference(tier);
+    const profile=q.getQualityProfile();
+    for(const [width,height,dpr] of [[2560,1230,2],[5120,2880,2],[1920,1080,1],[390,844,3]]){
+      const ratio=q.qualityPixelRatio(dpr,width,height);
+      expect(width*height*ratio*ratio).toBeLessThanOrEqual(profile.maxRenderPixels+1e-6);
+      expect(ratio).toBeLessThanOrEqual(Math.min(dpr,profile.pixelRatioCap));
+      expect(Number.isFinite(ratio)&&ratio>0).toBe(true);
+    }
+  }
+  q.setQualityPreference('beautiful');
+  expect(q.qualityPixelRatio(3,390,844)).toBe(1.8);
+  // Beautiful retains roughly one world pixel per CSS pixel on the tested Retina window.
+  expect(q.qualityPixelRatio(2,2560,1230)).toBeGreaterThanOrEqual(1);
+  expect(q.qualityPixelRatio(2,2560,1230)).toBeLessThan(1.8);
+  expect(q.qualityPixelRatio(2,0,NaN)).toBe(1.8);
 });

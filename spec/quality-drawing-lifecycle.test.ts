@@ -1,15 +1,15 @@
 // @vitest-environment jsdom
 import {expect,it,vi} from 'vitest';
 import * as T from 'three';
-const state=vi.hoisted(()=>({sizes:[] as number[][],drawers:0}));
+const state=vi.hoisted(()=>({sizes:[] as number[][],samples:[] as number[][],drawers:0}));
 vi.mock('../src/assets/claude-geometry/style/lines.ts',()=>({PEN_CELL:.2,LineDrawer:class {
-  pass={lines:{setFade(){},setPenCell(){}}};composer={passes:[]};constructor(){state.drawers++;}setSize(...size:number[]){state.sizes.push(size);}render(){}dispose(){}
+  pass={lines:{setFade(){},setPenCell(){}}};composer={renderTarget1:{samples:4},renderTarget2:{samples:4},passes:[]};constructor(){state.drawers++;}setSize(...size:number[]){state.sizes.push(size);state.samples.push([this.composer.renderTarget1.samples,this.composer.renderTarget2.samples]);}render(){}dispose(){}
 }}));
 vi.mock('../src/assets/claude-geometry/style/sky.ts',()=>({createCloudSky:()=>null}));
 import {createVillageDrawing} from '../src/client/village-drawing.ts';
 import {setQualityPreference} from '../src/client/quality.ts';
 it('sizes each rebuilt line target at unchanged DPR1 after repeated Smooth round trips',()=>{
- setQualityPreference('standard');state.sizes=[];state.drawers=0;
+ setQualityPreference('standard');state.sizes=[];state.samples=[];state.drawers=0;
  const renderer={domElement:document.createElement('canvas'),getSize:(size:T.Vector2)=>size.set(390,844),getPixelRatio:()=>1} as unknown as T.WebGLRenderer;
  const drawing=createVillageDrawing(renderer,new T.Scene(),new T.PerspectiveCamera());
  try{
@@ -20,6 +20,6 @@ it('sizes each rebuilt line target at unchanged DPR1 after repeated Smooth round
    expect(state.sizes.at(-1)).toEqual([390,844,1]);
    expect(state.sizes.length).toBe(state.drawers);
   }
-  expect(state.drawers).toBe(4);
+  expect(state.drawers).toBe(4);expect(state.samples).toEqual([[0,0],[0,0],[0,0],[0,0]]);
  }finally{drawing.dispose();setQualityPreference('standard');}
 });
