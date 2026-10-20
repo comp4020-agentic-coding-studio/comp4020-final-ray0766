@@ -4,6 +4,7 @@ import { dirname } from 'node:path';
 
 const routes: Record<string, string> = {
   state: 'session.resumed', universe: 'world.read', blueprints: 'blueprint.read',
+  'arrival/retry': 'arrival.retry_requested',
   history: 'history.read', 'history/snapshot': 'history.snapshot',
   'blueprints/save': 'blueprint.saved', 'home/setup/preview': 'home.setup.preview',
   'home/setup/confirm': 'home.setup.confirmed', 'home/enter': 'home.entered',

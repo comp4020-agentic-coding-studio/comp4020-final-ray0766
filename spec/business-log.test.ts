@@ -78,3 +78,13 @@ it('records only the matching acknowledged door state, never the requested state
   }
   for (const secret of ['REQUEST SECRET', 'RESPONSE SECRET', 'PRIVATE FURNITURE', 'expectedDoorVersion']) expect(lines.join('\n')).not.toContain(secret);
 });
+
+it.each([200,403])('names an arrival retry request without asserting background completion (%s)',status=>{
+  const lines:string[]=[],log=businessLog(fixture(),{output:line=>lines.push(line)});
+  log.record({route:'arrival/retry',identity:'arrival-identity',status,
+    context:{cookie:'PRIVATE COOKIE',playerId:'PRIVATE PLAYER'},
+    response:{arrival:{homePreparation:'retry',homePlanetId:null},error:'Only a new arrival can retry its own home preparation.'}});
+  expect(JSON.parse(lines[0])).toMatchObject({action:'arrival.retry_requested',status,result:status===200?'accepted':'refused'});
+  expect(JSON.parse(lines[0]).actor).toMatch(/^visitor-[a-f0-9]{20}$/);
+  for(const privateValue of ['PRIVATE COOKIE','PRIVATE PLAYER','arrival-identity','homePreparation','Only a new arrival'])expect(lines[0]).not.toContain(privateValue);
+});

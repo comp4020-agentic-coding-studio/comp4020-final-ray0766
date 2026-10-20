@@ -36,11 +36,13 @@ it('records two real HTTP identities and an owner-only refusal, with no cookie o
     expect((await request('character', cookieB, { character: 'fern' })).status).toBe(200);
     const denied = await request('objects/create', cookieB, { planetId: planet, objectId: randomUUID(), kind: 'lamp', position: [0, 1, 0], rotation: 0 });
     expect(denied.status).toBe(403);
+    expect((await request('arrival/retry',cookieB,{})).status).toBe(403);
     const text = readFileSync(database + '.business.jsonl', 'utf8'), events = text.trim().split('\n').map(line => JSON.parse(line));
     const created = events.filter(e => e.action === 'session.created');
     expect(created).toHaveLength(2); expect(created[0].actor).not.toBe(created[1].actor);
     expect(events.find(e => e.action === 'planet.claimed')).toMatchObject({ actor: created[0].actor, planet, result: 'accepted' });
     expect(events.find(e => e.action === 'object.created')).toMatchObject({ actor: created[1].actor, planet, result: 'refused', reason: 'planet_owner_required' });
+    expect(events.find(e=>e.action==='arrival.retry_requested')).toMatchObject({actor:created[1].actor,status:403,result:'refused',reason:'permission_refused'});
     for (const cookie of [cookieA, cookieB]) {
       const token = cookie.split('=')[1]; expect(text).not.toContain(token); expect(text).not.toContain(createHash('sha256').update(token).digest('hex'));
     }
@@ -105,3 +107,39 @@ it('logs acknowledged door states and the actual room-edit refusal on an isolate
     rmSync(directory, { recursive: true, force: true });
   }
 }, 25_000);
+
+it('logs an accepted new-arrival retry on an isolated integrated HTTP server',async()=>{
+  const port=await new Promise<number>((resolve,reject)=>{
+    const probe=createServer().once('error',reject).listen(0,'127.0.0.1',()=>{
+      const address=probe.address() as {port:number};probe.close(()=>resolve(address.port));
+    });
+  });
+  const directory=mkdtempSync(join(tmpdir(),'business-arrival-api-')),database=join(directory,'world.sqlite');
+  const env:NodeJS.ProcessEnv={...process.env,NODE_ENV:'test',HOST:'127.0.0.1',PORT:String(port),DATABASE_PATH:database};
+  delete env.HOME_SAMPLE;delete env.TEST_LEGACY_WORLD;
+  const server=spawn(process.execPath,['src/server/index.ts'],{env,stdio:['ignore','ignore','pipe']});
+  let errors='';server.stderr.on('data',chunk=>{errors=(errors+String(chunk)).slice(-2000);});
+  const base=`http://127.0.0.1:${port}`;
+  try{
+    let ready=false;
+    for(let attempt=0;attempt<100;attempt++){
+      if(server.exitCode!==null)throw Error('Isolated server exited: '+errors);
+      try{const health=await fetch(base+'/healthz',{signal:AbortSignal.timeout(300)}).then(r=>r.json());if(health.profile==='integrated'){ready=true;break;}}
+      catch{/* Wait only for this isolated server. */}
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    expect(ready,errors).toBe(true);
+    const arrival=await fetch(base+'/api/state',{signal:AbortSignal.timeout(5000)});
+    expect(arrival.status).toBe(200);const cookie=arrival.headers.get('set-cookie')!.split(';')[0];
+    const retry=await fetch(base+'/api/arrival/retry',{method:'POST',headers:{cookie,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(5000)});
+    expect(retry.status).toBe(200);
+    const text=readFileSync(database+'.business.jsonl','utf8'),events=text.trim().split('\n').map(line=>JSON.parse(line));
+    const created=events.find(e=>e.action==='session.created'),requested=events.filter(e=>e.action==='arrival.retry_requested');
+    expect(requested).toHaveLength(1);expect(requested[0]).toMatchObject({actor:created.actor,status:200,result:'accepted'});
+    expect(text).not.toContain(cookie.split('=')[1]);expect(text).not.toContain('api.unknown');
+  }finally{
+    server.kill('SIGTERM');
+    await new Promise<void>(resolve=>{if(server.exitCode!==null)return resolve();server.once('exit',()=>resolve());const timer=setTimeout(()=>{server.kill('SIGKILL');resolve();},2000);timer.unref();});
+    rmSync(directory,{recursive:true,force:true});
+  }
+},25_000);
