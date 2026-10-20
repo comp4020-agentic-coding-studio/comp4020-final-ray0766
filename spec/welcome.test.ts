@@ -108,6 +108,20 @@ it.each(['en','zh-CN'])('keeps the device notice available before modules and af
     expect(note.textContent).toBe(deviceNotes[language==='zh-CN'?'zh':'en']);
   } finally {page.window.close();}
 });
+it.each(['en','zh-CN'])('offers retry when the built module script has no source HTML id (%s)',language=>{
+  const page=new JSDOM(html.replace('id="game-module" ',''),{url:'http://welcome.test/',runScripts:'dangerously',beforeParse(window){
+    window.localStorage.setItem('little-worlds:language:v1',language);
+  }});
+  try{
+    const doc=page.window.document,retry=doc.getElementById('welcome-retry')!;
+    const image=doc.createElement('img');doc.body.append(image);image.dispatchEvent(new page.window.Event('error'));
+    expect(retry.hidden).toBe(true);
+    const script=doc.querySelector('script[type="module"][src]')!;expect(script.id).toBe('');
+    script.dispatchEvent(new page.window.Event('error'));
+    expect(retry.hidden).toBe(false);expect(doc.getElementById('welcome-start')!.hidden).toBe(true);
+    expect(doc.getElementById('welcome-device-note')!.textContent).toBe(deviceNotes[language==='zh-CN'?'zh':'en']);
+  }finally{page.window.close();}
+});
 it('preserves the device notice through readiness, graphics failure and live language changes',async()=>{
   welcome=mountWelcome({onStart:vi.fn()});
   expect(get('welcome-device-note').textContent).toBe(deviceNotes.en);
