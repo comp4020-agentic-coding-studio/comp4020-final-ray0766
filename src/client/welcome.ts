@@ -8,12 +8,14 @@ const words={
     readyHelp:'Take your time. You can change the picture quality in Pause at any time.',loadingHelp:'Progress counts the current preparation stage. Some steps have no measurable total.',
     start:'Start exploring',waiting:'Preparing your world…',retry:'Try again',network:'We could not finish loading.',networkHelp:'Check your connection, then retry. Your saved visit will be requested again.',
     graphics:'The 3D view is temporarily unavailable.',graphicsHelp:'Try reloading, enabling browser hardware acceleration, or using another up-to-date browser. Your saved world is unchanged.',
+    deviceNote:'Little Worlds uses real-time 3D graphics. Lower-performance devices may load slowly, stutter, or fail to finish loading. Please try “Smooth” quality first; if the game still does not run smoothly, consider using a more powerful computer. Loading failures may also be related to your network or browser settings.',
     quality:'Picture quality',count:'completed in this stage',label:'Welcome to Little Worlds'},
   zh:{eyebrow:'SUNSEED · 小小星球',title:'一个小世界，等你来。',intro:'逛逛小村庄，送出一点善意，再把家变成喜欢的模样。',
     modules:'正在下载游戏模块…',connecting:'正在连接已保存的旅程…',preparing:'正在准备画面…',ready:'你的世界准备好了。',
     readyHelp:'慢慢来，随时可在暂停菜单调整画质。',loadingHelp:'进度仅统计当前准备阶段；部分步骤没有可测的总量。',
     start:'开始探索',waiting:'正在准备你的星球…',retry:'重试',network:'加载暂时未完成。',networkHelp:'请检查连接后重试，将重新读取已保存的旅程。',
     graphics:'三维画面暂时不可用。',graphicsHelp:'可尝试重新加载、启用浏览器硬件加速，或使用其他较新的浏览器。已保存的星球没有改变。',
+    deviceNote:'小星球使用实时 3D 画面。性能较低的设备可能加载缓慢、出现卡顿，或无法完成加载。请先尝试「流畅」画质；若仍无法顺畅运行，建议换用性能更强的电脑。加载失败也可能与网络或浏览器设置有关。',
     quality:'画面质量',count:'当前阶段已完成',label:'欢迎来到小小星球'},
 };
 export type WelcomeStage='modules'|'connecting'|'preparing';

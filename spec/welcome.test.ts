@@ -1,9 +1,14 @@
 // @vitest-environment jsdom
 import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 import {readFileSync} from 'node:fs';
+import {JSDOM} from 'jsdom';
 import {mountWelcome} from '../src/client/welcome.ts';
 import {beginSceneLoading,sceneLoadingActive} from '../src/client/loading-state.ts';
 
+const deviceNotes={
+  en:'Little Worlds uses real-time 3D graphics. Lower-performance devices may load slowly, stutter, or fail to finish loading. Please try “Smooth” quality first; if the game still does not run smoothly, consider using a more powerful computer. Loading failures may also be related to your network or browser settings.',
+  zh:'小星球使用实时 3D 画面。性能较低的设备可能加载缓慢、出现卡顿，或无法完成加载。请先尝试「流畅」画质；若仍无法顺畅运行，建议换用性能更强的电脑。加载失败也可能与网络或浏览器设置有关。',
+};
 const html=readFileSync('index.html','utf8');
 const markup=html.slice(html.indexOf('<div id="boot-loading">'),html.indexOf('<script>'));
 const tasks:ReturnType<typeof beginSceneLoading>[]=[];
@@ -87,4 +92,32 @@ it('can remount the completed welcome DOM for a real context-loss notice',async(
   document.documentElement.lang='zh-CN';await Promise.resolve();
   expect(get('welcome-stage').textContent).toBe('三维画面暂时不可用。');
   get('welcome-retry').click();expect(reload).toHaveBeenCalledOnce();
+});
+
+it.each(['en','zh-CN'])('keeps the device notice available before modules and after a module failure (%s)',language=>{
+  const page=new JSDOM(html,{url:'http://welcome.test/',runScripts:'dangerously',beforeParse(window){
+    window.localStorage.setItem('little-worlds:language:v1',language);
+  }});
+  try {
+    const doc=page.window.document,note=doc.getElementById('welcome-device-note')!;
+    expect(doc.documentElement.lang).toBe(language);
+    expect(note.textContent).toBe(deviceNotes[language==='zh-CN'?'zh':'en']);
+    expect(doc.getElementById('welcome-panel')!.getAttribute('aria-describedby')!.split(' ')).toContain(note.id);
+    doc.getElementById('game-module')!.dispatchEvent(new page.window.Event('error'));
+    expect(doc.getElementById('welcome-retry')!.hidden).toBe(false);
+    expect(note.textContent).toBe(deviceNotes[language==='zh-CN'?'zh':'en']);
+  } finally {page.window.close();}
+});
+it('preserves the device notice through readiness, graphics failure and live language changes',async()=>{
+  welcome=mountWelcome({onStart:vi.fn()});
+  expect(get('welcome-device-note').textContent).toBe(deviceNotes.en);
+  document.documentElement.lang='zh-CN';await Promise.resolve();
+  expect(get('welcome-device-note').textContent).toBe(deviceNotes.zh);
+  welcome.ready({firstVisit:true});
+  expect(get('welcome-device-note').textContent).toBe(deviceNotes.zh);
+  welcome.failed('graphics');
+  expect(get('welcome-device-note').textContent).toBe(deviceNotes.zh);
+  expect(get('welcome-retry').hidden).toBe(false);
+  document.documentElement.lang='en';await Promise.resolve();
+  expect(get('welcome-device-note').textContent).toBe(deviceNotes.en);
 });
