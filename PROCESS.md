@@ -42,6 +42,8 @@ Synchronous heavy computation delayed unrelated requests. A bounded worker now p
 
 Durable arrivals ([04e688f](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/04e688f)) let newcomers enter the harbour while home preparation continues. Retina rendering ([a443c5e](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/a443c5e)) reduced unnecessary pixel and antialiasing work. The opening notice ([acb888c](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/acb888c)) keeps the author's bilingual device guidance visible even before the main module loads. It recommends Smooth quality and acknowledges network/browser failures without inventing a minimum GPU.
 
+A post-deployment check also found that Vite removes the entry script's HTML ID, so the existing module-failure Retry button stayed hidden. The [cec70b5](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/cec70b5) correction uses module attributes, with failing-then-passing tests and checks against actual built HTML. This was a concrete limit of the earlier source-only preview.
+
 ## Release and evidence boundary
 
 [Release checks](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/actions/workflows/checks.yml) tie validation and deployment to a commit. Production backup must pass integrity, foreign-key, and independent checksum verification before release. Existing storage and identities are preserved; test databases are never deployed as production. The [Crit10 record](docs/crit10/README.md) distinguishes code checks, release confirmation, and user-reported play.
