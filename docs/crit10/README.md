@@ -1,18 +1,22 @@
-# Crit10 演练准备（尚未演练）
+# Crit10：正式入口、证据与演练
 
-核查：2026-10-16，`integration/midpoint`，应用基线 `a0a9c6f`（中期标签 `midpoint-integrated-v1`）。本包只记录准备和源码核对，不代表真人结果或线上验收。
+核对日期：2026-10-21（Australia/Sydney）。规范开发分支为 `integration/midpoint`。正式应用：**https://comp4020-final-ray0766.fly.dev/**；公开说明：[/readme/](https://comp4020-final-ray0766.fly.dev/readme/)；[本次发布记录](release-verification.md)区分候选验证与已完成发布。
 
-依据：[官方 Crit10](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/crits/10-fly-by-instruments/)。两位同学使用独立 Chrome profile，仅凭 URL 使用共享应用；作者不操控应用，只从服务端日志说明谁做了什么。权限应由服务端检查并说明，日志需持续保留。最终要求另见[官方 Final](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/assessments/final-project/)。
+班次由用户确认：周三15:30。按课程提前两小时的规则，本次 cutoff 为 **2026-10-21 13:30 Australia/Sydney（02:30 UTC）**；上课为15:30（04:30 UTC）。反思必须在cutoff前已推送，不能等演练后才首次补交。依据：[官方 Crit10](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/crits/10-fly-by-instruments/)、[Studio crit model](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/studio-crit-model/)。
 
-- 作者先读：[主持人清单](host.zh-CN.md)、[权限矩阵与发现](permissions.zh-CN.md)、[日志及匿名导出](logs.zh-CN.md)。
-- 参与者入口：[只发 URL](participants.zh-CN.md)。不要把本目录、主持人清单、玩家指南或预设操作路线提前发给同学。
-- 现场使用：[空白观察记录](observation-template.zh-CN.md)。
-- 演练后：[Final 剩余清单](final-checklist.zh-CN.md)。
+## 当前证据
 
-当前本机 `http://127.0.0.1:8098` 已运行新日志代码；同一 Mac 的独立 profile 可做本地准备性演练。这个地址在同学自己的电脑上指向他们自己的机器，不能作为远程入口，也不满足官方已部署要求。当前交接中的线上仍是 Crit9，尚未部署本地新日志功能；本轮不访问生产或执行部署，不能声称线上 Crit10 已就绪。
+- 服务端以匿名浏览器cookie区分身份；权限契约与依据见[权限矩阵](permissions.zh-CN.md)、[ADR0009](../adr/0009-business-observation.md)。室内进入/编辑由主人控制，但布局描述不是保密数据。
+- 持久业务日志记录稳定化名、动作及接受/拒绝结果，轮转与采样限制明确，见[日志说明](logs.zh-CN.md)。
+- [开发过程](../../PROCESS.md)包含真实commit/compare链接；[Crit10反思](../../reflections/crit-10.md)依据用户的中文回答翻译整理，回答突破和开发者方向两题。
+- 用户确认同学已试玩，观察是“网站正常运行”。这是对两位同学URL-only、独立profile、作者看日志问题的概括回答；没有提供日期、具体动作或日志对应片段。见[用户报告及证据边界](peer-report.zh-CN.md)，不能把空白模板或自动化检查当现场记录。
+- 线上版本、备份、迁移和本次CI以[发布记录](release-verification.md)的终态为准；此前Crit9的绿色CI不证明新版本。
 
-本轮核查工作区起点干净，分支/HEAD符合规范；未发现 Claude CLI，Claude GUI 存在不等于没有其他编辑，因此安装文档前再次检查状态。只调用本地健康探针，没有调用身份API、操作浏览器或打开数据库，不改 README、PROCESS、个人反思或研究立场。
+## 现场材料
 
-2eaf52e准备包核验结果：8份Markdown的68个本地链接及源码行号可解析；导出示例只做语法与固定词表覆盖检查，未读取真实日志、未执行导出或生成真人证据。`node scripts/check-evidence.ts`、`git diff --check`通过；前者只找到现有crit8/9，不代表crit10完成。本轮未运行应用测试、浏览器测试、构建或部署。
+- 作者先读：[主持人清单](host.zh-CN.md)、[权限矩阵](permissions.zh-CN.md)、[日志及匿名导出](logs.zh-CN.md)。
+- 参与者只收：[正式URL](participants.zh-CN.md)。不要预先发送本目录、攻略或操作路线。
+- 当场填写：[空白观察记录](observation-template.zh-CN.md)。只写确实观察到的动作、作者解释和未确定项。
+- [提交核对与Final边界](final-checklist.zh-CN.md)区分本次Crit10和以后Final的要求。
 
-后续两项日志最小补修已完成定向验证，见[补修记录](log-fix-verification.md)。房间描述可见性取舍仍待用户答复，未改变权限。新日志仍仅在本地，未部署线上；没有新增真人演练或反思证据。
+本机8098和独立候选8137不是同学电脑上的公开入口，也不作为本次发布目标。本次不替换8098冻结产物、不重写其存档。2026-10-16的[日志补修记录](log-fix-verification.md)是历史技术证据，不是后来真人演练或当前线上状态。

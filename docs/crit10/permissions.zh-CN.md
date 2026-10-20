@@ -1,13 +1,14 @@
 # 权限矩阵与源码核对
 
-核查基线 `a0a9c6f`；本轮只读源码和现有测试，不新建身份、不跑权限API或全量测试。下表“允许/拒绝”是当前服务端契约，不是本轮真人验证结果。[ADR0009](../adr/0009-business-observation.md)决定以匿名浏览器身份区分人，保留主人对私有创作的修改权、共享室外空间；代价是没有跨设备账号和身份恢复。
+原始核查基线`a0a9c6f`；2026-10-21按集成版复核，并补充arrival重试与隔离HTTP检查，见[验证记录](release-verification.md)。下表“允许/拒绝”是当前服务端契约，不是本轮真人验证结果。[ADR0009](../adr/0009-business-observation.md)决定以匿名浏览器身份区分人，保留主人对私有创作的修改权、共享室外空间；代价是没有跨设备账号和身份恢复。
 
 | 资源/动作 | 当前服务端边界 | 可追溯依据（代码；现有检查） |
 | --- | --- | --- |
 | 身份与一般API | GET state可创建身份；cookie由服务器哈希查验。其他业务API须有效身份，客户端不能指定owner；POST另查Origin、JSON及限流。清cookie或换profile会成为另一身份，同一profile的标签页共享身份。 | [index.ts](../../src/server/index.ts#L51)；[store.ts](../../src/server/store.ts#L197)；[business-log-api](../../spec/business-log-api.test.ts) |
 | 室外星球/建筑/已放置蓝图 | 有身份可读星球列表及当前星球公共几何，含别人已放置蓝图的部件；不是他人私有命名/分组蓝图库。公共港不归个人。 | [planets.view](../../src/server/planets.ts#L154)、[universe](../../src/server/store.ts#L234)；[planet-api](../../spec/planet-api.test.ts) |
 | 建筑新增、移动、删除、替换、撤销；地形 | 只准目标星球主人；公共港/访客403。另查版本、容量、碰撞、场景/地形约束；不是拥有权就可任意穿墙或覆盖。 | [owns](../../src/server/planets.ts#L81)、[写入口](../../src/server/planets.ts#L173)、[replace](../../src/server/planets.ts#L110)；[planet-api](../../spec/planet-api.test.ts)、[terrain](../../spec/terrain.test.ts) |
-| 认领 | 公共港403；他人已认领409；每身份至多一个家园。新集成身份自动配家园，旧无家园身份保留；源码claim本身未要求已落地，UI飞行认领路径不是安全条件。 | [claim](../../src/server/planets.ts#L162)、[创建](../../src/server/store.ts#L260)；[planet-api](../../spec/planet-api.test.ts) |
+| 认领 | 公共港403；他人已认领409；每身份至多一个家园。新集成身份先进入港口，后台持久准备家园；旧无家园身份保留；源码claim本身未要求已落地，UI飞行认领路径不是安全条件。 | [claim](../../src/server/planets.ts#L162)、[创建](../../src/server/store.ts#L260)；[planet-api](../../spec/planet-api.test.ts) |
+| 家园准备重试 | 仅当前新arrival身份可重试自己的准备，不允许提交任意请求字段；旧身份403。接受请求不保证后台已完成。 | [HTTP入口](../../src/server/index.ts)、[retryArrivalHome](../../src/server/store.ts)、[arrival homes](../../src/server/arrival-homes.ts)、[定向HTTP检查](../../spec/business-log-api.test.ts) |
 | 私有蓝图库 / 自己飞船 | 库按服务端owner隔离，保存蓝图须有家园；放置使用自己库内容（共享站点目录例外）。飞船保存按当前身份player_id，不接收他人owner；查版本/落地状态。已放置几何不保密。 | [blueprints](../../src/server/blueprints.ts#L19)、[ships](../../src/server/ships.ts#L7)；[blueprints检查](../../spec/blueprints.test.ts)、[ships检查](../../spec/ships.test.ts) |
 | 房间进入 / 布置保存 / 建家与外观 | 进入和布置只准主人，另有距离、门、版本和所在场景条件；访客403。建家、补路、改造/撤销也查主人及当前状态。 | [home.enter](../../src/server/home.ts#L174)、[save](../../src/server/home.ts#L215)、[setup](../../src/server/home-setup.ts#L51)、[paths](../../src/server/home-paths.ts#L11)、[remodel](../../src/server/store.ts#L367)；[owner-access](../../spec/home-owner-access.test.ts) |
 | 房间描述数据读取 | **并非主人专属**：当前星球的home descriptor向访客返回室内material/items等完整描述（canEdit=false只表示编辑权）。不能宣称“私室数据只有主人看得见”。 | [descriptor](../../src/server/home.ts#L103)→[state](../../src/server/store.ts#L203)；[现有测试也断言访客与主人interior相同](../../spec/home-door.test.ts#L52) |

@@ -1,10 +1,10 @@
-# 本地日志、盲区与匿名导出
+# 正式与本地日志、盲区与匿名导出
 
 实现依据：[ADR0009](../adr/0009-business-observation.md)、[business-log.ts](../../src/server/business-log.ts)、[HTTP入口](../../src/server/index.ts)、[本地包装器](../../scripts/local-server.ts)。日志是观察证据，不是认证凭据，也不是完整操作录像。
 
 ## 查看（作者终端）
 
-在规范目录，`node scripts/local-preview.ts status`确认使用固定存档。不要为观察创建另一个空库，也不要运行数据库写命令或读取/转发business-key。
+课堂使用正式站点，先核对[发布版本](release-verification.md)。本地准备时，在规范目录用`node scripts/local-preview.ts status`确认固定存档及是否运行；不假设8098当前在线。不要为观察创建另一个空库，也不要运行数据库写命令或读取/转发business-key。
 
 ```sh
 # 本机8098：原始结构化业务事件（不含本地包装器的时间前缀）
@@ -15,7 +15,7 @@ tail -F .data/midpoint/server.log
 
 业务日志当前文件及`.1`各限1MiB；诊断server.log及`.1`各限256KiB。轮转淘汰旧事件；跨重启保留同一key才保留同一visitor别名；改key不改权限但破坏观察连续性。日志不是无限档案，也不保证断电前每行已刷盘。只看当前文件可能漏掉刚轮转内容。
 
-未来获批部署新日志功能后，作者可用 `mise exec -- flyctl logs -a comp4020-final-ray0766` 看stdout；部署库路径按Dockerfile为`/data/little-post.sqlite`，业务文件在其旁。**此命令不是本轮已运行的检查。当前线上未部署本地新日志，不能把旧线上日志或本地8098结果说成线上Crit10验收。**
+正式站点由作者在终端运行`mise exec -- flyctl logs -a comp4020-final-ray0766`查看stdout；部署库为`/data/little-post.sqlite`，持久业务文件为`/data/little-post.sqlite.business.jsonl`及`.1`。只有确认发布包含新代码后才用它讲解Crit10；没有公共日志API。下面的复制示例只针对本地文件，不能当作已经从生产导出的材料；生产记录只能经授权从这两个业务文件取得，不能复制库或key。
 
 ## 能与不能解释
 
@@ -28,6 +28,7 @@ tail -F .data/midpoint/server.log
 | universe和blueprint成功读取 | 刻意不记；首次state创建记session.created，后续state读取记session.resumed。没有world.read成功事件不代表没看到世界。 |
 | 认领、换装、保存、旅行等离散成功事件 | 不按上述五秒限频；仍不表示每一次真实输入都有事件或持久变化。character只记clay/fern/sky，interact只记pickup/deliver。 |
 | UI输入、面板打开、Atlas选择、草稿、语言、刷新意图、渲染/延迟 | 无对应业务事件。室内颜色/家具、移动坐标未细记；门操作仅在成功响应目标匹配且格式合法时附实际`doorOpen/doorVersion`，拒绝不附、不会采用请求意图；参见[发现](permissions.zh-CN.md)。不能凭没有日志声称用户没点，或凭accepted声称对方已看见。 |
+| `arrival.retry_requested` | 新到达者请求重试家园准备；200/accepted不保证工作已排队或完成（可能冷却/幂等），403/refused表示身份或权限不允许。只记请求结果，不泄露body或错误全文。 |
 | 网络中断、进程被杀、未到达服务器、响应丢失 | 不一定有完成日志。无匹配事件只说明未找到证据，不证明是权限拒绝或没有写入。已持久化但响应丢失也可能出现。 |
 | 文件写入失败 | 尽量继续stdout并报告storage unavailable；本地stdout也受诊断轮转限制。若业务日志与诊断都无记录，标证据缺失，不把故障抹成成功。 |
 
@@ -72,7 +73,7 @@ for name in ['previous.jsonl', 'current.jsonl']:
             if start <= time <= end: rows.append((time, e))
         except (ValueError, KeyError, TypeError): skipped += 1
 # Fixed business-field vocabularies; no arbitrary body/error text is exported.
-ACTIONS = set('api.unknown blueprint.read blueprint.saved coat.changed delivery.interacted flight.checkpoint flight.departed flight.landed gate.travelled ground.walked history.read history.snapshot home.door home.entered home.exited home.paths.applied home.paths.preview home.remodelled home.saved home.setup.confirmed home.setup.preview home.undo home.walked object.created object.deleted object.replaced object.undo object.updated planet.claimed presence session.created session.resumed ship.saved station.built station.preview terrain.applied travel.withdrawn world.read'.split())
+ACTIONS = set('api.unknown arrival.retry_requested blueprint.read blueprint.saved coat.changed delivery.interacted flight.checkpoint flight.departed flight.landed gate.travelled ground.walked history.read history.snapshot home.door home.entered home.exited home.paths.applied home.paths.preview home.remodelled home.saved home.setup.confirmed home.setup.preview home.undo home.walked object.created object.deleted object.replaced object.undo object.updated planet.claimed presence session.created session.resumed ship.saved station.built station.preview terrain.applied travel.withdrawn world.read'.split())
 REASONS = set('server_error gate_destination_refused gate_owner_required gate_proximity_required history_owner_required home_owner_required home_required identity_required invalid_request json_required method_refused not_found one_home_per_identity permission_refused planet_already_claimed planet_owner_required preparation_unavailable rate_limited request_too_large route_withdrawn stale_flight_checkpoint stale_ground_checkpoint state_conflict'.split())
 uuid = r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
 out = []

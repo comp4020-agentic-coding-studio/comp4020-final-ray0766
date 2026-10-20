@@ -71,9 +71,9 @@ checks late acknowledgements and recovery; `spec/teleport-guidance.test.ts` chec
 both languages and reuse of the existing guide without claiming or travelling.
 
 These are technical checks. They do not establish hosted performance or complete
-Crit 10: two classmates still need to use only the URL in separate profiles while
-the author explains their actions from logs without driving their UI. The author
-must supply the real Crit 10 reflection. Research-note authorship and visual or
+Crit 10. The author's [peer report](../crit10/peer-report.zh-CN.md) confirms play
+and normal operation but supplies no matched action/log transcript. The
+[reflection](../../reflections/crit-10.md) now uses the author's own account. Research-note authorship and visual or
 control acceptance remain with the user.
 
 ## Crit10 source audit clarification (2026-10-16)
@@ -86,8 +86,8 @@ layout data: the current home descriptor includes the interior for visitors too.
 The initial matrix recorded that visibility boundary and a generic room-save refusal
 reason; subsequent logging corrections are recorded below, with permissions unchanged. The
 [rehearsal pack](../crit10/README.md) separates host notes, URL-only participants,
-blank observations and safe evidence export. It records preparation, not a completed
-rehearsal or a claim that the current hosted release contains this logging feature.
+blank observations and safe evidence export. It separates preparation, the user's reported trial and exact release evidence;
+a template is never evidence that a rehearsal took place.
 
 ## Minimal logging corrections (2026-10-16)
 
@@ -100,3 +100,12 @@ the same version and is not evidence of another transition. No room contents,
 coordinates or additional body data are logged. The [focused verification](../crit10/log-fix-verification.md)
 uses temporary isolated servers; no permission or visibility policy changes,
 human rehearsal or hosted deployment are implied.
+
+## Arrival retry correction (2026-10-20 UTC)
+
+`POST /api/arrival/retry` records `arrival.retry_requested` instead of
+`api.unknown`. Accepted requests may be idempotent or subject to preparation
+cooldown; this event does not assert queue execution or home completion.
+Refusals retain the HTTP outcome and fixed reason without logging request bodies
+or raw errors. The focused unit and isolated integrated/legacy HTTP tests cover
+both accepted and refused requests; see [release verification](../crit10/release-verification.md).

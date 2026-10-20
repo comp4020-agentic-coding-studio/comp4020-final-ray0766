@@ -1,15 +1,25 @@
-# Final 剩余清单
+# Crit10提交核对与Final边界
 
-截至本包：**Crit10准备完成，真人演练和线上新日志验收未完成**。下列均是待办，不能因脚本/文档存在就勾为完成。官方来源核对于2026-10-16：[Crit10](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/crits/10-fly-by-instruments/)、[Final](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/assessments/final-project/)、[评阅环境和篇幅](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#marking-environment)。
+核对2026-10-21。官方：[Crit10](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/crits/10-fly-by-instruments/)、[cutoff规则](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/studio-crit-model/)、[Final](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/assessments/final-project/)。
 
-- [ ] 用户先看[权限发现](permissions.zh-CN.md)：室内描述当前不保密，是否收紧仍待用户决定；门实际结果与房间编辑拒绝分类两项日志已最小修复，见[验证](log-fix-verification.md)，尚未部署。权限功能不变。
-- [ ] 批准并单独协调发布本地新功能到课程Fly地址，按现有备份/发布流程执行；保留卷与身份，部署后确认新日志、两个身份、拒绝记录及持续保留。当前main/origin及线上不能当新日志已发布。本轮没有部署批准，也没有推送或重启服务。
-- [ ] 两位同学各独立Chrome profile、只拿URL，作者只读日志解释；保存实际结果和未覆盖项。线上演练失败或不能区分人同样是有效发现，不伪装通过。
-- [ ] 第三篇反思 `reflections/crit-10.md`：目前缺失；由本人据真实过程写，建议150–300英文词，回答[仓库两项站立问题](../../reflections/README.md)。空白观察模板不能替代，不能提前写已演练。
-- [ ] COMP8020根目录 `research-note.md`：目前缺失；本人形成600–800词批判立场、比较学术与实践来源、处理反论证。可之后协助查源、核引用或指出论证缺口；本包不替用户选择立场或写个人论证。
-- [ ] UI与交互人工验收：按官方1920×1080和390×844视口，另在真实手机评估亮度、可读性、触控、门框/台阶与镜头；模拟视口不等于实机性能。顶栏错号仍待原飞行/传送路径复现，见[Bug汇总](../BUG-SUMMARY.zh-CN.md)。不在本轮重开旧相机测试。
-- [ ] 在最终选定版本检验多人共享变化约一秒内无刷新可见，以及回来/重启/重新部署仍保留进度；当前本地准备不能证明线上/隔日持久性。
-- [ ] 本人复核README、PROCESS与实际行为/引用是否一致；指导范围分别400–600和900–1100词，保持简洁，必要更新另行进行。本轮不改已批准的个人论证。
-- [ ] 最终候选版执行课程 `pnpm check` 与 `pnpm check:evidence`、核对公开仓库/已部署版本/文件与引用；不在本轮重复全量。**check:evidence有crit8/9即可通过，不保证crit10存在，也不审研究立场、真人证据或线上行为。**
+本次周三15:30班；cutoff为2026-10-21 13:30 Australia/Sydney（02:30 UTC）。推送、可用部署和反思需要在cutoff前具备；不能把演练结束作为首次提交反思的时间。
 
-官方Final列出的截止为2026年11月9日中午；具体时区、Crit10个人cutoff和提交安排以课程通知为准。本包不是提交或发布操作。
+| 项目 | 可追溯证据与边界 |
+| --- | --- |
+| 多身份、共享状态及服务端权限 | [矩阵](permissions.zh-CN.md)、隔离HTTP双身份拒绝测试、现有多人检查；真人观察仍按实际记录判断。室内布局描述不保密，进入/编辑受限制。 |
+| who-did-what日志及持续保留 | [ADR0009](../adr/0009-business-observation.md)、[日志说明](logs.zh-CN.md)、持久卷旁的有限轮转文件；不承诺无限档案或每一帧。 |
+| 正式发布、备份、当前SHA的CI | [发布记录](release-verification.md)；只有对应SHA的终态成功及线上验收才能算完成。 |
+| 两位同学URL-only、独立profile、作者日志讲解 | [用户报告](peer-report.zh-CN.md)确认试玩且运行正常；没有逐动作/日志匹配材料，不能补造。课堂中作者仍须能从日志讲解。 |
+| PROCESS与开发提交 | [PROCESS](../../PROCESS.md)已更新事实过程和commit/compare链接。 |
+| 第三篇反思 | [crit-10.md](../../reflections/crit-10.md)根据用户已提供的突破和方向整理；不声称完整日志追踪或零缺陷。 |
+| README、公共说明与限制 | [README](../../README.md)描述实际arrival、匿名身份、房间数据边界和设备提醒；正式[/readme/](https://comp4020-final-ray0766.fly.dev/readme/)随部署更新。 |
+
+`check:evidence`只检查文件和链接形态，不审真人证据、研究立场或线上行为。当前发布不能拿旧722项通过替代；以本次CI数量和结果为准。禁用的相机测试仍不在课程默认check内。
+
+## 此后Final仍需单独完成
+
+- COMP8020根目录`research-note.md`仍缺。它是Final的600–800词批判研究论证，不是Crit10的附加个人反思；不代替用户选择观点。
+- 真实手机性能、公开负载、隔日保存和课堂具体日志讲解不能由模拟视口或定向测试包办。已有证据的条件和限制见[Crit9验证](../evidence/crit9-realtime/verification.md)。
+- 对所有新增人工观察保留版本、时间、实际动作和未观察项，不把[空白模板](observation-template.zh-CN.md)当完成证据。
+
+官方Final截止列为2026年11月9日中午，具体提交安排以课程通知为准。
