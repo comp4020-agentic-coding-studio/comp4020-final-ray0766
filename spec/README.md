@@ -47,3 +47,13 @@ them.
 At a crit, a green `check` job is half the shipped mark, but it's never the
 judgement of the work: your tutor checks what you deployed against the published
 spec.
+
+The original courier continuous-envelope oracle is retained with its pinned
+`spec/fixtures/original-courier.ts` subject from `d5e524c`. Its hash, geometry
+counts and strict bounds are unchanged; it is historical coverage, not evidence
+that the new traveller fits every camera. Current traveller checks are in
+`character-sample`, `appearance`, `first-character` and `legacy-ground-camera`.
+
+The [Final verification record](../docs/evidence/final-hd/verification.md) keeps
+the first full-run failures, fixture corrections, the door-revision falling
+regression, and the boundaries of current browser evidence.

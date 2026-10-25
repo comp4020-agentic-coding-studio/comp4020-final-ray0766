@@ -1,0 +1,51 @@
+{
+  "kind": "Historical intermediate-flight measurement, extracted without identities or saves",
+  "notCurrentFinalBenchmark": true,
+  "sourceVersionLimit": "These runs identify intermediate uncommitted builds by served bundle filenames. They predate automatic travel and must not be attributed to Final commit 4200c33 or presented as a current frame-rate or device guarantee.",
+  "runs": [
+    {
+      "phase": "before",
+      "sourceReportSha256": "5a222a1dec08e9d295d2683f2537df1ffc6afafb1ba79dd9334f380bc29eaa1c",
+      "status": "passed",
+      "browser": "155.0.8059.85",
+      "quality": "smooth",
+      "viewport": [
+        1440,
+        900
+      ],
+      "route": "Fixture start [0,50,45], controlled waypoints [360,50,45] and [0,50,45], stop within 2.5 m; actual keyboard input thereafter",
+      "bundlePaths": [
+        "/assets/index-B1o4QZgu.js"
+      ],
+      "initialReadyMs": 5847,
+      "routeDurationMs": 42004,
+      "blockingWaitsDuringFlight": 18,
+      "totalBlockingWaitMs": 8415.199999993667,
+      "heapPeakBytes": 102756328,
+      "rejectedMovementRequests": 0,
+      "pageErrors": 0
+    },
+    {
+      "phase": "after",
+      "sourceReportSha256": "895f955114e0ef657e69807e1879f62ccf5188c8ccff5c28ddb7e9417a7789d2",
+      "status": "passed",
+      "browser": "155.0.8059.85",
+      "quality": "smooth",
+      "viewport": [
+        1440,
+        900
+      ],
+      "route": "Fixture start [0,50,45], controlled waypoints [360,50,45] and [0,50,45], stop within 2.5 m; actual keyboard input thereafter",
+      "bundlePaths": [
+        "/assets/index-BUnksO0S.js"
+      ],
+      "initialReadyMs": 7695,
+      "routeDurationMs": 35493,
+      "blockingWaitsDuringFlight": 0,
+      "totalBlockingWaitMs": 0,
+      "heapPeakBytes": 102795288,
+      "rejectedMovementRequests": 0,
+      "pageErrors": 0
+    }
+  ]
+}

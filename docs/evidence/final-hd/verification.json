@@ -1,0 +1,192 @@
+{
+  "dateUTC": "2026-10-25",
+  "baseCommit": "4200c33e6d531fc37a7f7598b441ea1c347eb72d",
+  "candidateProductionChange": {
+    "file": "src/server/ground.ts",
+    "sha256": "c5752e1b2445883687f3d7e766614d22feaa6de1a4448fc7b204f4e54e93bee8",
+    "effect": "Preserve valid current-physics-version falling saves on a scene revision; no speed or collision limit changed"
+  },
+  "environment": {
+    "browser": "155.0.8059.85",
+    "mode": "installed Chrome, headless WebGL",
+    "viewports": [
+      [
+        1920,
+        1080
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "quality": "Smooth",
+    "identities": "two fresh independent cookie contexts; synthetic test data only",
+    "network": "loopback; extra controlled 500ms universe delay and brief offline toggle",
+    "hardware": "not freshly measured; no device performance claim"
+  },
+  "checks": {
+    "firstFullRun": {
+      "files": 151,
+      "tests": 970,
+      "passed": 950,
+      "failed": 20,
+      "seconds": 50.28,
+      "logSha256": "935e99e427ca56a385eb6e6048b26ed14b39964203720ec1c3e41f39096534c3"
+    },
+    "firstRepairRun": {
+      "files": 9,
+      "tests": 70,
+      "passed": 69,
+      "failed": 1,
+      "seconds": 12.09,
+      "logSha256": "2331c0006a7b7eb450909c509f0eb3279110fb7151e52d43e9113ccda89915fa"
+    },
+    "affectedAfterGroundFix": {
+      "files": 12,
+      "tests": 82,
+      "passed": 82,
+      "seconds": 12.88,
+      "logSha256": "5d4877fa8c4d51413ac02bec6aeadffa5301532ea9aafb6b28a47527541ec355"
+    },
+    "finalFullRun": {
+      "command": "APP_URL=<fresh isolated integrated test server> EXPECT_WORLD_PROFILE=integrated pnpm check",
+      "projects": [
+        "app",
+        "legacy-http"
+      ],
+      "files": 151,
+      "tests": 971,
+      "passed": 971,
+      "failed": 0,
+      "seconds": 50.52,
+      "logSha256": "100180a6bc1d9fc115627410d3766dad2c1ef2b6dd570cc6a58ea8f757a83e2d"
+    },
+    "evidence": {
+      "command": "pnpm check:evidence",
+      "passed": true,
+      "citedCommits": 7,
+      "logSha256": "de6eef35ca0d886e510ad0798f8eb012c772cb12342d1fdf2f57d6310ef53883"
+    },
+    "typecheck": "passed as part of final check",
+    "lint": "passed",
+    "clientAndWorkerBuild": "passed",
+    "disabledCamera": "not run"
+  },
+  "browser": {
+    "completedChecks": [
+      "Two separate Chrome contexts completed real appearance Save UI, then used disclosed test-only home doorway fixtures; each sees the other without reload",
+      "Owner writes render on the other browser without reload; visitor write returns 403 and adds nothing",
+      "Real rename dialog save reaches the other client; appearance parameters render on the remote avatar",
+      "390px resize keeps menu/focus usable; 500ms universe delay and brief offline/reconnect recover presence without reload",
+      "Actual isolated server stop/start with same DB preserves complete object records, name and appearance; both original browser cookies reload without repeating creation",
+      "Room entry, actual W/S walking and return to doorway, desktop-to-narrow resize, explicit Go outside enabled near the door and exits successfully"
+    ],
+    "measurements": [
+      {
+        "scenario": "object create",
+        "requestToAcknowledgementMs": 20,
+        "requestToObserverRenderFrameMs": 852
+      },
+      {
+        "scenario": "object rotation",
+        "requestToAcknowledgementMs": 17,
+        "requestToObserverRenderFrameMs": 657
+      },
+      {
+        "scenario": "object rotation",
+        "requestToAcknowledgementMs": 24,
+        "requestToObserverRenderFrameMs": 375
+      },
+      {
+        "scenario": "object rotation",
+        "requestToAcknowledgementMs": 23,
+        "requestToObserverRenderFrameMs": 820
+      },
+      {
+        "scenario": "object rotation",
+        "requestToAcknowledgementMs": 16,
+        "requestToObserverRenderFrameMs": 518
+      },
+      {
+        "scenario": "object rotation",
+        "requestToAcknowledgementMs": 16,
+        "requestToObserverRenderFrameMs": 247
+      },
+      {
+        "scenario": "appearance",
+        "requestToObserverRenderFrameMs": 522
+      }
+    ],
+    "objectUpdateSummaryMs": {
+      "samples": 6,
+      "min": 247,
+      "median": 587.5,
+      "max": 852
+    },
+    "pageErrors": [],
+    "paidAIRequests": 0,
+    "restart": "Actual owned test server stop/start with same test DB; same contexts reloaded; complete object records, name and appearance compared",
+    "layout": {
+      "inner": [
+        390,
+        844
+      ],
+      "scroll": [
+        390,
+        844
+      ],
+      "ui": 1,
+      "headers": 1,
+      "visible": [
+        {
+          "x": 12,
+          "y": 12,
+          "width": 366,
+          "height": 109.6875
+        }
+      ]
+    },
+    "boundedFailures": [
+      {
+        "kind": "test-driver",
+        "detail": "Delayed network route continued after being unregistered; fixed teardown to wait for in-flight handlers. Original failed log retained locally."
+      },
+      {
+        "kind": "test-assumption",
+        "detail": "Go outside was disabled far from the door, as required. A separate room-only follow-up walked W/S back to the doorway and exited successfully; the earlier run remains recorded as interrupted."
+      },
+      {
+        "kind": "visual-limit",
+        "detail": "The narrow synthetic visitor beside a doorway initially sees a close facade rather than a clear neighbour. This is not evidence of comfortable framing; no renderer change or claim of user acceptance is made."
+      }
+    ],
+    "limits": [
+      "Object writes used authenticated API calls; appearance creation and rename used UI. This does not prove a complete two-human URL-only review.",
+      "Timing endpoint is observed revision / rendered-avatar diagnostic plus two animation frames, not independent pixel-difference timing.",
+      "Private room walking/exit coverage does not reproduce every indoor building cutaway.",
+      "No WAN, deployment restart, physical mobile device or sustained load test."
+    ]
+  },
+  "artifacts": [
+    {
+      "file": "desktop-shared-home.png",
+      "sha256": "4947e68af8b60093bb9bd6bbb94c54465f3b2d77c1cfa1bfc34eece51b9d5165"
+    },
+    {
+      "file": "phone-first-character.png",
+      "sha256": "563ac6987a7e32bf89c9636b1850030212306764a0807e18e760bcb134934780"
+    },
+    {
+      "file": "phone-visitor-obstruction.png",
+      "sha256": "a6b6d895ac92c3280c7808df9c1f2842e46c36b864c5fe2a50c1fd01f6182e8b"
+    },
+    {
+      "file": "desktop-private-room.png",
+      "sha256": "cd46761e83466031aa1b640a7e2f865699ba3dd833a5fd2e8302ecc78e122e8d"
+    },
+    {
+      "file": "phone-private-room-door.png",
+      "sha256": "ff2bfa11fcd9990be6412363f35b30f9de50b0147081cc3cac5a9acfc78bb50e"
+    }
+  ]
+}

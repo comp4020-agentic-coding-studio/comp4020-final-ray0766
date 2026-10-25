@@ -9,6 +9,7 @@ import { createShipModel, envelopeProblems } from '../src/assets/claude-geometry
 import { SHIP_ENVELOPE } from '../src/assets/claude-geometry/ship/spec.ts';
 import { StyleLibrary } from '../src/assets/claude-geometry/style/materials.ts';
 import { ResourceTracker } from '../src/assets/claude-geometry/core/dispose.ts';
+import { defaultAppearance } from '../src/shared/appearance.ts';
 import { defaultShip } from '../src/shared/ships.ts';
 import { SAFE_RADIUS } from '../src/shared/flight.ts';
 import { RADIUS, normalize } from '../src/shared/world.ts';
@@ -52,6 +53,9 @@ it('uses the unchanged model envelope inside existing flight clearance and relea
 it('derives the ship owner from the HTTP cookie and rejects unauthenticated, foreign-origin and oversized writes',async()=>{
  const base=inject('baseUrl');const session=async()=>{const r=await fetch(base+'/api/state');return r.headers.get('set-cookie')!.split(';')[0];};const a=await session(),b=await session();
  const save=(cookie:string,content:unknown,origin?:string)=>fetch(base+'/api/ship/save',{method:'POST',headers:{cookie,'content-type':'application/json',...(origin?{origin}:{})},body:JSON.stringify(content)});
+ // New integrated identities explicitly complete creation before gameplay writes.
+ expect((await save(a,body())).status).toBe(409);
+ for(const cookie of [a,b])expect((await fetch(base+'/api/appearance',{method:'POST',headers:{cookie,'content-type':'application/json'},body:JSON.stringify({expectedRevision:0,appearance:defaultAppearance()})})).status).toBe(200);
  expect((await save(a,body())).status).toBe(200);expect((await save('',body())).status).toBe(401);expect((await save(a,body(),'https://untrusted.invalid')).status).toBe(403);
  expect((await save(b,{...body(),playerId:a})).status).toBe(400);expect((await save(b,{...body(),document:'x'.repeat(3000)})).status).toBe(413);
  const state=await(await fetch(base+'/api/state',{headers:{cookie:b}})).json();expect(state.ship).toEqual(defaultShip());

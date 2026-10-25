@@ -50,7 +50,7 @@ it('fences the released v7 public client without changing private ground, names,
   expect(s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('public')).toEqual(groundBeforeRejected);
   s.state('private');expect(s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('private')).toEqual(privateBefore);
   expect(snapshot()).toEqual(beforeRejected);expect(s.library('private')[0].blueprint).toEqual(blueprint);
-  expect(s.db.prepare('PRAGMA user_version').get()!.user_version).toBe(18);
+  expect(s.db.prepare('PRAGMA user_version').get()!.user_version).toBe(20);
  }finally{s.close();}
 });
 
@@ -67,6 +67,19 @@ it.each([7,8,9])('keeps a valid v%i public airborne pose when its collision revi
   const playerAfter=s.db.prepare('SELECT * FROM players WHERE id=?').get('public')!;
   expect(playerAfter).toEqual({...playerBefore,revision:Number(playerBefore.revision)+(version===HUB_PHYSICS_VERSION?0:1)});
   expect(s.state('public')).toEqual(b);
+ }finally{s.close();}
+});
+
+it('preserves current-version natural falling velocity across a public scene revision',()=>{
+ const s=openStore(':memory:');try{
+  s.create('public',0);
+  s.db.exec("UPDATE ground_states SET scene_revision=-1,radius=radius+0.5,vertical_speed=-2.3,grounded=0,jump_held=0 WHERE player_id='public'");
+  const before=s.db.prepare("SELECT * FROM ground_states WHERE player_id='public'").get()!,playerBefore=s.db.prepare("SELECT * FROM players WHERE id='public'").get()!;
+  s.state('public');const after=s.db.prepare("SELECT * FROM ground_states WHERE player_id='public'").get()!;
+  for(const key of ['position','radius','vertical_speed','grounded','planet_id','physics_version','jump_held'])expect(after[key],key).toEqual(before[key]);
+  expect(after.physics_version).toBe(HUB_PHYSICS_VERSION);expect(after.sequence).toBe(Number(before.sequence)+1);
+  expect(after.scene_revision).toBe(s.universe('public').currentPlanet.revision);
+  expect(s.db.prepare("SELECT * FROM players WHERE id='public'").get()).toEqual(playerBefore);
  }finally{s.close();}
 });
 

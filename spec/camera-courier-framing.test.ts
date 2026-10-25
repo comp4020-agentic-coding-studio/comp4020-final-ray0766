@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import * as T from 'three';
-import { courier } from '../src/client/character.ts';
+import { courier } from './fixtures/original-courier.ts';
 import { surfaceOrientation } from '../src/client/terrain.ts';
 import { createCourierUpperFramingEnvelope, projectCourierUpperFramingPoints } from '../src/client/camera-courier-framing.ts';
 const snapshot = (root: T.Object3D) => {

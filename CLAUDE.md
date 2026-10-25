@@ -1,6 +1,6 @@
 # Little Worlds development rules
 
-These are the current engineering rules for the goals in [README](README.md#design-goals-and-evidence). Earlier prototype and R3–R8 decisions remain in [ADRs](docs/adr/) and [integration records](docs/integration/); their dates, versions and then-unfinished work are historical, not a second current specification. Follow the user's later explicit instructions within their stated scope.
+These are the current engineering rules for the goals in [README](README.md#what-is-enforced-and-what-needs-judgement). Earlier prototype and R3–R8 decisions remain in [ADRs](docs/adr/) and [integration records](docs/integration/); their dates, versions and then-unfinished work are historical, not a second current specification. Follow the user's later explicit instructions within their stated scope.
 
 ## Working baseline
 
@@ -46,7 +46,7 @@ Use original or documented licensed assets. [Messenger](https://messenger.abeto.
 
 ## Verification and claims
 
-Keep both course HTTP invariants. Run applicable focused regressions, typecheck, lint, build and evidence checks; the full default `app` + `legacy-http` suite remains a separate release gate. The current local close-out does not authorise rerunning that previously refused suite: use explicit affected file lists and record the gap. [spec/README](spec/README.md) explains the isolated legacy server and separately runnable unused camera tests. Do not delete tests or loosen production contracts to hide a faulty fixture or driver.
+Keep both course HTTP invariants. Run applicable focused regressions, typecheck, lint, build and evidence checks; the full default `app` + `legacy-http` suite remains a separate release gate. The 25 October HD close-out explicitly authorises one isolated full run and bounded repair/rechecks, plus sanitised summaries and necessary screenshots. Preserve the first failed run; this does not authorise production changes. [spec/README](spec/README.md) explains the isolated legacy server and separately runnable unused camera tests. Do not delete tests or loosen production contracts to hide a faulty fixture or driver.
 
 Browser validation must show rendered pixels and real keyboard/touch interactions, including desktop/narrow layouts and relevant slow-network/disconnection recovery. Preserve failed runs and explain repairs. Report exact tested source, viewport, browser and limitations; CI, emulated phone viewports and short samples do not prove physical-phone performance, arbitrary blueprints or public-load capacity. Evidence paths in README map goals to checks, not blanket claims that every check just ran.
 

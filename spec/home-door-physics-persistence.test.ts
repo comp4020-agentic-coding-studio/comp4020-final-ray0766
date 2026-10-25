@@ -127,9 +127,9 @@ it('opens beside a saved exterior visitor in the former inward swing without mov
   expect(store.state('owner').home!.interior).toMatchObject({ doorOpen: true, doorVersion: 2 });
 }, 10_000);
 
-it('fences pre-toggle movement while preserving valid standing and airborne saves exactly', () => {
+it('fences pre-toggle movement while preserving valid standing and naturally falling saves exactly', () => {
   const { store, planet } = fixture(2), world = new GroundWorld(store.universe('owner').currentPlanet);
-  const standing = world.pose(SPAWN), airborne = { ...standing, radius: standing.radius + 1, verticalSpeed: 2.3, grounded: false, jumpHeld: true };
+  const standing = world.pose(SPAWN), airborne = { ...standing, radius: standing.radius + 1, verticalSpeed: -2.3, grounded: false, jumpHeld: false };
   expect(world.blocked(standing)).toBe(false); expect(world.blocked(airborne)).toBe(false);
   place(store, 'visitor-0', standing); place(store, 'visitor-1', airborne);
   const beforeStanding = store.state('visitor-0'), beforeAirborne = store.state('visitor-1');

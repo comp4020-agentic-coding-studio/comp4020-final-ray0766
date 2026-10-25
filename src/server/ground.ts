@@ -29,7 +29,7 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
     // Keep valid poses through door changes and physics upgrades, including airborne saves.
     // Public furnishings may invalidate a spot; removed supports must fall.
     const support=w.support(start.position,start.radius+.26);
-    const preserve=old&&([3,4,5,6,7,8,9].includes(old.physics_version)||(r.planet_id==='hub'&&[8,9,10].includes(old.physics_version)))&&old.planet_id===r.planet_id&&old.position===r.position&&!w.blocked(start)&&(!start.grounded||Math.abs(support.radius-start.radius)<.025);
+    const preserve=old&&(old.physics_version===physicsVersionFor(r.planet_id)||[3,4,5,6,7,8,9].includes(old.physics_version)||(r.planet_id==='hub'&&[8,9,10].includes(old.physics_version)))&&old.planet_id===r.planet_id&&old.position===r.position&&!w.blocked(start)&&(!start.grounded||Math.abs(support.radius-start.radius)<.025);
     // This walking-only upgrade does not relocate even a stuck saved pose.
     // The player can choose the explicit, confirmed self-recovery operation.
     const walkingUpgrade=old&&old.planet_id===r.planet_id&&old.position===r.position&&old.scene_revision===w.revision&&old.physics_version===physicsVersionFor(r.planet_id)-1;
