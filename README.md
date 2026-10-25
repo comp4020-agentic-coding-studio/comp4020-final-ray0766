@@ -1,6 +1,6 @@
 # Little Worlds · 小星球
 
-[Play](https://comp4020-final-ray0766.fly.dev/) · [Player guide](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/integration/midpoint/docs/player-guide.md) · [Source and checks](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/tree/integration/midpoint)
+[Play](https://comp4020-final-ray0766.fly.dev/) · [Player guide](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/player-guide.md) · [Source and checks](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/tree/main)
 
 ## A place to make and revisit
 
@@ -12,9 +12,9 @@ A delivery-only world offers a reason to walk but little that a visitor can leav
 
 ## What is enforced, and what needs judgement
 
-Server checks enforce ownership, unique planet names, acknowledged saves and versioned travel. Visitors cannot build in another person's world or enter their private room. Explicit character creation and Save/Cancel protect appearance choices. A failed request must preserve a recoverable draft or acknowledged position, not report success. These rules live in [CLAUDE](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/integration/midpoint/CLAUDE.md) and [the checks](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/tree/integration/midpoint/spec): `first-character`, `appearance`, `auto-trip`, `home-owner-access`, `teleport-station` and `save-progress`.
+Server checks enforce ownership, unique planet names, acknowledged saves and versioned travel. Visitors cannot build in another person's world or enter their private room. Explicit character creation and Save/Cancel protect appearance choices. A failed request must preserve a recoverable draft or acknowledged position, not report success. These rules live in [CLAUDE](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/CLAUDE.md) and [the checks](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/tree/main/spec): `first-character`, `appearance`, `auto-trip`, `home-owner-access`, `teleport-station` and `save-progress`.
 
-Readable entrances, comfortable observation and a worthwhile visit require judgement. The author’s own play exposed trapped movement and difficult flight, prompting walking-only characters, explicit safe-ground recovery and automatic journeys. Technical browser scenarios check keyboard focus, narrow layouts, retries and return routes; they do not establish that every building is comfortable or that visitors enjoy it. The [verification record](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/integration/midpoint/docs/evidence/final-hd/verification.md) separates measured results, historical evidence and outstanding acceptance. Wall cutaway near indoor corners remains a known visual limitation, not a completed repair.
+Readable entrances, comfortable observation and a worthwhile visit require judgement. The author’s own play exposed trapped movement and difficult flight, prompting walking-only characters, explicit safe-ground recovery and automatic journeys. Technical browser scenarios check keyboard focus, narrow layouts, retries and return routes; they do not establish that every building is comfortable or that visitors enjoy it. The [verification record](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/evidence/final-hd/verification.md) separates measured results, historical evidence and outstanding acceptance. Wall cutaway near indoor corners remains a known visual limitation, not a completed repair.
 
 ## Try the core route
 
@@ -22,4 +22,4 @@ Save your traveller, then press **Space / Guide** for **My planet**. Walk to its
 
 ## Boundaries
 
-Keep your cookies: anonymous identity has no account recovery. Presence expires; acknowledged creations persist. Room layouts are not confidential storage. Fixed help requires no AI; the paid guide trial is local-only and absent from production. Smooth quality and honest retry feedback support weaker devices without promising a frame rate. This branch is the Final candidate; the public site still runs `d5e524c` until a separately approved deployment.
+Keep your cookies: anonymous identity has no account recovery. Presence expires; acknowledged creations persist. Room layouts are not confidential storage. Fixed help requires no AI; the paid guide trial is local-only and absent from production. Smooth quality and honest retry feedback support weaker devices without promising a frame rate. The [release record](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/releases/final-2026-10.md) distinguishes local verification from the exact successful main deployment; a source push alone is not proof that the hosted version changed.

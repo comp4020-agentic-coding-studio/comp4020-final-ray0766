@@ -1,5 +1,7 @@
 # Final local readiness — 25 October 2026
 
+**Subsequent release:** See the [Final release record](../releases/final-2026-10.md) for the later local restart and main/Fly release scope. The limitations and earlier-stage statements below remain historical.
+
 **Latest verification:** [HD close-out and public evidence](../evidence/final-hd/verification.md) records the newly authorised isolated full check, repairs and browser evidence. The following close-out is a historical stage; its local-only evidence and no-full-suite statements are not the latest status.
 
 **Later updates:** the separately authorised [bounded live-guide trial](local-guide-ai.md) supersedes this earlier close-out's AI-off status. The author subsequently approved the revised English PROCESS, research note and three reflections, and final packaging for `origin/integration/midpoint`. The no-commit, AI-off and pending-writing statements below describe the earlier verification stage, not the subsequent packaging or current 8152 trial. Production deployment and production AI remain outside this request.

@@ -1,8 +1,10 @@
 # Final candidate verification — 25 October 2026 UTC
 
+**Subsequent release:** [Final release record](../../releases/final-2026-10.md) separates the approved local restart and main deployment from the initial local-only stage below.
+
 This is a technical acceptance record, **not author playtest approval or a production release**. The baseline is `4200c33e6d531fc37a7f7598b441ea1c347eb72d`; this close-out adds the documented ground-state repair, fixture corrections, writing refinements and this evidence. [verification.json](verification.json) identifies the changed production file by SHA-256 and preserves log and screenshot hashes. A repository commit containing this record fixes the accompanying code and evidence together.
 
-Production and `main` remain at `d5e524c`. The existing main workflow performs checks, a production backup and deployment; this close-out did not dispatch it or enable production AI. A development branch and local checks alone do not finish the course submission.
+At this initial local verification stage, production and `main` were at `d5e524c`. The existing main workflow performs checks, a production backup and deployment; this close-out did not dispatch it or enable production AI. A development branch and local checks alone do not finish the course submission.
 
 ## What the full check found
 
@@ -53,10 +55,10 @@ The [official Final brief](https://comp.anu.edu.au/courses/comp4020-agentic-codi
 | Multiuser, realtime, persistence | Current two-context writes/permission checks, six timed shared-object updates, appearance update and actual isolated restart. | Not two-human acceptance, WAN latency or production redeployment. Historical Crit 10 peer/log practice remains separately author-confirmed. |
 | Research | Approximately 698 body words; independent goal/acceptance position, source comparison and bounded response to review cost, including fallibility of human judgement. | A normative proposal, not measured productivity benefit. |
 | Required writing / checks | PROCESS approximately 1053 body words; reflection bodies 253 / 241 / 219. Files and cited commits pass evidence check. | Word guidance is not a mechanical grading guarantee. Historical reflections were not rewritten as current feature claims. |
-| Published main / live / CI | Earlier production `d5e524c` remains available; candidate checks are local. | **Release blocker:** main/Fly approval and a verified candidate CI/backup/deploy/live chain are still pending. Production AI is not authorised. |
+| Published main / live / CI | Earlier production `d5e524c` remains available; candidate checks are local. | At this stage main/Fly approval and the candidate CI/backup/deploy/live chain were pending; subsequent release evidence is separate. Production AI remains unauthorised. |
 
 [Historical flight-loading measurements](historical-flight-loading.json) support the PROCESS's intermediate 18-to-zero interruption example. They identify earlier served bundles and are explicitly not a benchmark of current automatic travel.
 
 ## Preservation and publication boundary
 
-8170 and 8171 used separate disposable test data. The existing 8152 backend, game database and paid-guide budget ledger were not replaced or reset by this check; 8098 and production were untouched. The small server repair is exercised on the isolated candidate, not claimed active in the already-running 8152 process. No credentials were read and no supplier calls were sent. Evidence excludes databases, cookies, internal identity hashes, private configuration and raw business logs. Subsequent authorised packaging targets only `origin/integration/midpoint`; it does not deploy production. Updating the existing AI-enabled 8152 backend still awaits explicit restart approval, so the isolated candidate result must not be presented as an already-updated 8152 service.
+8170 and 8171 used separate disposable test data. The existing 8152 backend, game database and paid-guide budget ledger were not replaced or reset by this check; 8098 and production were untouched. The small server repair is exercised on the isolated candidate, not claimed active in the already-running 8152 process. No credentials were read and no supplier calls were sent. Evidence excludes databases, cookies, internal identity hashes, private configuration and raw business logs. Subsequent development-branch packaging was followed by separate approval for the 8152 restart and main/Fly release. The release record records those later operations; they are not inferred from this local test result.
