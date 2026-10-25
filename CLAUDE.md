@@ -1,174 +1,57 @@
-# Little Post implementation rules
+# Little Worlds development rules
 
-These engineering rules record the scope authorised for the first local
-prototype. They do not claim to be the student's finished academic harness.
+These are the current engineering rules for the goals in [README](README.md#design-goals-and-evidence). Earlier prototype and R3–R8 decisions remain in [ADRs](docs/adr/) and [integration records](docs/integration/); their dates, versions and then-unfinished work are historical, not a second current specification. Follow the user's later explicit instructions within their stated scope.
 
-- Keep the existing course Final repository lineage and its two shipped checks.
-  Preserve fly.toml: one shared-cpu-1x machine, 256 MB, one /data volume.
-- Current authorised scope adds multiple claimable planets and a small original
-  building catalogue. Each server session can own at most one planet, each planet
-  has at most one owner; everyone can visit, only the owner can edit. Preserve the
-  spherical controller and keep the delivery as an optional public-harbour activity.
-  Do not expand into chat, trade, economics or large quest systems.
-- Travel is now continuous controllable arcade flight between fixed planet centres.
-  Atlas selections mark bearings only; never restore a production teleport route.
-  Server checks journey/sequence, bounded motion, collision clearance and near/slow
-  landing. Preserve both ground and flight saves; freeze/rebase after failed saves.
-  Round 7 user request adds teleport stations (hub + every home) linking only one's
-  own home and the hub, from a gate; visitors cannot use another home's gate. No
-  landing marks or multi-destination list; the atlas and /api/planets/visit stay as above.
-- Back up existing SQLite before schema migration; preserve original coats, quest
-  state and position. Enforce ownership on every write with server-derived identity
-  and SQL constraints/transactions. Hidden UI and client owner IDs grant no rights.
-- Use revision checks and idempotent writes, validate placement/overlap/capacity,
-  and test independent sessions, concurrent claims and read-only visitors. Anonymous
-  browser identity is not a real-world person or cross-device account.
-- Latest visual direction: an industrial science-fiction flight sample with original
-  mechanical geometry, PBR metal/glass layers, restrained HUD and readable exposure.
-  The authorised ground restyle adds an industrial public hub, connected routes,
-  original suits and a physical gate. Board only beside the saved port position;
-  no global takeoff button or client-supplied proximity bypass. Private return
-  beacons/craft are temporary travel scenery, never placed owner objects. Final workshop-v1 now reuses Claude’s committed editor to save private named/grouped
-  blueprints on the server and place immutable structures on owned planets.
-  Ship workshops, terrain editing and public history remain out of scope.
-- Original procedural assets or explicitly documented free licensed assets only.
-  The user approved NASA SVS public-domain lunar maps for the orbital sample.
-  Messenger is an interaction reference; do
-  not extract its code, shaders, models, sounds, or textures.
-- Spherical movement must keep unit radial position and orthogonal tangent
-  directions at poles. Character reversal must actually turn. Camera pose must
-  use a Camera lookAt convention, not an Object3D's opposite forward direction.
-- Only the server changes quest state. Check input type, finite unit positions,
-  bounded travel, valid coat, parcel state, and saved NPC proximity. Duplicate
-  pickup/delivery requests must be idempotent. Do not trust client counters.
-- Persist before acknowledging. Save SQLite to DATABASE_PATH (local .data;
-  /data in the container). Never commit databases, cookies, tokens or .env files.
-- Preserve fixed planet slots while expanding the finite survey; use bounded
-  orbital detail and remote-avatar budgets. Ground presence is ephemeral and
-  scoped by server-derived planet/mode. Never expose cookies or session hashes,
-  accept client position as presence authority, or grant building rights through
-  presence. No remote spacecraft/chat/voice/account systems in this iteration.
-- A failed save must show an error and reconnect to the acknowledged state.
-  Queue writes so delivery cannot overtake position. Never silently mark an
-  unsaved coat or quest complete.
-- Support WASD/arrows, E, clickable actions, touch joystick, visible focus,
-  modal keyboard use, reduced motion, and both marking viewports.
-- Browser validation must confirm the world is visibly rendered, not only that
-  a canvas element exists. Exercise the complete interaction via real controls.
-- Check close and overview cameras at desktop and phone sizes. Elevated NPC
-  labels need camera-ray occlusion, not the old radial visibility approximation.
-  Keep a readable active destination when it leaves the narrow phone viewport.
-- Keep original/properly credited scenery and character art. Record measured
-  performance with hardware/browser context; phone viewport emulation does not
-  establish physical phone performance.
-- Run typecheck, lint, course tests, focused state/motion tests, build, real Chrome
-  browser checks, and evidence checks. Record failures and repairs truthfully.
-- Write factual engineering evidence only. Do not invent student reflection,
-  personal positions, playtest feedback, citations, deployment, or test results.
-- No push, public repository change, Fly billing/deploy or submission without
-  separate approval. Crit7 and the deleted old implementation are out of scope.
+## Working baseline
 
-- Round 6 user clarification supersedes a decorative-only city: public and player
-  art share a material/geometry vocabulary. The existing six saved kinds use the
-  shared assets without changing storage. Seventeen structure resources expose
-  local metres, +Y up, +Z exterior and connection metadata for the separate editor.
-- The user assigned snapping/assembly/undo/blueprint storage to Claude. Do not build
-  a competing editor here. `src/assets/claude-geometry` is an immutable, verified
-  committed resource snapshot; its provenance manifest records the source hash.
-  Do not copy or overwrite that independent workspace's uncommitted changes.
-- Public display projection is reversible and separate from durable normals and
-  orbital coordinates. Compensate walking speed; transform visitor frames and
-  ground picking consistently. Private saved object transforms remain unchanged.
-- Store round 6 screenshots/results separately; keep earlier failed-run evidence.
+Use `/Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766`, branch `integration/midpoint`. Read [MIDPOINT](MIDPOINT.md) and its [source ledger](docs/integration/midpoint-sources.zh-CN.md). Inspect the working tree before editing; preserve unrelated changes, old worktrees and archives. Do not restore discarded cameras or overwrite the independent Claude source workspace.
 
-- Physics milestone: the user assigned art to Claude and ground physics to this
-  project. Keep the vendored db79d73 files and art adapters unchanged. Author static
-  collision metadata independently in `src/shared/physics`; use stable part IDs and
-  anchors. Persist height separately from spherical direction, validate movement
-  on the server, and preserve flight, ownership and existing saves. Do not expand
-  this milestone into a rigid-body engine or subsequent feature phase.
+Use isolated test databases for development and browser checks. Keep the frozen 8098 release and its `.data/midpoint` save/configuration intact unless a new task explicitly authorises changing them. Its managed entry is `node scripts/local-preview.ts`; never substitute an empty or sample database. The current isolated preview is 8152; its latest source/build/data checks are indexed in [local readiness](docs/integration/final-local-readiness.md). Keep commit, branch push, production deployment, migration and submission permissions separate. The 25 October packaging request authorises commits and a normal push to `origin/integration/midpoint`, not `main`, production deployment or production AI. Do not read or change credentials for unrelated product work. The separately authorised local guide trial is the narrow exception described in [its verification record](docs/integration/local-guide-ai.md); it does not authorise production credentials or deployment. Preserve the course deployment contract: the two HTTP invariants, one shared-cpu-1x / 256 MB machine and one `/data` volume in `fly.toml`.
 
-- The user subsequently authorised continuous local integration after physics:
-  first Claude R3 (`a4546bb`), then private ship designs reflected consistently in
-  the parked, flying and landed craft; then assess terrain and owner-private
-  history separately. Earlier scope limits do not block these authorised steps.
-  Keep independent commits and bounded verification. Preserve published 09233d9,
-  Crit 8 reflection/evidence and the independent Claude source workspace.
-- R3 vendored source remains byte-identical. Vite routes its asset URLs into the
-  pinned release directory; old resource URLs remain served. Do not silently
-  overwrite an immutable resource directory or mix transcoder versions. Physics,
-  collision proxies and the custom harbour service.light stay independent.
+## A coherent shared place
 
-- The user explicitly authorised the next two local playable stages: owner-private
-  building history, then deterministic terrain selection/preview/apply. Keep current
-  building tables authoritative and append history in the same transaction. Import
-  old objects as a labelled baseline, never fabricated past events. Every history
-  read is owner-only; playback cannot write to the world. Terrain remains opt-in:
-  preserve null legacy environments and the public harbour, apply RESTRICT to all
-  existing buildings, and share ground semantics across rendering, physics and server
-  validation. No broad historical terrain migration, source-art changes or deployment.
+Preserve the compact village, connected walkable routes, reusable workshop kit, home interiors and optional public delivery activity. No chat, trade, economy, combat or large quest system. New identities enter the public harbour while their home prepares; old identities without a home retain their state and receive the existing flight/claim/build guidance. A manually claimed home must not become a second home.
 
-- R7 local integration is explicitly authorised after the R4 baseline. Reuse only
-  the committed Claude snapshot `5a73b228f13b8b20460ea6f9403167fdfedc08be`;
-  32 new/changed files are recorded individually in PROVENANCE.json. Keep the
-  earlier immutable resource URL pin and industrial library default. Host adapters
-  select village; public harbour, courier, local props and HUD share that language.
-  Schema 10 adds a physics version and lazy safe recovery without rewriting old
-  buildings, blueprint hashes, ships or history. Preserve the existing capacities,
-  terrain semantics and interaction flows. Back up SQLite before updating local
-  preview 8098. Published Crit 8, Crit 7 and Claude's independent source stay untouched.
+Use automatic travel between fixed planet slots; Atlas choices require confirmation before changing an active trip. Skip/return use a versioned server trip and prepare the destination before arrival. Boarding requires the server-saved port proximity. Any outdoor teleport gate can return its traveller to the public planet or their own home, including a visitor at another owner's gate. Destination identity, saved proximity and visit epochs remain server-authoritative; gate travel grants no building or private-room rights. Preserve near/slow landings, journey/sequence fences, bounded flight and collision checks. Temporary craft and return beacons are travel scenery, not placed owner objects. Ship designs, owner-private history and opt-in terrain are existing features, not reasons to build a competing editor.
 
-- Latest user direction supersedes the projected city: a compact Messenger-inspired
-  village with actual public radius14, stable new private radii10–12 and metre-sized
-  assets. Preserve old owned/built/occupied layouts at10. The previous city source
-  is archived; do not delete it. Use shared radius for rendering and validation.
-- The user additionally authorised hold-Shift sprint and Space jump in a separate
-  bounded movement stage, preserving collisions, persistence and input isolation.
+## Movement and readable views
 
-- Sprint/jump milestone: public and private worlds now share validated ground
-  batches, schema 12 and physics version 3. Preserve the jump-press latch and
-  airborne saves; never accept client height/velocity. Shared public anchors
-  belong in harbour-layout.ts. Keep ordinary walking at 3 m/s and sprint at 4.8 m/s.
+Share `GroundWorld`, stable part IDs, radii and anchors between rendering, client prediction and server validation. Keep unit radial directions, orthogonal tangent frames at poles, independent saved height, legacy airborne saves and natural falling. Characters cannot jump; only sprint is accepted in movement flags. Explicit safe-ground recovery is server-selected, planet/visit/sequence-fenced and affects only the requesting character. Ordinary walking is 3 m/s and sprint is 4.8 m/s. Do not shrink the capsule, weaken speed/collision checks or accept client height/velocity to make a test pass. Bump the shared physics version when collision semantics change and fence old movement batches.
 
-- The user authorised Chinese/English UI switching. Keep translations in the host
-  adapter; do not edit the immutable art snapshot or translate user-authored names
-  and technical IDs. Language changes update text in place, preserving drafts,
-  selection, inputs and current gameplay. Persist only a local language preference.
+Desktop relative mouse look must start with an explicit gesture and release for Esc, menus/editors, hidden pages and focus loss. Never auto-recapture; retain touch dragging and the unsupported-browser fallback. Keep bounded pitch and camera-relative movement on the sphere. Choose a destination. Takeoff, flight and landing are automatic. Drag to look around. Click a planet to confirm a new destination. Skip waits for preparation; Cancel returns to departure. No manual driving or visible flight routes remain; guide ground routes are separate. Dedicated trip receipts fence destination changes and prepared arrivals; never weaken ordinary checkpoint validation. Frame actual distant destinations as well as nearby ones; keep coarse rendering and detail cache budgets bounded. Validate the user’s actual reported saved origin in an isolated fixture, and inspect pixels as well as frustum counts. Preserve the accepted outdoor camera. Every indoor entry/restoration uses the existing home-room fixed 2.5D projection; do not offer perspective/follow-orbit switching indoors or read old camera preferences to restore it. Release mouse capture on entry and restore the outdoor bearing on exit. Room/photo rendering changes must restore temporary clipping and leave geometry, physics and saved data intact; do not reactivate the unused v11/cutaway/certification route. Validate actual close and overview views, occluded labels, doors, stairs and destination readability at desktop and narrow widths. A new reported obstruction needs its own reproducible fixture; passing representative buildings does not prove all user blueprints safe. Source-of-truth dimensions and versions live in code, not old milestone prose.
 
-- R8 integration is now authorised from committed Claude source c499dee against
-  actual host baseline 5a73b228. Keep copied source byte-identical; adapt physics
-  and translations outside the vendor snapshot. New quick tree/pot/bench use the
-  same unscaled parts and colliders as blueprints; schema13 stores immutable
-  per-instance versions so existing objects and history retain legacy models.
-  Physics5 adds pitched entrance ramps, roof corners/verges and low fixtures.
-  Do not apply the source demo's display lift to actual terrain placement.
-- Public enrichment reuses the ordinary player kit inside eight blueprint plots
-  and 64 objects. Preserve entrances and task/port routes. The existing medium
-  practical-light budget stays two point and two spot slots, with no light shadows.
-  Use isolated browser saves and back up/compare every original SQLite table
-  before updating local8098. No published release, source workspace or reflection edits.
+## Identity, persistence and observation
 
-- Final readiness: server business logs use stable observation-only aliases, never cookies,
-  tokens, internal identity/session hashes, names, designs or complete request bodies.
-  Keep the two-file journal bounded beside SQLite and retain stdout events after Crit10;
-  sample movement/presence and repeated refusals. Permission checks remain authoritative.
-  See docs/adr/0009-business-observation.md for visibility, retention and test boundaries.
-- Old identities without a home keep their saved state. Explain the existing flight/claim/build
-  route at the harbour gate in both languages; do not silently claim or reset their identity.
-- Movement save feedback must track pending work and acknowledgements of captured batches.
-  An older response cannot mark newer movement saved; recovery retires old save tickets.
+Derive identity and permissions on the server. Each identity owns at most one planet; only its owner can build, enter/edit its room and read its history. Public geometry and nearby exterior door operation remain shared. Room layout descriptions are not confidential storage. Anonymous cookies are not real-world identity, cross-device login or an account-recovery system.
 
-- A room layout is an explicit-save draft, like a blueprint or ship design. Protect
-  browser leave/reload while it is dirty, including failed or pending saves; release
-  the listener on dispose and the guard only after acknowledgement or explicit discard.
-- Keep historical failures tied to their commit, module and evidence. Do not treat
-  disabled v11 camera specs as defects in the accepted runtime camera, or alter
-  production contracts to make a faulty fixture or driver pass. See docs/BUG-SUMMARY.zh-CN.md.
+Persist before acknowledging to `DATABASE_PATH` (local `.data`, container `/data`). Use SQLite transactions, ownership constraints, revisions, idempotent retries and placement/capacity checks. Append history with the authoritative write; import older objects as a labelled baseline, never fabricated events. Terrain stays opt-in and respects existing buildings. Back up SQLite before an authorised migration; preserve saved coats, quests, positions, buildings, ships and history. Never commit databases, cookies, tokens or private configuration.
 
-- Canonical local development entry (2026-10-16): use this repository root
-  `/Users/ray/Desktop/Study/ANU-Master/8020/comp4020-final-ray0766` on
-  `integration/midpoint`. Read MIDPOINT.md and docs/integration/midpoint-sources.zh-CN.md.
-  Use `node scripts/local-preview.ts` for local8098; preserve its private
-  `.data/midpoint` configuration and database. Older worktrees are retained history,
-  not active development entries. Never silently substitute an empty/sample database.
-  Existing production start/build/deploy contracts remain independent.
+Ground/flight save feedback follows the captured batch: stale acknowledgements cannot clear newer movement. Failed saves freeze/rebase to acknowledged state. Blueprints, ship designs and rooms are explicit-save drafts; retain failed drafts and protect dirty-room leave/reload until acknowledgement or explicit discard. Only the server changes delivery state, with saved proximity and idempotent actions.
+
+Presence is ephemeral, planet/mode scoped and never grants authority. Business observation uses stable pseudonyms, allowlisted actions and accepted/refused outcomes; never log names, designs, request bodies, cookies, tokens or internal identity/session hashes. Preserve bounded rotation, sampling and stdout, as specified in [ADR 0009](docs/adr/0009-business-observation.md).
+
+## Honest loading and accessible interaction
+
+Keep bounded, deduplicated preparation on the worker; failures use explicit retry/backoff, never synchronous heavy fallback on the request thread. Flight detail uses one bounded initial corridor wait, directional prefetch and a capped reusable cache; subsequent preparation must keep coarse worlds and controls usable. Retain truthful progress, explicit retries and quality-dependent resource bounds. Do not preload the whole universe or weaken server flight validation to improve a timing result. Arrival acknowledgement is distinct from home readiness. Do not reset identity or saved progress to disguise a loading failure.
+
+Retain Smooth/Standard/Beautiful and Auto, manual preference priority, the Retina pixel budget and the approved device notice before modules load and throughout welcome/error states. Do not invent a GPU minimum, percentage or completion state. An opening visual must use our main-world assets/render and must not initialise a second full world. Preserve retries, a usable quality choice, visible focus, keyboard/modal operation, touch controls, Chinese/English selection and reduced motion. English is the default before and after modules load when no valid explicit language choice is saved, regardless of browser language. Preserve an explicit saved Chinese choice and live language switching. Translate host UI in place without changing drafts or user-authored names.
+
+Sprout is stationary local scenery during a non-modal scene-anchored conversation. Space opens help without stealing editable/control keyboard input. Esc only releases mouse capture, including with dialogs open; use explicit close controls. Tab opens Pause only from eligible game-scene focus; preserve Tab/Shift+Tab navigation in every UI and consume the opening key until release. Destination choices draw only validated walking routes and never move the guide/player. Find ship is one destination in that guide; do not restore a duplicate menu marker. No external AI may be silently enabled. The explicitly authorised local trial requires a loopback backend, visible disclosure and an active Ask AI action. Send only the current question and public instructions. Persist atomic per-identity rolling 8/hour reservations and the shared US$1 budget before calling the pinned official endpoint; never reset the ledger or retry upstream automatically. Keep keys server-only and out of logs, source, browser bundles and evidence. Unknown charges keep their conservative reservation. The trial deadline is 1 January 2027 00:00 Australia/Sydney, not a price guarantee; future calls use 2x the peak rates verified on 25 October. Preserve historical charges and the US$1 cap when migrating the one recognised legacy policy; reject unknown policy changes. Do not describe future supplier billing as guaranteed. Fixed help must remain available, with AI/fallback labels accurate.
+
+## Assets and provenance
+
+Keep `src/assets/claude-geometry` byte-identical to its committed provenance manifest. Adapt materials, translation, rendering and independent collision proxies outside it. Preserve pinned resource URLs and older releases; do not mix transcoder versions or apply a source demo's display lift to actual placement. Public and private construction share the same material/geometry language. Keep the bounded remote-avatar budget and the existing medium practical-light budget: two point and two spot slots, without light shadows.
+
+Use original or documented licensed assets. [Messenger](https://messenger.abeto.co/) is a composition/navigation reference, not a source of copied code, branding, shaders, models, audio or textures. Keep the approved NASA maps credited and follow [ASSET-CREDITS](ASSET-CREDITS.md).
+
+## Verification and claims
+
+Keep both course HTTP invariants. Run applicable focused regressions, typecheck, lint, build and evidence checks; the full default `app` + `legacy-http` suite remains a separate release gate. The current local close-out does not authorise rerunning that previously refused suite: use explicit affected file lists and record the gap. [spec/README](spec/README.md) explains the isolated legacy server and separately runnable unused camera tests. Do not delete tests or loosen production contracts to hide a faulty fixture or driver.
+
+Browser validation must show rendered pixels and real keyboard/touch interactions, including desktop/narrow layouts and relevant slow-network/disconnection recovery. Preserve failed runs and explain repairs. Report exact tested source, viewport, browser and limitations; CI, emulated phone viewports and short samples do not prove physical-phone performance, arbitrary blueprints or public-load capacity. Evidence paths in README map goals to checks, not blanket claims that every check just ran.
+
+Do not invent student reflections, personal positions, playtest feedback, citations, performance improvements or release results. Crit10 peer use and log practice are author-confirmed complete; do not reopen them as missing because automated evidence is different. Keep human reports, repeatable technical checks and deployment confirmation distinct. New release approval must name the intended external action; previous completed releases do not authorise the next one.
+
+Character appearance is a finite versioned option record in `player_appearances`, not arbitrary geometry or uploaded assets. Validate all enum fields and ownership on the server; use an expected appearance revision and transactional, idempotent saves. Cancel must not write. Use the unified new traveller renderer. Preserve legacy progress and raw appearance rows; normalise retired model values on read. Only newly created integrated identities receive an incomplete `appearance_onboarding` row. Complete it atomically with an explicit appearance save; reject gameplay POSTs until complete. Never use localStorage as authority or force existing users through creation. Keep shared procedural geometry/materials and the existing four detailed outdoor visitor budget; do not increase it for customisation. Keep the editor preview lazy-loaded, and give incomplete first creation a clear resume/leave path.
+
+The walking-room cutaway is an unresolved visual decision: it can abruptly clip several walls near a corner. Do not call that repaired or change its style without approval; retain boundary/collision checks and the separate home editor view. Historical prototype controls and unused experimental modules are not current player instructions.

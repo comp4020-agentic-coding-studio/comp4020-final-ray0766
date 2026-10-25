@@ -6,14 +6,25 @@ import {structureFit} from '../../src/shared/blueprints.ts';
 import type {PlacedObject} from '../../src/shared/planets.ts';
 import type {PartPlacement} from '../../src/shared/blueprint-model.ts';
 import type {Vec3} from '../../src/shared/world.ts';
+const lookCursors=new WeakMap<Page,{x:number;y:number}>();
 export async function readFeet(page:Page){const d=await page.locator('#world canvas').evaluate(e=>({...((e as HTMLElement).dataset)}));return {position:JSON.parse(d.groundPosition!) as Vec3,radius:Number(d.feetRadius),north:new Vector3(...JSON.parse(d.cameraHeading!)),grounded:d.grounded==='true'};}
 export function frame(o:PlacedObject,parts:PartPlacement[],radius=10,environment:string|null=null){const anchor={dir:o.position,yaw:o.rotation},base=structureFit(parts,o.position,o.rotation,fieldOf(environment,radius)).baseRadius,inverse=new Quaternion().fromArray(anchorQuaternion(anchor)).invert();return {at:(x:number,z:number,y=0)=>localToDir(anchor,base,[x,y,z]),local:(p:{position:Vec3;radius:number})=>new Vector3(...p.position).multiplyScalar(p.radius).addScaledVector(new Vector3(...o.position),-base).applyQuaternion(inverse)};}
 export async function walk(page:Page,target:(feet:Awaited<ReturnType<typeof readFeet>>)=>Vec3,touch=false){
   const cdp=touch?await page.context().newCDPSession(page):null,held=new Set<string>();let touchActive=false;
   try{
-    // Camera drag aligns the initial keyboard path; movement remains actual keys/touch.
+    // Capture once by a real click; relative look must not re-centre each turn.
+    let cursor=lookCursors.get(page);
+    if(!touch&&!await page.evaluate(()=>!!document.pointerLockElement)){
+      cursor={x:Math.floor((page.viewportSize()?.width??1440)*.6),y:Math.floor((page.viewportSize()?.height??900)*.5)};
+      await page.mouse.click(cursor.x,cursor.y);lookCursors.set(page,cursor);
+      await page.waitForFunction(()=>!!document.pointerLockElement);
+    }
+    async function turnMouse(angle:number){
+      if(!cursor)throw Error('Walking driver has no captured mouse position');
+      cursor.x-=angle/.003;await page.mouse.move(cursor.x,cursor.y,{steps:2});
+    }
     if(!touch){const f=await readFeet(page),up=new Vector3(...f.position),dir=new Vector3(...target(f)).projectOnPlane(up).normalize();let turn=Math.atan2(up.dot(new Vector3().crossVectors(f.north,dir)),f.north.dot(dir));
-      while(Math.abs(turn)>.02){const amount=Math.max(-1.1,Math.min(1.1,turn));await page.mouse.move(850,450);await page.mouse.down();await page.mouse.move(850-amount/.004,450,{steps:4});await page.mouse.up();turn-=amount;}
+      while(Math.abs(turn)>.02){const amount=Math.max(-1.1,Math.min(1.1,turn));await turnMouse(amount);turn-=amount;}
     }
     for(let step=0;step<260;step++){
       const f=await readFeet(page),up=new Vector3(...f.position),to=new Vector3(...target(f)),distance=up.angleTo(to)*f.radius;
@@ -25,7 +36,7 @@ export async function walk(page:Page,target:(feet:Awaited<ReturnType<typeof read
         // A narrow stair needs continuous heading correction. Eight-direction
         // keyboard quantisation alone can keep pressing into a side rail.
         const angle=Math.atan2(up.dot(new Vector3().crossVectors(f.north,direction)),f.north.dot(direction));
-        if(Math.abs(angle)>.025){const turn=Math.max(-.7,Math.min(.7,angle));await page.mouse.move(850,450);await page.mouse.down();await page.mouse.move(850-turn/.004,450,{steps:2});await page.mouse.up();}
+        if(Math.abs(angle)>.025){const turn=Math.max(-.7,Math.min(.7,angle));await turnMouse(turn);}
         if(Math.abs(angle)<.8){if(!held.has('w')){await page.keyboard.down('w');held.add('w');}}else if(held.has('w')){await page.keyboard.up('w');held.delete('w');}
       }
       await page.waitForTimeout(distance<.55?35:65);

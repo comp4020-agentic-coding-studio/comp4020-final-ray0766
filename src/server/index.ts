@@ -9,6 +9,8 @@ import { openStore, RequestError } from './store.ts';
 import { integratedStartup } from './launch-options.ts';
 import { HeavyWork } from './heavy-work.ts';
 import { workerScript } from './worker-script.ts';
+import { createGuideHelp } from './guide-help.ts';
+import {GuideLedger,createGuideAI,GuideAIError} from './guide-ai.ts';
 import { businessLog } from './business-log.ts';
 
 const homeSample=process.env.HOME_SAMPLE==='1';
@@ -22,6 +24,11 @@ if(homeSample&&!store.homeSample){store.close();throw new Error('HOME_SAMPLE ref
 const cookieName=homeSample?(samplePort===8126?'little_home_sample':`little_home_sample_p${samplePort}`):'little_post';
 if (store.migrationBackup) console.log(`Before migration, saved a consistent backup: ${store.migrationBackup}`);
 const audit=businessLog(databasePath);
+const guideHelp=createGuideHelp();
+// Real provider access is explicitly local-only; default/production stays disabled.
+const aiEnabled=process.env.GUIDE_AI_ENABLED==='1';
+if(aiEnabled&&(process.env.HOST!=='127.0.0.1'||!process.env.GUIDE_AI_LEDGER_PATH||!process.env.DEEPSEEK_API_KEY))throw Error('Local guide configuration is incomplete.');
+const guideAI=aiEnabled?createGuideAI({ledger:new GuideLedger(process.env.GUIDE_AI_LEDGER_PATH!),key:process.env.DEEPSEEK_API_KEY!}):null;
 const presence=presenceStore(store.state);
 // New homes, station searches and other planets' ground are prepared on a worker thread, so one
 // player's arrival never holds everyone else's movement and presence. The harbour is built now,
@@ -77,6 +84,7 @@ const server = createServer(async (req, res) => {
         const number=(key:string)=>url.searchParams.has(key)?Number(url.searchParams.get(key)):undefined;
         send(200,snapshot?store.historySnapshot(id,url.searchParams.get('planetId'),number('sequence')):store.historyPage(id,url.searchParams.get('planetId'),number('after'),number('limit')));return;
       }
+      if(url.pathname==='/api/guide/status'&&req.method==='GET'){if(!id||!store.has(id))throw new RequestError(401,'Reload to reconnect your visit.');auditRoute=undefined;send(200,guideAI?.status(id)??{enabled:false,remaining:8,resetAt:null,budgetRemainingUsd:0,reason:'disabled',model:'deepseek-flash'});return;}
       if (req.method !== 'POST') throw new RequestError(405, 'Method not allowed.');
       if (req.headers.origin && new URL(req.headers.origin).host !== req.headers.host) throw new RequestError(403, 'Use this world’s own page.');
       if (!req.headers['content-type']?.startsWith('application/json')) throw new RequestError(415, 'Send JSON.');
@@ -93,8 +101,17 @@ const server = createServer(async (req, res) => {
       let body: Record<string, unknown>;
       try { body = JSON.parse(text); } catch { throw new RequestError(400, 'Invalid JSON.'); }
       if (!body || Array.isArray(body) || typeof body !== 'object') throw new RequestError(400, 'Expected an object.');
-      auditContext=body;
-      if (url.pathname === '/api/arrival/retry') send(200,store.retryArrivalHome(id,body));
+      auditContext=url.pathname.startsWith('/api/guide/')?{}:body;
+      if(!['/api/appearance','/api/arrival/retry'].includes(url.pathname))store.requireAppearance(id);
+      if(url.pathname==='/api/guide/ask'){
+        auditRoute=undefined;
+        if(!guideAI)throw new GuideAIError(503,'disabled');
+        const abort=new AbortController();res.on('close',()=>abort.abort());
+        await guideAI.ask(id,body,abort.signal,event=>{if(res.destroyed)return;if(!res.headersSent)res.writeHead(200,{'Content-Type':'application/x-ndjson','Cache-Control':'no-store','X-Accel-Buffering':'no'});res.write(JSON.stringify(event)+'\n');});
+        res.end();return;
+      }
+      if (url.pathname === '/api/guide/help') send(200,await guideHelp.reply(body));
+      else if (url.pathname === '/api/arrival/retry') send(200,store.retryArrivalHome(id,body));
       else if (url.pathname === '/api/blueprints/save') send(200, store.saveBlueprint(id, body));
       else if(url.pathname==='/api/home/setup/preview')send(200,store.previewHomeSetup(id,body));
       else if(url.pathname==='/api/home/setup/confirm')send(200,store.confirmHomeSetup(id,body));
@@ -112,16 +129,22 @@ const server = createServer(async (req, res) => {
       else if(url.pathname==='/api/terrain/apply')send(200,store.terrain(id,body));
       else if(url.pathname==='/api/ship/save')send(200,store.saveShip(id,body));
       else if(url.pathname==='/api/presence')send(200,presence.heartbeat(id,body));
+      else if (url.pathname === '/api/appearance') send(200,store.appearance(id,body));
       else if (url.pathname === '/api/character') send(200, store.character(id, body.character));
       else if (url.pathname === '/api/move') {
         if(Object.keys(body).some(k=>!['position','planetId','motion','visitEpoch'].includes(k)))throw new RequestError(400,'Unexpected movement field.');
         send(200, store.move(id, body.position, Date.now(), body.planetId,body.motion,body.visitEpoch));
       }
+      else if(url.pathname==='/api/ground/recover'){const result=store.recoverGround(id,body);presence.leave(id);send(200,result);}
       else if (url.pathname === '/api/interact') send(200, store.interact(id, body.action));
+      else if(url.pathname==='/api/trip/start'){const u=store.startTrip(id,body);presence.leave(id);send(200,u);}
+      else if(url.pathname==='/api/trip/change')send(200,store.changeTrip(id,body));
+      else if(url.pathname==='/api/trip/finish'){const u=await store.finishTrip(id,body);presence.leave(id);send(200,u);}
+      else if(url.pathname==='/api/planets/rename')send(200,store.renamePlanet(id,body));
       else if (url.pathname === '/api/flight/takeoff') {const result=store.takeoff(id,body);presence.leave(id);send(200,result);}
       else if (url.pathname === '/api/flight/checkpoint') send(200,store.flight(id,body));
       else if (url.pathname === '/api/flight/land') {await store.prepareLanding(id,body);const result=store.land(id,body);presence.leave(id);send(200,result);}
-      else if (url.pathname === '/api/teleport') {await store.prepareTeleport(id);const result=store.teleport(id,body);presence.leave(id);send(200,result);}
+      else if (url.pathname === '/api/teleport') {await store.prepareTeleport(id,body);const result=store.teleport(id,body);presence.leave(id);send(200,result);}
       else if (url.pathname === '/api/teleport/station/preview') send(200,store.previewStation(id,body));
       else if (url.pathname === '/api/teleport/station/confirm') send(200,store.confirmStation(id,body));
       else if (url.pathname === '/api/planets/visit') throw new RequestError(410,'Board your ship and fly to the planet before landing.');
@@ -156,6 +179,8 @@ const server = createServer(async (req, res) => {
     res.writeHead(200, headers);
     res.end(req.method === 'HEAD' ? undefined : body);
   } catch (error) {
+    if(res.headersSent){res.end();return;}
+    if(error instanceof GuideAIError){send(error.status,{error:'Guide request could not be completed.',code:error.code,quota:error.quota});return;}
     if (error instanceof RequestError) send(error.status, { error: error.message });
     else { console.error(error instanceof Error ? error.message : 'Request failed'); send(500, { error: 'The world is unavailable. Please retry.' }); }
   }

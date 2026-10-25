@@ -1,242 +1,77 @@
 # Little Worlds — current player guide
 
-This section describes the current integrated app and the local Final candidate.
-The dated evidence and the older implementation account below remain historical
-records. Release status is in the root [README](../README.md); the current bug
-inventory and its limits are in the [Chinese bug summary](BUG-SUMMARY.zh-CN.md).
+This guide describes the local Final candidate. Check [README](../README.md) for the difference between the current 8152 preview and the published release. The previous mixed prototype account is preserved as a [historical snapshot](integration/player-guide-history-20261025.md).
 
-## Start with the identity you have
+## Loading and your identity
 
-- In the new local integrated candidate, a new browser identity begins at the
-  main village while its own home is prepared in the background. The welcome
-  card offers picture quality; the optional guide follows Mica → Sol → the
-  village gate → your front door. Confirm the nearby action at each step.
-  Home preparation failures offer Retry and resume after a server restart.
-  Skip the guide or reopen Pause → Village guide without resetting progress.
-  After owning a planet, Pause → Build on my planet / Open workshop is optional.
-  Keep this browser's cookies. Published Crit9 retains its recorded release flow.
-- An old identity without a home keeps its saved location and progress. At the
-  harbour gate the bilingual message explains why it cannot return home yet.
-  Use Find my ship, board near the boarding ring, mark a Blank · unclaimed world
-  in Atlas, fly there and land, then Pause → Make this my planet → Build on my planet.
-  Marking a bearing does not move you. Landing range depends on the planet's
-  radius; slow below 6 m/s and wait for the landing action.
-- An existing owner whose home has no gate is a different case. Return by ship;
-  station preparation can follow on the owner's visit. If there is no suitable
-  site, use Pause → Place a teleport station. Saved buildings are not moved to
-  make room. A dismantled station is not automatically rebuilt.
-- Owning a planet and having an enterable room are separate. An older owner
-  without a room can use Set up my home to bind a doorway or confirm a cottage.
+English is the default when there is no valid saved language preference, regardless of browser language. Choose Chinese/English in the loading screen or interface; an explicit choice persists. Smooth is the first option to try if loading is slow or movement stutters. A stronger computer may help, but network and browser settings can also prevent loading. There is no verified minimum GPU. Preparation progress reports actual stages; use Retry after a failure.
 
-## Save, travel and visit
+Your identity is an anonymous browser cookie, not an account. Keep it to retain access to your planet. A new profile/private window creates a separate identity; clearing cookies does not recover the old one.
 
-Walk with WASD/arrows, hold Shift to sprint, Space to jump, and E or a nearby
-button to interact. Drag to turn the view; phones have touch controls. Only your
-own home gate and the public gate form a return pair. Other exploration uses
-flight. Board beside the saved port position and brake near a world to land.
+A genuinely new identity automatically opens **Create your traveller**. Choose a face, haircut, skin tone, eye colour and coat, then **Save and explore**. Only the server-confirmed save enables play. **Back to welcome** saves nothing and offers Continue creating or About. Returning within the same page keeps the draft; an unsaved refresh starts a draft again but still requires creation. Failed saves keep the current draft for retry.
 
-Ground and flight movement save periodically. The status distinguishes pending,
-saving and acknowledged movement; a refresh restores the last acknowledged
-checkpoint, including flight mode. A slow or interrupted request can leave later
-movement unsaved. Blueprint library saves, placement/apply, ship designs and room
-layouts each require their own explicit action. Save blueprint does not place it.
+Existing identities retain progress and saved appearance, or use a compatible new default. They are not forced through creation. Later, **Menu → Your traveller** offers Save/Cancel, a rotatable preview and explicit reload after a competing tab's save. Cancel does not change the stored look. The old courier option and comparison/trial page are retired.
 
-Only the owner may build, edit furniture, enter the private room or read private
-history. A nearby visitor can operate the shared exterior door, which does not
-permit room entry. Open the door before entering or leaving. Unsaved room layouts
-now request the browser's native leave/reload confirmation, including while a
-save is pending or has failed. Save successfully or explicitly cancel to clear
-that guard; it is not automatic draft persistence after a browser crash.
+## Move, look and open controls
 
-The local Final candidate records business actions using observation-only aliases,
-with bounded journals beside SQLite and stdout, as described in [ADR 0009](adr/0009-business-observation.md).
-This does not create accounts or cross-device recovery. Two classmates' URL-only
-Crit 10 session and user judgement of the visuals remain separate from automated checks.
+| Input | Action |
+| --- | --- |
+| WASD / arrows | Walk; outdoor direction follows the camera |
+| Shift | Sprint |
+| E / nearby action button | Use the nearby door, person, gate or ship |
+| Click the scene / Click to look | Capture the outdoor mouse for observation |
+| Esc | Release mouse capture only |
+| Tab from the scene / Menu button | Open Pause |
+| Tab / Shift+Tab inside a UI | Navigate its controls |
+| Space from the scene / Guide | Open Sprout's scene conversation |
+| M / Atlas | Browse destinations |
 
----
+Characters do not jump. Indoor movement stays in the fixed 2.5D room view. On touch, use the movement stick or tap the ground, drag to observe outdoors and tap action buttons. If mouse capture is unavailable, drag to look.
 
-## Earlier implementation account — historical snapshot
+Menus, editors, focus loss and Esc release capture. Close/Resume/Cancel buttons return you to the world; click again to capture. Esc does not dismiss menus or the guide. Typing a space, activating a focused button or using Tab inside a form does not invoke scene shortcuts.
 
-The rest of this file preserves earlier prototype directions, first-visit flow,
-local ports and verification limits. Its statements about an industrial harbour,
-empty new homes, fixed landing distances, running 8098 and unfinished C10 logging
-are historical, not current instructions or new evidence of a regression.
+If an old saved ledge leaves you stuck outdoors, **Menu → Return to safe ground** opens a confirmation. Stay here changes nothing. Confirm affects only your character at the current planet's server-selected landing area; buildings, possessions and other players remain. Indoors, exit normally first. Recovery does not silently reset old saves.
 
+## A short exploration route
 
-A constellation made together: fly to a blank planet, make it your home, and shape
-it with a small building kit. Everyone can visit every planet, while only its
-owner can change it. Sunseed Harbour is an original industrial starport district
-with a walkable arrival street, service buildings, a boarding apron and an optional
-courier delivery. Existing coats, delivery progress and locations survive the move
-to this multi-planet prototype.
+The new identity starts in the public village while a private home prepares in the background. Home preparation may take time; failures have a Retry path. The Mica → Sol delivery and Village guide are optional. Skip or reopen that guide without resetting progress.
 
-### First visit: a home, one object, then back to your ship
+1. Press Space or choose Guide. Sprout appears beside you in the same world, with fixed bilingual help. Choose **My planet** for the gate route. Close the conversation and walk the arrows yourself.
+2. At the gate, choose **Return to my home**. Enter your room, or use **Menu → Build on my planet** to place one ready-made module. A placement preview is not saved; confirm the placement and wait for acknowledgement.
+3. Choose **Guide → Find ship**. Indoors it first says to leave through the room door. Outdoors, the same selection continues as validated ground arrows. The guide stays put; it does not lead or push you. A blocked/unproved route is explained rather than presented as safe. Choose another topic to replace the route or Clear route to remove it.
+4. At the landing point, close the conversation and use **E / Board your ship**. Select a named destination and **Depart**. Main planet, My planet, Neighbour and Unclaimed distinguish the choices.
+5. Explore as a visitor, then use any available outdoor gate to return to the main planet or your own home. If there is no gate, find the parked ship and choose a return destination.
 
-1. At Sunseed Harbour, close the suit chooser and walk along the street to
-   **STARPORT / 01**. **Pause → Find my ship** shows a walking direction. At the
-   gate, press **E** or **Board your ship**, then **Launch ship**. **Stay here** or
-   **Escape** cancels the confirmation and keeps you on the ground.
-2. Open **Atlas** with **M** or from Pause. Choose a nearby **Blank · unclaimed**
-   world and **Mark bearing**. This only points the way. Fly within 20 m of its
-   centre and brake below 6 m/s, then choose the landing action and **Land and
-   explore**. On touch, use the steering stick and **Thrust / Brake**.
-3. On the blank world, open **Pause → Make this my planet**. Wait for the
-   ownership controls to update. One browser identity can own one world; keep
-   this browser’s data to retain access. A neighbour’s world is read-only.
-4. Choose **Build on my planet**. Pick an object, tap clear ground, optionally
-   **Rotate**, then **Place object**. The preview alone is not saved. If placement
-   is blocked, read the placement message and choose another spot. **Cancel**
-   drops the preview. Wait for the saved object before moving on.
-5. **Done building** returns to walking; confirm discarding only if you want to
-   lose an unsaved preview. Open **Pause → Find my ship**, follow the direction to
-   your landing point and walk beside the return beacon. **Board your ship** is
-   available there. Use **Launch ship** to leave, or **Stay here / Escape** to
-   cancel. To revisit the public starport, mark **Sunseed Harbour** in Atlas and
-   fly back; claiming and building do not move you there automatically.
+Topic buttons and **Use fixed help** run locally. In the authorised local trial, **Ask AI** sends only your current question and public gameplay instructions to DeepSeek; no chat history, saves or identity are sent. Replies stream into the same scene bubble and may be wrong. The guide cannot operate the game.
 
-Short first-visit tips follow this route beside the relevant controls. **Skip tips**
-hides them without cancelling a build or moving the player. Reopen them
-with **Pause → How to play → Show first-visit tips**. They finish after a saved
-first object and a later takeoff. The preference is local to this browser;
-existing builders start without tips unless they choose to show them. Tips hide
-while a save connection is unavailable and while a separate workshop or modal is
-open. Build tips sit after the existing controls in the scrollable build panel.
+The server allows 8 upstream attempts per cookie identity per rolling 60 minutes, shared across tabs and retained on restart. Remaining attempts and the next recovery time are shown. Upstream failures and Stop reply still count; invalid questions and rejected duplicate submissions do not. Use fixed help during an outage or limit. A persistent US$1 trial budget stops calls when another conservative reservation cannot fit; it does not reset on restart. The authorised trial covers all December and ends at 00:00 on 1 January 2027 in Australia/Sydney (UTC+11), equivalent to 13:00 UTC on 31 December 2026. It may stop earlier if the unchanged budget cannot cover another reservation. Future calls are reserved and accounted at twice the currently verified peak rate as price headroom; future supplier prices are not guaranteed. See [trial limits and actual checks](integration/local-guide-ai.md).
 
-**Open workshop** is optional for the first object. It edits private named/grouped
-blueprints; saving a blueprint to the library is separate from placing its
-structure on your planet. The ready-made kit is available directly through
-**Build on my planet**.
+## Automatic travel
 
-### Current design brief
+There is no manual flight mode, manual landing, altitude control or visible flight rail network. The ship takes off, navigates and lands automatically. Drag to orbit the 3D view; Look forward is optional and observation does not steer. Destinations remain real worlds; an edge indicator points towards a target outside the view.
 
-The user authorised an original direction beyond the Messenger learning
-prototype: many worlds, one home per browser identity, and shared exploration
-without editing someone else’s work. The main loop is walk to a real gate, board,
-fly, land, claim, build and revisit. Follow the blue-lit street from the public
-arrival point to STARPORT / 01. Only near the terminal does the E / touch boarding
-prompt appear. The server checks the saved walking position, current planet and
-journey before taking off. Cancel either transition to stay where you are.
+Click a visible planet or choose another destination during a trip to open **Change destination?**. Confirm changes the server trip; **Keep destination** cancels the proposal. Clicking an interface control does not select a planet behind it.
 
-Exploration shows the world, a small location/status line and contextual actions.
-Open Pause / Escape for Atlas, help, optional delivery, suit and planet controls.
-M opens the Atlas. Planet management and building appear only when requested.
-On other worlds, a temporary return beacon and parked craft mark the landing point.
-They are travel infrastructure, not objects belonging to the planet owner; new
-private worlds have zero placed objects. Pause → Find my ship gives an optional
-walking direction. Landing disembarks beside this safe return point; refreshing
-on the ground restores the last saved walking position.
+**Skip journey** still waits for destination preparation and an acknowledged arrival. A failure offers **Retry arrival** and a return option. **Cancel · return to departure** re-plans to the trip's captured origin. It does not delete the trip or leave you stranded. Menu, focus loss, disconnection and refresh can pause a journey; Resume, Skip and Return remain explicit. Ground refresh restores the last acknowledged walking position.
 
-The finite survey starts with 33 worlds in Harbour Belt, Lantern Reach and Outer
-Drift; it can replenish blank plots up to a hard 256-world limit. Existing planet
-slots and coordinates never move. The Atlas shows regions and distances and only
-marks a bearing. Nearby hops remain short; outer routes take longer. The public
-hub presents a human-scale industrial district on a much gentler display curve,
-while preserving its original saved spherical coordinates. Drag the ground scene left or right to turn the view and smoothly turn your
-character, including while standing still. Drag vertically to tilt only the camera.
-W/Up moves forward, S/Down walks backward, and A/D or Left/Right strafe in the
-horizontal view direction. The touch stick uses the same movement frame. A short departure shot rises over
-the same district before the existing orbital flight begins. Private worlds remain available for their owners’ construction.
+World detail uses a bounded cache and background preparation; it does not preload the entire universe. A coarse real destination may appear before its detailed buildings. The server retains journey, sequence, boundary and collision checks; prepared automatic arrivals have their own limited trip contract.
 
-In space, hold W to thrust, A/D to turn, arrows up/down to climb or dive, and S or
-Space to brake. You can drag to steer; phones have a stick and thrust/brake pedals.
-Approach within 20 metres of a planet’s centre and slow below 6 m/s to land.
-An original industrial craft, mechanical suits, public buildings, PBR materials
-and restrained instruments establish the visual direction. The existing six-kind
-player catalogue now uses the same high-quality material and structural resource
-layer as the public district. Shared pure geometry is reused from a fixed committed
-Claude resource snapshot. The integrated workshop also saves private blueprints
-and places immutable structures on an owned planet.
+## Homes, names and visitors
 
-The catalogue retains its saved cottage, tree, path, flowers, bench and lamp kinds.
-They now render as panelled service cabins, foliage, metal deck tiles, planters,
-metal benches and shielded lights. The cabin, floor and light share the public
-district asset factory.
-Enter Build mode, choose an object, tap an open ground position, rotate if needed,
-and save. Select an existing object on the planet or from the accessible object
-list to move, rotate or remove it. Leave Build mode to walk elsewhere. Placement
-reserves the landing spot, separates objects and limits each planet to 64 objects;
-path stones may overlap one another to form continuous routes.
+A new identity gets one home when preparation completes. An old identity without one keeps its old progress: use the ship to visit an unclaimed world, then **Menu → Make this my planet**. Having a planet and having an enterable room are separate; an older owner may need Set up my home. An existing home without a gate can be reached by ship; station siting is explicit and does not move saved buildings or silently rebuild a dismantled gate.
 
-This guide describes the implemented interaction and its limits. The current
-quality argument and release status are in the root README. The Crit 8 writing
-records the student's decisions with AI assistance; release evidence is separate.
+**Menu → Name my planet** changes only your own planet. Names use 1–32 characters. Trimmed, NFKC-normalized, case-insensitive duplicates are rejected by the server; keeping your current name is allowed. Names appear in destination and visitor views, while stable IDs and permissions remain unchanged.
 
-### Ownership, persistence and visitors
+Only an owner can build, enter/edit the private room or read private history. Nearby visitors may operate shared exterior doors and use gates; neither action grants ownership. At a neighbour's gate, E / Go to the main planet returns to the harbour, while Return to my home goes to your own world. Without a home, the main planet is still available. A home without a gate uses its landing pad for arrival.
 
-A random HttpOnly, SameSite browser cookie identifies a server session. SQLite
-stores ownership, object transforms, task state, current walking position, visit records and
-flight mode/position/heading/speed. Refresh resumes the last acknowledged state.
-Server journey and sequence checks reject old flight writes; distance, turn,
-acceleration and collision checks bound navigation. Landing checks saved proximity
-and speed. Offline flight freezes until a saved state is restored.
-The database enforces one owner per planet and one planet per identity. Claim
-transactions resolve races. Every building write checks server-derived ownership;
-client owner IDs or hidden buttons cannot grant permission. Requests validate
-models, coordinates, rotation, overlap and capacity. Version checks reject stale
-edits, duplicate operations do not multiply objects, and deletion tombstones
-prevent an old create request from resurrecting an object.
+All rooms retain the fixed 2.5D view. Open the door before entering/leaving. Furniture drafts use Save/Cancel; unsaved/pending/failed edits have leave/reload protection. This is not crash-proof draft storage. Photos use the same fixed room angle with zoom and explicit Back to exploring.
 
-Visitors see saved scene changes through one-second polling while their page is
-visible. Visible ground visitors also exchange one-second presence heartbeats.
-Positions come from validated server saves; facing is checked against the surface.
-Responses contain random ephemeral public IDs, suit, position and facing, never
-cookies or session hashes. Only people on the same planet are returned. Departure
-removes presence and a missing heartbeat expires after six seconds. Smooth local
-interpolation draws at most 16 nearby people, with at most four detailed suits.
-Presence does not change ownership, saved objects or quest state. Multiple tabs of
-one identity share one visit and one presence record. There are no remote ships,
-chat, voice, social accounts or trading. This is a bounded shared-world prototype,
-not an unlimited MMO.
+The walking-room wall cutaway can abruptly hide several wall sections near a corner. Collision and saved geometry remain, but the visual treatment is an unresolved design decision. It has been diagnosed, not repaired. Do not infer a missing building from that rendering effect.
 
-Orbit rendering loads at most eight detailed planets and shows at most 24 solid
-planet models; distant worlds use one batched beacon layer. Only nearby/selected
-world labels are displayed. Each planet remains limited to 64 saved objects.
+## What is saved
 
-An anonymous identity is not a real-world person. New browser profiles can create
-new identities. Clearing cookies loses access to the owned planet, which remains
-visitable. There is no login, cross-device identity or recovery flow. The Atlas
-explains this before claiming. These limits need revisiting before public release.
+Ground and flight movement save periodically; pending/saving/saved status applies to acknowledged movement. A later unacknowledged step may be lost on refresh. Appearance, building placement, blueprint library, ship design and room drafts each have explicit saves. Saving a blueprint is separate from placing it in the world.
 
-### Original work and references
+On a failed request, keep the draft and use the relevant retry/reload control. Wait for reconnection before changing the world. Conflicting tabs must resolve to the acknowledged revision, not silently overwrite one another. Nearby visitors are ephemeral presence, not saved NPCs; presence disappears after departure or expiry and never grants authority.
 
-[Messenger by abeto](https://messenger.abeto.co/) informed spherical movement and
-camera exploration; its [authors’ interview](https://www.commarts.com/webpicks/messenger)
-provided technical context. The live experience was also inspected in Chrome.
-Characters, city arrangement, ship geometry and interface are procedural work in
-this repository. A fixed set of user-owned Claude geometry resources is reused for
-the shared structural kit, with file hashes and attribution in the asset credits.
-Orbital surfaces also use NASA SVS public-domain lunar maps; [asset credits](/credits/)
-record their sources and terms. No game assets or source were extracted. Rendering uses
-[Three.js](https://threejs.org/docs/), with Node’s SQLite for persistence.
-
-### Run and verify
-
-Use Node 24 and pnpm 11: `pnpm install`, `pnpm build`, then `pnpm start`.
-Open http://localhost:8080 or `/readme/`. With the server running, use `pnpm lint`,
-`pnpm check`, `pnpm test:browser` and `pnpm check:evidence`.
-
-SQLite defaults to `.data/little-post.sqlite`. Upgrades create consistent backup
-files before transactional migration. Recovery instructions and actual test
-results are in `docs/evidence/round-6/verification.md`. Desktop and phone-size
-Chrome checks cover walking to gates, flight/return, independent owners, visitor
-presence, touch controls and persistence;
-physical phones and public hosting remain unverified.
-
-The constellation is capped at 256 worlds. Flight uses arcade steering, not orbital
-physics. Local prediction can lose motion that was not yet acknowledged.
-
-This guide describes the local candidate. The current release status is in the root
-README. C10 logging and hosted validation remain unfinished.
-
-The user-selected game reference qualities, what is implemented and what remains
-absent are compared in `docs/adr/0005-starports-regions-and-presence.md`. The existing
-`ColonyBridge` is exported for later UI adapters; `docs/integration/workshop-adapter.md`
-describes the current server endpoints and validation boundary. The integrated
-building workshop is optional; saved library blueprints remain
-separate from their placed copies on a planet.
-
-The current art/resource contract and editor division are documented in
-`docs/integration/shared-assets.md`; display scale and reference decisions are in
-`docs/adr/0006-shared-city-assets-and-display-scale.md`. Wall/stair/level assembly
-uses the integrated Claude editor; the ready-made kit continues to place the six
-compatible saved kinds. No commercial Star Citizen asset was imported.
+No player chat, voice, trade, combat, account recovery or cross-device identity is implemented. The constellation and visible visitor/rendering counts are bounded; this is a small shared-world project, not unlimited multiplayer hosting. See the [local verification index](integration/final-local-readiness.md) for actual checks and untested limits.

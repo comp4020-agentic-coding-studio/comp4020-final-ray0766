@@ -13,5 +13,5 @@ export default defineConfig({
     },
   }],
   server: { host: '127.0.0.1', proxy: { '/api': 'http://127.0.0.1:8080', '/readme': 'http://127.0.0.1:8080', '/healthz': 'http://127.0.0.1:8080' } },
-  build: { outDir: 'dist', chunkSizeWarningLimit: 650 },
+  build: { rolldownOptions:{input:{game:'index.html'}}, outDir: 'dist', chunkSizeWarningLimit: 650 },
 });

@@ -23,11 +23,11 @@ export function firstVisitTip(context: OnboardingContext, atlas = false): Tip {
   const p = u.currentPlanet;
   if (atlas) return {
     id: 'atlas', title: 'Choose a destination',
-    text: `${u.ownedPlanetId ? 'Choose a world to visit.' : 'Choose a nearby “Blank · unclaimed” world.'} Mark bearing points the way; it does not move you. Fly within 20 m, brake below 6 m/s, then choose Land and explore.`,
+    text: `${u.ownedPlanetId ? 'Choose a world to visit.' : 'Choose a nearby “Blank · unclaimed” world.'} Board the ship, select your destination and Depart. The ship lands automatically.`,
   };
   if (mode === 'space') return {
     id: 'flight', title: u.ownedPlanetId ? 'Fly to your next stop' : 'Fly to a blank world',
-    text: 'Atlas (M) marks a bearing. W thrusts, A/D turn, ↑/↓ climb or dive; S brakes. On touch, use the stick and Thrust / Brake. Slow near your destination to land.',
+    text: 'Choose a destination. Takeoff, flight and landing are automatic. Drag to look around. Click a planet to confirm a new destination. Skip waits for preparation; Cancel returns to departure.',
     action: { label: 'Open Atlas', target: 'open-map' },
   };
   if (p.kind === 'garden' && !p.claimed && !u.ownedPlanetId) return {
@@ -37,7 +37,7 @@ export function firstVisitTip(context: OnboardingContext, atlas = false): Tip {
   };
   if (p.mine && building) return hasBuiltHome(context) ? {
     id: 'saved', title: 'Your first object is saved',
-    text: 'Finish or cancel any new preview, then Done building returns to walking. Pause → Find my ship marks the way back to your landing point.',
+    text: 'Finish or cancel any new preview, then Done building returns to walking. Guide → Find ship shows the ground route back to your landing point.',
   } : {
     id: 'place', title: 'Place your first object',
     text: 'Choose an object → tap open ground → Rotate if needed → Place object. A preview is not saved. Cancel drops the preview; Done building returns to walking.',
@@ -54,19 +54,19 @@ export function firstVisitTip(context: OnboardingContext, atlas = false): Tip {
   };
   if (nearDock) return {
     id: 'board', title: 'Ready to board',
-    text: 'Press E or Board your ship, then Launch ship. Stay here or Escape cancels before takeoff.',
+    text: 'Press E or Board your ship, choose a destination, then Depart. Stay here cancels before takeoff.',
   };
   return {
     id: 'port', title: p.kind === 'hub' ? 'Walk to the starport' : 'Walk back to your ship',
     text: p.kind === 'hub'
-      ? 'Follow the short path to SUNSEED · PORT. Board your ship appears beside the gate. Find my ship adds a walking direction; Atlas marks a destination.'
-      : 'Done building returns to walking. Find my ship marks your landing point. Walk to its return beacon; Board your ship appears when you are close.',
-    action: { label: 'Find my ship', target: 'guide-port' },
+      ? 'Follow the short path to SUNSEED · PORT. Board your ship appears beside the gate. Guide → Find ship shows ground arrows; Atlas lists destinations.'
+      : 'Done building returns to walking. Guide → Find ship shows the route to your landing point. Walk to its return beacon; Board your ship appears when you are close.',
+    action: { label: 'Find ship with guide', target: 'guide-ship' },
   };
 }
 
 /** One contextual card, mounted beside existing controls. No network writes. */
-export function mountOnboarding({ read }: { read: () => OnboardingContext | null }) {
+export function mountOnboarding({ read, findShip }: { read: () => OnboardingContext | null; findShip?:()=>void }) {
   const get = (id: string) => document.getElementById(id);
   let preference: Preference | null = null;
   try {
@@ -91,6 +91,7 @@ export function mountOnboarding({ read }: { read: () => OnboardingContext | null
   actions.append(action, skip); card.append(title, copy, actions);
   let target: string | undefined;
   action.onclick = () => {
+    if(target==='guide-ship'){findShip?.();refresh();return;}
     const control = target ? get(target) : null;
     if (!(control instanceof HTMLButtonElement) || control.disabled || control.hidden) return;
     control.click(); refresh();

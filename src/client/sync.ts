@@ -1,7 +1,7 @@
 import type { PlayerState } from '../shared/world.ts';
 import type { Universe } from '../shared/planets.ts';
 
-/** One door revision can refresh collision without dropping a held walk/jump. */
+/** One door revision can refresh collision without dropping a held walk. */
 export function isDoorOnlyRevision(current:PlayerState|undefined,next:PlayerState):boolean {
   return !!current?.home && !!next.home && !!current.ground && !!next.ground &&
     current.planetId===next.planetId && current.environment===next.environment && current.worldRadius===next.worldRadius &&

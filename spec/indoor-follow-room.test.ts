@@ -32,3 +32,8 @@ it('clears the room mode when the existing world changes',()=>{
  const rooms=new IndoorFollowRooms(),w=world();for(let i=0;i<3;i++)rooms.update(w,feet,up,.05);
  expect(rooms.update(world(false),feet,up,.05)).toBeNull();
 });
+
+it('restores an indoor saved position immediately and excludes disconnected room floors',()=>{
+ const rooms=new IndoorFollowRooms(),w=world();const other={...w.bodies[0].colliders[0],center:new Vector3(15,59.92,0)};w.bodies[0].colliders.push(other,{...w.bodies[0].colliders[1],center:new Vector3(15,62.2,0)});
+ const room=rooms.update(w,feet,up,.01,true)!;expect(room.id).toBe('room');expect(room.width).toBe(4);expect(room.depth).toBe(4);expect(room.origin.distanceTo(feet)).toBeLessThan(.001);
+});

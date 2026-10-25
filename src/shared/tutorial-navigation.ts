@@ -9,7 +9,7 @@ import type { StationSite } from './teleport.ts';
 import type { PlanetView } from './planets.ts';
 import { GATE } from './village-kit/geometry.ts';
 
-export type TutorialDestination = 'mica' | 'sol' | 'gate' | 'home';
+export type TutorialDestination = 'mica' | 'sol' | 'gate' | 'home' | 'port';
 export interface TutorialTarget { kind: TutorialDestination; position: Vec3; planetId: string }
 export interface TutorialNavigationInput {
   position: Vec3; target: TutorialTarget; planetId: string; radius: number;
@@ -85,6 +85,10 @@ function targetRoute(input: TutorialNavigationInput): HomeSurfaceRoute | null {
   const { target, radius } = input;
   if (input.planetId === 'hub') {
     if (target.kind === 'mica' || target.kind === 'sol') return publicRoutes.find(r => r.id === (target.kind === 'mica' ? 'public-post' : 'public-orchard')) ?? null;
+    if (target.kind === 'port') {
+      const route = publicRoutes.find(r => r.id === 'public-harbour');
+      return route && connector(route.points.at(-1)!, target.position, input) ? { ...route, points: compact([...route.points, target.position], radius) } : null;
+    }
     if (target.kind !== 'gate') return null;
     const door = MAIN_PLANET_LEDGER.routes.find(r => r.id === 'door-teleport-station');
     const spawn = publicRoutes[0]?.points[0];
@@ -98,7 +102,7 @@ function targetRoute(input: TutorialNavigationInput): HomeSurfaceRoute | null {
     .sort((a, b) => arc(a.points.at(-1)!, target.position, radius) - arc(b.points.at(-1)!, target.position, radius))[0];
   if (!home) return null;
   let points = home.points.map(copy);
-  if (target.kind === 'gate' && arc(points[0], target.position, radius) < arc(points.at(-1)!, target.position, radius)) points.reverse();
+  if ((target.kind === 'gate' || target.kind === 'port') && arc(points[0], target.position, radius) < arc(points.at(-1)!, target.position, radius)) points.reverse();
   const finalApproach = connectorPath(points.at(-1)!, target.position, input);
   if (!finalApproach) return null;
   // Generated home routes can later be obstructed by saved construction.

@@ -35,7 +35,7 @@ export function createVillageDrawing(renderer:T.WebGLRenderer,scene:T.Scene,came
   // Do not allocate hidden line/depth/normal targets in Smooth. Each active
   // camera lazily rebuilds its own pipeline; an inactive room releases too.
   let drawer:LineDrawer|null=null;
-  const sky=clouds?createCloudSky(VILLAGE.cloudSky!,Math.min(camera.far*.8,1200)):null;
+  const sky=clouds?createCloudSky(VILLAGE.cloudSky!,Math.min(camera.far*.8,camera instanceof T.OrthographicCamera?9000:1200)):null;
   if(sky)scene.add(sky);
   let width=0,height=0,ratio=0,scale=0,disposed=false;
   const size=new T.Vector2();

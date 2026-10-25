@@ -6,7 +6,7 @@ import { defineConfig } from "vitest/config";
 const LEGACY_HTTP = ["api", "blueprints", "planet-api", "boarding-api", "history", "save-recovery", "terrain"].map(name => `spec/${name}.test.ts`);
 
 // Specs whose subject is camera code the game does not run: the v11
-// GroundCameraRig (never constructed; the game uses SimpleFollowCameraRig and
+// GroundCameraRig (never constructed; the game uses fixed orthographic rooms and
 // the 4f0d596 outdoor camera), the GroundCameraCutawayRig module (not imported
 // by the client), certifyCameraFrame (never called) and TownCameraCutaway
 // (built only when the cutaway switch, off, is on). Several replay captures

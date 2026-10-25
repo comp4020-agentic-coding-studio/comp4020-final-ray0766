@@ -335,7 +335,7 @@ export class Colony {
     el('ownership-note').hidden=!(p.kind==='garden'&&!p.claimed&&u.ownedPlanetId);
   }
   private starMap(){
-    const u=this.universe!;const key=JSON.stringify(u.planets.map(p=>[p.id,p.claimed,p.mine,p.objectCount]))+u.currentPlanet.id;
+    const u=this.universe!;const key=JSON.stringify(u.planets.map(p=>[p.id,p.name,p.claimed,p.mine,p.objectCount]))+u.currentPlanet.id;
     if(key===this.cards)return;this.cards=key;el('planet-list').replaceChildren();
     const priority=(p:Universe['planets'][number])=>p.mine?0:p.kind==='hub'?1:!p.claimed?2:3;
     const filter=el<HTMLSelectElement>('region-select').value;
@@ -348,7 +348,7 @@ export class Colony {
       const orb=document.createElement('div');orb.className='map-orb';orb.style.setProperty('--orb',p.kind==='hub'?'#d8b783':p.mine?'#91b499':p.claimed?'#9bb9c0':'#cdd4bc');orb.style.rotate=`${index*27}deg`;setText(orb, p.kind==='hub'?'⌂':p.claimed?'✦':'·');
       const info=document.createElement('div'),tag=document.createElement('small'),name=document.createElement('h3'),detail=document.createElement('p');
       setText(tag, p.kind==='hub'?'Shared':p.mine?'My planet':p.claimed?'Neighbour · read only':'Blank · unclaimed');setText(name, p.name, true);setText(detail, `${regionFor(p.slot).name} · ${Math.round(spaceDistance(p.center,origin))} m away · ${p.kind==='hub'?'Public starport':p.objectCount+' saved objects'}`);
-      const button=document.createElement('button');button.className='quiet visit-planet';setText(button, 'Mark bearing ◇');button.onclick=()=>this.mark(p.id);
+      const button=document.createElement('button');button.className='quiet visit-planet';setText(button, 'Choose destination');button.onclick=()=>this.mark(p.id);
       info.append(tag,name,detail);card.append(orb,info,button);el('planet-list').append(card);
     }
   }

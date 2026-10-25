@@ -15,10 +15,16 @@ export function legacyOutdoorCameraPose(walker: SurfaceWalker, portrait: boolean
   const pose=cameraPose(walker,portrait,false,radius),lift=feet.length()-radius;
   pose.position.addScaledVector(walker.up,lift);pose.target.addScaledVector(walker.up,lift);
   const head=feet.clone().addScaledVector(renderUp,1.35);
+  const boundedPitch=Number.isFinite(pitch)?Math.max(-.3,Math.min(.7,pitch)):0;
+  if(boundedPitch){
+    const right=walker.right();
+    pose.position.sub(head).applyAxisAngle(right,boundedPitch).add(head);
+    pose.target.sub(head).applyAxisAngle(right,boundedPitch).add(head);
+  }
   let clipped=probe(head,pose.position);const close=clipped<2.5;
   if(close){
     pose.position.copy(head).addScaledVector(walker.north,-1.2);
-    pose.target.copy(head).addScaledVector(walker.north,3).addScaledVector(walker.up,Math.tan(pitch)*3);
+    pose.target.copy(head).addScaledVector(walker.north,3).addScaledVector(walker.up,Math.tan(boundedPitch)*3);
     clipped=probe(head,pose.position);
   }
   // Keep the intended pitch when a wall retracts the eye; no fixed-target tilt.

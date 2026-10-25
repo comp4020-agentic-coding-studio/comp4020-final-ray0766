@@ -17,6 +17,8 @@ import { groundStore } from './ground.ts';
 import { blueprintStore } from './blueprints.ts';
 import { planetStore } from './planets.ts';
 import { RequestError } from './errors.ts';
+import {migrateAppearances,appearanceStore} from './appearances.ts';
+import {migrateTrips,tripStore} from './trips.ts';
 import { navigationStore } from './navigation.ts';
 import { homePathStore } from './home-paths.ts';
 import { homeSetupStore } from './home-setup.ts';
@@ -181,7 +183,9 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
       }
       migrateTeleport(db);
       migrateArrivalHomes(db);
-      db.exec('PRAGMA user_version=17; COMMIT;');
+      migrateTrips(db);
+      migrateAppearances(db);
+      db.exec('PRAGMA user_version=20; COMMIT;');
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
   const history = historyStore(db);
@@ -192,11 +196,13 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
   const homeEnabled=homeSample||integratedWorld;
   const planets = planetStore(db, blueprints, history, homeSample ? HOME_SAMPLE_RADIUS : undefined,integratedWorld?INTEGRATED_RADIUS:undefined);
   const navigation=navigationStore(db,planets);
+  const trips=tripStore(db,planets,navigation);
   const ground=groundStore(db,planets);
   const homes=homeStore(db,planets,blueprints,history,homeEnabled);
   const homePaths=homePathStore(db,planets,homes,homeEnabled);
   const homeSetup=homeSetupStore(db,planets,blueprints,homes,homeEnabled);
   const teleport=teleportStore(db,planets,blueprints,homes,ground,homeEnabled);
+  const appearances=appearanceStore(db);
   const row = (id: string): Row => {
     const result = db.prepare('SELECT * FROM players WHERE id=?').get(id) as unknown as Row | undefined;
     if (!result) throw new RequestError(401, 'Your session has expired. Reload to start a new visit.');
@@ -207,7 +213,8 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
     const location=homeEnabled?homes.location(id):undefined;
     const standing=flight.mode==='ground'&&location?.kind!=='interior'?ground.read(id):undefined;
     const r = row(id),arrival=arrivalHomes.read(id);
-    return { ...(arrival?{arrival}:{}), ...(homeEnabled?{location,home:homes.descriptor(id)}:{}), worldRadius:planets.planet(r.planet_id).radius, environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
+    const appearance=appearances.read(id);
+    return { appearanceRequired:appearances.required(id), ...(appearance?{appearance}:{}), trip:trips.read(id), ...(arrival?{arrival}:{}), ...(homeEnabled?{location,home:homes.descriptor(id)}:{}), worldRadius:planets.planet(r.planet_id).radius, environment:planets.planet(r.planet_id).environment??null, ship: ships.read(id), ...(standing?{ground:standing}:{}),character: r.character, quest: r.quest, position: JSON.parse(r.position), deliveries: r.deliveries, revision: r.revision, planetId: r.planet_id,flight:navigation.flight(id) };
   };
   // Set by the HTTP server: terrain, collision and siting work then runs on a worker thread.
   let heavy:ArrivalWork|null=null;
@@ -288,6 +295,23 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
   };
   return {
     db, state, universe, migrationBackup, homeSample, integratedWorld,
+    requireAppearance:(id:string)=>appearances.requireComplete(id),
+    startTrip(id:string,body:Record<string,unknown>,now=Date.now()){
+      const clean={...body};delete clean.visitEpoch;
+      const prior=trips.read(id);
+      if(prior?.requestId!==body.requestId){homes.exterior(id,body.visitEpoch);if(navigation.flight(id).mode==='ground'&&!ground.read(id).grounded)throw new RequestError(409,'Land on your feet before boarding.');}
+      trips.start(id,clean,now);if(prior?.requestId!==body.requestId){ground.reset(id);homes.movedExterior(id);}return universe(id);
+    },
+    changeTrip(id:string,body:Record<string,unknown>){homes.exterior(id,body.visitEpoch);const clean={...body};delete clean.visitEpoch;trips.change(id,clean);return universe(id);},
+    async finishTrip(id:string,body:Record<string,unknown>,now=Date.now()){
+      const clean={...body};delete clean.visitEpoch;const trip=trips.current(id,clean);
+      if(trip.status==='arrived')return universe(id);
+      homes.exterior(id,body.visitEpoch);
+      if(heavy)await prepareWorld(heavy,trip.targetId);else ground.world(trip.targetId);
+      // Recheck the exact trip revision after asynchronous work. A retarget wins over stale completion.
+      trips.finish(id,clean,now);homes.movedExterior(id);return universe(id);
+    },
+    renamePlanet(id:string,body:Record<string,unknown>){planets.rename(id,body);return universe(id);},
     teleport(id:string,body:Record<string,unknown>,now=Date.now()){teleport.teleport(id,body,now);return universe(id);},
     previewStation(id:string,body:Record<string,unknown>){return teleport.preview(id,body);},
     confirmStation(id:string,body:Record<string,unknown>){teleport.confirm(id,body);return universe(id);},
@@ -311,7 +335,7 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
       db.exec('BEGIN IMMEDIATE');
       try{
         db.prepare('INSERT INTO players(id,position,moved_at) VALUES(?,?,?)').run(id,JSON.stringify(SPAWN),now);
-        arrivalHomes.enroll(id,now);db.exec('COMMIT');
+        arrivalHomes.enroll(id,now);appearances.enroll(id);db.exec('COMMIT');
       }catch(error){if(db.isTransaction)db.exec('ROLLBACK');throw error;}
       return state(id);
     },
@@ -368,7 +392,7 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
     },
     useHeavyWork(work:ArrivalWork|null){heavy=work;arrivalHomes.use(work);},
     /** Before a teleport: the destination is the player's own home or the harbour (the server re-checks). */
-    async prepareTeleport(id:string){const work=heavy,r=db.prepare('SELECT planet_id FROM players WHERE id=?').get(id);if(!work||!r)return;await prepareWorld(work,r.planet_id==='hub'?planets.owned(id):'hub');},
+    async prepareTeleport(id:string,body:Record<string,unknown>){const work=heavy,r=db.prepare('SELECT planet_id FROM players WHERE id=?').get(id);if(!work||!r)return;const target=body.planetId;if(typeof target!=='string'||target===r.planet_id||(target!=='hub'&&target!==planets.owned(id)))return;await prepareWorld(work,target);},
     /** Before a landing: only a planet this flight can actually land on is prepared, after the same checks. */
     async prepareLanding(id:string,body:Record<string,unknown>){if(!heavy)return;homes.exterior(id,body.visitEpoch);const clean={...body};delete clean.visitEpoch;const target=navigation.landingTarget(id,clean);if(target)await prepareWorld(heavy,target);},
     /** Build a planet's ground now, before anyone is waiting (the harbour at startup). */
@@ -376,9 +400,10 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
     character(id: string, value: unknown) {
       if (!CHARACTERS.includes(value as Character)) throw new RequestError(400, 'Choose one of the three couriers.');
       row(id);
-      db.prepare('UPDATE players SET character=?,revision=revision+1 WHERE id=?').run(value as string, id);
+      appearances.coat(id,value as Character);
       return state(id);
     },
+    appearance(id:string,body:Record<string,unknown>){row(id);appearances.save(id,body);return state(id);},
     move(id: string, value: unknown, now = Date.now(), expectedPlanet?: unknown,motion?:unknown,visitEpoch?:unknown) {
       homes.exterior(id,visitEpoch);
       if (!validPosition(value)) throw new RequestError(400, 'Position must be a finite point on the planet.');
@@ -386,6 +411,13 @@ export function openStore(path: string, options: { homeSample?: boolean; integra
       if(navigation.flight(id).mode==='space')throw new RequestError(409,'Land before walking on the surface.');
       if ((expectedPlanet === undefined && r.planet_id !== 'hub') || (expectedPlanet !== undefined && expectedPlanet !== r.planet_id)) throw new RequestError(409, 'Your visit moved to another planet. Reconnecting…');
       ground.move(id,normalize(value),now,motion);return state(id);
+    },
+    recoverGround(id:string,body:Record<string,unknown>,now=Date.now()){
+      if(Object.keys(body).some(k=>!['planetId','visitEpoch','sequence'].includes(k)))throw new RequestError(400,'Unexpected recovery field.');
+      homes.exterior(id,body.visitEpoch);const r=row(id);
+      if(navigation.flight(id).mode!=='ground')throw new RequestError(409,'Land before returning to safe ground.');
+      if(body.planetId!==r.planet_id)throw new RequestError(409,'Your visit moved to another planet. Reconnecting…');
+      ground.recoverToPort(id,body.sequence,now);homes.movedExterior(id);return universe(id);
     },
     interact(id: string, action: unknown) {
       if (action !== 'pickup' && action !== 'deliver') throw new RequestError(400, 'Unknown delivery action.');

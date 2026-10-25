@@ -65,7 +65,7 @@ it('uses measured all-LOD quick-prop extents and a separate versioned stone lant
 });
 
 it('pins six sliding leaves to the source model and leaves the old inward swing clear',()=>{
- expect([PHYSICS_VERSION,HUB_PHYSICS_VERSION]).toEqual([8,9]);
+ expect([PHYSICS_VERSION,HUB_PHYSICS_VERSION]).toEqual([9,10]);
  expect(HOME_DOOR_SLIDING.width).toBe(LEAVES.width);expect(HOME_DOOR_SLIDING.top).toBe(DOOR_OPENING.top);
  expect(HOME_DOOR_SLIDING.tracks).toEqual(LEAVES.tracks);
  for(const open of [false,true])for(const side of [-1,1])for(let i=0;i<3;i++)expect(homeDoorPanelX(side,i,open)).toBe(leafX(side,i,open));

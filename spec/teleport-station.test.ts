@@ -13,7 +13,7 @@ import { placementProblem } from '../src/shared/planets.ts';
 import { fieldOf } from '../src/shared/terrain.ts';
 import { planetStore } from '../src/server/planets.ts';
 import { starterManifest, HOME_ENVIRONMENT } from '../src/shared/home-layout.ts';
-import { HOME_SAMPLE_RADIUS } from '../src/shared/home.ts';
+import { HOME_SAMPLE_RADIUS, homeEntry } from '../src/shared/home.ts';
 import { encodeBlueprint } from '../src/shared/blueprint-codec.ts';
 import type { Blueprint } from '../src/shared/blueprint-model.ts';
 import { segmentDistance } from '../src/shared/planet-plan/sphere.ts';
@@ -86,13 +86,56 @@ it('refuses a submitted third planet and leaves the traveller where they stand',
   atHub();
 }, 30_000);
 
-it("does not let a visitor use another home's station", () => {
+it('lets a visitor return to the harbour or their own home without changing the visited planet', () => {
   const s = open(fresh()); s.create('ana'); s.create('ben');
   const anaHome = s.universe('ana').ownedPlanetId!, benHome = s.universe('ben').ownedPlanetId!;
+  const before = s.universe('ana').currentPlanet;
+  for (const destination of ['hub', benHome]) {
+    flyAndLand(s, 'ben', anaHome); atStation(s, 'ben');
+    const gate = s.universe('ben').currentPlanet.objects.find(o => stationSites({ ...before, objects: [o] }).length)!;
+    expect(() => s.previewStation('ben', { planetId: anaHome })).toThrow('Only');
+    expect(() => s.removeObject('ben', { planetId: anaHome, objectId: gate.id, expectedVersion: gate.version })).toThrow();
+    const home = s.state('ben').home!;
+    expect(() => s.enterHome('ben', { planetId: anaHome, buildingId: home.buildingId, visitEpoch: epoch(s, 'ben') })).toThrow('Only the home owner');
+    go(s, 'ben', destination);
+    expect(s.state('ben').planetId).toBe(destination);
+    safelyAt(s, 'ben', stationSites(s.universe('ben').currentPlanet)[0].arrival);
+    expect(s.universe('ana').currentPlanet).toEqual(before);
+  }
+}, 30_000);
+
+it('returns a visitor without a home to the harbour, and refuses an invented home', () => {
+  const s = open(fresh()); s.create('ana'); s.create('ben');
+  const anaHome = s.universe('ana').ownedPlanetId!;
   flyAndLand(s, 'ben', anaHome); atStation(s, 'ben');
-  const visiting = unchanged(s, 'ben');
-  for (const planetId of ['hub', benHome]) expect(() => go(s, 'ben', planetId)).toThrow('belongs to another home');
-  visiting();
+  s.db.prepare('UPDATE planets SET owner_id=NULL WHERE owner_id=?').run('ben');
+  expect(s.universe('ben').ownedPlanetId).toBeNull();
+  expect(() => go(s, 'ben', anaHome)).toThrow('no home planet');
+  go(s, 'ben', 'hub'); expect(s.state('ben').planetId).toBe('hub');
+}, 30_000);
+
+it('keeps a legacy indoor visitor inside until they exit, then permits the outdoor gate', () => {
+  const s = open(fresh()); s.create('ana'); s.create('ben');
+  const anaHome = s.universe('ana').ownedPlanetId!;
+  flyAndLand(s, 'ben', anaHome); atStation(s, 'ben');
+  const home = s.state('ben').home!, visitEpoch = epoch(s, 'ben') + 1;
+  const inside = { kind: 'interior', planetId: anaHome, buildingId: home.buildingId, interiorId: home.interiorId, position: homeEntry(home.interior.room), yaw: 0, sequence: 0, visitEpoch };
+  s.db.prepare('UPDATE home_locations SET document=? WHERE player_id=?').run(JSON.stringify(inside), 'ben');
+  expect(() => go(s, 'ben', 'hub')).toThrow();
+  expect(s.state('ben').location?.kind).toBe('interior');
+  s.exitHome('ben', { buildingId: home.buildingId, visitEpoch }); atStation(s, 'ben');
+  const requestId = randomUUID(), body = { planetId: 'hub', requestId, visitEpoch: epoch(s, 'ben') };
+  s.teleport('ben', body); const arrived = s.state('ben');
+  expect(s.teleport('ben', body).player).toEqual(arrived);
+  expect(() => s.teleport('ben', { ...body, requestId: randomUUID() })).toThrow('home visit changed');
+}, 30_000);
+
+it('uses the safe home landing pad when its owner dismantled the destination station', () => {
+  const s = open(fresh()); s.create('ana'); s.create('ben');
+  const home = s.universe('ben').currentPlanet, gate = home.objects.find(o => stationSites({ ...home, objects: [o] }).length)!;
+  s.removeObject('ben', { planetId: home.id, objectId: gate.id, expectedVersion: gate.version });
+  flyAndLand(s, 'ben', s.universe('ana').ownedPlanetId!); atStation(s, 'ben'); go(s, 'ben', home.id);
+  safelyAt(s, 'ben', portPoint(home.id));
 }, 30_000);
 
 it('travels once for a repeated request and refuses a second click that carries the old visit', () => {

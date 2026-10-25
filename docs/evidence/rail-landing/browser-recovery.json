@@ -1,0 +1,119 @@
+{
+  "browser": "155.0.8059.85",
+  "status": "passed",
+  "fixtures": "Fresh local browser identities and isolated SQLite only; fixture placement/initial pose are test setup. Movement uses actual keyboard or touch controls.",
+  "views": [
+    {
+      "phone": false,
+      "route": "back",
+      "status": "passed",
+      "errors": [],
+      "rejections": [],
+      "checks": [
+        "old suspended save settles on the guard after loading",
+        "jump again and land on the guard",
+        "retreat from the guard onto the balcony"
+      ],
+      "initial": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landing": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landingGrounded": true,
+      "end": [
+        -0.9608867709387826,
+        2.2022573560633583,
+        0.8511688347352568
+      ]
+    },
+    {
+      "phone": false,
+      "route": "forward",
+      "status": "passed",
+      "errors": [],
+      "rejections": [],
+      "checks": [
+        "old suspended save settles on the guard after loading",
+        "jump again and land on the guard",
+        "continue forward off the guard and land on terrain"
+      ],
+      "initial": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landing": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landingGrounded": true,
+      "end": [
+        -0.8759471293502645,
+        -0.13158335545121852,
+        2.3262292711052077
+      ]
+    },
+    {
+      "phone": true,
+      "route": "back",
+      "status": "passed",
+      "errors": [],
+      "rejections": [],
+      "checks": [
+        "old suspended save settles on the guard after loading",
+        "jump again and land on the guard",
+        "retreat from the guard onto the balcony"
+      ],
+      "initial": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landing": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landingGrounded": true,
+      "end": [
+        -1.0028971177204986,
+        2.202325314293809,
+        1.0384206449539681
+      ]
+    },
+    {
+      "phone": true,
+      "route": "forward",
+      "status": "passed",
+      "errors": [],
+      "rejections": [],
+      "checks": [
+        "old suspended save settles on the guard after loading",
+        "jump again and land on the guard",
+        "continue forward off the guard and land on terrain"
+      ],
+      "initial": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landing": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landingGrounded": true,
+      "end": [
+        -1.0364488715369296,
+        -0.1331291801710162,
+        2.275222268117405
+      ]
+    }
+  ]
+}

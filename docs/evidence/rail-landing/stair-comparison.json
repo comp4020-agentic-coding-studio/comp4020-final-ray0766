@@ -1,0 +1,46 @@
+[
+  {
+    "radius": 12,
+    "guardTopSupport": false,
+    "end": [
+      -2,
+      -0.5090334892049527,
+      -2.7999999999999994
+    ],
+    "grounded": true,
+    "blocked": false
+  },
+  {
+    "radius": 12,
+    "guardTopSupport": true,
+    "end": [
+      -2,
+      -0.5090334892049527,
+      -2.7999999999999994
+    ],
+    "grounded": true,
+    "blocked": false
+  },
+  {
+    "radius": 21.6,
+    "guardTopSupport": false,
+    "end": [
+      -1.9999999999999993,
+      -0.2916908478009187,
+      -2.8000000000000003
+    ],
+    "grounded": true,
+    "blocked": false
+  },
+  {
+    "radius": 21.6,
+    "guardTopSupport": true,
+    "end": [
+      -1.9999999999999993,
+      -0.2916908478009187,
+      -2.8000000000000003
+    ],
+    "grounded": true,
+    "blocked": false
+  }
+]

@@ -149,7 +149,7 @@ export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof plane
         place(id, plan.planetId, site);
       });
     },
-    /** Your home's gate goes to the harbour; the harbour's gate goes back to your home. Nothing else. */
+    /** Any outdoor gate can return a visitor to the harbour or their own home. */
     teleport(id: string, body: Record<string, unknown>, now = Date.now()) {
       if (Object.keys(body).some(k => !['planetId', 'requestId', 'visitEpoch'].includes(k))) throw new RequestError(400, 'Unexpected teleport field.');
       if (typeof body.requestId !== 'string' || !UUID_PATTERN.test(body.requestId)) throw new RequestError(400, 'Include a teleport request identifier.');
@@ -165,12 +165,11 @@ export function teleportStore(db: DatabaseSync, planets: ReturnType<typeof plane
       if (JSON.parse(String(player.flight ?? '{"mode":"ground"}')).mode !== 'ground') throw new RequestError(409, 'Land before using a teleport station.');
       const here = String(player.planet_id), position = JSON.parse(String(player.position)) as Vec3, radius = planets.planet(here).radius;
       if (!ground.read(id).grounded || !sites(here).some(site => distance(position, site.interact, radius) <= STATION_REACH)) throw new RequestError(409, 'Walk up to a teleport station first.');
-      // The destination comes from server identity: a visitor's gate, or a submitted
-      // third planet, never moves anyone.
+      // Travel permission is independent of the gate owner's building permissions.
+      // Only the public hub and the traveller's server-owned home are destinations.
       const home = planets.owned(id);
-      if (here !== 'hub' && here !== home) throw new RequestError(403, 'This teleport station belongs to another home. Only its owner can use it.');
-      if (!home) throw new RequestError(409, 'You have no home planet to return to yet.');
-      if (body.planetId !== (here === 'hub' ? home : 'hub')) throw new RequestError(403, 'Teleport stations only link your own home and the main planet.');
+      if (!home && body.planetId !== 'hub') throw new RequestError(409, 'You have no home planet to return to yet.');
+      if (body.planetId === here || (body.planetId !== 'hub' && body.planetId !== home)) throw new RequestError(403, 'Teleport stations only link your own home and the main planet.');
       const target = planets.planet(body.planetId);
       // Arrive beside the destination's station, or at its landing pad if the home has none yet.
       const station = sites(target.id)[0];

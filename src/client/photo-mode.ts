@@ -1,10 +1,10 @@
 import * as T from 'three';
-import {setHTML,setText} from './i18n.ts';
+import {setHTML,setText,setAttribute} from './i18n.ts';
 import './photo-mode.css';
 import {createVillageDrawing} from './village-drawing.ts';
 
 export type PhotoCamera = T.PerspectiveCamera | T.OrthographicCamera;
-export interface PhotoView {scene:T.Scene;camera:PhotoCamera;target:T.Vector3;prepare?:(camera:PhotoCamera)=>void}
+export interface PhotoView {scene:T.Scene;camera:PhotoCamera;target:T.Vector3;fixedAngle?:boolean;fixedLabel?:string;finish?:()=>void;prepare?:(camera:PhotoCamera)=>void}
 interface PhotoBridge {
   renderer:T.WebGLRenderer;
   ready():boolean;
@@ -53,9 +53,8 @@ export class PhotoMode {
     window.addEventListener('keydown',e=>{
       if(!this.active)return;
       e.stopImmediatePropagation();
-      if(e.key==='Escape'){e.preventDefault();this.close();}
       if(e.key==='Tab'){
-        const items=[...this.root.querySelectorAll<HTMLElement>('button:not(:disabled),select,input')],i=items.indexOf(document.activeElement as HTMLElement);
+        const items=[...this.root.querySelectorAll<HTMLElement>('button:not(:disabled):not([hidden]),select,input')],i=items.indexOf(document.activeElement as HTMLElement);
         if(e.shiftKey&&i<=0){e.preventDefault();items.at(-1)?.focus();}else if(!e.shiftKey&&i===items.length-1){e.preventDefault();items[0]?.focus();}
       }
     },true);
@@ -84,10 +83,10 @@ export class PhotoMode {
     if(!scene.background)scene.background=(scene.fog?.color??this.bridge.renderer.getClearColor(new T.Color())).clone();
     this.basePosition.copy(camera.position);this.zoom=1;this.get<HTMLInputElement>('zoom').value='1';
     this.get('follow').setAttribute('aria-pressed',String(mode==='follow'));this.get('overview').setAttribute('aria-pressed',String(mode==='overview'));
-    resizeCamera(camera,innerWidth/innerHeight);setText(this.get('status'),'Drag to orbit. Your world stays as you left it.');
+    resizeCamera(camera,innerWidth/innerHeight);setAttribute(this.root.querySelector<HTMLElement>('.photo-drag')!,'aria-label',this.current.fixedAngle?(this.current.fixedLabel??'Fixed room view'):'Drag to frame your photo');this.get('follow').hidden=!!this.current.fixedAngle;this.get('overview').hidden=!!this.current.fixedAngle;setText(this.get('status'),this.current.fixedAngle?(this.current.fixedLabel??'Fixed room view. Use zoom to frame your photo.'):'Drag to orbit. Your world stays as you left it.');
   }
   private orbit(yaw:number,pitch:number){
-    const view=this.current;if(!view)return;
+    const view=this.current;if(!view||view.fixedAngle)return;
     const offset=this.basePosition.clone().sub(view.target),up=view.camera.up.clone().normalize();
     offset.applyAxisAngle(up,-yaw);const right=new T.Vector3().crossVectors(offset,up).normalize();
     const trial=offset.clone().applyAxisAngle(right,-pitch);
@@ -102,7 +101,7 @@ export class PhotoMode {
   }
   frame(){
     if(!this.current||this.saving)return;
-    this.current.prepare?.(this.current.camera);this.drawing?.render(this.current.target,this.mode==='overview');
+    this.current.prepare?.(this.current.camera);try{this.drawing?.render(this.current.target,this.mode==='overview');}finally{this.current.finish?.();}
   }
   async capture(){
     const view=this.current;if(!view||this.saving)return;this.saving=true;
@@ -124,7 +123,7 @@ export class PhotoMode {
       setText(this.get('status'),'Photo saved. Keep exploring or try another view.');
     }catch(error){setText(this.get('status'),error instanceof Error?error.message:'Photo export failed.');}
     finally{
-      exportDrawing?.dispose();renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);resizeCamera(view.camera,innerWidth/innerHeight);this.saving=false;
+      view.finish?.();exportDrawing?.dispose();renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);resizeCamera(view.camera,innerWidth/innerHeight);this.saving=false;
       for(const control of this.root.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select'))control.disabled=false;
       this.frame();
     }

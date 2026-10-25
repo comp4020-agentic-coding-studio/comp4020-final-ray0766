@@ -38,3 +38,7 @@ it('expires both rendered visitors and diagnostic counts then accepts a fresh re
   expect(presence.receive(snapshot(),7200,expired)).toBe(false);
   expect(presence.receive(snapshot(),7300,presence.ticket('garden'))).toBe(true);expect(canvas.dataset.visitors).toBe('1');
 });
+it('refreshes a saved remote look in place while preserving the four-detailed visitor budget',()=>{
+ const snap=snapshot();snap.visitors=Array.from({length:8},(_,i)=>({...snap.visitors[0],id:'v'+i}));presence.receive(snap,1000);presence.frame(1100,.016,new Vector3(...SPAWN),false);expect(canvas.dataset.detailedVisitors).toBe('4');
+ snap.visitors[0].appearance={revision:1,options:{version:1,model:'sample',face:'round',hair:'bob',skin:'deep',eyes:'ocean',coat:'fern'}};presence.receive(snap,1200);presence.frame(1300,.016,new Vector3(...SPAWN),false);expect(canvas.dataset.detailedVisitors).toBe('4');const looks=JSON.parse(canvas.dataset.visitorAppearances!);expect(looks.some((v:{options:{model:string;skin:string}})=>v.options.model==='sample'&&v.options.skin==='deep')).toBe(true);presence.clear();expect(canvas.dataset.visitorAppearances).toBeUndefined();
+});

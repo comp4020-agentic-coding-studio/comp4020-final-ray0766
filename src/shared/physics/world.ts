@@ -27,16 +27,18 @@ import { kerbRuns } from '../planet-plan/kerbs.ts';
 import { ROAD_PROFILES, SURFACE } from '../planet-plan/params.ts';
 export { BODY_RADIUS, BODY_HEIGHT, STEP_HEIGHT } from './body.ts';
 
-export const GRAVITY=12, MAX_FALL_SPEED=10, JUMP_SPEED=5.2;
-export const SPRINT_FLAG=1, JUMP_FLAG=2;
+export const GRAVITY=12, MAX_FALL_SPEED=10;
+export const SPRINT_FLAG=1;
+/** Reserved legacy wire bit; no longer starts a jump. */
+export const JUMP_FLAG=2;
 export const FIXED_STEP=1/60, MAX_PATH_STEPS=28;
 // Bump whenever static collision semantics change. Durable ground rows and
 // movement batches use this same value; a scene revision alone is not enough.
-// 8: home landing pads gain a starport terminal (planets above 20 m).
-export const PHYSICS_VERSION=8;
+// 10: walking only; legacy jump flags cannot apply an impulse.
+export const PHYSICS_VERSION=10;
 // Fence clients carrying the previous bundled public collision layout.
-// 9: the planned main planet (v12 ledger) with continuous streets and kerbs.
-export const HUB_PHYSICS_VERSION=9;
+// 11: public walking uses the same no-jump contract.
+export const HUB_PHYSICS_VERSION=11;
 export const physicsVersionFor=(planetId:string)=>planetId==='hub'?HUB_PHYSICS_VERSION:PHYSICS_VERSION;
 const ground=legacyHeightField();
 export interface GroundPose { position:Vec3; radius:number; verticalSpeed:number; grounded:boolean; jumpHeld?:boolean }
@@ -246,19 +248,31 @@ export class GroundWorld {
    * slide instead of cancelling the entire step. Both client and server call it. */
   move(old:GroundPose,target:Vec3,dt:number,flags=0):GroundPose{
     dt=Math.max(0,Math.min(.05,dt));const from=vec(old.position),to=vec(target).normalize();
-    const count=Math.max(1,Math.ceil(from.angleTo(to)*Math.max(this.baseRadius,old.radius)/SUBSTEP));
-    const jumpHeld=!!(flags&JUMP_FLAG);let pose={...old,jumpHeld,position:[...old.position] as Vec3};
-    if(jumpHeld&&!old.jumpHeld&&old.grounded){pose.grounded=false;pose.verticalSpeed=JUMP_SPEED;}
+    const angle=from.angleTo(to),count=Math.max(1,Math.ceil(angle*Math.max(this.baseRadius,old.radius)/SUBSTEP));
+    // Keep the shared call shape for saved motion replays, but no input can
+    // create upward velocity. Existing airborne saves may still fall naturally.
+    void flags;const jumpHeld=false;let pose={...old,jumpHeld,verticalSpeed:Math.min(0,old.verticalSpeed),position:[...old.position] as Vec3};
     for(let i=1;i<=count;i++){
       const desired=from.clone().lerp(to,i/count).normalize();const prior=vec(pose.position);
       const remaining=desired.clone().sub(prior).projectOnPlane(prior).multiplyScalar(pose.radius),next=prior.clone();
       const tick=dt/count;let accepted=false;
       for(let slide=0;slide<4;slide++){
-        const candidate=next.clone().addScaledVector(remaining,1/pose.radius).normalize().toArray() as Vec3;
+        // A previous slide can leave us off the original substep path. Chasing
+        // its next point must not turn that lateral correction into extra speed.
+        // Bound each candidate before support/collision checks, not afterwards.
+        const direction=next.clone().addScaledVector(remaining,1/pose.radius).normalize();
+        const moved=from.angleTo(direction),limit=angle*i/count;
+        if(moved>limit){const axis=new Vector3().crossVectors(from,direction).normalize();direction.copy(from).applyAxisAngle(axis,limit).normalize();}
+        const candidate=direction.toArray() as Vec3;
         const support=this.support(candidate,pose.radius+(pose.grounded?STEP_HEIGHT:SKIN));
         if(this.generated&&((this.field.waterLevel!==null&&this.field.heightAt(candidate)<this.field.waterLevel+.015)||support.radius>pose.radius+STEP_HEIGHT+SKIN))break;
-        const radial=this.radial(pose,candidate,tick),{radius}=radial;
-        const hit=this.hit(candidate,radius);
+        let radial=this.radial(pose,candidate,tick),hit=this.hit(candidate,radial.radius);
+        // At a stair edge the lower tread may be reachable while the capsule
+        // still overlaps the upper riser. Move clear at the current height and
+        // let gravity finish the descent instead of snapping into that riser.
+        if(hit&&pose.grounded&&radial.radius<pose.radius&&!this.hit(candidate,pose.radius)){
+          radial={...pose,position:candidate,grounded:false,verticalSpeed:0};hit=null;
+        }
         if(!hit){pose={...radial,jumpHeld};accepted=true;break;}
         const normal=hit.normal.projectOnPlane(next);
         if(normal.lengthSq()<1e-6){remaining.set(0,0,0);break;}

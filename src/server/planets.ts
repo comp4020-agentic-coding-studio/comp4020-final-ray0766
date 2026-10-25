@@ -38,7 +38,8 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     if(Number(db.prepare('SELECT count(*) AS n FROM planets').get()!.n)>=MAX_PLANETS)throw new RequestError(409,'All home planets are currently occupied.');
     const number=Number(db.prepare("SELECT count(*) AS n FROM planets WHERE kind='garden'").get()!.n)+1;
     const slot=Number(db.prepare('SELECT COALESCE(max(slot),-1)+1 AS slot FROM planets').get()!.slot),id='p-'+randomUUID();
-    db.prepare("INSERT INTO planets(id,name,kind,slot,radius,sample_radius,environment,world_radius) VALUES(?,?,'garden',?,?,?,?,?)").run(id,`Little world ${String(number).padStart(2,'0')}`,slot,radiusForSlot(slot),sampleRadius??null,(sampleRadius||worldRadius)?HOME_ENVIRONMENT:null,worldRadius??null);
+    let generatedName=`Little world ${String(number).padStart(2,'0')}`;const used=new Set(db.prepare('SELECT name FROM planets').all().map(r=>String(r.name).normalize('NFKC').trim().toLocaleLowerCase('en-US')));for(let n=2;used.has(generatedName.toLocaleLowerCase('en-US'));n++)generatedName=`Little world ${String(number).padStart(2,'0')} (${n})`;
+    db.prepare("INSERT INTO planets(id,name,kind,slot,radius,sample_radius,environment,world_radius) VALUES(?,?,'garden',?,?,?,?,?)").run(id,generatedName,slot,radiusForSlot(slot),sampleRadius??null,(sampleRadius||worldRadius)?HOME_ENVIRONMENT:null,worldRadius??null);
     history.baseline(id);return id;
   }
   function replenish() {
@@ -105,6 +106,16 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
       return new GroundWorld({...summary(p,''),objects:placed,blueprints:contents});
     },part.part as HomeDoorPartId))throw new RequestError(409,'Someone is in the doorway. Move the home after they step clear.');
   };
+  const nameKey=(name:string)=>name.normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('en-US');
+  const rename=(id:string,body:Record<string,unknown>)=>transaction(()=>{
+    strict(body,['planetId','name']);const p=owns(id,body.planetId);
+    if(typeof body.name!=='string')throw new RequestError(400,'Enter a planet name.');
+    const name=body.name.normalize('NFKC').trim().replace(/\s+/g,' ');
+    if([...name].length<1||[...name].length>32||/[<>]/u.test(name)||[...body.name].some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127))throw new RequestError(400,'Use 1–32 characters without control characters or angle brackets.');
+    if(name===p.name)return;
+    if(db.prepare('SELECT id,name FROM planets WHERE id<>?').all(p.id).some(other=>nameKey(String(other.name))===nameKey(name)))throw new RequestError(409,'That planet name is already taken. Choose another name.');
+    db.prepare('UPDATE planets SET name=?,revision=revision+1 WHERE id=?').run(name,p.id);
+  });
   const bump = (p: string) => db.prepare('UPDATE planets SET revision=revision+1 WHERE id=?').run(p);
   const same = (old: PlacedObject, p: Vec3, rotation: number) => Math.abs(old.rotation - rotation) < 1e-8 && old.position.every((v, i) => Math.abs(v - p[i]) < 1e-8);
   const replaceInner=(id:string,body:Record<string,unknown>,variant='custom',undo=false)=>{
@@ -134,7 +145,7 @@ export function planetStore(db: DatabaseSync, blueprints = blueprintStore(db), h
     if(h)db.prepare('UPDATE home_interiors SET variant=? WHERE building_id=?').run(variant,oid);
     bump(p.id);history.append(p.id,old,objects(p.id).find(o=>o.id===oid)!);
   };
-  return {
+  return { rename,
     /** `reserved` planets are being prepared for another new player and are skipped. */
     freshHomePlanet(reserved:ReadonlySet<string>=new Set()){return transaction(()=>{
       const available=(db.prepare(`SELECT id FROM planets p WHERE kind='garden' AND owner_id IS NULL

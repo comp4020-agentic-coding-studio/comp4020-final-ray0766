@@ -42,7 +42,7 @@ it('fences the released v7 public client without changing private ground, names,
   s.db.prepare('UPDATE ground_states SET physics_version=? WHERE player_id=?').run(7,'public');
   const publicBefore=s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('public')!;
   const b=s.state('public'),beforeRejected=snapshot(),groundBeforeRejected=s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('public');
-  for(const key of ['position','radius','vertical_speed','grounded','jump_held','planet_id'])expect(groundBeforeRejected![key],key).toEqual(publicBefore[key]);
+  for(const key of ['position','radius','grounded','planet_id'])expect(groundBeforeRejected![key],key).toEqual(publicBefore[key]);
   for(const table of protectedTables.filter(table=>table!=='players'))expect(beforeRejected[table],table).toEqual(beforeUpgrade[table]);
   expect(beforeRejected.players.find(row=>row.id==='private')).toEqual(beforeUpgrade.players.find(row=>row.id==='private'));
   expect(b.ground!.physicsVersion).toBe(HUB_PHYSICS_VERSION);expect(privateBefore!.physics_version).toBe(PHYSICS_VERSION);
@@ -50,7 +50,7 @@ it('fences the released v7 public client without changing private ground, names,
   expect(s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('public')).toEqual(groundBeforeRejected);
   s.state('private');expect(s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('private')).toEqual(privateBefore);
   expect(snapshot()).toEqual(beforeRejected);expect(s.library('private')[0].blueprint).toEqual(blueprint);
-  expect(s.db.prepare('PRAGMA user_version').get()!.user_version).toBe(17);
+  expect(s.db.prepare('PRAGMA user_version').get()!.user_version).toBe(18);
  }finally{s.close();}
 });
 
@@ -61,8 +61,8 @@ it.each([7,8,9])('keeps a valid v%i public airborne pose when its collision revi
   const before=s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('public')!;
   const playerBefore=s.db.prepare('SELECT * FROM players WHERE id=?').get('public')!;
   const b=s.state('public'),after=s.db.prepare('SELECT * FROM ground_states WHERE player_id=?').get('public')!;
-  for(const key of ['position','radius','vertical_speed','grounded','jump_held','planet_id'])expect(after[key],key).toEqual(before[key]);
-  expect(after.physics_version).toBe(HUB_PHYSICS_VERSION);expect(after.sequence).toBe(Number(before.sequence)+1);
+  for(const key of ['position','radius','grounded','planet_id'])expect(after[key],key).toEqual(before[key]);
+  expect(after.vertical_speed).toBe(0);expect(after.jump_held).toBe(0);expect(after.physics_version).toBe(HUB_PHYSICS_VERSION);expect(after.sequence).toBe(Number(before.sequence)+1);
   expect(after.scene_revision).toBe(s.universe('public').currentPlanet.revision);
   const playerAfter=s.db.prepare('SELECT * FROM players WHERE id=?').get('public')!;
   expect(playerAfter).toEqual({...playerBefore,revision:Number(playerBefore.revision)+(version===HUB_PHYSICS_VERSION?0:1)});
@@ -79,6 +79,6 @@ it('does not preserve an unknown public physics version as compatible airborne m
  }finally{s.close();}
 });
 
-it('upgrades a valid private v3 airborne save without changing position, height, velocity or jump latch',()=>{
- const s=openStore(':memory:');try{s.create('p',0);s.visit('p',s.universe('p').planets.find(p=>p.kind==='garden')!.id);s.state('p');s.db.exec("UPDATE ground_states SET physics_version=3,radius=radius+0.5,vertical_speed=2,grounded=0,jump_held=1 WHERE player_id='p'");const before=s.db.prepare("SELECT * FROM ground_states WHERE player_id='p'").get()!;s.state('p');const after=s.db.prepare("SELECT * FROM ground_states WHERE player_id='p'").get()!;for(const k of ['position','radius','vertical_speed','grounded','jump_held','scene_revision','planet_id'])expect(after[k]).toEqual(before[k]);expect(after.physics_version).toBe(PHYSICS_VERSION);expect(after.sequence).toBe(Number(before.sequence)+1);}finally{s.close();}
+it('upgrades a valid private v3 airborne save without changing position or height, retiring upward velocity and the jump latch',()=>{
+ const s=openStore(':memory:');try{s.create('p',0);s.visit('p',s.universe('p').planets.find(p=>p.kind==='garden')!.id);s.state('p');s.db.exec("UPDATE ground_states SET physics_version=3,radius=radius+0.5,vertical_speed=2,grounded=0,jump_held=1 WHERE player_id='p'");const before=s.db.prepare("SELECT * FROM ground_states WHERE player_id='p'").get()!;s.state('p');const after=s.db.prepare("SELECT * FROM ground_states WHERE player_id='p'").get()!;for(const k of ['position','radius','grounded','scene_revision','planet_id'])expect(after[k]).toEqual(before[k]);expect(after.vertical_speed).toBe(0);expect(after.jump_held).toBe(0);expect(after.physics_version).toBe(PHYSICS_VERSION);expect(after.sequence).toBe(Number(before.sequence)+1);}finally{s.close();}
 });

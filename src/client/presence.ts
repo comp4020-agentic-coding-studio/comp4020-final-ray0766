@@ -1,3 +1,4 @@
+import {appearanceOf,SKIN_COLORS} from '../shared/appearance.ts';
 import { setText } from './i18n.ts';
 import {SPRINT_SPEED} from '../shared/world.ts';
 import * as T from 'three';
@@ -19,7 +20,7 @@ export class GroundPresence {
     this.epoch++;this.planet='';this.receivedAt=0;
     for(const r of this.people.values())disposeGeometry(r.root);this.people.clear();
     for(const key of ['visitors','nearbyVisitors','visibleVisitors','detailedVisitors'])this.canvas.dataset[key]='0';
-    delete this.canvas.dataset.presencePlanet;delete this.canvas.dataset.visitorRadii;
+    delete this.canvas.dataset.presencePlanet;delete this.canvas.dataset.visitorRadii;delete this.canvas.dataset.visitorAppearances;
     setText(document.getElementById('presence-summary')!, 'No other visitors nearby.');
   }
   receive(snapshot:PresenceSnapshot,now=performance.now(),ticket=this.ticket(snapshot.planetId)){
@@ -35,11 +36,10 @@ export class GroundPresence {
         const body=applyArtMaterial(new T.MeshStandardMaterial({color:PALETTES[visitor.character],...COURIER_LOOK.surface}));body.userData.ownedResource=true;
         const torso=new T.Mesh(new T.CapsuleGeometry(.19,.64,3,6),body);torso.position.y=.74;low.add(torso);
         const helmet=new T.Mesh(new T.IcosahedronGeometry(.24,1),new T.MeshBasicMaterial({color:'#f3ecdb'}));helmet.position.y=1.39;low.add(helmet);
-        const peak=new T.Mesh(new T.BoxGeometry(.29,.035,.16),new T.MeshBasicMaterial({color:'#7d5b43'}));peak.position.set(0,1.43,.18);low.add(peak);
         const ring=new T.Mesh(new T.RingGeometry(.28,.32,20),new T.MeshBasicMaterial({color:'#326e68',transparent:true,opacity:.65,depthWrite:false,side:T.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=.03;root.add(ring);
         r={visitor,root,low,body,avatar:null,position:new T.Vector3(...visitor.position),from:new T.Vector3(...visitor.position),facing:new T.Vector3(...visitor.facing),at:now,speed:0,radius:visitor.radius??groundRadius(),fromRadius:visitor.radius??groundRadius()};this.people.set(visitor.id,r);
       }
-      const target=new T.Vector3(...visitor.position);r.speed=Math.min(SPRINT_SPEED,r.position.angleTo(target)*groundRadius()/Math.max(.1,(now-r.at)/1000));r.from.copy(r.position);r.fromRadius=r.radius;r.visitor=visitor;r.at=now;r.body.color.set(PALETTES[visitor.character]);r.avatar?.setColor(visitor.character);
+      const target=new T.Vector3(...visitor.position);r.speed=Math.min(SPRINT_SPEED,r.position.angleTo(target)*groundRadius()/Math.max(.1,(now-r.at)/1000));r.from.copy(r.position);r.fromRadius=r.radius;r.visitor=visitor;r.at=now;r.body.color.set(PALETTES[visitor.character]);if(r.avatar?.setAppearance(appearanceOf(visitor)))r.avatar.root.traverse(o=>{if(o instanceof T.Mesh)o.castShadow=false;});const head=r.low.children[1] as T.Mesh<T.BufferGeometry,T.MeshBasicMaterial>;head.material.color.set(SKIN_COLORS[appearanceOf(visitor).skin]);
     }
     this.canvas.dataset.visitors=String(this.people.size);this.canvas.dataset.nearbyVisitors=String(snapshot.nearbyCount);this.canvas.dataset.presencePlanet=snapshot.planetId;setText(document.getElementById('presence-summary')!, snapshot.nearbyCount?`${snapshot.nearbyCount} other visitor${snapshot.nearbyCount===1?'':'s'} on this world · teal foot rings`:'No other visitors nearby.');
     return true;
@@ -50,7 +50,7 @@ export class GroundPresence {
     for(const r of ordered){
       const t=Math.min(1,(now-r.at)/PRESENCE_INTERVAL),target=new T.Vector3(...r.visitor.position);r.position.copy(r.from).lerp(target,reduced?1:t).normalize();
       const near=self.angleTo(r.position)*groundRadius(),detail=near<6&&detailed<4;r.root.visible=near<21;if(r.root.visible)visible++;
-      if(detail){detailed++;if(!r.avatar){r.avatar=courier(r.visitor.character);r.avatar.root.traverse(o=>{if(o instanceof T.Mesh)o.castShadow=false;});r.root.add(r.avatar.root);}}
+      if(detail){detailed++;if(!r.avatar){r.avatar=courier(r.visitor.character,appearanceOf(r.visitor));r.avatar.root.traverse(o=>{if(o instanceof T.Mesh)o.castShadow=false;});r.root.add(r.avatar.root);}}
       else if(r.avatar){disposeGeometry(r.avatar.root);r.avatar=null;}
       r.low.visible=!detail;r.avatar?.animate(now/1000,t<1?r.speed:0,reduced,0,r.visitor.grounded??true);
       r.radius=reduced?(r.visitor.radius??groundRadius()):T.MathUtils.lerp(r.fromRadius,r.visitor.radius??groundRadius(),t);
@@ -58,6 +58,7 @@ export class GroundPresence {
       if(r.facing.lengthSq()<.01)r.facing.set(0,0,1).projectOnPlane(r.position);r.facing.normalize();
       r.root.quaternion.copy(surfaceOrientation(r.position,r.facing));r.root.position.copy(r.visitor.radius===undefined?surfacePoint(r.position,.02):r.position.clone().multiplyScalar(r.radius+.02));
     }
+    this.canvas.dataset.visitorAppearances=JSON.stringify(ordered.filter(r=>r.root.visible).map(r=>({detail:!!r.avatar,options:r.avatar?.root.userData.appearance??appearanceOf(r.visitor)})));
     this.canvas.dataset.visitorRadii=JSON.stringify(ordered.filter(r=>r.root.visible).map(r=>r.root.position.length()-.02));
     this.canvas.dataset.visibleVisitors=String(visible);this.canvas.dataset.detailedVisitors=String(detailed);
   }

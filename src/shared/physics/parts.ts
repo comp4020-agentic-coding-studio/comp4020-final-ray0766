@@ -106,7 +106,10 @@ export const PART_COLLIDERS:Record<PartId,()=>PartBox[]>={
  'wall.door-wide':()=>[...wideDoorFrame(),...wideDoorLeaves(false)],'wall.door-wide.open':()=>[...wideDoorFrame(),...wideDoorLeaves(true)],
  'step.entry-wide':wideEntryBoxes,
  'structure.column':()=>bounds('structure.column'),'stair.straight':stairs,
- 'rail.guard':()=>bounds('rail.guard'),'roof.parapet':()=>bounds('roof.parapet'),
+ // Legacy saves can stand above the guard. Its solid top accepts falling;
+ // rejecting that fall as a side collision leaves the capsule airborne forever.
+ 'rail.guard':()=>bounds('rail.guard').map(shape=>({...shape,support:true})),
+ 'roof.parapet':()=>bounds('roof.parapet'),
  'roof.slope':slopeRoof,'roof.plant':()=>bounds('roof.plant'),
  'street.paving':slab,'street.road':slab,'pad.quarter':slab,
  'street.kerb':()=>[box('kerb',[0,.045,0],[.995,.19,.15],true)],

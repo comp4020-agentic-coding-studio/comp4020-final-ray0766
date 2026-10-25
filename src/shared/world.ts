@@ -14,7 +14,11 @@ export interface ArrivalState { version:1; homePreparation:'pending'|'preparing'
 export interface PlayerState {
   /** Present only for identities enrolled in the new integrated arrival flow. */
   arrival?:ArrivalState;
+  trip?:import('./ship-trip.ts').ShipTrip|null;
   character: Character;
+  /** New identities must explicitly save a traveller before gameplay. Legacy identities are already admitted. */
+  appearanceRequired?:boolean;
+  appearance?: import('./appearance.ts').SavedAppearance;
   quest: Quest;
   position: Vec3;
   deliveries: number;

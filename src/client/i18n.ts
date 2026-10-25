@@ -2,8 +2,8 @@ import { messages, patterns } from './messages.ts';
 
 export type Language = 'en' | 'zh';
 export const LANGUAGE_KEY = 'little-worlds:language:v1';
-export function chooseLanguage(saved: string | null, browser: string): Language {
-  return saved === 'zh' || saved === 'en' ? saved : /^zh(?:-|$)/i.test(browser) ? 'zh' : 'en';
+export function chooseLanguage(saved: string | null): Language {
+  return saved === 'zh' ? 'zh' : 'en';
 }
 let language: Language = 'en';
 const source = new WeakMap<Node, string>();
@@ -108,7 +108,7 @@ export function setLanguage(next: Language) {
 export function initI18n() {
   let saved: string | null = null;
   try { saved = localStorage.getItem(LANGUAGE_KEY); } catch { /* Browser language remains available. */ }
-  language = chooseLanguage(saved, navigator.language);
+  language = chooseLanguage(saved);
   document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
   document.title = translate('Little Worlds — a constellation made together');
   // User-authored strings are never interpreted as message keys, even if their

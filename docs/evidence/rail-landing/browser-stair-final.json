@@ -1,0 +1,143 @@
+{
+  "browser": "155.0.8059.85",
+  "status": "passed",
+  "fixtures": "Fresh local browser identities and isolated SQLite only; fixture placement/initial pose are test setup. Movement uses actual keyboard or touch controls.",
+  "views": [
+    {
+      "phone": false,
+      "route": "back",
+      "status": "passed",
+      "errors": [],
+      "rejections": [],
+      "checks": [
+        "old suspended save settles on the guard after loading",
+        "jump again and land on the guard",
+        "retreat from the guard onto the balcony",
+        "descend full stair route to terrain",
+        "climb stairs back onto the upper platform"
+      ],
+      "initial": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landing": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landingGrounded": true,
+      "end": [
+        -1.0324116536142875,
+        2.2023704953695953,
+        1.1439462070937696
+      ],
+      "stairBottom": [
+        -1.9745480455766105,
+        -0.26918896596046504,
+        -2.647471658408368
+      ],
+      "stairTop": [
+        -0.8669210574745183,
+        2.2022806013557954,
+        1.0224627214805513
+      ]
+    },
+    {
+      "phone": false,
+      "route": "forward",
+      "status": "passed",
+      "errors": [],
+      "rejections": [],
+      "checks": [
+        "old suspended save settles on the guard after loading",
+        "jump again and land on the guard",
+        "continue forward off the guard and land on terrain"
+      ],
+      "initial": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landing": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landingGrounded": true,
+      "end": [
+        -0.8656356124249105,
+        -0.13655230610877503,
+        2.3760787664919016
+      ]
+    },
+    {
+      "phone": true,
+      "route": "back",
+      "status": "passed",
+      "errors": [],
+      "rejections": [],
+      "checks": [
+        "old suspended save settles on the guard after loading",
+        "jump again and land on the guard",
+        "retreat from the guard onto the balcony",
+        "descend full stair route to terrain",
+        "climb stairs back onto the upper platform"
+      ],
+      "initial": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landing": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landingGrounded": true,
+      "end": [
+        -0.9570185068396911,
+        2.202247362017978,
+        0.8171798101470918
+      ],
+      "stairBottom": [
+        -2.010254916247743,
+        -0.31327382698126455,
+        -2.9478593888737987
+      ],
+      "stairTop": [
+        -1.014792688542522,
+        2.202316784847732,
+        0.9997622199254899
+      ]
+    },
+    {
+      "phone": true,
+      "route": "forward",
+      "status": "passed",
+      "errors": [],
+      "rejections": [],
+      "checks": [
+        "old suspended save settles on the guard after loading",
+        "jump again and land on the guard",
+        "continue forward off the guard and land on terrain"
+      ],
+      "initial": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landing": [
+        -1.0000979035674122,
+        3.27243910178698,
+        1.4401409811370702
+      ],
+      "landingGrounded": true,
+      "end": [
+        -0.8767541433607042,
+        -0.1424316107302518,
+        2.42539392017676
+      ]
+    }
+  ]
+}

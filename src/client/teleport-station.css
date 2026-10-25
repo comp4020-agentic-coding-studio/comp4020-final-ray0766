@@ -1,4 +1,6 @@
-/* Teleport station: the one gate action and the owner's siting bar. */
+/* Return destinations and the owner's siting bar. */
+.teleport-prompt button{min-height:44px}
+#teleport-home{margin-top:6px}
 .teleport-prompt{bottom:92px}
 #teleport-home-help{max-width:290px;margin:4px 0 8px;font-size:12px;line-height:1.5;text-align:left}
 #station-setup-dialog{max-width:430px}#station-setup-dialog button{margin:6px 6px 0 0;min-height:44px}

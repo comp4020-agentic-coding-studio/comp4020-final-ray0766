@@ -22,7 +22,7 @@ beforeEach(() => {
   Object.defineProperty(document, 'hidden', { configurable: true, value: false });
 });
 afterEach(() => { mounted?.dispose(); mounted = undefined; vi.restoreAllMocks(); vi.useRealTimers(); });
-const mount = (read: () => OnboardingContext | null) => mounted = mountOnboarding({ read });
+const mount = (read: () => OnboardingContext | null, findShip?:()=>void) => mounted = mountOnboarding({ read,findShip });
 
 describe('acknowledged first-visit steps', () => {
   test('arrival at an unclaimed landing beacon leads to claiming before boarding', () => {
@@ -43,7 +43,7 @@ describe('acknowledged first-visit steps', () => {
     expect(firstVisitTip(state).id).toBe('port');
     state.nearDock = true;
     expect(firstVisitTip(state).id).toBe('board');
-    expect(firstVisitTip(state).text).toContain('Stay here or Escape');
+    expect(firstVisitTip(state).text).toContain('Stay here cancels');
   });
   test('visitors and existing owners are never told to claim a second home', () => {
     const state = context('garden'); state.universe.currentPlanet.claimed = true;
@@ -83,15 +83,15 @@ describe('context card without changing game controls', () => {
   });
   test('uses only the existing Find my ship handler; does not board or claim', () => {
     const guide = vi.fn(), board = vi.fn(), claim = vi.fn();
-    el('guide-port').onclick = guide; el('board-ship').onclick = board; el('claim-planet').onclick = claim;
-    mount(() => context());
+    el('board-ship').onclick = board; el('claim-planet').onclick = claim;
+    mount(() => context(),guide);
     (el('first-visit-tip').querySelector('button')!).click();
     expect(guide).toHaveBeenCalledOnce(); expect(board).not.toHaveBeenCalled(); expect(claim).not.toHaveBeenCalled();
   });
   test('hides behind unrelated dialogs, offline state, panels and notices', () => {
     const state = context(); mount(() => state);
-    el('courier-dialog').setAttribute('open', ''); mounted!.refresh(); expect(el('first-visit-tip').hidden).toBe(true);
-    el('courier-dialog').removeAttribute('open'); state.online = false;
+    el('help-dialog').setAttribute('open', ''); mounted!.refresh(); expect(el('first-visit-tip').hidden).toBe(true);
+    el('help-dialog').removeAttribute('open'); state.online = false;
     mounted!.refresh(); expect(el('first-visit-tip').hidden).toBe(true);
     state.online = true; document.body.classList.add('workshop-open');
     mounted!.refresh(); expect(el('first-visit-tip').hidden).toBe(true);
@@ -107,7 +107,7 @@ describe('context card without changing game controls', () => {
     expect(el('first-visit-tip').querySelector('button')!.hidden).toBe(true);
     el('menu-dialog').removeAttribute('open'); el('star-map').setAttribute('open', '');
     mounted!.refresh(); expect(el('first-visit-tip').nextElementSibling).toBe(el('planet-list'));
-    expect(el('first-visit-tip').textContent).toContain('does not move you');
+    expect(el('first-visit-tip').textContent).toContain('select your destination and Depart');
   });
   test('the docking tip is inline with the real Board control and yields to its confirmation', () => {
     const state = context(); state.nearDock = true; mount(() => state);

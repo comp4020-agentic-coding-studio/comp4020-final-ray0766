@@ -3,7 +3,7 @@ import type {ArrivalState} from '../shared/world.ts';
 import type {HeavyWork} from './heavy-work.ts';
 import {RequestError} from './errors.ts';
 
-export const STORE_SCHEMA=17;
+export const STORE_SCHEMA=20;
 export function migrateArrivalHomes(db:DatabaseSync){
   db.exec(`CREATE TABLE IF NOT EXISTS home_preparations (
     player_id TEXT PRIMARY KEY REFERENCES players(id),

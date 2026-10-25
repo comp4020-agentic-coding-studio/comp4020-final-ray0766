@@ -6,6 +6,7 @@ import { distance, normalize, RADIUS, SPEED, SPRINT_SPEED, validPosition } from 
 import type { Vec3 } from '../shared/world.ts';
 import type { planetStore } from './planets.ts';
 import { RequestError } from './errors.ts';
+import {portPoint} from '../shared/ports.ts';
 interface PlayerRow {position:string;planet_id:string;moved_at:number}
 interface GroundRow {planet_id:string;position:string;radius:number;vertical_speed:number;grounded:number;sequence:number;scene_revision:number;physics_version:number;jump_held:number;clock_credit:number;request_hash:string|null}
 const view=(r:GroundRow):GroundState=>({radius:r.radius,verticalSpeed:r.vertical_speed,grounded:!!r.grounded,sequence:r.sequence,sceneRevision:r.scene_revision,physicsVersion:r.physics_version,jumpHeld:!!r.jump_held});
@@ -23,12 +24,16 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
   function ensure(id:string):GroundRow{
     const r=player(id),old=row(id),w=world(r.planet_id);
     if(old&&old.planet_id===r.planet_id&&old.scene_revision===w.revision&&old.physics_version===physicsVersionFor(r.planet_id)&&old.position===r.position)return old;
-    const start=old&&old.planet_id===r.planet_id&&old.position===r.position?pose(old):w.pose(JSON.parse(r.position));
+    const saved=old&&old.planet_id===r.planet_id&&old.position===r.position?pose(old):w.pose(JSON.parse(r.position));
+    const start={...saved,jumpHeld:false,verticalSpeed:Math.min(0,saved.verticalSpeed)};
     // Keep valid poses through door changes and physics upgrades, including airborne saves.
     // Public furnishings may invalidate a spot; removed supports must fall.
     const support=w.support(start.position,start.radius+.26);
-    const preserve=old&&([3,4,5,6,7,8].includes(old.physics_version)||(r.planet_id==='hub'&&[8,9].includes(old.physics_version)))&&old.planet_id===r.planet_id&&old.position===r.position&&!w.blocked(start)&&(!start.grounded||Math.abs(support.radius-start.radius)<.025);
-    const safe=preserve?start:w.recover(start),changed=distance(safe.position,JSON.parse(r.position))>.00001;
+    const preserve=old&&([3,4,5,6,7,8,9].includes(old.physics_version)||(r.planet_id==='hub'&&[8,9,10].includes(old.physics_version)))&&old.planet_id===r.planet_id&&old.position===r.position&&!w.blocked(start)&&(!start.grounded||Math.abs(support.radius-start.radius)<.025);
+    // This walking-only upgrade does not relocate even a stuck saved pose.
+    // The player can choose the explicit, confirmed self-recovery operation.
+    const walkingUpgrade=old&&old.planet_id===r.planet_id&&old.position===r.position&&old.scene_revision===w.revision&&old.physics_version===physicsVersionFor(r.planet_id)-1;
+    const safe=walkingUpgrade||preserve?start:w.recover(start),changed=distance(safe.position,JSON.parse(r.position))>.00001;
     db.exec('BEGIN IMMEDIATE');try{
       write(id,safe,(old?.sequence??-1)+1,w.revision,.1,null,r.planet_id);
       // A physics upgrade also fences older player responses when only the
@@ -45,6 +50,18 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
     warm(planetId:string){const w=cache.get(planetId);return !!w&&w.revision===planets.planet(planetId).revision;},
     read(id:string){return view(ensure(id));},
     reset(id:string){db.prepare('DELETE FROM ground_states WHERE player_id=?').run(id);},
+    /** Explicit self-rescue only: never accept a coordinate or alter another save. */
+    recoverToPort(id:string,sequence:unknown,now:number){
+      const old=ensure(id),r=player(id),w=world(r.planet_id);
+      if(!Number.isSafeInteger(sequence)||sequence!==old.sequence)throw new RequestError(409,'Your saved position changed. Reconnect before returning to safe ground.');
+      const safe=w.recover(w.pose(portPoint(r.planet_id)));
+      if(!safe.grounded||w.blocked(safe))throw new RequestError(409,'The landing area is blocked. Please try again later.');
+      db.exec('BEGIN IMMEDIATE');try{
+        write(id,safe,old.sequence+1,w.revision,.1,null,r.planet_id);
+        db.prepare('UPDATE players SET position=?,moved_at=?,revision=revision+1 WHERE id=?').run(JSON.stringify(safe.position),now,id);
+        db.exec('COMMIT');
+      }catch(error){db.exec('ROLLBACK');throw error;}
+    },
     move(id:string,target:Vec3,now:number,motion?:unknown){
       const old=ensure(id),r=player(id),w=world(r.planet_id);let steps:MotionStep[],sequence=old.sequence+1,hash:string|null=null;
       if(motion!==undefined){
@@ -52,7 +69,7 @@ export function groundStore(db:DatabaseSync,planets:ReturnType<typeof planetStor
         const m=motion as GroundMotion;
         if(m.physicsVersion!==physicsVersionFor(r.planet_id))throw new RequestError(409,'The walking model was updated. Reload this page before moving.');
         if(!Number.isSafeInteger(m.sequence)||!Array.isArray(m.steps)||!m.steps.length||m.steps.length>MAX_PATH_STEPS)throw new RequestError(400,'Send a bounded movement path and sequence.');
-        for(const s of m.steps)if(!Array.isArray(s)||(s.length!==4&&s.length!==5)||!validPosition(s.slice(0,3))||typeof s[3]!=='number'||!Number.isFinite(s[3])||s[3]<=0||s[3]>.050001||(s[4]!==undefined&&(!Number.isInteger(s[4])||s[4]<0||s[4]>3)))throw new RequestError(400,'Invalid movement sample.');
+        for(const s of m.steps)if(!Array.isArray(s)||(s.length!==4&&s.length!==5)||!validPosition(s.slice(0,3))||typeof s[3]!=='number'||!Number.isFinite(s[3])||s[3]<=0||s[3]>.050001||(s[4]!==undefined&&(!Number.isInteger(s[4])||s[4]<0||s[4]>SPRINT_FLAG)))throw new RequestError(400,'Invalid movement sample.');
         hash=createHash('sha256').update(JSON.stringify({target,motion})).digest('hex');
         if(m.sequence===old.sequence&&hash===old.request_hash)return;
         if(m.sequence!==old.sequence+1)throw new RequestError(409,'A newer ground position exists. Reconnect to your saved position.');

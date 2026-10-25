@@ -1,0 +1,31 @@
+{
+  "asset": "public/assets/welcome/main-planet-v1.webp",
+  "width": 1200,
+  "height": 1200,
+  "bytes": 161748,
+  "sha256": "82fd4a065952af336e7a29f5a2eeb06dffcf98157e9a677d0c3bc66369cbb587",
+  "sourceCommit": "d5e524cf948c4d8da6476b61d5189ceb3df853a6",
+  "source": "src/client/scene.ts createWorld(scene, true, null, [], {}, 21.6), using samplePublicVillage/publicTown and current main-planet layout; existing original model/material adapters",
+  "camera": {
+    "type": "PerspectiveCamera",
+    "fov": 34,
+    "aspect": 1,
+    "near": 0.1,
+    "far": 300,
+    "position": [
+      26,
+      68,
+      63
+    ],
+    "lookAt": [
+      0,
+      0,
+      0
+    ]
+  },
+  "lighting": "ART_LIGHT.fill / fillIntensity ambient, ART_LIGHT.sun / sunIntensity directional at [-35,70,50]",
+  "renderer": "Chrome 155.0.8059.85, Three WebGLRenderer alpha/antialias/preserveDrawingBuffer, 1200x1200, pixelRatio1, SRGBColorSpace; canvas.toDataURL(image/webp, .88)",
+  "captureOnlyAdjustment": "hide transient meshes named landmark-beam; world.animate(0, true, camera.position, [0,1,0], true); no geography or model changes",
+  "runtime": "Single static image; capture renderer/helper is not imported by the app; no second world or added WebGL context",
+  "reference": "Composition based on the parent-reviewed user attachment description. No Messenger code, textures, models or logo were downloaded."
+}

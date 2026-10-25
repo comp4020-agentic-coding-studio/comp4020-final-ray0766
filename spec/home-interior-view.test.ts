@@ -14,13 +14,11 @@ describe('home room presentation', () => {
       expect(Math.abs(point.y)).toBeLessThan(.95);
       expect(Math.abs(point.z)).toBeLessThan(1);
     }
-    // The optional overview fits every corner; the normal narrow-screen view
-    // follows the player at 1.65x instead of shrinking the metre-sized avatar.
-    if (width < 700 || height < 500) { camera.zoom = 1.65; camera.updateProjectionMatrix(); }
+    // The sole fixed-angle view fits the entire room without changing avatar scale.
     const feet = new Vector3(...HOME_ENTRY).project(camera), head = new Vector3(HOME_ENTRY[0], 1.62, HOME_ENTRY[2]).project(camera);
     // Screen readability, not a device-independent NDC fraction: portrait
     // fitting leaves more vertical space but still needs a legible avatar.
-    expect((head.y - feet.y) * height / 2).toBeGreaterThan(60);
+    expect((head.y - feet.y) * height / 2).toBeGreaterThan(35);
   });
 
   it('allows moving a table into open space but refuses doorway, overlaps and a standing player', () => {

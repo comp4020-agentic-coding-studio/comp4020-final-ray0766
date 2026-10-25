@@ -1,0 +1,8 @@
+{
+  "src/shared/physics/world.ts": "b58bd43f1a97525af65c942387d271240ab0f97153c5f0b4a781ec1c59e7245a",
+  "src/shared/physics/parts.ts": "35e3da2f28d72e5a262f9dfabf2ef18cf93fe8766fb5959549fea7d2147d8517",
+  "src/server/ground.ts": "67a2beaed9ce8b955c1f283acd0b86ba440fa9ea7701291aae0da6bdd41ed446",
+  "spec/rail-landing.test.ts": "703e996be0ab301affb1f64c4dedb4d2767a10485c1f2765f3e0e4ae9f9cf989",
+  "spec/stair-replay.test.ts": "86792e38b761cdb07c36dde283442e629afa0b3312aaf0215de3e82970be6424",
+  "spec/village-physics.test.ts": "a99f4ec294ab77161ef394bbb66d998b51afb5964eef6f017e205a464bbb5f37"
+}

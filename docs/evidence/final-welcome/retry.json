@@ -1,0 +1,29 @@
+{
+  "browser": "155.0.8059.85",
+  "cases": [
+    {
+      "view": "desktop",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "staticBeforeMain": true,
+      "noWebGLBeforeMain": true,
+      "indeterminateProgress": true,
+      "moduleErrorRetryByKeyboard": true,
+      "realWorldReadyAfterRetry": true
+    },
+    {
+      "view": "phone",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "staticBeforeMain": true,
+      "noWebGLBeforeMain": true,
+      "indeterminateProgress": true,
+      "moduleErrorRetryByKeyboard": true,
+      "realWorldReadyAfterRetry": true
+    }
+  ]
+}

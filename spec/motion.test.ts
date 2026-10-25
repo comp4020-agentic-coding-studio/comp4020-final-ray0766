@@ -35,3 +35,13 @@ it('walks backward without turning the character away from the viewing heading',
   expect(w.velocity.clone().normalize().dot(w.facing)).toBeLessThan(-.99);
   expect(w.facing.length()).toBeCloseTo(1,9);
 });
+
+it('WASD follows the mouse heading on both sides of the sphere without rolling the frame',()=>{
+ for(const up of [[0,1,0],[0,-1,0],[1,0,0]])for(const [x,y] of [[0,1],[0,-1],[1,0],[-1,0]]){
+  const w=new SurfaceWalker(up);w.turnView(-Math.PI/2);
+  w.step(x,y,1/60);
+  const desired=w.right().multiplyScalar(x).addScaledVector(w.north,y).normalize();
+  expect(w.velocity.clone().normalize().dot(desired)).toBeGreaterThan(.99999);
+  expect(w.north.dot(w.up)).toBeCloseTo(0,9);expect(w.facing.dot(w.up)).toBeCloseTo(0,9);
+ }
+});

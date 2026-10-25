@@ -4,7 +4,7 @@ import { dirname } from 'node:path';
 
 const routes: Record<string, string> = {
   state: 'session.resumed', universe: 'world.read', blueprints: 'blueprint.read',
-  'arrival/retry': 'arrival.retry_requested',
+  'arrival/retry': 'arrival.retry_requested', 'guide/help': 'guide.help_requested',
   history: 'history.read', 'history/snapshot': 'history.snapshot',
   'blueprints/save': 'blueprint.saved', 'home/setup/preview': 'home.setup.preview',
   'home/setup/confirm': 'home.setup.confirmed', 'home/enter': 'home.entered',
@@ -13,8 +13,9 @@ const routes: Record<string, string> = {
   'home/paths/apply': 'home.paths.applied', 'home/remodel': 'home.remodelled',
   'home/undo': 'home.undo', 'objects/replace': 'object.replaced', 'objects/undo': 'object.undo',
   'terrain/apply': 'terrain.applied', 'ship/save': 'ship.saved', presence: 'presence',
-  character: 'coat.changed', move: 'ground.walked', interact: 'delivery.interacted',
+  appearance:'appearance.saved', character: 'coat.changed', 'ground/recover':'ground.recovered', move: 'ground.walked', interact: 'delivery.interacted',
   'flight/takeoff': 'flight.departed', 'flight/checkpoint': 'flight.checkpoint',
+  'trip/start':'trip.started','trip/change':'trip.changed','trip/finish':'trip.arrived','planets/rename':'planet.renamed',
   'flight/land': 'flight.landed', teleport: 'gate.travelled',
   'teleport/station/preview': 'station.preview', 'teleport/station/confirm': 'station.built',
   'planets/visit': 'travel.withdrawn', 'planets/claim': 'planet.claimed',

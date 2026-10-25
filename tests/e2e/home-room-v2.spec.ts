@@ -33,16 +33,16 @@ for(const phone of [false,true])test(`large independent room and explicit door: 
     await page.reload();await expect(page.locator('.home-interior-ui')).toBeVisible();await expect(page.locator('#home-exit')).toBeDisabled();
     expect((await state(page)).home!.interior.items).toEqual(home.interior.items);
     await page.waitForTimeout(300);await page.screenshot({path:`${evidence}/${id}-follow.png`});
-    await click('#home-camera-view');await page.waitForTimeout(300);await page.screenshot({path:`${evidence}/${id}-overview.png`});
+    await expect(page.locator('#home-camera-view')).toHaveCount(0);await page.waitForTimeout(300);await page.screenshot({path:`${evidence}/${id}-overview.png`});
     if(phone){
-      await page.setViewportSize({width:844,height:390});await click('#home-camera-view');await page.waitForTimeout(300);
+      await page.setViewportSize({width:844,height:390});await page.waitForTimeout(300);
       await page.screenshot({path:`${evidence}/${id}-landscape.png`});
-      for(const selector of ['#home-toggle-door','#home-camera-view','#home-arrange','#home-joystick']){
+      for(const selector of ['#home-toggle-door','#home-photo','#home-arrange','#home-joystick']){
         const box=await page.locator(selector).boundingBox();expect(box).toBeTruthy();expect(box!.x).toBeGreaterThanOrEqual(0);expect(box!.y).toBeGreaterThanOrEqual(0);expect(box!.x+box!.width).toBeLessThanOrEqual(844);expect(box!.y+box!.height).toBeLessThanOrEqual(390);
       }
-      await page.setViewportSize({width:390,height:844});checks.push('Landscape 844×390 retains reachable door, camera, arrange and movement controls');
+      await page.setViewportSize({width:390,height:844});checks.push('Landscape 844×390 retains reachable door, photo, arrange and movement controls');
     }
-    checks.push('60.2 square metres, unchanged furniture dimensions/coordinates and persistent interior identity','Exterior and interior close/open actions survive reload without moving the player','Closed portal refuses entry/exit; camera switches between follow and whole-room views');
+    checks.push('60.2 square metres, unchanged furniture dimensions/coordinates and persistent interior identity','Exterior and interior close/open actions survive reload without moving the player','Closed portal refuses entry/exit; fixed 2.5D room camera remains unchanged');
     await click('#home-arrange');await click('#home-material-sage');await click('#home-item-left');await click('#home-save');
     await expect(page.locator('#home-room-editor')).not.toBeVisible();
     const saved=await state(page);expect(saved.home!.interior.items[0].position[0]).toBe(home.interior.items[0].position[0]-.25);

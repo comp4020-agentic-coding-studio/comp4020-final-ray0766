@@ -1,0 +1,121 @@
+{
+  "browser": "155.0.8059.85",
+  "origin": "http://127.0.0.1:8164",
+  "physicalPhone": false,
+  "views": [
+    {
+      "name": "desktop",
+      "language": "zh-CN",
+      "metrics": {
+        "width": 1920,
+        "height": 1080,
+        "scrollHeight": 1080,
+        "clientHeight": 1080,
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "title": "小星球",
+        "imageLoaded": 1200,
+        "button": {
+          "x": 864.2202758789062,
+          "y": 786.3241577148438,
+          "width": 191.55950927734375,
+          "height": 54.6016845703125,
+          "top": 786.3241577148438,
+          "right": 1055.77978515625,
+          "bottom": 840.9258422851562,
+          "left": 864.2202758789062
+        },
+        "note": {
+          "x": 909,
+          "y": 927.671875,
+          "width": 456,
+          "height": 59.390625,
+          "top": 927.671875,
+          "right": 1365,
+          "bottom": 987.0625,
+          "left": 909
+        },
+        "animations": 0
+      },
+      "qualityChanged": true,
+      "keyboardStarted": true,
+      "errors": []
+    },
+    {
+      "name": "phone",
+      "language": "zh-CN",
+      "metrics": {
+        "width": 390,
+        "height": 844,
+        "scrollHeight": 844,
+        "clientHeight": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "title": "小星球",
+        "imageLoaded": 1200,
+        "button": {
+          "x": 99.22028350830078,
+          "y": 492.41790771484375,
+          "width": 191.5594482421875,
+          "height": 54.6016845703125,
+          "top": 492.41790771484375,
+          "right": 290.7797317504883,
+          "bottom": 547.0195922851562,
+          "left": 99.22028350830078
+        },
+        "note": {
+          "x": 32,
+          "y": 728.71875,
+          "width": 326,
+          "height": 70.375,
+          "top": 728.71875,
+          "right": 358,
+          "bottom": 799.09375,
+          "left": 32
+        },
+        "animations": 0
+      },
+      "qualityChanged": true,
+      "keyboardStarted": true,
+      "errors": []
+    },
+    {
+      "name": "phone-en",
+      "language": "en",
+      "metrics": {
+        "width": 390,
+        "height": 844,
+        "scrollHeight": 858,
+        "clientHeight": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "title": "Little Worlds",
+        "imageLoaded": 1200,
+        "button": {
+          "x": 99.22028350830078,
+          "y": 466.08978271484375,
+          "width": 191.5594482421875,
+          "height": 54.6016845703125,
+          "top": 466.08978271484375,
+          "right": 290.7797317504883,
+          "bottom": 520.6914672851562,
+          "left": 99.22028350830078
+        },
+        "note": {
+          "x": 32,
+          "y": 717.390625,
+          "width": 326,
+          "height": 105.5625,
+          "top": 717.390625,
+          "right": 358,
+          "bottom": 822.953125,
+          "left": 32
+        },
+        "animations": 0
+      },
+      "qualityChanged": true,
+      "keyboardStarted": true,
+      "errors": []
+    }
+  ]
+}

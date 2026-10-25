@@ -61,6 +61,7 @@ export function createTutorialRoute(parent: T.Object3D, surface: TutorialSurface
   arrows.name = 'tutorial-direction-arrows'; arrows.count = 0; arrows.instanceMatrix.setUsage(T.DynamicDrawUsage); arrows.frustumCulled = false;
   for (const mesh of [ribbon, arrows, ring]) { mesh.raycast = () => {}; mesh.castShadow = false; mesh.receiveShadow = false; mesh.renderOrder = 3; root.add(mesh); }
   const matrix = new T.Matrix4(), up = new T.Vector3(), front = new T.Vector3(), right = new T.Vector3();
+  let routePoints: Vec3[] = [];
   let disposed = false, lastKey = '', lastPosition: Vec3 | null = null, lastPlanAt = -Infinity, lastRingKey = '';
   let routesReference: TutorialRouteFrame['homeRoutes'], routesSignature = '', proofRevision = '';
   const proofCache = new Map<string, boolean>();
@@ -112,7 +113,7 @@ export function createTutorialRoute(parent: T.Object3D, surface: TutorialSurface
     if (disposed) return;
     const { target } = input;
     root.visible = input.visible && !input.paused && !!target && target.planetId === input.planetId;
-    if (!root.visible || !target) { lastKey = ''; return; }
+    if (!root.visible || !target) { lastKey = ''; routePoints = []; return; }
     // Polling reconstructs equivalent JSON arrays. Only re-serialize on a new
     // reference; use its exact contents, not reference identity, to invalidate.
     if (routesReference !== input.homeRoutes) {
@@ -124,7 +125,8 @@ export function createTutorialRoute(parent: T.Object3D, surface: TutorialSurface
     const now = input.time ?? 0;
     if (proofRevision !== key) { proofCache.clear(); proofRevision = key; }
     if (key !== lastRingKey) { drawRing(target.position, input.radius); lastRingKey = key; }
-    if (key !== lastKey || !lastPosition || (!diagnostics.connected && now - lastPlanAt >= .6) || (now - lastPlanAt >= .35 && arc(lastPosition, input.position, input.radius) >= .65)) {
+    const arrivalChanged = (arc(input.position, target.position, input.radius) <= .22) !== (diagnostics.reason === 'arrived');
+    if (key !== lastKey || !lastPosition || arrivalChanged || (!diagnostics.connected && now - lastPlanAt >= .6) || (now - lastPlanAt >= .35 && arc(lastPosition, input.position, input.radius) >= .65)) {
       const started = performance.now();
       const route = routeToTutorialTarget({ ...input, target, readProofCache: (from, to) => {
         const id = `${from.join(',')}|${to.join(',')}`, known = proofCache.get(id);
@@ -135,13 +137,13 @@ export function createTutorialRoute(parent: T.Object3D, surface: TutorialSurface
         const id = `${from.join(',')}|${to.join(',')}`;
         const safe = input.canConnect!(from, to); if (proofCache.size >= TUTORIAL_ROUTE_BUDGET.proofEntries) proofCache.delete(proofCache.keys().next().value!); proofCache.set(id, safe); return safe;
       } : undefined });
-      drawPath(route.points, input.radius); diagnostics.connected = route.connected; diagnostics.reason = route.reason;
+      routePoints = route.points; drawPath(route.points, input.radius); diagnostics.connected = route.connected; diagnostics.reason = route.reason;
       diagnostics.sourceRoutes = route.sourceRoutes; diagnostics.replans++; lastKey = key; lastPosition = [...input.position]; lastPlanAt = now;
       diagnostics.lastReplanMs = performance.now() - started; diagnostics.maxReplanMs = Math.max(diagnostics.maxReplanMs, diagnostics.lastReplanMs); diagnostics.proofCacheEntries = proofCache.size;
     }
     ringMaterial.opacity = input.reducedMotion ? .95 : .86 + Math.sin(now * 2.5) * .09;
   }
-  return { root, frame, diagnostics, dispose() {
+  return { root, frame, diagnostics, get path(): readonly Vec3[] { return routePoints; }, dispose() {
     if (disposed) return; disposed = true; root.removeFromParent(); root.clear();
     ribbonGeometry.dispose(); arrowGeometry.dispose(); ringGeometry.dispose(); ribbonMaterial.dispose(); arrowMaterial.dispose(); ringMaterial.dispose();
   } };

@@ -17,6 +17,7 @@ const observers=new Set<(task:Readonly<LoadingTask>|null)=>void>();
 let embeddedHost:HTMLElement|null=null;
 let root:HTMLDialogElement|null=null;
 const zh:Record<string,string>={
+  'Preparing your flight corridor…':'正在预加载飞行航路…',
   'Preparing your world…':'正在准备你的星球…','Preparing nearby worlds…':'正在准备附近的星球…',
   'Preparing your room…':'正在准备房间…','Opening the workshop…':'正在打开工坊…',
   'Preparing the ground…':'正在准备地面…','Bringing buildings into view…':'正在准备建筑…',

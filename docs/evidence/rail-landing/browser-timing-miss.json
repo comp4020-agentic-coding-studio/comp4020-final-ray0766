@@ -1,0 +1,26 @@
+{
+  "browser": "155.0.8059.85",
+  "status": "incomplete",
+  "fixtures": "Fresh local browser identities and isolated SQLite only; fixture placement/initial pose are test setup. Movement uses actual keyboard or touch controls.",
+  "views": [
+    {
+      "phone": false,
+      "status": "failed",
+      "errors": [],
+      "rejections": [],
+      "checks": [],
+      "initial": [
+        -1.000097647486785,
+        2.20232823916047,
+        1.0501025298611248
+      ],
+      "landing": [
+        -0.884401562353649,
+        -0.06775734508740941,
+        1.5997656217180758
+      ],
+      "landingGrounded": true,
+      "failure": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 3.2\nReceived:   -0.06775734508740941"
+    }
+  ]
+}

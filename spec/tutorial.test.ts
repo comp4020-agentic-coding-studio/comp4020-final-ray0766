@@ -163,3 +163,23 @@ it('localizes the safe fallback in place and keeps Skip available without confir
   expect(tutorial.target).toBeNull();expect(status.hidden).toBe(true);expect(context.universe.player.quest).toBe('available');
   expect(document.activeElement?.id).toBe('open-menu');
 });
+
+it('switches control guidance between flight observation/driving and ground movement',()=>{
+  const context=fixture();tutorial=mountTutorial({read:()=>context});
+  const controls=()=>card().querySelector('.tutorial-controls')!.textContent;
+  expect(controls()).toContain('WASD / arrows walk');
+  context.universe.player.flight.mode='space';tutorial.receive(context.universe);
+  expect(controls()).toContain('Choose a destination');expect(controls()).toContain('landing are automatic');expect(controls()).not.toContain('jumps');
+  context.touch=true;tutorial.receive(context.universe);expect(controls()).toContain('landing are automatic');expect(controls()).not.toContain('thumbstick to walk');
+  context.universe.player.flight.mode='ground';tutorial.receive(context.universe);expect(controls()).toContain('thumbstick to walk');
+});
+
+
+it('uses fixed room instructions indoors and restores outdoor and flight controls',()=>{
+  const context=fixture();context.fixedIndoor=true;tutorial=mountTutorial({read:()=>context});
+  const controls=card().querySelector('.tutorial-controls')!;
+  expect(controls.textContent).toContain('Fixed 2.5D');expect(controls.textContent).not.toContain('mouse');
+  context.touch=true;tutorial.receive(context.universe);expect(controls.textContent).toContain('thumbstick');expect(controls.textContent).not.toContain('drag');
+  context.fixedIndoor=false;context.touch=false;tutorial.receive(context.universe);expect(controls.textContent).toContain('mouse');
+  Object.assign(context.universe.player.flight,{mode:'space'});tutorial.receive(context.universe);expect(controls.textContent).toContain('Drag to look around');
+});

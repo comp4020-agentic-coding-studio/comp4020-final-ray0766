@@ -35,3 +35,25 @@ it('reclips an interpolated eye without moving the supplied head or exceeding cl
  expect(clipLegacyCameraBoom(head,eye,()=>.001).distanceTo(head)).toBeCloseTo(.001);
  expect(clipLegacyCameraBoom(head,eye,()=>0).equals(head)).toBe(true);expect(head.equals(before)).toBe(true);
 });
+
+it('applies bounded manual pitch in clear space, keeping the local horizon and arm length',()=>{
+ for(const up of [[0,1,0],[0,-1,0],[1,0,0]])for(const portrait of [false,true]){
+  const w=new SurfaceWalker(up),feet=w.up.clone().multiplyScalar(21.6);
+  const base=legacyOutdoorCameraPose(w,portrait,21.6,feet,w.up,0,clear);
+  for(const pitch of [-.3,.3,.7]){
+   const p=legacyOutdoorCameraPose(w,portrait,21.6,feet,w.up,pitch,clear),dir=p.target.clone().sub(p.position).normalize();
+   const expected=base.target.clone().sub(base.position).normalize().applyAxisAngle(w.right(),pitch);
+   expect(dir.distanceTo(expected)).toBeLessThan(1e-8);expect(dir.dot(w.right())).toBeCloseTo(0,9);
+   expect(p.position.distanceTo(p.head)).toBeCloseTo(base.position.distanceTo(base.head),8);
+  }
+  expect(legacyOutdoorCameraPose(w,portrait,21.6,feet,w.up,Infinity,clear).position.equals(base.position)).toBe(true);
+ }
+});
+it('rechecks a pitched boom against walls without extending beyond clearance',()=>{
+ const w=walker(),feet=w.up.clone().multiplyScalar(21.6);
+ for(const pitch of [-.3,.7])for(const limit of [.1,1,3,5]){
+  const p=legacyOutdoorCameraPose(w,false,21.6,feet,w.up,pitch,(a,b)=>Math.min(limit,a.distanceTo(b)));
+  expect(p.position.distanceTo(p.head)).toBeLessThanOrEqual(limit+1e-8);
+  expect(p.target.clone().sub(p.position).normalize().dot(w.right())).toBeCloseTo(0,9);
+ }
+});

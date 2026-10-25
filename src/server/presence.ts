@@ -30,7 +30,7 @@ export function presenceStore(state:(id:string)=>PlayerState){
         if(other===id||e.planetId!==self.planetId||e.scope!==scope)continue;
         // Re-read authoritative saves: no client position or exposed session hash.
         const p=state(other),otherScope=p.location?.kind==='interior'?'home:'+p.location.buildingId:'exterior';if(p.planetId!==self.planetId||p.flight.mode!=='ground'||otherScope!==scope){entries.delete(other);continue;}
-        nearby.push({id:e.publicId,position:p.location?.kind==='interior'?p.location.position:p.position,facing:e.facing,character:p.character,...(p.ground?{radius:p.ground.radius,grounded:p.ground.grounded}:{})});
+        nearby.push({id:e.publicId,position:p.location?.kind==='interior'?p.location.position:p.position,facing:e.facing,character:p.character,...(p.appearance?{appearance:p.appearance}:{}),...(p.ground?{radius:p.ground.radius,grounded:p.ground.grounded}:{})});
       }
       const metric=(p:Vec3)=>inside?Math.hypot(...p.map((v,i)=>v-inside.position[i])):distance(p,self.position);
       nearby.sort((a,b)=>metric(a.position)-metric(b.position)||a.id.localeCompare(b.id));

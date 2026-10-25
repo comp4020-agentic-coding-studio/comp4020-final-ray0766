@@ -56,7 +56,7 @@ it('keeps unknown final/shader stages indeterminate and translates live without 
   task.update('Finishing the view…');expect(get('welcome-progress').hasAttribute('value')).toBe(false);expect(get('welcome-count').hidden).toBe(true);
   document.documentElement.lang='zh-CN';await Promise.resolve();
   expect(get('welcome-stage').textContent).toBe('正在完成画面…');expect(get('welcome-start').textContent).toBe('正在准备你的星球…');
-  expect(get('welcome-panel').querySelector('h1')!.textContent).toBe('一个小世界，等你来。');
+  expect(get('welcome-panel').querySelector('h1')!.textContent).toBe('小星球');
   expect(get<HTMLButtonElement>('welcome-start').disabled).toBe(true);
 });
 it('presents only actual graphics failure guidance, with explicit retry and no identity/network work',()=>{
@@ -96,7 +96,7 @@ it('can remount the completed welcome DOM for a real context-loss notice',async(
 
 it.each(['en','zh-CN'])('keeps the device notice available before modules and after a module failure (%s)',language=>{
   const page=new JSDOM(html,{url:'http://welcome.test/',runScripts:'dangerously',beforeParse(window){
-    window.localStorage.setItem('little-worlds:language:v1',language);
+    window.localStorage.setItem('little-worlds:language:v1',language==='zh-CN'?'zh':'en');
   }});
   try {
     const doc=page.window.document,note=doc.getElementById('welcome-device-note')!;
@@ -110,7 +110,7 @@ it.each(['en','zh-CN'])('keeps the device notice available before modules and af
 });
 it.each(['en','zh-CN'])('offers retry when the built module script has no source HTML id (%s)',language=>{
   const page=new JSDOM(html.replace('id="game-module" ',''),{url:'http://welcome.test/',runScripts:'dangerously',beforeParse(window){
-    window.localStorage.setItem('little-worlds:language:v1',language);
+    window.localStorage.setItem('little-worlds:language:v1',language==='zh-CN'?'zh':'en');
   }});
   try{
     const doc=page.window.document,retry=doc.getElementById('welcome-retry')!;
@@ -134,4 +134,13 @@ it('preserves the device notice through readiness, graphics failure and live lan
   expect(get('welcome-retry').hidden).toBe(false);
   document.documentElement.lang='en';await Promise.resolve();
   expect(get('welcome-device-note').textContent).toBe(deviceNotes.en);
+});
+
+
+it.each([null,'','bad','zh-CN','en','zh'])('uses English boot defaults and preserves only explicit saved Chinese (%s)',saved=>{
+ const page=new JSDOM(html,{url:'http://welcome.test/',runScripts:'dangerously',beforeParse(window){
+  Object.defineProperty(window.navigator,'language',{value:'zh-CN',configurable:true});
+  if(saved!==null)window.localStorage.setItem('little-worlds:language:v1',saved);
+ }});
+ try{const doc=page.window.document,zh=saved==='zh';expect(doc.documentElement.lang).toBe(zh?'zh-CN':'en');expect(doc.getElementById('welcome-device-note')!.textContent).toBe(deviceNotes[zh?'zh':'en']);doc.getElementById('game-module')!.dispatchEvent(new page.window.Event('error'));expect(doc.getElementById('welcome-stage')!.textContent).toBe(zh?'游戏模块暂时无法加载。':'The game modules could not be loaded.');}finally{page.window.close();}
 });

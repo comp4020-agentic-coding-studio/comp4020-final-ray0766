@@ -91,7 +91,7 @@ beforeEach(()=>{
   mocks.library.mockImplementation(()=>({attachRenderer:vi.fn(),dispose:vi.fn()}));
   mocks.room.mockImplementation(()=>{const model=ownedModel(`room-${rooms.length}`);rooms.push(model);return model;});
   mocks.furniture.mockImplementation((name:string)=>{const model=ownedModel(name);furniture.push(model);return model;});
-  mocks.courier.mockImplementation(()=>({root:new T.Group(),setColor:vi.fn(),animate:vi.fn()}));
+  mocks.courier.mockImplementation(()=>({root:new T.Group(),setColor:vi.fn(),setAppearance:vi.fn(),animate:vi.fn()}));
   mocks.door.mockImplementation(()=>({root:new T.Group(),setOpen:vi.fn(),setPart:vi.fn(),frame:vi.fn(),dispose:vi.fn()}));
   mocks.drawing.mockImplementation(()=>({render:vi.fn(),resize:vi.fn(),dispose:vi.fn()}));
 });
@@ -342,4 +342,16 @@ describe('workshop preparation lifecycle',()=>{
     expect(bridge.read).toHaveBeenCalledTimes(2);expect((document.getElementById('ws-name') as HTMLInputElement).value).toBe('Recovered plan');
     expect(bridge.save).not.toHaveBeenCalled();expect(bridge.place).not.toHaveBeenCalled();expect(mocks.tasks.every(task=>task.finished)).toBe(true);
   });
+});
+
+it('restores every home into fixed 2.5D, releases capture and exposes no perspective toggle',async()=>{
+ const {home,renderer}=interior();const state=player();
+ localStorage.setItem('little-worlds:home-camera:v1','3d');
+ Object.defineProperty(document,'pointerLockElement',{configurable:true,value:renderer.domElement});
+ const release=vi.fn();Object.defineProperty(document,'exitPointerLock',{configurable:true,value:release});
+ try{home.receive(state);expect(release).toHaveBeenCalledOnce();await advanceUntil(()=>!home.preparing);home.frame(.05,2);
+ expect(document.querySelector('#home-camera-view')).toBeNull();expect(home.camera.isOrthographicCamera).toBe(true);expect(home.camera.zoom).toBe(1);expect(renderer.domElement.dataset.indoorView).toBe('2.5d');
+ const pose=home.camera.toJSON();document.body.dispatchEvent(new KeyboardEvent('keydown',{key:'v',bubbles:true}));home.frame(.05,2.05);expect(home.camera.toJSON()).toEqual(pose);
+ expect(home.getPhotoView(1920,1080).fixedAngle).toBe(true);expect(state.home!.interior).toEqual(player().home!.interior);
+ }finally{Reflect.deleteProperty(document,'pointerLockElement');Reflect.deleteProperty(document,'exitPointerLock');localStorage.clear();}
 });

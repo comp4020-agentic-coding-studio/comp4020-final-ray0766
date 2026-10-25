@@ -17,12 +17,14 @@ interface TeleportBridge {
   ghost(addition: HomeSetupAddition | undefined): void;
   apply(next: Universe): void;
   notice(message: string): void;
+  findShip?():void;
 }
 
-/** One gate action (your home ⇄ the harbour) and the owner's station siting. */
+/** Return destinations from any gate, plus the owner's station siting. */
 export class TeleportStations {
   private prompt = document.createElement('div');
   private action = document.createElement('button');
+  private homeAction = document.createElement('button');
   private homeHelp = document.createElement('p');
   private findShip = document.createElement('button');
   private setupButton = document.createElement('button');
@@ -42,10 +44,13 @@ export class TeleportStations {
     this.prompt.id = 'teleport-prompt'; this.prompt.className = 'boarding-prompt teleport-prompt'; this.prompt.hidden = true;
     setHTML(this.prompt, '<small id="teleport-context">TELEPORT STATION</small>');
     this.action.id = 'teleport-go'; this.action.className = 'primary'; this.prompt.append(this.action);
+    this.homeAction.id = 'teleport-home'; this.homeAction.className = 'primary'; this.homeAction.hidden = true;
+    setText(this.homeAction, 'Return to my home'); this.prompt.append(this.homeAction);
+    this.homeAction.onclick = () => { const home = this.universe?.ownedPlanetId; if (home) void this.use(home); };
     this.homeHelp.id='teleport-home-help';this.homeHelp.hidden=true;
     setText(this.homeHelp,'This gate returns to your own home. You have not claimed one yet. Find your ship, mark a Blank · unclaimed world in Atlas, fly there and land. Then Pause → Make this my planet → Build on my planet.');
     this.findShip.id='teleport-find-ship';this.findShip.className='primary';this.findShip.hidden=true;setText(this.findShip,'Find my ship');
-    this.findShip.onclick=()=>document.getElementById('guide-port')?.click();
+    this.findShip.onclick=()=>this.bridge.findShip?.();
     this.prompt.append(this.homeHelp,this.findShip);
     (document.getElementById('boarding-prompt') ?? document.body.lastElementChild)!.after(this.prompt);
     this.action.onclick = () => void this.use();
@@ -71,20 +76,26 @@ export class TeleportStations {
     }
     this.setupButton.hidden = !planet.mine || planet.kind !== 'garden' || this.sites.length > 0 || player.flight.mode !== 'ground' || player.location?.kind === 'interior';
   }
-  /** Your home's gate leads to the harbour, the harbour's gate back to your home; a neighbour's gate offers nothing. */
-  private destination(): string | null {
-    const u = this.universe; if (!u?.ownedPlanetId || (u.currentPlanet.kind === 'hub' && u.player.arrival && u.player.arrival.homePreparation !== 'ready')) return null;
-    if (u.currentPlanet.kind === 'hub') return u.ownedPlanetId;
-    return u.currentPlanet.id === u.ownedPlanetId ? u.planets.find(p => p.kind === 'hub')?.id ?? null : null;
+  /** Keep the harbour as the predictable E action on every non-hub planet. */
+  private destinations(): string[] {
+    const u = this.universe;
+    if (!u || u.player.flight.mode !== 'ground' || u.player.location?.kind === 'interior') return [];
+    const targets: string[] = [];
+    const hub = u.planets.find(p => p.kind === 'hub')?.id;
+    if (hub && u.currentPlanet.id !== hub) targets.push(hub);
+    const ready = !u.player.arrival || u.player.arrival.homePreparation === 'ready';
+    if (ready && u.ownedPlanetId && u.ownedPlanetId !== u.currentPlanet.id) targets.push(u.ownedPlanetId);
+    return targets;
   }
   /** Called from the UI tick with the walker's surface position. */
   frame(position: Vec3, radius: number, enabled: boolean) {
-    const target = this.destination();
+    const targets = this.destinations(), target = targets[0];
     const nearStation=enabled&&this.sites.some(site=>distance(position,site.interact,radius)<STATION_REACH-.12);
     const arrival=this.universe?.player.arrival,preparing=!!arrival&&arrival.homePreparation!=='ready';
-    const needsHome=nearStation&&this.universe?.currentPlanet.kind==='hub'&&(!this.universe.ownedPlanetId||preparing)&&!this.busy;
+    const needsHome=nearStation&&!!this.universe&&(!this.universe.ownedPlanetId||preparing)&&!this.busy;
     this.near=nearStation&&!!target;
-    this.homeHelp.hidden=!needsHome;this.findShip.hidden=!needsHome||preparing;this.action.hidden=!!needsHome;
+    this.homeHelp.hidden=!needsHome;this.findShip.hidden=!needsHome||preparing;this.action.hidden=!target;
+    this.homeAction.hidden=targets.length<2;this.homeAction.disabled=this.busy;
     if(needsHome)setText(this.homeHelp,preparing
       ? arrival?.homePreparation==='retry'?'Your home preparation paused. Open the village guide to retry. You can keep exploring here.':'Your home is being prepared. You can explore the village while this gate gets ready.'
       : 'This gate returns to your own home. You have not claimed one yet. Find your ship, mark a Blank · unclaimed world in Atlas, fly there and land. Then Pause → Make this my planet → Build on my planet.');
@@ -94,19 +105,18 @@ export class TeleportStations {
     const key = `${label}|${document.documentElement.lang}`;
     if (key !== this.labelKey) { this.labelKey = key; setText(this.action, label); if (!this.busy) { const hint = document.createElement('kbd'); hint.textContent = 'E'; this.action.append(hint); } }
   }
-  get canUse() { return this.near && !this.busy; }
+  get canUse() { return this.near && !this.busy && this.destinations().length > 0; }
   /** The station a fresh arrival stands beside, for facing it. */
   arrivalSite(position: Vec3, radius: number) { return this.sites.find(site => distance(position, site.arrival, radius) < .6) ?? null; }
-  async use() {
-    const target = this.destination();
-    if (!this.canUse || !target) return;
+  async use(target = this.destinations()[0]) {
+    if (!this.canUse || !target || !this.destinations().includes(target)) return;
     this.busy = true; this.labelKey = '';
     const request = this.pending?.planetId === target ? this.pending : { planetId: target, requestId: crypto.randomUUID() };
     this.pending = request;
     try {
       const next = await this.bridge.teleport(request.planetId, request.requestId);
       this.pending = null; this.bridge.apply(next);
-      this.bridge.notice(next.currentPlanet.kind === 'hub' ? 'Arrived at the harbour teleport station.' : 'Arrived home beside your teleport station.');
+      this.bridge.notice(next.currentPlanet.kind === 'hub' ? 'Arrived at the harbour teleport station.' : stationSites(next.currentPlanet).length ? 'Arrived home beside your teleport station.' : 'Arrived home at your landing pad.');
     } catch (error) {
       // A refusal is final for this request; a lost connection may retry the same one.
       if (error instanceof Error && 'status' in error) this.pending = null;

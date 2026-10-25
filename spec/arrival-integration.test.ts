@@ -4,7 +4,7 @@ import {existsSync,mkdtempSync,rmSync,statSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {openStore} from '../src/server/store.ts';
-import type {ArrivalWork} from '../src/server/arrival-homes.ts';
+import {STORE_SCHEMA,type ArrivalWork} from '../src/server/arrival-homes.ts';
 import type {HeavyKind} from '../src/server/heavy-work.ts';
 import type {HomeGenerationInputs} from '../src/server/home.ts';
 import {generateHomeManifest} from '../src/shared/home-generation.ts';
@@ -102,7 +102,7 @@ it('backs up schema 16 consistently before adding the task table without enrolli
   s.db.prepare("INSERT INTO players(id,position,moved_at,revision) VALUES('old',?,17,9)").run(JSON.stringify(SPAWN));
   s.db.exec('DROP TABLE home_preparations;PRAGMA user_version=16');
   const before=s.db.prepare("SELECT * FROM players WHERE id='old'").get();s.close();
-  const upgraded=open(path);expect(upgraded.db.prepare('PRAGMA user_version').get()!.user_version).toBe(17);
+  const upgraded=open(path);expect(upgraded.db.prepare('PRAGMA user_version').get()!.user_version).toBe(STORE_SCHEMA);
   expect(upgraded.migrationBackup).toContain('.v16-');expect(existsSync(upgraded.migrationBackup!)).toBe(true);
   expect(statSync(upgraded.migrationBackup!).mode&0o777).toBe(0o600);
   const backup=new DatabaseSync(upgraded.migrationBackup!,{readOnly:true});

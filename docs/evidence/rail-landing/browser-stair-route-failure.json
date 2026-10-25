@@ -1,0 +1,35 @@
+{
+  "browser": "155.0.8059.85",
+  "status": "incomplete",
+  "fixtures": "Fresh local browser identities and isolated SQLite only; fixture placement/initial pose are test setup. Movement uses actual keyboard or touch controls.",
+  "views": [
+    {
+      "phone": false,
+      "status": "failed",
+      "errors": [],
+      "rejections": [
+        {
+          "status": 409,
+          "error": "Ground movement exceeded the walking speed."
+        }
+      ],
+      "checks": [
+        "actual Space and forward key land on the guard",
+        "jump again and land on the guard",
+        "retreat from the guard onto the balcony"
+      ],
+      "initial": [
+        -1.000097647486785,
+        2.20232823916047,
+        1.0501025298611248
+      ],
+      "landing": [
+        -1.0281115749976495,
+        3.2725149168502674,
+        1.5969694731176405
+      ],
+      "landingGrounded": true,
+      "failure": "Error: Walking did not reach waypoint: {\"position\":[0.38175288982434974,0.8784126764411528,0.28749939300500865],\"radius\":22.155414161198003,\"north\":{\"x\":-0.006711391844665072,\"y\":0.3136838284748597,\"z\":-0.9495037719634727},\"grounded\":true}"
+    }
+  ]
+}

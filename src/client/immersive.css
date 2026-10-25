@@ -96,3 +96,24 @@ body #world { background:#a9e2d3; }
 .mini-courier.clay { background:#d76c42; }
 .mini-courier.fern { background:#537a62; }
 .mini-courier.sky { background:#6687a0; }
+
+/* A deliberate entry into relative mouse look; touch keeps its existing controls. */
+.mouse-look{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);max-width:calc(100% - 40px);padding:9px 14px;min-height:38px;background:var(--ui-chip);border:1px solid var(--ui-dialog-border);border-radius:20px;color:var(--ink);font:11px/1.4 system-ui;pointer-events:auto}
+.mouse-look[hidden]{display:none}
+@media(pointer:coarse){.mouse-look{display:none}}
+@media(max-width:700px) and (pointer:fine){.mouse-look{bottom:210px}}
+
+/* Keep relative-look entry clear of the flight landing action. */
+@media(min-width:701px){.in-space .mouse-look{bottom:110px}}
+@media(max-width:700px){.in-space .mouse-look{left:20px;right:auto;bottom:210px;transform:none;max-width:125px}.in-space .core-tutorial{max-height:216px}}
+
+/* Walk-in rooms share the fixed home-room projection; no indoor look toggle. */
+body.indoor-room-active #mouse-look,body.indoor-room-active #view-mode{display:none!important}
+
+#character-entry{max-width:440px;padding:28px;border-radius:24px;background:#f7f3e8;color:#293f38}#character-entry p{line-height:1.6}#character-entry button{min-height:44px;padding:10px 18px;border-radius:12px}#character-entry-error{color:#925339}
+
+/* Keep the menu name and its shortcut readable even on narrow screens. */
+.minimal-bar{gap:6px}.minimal-bar #location-chip{min-width:0;flex:1 1 auto;max-width:max-content}
+.minimal-bar #open-menu{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;white-space:nowrap}
+.minimal-bar #open-menu .menu-label{display:inline;margin:0;font:600 12px system-ui}
+.minimal-bar #open-menu kbd{display:inline-block;margin:0;padding:2px 5px;font:10px system-ui;color:inherit;background:var(--ui-choice);border:1px solid var(--ui-dialog-border);border-radius:4px}

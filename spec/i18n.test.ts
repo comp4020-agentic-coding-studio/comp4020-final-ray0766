@@ -6,10 +6,14 @@ import {messages,patterns} from '../src/client/messages.ts';
 
 beforeEach(()=>{localStorage.clear();document.body.innerHTML='<header class="minimal-bar"><span id="location-chip">SUNSEED / ARRIVALS</span><button id="open-menu">Pause menu</button></header>';setLanguage('en');localStorage.clear();});
 describe('language preference and source messages',()=>{
- test('explicit choice overrides browser language; invalid and unavailable storage are safe',()=>{
-  expect(chooseLanguage(null,'zh-TW')).toBe('zh');expect(chooseLanguage(null,'zh-CN')).toBe('zh');expect(chooseLanguage(null,'fr-FR')).toBe('en');expect(chooseLanguage('en','zh-CN')).toBe('en');expect(chooseLanguage('zh','en-US')).toBe('zh');expect(chooseLanguage('bad','zh-HK')).toBe('zh');
+ test('English is the default; explicit choices and unavailable storage are safe',()=>{
+  expect(chooseLanguage(null)).toBe('en');expect(chooseLanguage('')).toBe('en');expect(chooseLanguage('bad')).toBe('en');expect(chooseLanguage('zh-CN')).toBe('en');expect(chooseLanguage('en')).toBe('en');expect(chooseLanguage('zh')).toBe('zh');
   const get=vi.spyOn(Storage.prototype,'getItem').mockImplementation(()=>{throw Error('blocked');});const set=vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw Error('blocked');});
-  expect(()=>{initI18n();setLanguage('zh');}).not.toThrow();expect(document.documentElement.lang).toBe('zh-CN');get.mockRestore();set.mockRestore();
+  expect(()=>initI18n()).not.toThrow();expect(document.documentElement.lang).toBe('en');expect(()=>setLanguage('zh')).not.toThrow();expect(document.documentElement.lang).toBe('zh-CN');get.mockRestore();set.mockRestore();
+ });
+ test.each(['zh-CN','zh-TW','fr-FR'])('starts in English on a %s browser until the user chooses another language',browser=>{
+  const language=vi.spyOn(navigator,'language','get').mockReturnValue(browser);
+  try{initI18n();expect(document.documentElement.lang).toBe('en');setLanguage('zh');initI18n();expect(document.documentElement.lang).toBe('zh-CN');expect(localStorage.getItem(LANGUAGE_KEY)).toBe('zh');}finally{language.mockRestore();}
  });
  test('all translated patterns preserve their placeholder set and are ordered numerically',()=>{
   for(const [en,zh,terms=[]] of patterns){const slots=[...en.matchAll(/\{(\d+)\}/g)].map(m=>Number(m[1]));expect(slots,en).toEqual(slots.map((_,i)=>i));expect([...zh.matchAll(/\{(\d+)\}/g)].map(m=>Number(m[1])).sort(),en).toEqual([...slots].sort());for(const n of terms)expect(slots,en).toContain(n);}
@@ -40,7 +44,7 @@ describe('in-place UI translation',()=>{
  });
  test('initial HTML and accessible names change together, with language controls inside every dialog',()=>{
   const html=readFileSync('index.html','utf8');document.body.innerHTML=html.slice(html.indexOf('<body>')+6,html.indexOf('</body>'));localStorage.setItem(LANGUAGE_KEY,'zh');initI18n();
-  expect(document.documentElement.lang).toBe('zh-CN');expect(document.querySelector('#open-menu')?.getAttribute('aria-label')).toBe('暂停菜单');expect(document.querySelector('#ship-thrust')?.textContent).toBe('推进 ↑');expect(document.querySelectorAll('dialog .language-select').length).toBe(document.querySelectorAll('dialog').length);
-  const heading=document.querySelector('#planet-name')!;setText(heading,'Cottage',true);localizeTree(document.body);expect(heading.textContent).toBe('Cottage');setLanguage('en');expect(document.querySelector('#ship-thrust')?.textContent).toBe('THRUST ↑');
+  expect(document.documentElement.lang).toBe('zh-CN');expect(document.querySelector('#open-menu')?.getAttribute('aria-label')).toBe('菜单（Tab）');expect(document.querySelector('#open-menu .menu-label')?.textContent).toBe('菜单');expect(document.querySelector('#open-menu kbd')?.textContent).toBe('Tab');expect(document.querySelector('#open-menu')?.getAttribute('aria-keyshortcuts')).toBe('Tab');expect(document.querySelector('#ship-thrust')).toBeNull();expect(document.querySelector('#my-planet')?.textContent).toBe('选择我的星球');expect(document.querySelectorAll('dialog .language-select').length).toBe(document.querySelectorAll('dialog').length);
+  const heading=document.querySelector('#planet-name')!;setText(heading,'Cottage',true);localizeTree(document.body);expect(heading.textContent).toBe('Cottage');setLanguage('en');expect(document.querySelector('#confirm-flight')?.textContent).toBe('Depart');expect(document.querySelector('#land-ship')).toBeNull();
  });
 });

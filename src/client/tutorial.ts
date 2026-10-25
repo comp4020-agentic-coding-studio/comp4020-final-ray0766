@@ -15,7 +15,7 @@ export interface TutorialRouteFeedback {
   targetKind: TutorialTarget['kind'];
   arrived?: boolean;
 }
-export interface TutorialContext { universe: Universe; online: boolean; ready: boolean; paused?: boolean; touch?: boolean; route?: TutorialRouteFeedback }
+export interface TutorialContext { universe: Universe; online: boolean; ready: boolean; paused?: boolean; touch?: boolean; fixedIndoor?: boolean; route?: TutorialRouteFeedback }
 export type TutorialPreparation = 'pending' | 'preparing' | 'retry' | 'ready';
 interface Arrival { version: 1; homePreparation: TutorialPreparation; homePlanetId: string | null }
 type Preference = 'active' | 'skipped' | 'completed';
@@ -30,7 +30,6 @@ function arrivalOf(player: PlayerState): Arrival | undefined {
 }
 function gateTarget(universe: Universe): TutorialTarget | null {
   const planet = universe.currentPlanet;
-  if (planet.id !== 'hub' && planet.id !== universe.ownedPlanetId) return null;
   const sites = stationSites(planet), radius = planet.radius ?? 10;
   const site = [...sites].sort((a, b) => distance(universe.player.position, a.interact, radius) - distance(universe.player.position, b.interact, radius))[0];
   return site ? {kind: 'gate', position: [...site.interact], planetId: planet.id} : null;
@@ -66,10 +65,12 @@ const copy = {
     gateTitle: 'The village gate leads home', gate: 'Stand beside its glowing pad, then press E or tap Return to my home. It links this village and your own home only.',
     homeTitle: 'Walk to your front door', home: 'At your own doorway, open the door if it is closed, then press E or tap Enter home. The workshop, ship and decorating can wait.',
     completeTitle: 'Welcome home', complete: 'Delivery complete and you are inside your home. That is the core loop. Your next visit resumes your saved place. Explore, or choose your own next idea.',
-    returnHubTitle: 'Continue at the main village', returnHub: 'Your saved journey stays where it is. At your home, use its gate to the main planet. In flight or on another world, use Atlas to mark the main planet, return to your ship and land there.',
-    returnHomeTitle: 'Return to your own home', returnHome: 'Your delivery is already complete. In flight, mark your own planet in Atlas and land; on another world, return to your parked ship. At the main village, its gate takes you home.',
-    legacyTitle: 'Your existing journey is preserved', legacy: 'Your existing ownership and travel stay as saved. If you have no home yet, find your ship, mark a Blank · unclaimed world in Atlas, fly there and land. Pause → Make this my planet → Build on my planet. Already own a planet? Mark it in Atlas and keep using its Build controls. Gates link your own home and the main planet only; they cannot claim a home for you.',
-    movement: 'WASD / arrows walk · Shift runs · Space jumps · E interacts. Drag to turn, or tap the ground.', touchMovement: 'Use the thumbstick to walk, drag to turn, and tap the nearby action. Run and Jump remain on screen.',
+    returnHubTitle: 'Continue at the main village', returnHub: 'Your saved journey stays where it is. Use any nearby teleport gate to return to the main planet. If there is no gate or you are in flight, choose the main planet as your ship destination and confirm; flight and landing are automatic.',
+    returnHomeTitle: 'Return to your own home', returnHome: 'Your delivery is already complete. In flight, choose your own planet and confirm the destination change; arrival is automatic; on another world, a nearby teleport gate offers Return to my home. Without a gate, use your parked ship.',
+    legacyTitle: 'Your existing journey is preserved', legacy: 'Your existing ownership and travel stay as saved. If you have no home yet, find your ship, choose an Unclaimed world and Depart; flight and landing are automatic. Pause → Make this my planet → Build on my planet. Already own a planet? Choose it as a destination and keep using its Build controls. Gates link your own home and the main planet only; they cannot claim a home for you.',
+    indoorMovement: 'Fixed 2.5D room view · WASD / arrows move · E interacts.', touchIndoorMovement: 'Fixed 2.5D room view · use the thumbstick to move and tap nearby actions.',
+    movement: 'Click the scene, then move the mouse to look. WASD / arrows walk · Shift runs · E interacts · Tab opens Pause · Esc releases the mouse.', touchMovement: 'Use the thumbstick to walk, drag to turn, and tap the nearby action. Use the nearby action button to interact.',
+    flightMovement: 'Choose a destination. Takeoff, flight and landing are automatic. Drag to look around. Click a planet to confirm a new destination. Skip waits for preparation; Cancel returns to departure.', touchFlightMovement: 'Choose a destination. Takeoff, flight and landing are automatic. Drag to look around. Click a planet to confirm a new destination. Skip waits for preparation; Cancel returns to departure.',
     offline: 'Connection interrupted. Waiting for your saved state; no step has been confirmed.', preparingShort: 'Home: preparing in the background.', retryShort: 'Home preparation needs another try. Your journey remains saved.', readyShort: 'Home: ready when you are.',
     retryError: 'The retry could not be confirmed. Reconnect and try again; your current journey is unchanged.',
     collected: 'Parcel collected · saved', delivered: 'A small kindness delivered · saved', arrived: 'Home reached · confirmed',
@@ -86,10 +87,12 @@ const copy = {
     gateTitle: '村庄的传送门通往家园', gate: '站在传送门的发光踏台旁，按 E 或点击“回到我的家园”。它只连接主世界与你自己的家园。',
     homeTitle: '走到你家的门口', home: '到自家门口后，门关着时先开门，再按 E 或点击“进入家园”。工坊、飞船和装修都可以以后再学。',
     completeTitle: '欢迎回家', complete: '投递已完成，你也已进入自家房间。核心循环到这里就完成了；下次到访会继续原存档。接下来可以随意探索，选择自己的新点子。',
-    returnHubTitle: '回主世界继续这一小步', returnHub: '当前旅程与位置保持不变。在自家可以用传送门去主世界；飞行中或在其他星球时，在星图标记主世界，返回自己的飞船并在那里降落。',
-    returnHomeTitle: '回到你自己的家园', returnHome: '你的投递已经完成。飞行中可在星图标记自家星球再降落；在别的星球先返回停泊的飞船。回到主世界后，它的传送门会带你回家。',
-    legacyTitle: '继续你已有的旅程', legacy: '已有的归属与旅程保持原存档。还没有家园时，先找飞船，在星图标记“空白 · 未认领”星球，飞过去并降落，再从暂停菜单选择“认领这颗星球”→“在我的星球建造”。已经认领过时，可在星图标记自家星球，继续用原来的建造入口。传送门只连接自家与主世界，不能替你认领家园。',
-    movement: 'WASD / 方向键行走 · Shift 跑步 · 空格跳跃 · E 互动；拖动画面转向，也可以点击地面。', touchMovement: '用摇杆行走，拖动画面转向，点击附近的互动按钮；屏幕上也有跑步与跳跃按钮。',
+    returnHubTitle: '回主世界继续这一小步', returnHub: '当前旅程与位置保持不变。附近的任何传送门都可以返回主世界；没有传送门或飞行中时，选择主世界作为飞船目的地并确认；飞行和降落会自动完成。',
+    returnHomeTitle: '回到你自己的家园', returnHome: '你的投递已经完成。飞行中可选择自家星球并确认更改目的地，之后会自动抵达；在别的星球，附近传送门的“返回我的家园”可直接带你回家。没有传送门时，使用停泊的飞船。',
+    legacyTitle: '继续你已有的旅程', legacy: '已有的归属与旅程保持原存档。还没有家园时，先找飞船，选择“未认领”星球并出发；飞行与降落会自动完成，再从暂停菜单选择“认领这颗星球”→“在我的星球建造”。已经认领过时，可选择自家星球为目的地，继续用原来的建造入口。传送门只连接自家与主世界，不能替你认领家园。',
+    indoorMovement: '固定 2.5D 室内视角 · WASD / 方向键移动 · E 互动。', touchIndoorMovement: '固定 2.5D 室内视角 · 用摇杆移动，点击附近的互动按钮。',
+    movement: '点击场景后移动鼠标观察；WASD / 方向键行走 · Shift 跑步 · E 互动 · Tab 打开暂停菜单 · Esc 释放鼠标。', touchMovement: '用摇杆行走，拖动画面转向，点击附近的互动按钮进行操作。',
+    flightMovement: '选择目的地，飞船自动起飞、航行和降落。拖动观察，点击星球并确认可更改目的地。跳过需等待准备完成；取消会返回出发地。', touchFlightMovement: '选择目的地，飞船自动起飞、航行和降落。拖动观察，点击星球并确认可更改目的地。跳过需等待准备完成；取消会返回出发地。',
     offline: '连接暂时中断，正在等待已保存状态；尚未确认新的步骤。', preparingShort: '家园：正在后台准备。', retryShort: '家园准备需要重试，当前旅程仍然保存。', readyShort: '家园：已经准备好了，随时可以回家。',
     retryError: '重试还未得到确认，请恢复连接后再试；当前旅程没有改变。',
     collected: '包裹已领取 · 已保存', delivered: '这份小小善意已送达 · 已保存', arrived: '已经回家 · 已确认',
@@ -157,7 +160,7 @@ export function mountTutorial(options: TutorialOptions) {
     routeStatus.hidden = routeState === null;
     routeStatus.textContent = routeState === 'unavailable' ? words.routeUnavailable : routeState === 'ready' ? route?.arrived ? words.routeArrived : words.routeReady : routeState === 'checking' ? words.routeChecking : '';
     if (routeState) root.dataset.routeState = routeState;else delete root.dataset.routeState;
-    get('.tutorial-controls').textContent = context.touch ? words.touchMovement : words.movement;
+    get('.tutorial-controls').textContent = context.universe.player.flight.mode === 'space' ? (context.touch ? words.touchFlightMovement : words.flightMovement) : context.fixedIndoor ? (context.touch ? words.touchIndoorMovement : words.indoorMovement) : (context.touch ? words.touchMovement : words.movement);
     const completed = step.kind === 'complete';get('.tutorial-controls').hidden = completed;
     const skip = get<HTMLButtonElement>('.tutorial-skip');skip.textContent = completed ? words.close : words.skip;
     const status = get('.tutorial-home-state');status.hidden = !arrival || completed;

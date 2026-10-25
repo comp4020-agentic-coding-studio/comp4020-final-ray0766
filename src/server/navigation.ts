@@ -5,7 +5,7 @@ import { RADIUS } from '../shared/world.ts';
 import { bodyRadius, safeRadius, landingRadius } from '../shared/world-size.ts';
 import type { Vec3 } from '../shared/world.ts';
 import { canBoard, portPoint } from '../shared/ports.ts';
-import { bearing, firstCollision, groundFlight, LAND_SPEED, MAX_FLIGHT_SPEED, FLIGHT_ACCEL, FLIGHT_BRAKE, TURN_RATE, planetCenter, spaceDistance, validSpacePosition, wrapAngle } from '../shared/flight.ts';
+import { bearing, firstCollision, groundFlight, LAND_SPEED, MAX_FLIGHT_SPEED, FLIGHT_ACCEL, FLIGHT_BRAKE, TURN_RATE, planetCenter, spaceDistance, validSpacePosition, wrapAngle, flightBounds, withinFlightBoundary } from '../shared/flight.ts';
 import type { FlightState } from '../shared/flight.ts';
 interface FlightRow {flight:string|null;flight_at:number;planet_id:string;position:string}
 export function navigationStore(db:DatabaseSync,planets:ReturnType<typeof planetStore>){
@@ -38,9 +38,11 @@ export function navigationStore(db:DatabaseSync,planets:ReturnType<typeof planet
       if(next.sequence!==old.sequence+1)throw new RequestError(409,'A newer flight checkpoint already exists. Reconnect.');
       const dt=Math.min(2,Math.max(0,now-r.flight_at)/1000);
       const distance=spaceDistance(old.position,next.position);
-      const bodies=planets.list(id);
+      const bodies=planets.list(id),bounds=flightBounds(bodies);
+      if(!withinFlightBoundary(old.position,next.position,bounds))throw new RequestError(409,'Flight boundary reached. Move inward or choose Autopilot to return.');
+      const stoppedAtBoundary=next.speed===0&&Math.abs(spaceDistance(next.position,bounds.center)-Math.max(bounds.radius,spaceDistance(old.position,bounds.center)))<.01;
       const stoppedAtSurface=next.speed===0&&bodies.some(p=>spaceDistance(next.position,p.center)<=safeRadius(p,3.2));
-      const speedInvalid=next.speed-old.speed>FLIGHT_ACCEL*dt+.8||(!stoppedAtSurface&&old.speed-next.speed>FLIGHT_BRAKE*dt+.8);
+      const speedInvalid=next.speed-old.speed>FLIGHT_ACCEL*dt+.8||(!stoppedAtSurface&&!stoppedAtBoundary&&old.speed-next.speed>FLIGHT_BRAKE*dt+.8);
       if(distance>Math.max(old.speed,next.speed)*dt+.65||speedInvalid||Math.abs(wrapAngle(next.yaw-old.yaw))>TURN_RATE*dt+.16||Math.abs(next.pitch-old.pitch)>TURN_RATE*dt+.16)throw new RequestError(409,'Flight changed too quickly. Returning to the last saved position.');
       if(firstCollision(old.position,next.position,bodies,RADIUS+2.65)!==null)throw new RequestError(409,'Keep your ship outside the planet.');
       save(id,next,now);

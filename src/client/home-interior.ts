@@ -1,3 +1,4 @@
+import {appearanceOf} from '../shared/appearance.ts';
 import type { HomeDoorPartId } from '../shared/home-door.ts';
 import * as T from 'three';
 import {createVillageDrawing} from './village-drawing.ts';
@@ -32,23 +33,8 @@ export interface HomeInteriorOptions {
   recover(): Promise<Universe>;
 }
 
-/** Camera fitting in room-local coordinates; all room geometry stays in metres. */
-export function fitHomeCamera(camera: T.OrthographicCamera, width: number, depth: number, height: number, aspect: number, phone: boolean) {
-  camera.position.set(width * .88, Math.max(width, depth) * 1.18, depth * 1.45);
-  camera.lookAt(0, height * .31, 0);
-  camera.updateMatrixWorld(true);
-  const extent = new T.Box3();
-  for (const x of [-width / 2 - .25, width / 2 + .25]) for (const z of [-depth / 2 - .3, depth / 2 + .3]) for (const y of [-.25, height]) {
-    extent.expandByPoint(new T.Vector3(x, y, z).applyMatrix4(camera.matrixWorldInverse));
-  }
-  // Reserve the lower portion for controls. Fit the room, never scale the avatar.
-  const occupied = phone ? .71 : .83;
-  const span = Math.max((extent.max.y - extent.min.y) / occupied, (extent.max.x - extent.min.x) / (aspect * .91));
-  const centerY = (extent.min.y + extent.max.y) / 2 - span * (phone ? .045 : .015);
-  camera.left = -span * aspect / 2; camera.right = span * aspect / 2;
-  camera.top = centerY + span / 2; camera.bottom = centerY - span / 2;
-  camera.updateProjectionMatrix();
-}
+export {fitHomeCamera} from './room-camera.ts';
+import {fitHomeCamera} from './room-camera.ts';
 
 const PART: Record<HomeItem['kind'], PartId> = { table: 'furniture.table', chair: 'furniture.chair', shelf: 'furniture.shelf', plant: 'garden.pot' };
 const THEMES = HOME_ART_THEMES;
@@ -69,7 +55,6 @@ const translation: Record<string, [string, string]> = {
   title: ['A room of your own', '我的小屋'], guest: ['Visiting this home', '正在做客'],
   leave: ['Go outside · E', '出门 · E'], door: ['Open the door, then choose Go outside', '走到门口开门，再选择出门'],
   openDoor: ['Open door', '开门'], closeDoor: ['Close door', '关门'], opened: ['Door open', '门已打开'], closed: ['Door closed · open it to leave', '门已关好 · 开门后可出门'],
-  overview: ['Whole room', '全屋总览'], closeView: ['Follow me', '跟随近景'],
   photo: ['Photo mode', '照片模式'],
   arrange: ['Arrange room', '布置房间'], save: ['Save changes', '保存布置'], cancel: ['Cancel', '取消'],
   move: ['MOVE', '移动'], hint: ['WASD / arrows · open the door, then E to leave', 'WASD / 方向键移动 · 门口开门后按 E 出门'],
@@ -95,11 +80,9 @@ export class HomeInterior {
   private readonly library = createWorldStyleLibrary();
   private room = new T.Group();
   private readonly doorView = createHomeDoor();
-  private overview = false;
   private photoMode = false;
   private readonly fill = new T.HemisphereLight();
   private readonly sun = new T.DirectionalLight();
-  private cameraOffset = new T.Vector3();
   private furniture = new T.Group();
   private avatar = courier('clay');
   private selection = new T.Mesh(new T.RingGeometry(.45, .49, 4, 1, Math.PI / 4), new T.MeshBasicMaterial({ color: '#dcad5c', transparent: true, opacity: .85, depthWrite: false, side: T.DoubleSide }));
@@ -144,14 +127,13 @@ export class HomeInterior {
     this.ui.className = 'home-interior-ui'; this.ui.hidden = true;
     this.ui.dataset.i18nVerbatim = ''; this.ui.setAttribute('aria-label', 'Home interior');
     this.ui.innerHTML = `<header class="home-room-header"><div><span class="home-room-eyebrow">HOME / 小屋</span><h2 data-home-text="title"></h2><p id="home-room-status" role="status" aria-live="polite"></p></div><nav class="home-door-actions"><button id="home-toggle-door"></button><button id="home-exit" data-home-text="leave"></button></nav></header>
-      <div class="home-room-tools"><button id="home-camera-view" data-home-text="overview"></button><button id="home-photo" data-home-text="photo"></button><button id="home-arrange" data-home-text="arrange"></button><button id="home-retry" data-home-text="retry" hidden></button><p id="home-room-hint"></p></div>
+      <div class="home-room-tools"><button id="home-photo" data-home-text="photo"></button><button id="home-arrange" data-home-text="arrange"></button><button id="home-retry" data-home-text="retry" hidden></button><p id="home-room-hint"></p></div>
       <section id="home-room-editor" class="home-room-editor" hidden aria-label="Arrange room"><div class="home-material-row"><span data-home-text="material"></span><button id="home-material-warm" data-material="warm" data-home-text="warm"></button><button id="home-material-sage" data-material="sage" data-home-text="sage"></button><button id="home-material-blue" data-material="blue" data-home-text="blue"></button></div><label><span data-home-text="furniture"></span> <select id="home-item-select"></select></label><div class="home-item-moves"><button id="home-item-left">←</button><button id="home-item-forward">↑</button><button id="home-item-back">↓</button><button id="home-item-right">→</button><button id="home-item-rotate" data-home-text="rotate"></button></div><div class="home-save-row"><button id="home-cancel" data-home-text="cancel"></button><button id="home-save" data-home-text="save"></button></div></section>
       <div id="home-joystick" class="home-joystick" role="group" aria-label="Move around the room"><span id="home-stick"></span><small data-home-text="move"></small></div>`;
     document.body.append(this.ui);
     const on = (id: string, fn: () => void) => this.get(id).addEventListener('click', fn, { signal: this.abort.signal });
     on('home-exit', () => { if (this.nearExit()) void this.leave(); });
     on('home-toggle-door', () => void this.toggleDoor());
-    on('home-camera-view', () => { if(this.preparing)return;this.overview = !this.overview; this.lastViewport = ''; this.updateControls(); });
     on('home-photo',()=>{if(!this.pendingAction&&!this.preparing)window.dispatchEvent(new Event('open-photo-mode'));});
     on('home-arrange', () => this.beginEditing());
     on('home-cancel', () => this.cancelEditing());
@@ -172,7 +154,7 @@ export class HomeInterior {
     document.addEventListener('visibilitychange', () => { if (document.hidden) { this.clearInput(); if(!this.photoMode)void this.flush(); } }, { signal: this.abort.signal });
     const joystick = this.get('home-joystick');
     const drag = (e: PointerEvent) => { const rect = joystick.getBoundingClientRect(); this.stick.set((e.clientX - rect.left - rect.width / 2) / 34, (e.clientY - rect.top - rect.height / 2) / 34).clampLength(0, 1); this.get('home-stick').style.transform = `translate(${this.stick.x * 25}px,${this.stick.y * 25}px)`; };
-    joystick.addEventListener('pointerdown', e => { if (this.preparing || this.editing || !this.online || this.pendingAction) return; e.preventDefault(); this.stickPointer = e.pointerId; joystick.setPointerCapture(e.pointerId); drag(e); }, { signal: this.abort.signal });
+    joystick.addEventListener('pointerdown', e => { if (this.preparing || this.editing || !this.online || this.pendingAction || document.body.classList.contains('world-guide-talking')) return; e.preventDefault(); this.stickPointer = e.pointerId; joystick.setPointerCapture(e.pointerId); drag(e); }, { signal: this.abort.signal });
     joystick.addEventListener('pointermove', e => { if (this.stickPointer === e.pointerId) drag(e); }, { signal: this.abort.signal });
     for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) joystick.addEventListener(name, () => { this.stickPointer = null; this.stick.set(0, 0); this.get('home-stick').style.transform = ''; }, { signal: this.abort.signal });
     this.localize();
@@ -190,12 +172,11 @@ export class HomeInterior {
   private clearInput() { this.keys.clear(); this.stick.set(0, 0); this.moving = 0; this.get('home-stick').style.transform = ''; }
   private keyDown = (event: KeyboardEvent) => {
     if (!this.active || this.preparing || this.photoMode || event.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;
-    if ((event.target as Element)?.closest('input,select,textarea,[contenteditable]')) return;
+    if (document.body.classList.contains('world-guide-talking') || (event.target as Element)?.closest('input,select,textarea,button,a,[contenteditable]')) return;
     const key = event.key.toLowerCase();
-    if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'e', 'escape', ' '].includes(key)) {
+    if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'e'].includes(key)) {
       event.preventDefault(); event.stopImmediatePropagation();
       if (key === 'e' && !event.repeat && this.nearExit()) void this.leave();
-      else if (key === 'escape' && this.editing) this.cancelEditing();
       else this.keys.add(key);
     }
   };
@@ -218,12 +199,13 @@ export class HomeInterior {
     const arriving = restoring || visit !== this.currentVisit;
     this.home = player.home;
     if (arriving) {
-      this.overview = false; this.lastViewport = '';
+      this.lastViewport = '';
+      if(document.pointerLockElement)document.exitPointerLock();
       this.currentVisit = visit; this.position = [...location.position]; this.yaw = location.yaw;
       this.editing = false; this.dirty = false; this.clearInput();
       this.draft = copy(player.home.interior); this.draftVersion = this.draft.version; this.selected = this.draft.items[0]?.id ?? '';
       this._active = true; this.ui.hidden = true; document.body.classList.add('home-interior-active');
-      this.avatar.setColor(player.character); this.online = true; this.setStatus(player.home.canEdit ? 'entering' : 'readonly');
+      this.avatar.setAppearance(appearanceOf(player)); this.online = true; this.setStatus(player.home.canEdit ? 'entering' : 'readonly');
     }
     const sourceKey = `${player.home.interiorId}:${player.home.interior.version}:${player.home.door.partId??'wall.door.open'}`;
     if (arriving || sourceKey !== this.sourceKey || this.preparation?.visit !== undefined && this.preparation.visit !== visit) {
@@ -233,7 +215,7 @@ export class HomeInterior {
     }
     this.doorView.setPart(player.home.door.partId);
     this.doorView.setOpen(player.home.interior.doorOpen, arriving);
-    this.avatar.setColor(player.character); this.populateItems(); this.updateControls();
+    this.avatar.setAppearance(appearanceOf(player)); this.populateItems(); this.updateControls();
     return true;
   }
 
@@ -251,8 +233,8 @@ export class HomeInterior {
     for (const [id, guest] of this.guests) if (!current.has(id)) { disposeGeometry(guest.root); this.guests.delete(id); }
     for (const visitor of snapshot.visitors.slice(0, 8)) {
       let guest = this.guests.get(visitor.id);
-      if (!guest) { guest = courier(visitor.character); guest.root.traverse(o => { if (o instanceof T.Mesh) o.castShadow = false; }); this.scene.add(guest.root); this.guests.set(visitor.id, guest); }
-      guest.setColor(visitor.character); guest.root.position.fromArray(visitor.position); guest.root.rotation.y = Math.atan2(visitor.facing[0], visitor.facing[2]);
+      if (!guest) { guest = courier(visitor.character,appearanceOf(visitor)); guest.root.traverse(o => { if (o instanceof T.Mesh) o.castShadow = false; }); this.scene.add(guest.root); this.guests.set(visitor.id, guest); }
+      if(guest.setAppearance(appearanceOf(visitor)))guest.root.traverse(o=>{if(o instanceof T.Mesh)o.castShadow=false;}); guest.root.position.fromArray(visitor.position); guest.root.rotation.y = Math.atan2(visitor.facing[0], visitor.facing[2]);
     }
   }
 
@@ -359,14 +341,12 @@ export class HomeInterior {
   private nearExit() { return this.active && !this.preparing && !!this.home && homeNearDoor(this.position, this.home.interior.room, this.home.door.partId); }
   private updateControls() {
     const enabled = this.online && !this.pendingAction && !this.preparing;
-    this.get<HTMLButtonElement>('home-camera-view').disabled=!enabled;this.get<HTMLButtonElement>('home-photo').disabled=!enabled;
+    this.get<HTMLButtonElement>('home-photo').disabled=!enabled;
     this.get<HTMLButtonElement>('home-exit').disabled = !enabled || !this.nearExit() || this.editing || !this.home?.interior.doorOpen;
     const doorButton = this.get<HTMLButtonElement>('home-toggle-door');
     doorButton.disabled = !enabled || !this.nearExit() || this.editing;
     doorButton.textContent = this.text(this.home?.interior.doorOpen ? 'closeDoor' : 'openDoor');
     doorButton.setAttribute('aria-pressed', String(this.home?.interior.doorOpen ?? false));
-    this.get('home-camera-view').textContent = this.text(this.overview ? 'closeView' : 'overview');
-    this.get('home-camera-view').hidden = false;
     this.get('home-exit').title = this.text('door');
     this.get('home-arrange').hidden = !this.home?.canEdit || this.editing;
     this.get<HTMLButtonElement>('home-arrange').disabled = !enabled;
@@ -388,7 +368,8 @@ export class HomeInterior {
     if (document.documentElement.lang !== this.locale) this.localize();
     const dt = Math.min(.05, Math.max(0, delta));
     this.moving = 0;
-    if (this.online && !this.preparing && !this.pendingAction && !this.editing && !document.hidden) {
+    if(document.body.classList.contains('world-guide-talking'))this.clearInput();
+    if (this.online && !this.preparing && !this.pendingAction && !this.editing && !document.hidden && !document.body.classList.contains('world-guide-talking')) {
       const input = new T.Vector2(this.stick.x + Number(this.keys.has('d') || this.keys.has('arrowright')) - Number(this.keys.has('a') || this.keys.has('arrowleft')), this.stick.y + Number(this.keys.has('s') || this.keys.has('arrowdown')) - Number(this.keys.has('w') || this.keys.has('arrowup'))).clampLength(0, 1);
       // Screen-space controls against the fixed indoor camera.
       const right = new T.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 0); right.y = 0; right.normalize();
@@ -414,17 +395,13 @@ export class HomeInterior {
     this.avatar.animate(nowSeconds, this.moving, matchMedia('(prefers-reduced-motion: reduce)').matches);
     for (const guest of this.guests.values()) guest.animate(nowSeconds, 0, true);
     const viewport = `${innerWidth}:${innerHeight}:${this.home.interior.room.width}:${this.home.interior.room.depth}`;
-    if (viewport !== this.lastViewport) { const r = this.home.interior.room; fitHomeCamera(this.camera, r.width, r.depth, r.height, innerWidth / innerHeight, innerWidth < 700); this.cameraOffset.set(0, 0, 0); this.lastViewport = viewport; }
-    this.camera.position.sub(this.cameraOffset); this.cameraOffset.set(0, 0, 0);
-    if (!this.overview) {
-      const compact=innerWidth < 700 || innerHeight < 500,follow=compact?.72:.35;
-      this.camera.zoom = compact?1.65:1.18; this.cameraOffset.set(this.position[0] * follow, 0, this.position[2] * follow);
-      this.camera.position.add(this.cameraOffset);
-    } else this.camera.zoom = 1;
+    if (viewport !== this.lastViewport) { const r = this.home.interior.room; fitHomeCamera(this.camera, r.width, r.depth, r.height, innerWidth / innerHeight, innerWidth < 700); this.lastViewport = viewport; }
+    this.camera.zoom = 1;
     this.camera.updateMatrixWorld(true); this.camera.updateProjectionMatrix();
     this.doorView.frame(dt, matchMedia('(prefers-reduced-motion: reduce)').matches);
     this.drawing.render();
     const canvas = this.options.renderer.domElement;
+    canvas.dataset.indoorView = '2.5d';canvas.dataset.appearance=JSON.stringify(this.avatar.root.userData.appearance);
     canvas.dataset.homeInterior = this.home.interiorId; canvas.dataset.homePosition = JSON.stringify(this.position); canvas.dataset.homeVersion = String(this.home.interior.version);
     canvas.dataset.homeDoorOpen = String(this.home.interior.doorOpen); canvas.dataset.homeArea = String(this.home.interior.room.width * this.home.interior.room.depth);
     canvas.dataset.homePending = String(this.pendingAction || !!this.pendingMove); canvas.dataset.homeDrawCalls = String(this.options.renderer.info.render.calls);
@@ -502,16 +479,23 @@ export class HomeInterior {
     disposeGeometry(this.room); disposeGeometry(this.furniture); disposeGeometry(this.avatar.root); disposeGeometry(this.selection); this.doorView.dispose(); this.library.dispose();this.sun.shadow.dispose();
   }
 
+  /** Read-only local scene placement for the stationary guide; no saved actor or collider. */
+  guideContext(){
+    if(!this.active||this.preparing||this.editing||this.photoMode||!this.home)return null;
+    const home=this.home,room=home.interior;
+    return {scene:this.scene,camera:this.camera,feet:new T.Vector3(...this.position),forward:new T.Vector3(...this.facing),key:this.currentVisit,
+      stand:(point:T.Vector3)=>{const candidate:Vec3=[point.x,0,point.z];return homePositionAllowed(candidate,room.items,HOME_BODY_RADIUS+.1,room.room,room.doorOpen,home.door.partId)?new T.Vector3(...candidate):null;}};
+  }
+
   /** The host flushes acknowledged movement before entering photo mode. */
   setPhotoMode(active:boolean){this.photoMode=active;this.clearInput();}
 
   /** A separate camera: export/orbit may change it without changing gameplay. */
-  getPhotoView(width:number,height:number,mode:'follow'|'overview'='overview'){
+  getPhotoView(width:number,height:number){
     const camera=this.camera.clone(),room=this.home?.interior.room??HOME_ROOM,aspect=Math.max(1,width)/Math.max(1,height);
     const target=new T.Vector3(0,room.height*.31,0);
-    if(mode==='overview'){camera.zoom=1;fitHomeCamera(camera,room.width,room.depth,room.height,aspect,false);}
-    else{const span=camera.top-camera.bottom;camera.left=-span*aspect/2;camera.right=span*aspect/2;target.add(this.cameraOffset);}
+    camera.zoom=1;fitHomeCamera(camera,room.width,room.depth,room.height,aspect,false);
     camera.updateProjectionMatrix();camera.updateMatrixWorld(true);this.scene.updateMatrixWorld(true);
-    return {scene:this.scene,camera,target};
+    return {scene:this.scene,camera,target,fixedAngle:true};
   }
 }

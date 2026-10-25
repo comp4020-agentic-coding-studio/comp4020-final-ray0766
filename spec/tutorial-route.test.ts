@@ -4,7 +4,7 @@ import { createTutorialRoute, TUTORIAL_ROUTE_BUDGET } from '../src/client/tutori
 import { NPCS, SPAWN } from '../src/shared/world.ts';
 import { routeToTutorialTarget } from '../src/shared/tutorial-navigation.ts';
 import { TUTORIAL_NAVIGATION_BUDGET } from '../src/shared/tutorial-navigation.ts';
-import { dirOf } from '../src/shared/planet-plan/sphere.ts';
+import { dirOf, fromLocal } from '../src/shared/planet-plan/sphere.ts';
 
 describe('tutorial drawing is bounded and uses the actual surface adapter', () => {
   it('draws the current goal and curved path on a non-constant surface, then hides and releases them', () => {
@@ -97,3 +97,11 @@ describe('tutorial drawing is bounded and uses the actual surface adapter', () =
     view.dispose();
   });
 });
+
+ it('updates arrival on the final small step without waiting for the replan distance or timer',()=>{
+  const view=createTutorialRoute(new T.Group(),{surfacePoint:p=>p.multiplyScalar(14)}),goal:[number,number,number]=[0,1,0];
+  const input={position:fromLocal(goal,[0,.3],14),target:{kind:'port' as const,position:goal,planetId:'home'},planetId:'home',radius:14,visible:true,time:1,canConnect:()=>true};
+  view.frame(input);expect(view.diagnostics.reason).toBe('route');
+  view.frame({...input,position:fromLocal(goal,[0,.1],14),time:1.01});expect(view.diagnostics.reason).toBe('arrived');expect(view.diagnostics.arrows).toBe(0);
+  view.frame({...input,time:1.02});expect(view.diagnostics.reason).toBe('route');view.dispose();
+ });
