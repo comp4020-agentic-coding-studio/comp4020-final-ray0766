@@ -63,7 +63,7 @@ The original 8152 SQLite database is reused after a consistent backup and table-
 
 ## Remaining decisions and limits
 
-- **Wall cutaway remains an unresolved visual decision.** Close-to-wall/corner clipping was diagnosed earlier; collision and saved rooms were not redesigned in this close-out. It is not presented as fixed.
+- **At this checkpoint, wall cutaway remained an unresolved visual decision.** The author subsequently accepted it and same-position traveller occlusion as known limitations. Collision and saved rooms were not redesigned; neither is presented as fixed.
 - **AI remains disabled.** Fixed local help is not a live model. Earlier bounded provider experiments do not authorize persistent calls.
 - **Author review remains outstanding** for the proposed new PROCESS/three-reflection wording and research-note argument. The actual `PROCESS.md`, `research-note.md` and `reflections/crit-8.md`, `crit-9.md`, `crit-10.md` were byte-for-byte preserved from this turn's starting snapshot.
 - No newly approved full-suite run or repository evidence archive was attempted. After explicit approval and starting a fresh isolated test server, the proposed release check is `APP_URL=http://127.0.0.1:<test-port> pnpm check`. Earlier full-suite logs took about 55 seconds; allow roughly 1–3 minutes plus fixture startup, **an estimate, not a current measurement**. Never point that run at 8152's original saves or production. The separate disabled-camera replay suite is not part of this recommendation.

@@ -1,0 +1,85 @@
+{
+  "user": "Test explorer 1",
+  "startedAt": "2026-10-26T08:35:50.072Z",
+  "source": "29e7e6870b458a4cfff70c13c9dc5fab6f0f509a",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "checks": [
+    "Own planet renamed and bench placed by UI",
+    "Refresh kept Test explorer 1 and new Bench 42 in the saved-object UI; character creation did not repeat",
+    "Independent persistent profile and Chrome process; first-character save via UI, guide selection, keyboard gate walk and teleport, owner rename, collision refusal, valid bench placement and refresh",
+    "Atlas displayed Test explorer 2 as Neighbour · read only with its own object count"
+  ],
+  "events": [
+    {
+      "at": "2026-10-26T08:36:03.258Z",
+      "message": "First character saved through UI; independent persistent Chrome profile ready"
+    },
+    {
+      "at": "2026-10-26T08:37:07.456Z",
+      "message": "Parallel exploration window started"
+    },
+    {
+      "at": "2026-10-26T08:37:47.810Z",
+      "message": "Walked guide ground route to teleport gate using keyboard"
+    },
+    {
+      "at": "2026-10-26T08:38:16.789Z",
+      "message": "Returned through gate to own home and named it Test explorer 1 using UI"
+    },
+    {
+      "at": "2026-10-26T08:40:31.277Z",
+      "message": "Bench confirmed and saved through Place object UI"
+    },
+    {
+      "at": "2026-10-26T08:40:59.354Z",
+      "message": "Saved bench and planet name persisted across refresh"
+    },
+    {
+      "at": "2026-10-26T08:41:27.181Z",
+      "message": "Opened Atlas to observe other test users retained worlds"
+    },
+    {
+      "at": "2026-10-26T08:42:39.977Z",
+      "message": "Cross-visit limited to Atlas observation; no safe ship guide route at this saved starting point"
+    }
+  ],
+  "errors": [],
+  "providerRequests": 0,
+  "limitations": [
+    "Movement uses real keyboard input assisted by read-only route and canvas-position diagnostics; this is an agent test, not a human usability study.",
+    "Harness initially tried to close the guide after Close and walk had already closed it; no product failure was inferred.",
+    "A cross-visit attempt stopped because the existing route proof returned no-safe-approach for Find ship from the home gate. No position injection or backend travel was used. Atlas observed Test explorer 2; a physical cross-visit was not completed.",
+    "Cross observation of Test explorer 2 was its Atlas DOM card, not an inspected physical visit."
+  ],
+  "retained": true,
+  "browser": "Chrome/155.0.8059.85",
+  "readyAt": "2026-10-26T08:36:03.258Z",
+  "builtAt": "2026-10-26T08:40:31.278Z",
+  "savedObjects": 42,
+  "savedBenchLabel": "Bench 42",
+  "crossObservation": {
+    "at": "2026-10-26T08:41:27.182Z",
+    "cards": [
+      "✦\nMY PLANET\nTest explorer 1\n\nHarbour Belt · 0 m away · 42 saved objects\n\nChoose destination",
+      "✦\nNEIGHBOUR · READ ONLY\nTest explorer 2\n\nHarbour Belt · 93 m away · 41 saved objects\n\nChoose destination"
+    ],
+    "routeResult": {
+      "at": "2026-10-26T08:42:39.977Z",
+      "connected": false,
+      "reason": "no-safe-approach",
+      "visibleStatus": "Find ship · No confirmed safe route"
+    }
+  },
+  "quality": "standard",
+  "completedAt": "2026-10-26T08:43:59.130Z",
+  "status": "completed-with-cross-visit-limit",
+  "screenshots": [
+    "refreshed-home.png",
+    "ship-route-blocked.png"
+  ],
+  "lastOnlineAt": "2026-10-26T08:44:13.203Z",
+  "endedAt": "2026-10-26T08:44:13.457Z"
+}

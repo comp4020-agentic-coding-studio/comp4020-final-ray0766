@@ -1,0 +1,81 @@
+{
+  "user": "Test explorer 3",
+  "source": "29e7e6870b458a4cfff70c13c9dc5fab6f0f509a",
+  "browser": "155.0.8059.85",
+  "viewport": "1920x1080",
+  "startedAt": "2026-10-26T08:36:34.426Z",
+  "events": [
+    {
+      "at": "2026-10-26T08:36:45.920Z",
+      "message": "First character saved through UI; ready and online"
+    },
+    {
+      "at": "2026-10-26T08:37:25.352Z",
+      "message": "Coordinated exploration begins after shared go signal"
+    },
+    {
+      "at": "2026-10-26T08:41:02.201Z",
+      "message": "Walked to public gate using keyboard and selected Return to my home"
+    },
+    {
+      "at": "2026-10-26T08:41:57.728Z",
+      "message": "Renamed owned planet to Test explorer 3 using menu and enabled Smooth quality"
+    },
+    {
+      "at": "2026-10-26T08:43:02.429Z",
+      "message": "Placed one Bench via catalogue, canvas click and Place object UI"
+    },
+    {
+      "at": "2026-10-26T08:43:40.964Z",
+      "message": "Reload kept saved appearance, Test explorer 3 name, Smooth choice and 42/64 objects"
+    },
+    {
+      "at": "2026-10-26T08:43:57.132Z",
+      "message": "Atlas lists Test explorer 1 and Test explorer 2 as read-only neighbours with 42 saved objects each"
+    },
+    {
+      "at": "2026-10-26T08:46:40.526Z",
+      "message": "Bounded UI test complete; browser closed only, all data retained"
+    }
+  ],
+  "errors": [],
+  "aiRequests": 0,
+  "limits": [
+    "Agent-driven UI with read-only DOM diagnostics; not a human usability study.",
+    "No overnight persistence, physical-phone, WAN timing, adversarial permissions or physical cross-visit in user3 run."
+  ],
+  "screenshots": [
+    "first-character.png",
+    "guide-route.png",
+    "bench-saved.png",
+    "bench-after-refresh.png",
+    "atlas-peers.png",
+    "atlas-peers-visible.png",
+    "bench-after-refresh-settled.png"
+  ],
+  "status": "passed-bounded-ui",
+  "completedAt": "2026-10-26T08:46:40.526Z",
+  "objectCounts": {
+    "before": 41,
+    "afterSave": 42,
+    "afterRefresh": 42,
+    "addedByThisTest": 1
+  },
+  "crossObservation": "Atlas visibly listed Test explorer 1 and Test explorer 2 as read-only neighbours, each with 42 saved objects; no physical cross-visit attempted.",
+  "isolation": "Separate persistent Chrome process/profile from users 1 and 2; no shared cookie jar or desktop focus.",
+  "quality": "Started on Auto/Standard; changed through menu to Smooth before placing bench; preference retained after reload.",
+  "harnessIssues": [
+    "Wrong teleport-action selector corrected to visible teleport-go.",
+    "Smooth initially treated as button; corrected to quality-select dropdown.",
+    "Rename closes Pause; reopened menu before Build.",
+    "Immediate post-refresh screenshot caught camera transition; settled screenshot supersedes it.",
+    "Initial savedCount included the select placeholder; corrected to visible menu count 42/64 and saved Bench 42."
+  ],
+  "observations": [
+    "Initial idle UI briefly showed connection interrupted/offline retrying; recovered without reload before movement. Cause unknown.",
+    "Visible gate route plus short A/W walking reached public gate; no deadlock observed on this route.",
+    "Two other visible visitors in DOM diagnostic at common start; pixels showed another traveller before leaving harbour.",
+    "One late read-only universe request failed with net::ERR_NETWORK_CHANGED while report was being finalised; no save was in progress."
+  ],
+  "dataRetention": "All production identity, named planet and new bench remain saved. Private persistent browser profile retained."
+}

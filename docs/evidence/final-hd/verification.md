@@ -1,6 +1,6 @@
 # Final candidate verification — 25 October 2026 UTC
 
-**Subsequent release:** [Final release record](../../releases/final-2026-10.md) separates the approved local restart and main deployment from the initial local-only stage below.
+**Subsequent release:** [29e7e68](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/29e7e6870b458a4cfff70c13c9dc5fab6f0f509a) was deployed successfully in [run 40209299668](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/actions/runs/40209299668). The [release record](../../releases/final-2026-10.md) separates that outcome from the initial local-only evidence below. The author subsequently accepted wall cutaway and same-position traveller occlusion as known limitations; this does not turn the recorded adverse views into fixes or blanket comfort approval. The historical pending statements below describe their original checkpoint.
 
 This is a technical acceptance record, **not author playtest approval or a production release**. The baseline is `4200c33e6d531fc37a7f7598b441ea1c347eb72d`; this close-out adds the documented ground-state repair, fixture corrections, writing refinements and this evidence. [verification.json](verification.json) identifies the changed production file by SHA-256 and preserves log and screenshot hashes. A repository commit containing this record fixes the accompanying code and evidence together.
 

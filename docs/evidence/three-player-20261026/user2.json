@@ -1,0 +1,38 @@
+{
+  "user": "Test explorer 2",
+  "source": "29e7e6870b458a4cfff70c13c9dc5fab6f0f509a",
+  "viewport": "390x844 touch",
+  "started": "2026-10-26T08:36:00.804Z",
+  "actions": [
+    {
+      "at": "2026-10-26T08:36:47.580Z",
+      "text": "Created traveller with Soft bob and Sky coat using visible Save UI; corrected selector-only test assumption (select, not button)"
+    },
+    {
+      "at": "2026-10-26T08:37:32.454Z",
+      "text": "Coordinated overlap began; other travellers visible=2"
+    },
+    {
+      "at": "2026-10-26T08:40:25.548Z",
+      "text": "Walked home path with real touch joystick, readonly diagnostics assisted direction"
+    },
+    {
+      "at": "2026-10-26T08:40:41.269Z",
+      "text": "Used visible teleport Return to my home"
+    },
+    {
+      "at": "2026-10-26T08:41:23.529Z",
+      "text": "Arrived owned Little world 02 and renamed through UI to Test explorer 2"
+    },
+    {
+      "at": "2026-10-26T08:43:32.404Z",
+      "text": "Placed one Bench via touch on visible ground and Place object"
+    },
+    {
+      "at": "2026-10-26T08:44:04.326Z",
+      "text": "Refresh retained Test explorer 2 name and new Bench 42; no repeat character creation"
+    }
+  ],
+  "errors": [],
+  "apiCalls": 0
+}

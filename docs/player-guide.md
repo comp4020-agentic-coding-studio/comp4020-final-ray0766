@@ -1,6 +1,6 @@
 # Little Worlds — current player guide
 
-This guide describes the local Final candidate. Check [README](../README.md) for the difference between the current 8152 preview and the published release. The previous mixed prototype account is preserved as a [historical snapshot](integration/player-guide-history-20261025.md).
+This guide describes the published Final application. [Release verification](releases/final-2026-10.md) records the deployed version; the paid AI guide trial remains exclusive to the local 8152 preview. The previous mixed prototype account is preserved as a [historical snapshot](integration/player-guide-history-20261025.md).
 
 ## Loading and your identity
 
@@ -66,7 +66,7 @@ Only an owner can build, enter/edit the private room or read private history. Ne
 
 All rooms retain the fixed 2.5D view. Open the door before entering/leaving. Furniture drafts use Save/Cancel; unsaved/pending/failed edits have leave/reload protection. This is not crash-proof draft storage. Photos use the same fixed room angle with zoom and explicit Back to exploring.
 
-The walking-room wall cutaway can abruptly hide several wall sections near a corner. Collision and saved geometry remain, but the visual treatment is an unresolved design decision. It has been diagnosed, not repaired. Do not infer a missing building from that rendering effect.
+The walking-room wall cutaway can abruptly hide several wall sections near a corner. Collision and saved geometry remain. The author has accepted this and the possible occlusion when travellers share a landing position as known visual limitations; neither has been repaired. Do not infer a missing building from that rendering effect.
 
 ## What is saved
 
