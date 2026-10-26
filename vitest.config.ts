@@ -25,6 +25,11 @@ const DISABLED_CAMERA = [
 // adding to `include`.
 export default defineConfig({
   test: {
+    // Several files generate collision-checked worlds and launch their own
+    // preparation workers. Bound file-level parallelism so those CPU-heavy
+    // fixtures do not multiply by every available core and race their deadlines.
+    // All app/legacy cases and their existing timeouts still run unchanged.
+    maxWorkers: 2,
     projects: [
       { extends: true, test: { name: "app", include: ["spec/**/*.test.ts"], exclude: [...LEGACY_HTTP, ...DISABLED_CAMERA], globalSetup: ["./spec/global-setup.ts"] } },
       // One file at a time: they share one legacy world, and several claim "the first free planet".

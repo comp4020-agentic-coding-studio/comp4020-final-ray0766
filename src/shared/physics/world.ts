@@ -224,8 +224,7 @@ export class GroundWorld {
     return deepest;
   }
   blocked(pose:GroundPose){return !!this.hit(pose.position,pose.radius);}
-  private radial(pose:GroundPose,position:Vec3,dt:number):GroundPose{
-    const support=this.support(position,pose.radius+(pose.grounded?STEP_HEIGHT:SKIN));
+  private radial(pose:GroundPose,position:Vec3,dt:number,support=this.support(position,pose.radius+(pose.grounded?STEP_HEIGHT:SKIN))):GroundPose{
     if(pose.grounded&&Math.abs(support.radius-pose.radius)<=STEP_HEIGHT+SKIN)return {...pose,position,radius:support.radius,verticalSpeed:0,grounded:true};
     let verticalSpeed=Math.max(-MAX_FALL_SPEED,pose.verticalSpeed-GRAVITY*dt);
     let radius=pose.radius+(pose.verticalSpeed+verticalSpeed)*.5*dt,grounded=false;
@@ -266,7 +265,9 @@ export class GroundWorld {
         const candidate=direction.toArray() as Vec3;
         const support=this.support(candidate,pose.radius+(pose.grounded?STEP_HEIGHT:SKIN));
         if(this.generated&&((this.field.waterLevel!==null&&this.field.heightAt(candidate)<this.field.waterLevel+.015)||support.radius>pose.radius+STEP_HEIGHT+SKIN))break;
-        let radial=this.radial(pose,candidate,tick),hit=this.hit(candidate,radial.radius);
+        // This exact candidate/ceiling was just queried above; reuse that
+        // result without changing the support search or the accepted pose.
+        let radial=this.radial(pose,candidate,tick,support),hit=this.hit(candidate,radial.radius);
         // At a stair edge the lower tread may be reachable while the capsule
         // still overlaps the upper riser. Move clear at the current height and
         // let gravity finish the descent instead of snapping into that riser.

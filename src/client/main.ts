@@ -50,7 +50,7 @@ import {createMouseLook,lookDelta} from './mouse-look.ts';
 import { GroundCameraRig } from './ground-camera.ts';
 import {IndoorRoomView} from './indoor-room-view.ts';
 import { IndoorFollowRooms } from './indoor-follow-room.ts';
-import { legacyOutdoorCameraPose, clipLegacyCameraBoom } from './legacy-ground-camera.ts';
+import { INITIAL_OUTDOOR_PITCH, legacyOutdoorCameraPose, clipLegacyCameraBoom } from './legacy-ground-camera.ts';
 import { TownCameraCutaway } from './camera-cutaway.ts';
 import type { CameraCutawayDiagnostics } from './camera-cutaway.ts';
 import type { CameraFrameCertificate } from './camera-frame-collision.ts';
@@ -72,6 +72,7 @@ import {TownResidents} from './town-residents.ts';
 import {residentDialogue} from '../shared/town-residents.ts';
 import type {TownResidentDefinition} from '../shared/town-residents.ts';
 import {createVillageDrawing} from './village-drawing.ts';
+import {buildCameraFrame} from './build-camera.ts';
 import {arrivalViewScore} from './arrival-camera.ts';
 import { HomeSetup } from './home-setup.ts';
 import { TeleportStations } from './teleport-station.ts';
@@ -100,7 +101,7 @@ function readyWelcome(){if(initialStateReady&&!welcomeCommitted){welcomeCommitte
 let walker: SurfaceWalker;
 let target: T.Vector3 | null = null;
 let busy = false, online = false, noticeUntil = 0, conversationUntil = 0;
-let overview = false;let cameraPitch=0;let doorstepCameraPending=false;
+let overview = false;let cameraPitch=INITIAL_OUTDOOR_PITCH;let doorstepCameraPending=false;
 // Isolated local A/B build switch; no saved setting or world-data change.
 // The follow camera permits occlusion; preview flags cannot enable visual masks.
 const cameraCutawayB:boolean=false;
@@ -233,7 +234,7 @@ function accept(next: PlayerState) {
     walker = new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();started=false;near=null;
     $('npc-mica').hidden=true;$('npc-sol').hidden=true;$('conversation').hidden=true;document.body.classList.remove('delivery-open');
   }
-  if((reconnecting||justLanded||locationChanged) && walker){cameraPitch=0;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();clearGroundMotion();rebaseGroundCamera();}
+  if((reconnecting||justLanded||locationChanged) && walker){cameraPitch=INITIAL_OUTDOOR_PITCH;walker=new SurfaceWalker(state.position);lastSaved.copy(walker.up);clearInput();clearGroundMotion();rebaseGroundCamera();}
   const newGeometry=state.ground?.sceneRevision!==previousGround?.sceneRevision||state.ground?.physicsVersion!==previousGround?.physicsVersion;
   const priorPlanet=colony?.universe?.currentPlanet;
   if(!worldPending&&doorOnlyRevision&&state.ground&&state.home&&priorPlanet?.id===state.planetId&&priorPlanet.homeDoor){
@@ -733,6 +734,7 @@ function animate(now:number) {
   if(qualityApplyPending&&!photoMode?.capturing)resize();
   observeQualityFrame(now-previous,{ready:!!walker&&!worldPending&&!homeInterior?.preparing,foreground:!document.hidden,paused:photoPaused||homeTransition||!!document.querySelector('dialog[open]')||document.body.matches('.workshop-open,.shipyard-open,.history-open,.terrain-workshop-open')});
   const dt=Math.min((now-previous)/1000,.05);previous=now;elapsed+=dt;
+  if(!colony?.building&&camera.view?.enabled)camera.clearViewOffset();
   const groundCameraSuspended=worldPending||homeInterior?.preparing||homeInterior?.active||photoPaused||flight?.active||document.body.matches('.workshop-open,.shipyard-open,.history-open,.terrain-workshop-open');
   if(groundCameraSuspended||overview)activeTownCutaway?.reset();
   // Returning from a separate camera mode starts a new local eye sphere;
@@ -851,11 +853,12 @@ function animate(now:number) {
   const frameRenderEvidence:CameraRenderFrame|null=null;
   if(overview){
     avatarOcclusion.restore();
-    const pose=cameraPose(walker,phone,true,groundRadius());
-    pose.position.addScaledVector(walker.up,world.height(walker.up));
-    pose.target.addScaledVector(walker.up,world.height(walker.up));
+    const buildFrame=colony?.building?buildCameraFrame(renderUp,walker.north,groundRadius(),camera.fov,innerWidth,innerHeight,$('builder').getBoundingClientRect()):null;
+    const pose=buildFrame??cameraPose(walker,phone,true,groundRadius());
+    if(buildFrame)camera.setViewOffset(innerWidth,innerHeight,buildFrame.offsetX,buildFrame.offsetY,innerWidth,innerHeight);
+    else {camera.clearViewOffset();pose.position.addScaledVector(walker.up,world.height(walker.up));pose.target.addScaledVector(walker.up,world.height(walker.up));}
     poseCamera.position.copy(pose.position);poseCamera.up.copy(renderUp);poseCamera.lookAt(pose.target);
-    if(!started){camera.position.copy(pose.position);camera.quaternion.copy(poseCamera.quaternion);}
+    if(!started||buildFrame){camera.position.copy(pose.position);camera.quaternion.copy(poseCamera.quaternion);}
     camera.up.copy(renderUp);camera.position.lerp(pose.position,reduced?1:1-Math.exp(-7*dt));camera.quaternion.slerp(poseCamera.quaternion,reduced?1:1-Math.exp(-8*dt));
   }else{
     const room=indoorRoomView.room;

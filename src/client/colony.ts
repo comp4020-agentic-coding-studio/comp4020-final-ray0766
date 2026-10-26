@@ -63,7 +63,7 @@ export class Colony {
     bridge.scene.add(this.layer);
     bridge.scene.add(this.pathPreview);
     const loadWorkshop=this.loadWorkshop=lazyPanel(async()=>{const {Workshop}=await import('./workshop.ts');return this.workshop = new Workshop({read:bridge.libraryRead,save:bridge.librarySave,allowed:()=>!!this.universe?.currentPlanet.mine&&this.universe.player.flight.mode==='ground'&&this.universe.player.location?.kind!=='interior'&&this.syncing,
-      place:entry=>{this.localParts[entry.hash]=entry.blueprint.parts;this.setBuilding(true);this.draft={id:crypto.randomUUID(),kind:'structure',blueprintHash:entry.hash,...structureSize(entry.blueprint.parts),position:null,rotation:0};this.placing=true;this.editor();bridge.notice('Tap an open spot, turn the structure, then Place object.');}});});
+      place:entry=>{this.localParts[entry.hash]=entry.blueprint.parts;this.setBuilding(true);this.draft={id:crypto.randomUUID(),kind:'structure',blueprintHash:entry.hash,...structureSize(entry.blueprint.parts),position:null,rotation:0};this.placing=true;this.editor();this.setKitCollapsed(innerWidth<=700);bridge.notice('Tap an open spot, turn the structure, then Place object.');}});});
     const workshopButton=document.createElement('button');workshopButton.id='open-workshop';workshopButton.className='primary';setText(workshopButton, 'Open workshop');workshopButton.hidden=true;
     el('build-mode').after(workshopButton);
     workshopButton.onclick=()=>void openPanel(workshopButton,loadWorkshop,async panel=>{if(!this.universe?.currentPlanet.mine||this.universe.player.flight.mode!=='ground'||!this.setBuilding(false))return;await bridge.flush();el<HTMLDialogElement>('menu-dialog').close();await panel.open();});
@@ -74,6 +74,8 @@ export class Colony {
     el('claim-planet').onclick=()=>void this.claim();
     el('build-mode').onclick=()=>this.setBuilding(!this.building);
     el('finish-building').onclick=()=>this.setBuilding(false);
+    el('toggle-building-kit').onclick=()=>this.setKitCollapsed(!el('builder').classList.contains('kit-collapsed'));
+    window.addEventListener('resize',()=>{if(innerWidth>700)this.setKitCollapsed(false);});
     el('rotate-object').onclick=()=>{if(this.draft){this.draft.rotation=(this.draft.rotation+Math.PI/4)%(Math.PI*2);this.preview();this.editor();}};
     el('move-object').onclick=()=>{this.placing=true;this.editor();};
     const editStructure=document.createElement('button');editStructure.id='edit-structure';setText(editStructure,'Edit parts');
@@ -85,7 +87,7 @@ export class Colony {
     for(const kind of Object.keys(CATALOGUE) as BuildKind[]) {
       const button=document.createElement('button');button.className='catalogue-item';button.dataset.kind=kind;setAttribute(button, 'aria-label', `Add ${CATALOGUE[kind].name.toLowerCase()}`);
       const icon=document.createElement('span');setText(icon, CATALOGUE[kind].icon);const name=document.createElement('strong');setText(name, CATALOGUE[kind].name);
-      button.append(icon,name);button.onclick=()=>{if(this.busy||!this.discardPlacement())return;this.clearDraft();this.draft={id:crypto.randomUUID(),kind,assetVersion:2,position:null,rotation:0};this.placing=true;this.editor();};el('catalogue').append(button);
+      button.append(icon,name);button.onclick=()=>{if(this.busy||!this.discardPlacement())return;this.clearDraft();this.draft={id:crypto.randomUUID(),kind,assetVersion:2,position:null,rotation:0};this.placing=true;this.editor();this.setKitCollapsed(innerWidth<=700);};el('catalogue').append(button);
     }
     bridge.canvas.addEventListener('pointerdown',e=>{
       this.pointer=this.building&&!this.busy&&!document.querySelector('dialog[open]')&&e.button===0&&e.isPrimary!==false?{id:e.pointerId,x:e.clientX,y:e.clientY}:null;
@@ -107,7 +109,14 @@ export class Colony {
     void this.poll();
   }
   get paused() { return this.building || this.map.open || this.busy || this.workshop?.opened; }
-  private clearDraft(){this.pointer=null;this.draft=null;this.selected=null;this.placing=false;el<HTMLSelectElement>('built-list').value='';if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}}
+  private setKitCollapsed(collapsed:boolean){
+    const panel=el('builder'),choices=el('building-kit-choices'),toggle=el('toggle-building-kit');
+    panel.classList.toggle('kit-collapsed',collapsed);toggle.setAttribute('aria-expanded',String(!collapsed));
+    setText(toggle,collapsed?'Show kit':'Hide kit');
+    // Move keyboard focus before its selected catalogue control is visually hidden.
+    if(collapsed&&choices.contains(document.activeElement))toggle.focus();
+  }
+  private clearDraft(){this.setKitCollapsed(false);this.pointer=null;this.draft=null;this.selected=null;this.placing=false;el<HTMLSelectElement>('built-list').value='';if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}}
   private hasDraft(){const d=this.draft;if(!d?.position)return false;const old=this.universe?.currentPlanet.objects.find(o=>o.id===d.id);return !old||old.rotation!==d.rotation||old.position.some((v,i)=>Math.abs(v-d.position![i])>1e-8);}
   private discardPlacement(){return !this.hasDraft()||window.confirm(translate('Discard the unsaved building placement or changes?'));}
   private setBuilding(value:boolean,force=false){
@@ -289,7 +298,7 @@ export class Colony {
     let obj:T.Object3D|null=hit.object;while(obj&&!obj.userData.objectId)obj=obj.parent;
     if(obj?.userData.objectId)this.select(obj.userData.objectId);
   }
-  private select(id:string){if(this.busy||!this.discardPlacement()){el<HTMLSelectElement>('built-list').value=this.selected??'';return;}const found=this.universe?.currentPlanet.objects.find(o=>o.id===id);this.clearDraft();if(found){this.selected=found.id;this.draft={...found,position:[...found.position]};this.preview();}el<HTMLSelectElement>('built-list').value=id;this.editor();}
+  private select(id:string){if(this.busy||!this.discardPlacement()){el<HTMLSelectElement>('built-list').value=this.selected??'';return;}const found=this.universe?.currentPlanet.objects.find(o=>o.id===id);this.clearDraft();if(found){this.selected=found.id;this.draft={...found,position:[...found.position]};this.preview();}el<HTMLSelectElement>('built-list').value=id;this.editor();if(found)this.setKitCollapsed(innerWidth<=700);}
   private preview(){
     if(this.ghost){disposeGeometry(this.ghost);this.ghost=null;}
     if(!this.draft?.position)return;

@@ -136,6 +136,16 @@ export function routeToTutorialTarget(input: TutorialNavigationInput): TutorialN
   if (input.planetId !== 'hub' && (input.homeRoutes ?? []).reduce((sum, route) => sum + Math.max(0, route.points.length - 1), 0) > TUTORIAL_NAVIGATION_BUDGET.homeSegments)
     return { ...result, reason: 'route-too-complex' };
   if (arc(input.position, input.target.position, input.radius) <= .22) return { ...result, connected: true, reason: 'arrived' };
+  // A ship is at the common arrival point, not at the house doorway. Prove a
+  // short local approach first, including the existing bounded gate bends.
+  // Reversing the whole home path makes its far doorway the fallback root and
+  // can reject this reachable pad merely because straight joins cross a pot.
+  // This uses exactly the same world replay, frame budget and cache as every
+  // other connector; an unproved shortcut is never displayed.
+  if (input.planetId !== 'hub' && input.target.kind === 'port') {
+    const local = connectorPath(input.position, input.target.position, input);
+    if (local) return { ...result, points: compact(local, input.radius), connected: true, reason: 'route' };
+  }
   const destination = targetRoute(input);
   if (!destination) {
     // A legacy/custom home can have no generated path. A short direct route

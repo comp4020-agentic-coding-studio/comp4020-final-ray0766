@@ -1,6 +1,6 @@
 # Little Worlds — current player guide
 
-This guide describes the published Final application. [Release verification](releases/final-2026-10.md) records the deployed version; the paid AI guide trial remains exclusive to the local 8152 preview. The previous mixed prototype account is preserved as a [historical snapshot](integration/player-guide-history-20261025.md).
+This guide describes the Final application in this source revision, including the route and framing follow-up. [Release verification](releases/final-2026-10.md) identifies the matching deployment separately. The paid AI guide trial remains exclusive to the authorised local 8152 setup; it is off in production and the isolated 8185 repair preview. The previous mixed prototype account is preserved as a [historical snapshot](integration/player-guide-history-20261025.md).
 
 ## Loading and your identity
 
@@ -26,7 +26,7 @@ Existing identities retain progress and saved appearance, or use a compatible ne
 | Space from the scene / Guide | Open Sprout's scene conversation |
 | M / Atlas | Browse destinations |
 
-Characters do not jump. Indoor movement stays in the fixed 2.5D room view. On touch, use the movement stick or tap the ground, drag to observe outdoors and tap action buttons. If mouse capture is unavailable, drag to look.
+Characters do not jump. Indoor movement stays in the fixed 2.5D room view. the initial outdoor view looks slightly further down (about seven degrees); free observation remains available and is not forced back to that angle. On touch, use the movement stick or tap the ground, drag to observe outdoors and tap action buttons. If mouse capture is unavailable, drag to look.
 
 Menus, editors, focus loss and Esc release capture. Close/Resume/Cancel buttons return you to the world; click again to capture. Esc does not dismiss menus or the guide. Typing a space, activating a focused button or using Tab inside a form does not invoke scene shortcuts.
 
@@ -37,8 +37,8 @@ If an old saved ledge leaves you stuck outdoors, **Menu → Return to safe groun
 The new identity starts in the public village while a private home prepares in the background. Home preparation may take time; failures have a Retry path. The Mica → Sol delivery and Village guide are optional. Skip or reopen that guide without resetting progress.
 
 1. Press Space or choose Guide. Sprout appears beside you in the same world, with fixed bilingual help. Choose **My planet** for the gate route. Close the conversation and walk the arrows yourself.
-2. At the gate, choose **Return to my home**. Enter your room, or use **Menu → Build on my planet** to place one ready-made module. A placement preview is not saved; confirm the placement and wait for acknowledgement.
-3. Choose **Guide → Find ship**. Indoors it first says to leave through the room door. Outdoors, the same selection continues as validated ground arrows. The guide stays put; it does not lead or push you. A blocked/unproved route is explained rather than presented as safe. Choose another topic to replace the route or Clear route to remove it.
+2. At the gate, choose **Return to my home**. Enter your room, or use **Menu → Build on my planet** to place one ready-made module. A placement preview is not saved; confirm the placement and wait for acknowledgement. on narrow screens, selecting an item folds the kit away from the placement area; **Show kit / Hide kit** preserves the draft. **Cancel** discards it, and **Done building** returns to walking. The building view fits the planet into the canvas area beside or above the controls.
+3. Choose **Guide → Find ship**. Indoors it first says to leave through the room door. Outdoors, the same selection continues as validated ground arrows. The guide stays put; it does not lead or push you. A blocked/unproved route is explained rather than presented as safe. Find ship can use a nearby safe bent connection from a home gate, without relaxing collision or boarding proximity. Choose another topic to replace the route or Clear route to remove it.
 4. At the landing point, close the conversation and use **E / Board your ship**. Select a named destination and **Depart**. Main planet, My planet, Neighbour and Unclaimed distinguish the choices.
 5. Explore as a visitor, then use any available outdoor gate to return to the main planet or your own home. If there is no gate, find the parked ship and choose a return destination.
 
@@ -74,4 +74,4 @@ Ground and flight movement save periodically; pending/saving/saved status applie
 
 On a failed request, keep the draft and use the relevant retry/reload control. Wait for reconnection before changing the world. Conflicting tabs must resolve to the acknowledged revision, not silently overwrite one another. Nearby visitors are ephemeral presence, not saved NPCs; presence disappears after departure or expiry and never grants authority.
 
-No player chat, voice, trade, combat, account recovery or cross-device identity is implemented. The constellation and visible visitor/rendering counts are bounded; this is a small shared-world project, not unlimited multiplayer hosting. See the [local verification index](integration/final-local-readiness.md) for actual checks and untested limits.
+No player chat, voice, trade, combat, account recovery or cross-device identity is implemented. The constellation and visible visitor/rendering counts are bounded; this is a small shared-world project, not unlimited multiplayer hosting. See the [latest local repair verification](integration/usability-fixes-20261026.md) and [earlier verification index](integration/final-local-readiness.md) for actual checks and untested limits.

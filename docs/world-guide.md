@@ -1,6 +1,6 @@
 # Local world guide
 
-This local candidate has not been deployed.
+The fixed scene guide is part of the [published Final](releases/final-2026-10.md). The paid AI trial below is local-only. The [Find ship routing repair](integration/usability-fixes-20261026.md) in this revision proves nearby bent connections without changing the walking, collision or boarding rules.
 
 Press **Space** or choose **Guide** to talk to Sprout beside your character. Use **Close** or **Close and walk** to dismiss the conversation. **Esc** only releases mouse capture. **Tab** opens Pause from the game scene; within this conversation it keeps native focus navigation. Typing spaces and activating focused buttons keep their native behaviour. A small non-modal bubble is anchored beside the guide in the existing 3D scene, without changing camera or opening a full-screen page. Close and walk returns control; mouse capture only resumes after another explicit click. Touch has Guide buttons outside and in the home interior.
 

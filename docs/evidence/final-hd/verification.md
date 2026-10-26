@@ -6,6 +6,10 @@ This is a technical acceptance record, **not author playtest approval or a produ
 
 At this initial local verification stage, production and `main` were at `d5e524c`. The existing main workflow performs checks, a production backup and deployment; this close-out did not dispatch it or enable production AI. A development branch and local checks alone do not finish the course submission.
 
+**Later usability follow-up:** the [usability follow-up](../../integration/usability-fixes-20261026.md) records route/framing repairs, exact support-query reuse, bounded test scheduling and fixture cleanup, with 153 files / 978 tests passing. Their publication and production verification are tracked separately in the release record above. The 971-test result below belongs to this 25 October stage and must not be relabelled as the newer run.
+
+**Later production persistence evidence:** [three retained profiles](../three-player-20261026/return-visit/README.md) returned across the Sydney date change after 13h 25m–13h 28m, retaining their named homes and Bench 42 after an intervening successful deployment. This supplements the local restart evidence below; it is not 24-hour retention, an automatic-stop history audit or a test of the later usability repairs.
+
 ## What the full check found
 
 The first authorised isolated `pnpm check` ran 151 files / 970 tests: **950 passed and 20 failed**. The first repair pass retained one failure. The final candidate ran **151 files / 971 tests, all passed, in 50.52 seconds**, including `app` and the separately isolated `legacy-http` project. `pnpm check:evidence` passed with seven resolvable commit references and the three required reflections. Typecheck, lint, client build and preparation-worker build passed. The optional disabled-camera suite was not run.
@@ -20,7 +24,7 @@ The first authorised isolated `pnpm check` ran 151 files / 970 tests: **950 pass
 
 The original failed runs are retained privately; the public JSON records their outcomes and hashes rather than exposing raw logs. No assertion or production speed/collision limit was relaxed to hide a failure.
 
-## Current browser evidence
+## Browser evidence at this checkpoint
 
 Installed Chrome **155.0.8059.85**, headless WebGL, Smooth quality; **1920×1080** and **390×844**, with a touch-emulated context and a separate resize check. Two new cookie contexts and fresh disposable databases were used. Doorway placement fixtures were explicit test setup; they are not evidence that two humans completed the whole route from the URL.
 
@@ -42,7 +46,7 @@ The first browser attempt failed in its delayed-route teardown; waiting for in-f
 | [Private room, 1920×1080](desktop-private-room.png) | Character and room boundary remain visible after movement; exit is disabled away from the doorway. |
 | [Private doorway, settled 390×844](phone-private-room-door.png) | Doorway position enables Go outside; explicit exit succeeded after this capture. |
 
-The reported abrupt wall cutaway in walk-through interiors remains an unresolved visual decision. It was not silently redesigned. Small-scale readability on physical phones, arbitrary buildings, every route, long sessions, other browser engines and production load remain outside this bounded check. The room exit tooltip is also generic: it says to open the door even when distance is the actual reason for refusal. This is a clarity issue, not evidence that exit bypasses proximity checks.
+At this checkpoint, the reported abrupt wall cutaway in walk-through interiors remained an unresolved visual decision; the author subsequently accepted it as noted above. It was not silently redesigned. Small-scale readability on physical phones, arbitrary buildings, every route, long sessions, other browser engines and production load remain outside this bounded check. The room exit tooltip is also generic: it says to open the door even when distance is the actual reason for refusal. This is a clarity issue, not evidence that exit bypasses proximity checks.
 
 ## Course / HD evidence map
 

@@ -42,4 +42,12 @@ All listed images were inspected. They contain only the game and synthetic test 
 
 All three new identities, homes, names, appearances and benches remain on production. The three persistent profiles also remain private for later return; closing Chrome did not clear them. No reset or end-of-test cleanup was performed. Local 8152, frozen 8098, the AI budget ledger and production configuration were untouched. No paid guide request was made.
 
-This demonstrates concurrent agent sessions, UI construction and immediate refresh persistence. It does **not** demonstrate next-day persistence, a new restart/redeployment check, physical-phone performance, arbitrary layouts, a complete fly/land/return route, or ordinary-human usability. The previously accepted wall cutaway and same-position traveller occlusion remain limitations, not repaired features.
+That original session demonstrates concurrent agent sessions, UI construction and immediate refresh persistence. On its own it does **not** demonstrate next-day persistence, a new restart/redeployment check, physical-phone performance, arbitrary layouts, a complete fly/land/return route, or ordinary-human usability. The previously accepted wall cutaway and same-position traveller occlusion remain limitations, not repaired features.
+
+## Subsequent local follow-up
+
+The [26 October local repair record](../../integration/usability-fixes-20261026.md) separates later Find ship, narrow-builder and initial-view repairs, browser checks and the subsequent 153-file / 978-test local gate from this production session. Publication is recorded separately in the [release record](../../releases/final-2026-10.md); the failures and limits reported above remain the actual results of this session.
+
+## Return on the next Sydney date
+
+The [later return check](return-visit/README.md) reopened all three retained profiles on 27 October at 09:09 AEDT (26 October 22:09 UTC). Their names, 42-object lists and Bench 42 remained, with no repeated character creation. The actual intervals were 13h 25m–13h 28m, not 24 hours. Existing CI records show a successful production deployment between the original saves and the revisit; automatic stop/start history was not independently checked. No data was created, edited or removed. This additional production evidence does not validate the later usability repairs or turn the original incomplete visits into successes.

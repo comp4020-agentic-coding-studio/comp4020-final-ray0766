@@ -1,6 +1,8 @@
 // Host-owned UI translations. English source strings are the stable fallback.
 // Saved names, IDs, resource snapshots and server payloads are not translated.
 export const messages: Record<string, string> = {
+  'Show kit': '展开建造工具',
+  'Hide kit': '收起建造工具',
   "Your traveller": "我的旅人",
   "Create your traveller to begin": "先创建旅人再开始探索",
   "Customize character": "编辑人物外观",

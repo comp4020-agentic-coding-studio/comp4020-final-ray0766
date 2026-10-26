@@ -33,3 +33,7 @@ References did not make a decision permanent. I had also used Palworld to descri
 ## Knowing what remains to be accepted
 
 In this exploration game, I found that AI-led testing could consume many tokens while missing unusual player actions. I did not measure that cost. My own play exposed places where the character became trapped, which is why I want repeatable technical checks alongside people trying less obvious routes. For experience-related repairs, a regression test should be followed by play; this does not require manual approval of every code edit. Crit 10's smoother loading and classmates playing normally were useful observations, not comprehensive acceptance. The integrated implementation and technical close-out are recorded in [865ea0f](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/865ea0fe1462d67c612a1308e5cc852ebd7d34df). Deployment has its own [verification record](docs/releases/final-2026-10.md); I have not completed all final human acceptance checks.
+
+The subsequent [agent-session findings](docs/evidence/three-player-20261026/README.md) prompted [verified repairs](docs/integration/usability-fixes-20261026.md); their release has separate checks, and neither report establishes completed human acceptance.
+
+A later [return check](docs/evidence/three-player-20261026/return-visit/README.md) retained all three saves across Sydney’s local date change and an intervening deployment.

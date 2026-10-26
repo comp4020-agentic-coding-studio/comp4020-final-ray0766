@@ -7,6 +7,7 @@ import { GroundWorld } from '../src/shared/physics/world.ts';
 import { FIXED_STEP, STEP_HEIGHT } from '../src/shared/physics/world.ts';
 import type { GroundPose } from '../src/shared/physics/world.ts';
 import { stationSites } from '../src/shared/teleport.ts';
+import { canBoard, portPoint } from '../src/shared/ports.ts';
 import { routeToTutorialTarget, sampleTutorialRoute, canWalkTutorialConnector, tutorialStationApproaches, TUTORIAL_NAVIGATION_BUDGET } from '../src/shared/tutorial-navigation.ts';
 import { generateHomeManifest, homeManifestScene } from '../src/shared/home-generation.ts';
 import { TELEPORT_STATION } from '../src/shared/planet-plan/compositions.ts';
@@ -29,9 +30,9 @@ describe('tutorial navigation consumes the real frozen paths', () => {
   });
   it('never guesses an off-route connection, and can select a farther actually reachable segment', () => {
     const position = dirOf(70, 320), target = { kind: 'mica' as const, position: NPCS.mica.position, planetId: 'hub' };
-    expect(routeToTutorialTarget({ position, target, radius: 21.6, planetId: 'hub', canConnect: () => false }).points).toEqual([]);
+    expect(routeToTutorialTarget({ position, target, radius: 21.6, planetId: 'hub', clock: () => 0, canConnect: () => false }).points).toEqual([]);
     let checks = 0;
-    const result = routeToTutorialTarget({ position, target, radius: 21.6, planetId: 'hub', canConnect: () => ++checks === 2 });
+    const result = routeToTutorialTarget({ position, target, radius: 21.6, planetId: 'hub', clock: () => 0, canConnect: () => ++checks === 2 });
     expect(checks).toBeGreaterThan(1); expect(checks).toBeLessThanOrEqual(12); expect(result.connected).toBe(true);
   });
   it('refuses a destination on another planet and proves a legacy home approach before drawing it', () => {
@@ -91,7 +92,7 @@ it('selects and continuously walks the three tutorial legs against the real v15 
   }
 }, 30000);
 
-it('replays the failed phone seed with its ordinary registered station: arrival and interrupted position safely bend around the pot, then return to the gate', () => {
+it('replays the failed phone seed with its ordinary registered station: home, gate and ship routes safely bend around the pot and reach the real boarding zone', () => {
   // Sanitized reconstruction of the self-created phone fixture. Only the
   // generator seed, registered station site and test-driver feet position are
   // retained: no cookie, identity, name or copied private design document.
@@ -104,7 +105,8 @@ it('replays the failed phone seed with its ordinary registered station: arrival 
   const world = new GroundWorld(planet), station = stationSites(planet)[0], home = manifest.routes.find(r => r.id === 'home')!.points.at(-1)!;
   const saved: Vec3 = [-.16443420439038595, .9514623254040018, .26015540694613776];
   expect(canWalkTutorialConnector(world, station.arrival, SPAWN)).toBe(false);
-  for (const [start, kind, destination] of [[station.arrival, 'home', home], [saved, 'home', home], [home, 'gate', station.interact]] as const) {
+  for (const [start, kind, destination] of [[station.arrival, 'home', home], [saved, 'home', home], [home, 'gate', station.interact],
+    [station.arrival, 'port', portPoint(planet.id)], [station.interact, 'port', portPoint(planet.id)], [home, 'port', portPoint(planet.id)]] as const) {
     const cache = new Map<string, boolean>(); let result: ReturnType<typeof routeToTutorialTarget> | undefined;
     for (let round = 0; round < 16; round++) {
       let proofs = 0;
@@ -117,7 +119,7 @@ it('replays the failed phone seed with its ordinary registered station: arrival 
       if (result.connected || !proofs) break;
     }
     expect(result?.connected, `${kind}: ${result?.reason}`).toBe(true);
-    expect(result!.points.length).toBeGreaterThan(3);
+    expect(result!.points.length).toBeGreaterThan(kind === 'port' ? 1 : 3);
     let pose: GroundPose = { ...world.pose(start), radius: world.support(start, world.radius(start) + STEP_HEIGHT).radius };
     for (const target of result!.points.slice(1)) {
       let reached = false;
@@ -129,5 +131,15 @@ it('replays the failed phone seed with its ordinary registered station: arrival 
       expect(reached, `${kind}: ordinary walk stopped`).toBe(true);
     }
     expect(arc(pose.position, destination, radius)).toBeLessThan(.035);
+    if (kind === 'port') expect(canBoard(planet.id, pose.position, radius)).toBe(true);
   }
 }, 30000);
+
+it('never draws an unproved local ship shortcut even when the home manifest exists', () => {
+  const position = dirOf(83, 0), target = { kind: 'port' as const, position: SPAWN, planetId: 'blocked-home' };
+  const result = routeToTutorialTarget({ position, target, planetId: target.planetId, radius: 21.6,
+    homeRoutes: [{ id: 'home', width: .96, points: [SPAWN, dirOf(82, 40)] }],
+    clock: () => 0, canConnect: () => false });
+  expect(result.connected).toBe(false);
+  expect(result.points).toEqual([]);
+});

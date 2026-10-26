@@ -44,6 +44,12 @@ of these specs replay captures from a town the main planet replaced, and one
 replays pole travel for over twenty minutes. `pnpm test:disabled-camera` runs
 them.
 
+The normal gate caps file-level concurrency at two because several specs generate
+CPU-heavy collision-checked worlds and some start preparation workers. This limits
+resource contention without changing test inclusion, isolation or deadlines; the
+legacy HTTP project remains sequential. Heavy-work fixtures clean up only the
+temporary stores and bundle directories they create.
+
 At a crit, a green `check` job is half the shipped mark, but it's never the
 judgement of the work: your tutor checks what you deployed against the published
 spec.

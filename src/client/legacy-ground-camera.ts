@@ -2,6 +2,8 @@ import { Vector3 } from 'three';
 import { cameraPose } from './motion.ts';
 import type { SurfaceWalker } from './motion.ts';
 export type LegacyCameraProbe = (start: Vector3, end: Vector3) => number;
+/** Start with more of the walkable foreground; mouse look remains unrestricted within its usual bounds. */
+export const INITIAL_OUTDOOR_PITCH = -.12;
 /** Original boom clipping, without extending beyond the measured clearance. */
 export function clipLegacyCameraBoom(head: Vector3, eye: Vector3, probe: LegacyCameraProbe) {
   const boom=eye.clone().sub(head),length=boom.length();

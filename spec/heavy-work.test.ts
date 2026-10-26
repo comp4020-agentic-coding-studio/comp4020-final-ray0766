@@ -14,13 +14,33 @@ import { workerScript } from '../src/server/worker-script.ts';
 // re-checks the saved planet before it writes what the worker prepared.
 
 type Store = ReturnType<typeof openStore>;
-const stores: Store[] = [], workers: HeavyWork[] = [];
-afterEach(async () => { for (const store of stores.splice(0)) store.close(); for (const work of workers.splice(0)) await work.close(); });
+const stores: Store[] = [], workers: HeavyWork[] = [], directories: string[] = [];
+const temporaryDirectory = (prefix: string) => { const dir = mkdtempSync(join(tmpdir(), prefix)); directories.push(dir); return dir; };
+afterEach(async () => {
+  const failures: unknown[] = [];
+  try {
+    for (const store of stores.splice(0)) {
+      try { store.close(); } catch (error) { failures.push(error); }
+    }
+  } finally {
+    try {
+      for (const work of workers.splice(0)) {
+        try { await work.close(); } catch (error) { failures.push(error); }
+      }
+    } finally {
+      // Only directories created and registered by this test file are removed.
+      for (const dir of directories.splice(0)) {
+        try { rmSync(dir, { recursive: true, force: true }); } catch (error) { failures.push(error); }
+      }
+    }
+  }
+  if (failures.length) throw new AggregateError(failures, 'Heavy-work fixture cleanup failed.');
+});
 const open = (path: string) => { const store = openStore(path, { integratedWorld: true }); stores.push(store); return store; };
 const work = () => { const w = new HeavyWork(); workers.push(w); return w; };
 /** Two copies of one fresh save, so both offer the same first fresh planet. */
 function twins() {
-  const dir = mkdtempSync(join(tmpdir(), 'heavy-')), base = join(dir, 'base.sqlite');
+  const dir = temporaryDirectory('heavy-'), base = join(dir, 'base.sqlite');
   open(base).close(); stores.splice(0);
   for (const name of ['inline.sqlite', 'prepared.sqlite']) copyFileSync(base, join(dir, name));
   return [open(join(dir, 'inline.sqlite')), open(join(dir, 'prepared.sqlite'))] as const;
@@ -95,7 +115,7 @@ parentPort.on('message', ({ id, kind, input }) => { if (kind !== 'home') process
 
 it('prepares exactly the same arrival with the bundled JavaScript worker', async () => {
   // The bundle is built here, so this does not depend on a prior pnpm build.
-  const out = relative(process.cwd(), mkdtempSync(join(tmpdir(), 'worker-bundle-')));
+  const out = relative(process.cwd(), temporaryDirectory('worker-bundle-'));
   execFileSync(process.execPath, ['scripts/build-worker.ts', out], { stdio: 'ignore' });
   const script = workerScript(process.cwd(), out);
   expect(script.bundled).toBe(true);
@@ -111,7 +131,7 @@ it('prepares exactly the same arrival with the bundled JavaScript worker', async
 }, 60_000);
 
 it('uses the bundled worker only while every source that went into it is unchanged', () => {
-  const root = mkdtempSync(join(tmpdir(), 'worker-root-')), source = join(root, 'src', 'a.ts');
+  const root = temporaryDirectory('worker-root-'), source = join(root, 'src', 'a.ts');
   mkdirSync(join(root, 'src')); mkdirSync(join(root, 'build', 'worker'), { recursive: true });
   expect(workerScript(root)).toMatchObject({ bundled: false, reason: 'no bundled worker was built' });
   writeFileSync(source, 'export const a = 1;');

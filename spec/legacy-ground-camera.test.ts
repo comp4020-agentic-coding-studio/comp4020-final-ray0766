@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 import { Vector3, Quaternion } from 'three';
 import { SurfaceWalker, cameraPose } from '../src/client/motion.ts';
-import { legacyOutdoorCameraPose, clipLegacyCameraBoom } from '../src/client/legacy-ground-camera.ts';
+import { INITIAL_OUTDOOR_PITCH, legacyOutdoorCameraPose, clipLegacyCameraBoom } from '../src/client/legacy-ground-camera.ts';
 const walker=()=>new SurfaceWalker([0,1,0]);
 const clear=(a:Vector3,b:Vector3)=>a.distanceTo(b);
 it('retains the delivered outdoor eye and direction in clear space',()=>{
@@ -55,5 +55,20 @@ it('rechecks a pitched boom against walls without extending beyond clearance',()
   const p=legacyOutdoorCameraPose(w,false,21.6,feet,w.up,pitch,(a,b)=>Math.min(limit,a.distanceTo(b)));
   expect(p.position.distanceTo(p.head)).toBeLessThanOrEqual(limit+1e-8);
   expect(p.target.clone().sub(p.position).normalize().dot(w.right())).toBeCloseTo(0,9);
+ }
+});
+
+it('starts outdoors looking farther down at the ground without changing the boom safety contract',()=>{
+ for(const up of [[0,1,0],[0,-1,0],[1,0,0]])for(const portrait of [false,true]){
+  const w=new SurfaceWalker(up),feet=w.up.clone().multiplyScalar(21.6);
+  for(const limit of [20,1]){
+   const probe=(a:Vector3,b:Vector3)=>Math.min(limit,a.distanceTo(b));
+   const neutral=legacyOutdoorCameraPose(w,portrait,21.6,feet,w.up,0,probe);
+   const initial=legacyOutdoorCameraPose(w,portrait,21.6,feet,w.up,INITIAL_OUTDOOR_PITCH,probe);
+   const tilt=(p:typeof initial)=>p.target.clone().sub(p.position).normalize().dot(w.up);
+   expect(tilt(initial)).toBeLessThan(tilt(neutral));
+   expect(initial.position.distanceTo(initial.head)).toBeLessThanOrEqual(limit+1e-8);
+   expect(initial.target.clone().sub(initial.position).normalize().dot(w.right())).toBeCloseTo(0,9);
+  }
  }
 });

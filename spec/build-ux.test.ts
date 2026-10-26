@@ -141,6 +141,30 @@ async function colony(){
   return {controller,canvas,point,down,up,write,dispose:()=>{ground.geometry.dispose();ground.material.dispose();}};
 }
 describe('planet builder cancellation and keyboard boundaries',()=>{
+  it('collapses the narrow catalogue after selection without losing the draft or controls',async()=>{
+    vi.stubGlobal('innerWidth',390);
+    try{
+      const {controller,point,write,dispose}=await colony();
+      expect(el('builder').classList.contains('kit-collapsed')).toBe(true);
+      expect(el('toggle-building-kit').getAttribute('aria-expanded')).toBe('false');
+      el('toggle-building-kit').click();
+      expect(el('builder').classList.contains('kit-collapsed')).toBe(false);
+      const tree=document.querySelector<HTMLButtonElement>('[data-kind="tree"]')!;
+      tree.focus();tree.click();
+      expect(document.activeElement).toBe(el('toggle-building-kit'));
+      expect(el('toggle-building-kit').textContent).toBe('Show kit');
+      point();expect(el<HTMLButtonElement>('save-object').disabled).toBe(false);
+      el('toggle-building-kit').click();el('toggle-building-kit').click();
+      expect(el('build-selection').textContent).toBe('Tree');
+      expect(el<HTMLButtonElement>('save-object').disabled).toBe(false);
+      expect(controller.building).toBe(true);expect(write).not.toHaveBeenCalled();
+      vi.mocked(window.confirm).mockReturnValue(true);el('cancel-object').click();
+      expect(el('object-tools').hidden).toBe(true);
+      expect(el('toggle-building-kit').getAttribute('aria-expanded')).toBe('true');
+      el('finish-building').click();expect(controller.building).toBe(false);dispose();
+    }finally{vi.unstubAllGlobals();}
+  });
+
   it('does not place from a cancelled or dragged pointer gesture',async()=>{
     const {canvas,down,up,dispose}=await colony();
     down();pointer(canvas,'pointercancel',innerWidth/2);up();expect(el<HTMLButtonElement>('save-object').disabled).toBe(true);

@@ -1,0 +1,155 @@
+{
+  "site": "https://comp4020-final-ray0766.fly.dev",
+  "productionSha": "393b97745e873f5e94d614abee31da6a75183b8d",
+  "observedUTC": {
+    "start": "2026-10-26T22:09:27.390Z",
+    "end": "2026-10-26T22:09:38.249Z"
+  },
+  "timezone": "Australia/Sydney (UTC+11)",
+  "users": [
+    {
+      "user": "Test explorer 1",
+      "browser": "155.0.8059.85",
+      "priorRefreshAt": "2026-10-26T08:40:59.354Z",
+      "observedAt": "2026-10-26T22:09:30.429Z",
+      "elapsedSeconds": 48511.075,
+      "sydneyPrior": "Monday, 26 October 2026 at 7:40:59 pm AEDT",
+      "sydneyObserved": "Tuesday, 27 October 2026 at 9:09:30 am AEDT",
+      "savedCookiePresent": true,
+      "identityProbeStatus": 200,
+      "ownedNameBefore": "Test explorer 1",
+      "currentOwned": true,
+      "characterCreationRequired": false,
+      "creationRepeated": false,
+      "quality": "auto",
+      "locationText": "TEST EXPLORER 1",
+      "savedObjectCount": 42,
+      "benchLabel": "Bench 42",
+      "objectsUnchanged": true,
+      "appearanceUnchanged": true,
+      "appearance": {
+        "revision": 1,
+        "options": {
+          "version": 1,
+          "model": "sample",
+          "face": "soft",
+          "hair": "swept",
+          "skin": "sand",
+          "eyes": "moss",
+          "coat": "clay"
+        }
+      },
+      "pageErrors": [],
+      "providerRequests": 0
+    },
+    {
+      "user": "Test explorer 2",
+      "browser": "155.0.8059.85",
+      "priorRefreshAt": "2026-10-26T08:44:04.326Z",
+      "observedAt": "2026-10-26T22:09:33.955Z",
+      "elapsedSeconds": 48329.629,
+      "sydneyPrior": "Monday, 26 October 2026 at 7:44:04 pm AEDT",
+      "sydneyObserved": "Tuesday, 27 October 2026 at 9:09:33 am AEDT",
+      "savedCookiePresent": true,
+      "identityProbeStatus": 200,
+      "ownedNameBefore": "Test explorer 2",
+      "currentOwned": true,
+      "characterCreationRequired": false,
+      "creationRepeated": false,
+      "quality": "auto",
+      "locationText": "TEST EXPLORER 2",
+      "savedObjectCount": 42,
+      "benchLabel": "Bench 42",
+      "objectsUnchanged": true,
+      "appearanceUnchanged": true,
+      "appearance": {
+        "revision": 1,
+        "options": {
+          "version": 1,
+          "model": "sample",
+          "face": "soft",
+          "hair": "bob",
+          "skin": "sand",
+          "eyes": "moss",
+          "coat": "sky"
+        }
+      },
+      "pageErrors": [],
+      "providerRequests": 0
+    },
+    {
+      "user": "Test explorer 3",
+      "browser": "155.0.8059.85",
+      "priorRefreshAt": "2026-10-26T08:43:40.964Z",
+      "observedAt": "2026-10-26T22:09:37.637Z",
+      "elapsedSeconds": 48356.673,
+      "sydneyPrior": "Monday, 26 October 2026 at 7:43:40 pm AEDT",
+      "sydneyObserved": "Tuesday, 27 October 2026 at 9:09:37 am AEDT",
+      "savedCookiePresent": true,
+      "identityProbeStatus": 200,
+      "ownedNameBefore": "Test explorer 3",
+      "currentOwned": true,
+      "characterCreationRequired": false,
+      "creationRepeated": false,
+      "quality": "smooth",
+      "locationText": "TEST EXPLORER 3",
+      "savedObjectCount": 42,
+      "benchLabel": "Bench 42",
+      "objectsUnchanged": true,
+      "appearanceUnchanged": true,
+      "appearance": {
+        "revision": 1,
+        "options": {
+          "version": 1,
+          "model": "sample",
+          "face": "soft",
+          "hair": "swept",
+          "skin": "sand",
+          "eyes": "moss",
+          "coat": "clay"
+        }
+      },
+      "pageErrors": [],
+      "providerRequests": 0
+    }
+  ],
+  "newIdentitiesCreated": false,
+  "gameMutationsObserved": false,
+  "providerRequests": 0,
+  "deploymentEvidence": "https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/actions/runs/40295066160",
+  "deploymentCompletedUTC": "2026-10-26T08:55:44Z",
+  "autoStopRestartHistoryVerified": false,
+  "localCandidateVerifiedAfterDeployment": false,
+  "harnessCorrections": [
+    "Returning users do not mount the lazy appearance dialog: test absence instead of waiting for the element.",
+    "Returning welcome dismisses automatically after preparation; do not click its transient disabled button.",
+    "Quality control is .quality-select, not #quality-select.",
+    "Location-chip text is styled uppercase; compare names case-insensitively."
+  ],
+  "screenshots": [
+    {
+      "path": "user1-returned.png",
+      "sha256": "4c43088eca182de9441a597a2193ca3b66564f8befca29ef7a3b0b87b6dc1e8e",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "path": "user2-returned.png",
+      "sha256": "ba0eefe0a4037336674484b959e4687a2ec10273652233beb126b3166accfcf4",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "path": "user3-returned.png",
+      "sha256": "cec4952b473fc1d7ad2733dd153014c64834a8a8b929b6e1e16e6b6108e250b4",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      }
+    }
+  ]
+}
