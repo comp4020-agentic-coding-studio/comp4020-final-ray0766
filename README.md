@@ -24,6 +24,6 @@ Save your traveller, then press **Space / Guide** for **My planet**. Walk to its
 
 Keep your cookies: anonymous identity has no account recovery. Presence expires; acknowledged creations persist. Room layouts are not confidential storage. Fixed help requires no AI; the paid guide trial is local-only and absent from production. Smooth quality and honest retry feedback support weaker devices without promising a frame rate. The [release record](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/releases/final-2026-10.md) distinguishes local verification from the exact successful main deployment; a source push alone is not proof that the hosted version changed.
 
-The [usability follow-up](docs/integration/usability-fixes-20261026.md) fixes the reported route and framing problems, with 978 local tests passing. The release record separates this revision’s deployment checks from the earlier 971-test release.
+The [usability follow-up](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/integration/usability-fixes-20261026.md) fixes the reported route and framing problems, with 978 local tests passing. The release record separates this revision’s deployment checks from the earlier 971-test release.
 
-A [production return check](docs/evidence/three-player-20261026/return-visit/README.md) retained three test homes across the Sydney date change and an intervening deployment, after about 13.5 hours.
+A [production return check](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/evidence/three-player-20261026/return-visit/README.md) retained three test homes across the Sydney date change and an intervening deployment, after about 13.5 hours.

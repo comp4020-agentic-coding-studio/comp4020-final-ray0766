@@ -1,0 +1,186 @@
+{
+  "applicationSha": "711516106ff7eab293a7aa3b482994da832b1c2e",
+  "workflow": "https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/actions/runs/40412311125",
+  "ci": {
+    "files": 153,
+    "tests": 978,
+    "seconds": 197.93,
+    "conclusion": "success"
+  },
+  "backup": {
+    "schema": 20,
+    "bytes": 679936,
+    "integrity": "ok",
+    "foreignKeys": 0,
+    "independentlyRechecked": true
+  },
+  "cutover": "Not needed; live database was already integrated",
+  "releaseConfirmedAt": "2026-10-26T22:31:55Z",
+  "users": [
+    {
+      "user": 1,
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "browser": "155.0.8059.85",
+      "name": "Test explorer 1",
+      "savedListCount": 42,
+      "bench": true,
+      "beforeMatches": {
+        "name": true,
+        "objects": true,
+        "appearance": true,
+        "creationNotRequired": true
+      },
+      "afterUnchanged": {
+        "objects": true,
+        "appearance": true,
+        "name": true
+      },
+      "initialView": {
+        "pitch": -0.12,
+        "overview": false,
+        "playerVisible": false,
+        "eyeHeadDistance": 1.2,
+        "indoorView": null,
+        "avatarNote": "Existing close-boom avatar hiding; inspect returned-home pixels separately from the earlier fresh-hub check."
+      },
+      "routePointCount": 3,
+      "boardPrompt": "PARKED SHIP / RETURN BEACON\nBoard your ship\nE",
+      "grounded": "true",
+      "productionAIEnabled": false,
+      "providerRequests": 0,
+      "pageErrors": [],
+      "postPaths": {
+        "/api/presence": 66,
+        "/api/move": 21
+      },
+      "completedAt": "2026-10-26T22:33:47.251Z"
+    },
+    {
+      "user": 2,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "browser": "155.0.8059.85",
+      "name": "Test explorer 2",
+      "savedListCount": 42,
+      "bench": true,
+      "beforeMatches": {
+        "name": true,
+        "objects": true,
+        "appearance": true,
+        "creationNotRequired": true
+      },
+      "afterUnchanged": {
+        "objects": true,
+        "appearance": true,
+        "name": true
+      },
+      "initialView": {
+        "pitch": -0.12,
+        "overview": false,
+        "playerVisible": false,
+        "eyeHeadDistance": 1.2,
+        "indoorView": null,
+        "avatarNote": "Existing close-boom avatar hiding; inspect returned-home pixels separately from the earlier fresh-hub check."
+      },
+      "compact": {
+        "expanded": "false",
+        "kitDisplay": "none",
+        "focused": "toggle-building-kit",
+        "panel": {
+          "x": 12,
+          "y": 625.609375,
+          "width": 366,
+          "height": 206.390625,
+          "top": 625.609375,
+          "right": 378,
+          "bottom": 832,
+          "left": 12
+        }
+      },
+      "touchPreview": {
+        "placeEnabled": true,
+        "status": "Turn: 0°"
+      },
+      "draftRetained": true,
+      "discardPrompt": "Discard the unsaved building placement or changes?",
+      "cancelled": true,
+      "productionAIEnabled": false,
+      "providerRequests": 0,
+      "pageErrors": [],
+      "postPaths": {
+        "/api/presence": 14
+      },
+      "completedAt": "2026-10-26T22:34:33.841Z"
+    },
+    {
+      "user": 3,
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "browser": "155.0.8059.85",
+      "name": "Test explorer 3",
+      "savedListCount": 42,
+      "bench": true,
+      "beforeMatches": {
+        "name": true,
+        "objects": true,
+        "appearance": true,
+        "creationNotRequired": true
+      },
+      "afterUnchanged": {
+        "objects": true,
+        "appearance": true,
+        "name": true
+      },
+      "initialView": {
+        "pitch": -0.12,
+        "overview": false,
+        "playerVisible": false,
+        "eyeHeadDistance": 1.2000000000000002,
+        "indoorView": null,
+        "avatarNote": "Existing close-boom avatar hiding; inspect returned-home pixels separately from the earlier fresh-hub check."
+      },
+      "productionAIEnabled": false,
+      "providerRequests": 0,
+      "pageErrors": [],
+      "postPaths": {
+        "/api/presence": 9
+      },
+      "completedAt": "2026-10-26T22:33:54.940Z"
+    }
+  ],
+  "newIdentities": 0,
+  "storedObjectsEdited": 0,
+  "paidAIRequests": 0,
+  "screenshots": [
+    {
+      "path": "user1-initial.png",
+      "sha256": "a5c17e4e4f9f7a40162bff43ca95ade473b1487a8fb934935e000fbc279cb1b7"
+    },
+    {
+      "path": "find-ship-arrived.png",
+      "sha256": "9a56d88d6721f58b58b654fb40e097dac5ffcf11da6ac76623d18b46da0b09a0"
+    },
+    {
+      "path": "narrow-preview.png",
+      "sha256": "b572df6d17de9b14f3805c7987ced27975ece03230de95002db51edaa3d91c60"
+    }
+  ],
+  "harnessCorrections": [
+    "Returning-home close-boom hiding is inherited; asserting visible avatar at every saved origin was invalid. Initial pitch and pixels were checked separately.",
+    "Playwright dismisses an unhandled confirmation. The narrow check was repeated alone with explicit acceptance of the discard-unsaved-preview prompt."
+  ],
+  "limits": [
+    "Chrome on Mac with an emulated narrow viewport, not a physical phone or human acceptance.",
+    "Returned-home camera views retain existing close-boom hiding and considerable sky; fresh-hub framing was checked locally earlier, not with a new production identity.",
+    "The earlier 13.5-hour next-Sydney-date evidence was on 393b977, not a 24-hour test of this release.",
+    "Automatic Fly sleep/wake history was not independently verified.",
+    "No new flight, arbitrary-building, load or full cross-visit scenario was run in this bounded release check."
+  ]
+}
