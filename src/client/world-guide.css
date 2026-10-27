@@ -9,3 +9,15 @@
 #world-guide-home{position:fixed;right:16px;top:150px;z-index:35}
 .world-guide-talking #joystick,.world-guide-talking #home-joystick{pointer-events:none;opacity:.3}
 @media(max-width:700px){#world-guide-dialog{max-height:32dvh;padding:12px}#world-guide-dialog h2{font-size:16px}#world-guide-hud{left:12px;top:auto;bottom:210px;width:230px;max-height:calc(100dvh - 360px);overflow:auto}#world-guide-open{font-size:11px;padding:5px 8px}.minimal-bar #location-chip{min-width:0}#world-guide-home{top:190px;right:12px}}
+
+/* A separate chat panel: fixed help never supplies the free-text answer. */
+#world-guide-dialog{left:auto;right:16px;top:76px;width:min(370px,calc(100vw - 32px));max-height:calc(100dvh - 100px);border-radius:20px}
+#world-guide-dialog h3{font:700 15px/1.4 system-ui;margin:14px 0 6px}
+#world-guide-ai-answer{white-space:pre-wrap;overflow-wrap:anywhere;border-left:3px solid #64a28a;padding-left:10px;max-height:28dvh;overflow:auto}
+#world-guide-ai-answer:empty{display:none}
+#world-guide-help{margin-top:14px;border-top:1px solid #acbcaa;padding-top:10px}
+#world-guide-help summary{cursor:pointer;min-height:44px;font:700 13px/1.5 system-ui;display:list-item}
+#world-guide-dialog button:disabled{opacity:.55;cursor:not-allowed}
+#world-guide-dialog button:focus-visible,#world-guide-help summary:focus-visible{outline:3px solid #287e69;outline-offset:2px}
+#world-guide-dialog .world-guide-input{flex-wrap:wrap}#world-guide-question{flex:1 1 180px}#world-guide-ask{flex:1 0 auto}
+@media(max-width:700px){#world-guide-dialog{right:12px;top:72px;width:calc(100vw - 24px);max-height:56dvh}#world-guide-ai-answer{max-height:18dvh}}

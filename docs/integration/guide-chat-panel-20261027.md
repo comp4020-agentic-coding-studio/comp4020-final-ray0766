@@ -1,0 +1,22 @@
+# Guide chat panel — local revision, 27 October 2026
+
+This revision separates free-text DeepSeek chat from fixed gameplay help. It is based on published commit `08662e717fb4dd5346cbd86ccd6c01ed5d9d8ac1`; the work described here is local, not a production AI release. The earlier [live trial](local-guide-ai.md) remains a historical record of its own real requests and timings.
+
+## Cause and change
+
+Production was intentionally AI-off. Backend startup permits enabled AI only with the authorised loopback configuration. The old client also routed disabled, limited or failed free-text requests to a keyword helper, which could produce a generic unknown answer. Its model prompt separately restricted unrelated questions. These were distinct causes, not evidence that the provider had failed.
+
+Space / Guide now opens a non-modal right-side panel while the world stays visible. Every valid free-text submission uses the model endpoint when enabled and within limits; it never calls the keyword helper. The prompt allows general conversation while keeping undocumented game mechanics uncertain and denying any game-state tools. Fixed topic help and walking directions occupy a separate expandable section and do not replace model text. Disabled service, offline status, limits, failures and cancellation are explicit. Input and partial replies remain available; retry requires a player action. Only the current question and public instructions are sent, as disclosed before sending.
+
+The existing server identity validation, rolling eight-attempt hourly allowance, atomic reservation ledger, cumulative US$1 cap, input/output limits and Sydney deadline are unchanged. No key, real ledger or production configuration was read, copied, reset or enabled as part of the implementation. A subsequent authorised read-only aggregate check of the existing ledger informed the pending migration plan; it made no writes or provider requests. Production enablement and a single-budget handoff require separate approval and implementation. Two independent US$1 ledgers would not preserve the original cap.
+
+## Verification performed
+
+- Five selected test files, **41 tests passed**: `guide-conversation`, `guide-ai`, `guide-interaction`, `world-guide`, and `scene-shortcuts`. They cover free-form routing, disabled/limited states, partial failure, stale responses after cancellation, duplicate clicks, fixed-help separation, stationary routes and keyboard ownership. The existing ledger tests retain quota, atomic budget, restart, cancellation and deadline coverage.
+- TypeScript, changed-file ESLint, client/worker build and `check:evidence` passed. The default full application suite was not rerun for this local revision; the previous release's full-suite result is not claimed as verification of this change.
+- Installed Chrome, **1920×1080** English and **390×844** Chinese touch emulation, with an isolated cloned game database and mock-only upstream: first appearance, open panel, input spaces, general question streaming, duplicate Send, separate fixed directions, upstream failure, Stop, disabled-status feedback, explicit status refresh, keyboard focus and closing back to the world passed. No page errors were recorded. Screenshots were inspected. This is not a physical-phone or real-provider language/latency test.
+- The first narrow run failed because the mock chose its language from a question keyword instead of the request's language. The failure report was retained; the mock was corrected to read the actual system language, and only the narrow scenario was rerun. No production assertion was relaxed.
+
+There were **zero real DeepSeek calls**. The preview on loopback port 8176 is visibly labelled **LOCAL MOCK — No DeepSeek calls**; it is not the paid 8152 service. Original 8152/8098 saves, the real budget ledger, retained production test identities and their buildings were not modified.
+
+Local supporting artifacts are under `guide-panel-change/` in the task workspace: `checked-source.json`, the first `browser-result.json`, passing `browser-narrow-result.json`, and desktop/narrow chat/disabled screenshots. These local files are not public evidence links and are not described as human acceptance. The existing authorised trial cost/latency observations remain historical; this revision makes no new model-quality, real latency or production-availability claim.

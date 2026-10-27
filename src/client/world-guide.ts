@@ -18,32 +18,32 @@ interface Frame {
   scene: T.Scene; camera: T.Camera; feet: T.Vector3; up: T.Vector3; forward: T.Vector3;
   roomKey: string; indoor: boolean; online: boolean; stand(point:T.Vector3):T.Vector3|null;
 }
-/** A stationary local character and a scene-anchored, non-modal speech bubble. */
+/** A stationary local character and a right-side, non-modal conversation panel. */
 export function createWorldGuide(scene: T.Scene, release: () => void) {
-  let current: Frame | null=null, topic:GuideTopic='home', selected:GuideTopic|null=null, routePlanet='', roomKey='', lastPaint='', answer='', answerLanguage='', talking=false;
+  let current: Frame | null=null, topic:GuideTopic='home', selected:GuideTopic|null=null, routePlanet='', roomKey='', lastPaint='', talking=false;
   const actor=courier('fern');actor.root.name='world-guide';actor.root.visible=false;scene.add(actor.root);
   const route=createTutorialRoute(scene,{surfacePoint(normal,offset=0){const w=current?.world;return normal.clone().setLength(w?w.support(normal.toArray() as Vec3,w.radius(normal.toArray() as Vec3)+.45).radius+offset:10+offset);}});
   const open=document.createElement('button');open.id='world-guide-open';open.type='button';document.querySelector('.minimal-bar')?.append(open);
   const menuOpen=document.createElement('button');menuOpen.id='world-guide-menu';menuOpen.type='button';document.getElementById('help')?.before(menuOpen);
   const homeOpen=document.createElement('button');homeOpen.id='world-guide-home';homeOpen.type='button';homeOpen.hidden=true;document.body.append(homeOpen);
   const bubble=document.createElement('section');bubble.id='world-guide-dialog';bubble.hidden=true;bubble.dataset.i18nVerbatim='';bubble.setAttribute('role','dialog');bubble.setAttribute('aria-modal','false');bubble.setAttribute('aria-labelledby','world-guide-title');
-  bubble.innerHTML='<button id="world-guide-close" type="button" aria-label="Close">×</button><h2 id="world-guide-title"></h2><p id="world-guide-intro"></p><p id="world-guide-answer" role="status" aria-live="polite"></p><div id="world-guide-topics"></div><p id="world-guide-availability"></p><p id="world-guide-ai-status"></p><p id="world-guide-ai-quota"></p><form id="world-guide-form"><label for="world-guide-question" id="world-guide-question-label"></label><div class="world-guide-input"><input id="world-guide-question" maxlength="500" autocomplete="off"><button id="world-guide-ask" type="submit"></button></div></form><p id="world-guide-ai-result" role="status"></p><button id="world-guide-ai-stop" type="button" hidden></button><button id="world-guide-local" type="button"></button><button id="world-guide-walk" type="button"></button>';
+  bubble.innerHTML='<button id="world-guide-close" type="button" aria-label="Close">×</button><h2 id="world-guide-title"></h2><p id="world-guide-intro"></p><section aria-labelledby="world-guide-chat-title"><h3 id="world-guide-chat-title"></h3><p id="world-guide-ai-status"></p><p id="world-guide-ai-quota"></p><p id="world-guide-ai-answer" role="status" aria-live="polite"></p><p id="world-guide-ai-result" role="status"></p><form id="world-guide-form"><label for="world-guide-question" id="world-guide-question-label"></label><div class="world-guide-input"><input id="world-guide-question" maxlength="500" autocomplete="off"><button id="world-guide-ask" type="submit"></button></div></form><button id="world-guide-ai-stop" type="button" hidden></button><button id="world-guide-refresh" type="button"></button><button id="world-guide-local" type="button"></button></section><details id="world-guide-help"><summary id="world-guide-help-title"></summary><p id="world-guide-answer"></p><div id="world-guide-topics"></div><p id="world-guide-availability"></p></details><button id="world-guide-walk" type="button"></button>';
   document.body.append(bubble);
   const hud=document.createElement('section');hud.id='world-guide-hud';hud.hidden=true;hud.dataset.i18nVerbatim='';hud.innerHTML='<p id="world-guide-status" role="status"></p><button id="world-guide-details" type="button"></button><button id="world-guide-stop" type="button"></button>';document.body.append(hud);
   const el=<E extends HTMLElement=HTMLElement>(id:string)=>document.getElementById('world-guide-'+id)! as E;
   const language=()=>document.documentElement.lang.startsWith('zh')?'zh' as const:'en' as const;
-  const ai=createGuideConversation({language,answer(text){answerLanguage=language();answer=text;lastPaint='';paint();},changed(){lastPaint='';paint();}});
+  const ai=createGuideConversation({language,answer(text){el('ai-answer').textContent=text;},changed(){lastPaint='';paint();}});
   function close(focus=false){ai.cancel();talking=false;bubble.hidden=true;actor.root.visible=false;document.body.classList.remove('world-guide-talking');release();if(focus)document.querySelector<HTMLCanvasElement>('#world canvas')?.focus({preventScroll:true});}
-  function select(value:GuideTopic){ai.reset();topic=value;answer='';selected=value==='save'?null:value;routePlanet=current?.universe.currentPlanet.id??'';route.root.visible=false;document.querySelector<HTMLButtonElement>('.tutorial-skip')?.click();paint();}
+  function select(value:GuideTopic){topic=value;selected=value==='save'?null:value;routePlanet=current?.universe.currentPlanet.id??'';route.root.visible=false;document.querySelector<HTMLButtonElement>('.tutorial-skip')?.click();paint();}
   function paint(){
     const lang=language(),zh=lang==='zh',target=current&&guideTarget(current.universe,topic),available=!!target&&!!current?.enabled&&!current.indoor;
     const aboard=current?.universe.player.flight.mode==='space',nearShip=topic==='visit'&&!current?.indoor&&!!current&&distance(current.position,portPoint(current.universe.currentPlanet.id),current.world.baseRadius)<BOARD_RADIUS-.12;
-    const key=[lang,topic,selected,available,aboard,nearShip,current?.indoor,current?.online,route.diagnostics.reason,actor.root.visible,talking,answer,ai.revision].join('|');if(key===lastPaint)return;lastPaint=key;
+    const key=[lang,topic,selected,available,aboard,nearShip,current?.indoor,current?.online,route.diagnostics.reason,actor.root.visible,talking,ai.revision].join('|');if(key===lastPaint)return;lastPaint=key;
     open.textContent=aboard?(zh?'向导 · 已登船':'Guide · Aboard'):(zh?'向导 · 空格':'Guide · Space');open.title=aboard?(zh?'你已在飞船中，使用目的地与航程控制；落地后可使用地面向导。':'You are already aboard. Use the destination and trip controls; ground guidance resumes after landing.'):(zh?'空格打开向导，选择寻找飞船。':'Space opens the guide. Choose Find ship.');open.setAttribute('aria-label',zh?'小星球向导':'World guide');menuOpen.textContent=homeOpen.textContent=zh?'小星球向导':'World guide';
     el('title').textContent=zh?'芽芽 · 小星球向导':'Sprout · World guide';
-    el('intro').textContent=actor.root.visible?(zh?'我在你身边。选一站查看地面路线，再关闭对话自己走。':'I am beside you. Choose a stop for ground directions, then close this chat and walk.'):(zh?'附近没有安全的站立空位，我先通过这个小气泡提供帮助。':'There is no safe standing space nearby; I can still help in this small bubble.');
+    el('intro').textContent=actor.root.visible?(zh?'我在你身边。可在右侧聊天，或展开固定帮助查看地面路线。':'I am beside you. Chat on the right, or open fixed help for ground directions.'):(zh?'附近没有安全的站立空位，仍可在此聊天或查看固定帮助。':'There is no safe standing space nearby; chat and fixed help remain available here.');
     el('topics').replaceChildren(...GUIDE_TOPICS.map((value,i)=>{const b=document.createElement('button');b.type='button';b.textContent=names[lang][i];b.dataset.topic=value;b.setAttribute('aria-pressed',String(topic===value));b.onclick=()=>select(value);return b;}));
-    if(answerLanguage!==lang)answer='';el('answer').textContent=answer||GUIDE_HELP[topic][lang];
+    el('answer').textContent=GUIDE_HELP[topic][lang];
     el('availability').textContent=aboard?(zh?'你已在飞船中，请使用目的地与航程控制。':'You are already aboard; use the destination and trip controls.'):!current?.online?(zh?'当前离线。可以阅读本地帮助；重连后再继续路线。':'Offline. Local help is available; reconnect before continuing the route.'):current.indoor?(topic==='visit'?(zh?'第 1 步：关闭对话，从房门出去。第 2 步：室外地面箭头会继续指向飞船。':'Step 1: close this chat and leave through the room door. Step 2: ground arrows outside continue to your ship.'):(zh?'室内可交谈；请先出门，再显示室外目的地路线。':'You can talk indoors. Go outside before showing a route to an outdoor destination.')):nearShip?(zh?'飞船就在这里。关闭对话，按 E 或点击“登上飞船”，再选择目的地。':'Your ship is here. Close this chat, press E or choose Board your ship, then pick a destination.'):!available?(zh?'这里没有可用的步行目的地；请使用固定帮助。':'There is no walking destination here; use the fixed help.'):selected?(route.diagnostics.connected?(zh?'地面箭头已显示。向导不会领路；请自己沿路线行走。':'Ground arrows are shown. Sprout stays here; walk the route yourself.'):(zh?'正在确认安全路线。若无法连通，请回到附近石板路再试。':'Checking a safe route. If no route connects, return to the nearby stone path and try again.')):(zh?'点一个目的地，显示地面导航。':'Choose a destination to show ground directions.');
     ai.paint();
     el('walk').textContent=zh?'关闭并行走':'Close and walk';el('details').textContent=zh?'与向导交谈':'Talk to guide';el('stop').textContent=zh?'清除路线':'Clear route';el('close').setAttribute('aria-label',zh?'关闭向导':'Close guide');
@@ -68,7 +68,7 @@ export function createWorldGuide(scene: T.Scene, release: () => void) {
     if(guideShortcut(event)&&current?.visible&&!document.querySelector('dialog[open]')){shortcutHeld=true;event.preventDefault();event.stopImmediatePropagation();if(talking)close(true);else show();}
   },{capture:true});
   paint();
-  return {get active(){return selected!==null;},get talking(){return talking;},close,findShip(){if(!current?.visible)return;select('visit');show();},frame(input:Frame){
+  return {get active(){return selected!==null;},get talking(){return talking;},close,findShip(){if(!current?.visible)return;select('visit');show();el<HTMLDetailsElement>('help').open=true;},frame(input:Frame){
     ai.tick(talking);current=input;open.disabled=menuOpen.disabled=!input.visible;homeOpen.hidden=!input.visible||!input.indoor||!input.universe.player.location||input.universe.player.location.kind!=='interior';
     if(talking&&(!input.visible||input.roomKey!==roomKey||!!document.querySelector('dialog[open]')))close();
     if(selected&&routePlanet!==input.universe.currentPlanet.id){selected=null;route.root.visible=false;}
@@ -78,11 +78,7 @@ export function createWorldGuide(scene: T.Scene, release: () => void) {
     if(talking){
       if(actor.root.visible&&!input.stand(actor.root.position.clone()))actor.root.visible=false;
       actor.animate(input.time,0,input.reducedMotion);
-      const point=(actor.root.visible?actor.root.position:input.feet).clone().addScaledVector(input.up,1.7).project(input.camera);
-      const width=Math.min(340,innerWidth-24),height=Math.min(bubble.offsetHeight,innerHeight*.48),anchorX=(point.x+1)*innerWidth/2,anchorY=(1-point.y)*innerHeight/2;
-      const playerScreen=input.feet.clone().project(input.camera),playerX=(playerScreen.x+1)*innerWidth/2;
-      const left=anchorX<playerX?anchorX-width-28:anchorX+28,top=innerWidth<700?anchorY-height-28:anchorY-height/2;
-      bubble.style.left=Math.max(12,Math.min(innerWidth-width-12,left))+'px';bubble.style.top=Math.max(70,Math.min(innerHeight-height-18,top))+'px';
+
     }
     paint();return {mode:talking?'talking':selected?'route':'idle',position:actor.root.visible?actor.root.position.toArray():null,topic,selected,route:route.root.visible?route.diagnostics.reason:'hidden',routeVisible:route.root.visible,aiEnabled:ai.enabled,actorVisible:actor.root.visible};
   }};
