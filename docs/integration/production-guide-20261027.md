@@ -19,3 +19,23 @@ The credential is supplied only through Fly's encrypted secret import on standar
 The earlier [987-test gate and desktop/narrow mock checks](guide-chat-panel-20261027.md) concern the chat revision. The final local gate passed 155 files / 991 tests, including the additional startup/ledger cases for production fencing and refusal to create a replacement trial; typecheck, full lint, client/worker build and evidence checks also passed. Real-provider acceptance is a separate post-deployment step, within this same budget, using retained test identities and only public/fictitious questions; no model-quality or latency result is inferred from the mocks. Failure simulation remains explicitly labelled and need not consume a real provider attempt. The CI run and runtime acceptance in the release handover identify the exact deployed SHA.
 
 The research revision has 687 body words. PROCESS and Crit 8/9/10 retain their truthful historical descriptions; production approval does not retroactively change the earlier local-only phase.
+
+## Production acceptance
+
+Executable revision [720ff83](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/commit/720ff83b58bfdc0b381a1cd25bc1f9ae74fd5c4d) passed [CI and deployment run 40564747942](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/actions/runs/40564747942): 155 files / 991 tests, evidence checks and secret scans. The production game backup was 786,432 bytes, schema 20, integrity `ok`, zero foreign-key violations; the existing integrated database needed no migration. The release was confirmed at 19:04:32 UTC. AI was enabled only after this success, through Fly configuration on that same image. Subsequent documentation commits do not change this tested executable revision.
+
+At 19:07 UTC, retained test users 1 and 2 used the actual right-side panel in installed Chrome at 1920×1080 and touch-emulated 390×844. No new identity was created. An English question about the blue sky received a light-scattering explanation; a Chinese building-save question correctly required Save and server acknowledgement. Neither response came from fixed help. Each identity showed 7/8 remaining. Their planet names, saved appearance and current-planet objects matched before/after; no buildings were placed or removed.
+
+| Actual provider attempt | First content at backend | Total backend stream | Browser round trip | Tokens in/out | Conservative charge |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| English general question | 2,113 ms | 2,538 ms | 2,841 ms | 639 / 43 | US$0.0004866 |
+| Chinese saving question | 622 ms | 841 ms | 1,321 ms | 600 / 28 | US$0.0004272 |
+
+The nine-record ledger then showed **US$0.0026970 cumulative accounting**, **US$0.9973030 remaining**, no pending attempts and integrity `ok`. The two acceptance calls added US$0.0009138; no budget was reset. These are conservative token-rate charges, not a provider invoice or latency guarantee. Local paid startup remains disabled.
+
+An initial browser attempt selected the hidden welcome-language control and stopped **before sending**; the unchanged seven-record ledger confirmed zero charge. The corrected attempt selected the visible control. Chrome response-body capture failed after both real streams, so answer content was verified in the rendered UI/screenshots and token/timing results were read from the two ledger entries, not invented from a missing capture. The failure UI was checked with a browser-injected HTTP 503: it retained input and displayed failure without a fixed answer. That check made no provider request and is not described as a real provider outage.
+
+![Desktop actual DeepSeek response](../evidence/production-guide-20261027/desktop.png)
+![Narrow actual DeepSeek response](../evidence/production-guide-20261027/narrow.png)
+
+Only synthetic test questions and visible gameplay are included. Raw browser profiles, cookies, credentials, request records and databases remain private. Real replies do not establish universal factual accuracy; mock quota/exhaustion tests remain distinct from the two real acceptance calls.
