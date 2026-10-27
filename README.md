@@ -18,11 +18,11 @@ Readable entrances, comfortable observation and a worthwhile visit require judge
 
 ## Try the core route
 
-Save your traveller, then press **Space / Guide** for **My planet**. Walk to its gate, return home and use **Menu → Build on my planet** to place one module. **Guide → Find ship** draws a ground route; board, choose a destination and Depart. Flight lands automatically. A neighbour's gate returns you to the main planet or your own home. **Tab** opens Menu; **Esc** releases the mouse. Touch equivalents and detailed controls are in the player guide.
+Save your traveller, then press **Space / Guide**, expand **Fixed help** if shown, and choose **My planet**. Walk to its gate, return home and use **Menu → Build on my planet** to place one module. **Guide → Find ship** draws a ground route; board, choose a destination and Depart. Flight lands automatically. A neighbour's gate returns you to the main planet or your own home. **Tab** opens Menu; **Esc** releases the mouse. Touch equivalents and detailed controls are in the player guide.
 
 ## Boundaries
 
-Keep your cookies: anonymous identity has no account recovery. Presence expires; acknowledged creations persist. Room layouts are not confidential storage. Fixed help requires no AI; the paid guide trial is local-only and absent from production. Smooth quality and honest retry feedback support weaker devices without promising a frame rate. The [release record](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/releases/final-2026-10.md) distinguishes local verification from the exact successful main deployment; a source push alone is not proof that the hosted version changed.
+Keep your cookies: anonymous identity has no account recovery. Presence expires; acknowledged creations persist. Room layouts are not confidential storage. Fixed help requires no AI; the paid guide trial is local-only and absent from production. A right-side chat panel has passed local mock checks; production enablement remains pending. Smooth quality and honest retry feedback support weaker devices without promising a frame rate. The [release record](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/releases/final-2026-10.md) distinguishes local verification from the exact successful main deployment; a source push alone is not proof that the hosted version changed.
 
 The [usability follow-up](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/integration/usability-fixes-20261026.md) fixes the reported route and framing problems, with 978 local tests passing. The release record separates this revision’s deployment checks from the earlier 971-test release.
 
