@@ -15,9 +15,11 @@ export interface GuideUsage {prompt_tokens:number;completion_tokens:number}
 export class GuideAIError extends RequestError {code:string;quota?:GuideQuota;constructor(status:number,code:string,quota?:GuideQuota){super(status,code);this.code=code;this.quota=quota;}}
 export class GuideLedger {
  readonly db:DatabaseSync;private clock:()=>number;
- constructor(path:string,clock=Date.now){
+ constructor(path:string,clock=Date.now,requireExisting=false){
   this.clock=clock;
-  this.db=new DatabaseSync(path);this.db.exec('PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL;');
+  this.db=new DatabaseSync(path);
+  if(requireExisting){try{if(!this.db.prepare('SELECT 1 FROM guide_trial WHERE id=1').get())throw Error();}catch{this.db.close();throw Error('Transferred guide ledger is missing its original trial.');}}
+  this.db.exec('PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL;');
   this.db.exec(`CREATE TABLE IF NOT EXISTS guide_trial(id INTEGER PRIMARY KEY CHECK(id=1),cap INTEGER NOT NULL,policy TEXT NOT NULL,halted INTEGER NOT NULL DEFAULT 0);
    CREATE TABLE IF NOT EXISTS guide_requests(actor TEXT NOT NULL,request_id TEXT NOT NULL,digest TEXT NOT NULL,started INTEGER NOT NULL,expires INTEGER NOT NULL,state TEXT NOT NULL,charged INTEGER NOT NULL,prompt_tokens INTEGER,completion_tokens INTEGER,first_ms INTEGER,total_ms INTEGER,PRIMARY KEY(actor,request_id));
    CREATE INDEX IF NOT EXISTS guide_requests_window ON guide_requests(actor,started);`);

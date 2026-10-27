@@ -11,6 +11,7 @@ import { HeavyWork } from './heavy-work.ts';
 import { workerScript } from './worker-script.ts';
 import { createGuideHelp } from './guide-help.ts';
 import {GuideLedger,createGuideAI,GuideAIError} from './guide-ai.ts';
+import {guideConfiguration} from './guide-config.ts';
 import { businessLog } from './business-log.ts';
 
 const homeSample=process.env.HOME_SAMPLE==='1';
@@ -25,10 +26,9 @@ const cookieName=homeSample?(samplePort===8126?'little_home_sample':`little_home
 if (store.migrationBackup) console.log(`Before migration, saved a consistent backup: ${store.migrationBackup}`);
 const audit=businessLog(databasePath);
 const guideHelp=createGuideHelp();
-// Real provider access is explicitly local-only; default/production stays disabled.
-const aiEnabled=process.env.GUIDE_AI_ENABLED==='1';
-if(aiEnabled&&(process.env.HOST!=='127.0.0.1'||!process.env.GUIDE_AI_LEDGER_PATH||!process.env.DEEPSEEK_API_KEY))throw Error('Local guide configuration is incomplete.');
-const guideAI=aiEnabled?createGuideAI({ledger:new GuideLedger(process.env.GUIDE_AI_LEDGER_PATH!),key:process.env.DEEPSEEK_API_KEY!}):null;
+// Default off; production requires explicit approval configuration and the transferred ledger.
+const aiConfig=guideConfiguration(process.env);
+const guideAI=aiConfig?createGuideAI({ledger:new GuideLedger(aiConfig.ledger,Date.now,aiConfig.production),key:aiConfig.key}):null;
 const presence=presenceStore(store.state);
 // New homes, station searches and other planets' ground are prepared on a worker thread, so one
 // player's arrival never holds everyone else's movement and presence. The harbour is built now,

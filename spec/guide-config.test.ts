@@ -1,0 +1,6 @@
+import{it,expect}from'vitest';
+import{guideConfiguration}from'../src/server/guide-config.ts';
+const live={GUIDE_AI_ENABLED:'1',GUIDE_AI_DEPLOYMENT:'production',FLY_APP_NAME:'comp4020-final-ray0766',GUIDE_AI_LEDGER_PATH:'/data/guide-ai/trial.sqlite',DEEPSEEK_API_KEY:'mock'};
+it('defaults off and rejects accidental public enablement',()=>{expect(guideConfiguration({})).toBeNull();expect(()=>guideConfiguration({...live,GUIDE_AI_DEPLOYMENT:undefined})).toThrow();expect(()=>guideConfiguration({...live,FLY_APP_NAME:'another-app'})).toThrow();});
+it('requires the existing transferred production ledger without creating a second budget',()=>{expect(()=>guideConfiguration(live,()=>false)).toThrow();expect(()=>guideConfiguration({...live,GUIDE_AI_LEDGER_PATH:'/tmp/new.sqlite'},()=>true)).toThrow();expect(guideConfiguration(live,()=>true)).toMatchObject({production:true,ledger:'/data/guide-ai/trial.sqlite'});});
+it('retains explicit local mock configuration and rejects missing credentials or unknown modes',()=>{expect(guideConfiguration({GUIDE_AI_ENABLED:'1',HOST:'127.0.0.1',GUIDE_AI_LEDGER_PATH:':memory:',DEEPSEEK_API_KEY:'mock'})).toMatchObject({production:false});expect(()=>guideConfiguration({...live,DEEPSEEK_API_KEY:''},()=>true)).toThrow();expect(()=>guideConfiguration({...live,GUIDE_AI_DEPLOYMENT:'preview'},()=>true)).toThrow();});

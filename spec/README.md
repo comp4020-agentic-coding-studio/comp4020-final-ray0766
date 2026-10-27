@@ -64,9 +64,11 @@ The [Final verification record](../docs/evidence/final-hd/verification.md) keeps
 the first full-run failures, fixture corrections, the door-revision falling
 regression, and the boundaries of current browser evidence.
 
-The local right-side guide-chat revision is covered by `guide-conversation`,
+The right-side guide-chat revision is covered by `guide-conversation`,
 `guide-ai`, `guide-interaction`, `world-guide` and `scene-shortcuts`. Free-text
 questions use the enabled model endpoint; fixed help remains a separate local
 section. These provider tests use mocks and do not enable production AI or
 prove real model answer quality. The [revision record](../docs/integration/guide-chat-panel-20261027.md)
 separates scoped/browser checks, the subsequent full gate, and publication status.
+
+Production startup checks in `guide-config` require the explicit app/path configuration and an existing transferred ledger. `guide-ai` refuses an empty ledger in production mode; none of these tests contacts the provider.

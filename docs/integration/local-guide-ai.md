@@ -1,5 +1,7 @@
 # Local live-guide trial — 25 October 2026
 
+Historical record: the [27 October handoff](production-guide-20261027.md) retires local paid access and transfers this same budget to production. The original measurements below remain unchanged.
+
 This records the authorised **local-only** trial on <http://127.0.0.1:8152/?measure=1>, developed on `integration/midpoint`. Its initial verification made no commit, push, production deployment or production data change. Later development-branch packaging includes the implementation and this record, not its credentials, trial ledger or production enablement. It supersedes the AI-off status in the earlier [local close-out](final-local-readiness.md); those earlier checks remain historical facts.
 
 ## Player experience and data boundary

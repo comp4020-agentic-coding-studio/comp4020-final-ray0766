@@ -1,5 +1,7 @@
 # Guide chat panel — local revision, 27 October 2026
 
+This records the completed local stage. The subsequent [production handoff](production-guide-20261027.md) supersedes its pending-approval status; the mock results below remain mock results.
+
 This revision separates free-text DeepSeek chat from fixed gameplay help. It is based on published commit `08662e717fb4dd5346cbd86ccd6c01ed5d9d8ac1`; the work described here is local, not a production AI release. The earlier [live trial](local-guide-ai.md) remains a historical record of its own real requests and timings.
 
 ## Cause and change

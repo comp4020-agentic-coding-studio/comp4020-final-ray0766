@@ -36,7 +36,7 @@ export function createGuideConversation(options:{language:()=> 'en'|'zh';answer:
    duplicate:['Already submitted; no second AI call was made.','已提交过，没有再次调用 AI。'],
    hourly:['Hourly limit reached. No new question was sent. Fixed help is separate below.','已达小时限额，新问题未发送。下方可单独查看固定帮助。'],
    budget:['Trial budget cannot reserve another call. No new question was sent.','本轮剩余预算不足以预留下一次调用，新问题未发送。'],
-   trial_ended:['The local AI trial ended at 00:00 on 1 Jan 2027 (Sydney, UTC+11).','本地 AI 试用于悉尼时间 2027 年 1 月 1 日 00:00（UTC+11）结束。'],
+   trial_ended:['The AI trial ended at 00:00 on 1 Jan 2027 (Sydney, UTC+11).','AI 试用于悉尼时间 2027 年 1 月 1 日 00:00（UTC+11）结束。'],
    budget_review:['Budget review is required before more calls.','需先复核预算，才能继续调用。'],
    busy:['DeepSeek chat is busy. No call was sent; try again later.','聊天服务繁忙，未发起调用；请稍后重试。'],
    disabled:['DeepSeek is not enabled on this server. Your question has not been sent. Fixed help is separate below.','此服务器尚未启用 DeepSeek，你的问题未发送。下方可单独查看固定帮助。'],
