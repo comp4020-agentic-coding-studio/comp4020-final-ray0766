@@ -1,0 +1,252 @@
+{
+  "testedSource": "86e101b0010b550b380309bdc4cf248d6560ca47",
+  "site": "https://comp4020-final-ray0766.fly.dev",
+  "return": {
+    "source": "86e101b0010b550b380309bdc4cf248d6560ca47",
+    "startedAt": "2026-10-27T19:38:21.044Z",
+    "site": "https://comp4020-final-ray0766.fly.dev",
+    "users": [
+      {
+        "user": "Test explorer 1",
+        "startedAt": "2026-10-27T19:38:21.045Z",
+        "priorRefreshAt": "2026-10-26T08:40:59.354Z",
+        "status": "passed-name-bench-count-and-returning-identity",
+        "pageErrors": [],
+        "providerRequests": 0,
+        "postPaths": {
+          "/api/presence": 9
+        },
+        "browser": "156.0.8078.48",
+        "savedCookiePresent": true,
+        "identityProbeStatus": 200,
+        "ownedNameBefore": "Test explorer 1",
+        "savedObjectsBefore": 42,
+        "currentOwned": true,
+        "objectCountBefore": 42,
+        "characterCreationRequired": false,
+        "creationRepeated": false,
+        "quality": "auto",
+        "locationText": "TEST EXPLORER 1",
+        "savedObjectCount": 42,
+        "benchLabel": "Bench 42",
+        "observedAt": "2026-10-27T19:38:24.784Z",
+        "elapsedSeconds": 125845.43,
+        "sydneyObserved": "Wednesday, 28 October 2026 at 6:38:24 am AEDT",
+        "sydneyPrior": "Monday, 26 October 2026 at 7:40:59 pm AEDT",
+        "objectsUnchanged": true,
+        "appearanceUnchanged": true,
+        "appearance": {
+          "revision": 1,
+          "options": {
+            "version": 1,
+            "model": "sample",
+            "face": "soft",
+            "hair": "swept",
+            "skin": "sand",
+            "eyes": "moss",
+            "coat": "clay"
+          }
+        },
+        "appearanceMatchesPrior": true,
+        "closedAt": "2026-10-27T19:38:25.086Z"
+      },
+      {
+        "user": "Test explorer 2",
+        "startedAt": "2026-10-27T19:38:25.086Z",
+        "priorRefreshAt": "2026-10-26T08:44:04.326Z",
+        "status": "passed-name-bench-count-and-returning-identity",
+        "pageErrors": [],
+        "providerRequests": 0,
+        "postPaths": {
+          "/api/presence": 10
+        },
+        "browser": "156.0.8078.48",
+        "savedCookiePresent": true,
+        "identityProbeStatus": 200,
+        "ownedNameBefore": "Test explorer 2",
+        "savedObjectsBefore": 42,
+        "currentOwned": true,
+        "objectCountBefore": 42,
+        "characterCreationRequired": false,
+        "creationRepeated": false,
+        "quality": "auto",
+        "locationText": "TEST EXPLORER 2",
+        "savedObjectCount": 42,
+        "benchLabel": "Bench 42",
+        "observedAt": "2026-10-27T19:38:28.511Z",
+        "elapsedSeconds": 125664.185,
+        "sydneyObserved": "Wednesday, 28 October 2026 at 6:38:28 am AEDT",
+        "sydneyPrior": "Monday, 26 October 2026 at 7:44:04 pm AEDT",
+        "objectsUnchanged": true,
+        "appearanceUnchanged": true,
+        "appearance": {
+          "revision": 1,
+          "options": {
+            "version": 1,
+            "model": "sample",
+            "face": "soft",
+            "hair": "bob",
+            "skin": "sand",
+            "eyes": "moss",
+            "coat": "sky"
+          }
+        },
+        "appearanceMatchesPrior": true,
+        "closedAt": "2026-10-27T19:38:28.715Z"
+      },
+      {
+        "user": "Test explorer 3",
+        "startedAt": "2026-10-27T19:38:28.715Z",
+        "priorRefreshAt": "2026-10-26T08:43:40.964Z",
+        "status": "passed-name-bench-count-and-returning-identity",
+        "pageErrors": [],
+        "providerRequests": 0,
+        "postPaths": {
+          "/api/presence": 9
+        },
+        "browser": "156.0.8078.48",
+        "savedCookiePresent": true,
+        "identityProbeStatus": 200,
+        "ownedNameBefore": "Test explorer 3",
+        "savedObjectsBefore": 42,
+        "currentOwned": true,
+        "objectCountBefore": 42,
+        "characterCreationRequired": false,
+        "creationRepeated": false,
+        "quality": "smooth",
+        "locationText": "TEST EXPLORER 3",
+        "savedObjectCount": 42,
+        "benchLabel": "Bench 42",
+        "observedAt": "2026-10-27T19:38:32.052Z",
+        "elapsedSeconds": 125691.088,
+        "sydneyObserved": "Wednesday, 28 October 2026 at 6:38:32 am AEDT",
+        "sydneyPrior": "Monday, 26 October 2026 at 7:43:40 pm AEDT",
+        "objectsUnchanged": true,
+        "appearanceUnchanged": true,
+        "appearance": {
+          "revision": 1,
+          "options": {
+            "version": 1,
+            "model": "sample",
+            "face": "soft",
+            "hair": "swept",
+            "skin": "sand",
+            "eyes": "moss",
+            "coat": "clay"
+          }
+        },
+        "appearanceMatchesPrior": true,
+        "closedAt": "2026-10-27T19:38:32.351Z"
+      }
+    ],
+    "noNewIdentities": true,
+    "completedAt": "2026-10-27T19:38:32.351Z"
+  },
+  "movementSync": {
+    "startedAt": "2026-10-27T19:38:43.503Z",
+    "source": "86e101b0010b550b380309bdc4cf248d6560ca47",
+    "kind": "Retained profiles; real keyboard motion, passive response/render instrumentation, no test API writes",
+    "users": [
+      {
+        "user": "Test explorer 1",
+        "viewport": "1920x1080",
+        "arrivedHub": "2026-10-27T19:38:47.743Z",
+        "browser": "156.0.8078.48",
+        "returnedHome": true,
+        "objectsPreserved": true,
+        "appearancePreserved": true,
+        "namePreserved": true
+      },
+      {
+        "user": "Test explorer 2",
+        "viewport": "390x844",
+        "arrivedHub": "2026-10-27T19:38:54.386Z",
+        "browser": "156.0.8078.48",
+        "returnedHome": true,
+        "objectsPreserved": true,
+        "appearancePreserved": true,
+        "namePreserved": true
+      }
+    ],
+    "samples": [
+      {
+        "key": "w",
+        "inputUtc": "2026-10-27T19:38:55.789Z",
+        "holdMs": 240,
+        "receiveMs": 292,
+        "displayStateMs": 315.89990234375,
+        "visible": 1,
+        "positionDeltaUnit": 0.022370741623463298
+      },
+      {
+        "key": "s",
+        "inputUtc": "2026-10-27T19:38:57.327Z",
+        "holdMs": 240,
+        "receiveMs": 239.800048828125,
+        "displayStateMs": 260.300048828125,
+        "visible": 1,
+        "positionDeltaUnit": 0.0049195415926615435
+      },
+      {
+        "key": "a",
+        "inputUtc": "2026-10-27T19:38:58.791Z",
+        "holdMs": 240,
+        "receiveMs": 530.300048828125,
+        "displayStateMs": 563.300048828125,
+        "visible": 1,
+        "positionDeltaUnit": 0.032395479367712116
+      },
+      {
+        "key": "d",
+        "inputUtc": "2026-10-27T19:39:00.575Z",
+        "holdMs": 240,
+        "receiveMs": 492,
+        "displayStateMs": 513.199951171875,
+        "visible": 1,
+        "positionDeltaUnit": 0.03140971738268377
+      },
+      {
+        "key": "w",
+        "inputUtc": "2026-10-27T19:39:02.310Z",
+        "holdMs": 240,
+        "receiveMs": 512.099853515625,
+        "displayStateMs": 542.39990234375,
+        "visible": 1,
+        "positionDeltaUnit": 0.02970004889352281
+      },
+      {
+        "key": "s",
+        "inputUtc": "2026-10-27T19:39:04.075Z",
+        "holdMs": 240,
+        "receiveMs": 492.300048828125,
+        "displayStateMs": 511.89990234375,
+        "visible": 1,
+        "positionDeltaUnit": 0.0291767745023027
+      }
+    ],
+    "errors": [],
+    "providerRequests": 0,
+    "status": "completed",
+    "finishedAt": "2026-10-27T19:39:06.288Z"
+  },
+  "measurementDefinition": {
+    "receiveMs": "Real keyboard dispatch start to observer receipt and JSON parsing of the first changed actor-position response. Includes automation overhead.",
+    "displayStateMs": "Same start to accepted presence diagnostic mutation plus two animation frames; not pixel-difference timing or completed interpolation.",
+    "positionChangeThresholdUnit": 0.002,
+    "noClientOrServerStateInjection": true
+  },
+  "preservation": {
+    "noNewIdentities": true,
+    "noLayoutNameOrAppearanceWrites": true,
+    "normalTravelAndMovementSaved": true,
+    "noPaidAIRequest": true,
+    "noForcedServerRestart": true
+  },
+  "summary": {
+    "returnElapsedSecondsMin": 125664.185,
+    "returnElapsedSecondsMax": 125845.43,
+    "movementSamples": 6,
+    "receiveMsMedian": 492.1500244140625,
+    "displayStateMsMedian": 512.5499267578125
+  }
+}

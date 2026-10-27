@@ -51,3 +51,7 @@ The [26 October local repair record](../../integration/usability-fixes-20261026.
 ## Return on the next Sydney date
 
 The [later return check](return-visit/README.md) reopened all three retained profiles on 27 October at 09:09 AEDT (26 October 22:09 UTC). Their names, 42-object lists and Bench 42 remained, with no repeated character creation. The actual intervals were 13h 25m–13h 28m, not 24 hours. Existing CI records show a successful production deployment between the original saves and the revisit; automatic stop/start history was not independently checked. No data was created, edited or removed. This additional production evidence does not validate the later usability repairs or turn the original incomplete visits into successes.
+
+## Later return beyond 24 elapsed hours
+
+The [27 October production recheck](../production-return-sync-20261027/README.md) used these same retained identities, observing their named homes, 42 objects, Bench 42 and appearances after 34h54m–34h57m. It also records six real movement samples between users 1 and 2 on the main planet. Their normal gate journeys and walking did not edit their layouts; both returned home. This supplements, rather than changes, the original failures and the earlier 13.5-hour check. No paid AI request or new identity was used.

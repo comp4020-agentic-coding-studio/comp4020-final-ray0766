@@ -26,4 +26,4 @@ Keep your cookies: anonymous identity has no account recovery. Presence expires;
 
 The [usability follow-up](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/integration/usability-fixes-20261026.md) fixes the reported route and framing problems, with 978 local tests passing. The release record separates this revision’s deployment checks from the earlier 971-test release.
 
-A [production return check](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/evidence/three-player-20261026/return-visit/README.md) retained three test homes across the Sydney date change and an intervening deployment, after about 13.5 hours.
+A [production recheck](https://github.com/comp4020-agentic-coding-studio/comp4020-final-ray0766/blob/main/docs/evidence/production-return-sync-20261027/README.md) retained three homes after 34h54m–34h57m. Six movement samples reached the other production client in 240–530 ms; the record explains measurement boundaries.

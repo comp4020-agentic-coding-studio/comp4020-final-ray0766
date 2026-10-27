@@ -10,6 +10,8 @@ At this initial local verification stage, production and `main` were at `d5e524c
 
 **Later production persistence evidence:** [three retained profiles](../three-player-20261026/return-visit/README.md) returned across the Sydney date change after 13h 25m–13h 28m, retaining their named homes and Bench 42 after an intervening successful deployment. This supplements the local restart evidence below; it is not 24-hour retention, an automatic-stop history audit or a test of the later usability repairs.
 
+**27 October production update:** the [new retained-profile check](../production-return-sync-20261027/README.md) confirms all three original homes, 42 objects, Bench 42 and appearances after more than 34 hours. Six actual movement samples reached a second production client in 240–530 ms; the record distinguishes response/applied-state timing from pixels and untimed building updates. The earlier 13.5-hour and local restart observations remain historical. Automatic sleep/wake is still unverified.
+
 ## What the full check found
 
 The first authorised isolated `pnpm check` ran 151 files / 970 tests: **950 passed and 20 failed**. The first repair pass retained one failure. The final candidate ran **151 files / 971 tests, all passed, in 50.52 seconds**, including `app` and the separately isolated `legacy-http` project. `pnpm check:evidence` passed with seven resolvable commit references and the three required reflections. Typecheck, lint, client build and preparation-worker build passed. The optional disabled-camera suite was not run.
