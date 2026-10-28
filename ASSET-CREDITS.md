@@ -146,3 +146,7 @@ The vendored manifest now covers 62 TypeScript files. The main project's terrain
 adapters supply persistence, ownership, collision grading, scene-light direction
 and transparent-canvas compositing; the source geometry and shaders are unchanged.
 No terrain demo server patch or additional downloaded art was used.
+
+## Original ambient music
+
+The optional background music is an original procedural bell/pad miniature implemented for Little Worlds in `src/client/ambient-music.ts`. Web Audio oscillators synthesize its notes locally; there are no sampled recordings, downloaded tracks, external audio services or new asset licences. Messenger is an atmosphere reference only; its music was not copied.

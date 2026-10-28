@@ -1,0 +1,24 @@
+{
+  "subjectiveListening": false,
+  "realProviderRequests": 0,
+  "cases": [
+    {
+      "viewport": "1920x1080",
+      "errors": [],
+      "signalPeak": 0.01512917596846819,
+      "oneContextBeforeReload": true,
+      "preferenceRestored": true,
+      "noBeforeGesture": true
+    },
+    {
+      "viewport": "390x844",
+      "errors": [],
+      "signalPeak": 0.01605052314698696,
+      "oneContextBeforeReload": true,
+      "preferenceRestored": true,
+      "noBeforeGesture": true
+    }
+  ],
+  "status": "passed",
+  "sourceSha256": "49bf05435c5c51ac3ec79fe0bc275c1e8c15cb1e75e747207c3a2c5b5135d939"
+}

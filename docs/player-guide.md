@@ -12,6 +12,10 @@ A genuinely new identity automatically opens **Create your traveller**. Choose a
 
 Existing identities retain progress and saved appearance, or use a compatible new default. They are not forced through creation. Later, **Menu → Your traveller** offers Save/Cancel, a rotatable preview and explicit reload after a competing tab's save. Cancel does not change the stored look. The old courier option and comparison/trial page are retired.
 
+## Background music
+
+**Menu → Background music** offers Music on/off and Volume. Original procedural light music starts only after a click or keypress, at a quiet 14% default; adjust it to taste. The browser remembers your switch and volume locally. Background tabs suspend playback; returning resumes only if music remains enabled. If autoplay or audio support is blocked, the status offers a retry through the music switch. There are no audio downloads or paid audio calls. See the [audio verification and listening boundary](evidence/ambient-music-20261028/README.md).
+
 ## Move, look and open controls
 
 | Input | Action |

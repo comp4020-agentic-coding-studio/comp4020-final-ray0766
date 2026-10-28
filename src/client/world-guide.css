@@ -40,3 +40,5 @@
 #world-guide-chat footer{justify-content:flex-end}#world-guide-question{resize:none}#world-guide-chat footer button{min-width:60px}
 @media(max-width:700px){#world-guide-chat{height:52dvh;max-height:52dvh;gap:5px}#world-guide-chat #world-guide-messages{min-height:60px;max-height:none}#world-guide-disclosure{max-height:17dvh}#world-guide-chat #world-guide-ai-quota{font-size:10px}#world-guide-chat footer button{padding:6px 9px}}
 @media(max-width:700px){#world-guide-disclosure{max-height:13dvh}}
+
+#ambient-music{border-top:1px solid #acbcaa;padding-top:12px;margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}#ambient-music h3{width:100%;margin:0;font:600 15px system-ui}#ambient-music label,#ambient-music p{font:12px/1.5 system-ui}#ambient-music input{max-width:180px;min-height:44px;accent-color:#285e49}#ambient-music p{width:100%;margin:0}#ambient-music button{min-height:44px}

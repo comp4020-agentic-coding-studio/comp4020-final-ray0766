@@ -1,3 +1,4 @@
+import {mountAmbientMusic} from './ambient-music.ts';
 import {mountSceneShortcuts,restoreSceneFocus} from './scene-shortcuts.ts';
 import {CharacterEntry} from './character-entry.ts';
 import {appearanceOf} from '../shared/appearance.ts';
@@ -82,6 +83,7 @@ import {mountWelcome} from './welcome.ts';
 import type {PhotoView} from './photo-mode.ts';
 
 initI18n();
+mountAmbientMusic();
 
 const $ = <E extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as E;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
