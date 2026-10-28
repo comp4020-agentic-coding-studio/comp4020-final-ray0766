@@ -10,6 +10,7 @@ export function createGuideConversation(options:{language:()=> 'en'|'zh';answer:
   const q=el<HTMLInputElement>('question').value.trim();if(pending)return;
   if(!q||q.length>500){note='invalid_question';notify();return;}
   if(!quota?.enabled||quota.remaining<1){note=quota?.reason??(quota?'hourly':'unavailable');notify();return;}
+  const log=el('messages');if(log){el('ai-answer').removeAttribute('id');const user=document.createElement('p');user.className='guide-message-user';user.textContent=q;const reply=document.createElement('p');reply.id='world-guide-ai-answer';reply.className='guide-message-assistant';log.append(user,reply);while(log.children.length>24)log.firstElementChild?.remove();}
   pending=true;note='replying';mode='ai';const abort=controller=new AbortController();let text='',finished=false;options.answer('');notify();
   try{
    const r=await fetch('/api/guide/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,language:options.language(),requestId:crypto.randomUUID()}),signal:abort.signal});
@@ -34,12 +35,12 @@ export function createGuideConversation(options:{language:()=> 'en'|'zh';answer:
    replying:['Waiting for DeepSeek…','正在等待 DeepSeek…'],complete:['DeepSeek reply · verify important details.','DeepSeek 回复 · 请核实重要信息。'],
    cancelled:['Stopped. Any partial reply is incomplete; an upstream attempt still counts.','已停止。回复片段并不完整；已发起的上游请求仍计次。'],
    duplicate:['Already submitted; no second AI call was made.','已提交过，没有再次调用 AI。'],
-   hourly:['Hourly limit reached. No new question was sent. Fixed help is separate below.','已达小时限额，新问题未发送。下方可单独查看固定帮助。'],
+   hourly:['Hourly limit reached. No new question was sent. Fixed help is available on the left.','已达小时限额，新问题未发送。左侧可单独查看固定帮助。'],
    budget:['Trial budget cannot reserve another call. No new question was sent.','本轮剩余预算不足以预留下一次调用，新问题未发送。'],
    trial_ended:['The AI trial ended at 00:00 on 1 Jan 2027 (Sydney, UTC+11).','AI 试用于悉尼时间 2027 年 1 月 1 日 00:00（UTC+11）结束。'],
    budget_review:['Budget review is required before more calls.','需先复核预算，才能继续调用。'],
    busy:['DeepSeek chat is busy. No call was sent; try again later.','聊天服务繁忙，未发起调用；请稍后重试。'],
-   disabled:['DeepSeek is not enabled on this server. Your question has not been sent. Fixed help is separate below.','此服务器尚未启用 DeepSeek，你的问题未发送。下方可单独查看固定帮助。'],
+   disabled:['DeepSeek is not enabled on this server. Your question has not been sent. Fixed help is available on the left.','此服务器尚未启用 DeepSeek，你的问题未发送。左侧可单独查看固定帮助。'],
    session:['Your visit could not be verified. Reload to reconnect before sending.','无法验证当前访客身份，请刷新重连后再发送。'],
    offline:['Cannot check AI availability. Reconnect and refresh status; your question is kept.','无法确认 AI 状态。请重连并刷新状态；输入仍保留。'],
    invalid_question:['Enter a question of 1–500 characters.','请输入 1–500 字符的问题。'],

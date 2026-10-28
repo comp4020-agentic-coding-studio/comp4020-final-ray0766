@@ -1,0 +1,63 @@
+{
+  "provider": "mock only; no real calls",
+  "cases": [
+    {
+      "viewport": "1920x1080",
+      "checks": [
+        "right-side bounded panel; input Space; general question streams through mock upstream; duplicate click sends once",
+        "fixed topic directions remain separate and never overwrite chat or send API requests",
+        "upstream failure is explicit; input retained; no fixed reply substituted",
+        "Stop cancels pending stream",
+        "disabled server clearly explained with no synthetic answer",
+        "independent close/reopen preserves transcript and route; native Tab/Space do not open game menu",
+        "Close and walk dismisses both panels to resume game"
+      ],
+      "errors": [],
+      "panel": {
+        "x": 1514,
+        "y": 80,
+        "width": 390,
+        "height": 449
+      },
+      "help": {
+        "x": 16,
+        "y": 80,
+        "width": 310,
+        "height": 495.390625
+      }
+    },
+    {
+      "viewport": "390x844",
+      "checks": [
+        "right-side bounded panel; input Space; general question streams through mock upstream; duplicate click sends once",
+        "fixed topic directions remain separate and never overwrite chat or send API requests",
+        "upstream failure is explicit; input retained; no fixed reply substituted",
+        "Stop cancels pending stream",
+        "disabled server clearly explained with no synthetic answer",
+        "independent close/reopen preserves transcript and route; native Tab/Space do not open game menu",
+        "Close and walk dismisses both panels to resume game"
+      ],
+      "errors": [],
+      "panel": {
+        "x": 12,
+        "y": 483,
+        "width": 366,
+        "height": 349
+      },
+      "help": {
+        "x": 12,
+        "y": 128,
+        "width": 366,
+        "height": 202.546875
+      }
+    }
+  ],
+  "result": "passed",
+  "baseline": "7f68036548ab7a27bdcb54e3fdaf8689e8619b27",
+  "sourceSha256": {
+    "src/client/world-guide.ts": "90a897a80b82a1353e421acf5f8d3a500f3107c5a1a5a1f30f93865b1a304526",
+    "src/client/guide-conversation.ts": "05f454476c4c5d6d3a5da5fd970cff2d792e84d5b4175ec55ea7c97a70b44891",
+    "src/client/world-guide.css": "38a4621712c97cd0e6d78148501f1506ef57be189d18e54128b26f97c75cfde9"
+  },
+  "realProviderRequests": 0
+}

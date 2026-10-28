@@ -18,7 +18,7 @@ Readable entrances, comfortable observation and a worthwhile visit require judge
 
 ## Try the core route
 
-Save your traveller, then press **Space / Guide**, expand **Fixed help** if shown, and choose **My planet**. Walk to its gate, return home and use **Menu → Build on my planet** to place one module. **Guide → Find ship** draws a ground route; board, choose a destination and Depart. Flight lands automatically. A neighbour's gate returns you to the main planet or your own home. **Tab** opens Menu; **Esc** releases the mouse. Touch equivalents and detailed controls are in the player guide.
+Save your traveller, then press **Space / Guide** on the left, open **Fixed help** if shown, and choose **My planet**. Walk to its gate, return home and use **Menu → Build on my planet** to place one module. **Guide → Find ship** draws a ground route; board, choose a destination and Depart. Flight lands automatically. A neighbour's gate returns you to the main planet or your own home. **Tab** opens Menu; **Esc** releases the mouse. Touch equivalents and detailed controls are in the player guide.
 
 ## Boundaries
 

@@ -27,3 +27,9 @@ it('blocks duplicate sends and ignores a late response after cancellation',async
 it('keeps invalid input local and recovers from a failed status request explicitly',async()=>{
  const fetcher=vi.fn().mockRejectedValueOnce(Error('offline')).mockResolvedValue(Response.json(quota));vi.stubGlobal('fetch',fetcher);const{chat,question}=setup();await chat.refresh();expect(document.getElementById('world-guide-ai-result')!.textContent).toContain('Cannot check');await chat.refresh();question.value=' ';await chat.ask();expect(document.getElementById('world-guide-ai-result')!.textContent).toContain('1–500');expect(fetcher).toHaveBeenCalledTimes(2);
 });
+
+it('keeps a bounded local message transcript without sending prior messages upstream',async()=>{
+ const bodies:string[]=[];vi.stubGlobal('fetch',vi.fn(async(url:string,init?:RequestInit)=>{if(url.endsWith('/status'))return Response.json(quota);bodies.push(String(init?.body));return stream();}));const{chat,question}=setup();const log=document.createElement('div');log.id='world-guide-messages';document.body.append(log);log.append(document.getElementById('world-guide-ai-answer')!);await chat.refresh();
+ for(const q of ['<img src=x onerror=alert(1)>','Second question']){question.value=q;await chat.ask();}
+ expect(log.querySelectorAll('.guide-message-user')).toHaveLength(2);expect(log.querySelectorAll('.guide-message-assistant')).toHaveLength(2);expect(log.querySelector('img')).toBeNull();expect(document.querySelectorAll('#world-guide-ai-answer')).toHaveLength(1);expect(JSON.parse(bodies[1]).question).toBe('Second question');expect(bodies[1]).not.toContain('onerror');
+});
