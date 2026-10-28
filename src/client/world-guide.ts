@@ -26,6 +26,7 @@ export function createWorldGuide(scene: T.Scene, release: () => void) {
   const open=document.createElement('button');open.id='world-guide-open';open.type='button';document.querySelector('.minimal-bar')?.append(open);
   const menuOpen=document.createElement('button');menuOpen.id='world-guide-menu';menuOpen.type='button';document.getElementById('help')?.before(menuOpen);
   const homeOpen=document.createElement('button');homeOpen.id='world-guide-home';homeOpen.type='button';homeOpen.hidden=true;document.body.append(homeOpen);
+  const homeChat=document.createElement('button');homeChat.id='world-guide-chat-home';homeChat.type='button';homeChat.hidden=true;document.body.append(homeChat);
   const bubble=document.createElement('section');bubble.id='world-guide-dialog';bubble.hidden=true;bubble.dataset.i18nVerbatim='';bubble.setAttribute('role','dialog');bubble.setAttribute('aria-modal','false');bubble.setAttribute('aria-labelledby','world-guide-title');
   bubble.innerHTML='<button id="world-guide-close" type="button" aria-label="Close">×</button><h2 id="world-guide-title"></h2><p id="world-guide-intro"></p><details id="world-guide-help" open><summary id="world-guide-help-title"></summary><div id="world-guide-topics"></div><p id="world-guide-answer" role="status"></p><p id="world-guide-availability"></p></details><button id="world-guide-walk" type="button"></button>';
   document.body.append(bubble);
@@ -43,7 +44,7 @@ export function createWorldGuide(scene: T.Scene, release: () => void) {
     const lang=language(),zh=lang==='zh',target=current&&guideTarget(current.universe,topic),available=!!target&&!!current?.enabled&&!current.indoor;
     const aboard=current?.universe.player.flight.mode==='space',nearShip=topic==='visit'&&!current?.indoor&&!!current&&distance(current.position,portPoint(current.universe.currentPlanet.id),current.world.baseRadius)<BOARD_RADIUS-.12;
     const key=[lang,topic,selected,available,aboard,nearShip,current?.indoor,current?.online,route.diagnostics.reason,actor.root.visible,talking,ai.revision].join('|');if(key===lastPaint)return;lastPaint=key;
-    chatOpen.textContent=zh?'聊天 · DeepSeek':'Chat · DeepSeek';el('chat-close').setAttribute('aria-label',zh?'收起聊天':'Close chat');
+    homeChat.textContent=chatOpen.textContent=zh?'聊天 · DeepSeek':'Chat · DeepSeek';el('chat-close').setAttribute('aria-label',zh?'收起聊天':'Close chat');
     open.textContent=aboard?(zh?'向导 · 已登船':'Guide · Aboard'):(zh?'向导 · 空格':'Guide · Space');open.title=aboard?(zh?'你已在飞船中，使用目的地与航程控制；落地后可使用地面向导。':'You are already aboard. Use the destination and trip controls; ground guidance resumes after landing.'):(zh?'空格打开向导，选择寻找飞船。':'Space opens the guide. Choose Find ship.');open.setAttribute('aria-label',zh?'小星球向导':'World guide');menuOpen.textContent=homeOpen.textContent=zh?'小星球向导':'World guide';
     el('title').textContent=zh?'芽芽 · 小星球向导':'Sprout · World guide';
     el('intro').textContent=actor.root.visible?(zh?'我在你身边。可在右侧聊天，或展开固定帮助查看地面路线。':'I am beside you. Chat on the right, or open fixed help for ground directions.'):(zh?'附近没有安全的站立空位，仍可在此聊天或查看固定帮助。':'There is no safe standing space nearby; chat and fixed help remain available here.');
@@ -62,7 +63,7 @@ export function createWorldGuide(scene: T.Scene, release: () => void) {
     lastPaint='';paint();if(panel==='chat')void ai.refresh();el(panel==='chat'?'question':'close').focus({preventScroll:true});
   }
   open.onclick=menuOpen.onclick=homeOpen.onclick=el('details').onclick=()=>show('help');
-  chatOpen.onclick=()=>show('chat');
+  homeChat.onclick=chatOpen.onclick=()=>show('chat');
   el('local').addEventListener('click',()=>show('help'));
   el('chat-close').onclick=()=>{ai.cancel();chat.hidden=true;if(bubble.hidden)close(true);else el('close').focus();};
   el('close').onclick=()=>{bubble.hidden=true;if(chat.hidden)close(true);else el('question').focus();};
@@ -79,6 +80,7 @@ export function createWorldGuide(scene: T.Scene, release: () => void) {
   paint();
   return {get active(){return selected!==null;},get talking(){return talking;},close,findShip(){if(!current?.visible)return;select('visit');show();el<HTMLDetailsElement>('help').open=true;},frame(input:Frame){
     ai.tick(!chat.hidden);current=input;chatOpen.disabled=!input.visible;open.disabled=menuOpen.disabled=!input.visible;homeOpen.hidden=!input.visible||!input.indoor||!input.universe.player.location||input.universe.player.location.kind!=='interior';
+    homeChat.hidden=homeOpen.hidden;
     if(talking&&(!input.visible||input.roomKey!==roomKey||!!document.querySelector('dialog[open]')))close();
     if(selected&&routePlanet!==input.universe.currentPlanet.id){selected=null;route.root.visible=false;}
     const target=selected?guideTarget(input.universe,selected):null;
