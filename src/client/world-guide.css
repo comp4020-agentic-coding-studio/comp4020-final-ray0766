@@ -31,3 +31,12 @@
 @media(max-width:700px){#world-guide-dialog{top:128px;max-height:24dvh}}
 
 #world-guide-chat-home{position:fixed;right:16px;top:240px;z-index:35;min-height:44px;border:1px solid #acbcaa;border-radius:12px;padding:8px 12px;background:#f5f1e2;color:#293c38}#world-guide-chat-home[hidden]{display:none}body.home-interior-active #world-guide-chat>footer{display:flex!important}@media(max-width:700px){body #home-controls{top:128px}}
+
+/* Complete conversation: only the history scrolls; the composer stays in place. */
+#world-guide-chat{width:min(460px,calc(100vw - 32px));height:min(740px,calc(100dvh - 110px));overflow:hidden}
+#world-guide-chat #world-guide-messages{flex:1 1 0;min-height:0;max-height:none;overflow:auto;border-block:1px solid #d8e1d3;padding-block:12px}
+#world-guide-chat>header,#world-guide-chat>form,#world-guide-chat>footer,#world-guide-chat>p,#world-guide-disclosure{flex:0 0 auto}
+#world-guide-disclosure{font:11px/1.4 system-ui;max-height:22dvh;overflow:auto}#world-guide-disclosure summary{cursor:pointer;padding:4px 0}#world-guide-chat #world-guide-ai-quota{font-size:11px}#world-guide-chat #world-guide-ai-result{font-size:11px;max-height:54px;overflow:auto}
+#world-guide-chat footer{justify-content:flex-end}#world-guide-question{resize:none}#world-guide-chat footer button{min-width:60px}
+@media(max-width:700px){#world-guide-chat{height:52dvh;max-height:52dvh;gap:5px}#world-guide-chat #world-guide-messages{min-height:60px;max-height:none}#world-guide-disclosure{max-height:17dvh}#world-guide-chat #world-guide-ai-quota{font-size:10px}#world-guide-chat footer button{padding:6px 9px}}
+@media(max-width:700px){#world-guide-disclosure{max-height:13dvh}}

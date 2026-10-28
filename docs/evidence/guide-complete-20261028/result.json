@@ -1,0 +1,81 @@
+{
+  "provider": "mock only; no real calls",
+  "cases": [
+    {
+      "viewport": "1920x1080",
+      "checks": [
+        "expanded data disclosure keeps composer and actions inside dialog",
+        "right-side bounded panel; input Space; general question streams through mock upstream; duplicate click sends once",
+        "fixed topic directions remain separate and never overwrite chat or send API requests",
+        "Space opens both panels; history scroll does not move composer",
+        "upstream failure is explicit; input retained; no fixed reply substituted",
+        "Stop cancels pending stream",
+        "disabled server clearly explained with no synthetic answer",
+        "independent close/reopen preserves transcript and route; native Tab/Space do not open game menu",
+        "Close and walk dismisses both panels to resume game",
+        "indoor CSS footer remains visible; narrow synthetic home card clears toolbar Menu"
+      ],
+      "errors": [],
+      "panel": {
+        "x": 1444,
+        "y": 80,
+        "width": 460,
+        "height": 740
+      },
+      "history": {
+        "x": 1461,
+        "y": 204.890625,
+        "width": 426,
+        "height": 442.609375
+      },
+      "help": {
+        "x": 16,
+        "y": 80,
+        "width": 310,
+        "height": 495.390625
+      }
+    },
+    {
+      "viewport": "390x844",
+      "checks": [
+        "expanded data disclosure keeps composer and actions inside dialog",
+        "right-side bounded panel; input Space; general question streams through mock upstream; duplicate click sends once",
+        "fixed topic directions remain separate and never overwrite chat or send API requests",
+        "Space opens both panels; history scroll does not move composer",
+        "upstream failure is explicit; input retained; no fixed reply substituted",
+        "Stop cancels pending stream",
+        "disabled server clearly explained with no synthetic answer",
+        "independent close/reopen preserves transcript and route; native Tab/Space do not open game menu",
+        "Close and walk dismisses both panels to resume game",
+        "indoor CSS footer remains visible; narrow synthetic home card clears toolbar Menu"
+      ],
+      "errors": [],
+      "panel": {
+        "x": 20,
+        "y": 393.125,
+        "width": 358,
+        "height": 438.875
+      },
+      "history": {
+        "x": 33,
+        "y": 508.515625,
+        "width": 332,
+        "height": 162.984375
+      },
+      "help": {
+        "x": 12,
+        "y": 128,
+        "width": 366,
+        "height": 202.546875
+      }
+    }
+  ],
+  "result": "passed",
+  "baseline": "3e74f96d7bb8d46952a57be0d62dbbfe11a616d7",
+  "sourceSha256": {
+    "src/client/world-guide.ts": "917a09250316e546556abffa59e34e6c5637df71dbe0360436178d7c708c82b7",
+    "src/client/guide-conversation.ts": "a2f3c1f758ded88c941290492cf3b7b61d22b12271cd3503b2a024a67a9a2db4",
+    "src/client/world-guide.css": "36b56c7c3772030b19680ecc60b9511bbda6193ef71db68ffe29a02cc6841688"
+  },
+  "realProviderRequests": 0
+}

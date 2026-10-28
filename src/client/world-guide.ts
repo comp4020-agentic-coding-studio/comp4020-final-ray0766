@@ -31,7 +31,7 @@ export function createWorldGuide(scene: T.Scene, release: () => void) {
   bubble.innerHTML='<button id="world-guide-close" type="button" aria-label="Close">×</button><h2 id="world-guide-title"></h2><p id="world-guide-intro"></p><details id="world-guide-help" open><summary id="world-guide-help-title"></summary><div id="world-guide-topics"></div><p id="world-guide-answer" role="status"></p><p id="world-guide-availability"></p></details><button id="world-guide-walk" type="button"></button>';
   document.body.append(bubble);
   const chat=document.createElement('section');chat.id='world-guide-chat';chat.hidden=true;chat.dataset.i18nVerbatim='';chat.setAttribute('role','dialog');chat.setAttribute('aria-modal','false');chat.setAttribute('aria-labelledby','world-guide-chat-title');
-  chat.innerHTML='<header><h2 id="world-guide-chat-title"></h2><button id="world-guide-chat-close" type="button" aria-label="Close chat">×</button></header><p id="world-guide-ai-status"></p><p id="world-guide-ai-quota"></p><div id="world-guide-messages" role="log" aria-live="polite"><p id="world-guide-ai-answer"></p></div><p id="world-guide-ai-result" role="status"></p><form id="world-guide-form"><label for="world-guide-question" id="world-guide-question-label"></label><div class="world-guide-input"><textarea id="world-guide-question" maxlength="500" rows="2"></textarea><button id="world-guide-ask" type="submit"></button></div></form><footer><button id="world-guide-ai-stop" type="button" hidden></button><button id="world-guide-refresh" type="button"></button><button id="world-guide-local" type="button"></button></footer>';
+  chat.innerHTML='<header><h2 id="world-guide-chat-title"></h2><button id="world-guide-chat-close" type="button" aria-label="Close chat">×</button></header><details id="world-guide-disclosure"><summary id="world-guide-disclosure-title"></summary><p id="world-guide-ai-status"></p></details><p id="world-guide-ai-quota"></p><div id="world-guide-messages" role="log" aria-live="polite"><p id="world-guide-ai-answer"></p></div><p id="world-guide-ai-result" role="status"></p><form id="world-guide-form"><label for="world-guide-question" id="world-guide-question-label"></label><div class="world-guide-input"><textarea id="world-guide-question" maxlength="500" rows="2"></textarea><button id="world-guide-ask" type="submit"></button></div></form><footer><button id="world-guide-ai-stop" type="button" hidden></button><button id="world-guide-refresh" type="button"></button><button id="world-guide-local" type="button"></button></footer>';
   document.body.append(chat);
   const chatOpen=document.createElement('button');chatOpen.id='world-guide-chat-open';chatOpen.type='button';document.querySelector('.minimal-bar')?.append(chatOpen);
   const hud=document.createElement('section');hud.id='world-guide-hud';hud.hidden=true;hud.dataset.i18nVerbatim='';hud.innerHTML='<p id="world-guide-status" role="status"></p><button id="world-guide-details" type="button"></button><button id="world-guide-stop" type="button"></button>';document.body.append(hud);
@@ -55,14 +55,14 @@ export function createWorldGuide(scene: T.Scene, release: () => void) {
     el('walk').textContent=zh?'关闭并行走':'Close and walk';el('details').textContent=zh?'与向导交谈':'Talk to guide';el('stop').textContent=zh?'清除路线':'Clear route';el('close').setAttribute('aria-label',zh?'关闭向导':'Close guide');
     el('status').textContent=selected?(names[lang][GUIDE_TOPICS.indexOf(selected)]+' · '+(current?.indoor?(zh?'出门后继续':'Continue outside'):!current?.online?(zh?'等待重连':'Waiting for connection'):selected==='visit'&&nearShip?(zh?'可登船':'Ready to board'):route.diagnostics.reason==='arrived'?(zh?'已到达':'Arrived'):route.diagnostics.connected?(zh?'沿地面箭头行走':'Follow the ground arrows'):route.diagnostics.reason==='checking'?(zh?'检查路线中':'Checking route'):(zh?'没有已确认的安全路线':'No confirmed safe route'))):'';
   }
-  function show(panel:'help'|'chat'='help'){
+  function show(panel:'help'|'chat'|'both'='both'){
     if(!current?.visible)return;release();document.querySelector<HTMLDialogElement>('#menu-dialog')?.close();document.querySelector<HTMLButtonElement>('.tutorial-skip')?.click();
-    const p=nearbyGuidePoint(current.feet,current.up,current.forward,current.stand);talking=true;document.body.classList.add('world-guide-talking');if(panel==='help')bubble.hidden=false;else chat.hidden=false;roomKey=current.roomKey;
+    const p=nearbyGuidePoint(current.feet,current.up,current.forward,current.stand);talking=true;document.body.classList.add('world-guide-talking');if(panel!=='chat')bubble.hidden=false;if(panel!=='help')chat.hidden=false;roomKey=current.roomKey;
     actor.root.removeFromParent();current.scene.add(actor.root);actor.root.visible=!!p;
     if(p){actor.root.position.copy(p);const up=current.up.clone().normalize(),forward=current.feet.clone().sub(p).projectOnPlane(up).normalize(),right=new T.Vector3().crossVectors(up,forward).normalize();actor.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(right,up,forward));actor.greet(current.time);}
-    lastPaint='';paint();if(panel==='chat')void ai.refresh();el(panel==='chat'?'question':'close').focus({preventScroll:true});
+    lastPaint='';paint();if(panel!=='help')void ai.refresh();el(panel==='help'?'close':'question').focus({preventScroll:true});
   }
-  open.onclick=menuOpen.onclick=homeOpen.onclick=el('details').onclick=()=>show('help');
+  open.onclick=menuOpen.onclick=homeOpen.onclick=el('details').onclick=()=>show('both');
   homeChat.onclick=chatOpen.onclick=()=>show('chat');
   el('local').addEventListener('click',()=>show('help'));
   el('chat-close').onclick=()=>{ai.cancel();chat.hidden=true;if(bubble.hidden)close(true);else el('close').focus();};
@@ -75,7 +75,7 @@ export function createWorldGuide(scene: T.Scene, release: () => void) {
   window.addEventListener('blur',()=>{shortcutHeld=false;});
   window.addEventListener('keydown',event=>{
     if(shortcutHeld&&(event.code==='Space'||event.key===' ')){event.preventDefault();event.stopImmediatePropagation();return;}
-    if(guideShortcut(event)&&current?.visible&&!document.querySelector('dialog[open]')){shortcutHeld=true;event.preventDefault();event.stopImmediatePropagation();if(!bubble.hidden){bubble.hidden=true;if(chat.hidden)close(true);}else show();}
+    if(guideShortcut(event)&&current?.visible&&!document.querySelector('dialog[open]')){shortcutHeld=true;event.preventDefault();event.stopImmediatePropagation();if(talking)close(true);else show('both');}
   },{capture:true});
   paint();
   return {get active(){return selected!==null;},get talking(){return talking;},close,findShip(){if(!current?.visible)return;select('visit');show();el<HTMLDetailsElement>('help').open=true;},frame(input:Frame){
