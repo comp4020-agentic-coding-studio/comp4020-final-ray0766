@@ -1,5 +1,7 @@
 # Crit10提交核对与Final边界
 
+> 历史快照：本清单保留2026-10-21的Crit10核对状态。下文“research-note.md仍缺”和“此后Final仍需单独完成”描述当时阶段，不是当前待办；研究短文及Final交付现已完成，且已完成超过34小时的保留用户回访。当前状态见[发布总览](../releases/final-2026-10.md)、[研究短文](../../research-note.md)及[回访与同步证据](../evidence/production-return-sync-20261027/README.md)。原始观察与未测范围不改写。
+
 核对2026-10-21。官方：[Crit10](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/crits/10-fly-by-instruments/)、[cutoff规则](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/studio-crit-model/)、[Final](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/assessments/final-project/)。
 
 本次周三15:30班；cutoff为2026-10-21 13:30 Australia/Sydney（02:30 UTC）。推送、可用部署和反思需要在cutoff前具备；不能把演练结束作为首次提交反思的时间。
