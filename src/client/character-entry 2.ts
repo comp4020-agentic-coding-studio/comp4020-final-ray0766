@@ -1,0 +1,13 @@
+import {prepareDialog} from './i18n.ts';
+/** Server-required creation owns the entry gate; local preferences cannot skip it. */
+export class CharacterEntry{
+ private dialog=document.createElement('dialog');private busy=false;private failed=false;
+ constructor(private options:{open:()=>Promise<void>;required:()=>boolean}){
+  this.dialog.id='character-entry';this.dialog.dataset.i18nVerbatim='';this.dialog.setAttribute('aria-labelledby','character-entry-title');this.dialog.innerHTML='<h2 id="character-entry-title"></h2><p id="character-entry-copy"></p><p id="character-entry-error" role="status"></p><button id="character-entry-continue" type="button"></button><button id="character-entry-reload" type="button" hidden></button><p><a id="character-entry-about" href="/readme/">About Little Worlds</a></p>';document.body.append(this.dialog);prepareDialog(this.dialog);this.dialog.querySelector<HTMLButtonElement>('#character-entry-reload')!.onclick=()=>location.reload();
+  this.dialog.querySelector<HTMLButtonElement>('button')!.onclick=()=>void this.start();this.dialog.addEventListener('cancel',e=>e.preventDefault());new MutationObserver(()=>this.paint()).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});this.paint();
+ }
+ private paint(){const zh=document.documentElement.lang.startsWith('zh');this.dialog.querySelector('h2')!.textContent=zh?'先创建你的旅人':'Create your traveller first';this.dialog.querySelector('#character-entry-copy')!.textContent=zh?'保存外观后即可探索。尚未完成建角；你可以继续，也可以离开此页，稍后用同一浏览器返回。':'Save your appearance to start exploring. Creation is unfinished. Continue now, or leave this page and return later in this browser.';this.dialog.querySelector('#character-entry-error')!.textContent=this.failed?(zh?'编辑器暂时无法打开，请检查连接后重试。':'The editor could not open. Check your connection and try again.') : '';const b=this.dialog.querySelector<HTMLButtonElement>('button')!;b.disabled=this.busy;b.textContent=this.busy?(zh?'正在打开…':'Opening…'):(zh?'继续创建人物':'Continue creating');const reload=this.dialog.querySelector<HTMLButtonElement>('#character-entry-reload')!;reload.hidden=!this.failed;reload.disabled=this.busy;reload.textContent=zh?'重新加载页面':'Reload page';this.dialog.querySelector('a')!.textContent=zh?'了解小星球':'About Little Worlds';}
+ back(){if(!this.options.required())return;this.paint();if(!this.dialog.open)this.dialog.showModal();}
+ async start(){if(this.busy)return;if(!this.options.required()){this.complete();return;}this.busy=true;this.failed=false;this.back();this.paint();try{await this.options.open();this.complete();}catch{this.failed=true;}finally{this.busy=false;this.paint();}}
+ complete(){this.dialog.close();}
+}

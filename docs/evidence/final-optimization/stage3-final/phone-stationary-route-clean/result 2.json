@@ -1,0 +1,859 @@
+{
+  "browser": "155.0.8059.80",
+  "physicalPhone": false,
+  "touch": true,
+  "steps": [
+    {
+      "step": "physics-proved-plan-gate",
+      "reason": "route",
+      "segments": 7,
+      "proofs": 29
+    },
+    {
+      "step": "walk-gate",
+      "durationMs": 5674,
+      "waypoints": 8,
+      "maxPlanMs": 11.799999997019768
+    }
+  ],
+  "errors": [],
+  "consoleErrors": [],
+  "apiWrites": [
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/exit",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/teleport",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/teleport",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    }
+  ],
+  "firstResponse": {
+    "planetId": "p-386dae93-d34b-4cb9-a15d-844394b37f17",
+    "quest": "delivered",
+    "arrival": {
+      "version": 1,
+      "homePreparation": "ready",
+      "homePlanetId": "p-386dae93-d34b-4cb9-a15d-844394b37f17"
+    },
+    "atSpawn": false
+  },
+  "stationary": [
+    {
+      "elapsedMs": 7,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 18,
+        "lastReplanMs": 5.200000002980232,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 2
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 263,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 18,
+        "lastReplanMs": 5.200000002980232,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 2
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 519,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 19,
+        "lastReplanMs": 5.399999998509884,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 6
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 779,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 19,
+        "lastReplanMs": 5.399999998509884,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 6
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 1037,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 19,
+        "lastReplanMs": 5.399999998509884,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 6
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 1301,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 20,
+        "lastReplanMs": 5.100000001490116,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 8
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 1558,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 20,
+        "lastReplanMs": 5.100000001490116,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 8
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 1817,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 21,
+        "lastReplanMs": 4.5,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 9
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 2075,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 21,
+        "lastReplanMs": 4.5,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 9
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 2333,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 22,
+        "lastReplanMs": 5,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 11
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 2592,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 22,
+        "lastReplanMs": 5,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 11
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 2850,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 22,
+        "lastReplanMs": 5,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 11
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 3109,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 23,
+        "lastReplanMs": 6.9000000059604645,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 14
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 3368,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 23,
+        "lastReplanMs": 6.9000000059604645,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 14
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 3630,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 24,
+        "lastReplanMs": 4.300000004470348,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 17
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 3890,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 24,
+        "lastReplanMs": 4.300000004470348,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 17
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 4148,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 25,
+        "lastReplanMs": 4.300000004470348,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 20
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 4407,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 25,
+        "lastReplanMs": 4.300000004470348,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 20
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 4665,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 25,
+        "lastReplanMs": 4.300000004470348,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 20
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 4924,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 26,
+        "lastReplanMs": 4.5999999940395355,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 24
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 5183,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 26,
+        "lastReplanMs": 4.5999999940395355,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 24
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 5446,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 27,
+        "lastReplanMs": 6.200000002980232,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 27
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 5706,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 27,
+        "lastReplanMs": 6.200000002980232,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 27
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 5965,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 28,
+        "lastReplanMs": 3.5,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 33
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 6221,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 28,
+        "lastReplanMs": 3.5,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 33
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 6480,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 28,
+        "lastReplanMs": 3.5,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 33
+      },
+      "copy": "正在确认附近可走路线…"
+    },
+    {
+      "elapsedMs": 6736,
+      "route": {
+        "connected": true,
+        "sourceRoutes": [
+          "home"
+        ],
+        "reason": "route",
+        "arrows": 18,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 966,
+        "replans": 29,
+        "lastReplanMs": 4.899999998509884,
+        "maxReplanMs": 11.799999997019768,
+        "proofCacheEntries": 36
+      },
+      "copy": "跟随鲜艳路线走向目标圈。"
+    }
+  ],
+  "routeVisibleMs": 6737,
+  "stationaryMovementMetres": 4.551859639176556e-7,
+  "passed": true
+}

@@ -1,0 +1,502 @@
+{
+  "browser": "155.0.8059.80",
+  "physicalPhone": false,
+  "touch": true,
+  "steps": [
+    {
+      "step": "physics-proved-plan-gate",
+      "reason": "route",
+      "segments": 7,
+      "proofs": 8
+    },
+    {
+      "step": "walk-gate",
+      "durationMs": 5776,
+      "waypoints": 8,
+      "maxPlanMs": 7.5
+    }
+  ],
+  "errors": [],
+  "consoleErrors": [],
+  "apiWrites": [
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/home/exit",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/move",
+      "status": 200
+    },
+    {
+      "route": "/api/teleport",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/teleport",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    },
+    {
+      "route": "/api/presence",
+      "status": 200
+    }
+  ],
+  "firstResponse": {
+    "planetId": "p-19d8584c-22e6-4c1a-85a4-73e64f6a1e57",
+    "quest": "delivered",
+    "arrival": {
+      "version": 1,
+      "homePreparation": "ready",
+      "homePlanetId": "p-19d8584c-22e6-4c1a-85a4-73e64f6a1e57"
+    },
+    "atSpawn": false
+  },
+  "stationary": [
+    {
+      "elapsedMs": 10,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 19,
+        "lastReplanMs": 5.600000001490116,
+        "maxReplanMs": 7.5,
+        "proofCacheEntries": 2
+      },
+      "copy": "Checking a walkable route nearby…"
+    },
+    {
+      "elapsedMs": 265,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 19,
+        "lastReplanMs": 5.600000001490116,
+        "maxReplanMs": 7.5,
+        "proofCacheEntries": 2
+      },
+      "copy": "Checking a walkable route nearby…"
+    },
+    {
+      "elapsedMs": 520,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 20,
+        "lastReplanMs": 4.5,
+        "maxReplanMs": 7.5,
+        "proofCacheEntries": 5
+      },
+      "copy": "Checking a walkable route nearby…"
+    },
+    {
+      "elapsedMs": 775,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 20,
+        "lastReplanMs": 4.5,
+        "maxReplanMs": 7.5,
+        "proofCacheEntries": 5
+      },
+      "copy": "Checking a walkable route nearby…"
+    },
+    {
+      "elapsedMs": 1033,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 20,
+        "lastReplanMs": 4.5,
+        "maxReplanMs": 7.5,
+        "proofCacheEntries": 5
+      },
+      "copy": "Checking a walkable route nearby…"
+    },
+    {
+      "elapsedMs": 1289,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 21,
+        "lastReplanMs": 4.5,
+        "maxReplanMs": 7.5,
+        "proofCacheEntries": 7
+      },
+      "copy": "Checking a walkable route nearby…"
+    },
+    {
+      "elapsedMs": 1549,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 21,
+        "lastReplanMs": 4.5,
+        "maxReplanMs": 7.5,
+        "proofCacheEntries": 7
+      },
+      "copy": "Checking a walkable route nearby…"
+    },
+    {
+      "elapsedMs": 1804,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 22,
+        "lastReplanMs": 4.700000002980232,
+        "maxReplanMs": 7.5,
+        "proofCacheEntries": 8
+      },
+      "copy": "Checking a walkable route nearby…"
+    },
+    {
+      "elapsedMs": 2060,
+      "route": {
+        "connected": false,
+        "sourceRoutes": [],
+        "reason": "checking",
+        "arrows": 0,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 96,
+        "replans": 22,
+        "lastReplanMs": 4.700000002980232,
+        "maxReplanMs": 7.5,
+        "proofCacheEntries": 8
+      },
+      "copy": "Checking a walkable route nearby…"
+    },
+    {
+      "elapsedMs": 2327,
+      "route": {
+        "connected": true,
+        "sourceRoutes": [
+          "home"
+        ],
+        "reason": "route",
+        "arrows": 18,
+        "arrowTriangles": 44,
+        "drawCalls": 3,
+        "triangles": 968,
+        "replans": 23,
+        "lastReplanMs": 7.699999995529652,
+        "maxReplanMs": 7.699999995529652,
+        "proofCacheEntries": 10
+      },
+      "copy": "Checking a walkable route nearby…"
+    }
+  ],
+  "routeVisibleMs": 2329,
+  "stationaryMovementMetres": 0,
+  "passed": true
+}
