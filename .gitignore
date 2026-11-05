@@ -29,3 +29,6 @@ mise.local.toml
 *.business.jsonl*
 test-results/
 playwright-report/
+
+# macOS/iCloud duplicate copies
+* 2.*

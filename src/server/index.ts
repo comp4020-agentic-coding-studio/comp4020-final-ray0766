@@ -164,7 +164,7 @@ const server = createServer(async (req, res) => {
     if (['/readme','/readme/','/credits','/credits/'].includes(url.pathname)) {
       const credits=url.pathname.startsWith('/credits');
       const content = await marked.parse(await readFile(credits?'ASSET-CREDITS.md':'README.md', 'utf8'));
-      body = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>About — Little Post</title><style>body{max-width:760px;margin:64px auto;padding:0 24px;background:#f5f3ea;color:#263e36;font:17px/1.8 system-ui}a{color:#9a3b20}h1,h2,h3{line-height:1.2}pre{overflow:auto;padding:20px;background:#e9e7de}code{font-size:.88em}h2{margin-top:48px}</style><a href="/">← Back to the planet</a><main>${content}</main></html>`;
+      body = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>About — Little Worlds</title><style>body{max-width:760px;margin:64px auto;padding:0 24px;background:#f5f3ea;color:#263e36;font:17px/1.8 system-ui}a{color:#9a3b20}h1,h2,h3{line-height:1.2}pre{overflow:auto;padding:20px;background:#e9e7de}code{font-size:.88em}h2{margin-top:48px}</style><a href="/">← Back to the planet</a><main>${content}</main></html>`;
       type = 'text/html; charset=utf-8';
     } else {
       const path = resolve(root, '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname));

@@ -1139,7 +1139,7 @@ export const messages: Record<string, string> = {
   "Find Mica at the post office.": "去邮局找 Mica。",
   "Delivery complete · thank you": "投递完成 · 谢谢你",
   "This browser could not start WebGL. Try an up-to-date browser with hardware acceleration.": "此浏览器无法启动 WebGL。请使用支持硬件加速的新版浏览器。",
-  "Read about Little Post": "了解 Little Post 项目",
+  "Read about Little Worlds": "了解 Little Worlds 项目",
   "WebGL unavailable": "WebGL 不可用",
   "Little Worlds planet. Use WASD or arrows to walk, hold Shift to run; board your ship to fly between worlds.": "小小世界。使用 WASD 或方向键行走，按住 Shift 疾走；登上飞船可前往其他星球。",
   "Follow the short path to SUNSEED · PORT.": "沿短路前往 SUNSEED · PORT 星港。",

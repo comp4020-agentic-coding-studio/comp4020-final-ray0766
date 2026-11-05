@@ -297,7 +297,7 @@ let renderer: T.WebGLRenderer;
 try { renderer = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' }); }
 catch {
   setQualityCapabilities({webgl:false});welcome.failed('graphics',()=>location.reload());
-  setHTML($('world'), '<div class="fallback">This browser could not start WebGL. Try an up-to-date browser with hardware acceleration. <a href="/readme/">Read about Little Post</a></div>');
+  setHTML($('world'), '<div class="fallback">This browser could not start WebGL. Try an up-to-date browser with hardware acceleration. <a href="/readme/">Read about Little Worlds</a></div>');
   throw new Error('WebGL unavailable');
 }
 setQualityCapabilities({webgl:true,maxTextureSize:renderer.capabilities.maxTextureSize,maxSamples:renderer.capabilities.maxSamples});
